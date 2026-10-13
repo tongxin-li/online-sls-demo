@@ -1,4 +1,4 @@
-# Voltage lab
+# Keeping the Grid Steady
 
 [Open the hosted experiment](https://tongxin.me/online-sls-demo/)
 
