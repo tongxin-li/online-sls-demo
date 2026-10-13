@@ -30,8 +30,8 @@
 .pe-battery-terminal { fill:#789980; stroke:none; }
 .pe-effort-segment { fill:#4c8972; stroke:none; opacity:.15; transition:opacity .4s; }
 .pe-control-arrow { stroke:#4c8972; stroke-width:.9; transition:opacity .4s; }
-.pe-disconnect { stroke:#c58948; stroke-width:1.9; stroke-linecap:round; opacity:0; transition:opacity .25s; }
-.pe-root[data-equipment='Battery'].pe-pulse-active .pe-disconnect { opacity:1; }
+.pe-charging-surge { stroke:#c58948; stroke-width:1.9; stroke-linecap:round; opacity:0; transition:opacity .25s; }
+.pe-root[data-equipment='Battery'].pe-pulse-active .pe-charging-surge { opacity:1; }
 .pe-transformer { fill:#e1ebe3; }
 .pe-coil { stroke:#80a189; stroke-width:1.25; }
 .pe-insulator,.pe-station-wire { stroke:#5d7c6c; stroke-width:1; }
@@ -57,3 +57,5 @@
   .pe-root * { animation:none!important; transition:none!important; }
   .pe-burst { display:none; }
 }
+
+.pe-host[data-bus='1']:hover .pe-disc { stroke:#dce6de; stroke-width:1; }

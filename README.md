@@ -2,108 +2,135 @@
 
 [Open the hosted experiment](https://tongxin.me/online-sls-demo/)
 
-Explore abstract state recovery, control cost, prediction gains and online learning on a synthetic 24 node network. The equipment artwork is illustrative. The displayed state is not a physical voltage computed from power flow. The browser experiment uses the shared matrix adaptation idea from the manuscript experiments. It is not a reproduction of the full delayed FIR projected update in Algorithm 1.
+An interactive 24 bus distribution feeder with LinDistFlow voltages, bounded inverter reactive dispatch and shared prediction learning. Click a home, solar plant or battery to disturb its power. Compare Adaptive against Scalar adaptation, Fixed prediction and Feedback only on identical disturbances.
 
-## Dynamics
+The control goal is to restore the fixed nominal voltage profile after power changes. This constructed feeder illustrates shared matrix adaptation. It does not reproduce the manuscript plant, the full delayed FIR update in Algorithm 1, or the paper's numerical results.
 
-The plant uses the manuscript communication scenario
+## Feeder and operating point
 
-```
-x[t+1] = A x[t] + u[t] + w[t]
-y[t] = 1 + x[t]
-A = 0.4 I + 0.58 D^(-1/2) W D^(-1/2)
-W[i,j] = exp(-distance(i,j)/2) for i != j
-W[i,i] = 0
-D = diag(W 1)
-B = I, Q = 35 I, R = 0.08 I
-```
+The model is a balanced radial feeder with bus 1 fixed at 1 pu. Power uses a 1 MVA base and voltage uses a 12.47 kV line to line base. For zero based branch index e, resistance is `0.45 + 0.15 (e mod 4)` ohms and reactance is `0.30 + 0.08 (e mod 3)` ohms. The topology and all parameters are declared in `src/simulation.js`.
 
-Distances come from the 24 node tree, not electrical line impedances. Every node has an unconstrained direct control input. There is no power balance, fixed slack bus, active or reactive power injection model, or inverter capability constraint. The fixed feedback gain comes from the discrete Riccati equation. Five forecast samples enter the LQR preview correction. Forecasts are immutable once they enter that preview. All compared controllers receive identical disturbances and forecasts.
+Homes consume 70 kW at power factor 0.95. Battery buses have 50 kW of baseline demand. Solar buses generate 80 kW. Inverters are installed at buses 5, 7, 8, 12, 14, 18, 21 and 24. Their rating is 120 kVA and their reactive command limit is 70 kvar in either direction.
 
-The cost at time t is `35 ||x[t]||² + 0.08 ||u[t]||²`. A pulse applied during step t first changes the state at t+1. Its state cost is charged at t+1. Both charts use those discrete sample indices. This delay belongs to the abstract recurrence and does not establish physical voltage recovery timing. The cumulative plot sums actual stage costs without a terminal cost. No state or cost is clipped or artificially amplified.
-
-## Shared learning
-
-The adaptive controller uses one matrix G to calibrate all five preview samples. Before action t, it fits only revealed observations through t−1. Learning starts at t=30 and uses the preceding 60 samples.
-
-The declared browser objective is
+Let D contain root paths for the 23 nonslack buses. Voltage magnitude sensitivities are
 
 ```
-(1 / (2 m)) sum ||G forecast[s] - disturbance[s]||²
-    + (lambda / 2) ||G - I||_F²
-lambda = 1.27e-5
+Rv = D diag(r_pu) D'
+Xv = D diag(x_pu) D'
+v = 1 - Rv p_net - Xv q_load + Xv E q_inv
 ```
 
-The implementation normalizes forecast and disturbance vectors by 0.006 and scales the ridge coefficient accordingly. A positive definite linear solve obtains the exact shared optimum at each update. This explicitly defined mean forecast loss is a reduced approximation to the manuscript response weighted objective. It does not enforce or reproduce the full FIR response projection.
+E maps the eight inverters to their buses. This is the voltage magnitude approximation, with no factor of two. The squared voltage form of LinDistFlow uses that factor. Line losses are neglected. The model omits unbalanced phases, protection and frequency dynamics.
 
-The visible cycle shows a forecast, the applied control, the recovered disturbance and the gain update. Live gain change need not decrease monotonically because the sample window changes. Freeze and converge holds the plant, observations and cost fixed, then takes one gradient iteration per display tick toward the exact fixed ridge minimizer. This is a numerical diagnostic, not a demonstration of the paper's full convergence theorem.
+The fixed reference vbar is computed once from nominal demand and generation with zero reactive inverter injection. All controllers share it. It is not changed by forecasts, attacks, seeds or measured performance.
 
-The graph and matrix rank three remote sources per receiver using prediction gain magnitude. They are recommendations. They do not change the illustrated tree or the deployed dense controller. The paper's offline discovery and resynthesis experiment is not reproduced here.
+Reactive commands have a two second actuator time constant with one second samples
 
-## Controller comparison
+```
+a = exp(-1 / 2)
+q_inv[t+1] = a q_inv[t] + (1-a) u[t]
+x[t] = v[t] - vbar
+x[t+1] = a x[t] + (1-a) Xv E u[t] + F (d[t+1] - a d[t])
+```
 
-The demo now compares Adaptive with three baselines
+Here d is the change in net active demand relative to the nominal operating point. For homes, a power factor of 0.95 maps active changes to reactive demand changes. Solar and battery changes affect net active power only. F combines the corresponding Rv and Xv sensitivities. The plant state shown on screen is actual voltage, while the controller and cost use deviations from vbar.
+
+The stage cost is `35 ||v[t] - vbar||² + 0.08 ||u[t]||²`. Commands u use the 1 MVA base. The reactive command penalty is distinct from actual inverter injection, which follows the actuator lag. Saturation is applied before computing this penalty. Actual voltage is never clipped. The 0.95 to 1.05 pu band is a displayed operating band, not an enforced voltage constraint.
+
+## Prediction and control
+
+A general input matrix Riccati solve supplies a fixed LQR feedback gain and five preview gains. All forecasts are anchored to currently measured power. For a raw forecast h and current observation d, the conditioned future prediction is
+
+```
+dhat[t+k] = d[t] + G (h[t+k] - h[t])
+```
+
+The current raw forecast h[t] was issued before d[t] was revealed. At the initial sample both are zero. Adaptive uses its fitted G, Scalar uses alpha I, Fixed uses I and Feedback only uses zero. Feedback therefore holds current power across the preview. Prediction controllers add their calibrated forecast changes to that same measured anchor. This holds the current forecast residual constant across the preview and responds to unforecast load changes using measurements alone. No pulse metadata is supplied to any controller.
+
+The conditioned power sequence is mapped through F to voltage disturbance increments. This causal conditioning is a declared browser forecast model, not a step from the paper's full Algorithm 1.
+
+Raw power forecasts are immutable after entering the preview. A transformed voltage disturbance preview also depends on currently measured power, so it is not itself claimed to be immutable. Clicked disturbances are absent from every raw forecast.
 
 | Controller | Prediction calibration |
 | --- | --- |
 | Adaptive | Full shared matrix G fitted from past observations |
 | Scalar adaptation | One shared scalar alpha fitted from the same observations |
 | Fixed prediction | Identity calibration throughout the run |
-| Feedback only | No prediction input |
+| Feedback only | Current information without future power forecasts |
 
-Scalar uses the same mean ridge objective restricted to G = alpha I. If S and T are the regularized normalized covariance and cross covariance, alpha = trace(T) / trace(S). Equivalently, both the numerator and denominator include N times the ridge coefficient. Both adaptive methods start at t = 30 and use the same preceding 60 samples.
+The adaptive methods start at sample 30 and use the preceding 60 revealed samples. Before learning starts, all three predictive controllers coincide. The plot preserves this exact overlap. Line patterns, sample symbols and numerical cost rows identify every controller without altering its values.
 
-Adaptive, Scalar adaptation and Fixed prediction are identical before learning begins. The plot preserves exact overlap. Distinct colors, dash patterns, sample symbols and numerical cost rows identify the controllers without changing their values.
+The declared fitting objective is
 
-The forecast presets use a common latent disturbance process and identical Gaussian draws for any given seed. Reliable forecasts use gain 1 and noise scale 0.05 at all sources. Uniform corruption uses gain 0.65 and noise scale 0.65 at all sources. Mixed reliability retains the previous demo setup, with gain 0.15 and noise scale 1.6 at buses 3, 6, 9, 12, 15, 18, 21 and 24, and reliable forecasts elsewhere. These parameters follow the types of conditions in the manuscript. This browser experiment is not a reproduction of the paper's reported cost ratios.
+```
+(1 / (2 m)) sum ||G forecast[s] - observed_power[s]||²
+    + (lambda / 2) ||G - I||_F²
+lambda = 1.27e-5
+```
 
-The preset selector starts a fresh experiment. Run 180 steps advances the current experiment without dropping its history or interventions. Cost comparison is the default view. Every cost row includes all samples from t = 0, and differences are signed so higher adaptive cost remains visible. The Learning view retains the fixed data convergence diagnostic.
+Power vectors are normalized by 0.006 pu, equivalent to 6 kW, with the ridge coefficient scaled consistently. A positive definite solve gives the exact matrix optimum. Scalar adaptation restricts the same objective to alpha I on the 23 nonslack coordinates, with the unused slack coefficient fixed at one. If S and T are the regularized normalized covariance and cross covariance on those coordinates, `alpha = trace(T) / trace(S)`. Both traces include 23 times the ridge coefficient. The matrix learner has the same fixed slack coordinate.
 
-Unexpected clicked pulses are absent from all forecasts. They test recovery and can dominate prediction related cost differences. The shared matrix method is intended to retain useful sources while suppressing unreliable ones. Its advantage is conditional and must be evaluated against Scalar as well as Feedback only.
+This mean power forecast loss is a restricted experimental variant. It differs from the response weighted objective and completed FIR projection in the full manuscript algorithm. No claim of reproducing its theorem is made.
+
+## Communication and convergence
+
+The graph and matrix rank three remote prediction sources for each inverter receiver using mapped power preview gains. The physical feeder stays fixed. These recommendations do not restrict the deployed controller, which continues to use the full learned prediction map. Homes without inverters have no receiver row of control links.
+
+Live gain changes need not shrink monotonically because observations keep changing. Freeze data holds the plant, samples and costs fixed, then performs gradient iterations toward the exact fixed ridge minimizer. The displayed convergence is a fitting diagnostic, not a guarantee that live costs or communication recommendations converge.
 
 ## Interaction
 
-Run advances one control sample per second by default. Step advances a single sample. Clicking a bus queues an abstract additive state disturbance at the current time. Paused attacks wait for Run or Step. Several attacks at the same bus and time add exactly. There is no cooldown and a completed horizon can extend without discarding history.
+Run advances one physical sample per second by default. Playback speed changes animation pace, not physical time. Step advances one sample. Run 180 steps advances the current experiment without dropping its history or interventions. Forecast preset selection starts a fresh experiment.
 
-Equipment roles change the injected disturbance profile
+A click queues a power change at the selected bus. Paused clicks wait for Run or Step. Repeated clicks at the same bus and time are accepted without a cooldown. The substation is fixed and cannot be attacked.
 
-| Equipment | Event | Decay constant | Duration |
-| --- | --- | --- | --- |
-| Homes | Demand surge | 3 samples | 12 samples |
-| Solar | Cloud cover | 6 samples | 24 samples |
-| Battery | Inverter outage | 2 samples | 8 samples |
-| Substation | Feeder disturbance | 4 samples | 16 samples |
+| Equipment | Event | Power effect |
+| --- | --- | --- |
+| Homes | Demand surge | Increased active and reactive demand at power factor 0.95 |
+| Solar | Cloud cover | Reduced active generation, bounded by available solar power |
+| Battery | Charging surge | Increased active charging demand, bounded by charging capacity |
 
-Each event contributes `-strength * exp(-age / decay)` at its bus. Role icons do not imply separate inverter or battery state equations. Battery bars show current control effort, not state of charge. Queued events have count badges. Realized events trigger lightning, clouds or equipment effects based on the actual event state.
+Events decay over time. Requested power changes add before equipment limits are applied. The page shows applied power when a limit reduces the request. Solar loss cannot exceed available generation. Battery charging is limited to 90 kW, which leaves enough apparent power capacity for the 70 kvar reactive limit within a 120 kVA rating. These bounds also cover reactive lag because actual reactive injection remains within the same limit.
 
-The default pulse is 0.02 normalized units with 0.01 and 0.03 alternatives. Single pulses in the seeded validation stay close to the displayed 0.95 to 1.05 illustrative state band. Repeated disturbances may leave that range. The model has no AC power flow, actuator saturation or hard voltage constraint.
+The default request is 100 kW, with 50 and 150 kW options. An intervention queued at t changes voltage at t+1. The corresponding voltage error enters stage cost at t+1. Instantaneous cost and voltage retain their true sample indices. No cost is amplified for display.
 
-The experiment starts at zero so initial learning is visible. Version 5 browser state preserves repeated interventions at the same time. Older versions start fresh because their preview and learning definitions differ.
+Equipment animations represent realized power events. Battery bars represent reactive injection, not state of charge. The model does not track battery energy.
 
-## Reproducible paired comparison
+Version 6 browser state stores physical interventions and starts older synthetic sessions fresh.
 
-The table reports mean cumulative cost across seeds 1 through 20, with 180 samples per run and no clicked pulses. Warmup is included. Every controller receives exactly the same disturbances and forecasts for a given seed. Parameters were not changed to produce these results.
+## Forecast conditions and paired results
+
+All presets share the same latent power process and Gaussian draws for any given seed. Reliable forecasts use gain 1 and noise scale 0.05. Uniform corruption uses gain 0.65 and noise scale 0.65. Mixed reliability uses gain 0.15 and noise scale 1.6 at buses 3, 6, 9, 12, 15, 18, 21 and 24, with reliable forecasts elsewhere.
+
+These conditions were declared before evaluating the physical feeder. Unexpected pulses test recovery and can dominate differences attributable to prediction quality. A method is not guaranteed to win.
+
+The following means include every sample from 0 through 179 across seeds 1 through 20, with no clicked pulses. Each seed supplies identical realized powers and raw forecasts to all four controllers. Physical parameters and forecast conditions were fixed before evaluating these runs.
 
 | Forecasts | Adaptive | Scalar adaptation | Fixed prediction | Feedback only |
 | --- | --- | --- | --- | --- |
-| Reliable | 0.021498 | 0.020294 | 0.020335 | 2.968790 |
-| Uniform corruption | 2.181798 | 2.113740 | 2.656043 | 2.968790 |
-| Mixed reliability | 1.662154 | 2.891628 | 5.323677 | 2.968790 |
+| Reliable forecasts | 0.01089482 | 0.01089626 | 0.01089644 | 0.01646539 |
+| Uniform corruption | 0.01401949 | 0.01430522 | 0.01491790 | 0.01646539 |
+| Mixed reliability | 0.01258245 | 0.01512762 | 0.01764981 | 0.01646539 |
 
-For mixed reliability, the adaptive mean is 42.52 percent below Scalar, 68.78 percent below Fixed prediction and 44.01 percent below Feedback only. It wins all 20 paired mixed runs against each baseline. Scalar has the lower mean under both reliable and uniform forecasts. These are measurements of this browser benchmark, not the paper's experimental percentages or a guarantee about other systems.
+Under mixed reliability, Adaptive reduced mean cost by 16.83 percent against Scalar, 28.71 percent against Fixed prediction and 23.58 percent against Feedback only. It had lower cost in all 20 paired mixed runs. Under uniform corruption the mean advantage against Scalar was 2.00 percent. With reliable forecasts, the three prediction methods were practically tied, with differences below 0.015 percent. These are measurements of this browser model, not guarantees or the paper's experimental percentages.
 
-[All paired runs and settings](benchmark-results.json) are included. Reproduce them with `node src/benchmark.cjs --json`. The benchmark ends at 180 and truncates the final preview. The interactive run continues beyond 180 and retains its available preview. Its cost readouts are always computed from that live run.
+Actual voltages over these runs ranged from 0.98595 to 1.00000 pu. The nominal profile ranged from 0.98738 to 1.00000 pu. Independent balanced AC power flow checks of the nominal feeder and representative single 150 kW interventions found a maximum voltage magnitude discrepancy below 0.00026 pu. This validates the approximation in those tested conditions, not arbitrary stacked disturbances.
+
+[Every paired run and its settings](benchmark-results.json) includes costs, actual voltage ranges and command saturation counts. Reproduce the report with `node src/benchmark.cjs --json`. The benchmark ends at 180 and truncates its final preview. The interactive session can continue beyond 180 with available preview, so its last few cost samples can differ.
+
+All 17 numerical tests pass. They cover electrical sensitivities, the general input Riccati solve, conditional preview causality, physical voltage and inverter equations, capability limits, actual bounded command costs, repeated interventions, shared learning, AC power flow consistency, fixed data convergence and deterministic replay.
 
 ## Build and validate
 
-The checked in `index.html` and `assets` directory deploy directly to GitHub Pages. D3 is bundled with its license. DM Sans loads from Google Fonts with a system fallback.
+The checked in `index.html` and bundled assets deploy directly to GitHub Pages. D3 includes its license. DM Sans loads from Google Fonts with a system fallback.
 
 ```sh
 python3 build.py
 node src/test-simulation.cjs
+node src/benchmark.cjs --json
 python3 -m http.server 8000
 ```
 
-Numerical tests cover the plant and Riccati equation, preview coefficients, immutable forecasts, causal exact fitting, distinct equipment profiles, repeated pulse superposition, timing, state ranges, horizon extension, fixed objective convergence and deterministic replay.
+The source files are in `src`. Equipment artwork is native SVG. The page contains no private manuscript files or experimental datasets.
 
-The source files are in `src`. Equipment artwork is native SVG in `equipment.js` and `equipment.css`. The page contains no private manuscript files or experimental datasets.
+The physical equations follow the balanced linear approximation discussed in [Accelerated Voltage Regulation in Multi Phase Distribution Networks](https://arxiv.org/abs/1903.00072). Inverter real and reactive power capability is discussed in [Optimal Inverter VAR Control in Distribution Systems with High PV Penetration](https://arxiv.org/abs/1112.5594).

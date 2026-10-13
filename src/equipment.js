@@ -6,8 +6,9 @@
  *
  * PowerEquipment.update(host, {
  *   voltage: 1.0,       // Actual bus voltage in per unit, not voltage deviation.
- *   input: 0,          // Actual current controller input at this bus.
- *   inputScale: 0.02,  // Display reference for the magnitude of control effort.
+ *   referenceVoltage: 1.0, // Nominal feeder voltage for this bus in per unit.
+ *   input: 0,          // Actual inverter reactive output at this bus in kvar.
+ *   inputScale: 100,   // Inverter reactive capability in kvar for the effort display.
  *   selected: false,
  *   activePulse: false,
  *   queuedPulses: 0,   // Requests waiting for the next physical model sample.
@@ -15,7 +16,7 @@
  *   phase: 0           // Optional simulation step. Recorded, not invented motion.
  * })
  *
- * The battery bars display control effort, never battery state of charge.
+ * The battery bars display reactive inverter effort, never battery state of charge.
  * Voltage changes the surrounding ring and window light. No visual state feeds
  * back into the physical model. Hit area radius 21. Equipment radius 13.5.
  */
@@ -69,7 +70,7 @@
         glyph.append('rect').attr('class', 'pe-effort-segment').attr('data-segment', i).attr('x', -5.2).attr('y', 5.8 - i * 4.1).attr('width', 10.4).attr('height', 2.7).attr('rx', .7);
       }
       path(glyph, 'pe-control-arrow', 'M-2.3-4.4H2.3M.3-6.3L2.4-4.4L.3-2.5');
-      path(glyph, 'pe-disconnect', 'M-7 7L7-7');
+      path(glyph, 'pe-charging-surge', 'M-13-4V4M-16 1L-13 4L-10 1');
     } else {
       path(glyph, 'pe-station-base', 'M-11 10H11M-8 10V7H8V10');
       glyph.append('rect').attr('class', 'pe-transformer').attr('x', -9).attr('y', -3).attr('width', 18).attr('height', 10).attr('rx', 2);
@@ -103,11 +104,12 @@
     if (equipment.empty()) equipment = render(host, data.role || 'Homes');
     const voltage = finite(data.voltage, 1);
     const input = finite(data.input, 0);
-    const inputScale = Math.max(Math.abs(finite(data.inputScale, .02)), 1e-9);
+    const inputScale = Math.max(Math.abs(finite(data.inputScale, 100)), 1e-9);
     const effort = clamp(Math.abs(input) / inputScale);
     const queuedPulses = Math.max(0, Math.floor(finite(data.queuedPulses, 0)));
-    const stress = clamp(Math.abs(voltage - 1) / .05);
-    const voltageColor = stress > .6 ? '#be793e' : stress > .25 ? '#859454' : '#4c816b';
+    const reference = finite(data.referenceVoltage, 1);
+    const stress = clamp(Math.abs(voltage - reference) / .025);
+    const voltageColor = voltage < .95 || voltage > 1.05 || stress > .6 ? '#be793e' : stress > .25 ? '#859454' : '#4c816b';
     equipment.attr('data-voltage', voltage).attr('data-control', input)
       .attr('data-phase', finite(data.phase, 0)).attr('data-pulse-active', String(Boolean(data.activePulse)))
       .classed('pe-selected', Boolean(data.selected)).classed('pe-pulse-active', Boolean(data.activePulse))

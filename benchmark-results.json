@@ -30,226 +30,771 @@
     "static",
     "causal"
   ],
-  "ridge": 1.27e-05,
+  "ridge": 0.0000127,
   "window": 60,
   "warmup": 30,
   "preview": 5,
-  "description": "Synthetic network benchmark with shared forecast calibration",
+  "model": "Synthetic balanced radial LinDistFlow with inverter lag",
+  "sampleSeconds": 1,
+  "baseKv": 12.47,
+  "baseMva": 1,
+  "inverterBuses": [
+    5,
+    7,
+    8,
+    12,
+    14,
+    18,
+    21,
+    24
+  ],
+  "inverterRatingKva": 120,
+  "reactiveCommandLimitKvar": 70,
+  "inverterTimeConstantSeconds": 2,
+  "powerNoiseScaleKw": 6,
+  "referenceVoltage": [
+    1,
+    0.9978875889526416,
+    0.9954282207201821,
+    0.9942874283056935,
+    0.9943009178339937,
+    0.9940013463962286,
+    0.9939718698582358,
+    0.9940145664664521,
+    0.9937145715413563,
+    0.9934439388428526,
+    0.9931754580842224,
+    0.9928941413973197,
+    0.9934055843423415,
+    0.9933879445910747,
+    0.9955179953896999,
+    0.9903721300913015,
+    0.9899225997914205,
+    0.9889399520011066,
+    0.9882341626162202,
+    0.987855999323162,
+    0.9878576520647362,
+    0.9882053775337394,
+    0.9876662640766054,
+    0.9873849473897026
+  ],
+  "objective": "35 sum((V - V_reference)^2) + 0.08 sum(bounded reactive command in pu squared)",
+  "forecast": "Current observed power plus calibrated changes in sealed raw power forecasts",
+  "scalarRestriction": "diag(1, alpha I_23), slack coefficient fixed at one",
+  "description": "Physical linear feeder benchmark with shared power forecast calibration",
   "results": [
     {
       "preset": "reliable",
       "label": "Reliable forecasts",
       "means": {
-        "online": 0.021497712913531152,
-        "scalar": 0.020293512595718485,
-        "static": 0.02033514402923841,
-        "causal": 2.968790000516171
+        "online": 0.01089482220479414,
+        "scalar": 0.010896263164960649,
+        "static": 0.010896443749220053,
+        "causal": 0.016465386233792217
       },
       "standardDeviations": {
-        "online": 0.00043069669787600123,
-        "scalar": 0.0003878361131485544,
-        "static": 0.000384357302350339,
-        "causal": 0.15880539420888148
+        "online": 0.0013843756677009446,
+        "scalar": 0.0013843033654859663,
+        "static": 0.0013842621304046155,
+        "causal": 0.0016858168264630364
       },
       "comparisons": {
         "scalar": {
-          "wins": 0,
+          "wins": 19,
           "ties": 0,
-          "losses": 20,
-          "savingsPercent": -5.933917611023777
+          "losses": 1,
+          "savingsPercent": 0.013224351731359149
         },
         "static": {
-          "wins": 0,
+          "wins": 19,
           "ties": 0,
-          "losses": 20,
-          "savingsPercent": -5.717042783769665
+          "losses": 1,
+          "savingsPercent": 0.014881409597775114
         },
         "causal": {
           "wins": 20,
           "ties": 0,
           "losses": 0,
-          "savingsPercent": 99.27587626912671
+          "savingsPercent": 33.83196695116392
+        }
+      },
+      "voltageRange": {
+        "online": {
+          "min": 0.9863078883999039,
+          "max": 1
+        },
+        "scalar": {
+          "min": 0.9863113819531841,
+          "max": 1
+        },
+        "static": {
+          "min": 0.9863116240155337,
+          "max": 1
+        },
+        "causal": {
+          "min": 0.9859515967221683,
+          "max": 1
         }
       },
       "runs": [
         {
           "seed": 1,
           "costs": {
-            "online": 0.021230934180033842,
-            "scalar": 0.020081057874465225,
-            "static": 0.020121323200400373,
-            "causal": 2.8301822943409025
+            "online": 0.009830156885959628,
+            "scalar": 0.009832999450981046,
+            "static": 0.0098335389063779,
+            "causal": 0.015211283244997027
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9864296276801964,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9864296276801964,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9864296276801964,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9860544199451933,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 2,
           "costs": {
-            "online": 0.021199082985726352,
-            "scalar": 0.020004651097865978,
-            "static": 0.02007868934798737,
-            "causal": 2.943846916917631
+            "online": 0.010558934840143516,
+            "scalar": 0.010559714103495774,
+            "static": 0.010559894640569197,
+            "causal": 0.016935458869956312
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9863078883999039,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9863113819531841,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9863116240155337,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9862901901490192,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 3,
           "costs": {
-            "online": 0.020853732904962945,
-            "scalar": 0.019717938681791777,
-            "static": 0.01974934543026726,
-            "causal": 2.760747628622225
+            "online": 0.008638176978408095,
+            "scalar": 0.008639805105843175,
+            "static": 0.008639933813736568,
+            "causal": 0.013665694904803422
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9866002113082404,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9866013040994306,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9866021279400565,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9863600774545455,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 4,
           "costs": {
-            "online": 0.021814856194800405,
-            "scalar": 0.02062584839874894,
-            "static": 0.020687781551784398,
-            "causal": 3.0451222775538382
+            "online": 0.01042926219672771,
+            "scalar": 0.010431111733783487,
+            "static": 0.010431313920819042,
+            "causal": 0.015018938746395072
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9868046065465291,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.986802014844747,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9868033661914656,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9866216178918004,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 5,
           "costs": {
-            "online": 0.02151015766397466,
-            "scalar": 0.020409207972709776,
-            "static": 0.020434800509467974,
-            "causal": 3.1487251169888535
+            "online": 0.012497010547375457,
+            "scalar": 0.012497688940822833,
+            "static": 0.012497944680363702,
+            "causal": 0.018102725191738556
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9866554640591425,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9866552006759274,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9866556758265657,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9864525781396125,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 6,
           "costs": {
-            "online": 0.02166640705809616,
-            "scalar": 0.02041617636872806,
-            "static": 0.020446306124151076,
-            "causal": 2.900820411964541
+            "online": 0.010687424785912133,
+            "scalar": 0.01069014212720577,
+            "static": 0.010690491235837518,
+            "causal": 0.016445898161590745
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9867597674911818,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9867597674911818,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9867597674911818,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9865320067370366,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 7,
           "costs": {
-            "online": 0.021581618831806915,
-            "scalar": 0.02040792586689763,
-            "static": 0.020441732408653733,
-            "causal": 2.857116870298568
+            "online": 0.010265915974539174,
+            "scalar": 0.010267756847292144,
+            "static": 0.010267781954536726,
+            "causal": 0.01608770411757052
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9864128092083452,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9864128092083452,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9864128092083452,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9859515967221683,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 8,
           "costs": {
-            "online": 0.020938123827963513,
-            "scalar": 0.01982678428368889,
-            "static": 0.01989173519536591,
-            "causal": 2.8465263447501252
+            "online": 0.009604863166378135,
+            "scalar": 0.009606168485155515,
+            "static": 0.009606588449573546,
+            "causal": 0.014796710620806588
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9867936626858866,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9867958870606307,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9867965885952964,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9865199812857904,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 9,
           "costs": {
-            "online": 0.021098189098549595,
-            "scalar": 0.019857522376544475,
-            "static": 0.019879733885036343,
-            "causal": 2.8257504472841126
+            "online": 0.009111539701974671,
+            "scalar": 0.009113141556461708,
+            "static": 0.009113010302328976,
+            "causal": 0.014691329054983262
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9867102458035518,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9867087750437215,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9867103077783695,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9862803174106968,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 10,
           "costs": {
-            "online": 0.02179130598863637,
-            "scalar": 0.020466801497412878,
-            "static": 0.020504503281982903,
-            "causal": 3.1520983642700577
+            "online": 0.012921972955986748,
+            "scalar": 0.01292286742856035,
+            "static": 0.012922774361990077,
+            "causal": 0.019167057863146677
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9864031367796604,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9864068420180998,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9864080329646956,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9859667506935561,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 11,
           "costs": {
-            "online": 0.02073644725953501,
-            "scalar": 0.019531044719298712,
-            "static": 0.0196136991646962,
-            "causal": 2.5606661729051505
+            "online": 0.008917118921686118,
+            "scalar": 0.008918408330899281,
+            "static": 0.00891882246472636,
+            "causal": 0.014510862532990025
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9866507035048971,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9866507035048971,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9866507035048971,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9864092885496707,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 12,
           "costs": {
-            "online": 0.022604081917699366,
-            "scalar": 0.021237779800325197,
-            "static": 0.0212868204840829,
-            "causal": 3.1818623059997067
+            "online": 0.011191109388953574,
+            "scalar": 0.011192415581947815,
+            "static": 0.011193299746349125,
+            "causal": 0.016854825837078403
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9866998007944312,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9866998007944312,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9866998007944312,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9863792545895936,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 13,
           "costs": {
-            "online": 0.02135854313504005,
-            "scalar": 0.020199768999563036,
-            "static": 0.020263477255270272,
-            "causal": 2.9419052989644463
+            "online": 0.011308268178358819,
+            "scalar": 0.01130967504161079,
+            "static": 0.011309795100719963,
+            "causal": 0.01697187798896268
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9867018039235835,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9867014044377624,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9867028792719119,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9863195160893471,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 14,
           "costs": {
-            "online": 0.021355097541748524,
-            "scalar": 0.020167864100260675,
-            "static": 0.02019329316405627,
-            "causal": 2.9836581239327487
+            "online": 0.010690614115483629,
+            "scalar": 0.010691979109786394,
+            "static": 0.010692003410504136,
+            "causal": 0.016152799027265102
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9867626313896758,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9867619289020937,
+              "max": 1
+            },
+            "static": {
+              "min": 0.986764229963494,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9863234719168824,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 15,
           "costs": {
-            "online": 0.021608155008285366,
-            "scalar": 0.020477975467741976,
-            "static": 0.02050336180104189,
-            "causal": 2.9942625155263505
+            "online": 0.011215674126010326,
+            "scalar": 0.01121532946969111,
+            "static": 0.011215486342370807,
+            "causal": 0.016700879615760958
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9865881450678912,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9865866458304899,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9865877508951876,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9862141288337314,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 16,
           "costs": {
-            "online": 0.021837687430754392,
-            "scalar": 0.020688454240750193,
-            "static": 0.02074017789907771,
-            "causal": 3.0578173355722273
+            "online": 0.013311183282294269,
+            "scalar": 0.013313834608737942,
+            "static": 0.013314340386006335,
+            "causal": 0.018436962505858932
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9865575226479952,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9865607784960608,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9865612794002941,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9862003872913044,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 17,
           "costs": {
-            "online": 0.02174108030659206,
-            "scalar": 0.02053489266857046,
-            "static": 0.020572658765952705,
-            "causal": 3.1814822038081143
+            "online": 0.013648294368097794,
+            "scalar": 0.01364992187562109,
+            "static": 0.013649653914288731,
+            "causal": 0.020480500571885215
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9866436708520772,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9866378142626689,
+              "max": 1
+            },
+            "static": {
+              "min": 0.986639244129835,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9863130467141739,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 18,
           "costs": {
-            "online": 0.02174512311925609,
-            "scalar": 0.020384527632975633,
-            "static": 0.02041521546615425,
-            "causal": 3.097869314059953
+            "online": 0.010772538423870241,
+            "scalar": 0.010773853605441502,
+            "static": 0.010773594805268166,
+            "causal": 0.015280895517510672
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9866508320642218,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9866521011180025,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9866548647819467,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.986394663501934,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 19,
           "costs": {
-            "online": 0.021395639299687817,
-            "scalar": 0.020308609871238493,
-            "static": 0.020310049215991305,
-            "causal": 3.042648827213215
+            "online": 0.011249398161044161,
+            "scalar": 0.011250422949292049,
+            "static": 0.011250572442984353,
+            "causal": 0.016736180056691453
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.986741860472152,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9867387320995312,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9867395740688896,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9865182210972133,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 20,
           "costs": {
-            "online": 0.021887994517473666,
-            "scalar": 0.020525419994791756,
-            "static": 0.020568176433347355,
-            "causal": 3.0226912393506553
+            "online": 0.01104698709667858,
+            "scalar": 0.01104802694658322,
+            "static": 0.011048034105049825,
+            "causal": 0.017059140245852766
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.986737945314355,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.986737945314355,
+              "max": 1
+            },
+            "static": {
+              "min": 0.986737945314355,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9864955074293121,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         }
       ]
@@ -258,216 +803,714 @@
       "preset": "uniform",
       "label": "Uniform corruption",
       "means": {
-        "online": 2.1817984959160563,
-        "scalar": 2.1137404988668473,
-        "static": 2.6560432983665407,
-        "causal": 2.968790000516171
+        "online": 0.014019485784959766,
+        "scalar": 0.01430521994410924,
+        "static": 0.014917896623981875,
+        "causal": 0.016465386233792217
       },
       "standardDeviations": {
-        "online": 0.05382280268734702,
-        "scalar": 0.06025974670537483,
-        "static": 0.04375441500163782,
-        "causal": 0.15880539420888148
+        "online": 0.0015599443310409591,
+        "scalar": 0.0015396249338824474,
+        "static": 0.0015055544895673741,
+        "causal": 0.0016858168264630364
       },
       "comparisons": {
         "scalar": {
-          "wins": 2,
+          "wins": 19,
           "ties": 0,
-          "losses": 18,
-          "savingsPercent": -3.219789613989709
+          "losses": 1,
+          "savingsPercent": 1.997411855713109
         },
         "static": {
           "wins": 20,
           "ties": 0,
           "losses": 0,
-          "savingsPercent": 17.85531142290277
+          "savingsPercent": 6.022369384017799
         },
         "causal": {
           "wins": 20,
           "ties": 0,
           "losses": 0,
-          "savingsPercent": 26.50883034715435
+          "savingsPercent": 14.854801546122765
+        }
+      },
+      "voltageRange": {
+        "online": {
+          "min": 0.9862036379017498,
+          "max": 1
+        },
+        "scalar": {
+          "min": 0.9862036379017498,
+          "max": 1
+        },
+        "static": {
+          "min": 0.9862036379017498,
+          "max": 1
+        },
+        "causal": {
+          "min": 0.9859515967221683,
+          "max": 1
         }
       },
       "runs": [
         {
           "seed": 1,
           "costs": {
-            "online": 2.2449340660692894,
-            "scalar": 2.0592120426139666,
-            "static": 2.660315837767734,
-            "causal": 2.8301822943409025
+            "online": 0.01308807674709705,
+            "scalar": 0.013113943487084712,
+            "static": 0.013997594636245139,
+            "causal": 0.015211283244997027
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.98636565678586,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.98636565678586,
+              "max": 1
+            },
+            "static": {
+              "min": 0.98636565678586,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9860544199451933,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 2,
           "costs": {
-            "online": 2.135747248800948,
-            "scalar": 2.044850139652536,
-            "static": 2.580482996797895,
-            "causal": 2.943846916917631
+            "online": 0.013671702069636337,
+            "scalar": 0.014154458810447499,
+            "static": 0.014453158073610833,
+            "causal": 0.016935458869956312
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9862918794895351,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9863064485368221,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9863137685289981,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9862901901490192,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 3,
           "costs": {
-            "online": 2.182151959255847,
-            "scalar": 2.051068411514997,
-            "static": 2.6297104752399703,
-            "causal": 2.760747628622225
+            "online": 0.011665364810333333,
+            "scalar": 0.011861827772389089,
+            "static": 0.012724547542223267,
+            "causal": 0.013665694904803422
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9863508815566927,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.986329083816837,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9863148966720564,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9863600774545455,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 4,
           "costs": {
-            "online": 2.175541818497475,
-            "scalar": 2.1058466102304942,
-            "static": 2.664711976289676,
-            "causal": 3.0451222775538382
+            "online": 0.013517189124165913,
+            "scalar": 0.013608533074913042,
+            "static": 0.014586600418035481,
+            "causal": 0.015018938746395072
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9867595189771433,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9867048161979276,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9867324773818624,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9866216178918004,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 5,
           "costs": {
-            "online": 2.1964810299423374,
-            "scalar": 2.1622959490969507,
-            "static": 2.6487474645211053,
-            "causal": 3.1487251169888535
+            "online": 0.015668118705700503,
+            "scalar": 0.015893679491796615,
+            "static": 0.01635208862312995,
+            "causal": 0.018102725191738556
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9864829852043965,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9865649503040317,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9866066729413139,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9864525781396125,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 6,
           "costs": {
-            "online": 2.1774076776760487,
-            "scalar": 2.1392787143612924,
-            "static": 2.7171783252593347,
-            "causal": 2.900820411964541
+            "online": 0.013636362973106652,
+            "scalar": 0.014094840270650642,
+            "static": 0.014825490111471294,
+            "causal": 0.016445898161590745
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9864947748674613,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9865193970863112,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9864868248245404,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9865320067370366,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 7,
           "costs": {
-            "online": 2.216397829365803,
-            "scalar": 2.10490382285407,
-            "static": 2.719835186868545,
-            "causal": 2.857116870298568
+            "online": 0.013660698209170022,
+            "scalar": 0.013862149181009965,
+            "static": 0.014776644851430822,
+            "causal": 0.01608770411757052
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9862036379017498,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9862036379017498,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9862036379017498,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9859515967221683,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 8,
           "costs": {
-            "online": 2.0881867550974396,
-            "scalar": 2.0422054178398317,
-            "static": 2.5824316071151006,
-            "causal": 2.8465263447501252
+            "online": 0.012320994451821657,
+            "scalar": 0.012674600615600724,
+            "static": 0.013064828881868187,
+            "causal": 0.014796710620806588
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9867588145700519,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9866822744926427,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9867330852520299,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9865199812857904,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 9,
           "costs": {
-            "online": 2.2196042298353706,
-            "scalar": 2.1138583811391656,
-            "static": 2.656306979874402,
-            "causal": 2.8257504472841126
+            "online": 0.01232472546802196,
+            "scalar": 0.012820750983310997,
+            "static": 0.013121113535860533,
+            "causal": 0.014691329054983262
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9865404592790051,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9864706337123869,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9864797492485682,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9862803174106968,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 10,
           "costs": {
-            "online": 2.211349623453643,
-            "scalar": 2.1626872965029134,
-            "static": 2.649135641762408,
-            "causal": 3.1520983642700577
+            "online": 0.016661127306883076,
+            "scalar": 0.01706732923666926,
+            "static": 0.017799792456710584,
+            "causal": 0.019167057863146677
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9863273296125027,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9863055590262017,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9863701474193105,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9859667506935561,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 11,
           "costs": {
-            "online": 2.0967234808220714,
-            "scalar": 1.9479542692811962,
-            "static": 2.607539888679574,
-            "causal": 2.5606661729051505
+            "online": 0.011588816387936846,
+            "scalar": 0.011989805151745381,
+            "static": 0.012852557245000598,
+            "causal": 0.014510862532990025
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9865405810346118,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9865435911372905,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9866105013958709,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9864092885496707,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 12,
           "costs": {
-            "online": 2.3110195450255553,
-            "scalar": 2.196883044950351,
-            "static": 2.752045998057244,
-            "causal": 3.1818623059997067
+            "online": 0.01419881428215375,
+            "scalar": 0.014268692516515878,
+            "static": 0.014941765758148578,
+            "causal": 0.016854825837078403
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9865371373999818,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9865371373999818,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9865371373999818,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9863792545895936,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 13,
           "costs": {
-            "online": 2.151409957864329,
-            "scalar": 2.0937094415201245,
-            "static": 2.631207151279553,
-            "causal": 2.9419052989644463
+            "online": 0.014581593778454827,
+            "scalar": 0.014887508683104123,
+            "static": 0.015324298814836148,
+            "causal": 0.01697187798896268
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9866383102546993,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9864968608015787,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9865827594974738,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9863195160893471,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 14,
           "costs": {
-            "online": 2.182948964234354,
-            "scalar": 2.1207436210774624,
-            "static": 2.639341549165211,
-            "causal": 2.9836581239327487
+            "online": 0.013620261226072827,
+            "scalar": 0.013824416237695874,
+            "static": 0.014228492921855114,
+            "causal": 0.016152799027265102
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9865627518405474,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9865621515497599,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9865361060716487,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9863234719168824,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 15,
           "costs": {
-            "online": 2.138190500265039,
-            "scalar": 2.135456071539175,
-            "static": 2.680739944097263,
-            "causal": 2.9942625155263505
+            "online": 0.01404696920939703,
+            "scalar": 0.014462699818502196,
+            "static": 0.014921871426961596,
+            "causal": 0.016700879615760958
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9865983970937804,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9864435508683054,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9865521373182362,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9862141288337314,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 16,
           "costs": {
-            "online": 2.1326480772632497,
-            "scalar": 2.1574832052223045,
-            "static": 2.690048059423178,
-            "causal": 3.0578173355722273
+            "online": 0.01683145137754245,
+            "scalar": 0.016722823188370827,
+            "static": 0.017538368033590167,
+            "causal": 0.018436962505858932
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9863613984465855,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9863846307703709,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9863362179387314,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9862003872913044,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 17,
           "costs": {
-            "online": 2.1235636205126815,
-            "scalar": 2.1613727944718537,
-            "static": 2.623715357885365,
-            "causal": 3.1814822038081143
+            "online": 0.017051972000608928,
+            "scalar": 0.01744852336009,
+            "static": 0.017772964189194176,
+            "causal": 0.020480500571885215
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9865347222784064,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9864579019229713,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9865048210078323,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9863130467141739,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 18,
           "costs": {
-            "online": 2.2120688753933404,
-            "scalar": 2.157774331348619,
-            "static": 2.635724576927702,
-            "causal": 3.097869314059953
+            "online": 0.013935427308515803,
+            "scalar": 0.01418484896426651,
+            "static": 0.014990359478936201,
+            "causal": 0.015280895517510672
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9865915589199881,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9864918389062229,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9865309630790301,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.986394663501934,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 19,
           "costs": {
-            "online": 2.216350320079213,
-            "scalar": 2.1832628356226316,
-            "static": 2.6821548113799025,
-            "causal": 3.042648827213215
+            "online": 0.013879424161926545,
+            "scalar": 0.014447973260974207,
+            "static": 0.014856457268243703,
+            "causal": 0.016736180056691453
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9865605951776518,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.986564917688184,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9865855095689956,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9865182210972133,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 20,
           "costs": {
-            "online": 2.2232443388670924,
-            "scalar": 2.1339635764970146,
-            "static": 2.6694921389396598,
-            "causal": 3.0226912393506553
+            "online": 0.014440626100649773,
+            "scalar": 0.014714994777047283,
+            "static": 0.015228938212285176,
+            "causal": 0.017059140245852766
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9865402114970782,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9865402114970782,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9865402114970782,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9864955074293121,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         }
       ]
@@ -476,216 +1519,714 @@
       "preset": "mixed",
       "label": "Mixed reliability",
       "means": {
-        "online": 1.662154114306024,
-        "scalar": 2.891627625600875,
-        "static": 5.323676813820245,
-        "causal": 2.968790000516171
+        "online": 0.012582450711212135,
+        "scalar": 0.01512762468208051,
+        "static": 0.017649809630146614,
+        "causal": 0.016465386233792217
       },
       "standardDeviations": {
-        "online": 0.08369133264858318,
-        "scalar": 0.11229214483968515,
-        "static": 0.17608143378949953,
-        "causal": 0.15880539420888148
+        "online": 0.0014562941175116312,
+        "scalar": 0.0016674858127499468,
+        "static": 0.0017039411146471672,
+        "causal": 0.0016858168264630364
       },
       "comparisons": {
         "scalar": {
           "wins": 20,
           "ties": 0,
           "losses": 0,
-          "savingsPercent": 42.51839000325529
+          "savingsPercent": 16.824676870012983
         },
         "static": {
           "wins": 20,
           "ties": 0,
           "losses": 0,
-          "savingsPercent": 68.77808002936845
+          "savingsPercent": 28.71055849961814
         },
         "causal": {
           "wins": 20,
           "ties": 0,
           "losses": 0,
-          "savingsPercent": 44.012405255439674
+          "savingsPercent": 23.582413843478882
+        }
+      },
+      "voltageRange": {
+        "online": {
+          "min": 0.9862917267416412,
+          "max": 1
+        },
+        "scalar": {
+          "min": 0.9861329059529252,
+          "max": 1
+        },
+        "static": {
+          "min": 0.9862902761929259,
+          "max": 1
+        },
+        "causal": {
+          "min": 0.9859515967221683,
+          "max": 1
         }
       },
       "runs": [
         {
           "seed": 1,
           "costs": {
-            "online": 1.7367023844145013,
-            "scalar": 2.8677471837226602,
-            "static": 5.415530372589431,
-            "causal": 2.8301822943409025
+            "online": 0.011788217665787313,
+            "scalar": 0.014257829945743452,
+            "static": 0.017514911464645806,
+            "causal": 0.015211283244997027
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9863185983306795,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9863185983306795,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9863185983306795,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9860544199451933,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 2,
           "costs": {
-            "online": 1.610276988868386,
-            "scalar": 2.7717223886489455,
-            "static": 5.135717437955855,
-            "causal": 2.943846916917631
+            "online": 0.012302214706517014,
+            "scalar": 0.015299997101930765,
+            "static": 0.0173980912258269,
+            "causal": 0.016935458869956312
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9863495380971993,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.986396249759328,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9865135840915863,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9862901901490192,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 3,
           "costs": {
-            "online": 1.6196419707817435,
-            "scalar": 2.8109322988285785,
-            "static": 5.326017715438147,
-            "causal": 2.760747628622225
+            "online": 0.010255650354300382,
+            "scalar": 0.012646435190566546,
+            "static": 0.015036343085996745,
+            "causal": 0.013665694904803422
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.986488215361447,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.986356600089297,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9863518912279542,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9863600774545455,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 4,
           "costs": {
-            "online": 1.6144630315420943,
-            "scalar": 2.8385333149139083,
-            "static": 5.311729459184798,
-            "causal": 3.0451222775538382
+            "online": 0.011848709250165226,
+            "scalar": 0.013924242544587302,
+            "static": 0.017089882951201434,
+            "causal": 0.015018938746395072
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9868258731146453,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9867025602418847,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9866253201576001,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9866216178918004,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 5,
           "costs": {
-            "online": 1.7287595859610652,
-            "scalar": 2.9629305659919956,
-            "static": 5.226277183233612,
-            "causal": 3.1487251169888535
+            "online": 0.014588374736503026,
+            "scalar": 0.01719719792573027,
+            "static": 0.019530119024628978,
+            "causal": 0.018102725191738556
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9866004351925528,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9865167750099049,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9865830437843566,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9864525781396125,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 6,
           "costs": {
-            "online": 1.7082064203468523,
-            "scalar": 2.976123812096551,
-            "static": 5.677987824742052,
-            "causal": 2.900820411964541
+            "online": 0.012682618507220347,
+            "scalar": 0.015138545154882811,
+            "static": 0.017148395462542758,
+            "causal": 0.016445898161590745
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9866520014844055,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9864977046691844,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9863805784748942,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9865320067370366,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 7,
           "costs": {
-            "online": 1.551269232009062,
-            "scalar": 2.7626619522357703,
-            "static": 5.3443049032634375,
-            "causal": 2.857116870298568
+            "online": 0.01166659395912583,
+            "scalar": 0.014108959841436869,
+            "static": 0.017180102543800455,
+            "causal": 0.01608770411757052
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9862917267416412,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9862917267416412,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9862917267416412,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9859515967221683,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 8,
           "costs": {
-            "online": 1.5187884282302877,
-            "scalar": 2.659743545740739,
-            "static": 4.899599648266233,
-            "causal": 2.8465263447501252
+            "online": 0.011179629875881099,
+            "scalar": 0.013188515087523717,
+            "static": 0.014747308592603049,
+            "causal": 0.014796710620806588
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9867397095279596,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9866658553006022,
+              "max": 1
+            },
+            "static": {
+              "min": 0.986703154069047,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9865199812857904,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 9,
           "costs": {
-            "online": 1.650694637746146,
-            "scalar": 2.8208605484518,
-            "static": 5.174251089554071,
-            "causal": 2.8257504472841126
+            "online": 0.010923359387037292,
+            "scalar": 0.013548721829390967,
+            "static": 0.015623516844410316,
+            "causal": 0.014691329054983262
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9865923763173953,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9864961719800817,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9865655128889216,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9862803174106968,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 10,
           "costs": {
-            "online": 1.7208131727195484,
-            "scalar": 3.010857238546863,
-            "static": 5.330038830705946,
-            "causal": 3.1520983642700577
+            "online": 0.014711852862462809,
+            "scalar": 0.01768744092453685,
+            "static": 0.020155758219921563,
+            "causal": 0.019167057863146677
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9863456524168717,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9861329059529252,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9863341662258227,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9859667506935561,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 11,
           "costs": {
-            "online": 1.7092734172541424,
-            "scalar": 2.7825550134460624,
-            "static": 5.449621395952398,
-            "causal": 2.5606661729051505
+            "online": 0.01038764084463703,
+            "scalar": 0.012699493217457402,
+            "static": 0.015274875680984422,
+            "causal": 0.014510862532990025
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.986606123109928,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.98651757047326,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9866332187398771,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9864092885496707,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 12,
           "costs": {
-            "online": 1.8295891215492253,
-            "scalar": 3.0931729173650617,
-            "static": 5.5809506984563235,
-            "causal": 3.1818623059997067
+            "online": 0.01277769687748358,
+            "scalar": 0.015528232520061436,
+            "static": 0.018896046416229197,
+            "causal": 0.016854825837078403
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9865405763433495,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9865405763433495,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9864810177774769,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9863792545895936,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 13,
           "costs": {
-            "online": 1.7392754115837816,
-            "scalar": 2.9481053572727616,
-            "static": 5.309711410919841,
-            "causal": 2.9419052989644463
+            "online": 0.013170265725321905,
+            "scalar": 0.015543643849379025,
+            "static": 0.017781329085096265,
+            "causal": 0.01697187798896268
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9867100458216044,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9865331723903967,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9866892117076985,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9863195160893471,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 14,
           "costs": {
-            "online": 1.7090771959959887,
-            "scalar": 2.9475738486533154,
-            "static": 5.29423385591417,
-            "causal": 2.9836581239327487
+            "online": 0.012380261604892535,
+            "scalar": 0.014865716283726366,
+            "static": 0.01729087676315884,
+            "causal": 0.016152799027265102
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9865415429021617,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9865415429021617,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9865415429021617,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9863234719168824,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 15,
           "costs": {
-            "online": 1.5545386838160025,
-            "scalar": 2.928357087636155,
-            "static": 5.463883682177095,
-            "causal": 2.9942625155263505
+            "online": 0.012991274518493797,
+            "scalar": 0.015303819908789495,
+            "static": 0.0178407055201842,
+            "causal": 0.016700879615760958
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9865129864901044,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9863527924382876,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9865224208916749,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9862141288337314,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 16,
           "costs": {
-            "online": 1.5496243655725686,
-            "scalar": 2.8897839561998238,
-            "static": 5.347600125615623,
-            "causal": 3.0578173355722273
+            "online": 0.015206060386772698,
+            "scalar": 0.01765842968551012,
+            "static": 0.020257480287014504,
+            "causal": 0.018436962505858932
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9864752899882938,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9863635449147916,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9862902761929259,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9862003872913044,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 17,
           "costs": {
-            "online": 1.678617347061101,
-            "scalar": 3.0839373847781584,
-            "static": 5.366855271068214,
-            "causal": 3.1814822038081143
+            "online": 0.015216411562134286,
+            "scalar": 0.018634531706296264,
+            "static": 0.020570489172022987,
+            "causal": 0.020480500571885215
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9866451369562811,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9863975282783181,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9864567181418821,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9863130467141739,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 18,
           "costs": {
-            "online": 1.5731614111412808,
-            "scalar": 2.7887452383330644,
-            "static": 5.0264533340516895,
-            "causal": 3.097869314059953
+            "online": 0.012132002093197126,
+            "scalar": 0.0141984539431074,
+            "static": 0.01690719036381687,
+            "causal": 0.015280895517510672
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9866053752149518,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9865681365114555,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9865438231861072,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.986394663501934,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 19,
           "costs": {
-            "online": 1.710041233382715,
-            "scalar": 2.9537991747900265,
-            "static": 5.437573007196213,
-            "causal": 3.042648827213215
+            "online": 0.012587394648685786,
+            "scalar": 0.01570377350476102,
+            "static": 0.019012088491993432,
+            "causal": 0.016736180056691453
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9866101319089617,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9865483987813685,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9864539140351002,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9865182210972133,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         },
         {
           "seed": 20,
           "costs": {
-            "online": 1.7302682461439858,
-            "scalar": 2.9344096843652645,
-            "static": 5.355199030119733,
-            "causal": 3.0226912393506553
+            "online": 0.012852784657623625,
+            "scalar": 0.015418513476192051,
+            "static": 0.01774068140685358,
+            "causal": 0.017059140245852766
+          },
+          "voltageRange": {
+            "online": {
+              "min": 0.9865698854512327,
+              "max": 1
+            },
+            "scalar": {
+              "min": 0.9865698854512327,
+              "max": 1
+            },
+            "static": {
+              "min": 0.9865698854512327,
+              "max": 1
+            },
+            "causal": {
+              "min": 0.9864955074293121,
+              "max": 1
+            }
+          },
+          "saturationCount": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
           }
         }
       ]

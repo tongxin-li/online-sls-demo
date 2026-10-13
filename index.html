@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<meta name="description" content="An illustrative network control benchmark. Explore abstract state recovery, control cost, and adaptive prediction. This demo does not model physical feeder voltage.">
+<meta name="description" content="An interactive LinDistFlow feeder experiment. Disturb loads and solar generation, observe voltage recovery, and compare adaptive prediction with three control baselines.">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Keeping the Grid Steady</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600&display=swap">
@@ -175,6 +175,10 @@ summary span { color:#a4aba4; }
 @media(max-width:900px) { .pr-bottomline { flex-wrap:wrap; gap:3px; padding:6px 0; } .pr-legend { gap:11px; } }
 @media(max-width:650px) { .pr-comparison-controls { gap:8px; } .pr-comparison-controls>.pr-caption { flex-basis:100%; font-size:9px; } .pr-legend { gap:8px 14px; } .pr-cost-table { font-size:10px; } }
 
+#pr-bus-detail { min-width:0; line-height:1.4; }
+#pr-network .bus-node[aria-disabled='true'] { cursor:default; }
+.pr-algorithm-flow span:last-child { white-space:normal; overflow-wrap:anywhere; }
+
 /* Equipment marks stay decorative. The enclosing bus owns interaction. */
 .pe-host { -webkit-user-select:none; user-select:none; touch-action:manipulation; }
 .pe-hit { fill:transparent; pointer-events:all; }
@@ -207,8 +211,8 @@ summary span { color:#a4aba4; }
 .pe-battery-terminal { fill:#789980; stroke:none; }
 .pe-effort-segment { fill:#4c8972; stroke:none; opacity:.15; transition:opacity .4s; }
 .pe-control-arrow { stroke:#4c8972; stroke-width:.9; transition:opacity .4s; }
-.pe-disconnect { stroke:#c58948; stroke-width:1.9; stroke-linecap:round; opacity:0; transition:opacity .25s; }
-.pe-root[data-equipment='Battery'].pe-pulse-active .pe-disconnect { opacity:1; }
+.pe-charging-surge { stroke:#c58948; stroke-width:1.9; stroke-linecap:round; opacity:0; transition:opacity .25s; }
+.pe-root[data-equipment='Battery'].pe-pulse-active .pe-charging-surge { opacity:1; }
 .pe-transformer { fill:#e1ebe3; }
 .pe-coil { stroke:#80a189; stroke-width:1.25; }
 .pe-insulator,.pe-station-wire { stroke:#5d7c6c; stroke-width:1; }
@@ -234,6 +238,8 @@ summary span { color:#a4aba4; }
   .pe-root * { animation:none!important; transition:none!important; }
   .pe-burst { display:none; }
 }
+
+.pe-host[data-bus='1']:hover .pe-disc { stroke:#dce6de; stroke-width:1; }
 </style>
 </head>
 <body class="research-site">
@@ -252,34 +258,34 @@ summary span { color:#a4aba4; }
 })();
 </script>
 <header class="research-header">
-  <div class="research-title-row"><h1>Keeping the Grid Steady<span class="research-tag">Synthetic network benchmark</span></h1><nav aria-label="Page navigation"><a href="#about-demo">Method</a><a href="https://github.com/tongxin-li/online-sls-demo" target="_blank" rel="noopener noreferrer">Code ↗</a></nav></div>
+  <div class="research-title-row"><h1>Keeping the Grid Steady<span class="research-tag">Adaptive voltage regulation</span></h1><nav aria-label="Page navigation"><a href="#about-demo">Method</a><a href="https://github.com/tongxin-li/online-sls-demo" target="_blank" rel="noopener noreferrer">Code ↗</a></nav></div>
 </header>
 
 <main id="power-response-demo">
   <div class="pr-controlbar" aria-label="Simulation controls">
     <div class="pr-toolbar">
       <button type="button" class="btn btn-play" id="pr-run">Run</button>
-      <button type="button" class="btn btn-quiet" id="pr-step" title="Advance one control sample">Step</button>
+      <button type="button" class="btn btn-quiet" id="pr-step" title="Advance one second of feeder operation">Step</button>
       <button type="button" class="btn btn-quiet" id="pr-restart" title="Start a fresh experiment">Reset</button>
       <select id="pr-speed" aria-label="Playback speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
-      <span id="pr-clock" class="tabular-nums">t = 0</span>
+      <span id="pr-clock" class="tabular-nums">t = 0 s</span>
     </div>
     <div class="pr-actions">
       <label for="pr-strength">Pulse</label>
-      <select id="pr-strength" aria-label="Pulse strength"><option value="0.01">Small · 0.01</option><option value="0.02" selected>Medium · 0.02</option><option value="0.03">Large · 0.03</option></select>
-      <button type="button" class="btn btn-attack" id="pr-pulse" aria-keyshortcuts="D"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14 2 5 14h6l-1 8 9-13h-6z"/></svg><span id="pr-pulse-label">Attack bus 6</span></button>
+      <select id="pr-strength" aria-label="Pulse strength"><option value="50">50 kW</option><option value="100" selected>100 kW</option><option value="150">150 kW</option></select>
+      <button type="button" class="btn btn-attack" id="pr-pulse" aria-keyshortcuts="D"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14 2 5 14h6l-1 8 9-13h-6z"/></svg><span id="pr-pulse-label">Attack bus 7</span></button>
     </div>
   </div>
   <div class="pr-comparison-controls">
     <label for="pr-preset">Forecasts <select id="pr-preset" aria-label="Forecast preset"><option value="reliable">Reliable forecasts</option><option value="uniform">Uniform noise</option><option value="mixed" selected>Mixed reliability</option></select></label>
-    <button type="button" class="btn btn-compare" id="pr-compare" title="Advance 180 additional control samples and keep all accumulated costs">Run 180 steps</button>
+    <button type="button" class="btn btn-compare" id="pr-compare" title="Advance 180 seconds of feeder operation and keep all accumulated costs">Run 180 steps</button>
     <span class="pr-caption">Changing forecasts resets the experiment</span>
   </div>
-  <div class="pr-mission"><span><span class="pr-status-dot" id="pr-voltage-status" aria-hidden="true"></span>State reference <strong>1.00</strong><span class="pr-target"> · Target 0.95 to 1.05</span></span><span id="pr-voltage-range" class="tabular-nums"></span></div>
+  <div class="pr-mission"><span><span class="pr-status-dot" id="pr-voltage-status" aria-hidden="true"></span>Restore the <strong>nominal voltage profile</strong><span class="pr-target"> · Illustrative band 0.95 to 1.05 pu</span></span><span id="pr-voltage-range" class="tabular-nums"></span></div>
   <div class="pr-dashboard">
     <section class="pr-panel pr-network-panel" aria-labelledby="pr-network-title">
-      <div class="pr-subhead"><h2 id="pr-network-title">Illustrative network</h2><span id="pr-action-note" class="pr-caption" aria-live="polite">Click a bus to attack</span></div>
-      <svg class="pr-chart" id="pr-network" role="group" aria-label="Illustrative network. Click a bus to inject an abstract state disturbance"></svg>
+      <div class="pr-subhead"><h2 id="pr-network-title">Power network</h2><span id="pr-action-note" class="pr-caption" aria-live="polite">Click a bus to attack</span></div>
+      <svg class="pr-chart" id="pr-network" role="group" aria-label="24 bus radial power feeder. Click a load, solar, or battery bus to queue a power disturbance"></svg>
       <div class="pr-panel-foot"><span id="pr-bus-detail" class="tabular-nums"></span><span class="pr-live-stage">Cost <strong id="pr-live-cost" class="tabular-nums">0.0000</strong></span></div>
     </section>
     <section class="pr-panel pr-matrix-panel" aria-labelledby="pr-matrix-title">
@@ -288,34 +294,34 @@ summary span { color:#a4aba4; }
       <div class="pr-panel-foot"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div>
     </section>
     <section class="pr-panel pr-stage-panel" aria-labelledby="pr-stage-title">
-      <div class="pr-subhead"><h2 id="pr-stage-title">State and cost</h2><strong id="pr-state-value" class="pr-state-value tabular-nums">1.000</strong></div>
-      <div class="pr-plot-label"><span id="pr-voltage-detail">Bus 6 state</span><span class="pr-target-key">Target 0.95 to 1.05</span></div>
-      <svg class="pr-chart" id="pr-voltage" role="img" aria-label="Selected normalized state with an illustrative target range"></svg>
-      <div class="pr-plot-label"><span>Instantaneous cost</span><span id="pr-pulse-summary" class="tabular-nums" aria-live="polite"></span></div>
-      <svg class="pr-chart" id="pr-stage" role="img" aria-label="Instantaneous quadratic cost under the same disturbances"></svg>
+      <div class="pr-subhead"><h2 id="pr-stage-title">Voltage and cost</h2><strong id="pr-state-value" class="pr-state-value tabular-nums">1.000 pu</strong></div>
+      <div class="pr-plot-label"><span id="pr-voltage-detail">Bus 7 voltage</span><span id="pr-voltage-reference" class="pr-target-key">Nominal voltage</span></div>
+      <svg class="pr-chart" id="pr-voltage" role="img" aria-label="Selected bus voltage in per unit with its nominal reference profile"></svg>
+      <div class="pr-plot-label"><span>Normalized cost per second</span><span id="pr-pulse-summary" class="tabular-nums" aria-live="polite"></span></div>
+      <svg class="pr-chart" id="pr-stage" role="img" aria-label="Normalized voltage and reactive effort cost under identical power disturbances"></svg>
       <div id="pr-stage-detail" class="pr-panel-foot tabular-nums"></div>
     </section>
     <section class="pr-panel pr-learning-panel" aria-labelledby="pr-learning-title">
       <div class="pr-subhead"><h2 id="pr-learning-title">Cost comparison</h2><select id="pr-view" aria-label="Controller view"><option value="cost" selected>Cost comparison</option><option value="learning">Learning</option></select></div>
       <div id="pr-learning-content" hidden>
         <div class="pr-algorithm-flow" id="pr-learning-flow" aria-label="Shared matrix learning cycle">
-          <div><span class="pr-flow-index">01</span><strong>Forecast</strong><span id="pr-flow-predict">5 steps</span></div>
-          <div><span class="pr-flow-index">02</span><strong>Control</strong><span id="pr-flow-control">Feedback + preview</span></div>
-          <div><span class="pr-flow-index">03</span><strong>Observe</strong><span id="pr-flow-observe">Recover disturbance</span></div>
+          <div><span class="pr-flow-index">01</span><strong>Forecast</strong><span id="pr-flow-predict">Load forecast</span></div>
+          <div><span class="pr-flow-index">02</span><strong>Control</strong><span id="pr-flow-control">Reactive support</span></div>
+          <div><span class="pr-flow-index">03</span><strong>Observe</strong><span id="pr-flow-observe">Realized load</span></div>
           <div><span class="pr-flow-index">04</span><strong>Learn</strong><span id="pr-flow-update">Fit prediction gain</span></div>
         </div>
         <div class="pr-learning-caption"><span id="pr-learning-kind">Gain change per step</span><button type="button" class="btn btn-fit" id="pr-freeze">Freeze data and fit</button></div>
         <svg class="pr-chart" id="pr-convergence" role="img" aria-label="Learning diagnostic over time"></svg>
         <p id="pr-mode-note" class="pr-caption"></p>
       </div>
-      <div id="pr-cost-content"><svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative quadratic cost of the adaptive method and three baselines"></svg><table class="pr-cost-table tabular-nums" aria-label="Cumulative controller costs"><thead><tr><th scope="col">Method</th><th scope="col">Total cost</th><th scope="col">vs feedback</th></tr></thead><tbody id="pr-cost-detail"></tbody></table><p id="pr-comparison-summary" class="pr-comparison-summary" aria-live="polite">Run to compare adaptive and scalar costs</p><p class="pr-caption pr-comparison-note">All samples and pulses included · Lower is better</p></div>
+      <div id="pr-cost-content"><svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative normalized voltage and reactive effort cost of four controllers"></svg><table class="pr-cost-table tabular-nums" aria-label="Cumulative controller costs"><thead><tr><th scope="col">Method</th><th scope="col">Total cost</th><th scope="col">vs feedback</th></tr></thead><tbody id="pr-cost-detail"></tbody></table><p id="pr-comparison-summary" class="pr-comparison-summary" aria-live="polite">Run to compare adaptive and scalar costs</p><p class="pr-caption pr-comparison-note">Normalized objective · All samples and pulses included</p></div>
     </section>
   </div>
   <div class="pr-bottomline">
     <div class="pr-legend" aria-label="Adaptive method and three baselines"><button type="button" data-series="online" aria-pressed="true"><span class="pr-swatch online"></span>Adaptive</button><button type="button" data-series="scalar" aria-pressed="true"><span class="pr-swatch scalar"></span>Scalar adaptation</button><button type="button" data-series="static" aria-pressed="true"><span class="pr-swatch static"></span>Fixed prediction</button><button type="button" data-series="causal" aria-pressed="true"><span class="pr-swatch causal"></span>Feedback only</button></div>
     <span id="pr-event" role="status" aria-live="polite">Ready · Space to run</span>
   </div>
-  <p class="pr-overlap-note">1 adaptive method + 3 baselines · Prediction curves overlap before learning at t 30</p>
+  <p class="pr-overlap-note">1 adaptive method + 3 baselines · Prediction curves overlap before learning at 30 s</p>
   <details class="pr-adaptation" id="pr-adaptation">
     <summary>Experiment settings <span aria-hidden="true">+</span></summary>
     <div class="pr-settings"><label>Bus <select id="pr-bus" aria-label="Selected bus"></select></label><button type="button" class="btn" id="pr-fault">Repair forecast</button><button type="button" class="btn" id="pr-reference">Set reference</button><label class="form-check"><input type="checkbox" id="pr-all-links">All prediction links</label></div>
@@ -327,64 +333,55 @@ summary span { color:#a4aba4; }
 </main>
 
 <footer class="research-footer">
-  <details class="research-methods" id="about-demo"><summary>Dynamics and relation to the paper <span aria-hidden="true">+</span></summary><div class="research-methods-body">
-    <section><h3>Synthetic benchmark dynamics</h3><div class="pr-equation">xₜ₊₁ = Axₜ + uₜ + wₜ &nbsp; · &nbsp; yₜ = 1 + xₜ</div><p>A = 0.4I + 0.58D<sup>−½</sup>WD<sup>−½</sup>, where Wᵢⱼ = exp(−dᵢⱼ / 2) for different buses, Wᵢᵢ = 0, and D contains row sums of W. This reproduces the paper’s synthetic communication benchmark. A is based on graph distance, not electrical impedance. Every node has an unconstrained direct input B = I. There is no power flow equation, power balance, fixed slack bus or inverter capability model. The displayed value y is an abstract normalized state, not a computed physical voltage.</p><p>The stage cost is cₜ = 35‖xₜ‖² + 0.08‖uₜ‖². An unexpected pulse enters xₜ₊₁, so its state cost appears at the following sample. The plots preserve that timing.</p><p>Equipment artwork gives different decay profiles to abstract additive disturbances. A click does not represent a specified load change in kW or an inverter response in kvar. Repeated clicks add disturbances, including several at the same paused step. States are never clipped. The target band is illustrative.</p></section>
-    <section><h3>What is being learned</h3><p>This is a shared matrix experimental variant. A fixed LQR feedback gain regulates the abstract state. A learned matrix G adjusts five previewed disturbance samples, using the latest 60 revealed samples and starting at step 30. The displayed links rank prediction gains. They are recommendations only. The illustrated tree stays fixed and the dense controller continues to use all sources.</p><div class="pr-equation">Forecast → control → observe wₜ → fit G → next control</div><p>Live data keeps changing, so gain changes need not decay monotonically. Freeze data holds the plant and fits the same ridge objective repeatedly, showing error relative to its exact minimizer.</p><h3>Four controllers</h3><p>Adaptive fits a matrix. Scalar adaptation fits one common multiplier using the same objective and observations. Fixed prediction keeps its original gains. Feedback only ignores forecasts. The three predictive controllers coincide until learning starts at step 30. All four receive identical disturbances, including every clicked pulse.</p><p>Reliable, uniformly corrupted and mixed reliability forecasts test different conditions. Unexpected pulses are absent from every forecast and test recovery. They do not directly test the benefit of recognizing unreliable prediction channels. The comparison includes every sample and reports higher costs as well as lower ones. No controller is guaranteed to win.</p><h3>Algorithm 1 in the paper</h3><div class="pr-equation">Φ̂(t+1) = Π<sub>F<sub>d</sub></sub>[Φ̂(t) − η∇h̃<sub>t−d</sub>(Φ̂(t−d))]</div><p>The full algorithm updates completed FIR response windows with a delayed gradient and projection. Its theorem concerns a fixed completed prefix. This browser experiment uses a restricted shared gain and a declared ridge fit, rather than reproducing that full update or its convergence guarantee.</p></section>
-  </div></details><span class="research-colophon">O PredSLS · Shared matrix experiment</span>
+  <details class="research-methods" id="about-demo"><summary>Feeder model and learning method <span aria-hidden="true">+</span></summary><div class="research-methods-body">
+    <section><h3>A linear distribution feeder</h3><div class="pr-equation">vₜ = 1 − Rᵥpₜ − Xᵥqₜ<sup>load</sup> + XᵥEqₜ<sup>inv</sup></div><p>This declared 24 bus radial feeder uses balanced LinDistFlow, with bus 1 fixed at 1 pu. Voltage magnitudes follow net real demand, reactive demand and inverter injection through electrical line impedances. The approximation neglects line losses and assumes small voltage deviations. It is a constructed feeder, not a measured utility network.</p><p>The bases are 12.47 kV and 1 MVA. Line resistances span 0.45 to 0.90 Ω and reactances span 0.30 to 0.46 Ω. Homes consume 70 kW at power factor 0.95. Battery buses consume 50 kW, and solar buses generate 80 kW. Eight 120 kVA inverters accept reactive commands up to ±70 kvar.</p><div class="pr-equation">qₜ₊₁<sup>inv</sup> = a qₜ<sup>inv</sup> + (1 − a)uₜ &nbsp; · &nbsp; a = exp(−1/2)</div><p>One sample represents one second. Inverters have a two second response time. The fixed reference v̄ is the nominal feeder profile with zero inverter reactive injection. The goal is to restore that profile after power changes, with a penalty for reactive dispatch. Actual voltage is shown in pu without clipping.</p><div class="pr-equation">cₜ = 35‖vₜ − v̄‖² + 0.08‖uₜ‖²</div><p>Reactive commands u use the 1 MVA base. Clicks increase demand, reduce available solar generation or increase battery charging. Repeated clicks add requested power changes. Solar loss and battery charging respect their available power limits. A click changes the next voltage sample, whose state cost appears at that sample.</p><p>The voltage approximation follows <a href="https://arxiv.org/abs/1903.00072" target="_blank" rel="noopener noreferrer">LinDistFlow voltage regulation</a>. It omits unbalanced phases, protection, frequency dynamics and nonlinear inverter controls.</p></section>
+    <section><h3>What is being learned</h3><p>A fixed LQR feedback gain regulates voltage deviations from v̄. A shared matrix G calibrates five power forecasts using the latest 60 revealed samples, starting at step 30. Raw power forecasts are sealed before interventions. All four controllers share the same physical disturbances. Future power is anchored to its current measurement, then adjusted by calibrated forecast changes. Feedback only holds the current power. This lets every controller respond to an unexpected load after observing it, without access to event metadata.</p><div class="pr-equation">Forecast power → command reactive power → measure → fit G</div><p>The graph and matrix rank useful forecast sources for the eight inverter buses. These are communication recommendations. They do not switch feeder lines or restrict the deployed controller. Live data keeps changing, so learned gains and recommendations need not converge monotonically. Freeze data instead holds the observations fixed and shows fitting error relative to the exact ridge minimizer.</p><h3>One method and three baselines</h3><p>Adaptive fits a matrix. Scalar adaptation fits one common multiplier using the same objective and observations. Fixed prediction keeps its original gains. Feedback only uses current information without future forecasts. The three predictive controllers coincide until learning starts at step 30.</p><p>Reliable, uniformly corrupted and mixed reliability forecasts test different conditions. Clicked pulses are unexpected by all controllers and test recovery. They do not directly test the benefit of recognizing unreliable prediction channels. The comparison includes every sample and reports higher costs as well as lower ones.</p><h3>Relation to the paper</h3><div class="pr-equation">Φ̂(t+1) = Π<sub>F<sub>d</sub></sub>[Φ̂(t) − η∇h̃<sub>t−d</sub>(Φ̂(t−d))]</div><p>Algorithm 1 updates completed FIR response windows with a delayed gradient and projection. This browser experiment uses a restricted shared gain with a declared ridge fit. It illustrates that adaptation idea on a physical feeder approximation, without reproducing the full algorithm, its theorem or the paper’s numerical experiment.</p></section>
+  </div></details><span class="research-colophon">LinDistFlow · Shared matrix experiment</span>
 </footer>
 
 <script src="assets/d3.v7.min.js"></script>
-<script>/* Shared predictive response calibration for the interactive voltage demo.
- * Uses the manuscript communication plant and a five sample LQR preview.
- * This restricted shared multiplier is not the full delayed FIR projected
- * response algorithm and does not inherit that algorithm's regret theorem.
- * Every controller receives the same immutable disturbance and forecast pair.
- * Costs use x_t' Q x_t + u_t' R u_t, with no terminal cost.
+<script>/* Synthetic radial feeder with linear DistFlow voltage magnitudes and bounded
+ * inverter reactive power commands. The actuator has a physical first order lag.
+ * Shared matrix/scalar forecast calibration illustrates the paper's experiment;
+ * this is not the full delayed projected FIR algorithm or its regret theorem.
  */
 (function (root, factory) {
-  const api = factory();
-  if (typeof module === 'object' && module.exports) module.exports = api;
-  else root.PowerDemo = api;
-})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  const api=factory();
+  if(typeof module==='object'&&module.exports)module.exports=api;
+  else root.PowerDemo=api;
+})(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
-
-  const N = 24;
-  const CONTROLLERS = ['online','scalar','static','causal'];
-  // Every preset uses the same latent disturbance process and Gaussian draws.
-  // Only the forecast channel gain and error standard deviation change.
-  const FORECAST_PRESETS = [
-    {id:'reliable',label:'Reliable forecasts',faultBuses:[],gain:1,noise:0.05,
-      faultyGain:0.15,faultyNoise:1.6},
-    {id:'uniform',label:'Uniform corruption',faultBuses:Array.from({length:N},(_,i)=>i+1),
-      gain:1,noise:0.05,faultyGain:0.65,faultyNoise:0.65},
-    {id:'mixed',label:'Mixed reliability',faultBuses:[3,6,9,12,15,18,21,24],
-      gain:1,noise:0.05,faultyGain:0.15,faultyNoise:1.6}
-  ];
-  const AMPLITUDE = 0.006;
-  const RAW_RIDGE = 1.27e-5;
-  // Mean squared forecast loss is normalized by AMPLITUDE squared. The raw
-  // ridge value follows the voltage experiment, but this explicit mean loss
-  // differs from the manuscript's full response weighted objective.
-  const RIDGE = RAW_RIDGE / (AMPLITUDE * AMPLITUDE);
-  const PREVIEW = 5;
-  const WINDOW = 60;
-  const WARMUP = 30;
-  const TOLERANCE = 1e-5;
-  const PULSE_DEFAULT = 0.02;
-  const PULSE_MIN = 0.005;
-  const PULSE_MAX = 0.15;
-  const EDGES = [[1,2],[2,3],[3,4],[4,5],[4,6],[6,7],[4,8],
+  const N=24, M=8, AMPLITUDE=.006, RAW_RIDGE=1.27e-5;
+  const RIDGE=RAW_RIDGE/(AMPLITUDE*AMPLITUDE),PREVIEW=5,WINDOW=60,WARMUP=30,TOLERANCE=1e-5;
+  const BASE_KV=12.47,BASE_MVA=1,POWER_BASE_KW=1000,SAMPLE_SECONDS=1,TAU_SECONDS=2;
+  const LAG=Math.exp(-SAMPLE_SECONDS/TAU_SECONDS),Q_LIMIT=.07,S_RATING=.12;
+  const PULSE_DEFAULT=100,PULSE_MIN=10,PULSE_MAX=150;
+  const CONTROLLERS=['online','scalar','static','causal'];
+  const INVERTER_BUSES=[5,7,8,12,14,18,21,24];
+  const SOLAR_BUSES=[5,7,14,21],BATTERY_BUSES=[8,12,18,24];
+  const PF_RATIO=Math.tan(Math.acos(.95));
+  const EDGES=[[1,2],[2,3],[3,4],[4,5],[4,6],[6,7],[4,8],
     [3,9],[9,10],[9,11],[11,12],[1,15],[15,13],[13,14],[13,16],
     [16,17],[16,18],[18,19],[19,20],[20,21],[18,22],[22,23],[23,24]];
-
-  const BUS_PROFILES = Array.from({length:N},(_,i)=> {
+  const FORECAST_PRESETS=[
+    {id:'reliable',label:'Reliable forecasts',faultBuses:[],gain:1,noise:.05,faultyGain:.15,faultyNoise:1.6},
+    {id:'uniform',label:'Uniform corruption',faultBuses:Array.from({length:23},(_,i)=>i+2),
+      gain:1,noise:.05,faultyGain:.65,faultyNoise:.65},
+    {id:'mixed',label:'Mixed reliability',faultBuses:[3,6,9,12,15,18,21,24],
+      gain:1,noise:.05,faultyGain:.15,faultyNoise:1.6}
+  ];
+  const BUS_PROFILES=Array.from({length:N},(_,i)=>{
     const bus=i+1;
-    if (bus===1) return {bus,role:'Substation',eventName:'Feeder disturbance',decay:4,steps:16};
-    if ([5,7,14,21].includes(bus)) return {bus,role:'Solar',eventName:'Cloud cover',decay:6,steps:24};
-    if ([8,12,18,24].includes(bus)) return {bus,role:'Battery',eventName:'Inverter outage',decay:2,steps:8};
-    return {bus,role:'Homes',eventName:'Demand surge',decay:3,steps:12};
+    if(bus===1)return{bus,role:'Substation',eventName:'Fixed slack',decay:4,steps:16,
+      attackable:false,inverterKvar:0,baseDemandKw:0,baseGenerationKw:0,reactiveRatio:0};
+    const solar=SOLAR_BUSES.includes(bus),battery=BATTERY_BUSES.includes(bus);
+    return{bus,role:solar?'Solar':battery?'Battery':'Homes',
+      eventName:solar?'Cloud cover':battery?'Charging surge':'Demand surge',
+      decay:solar?6:battery?2:3,steps:solar?24:battery?8:12,attackable:true,
+      inverterKvar:solar||battery?70:0,inverterKva:solar||battery?120:0,
+      baseDemandKw:battery?50:70,baseGenerationKw:solar?80:0,
+      activePowerLimitKw:solar||battery?90:null,reactiveRatio:solar||battery?0:PF_RATIO};
   });
-
   function zeros(n = N, m = n) { return Array.from({length:n}, () => Array(m).fill(0)); }
   function eye(n = N) { const a = zeros(n); for (let i=0;i<n;i++) a[i][i]=1; return a; }
   function copy(a) { return a.map(row => row.slice()); }
@@ -433,48 +430,6 @@ summary span { color:#a4aba4; }
     return x;
   }
 
-  function buildModel() {
-    const adjacency=Array.from({length:N},()=>[]);
-    for (const [a,b] of EDGES) { adjacency[a-1].push(b-1); adjacency[b-1].push(a-1); }
-    const distances=zeros();
-    for (let i=0;i<N;i++) {
-      const d=Array(N).fill(-1), queue=[i]; d[i]=0;
-      for (let q=0;q<queue.length;q++) for (const j of adjacency[queue[q]]) {
-        if (d[j]<0) { d[j]=d[queue[q]]+1; queue.push(j); }
-      }
-      distances[i]=d;
-    }
-    const w=distances.map((row,i)=>row.map((d,j)=>i===j?0:Math.exp(-d/2)));
-    const degree=w.map(row=>row.reduce((s,v)=>s+v,0));
-    const A=w.map((row,i)=>row.map((v,j)=>(i===j?0.4:0)+0.58*v/Math.sqrt(degree[i]*degree[j])));
-    const Q=eye().map(row=>row.map(v=>35*v));
-    const R=eye().map(row=>row.map(v=>0.08*v));
-    const at=transpose(A);
-    let P=copy(Q), residual=Infinity, iterations=0;
-    for (;iterations<500;iterations++) {
-      const H=solveSPD(combine(R,P),P);
-      const next=combine(Q,multiply(at,multiply(combine(P,multiply(P,H),1,-1),A)));
-      residual=frobenius(combine(next,P,1,-1));
-      P=next;
-      if (residual<1e-12) break;
-    }
-    const H=solveSPD(combine(R,P),P);
-    const K=multiply(H,A).map(row=>row.map(v=>-v));
-    // For fixed feedback A_c=A+K and perfect future disturbances, the LQR
-    // preview term is -sum_j (R+P)^-1 (A_c')^j P w[t+j]. We retain five
-    // immutable predictions and put the shared multiplier G on their right.
-    const previewGains=[], closedLoopTranspose=transpose(combine(A,K));
-    let response=P;
-    for (let j=0;j<PREVIEW;j++) {
-      previewGains.push(solveSPD(combine(R,P),response).map(row=>row.map(v=>-v)));
-      response=multiply(closedLoopTranspose,response);
-    }
-    return deepFreeze({A,B:eye(),Q,R,P,H,K,previewGains,distances,
-      variant:'Manuscript dense communication voltage surrogate',dareResidual:residual,
-      dareIterations:iterations+1,closedLoopNormInf:normInf(combine(A,K))});
-  }
-  const model=buildModel();
-
   function seededRandom(seed) {
     let state=seed>>>0;
     function uniform() {
@@ -505,9 +460,11 @@ summary span { color:#a4aba4; }
   }
   function exactGain(stats) { return transpose(solveSPD(stats.S,transpose(stats.T))); }
   function exactScalarGain(stats) {
-    // Restrict the SAME objective to G=alpha I. Its ridge penalty is
-    // lambda*N*(alpha-1)^2/2, hence the N*lambda term in both traces.
-    const trace=a=>a.reduce((sum,row,i)=>sum+row[i],0);
+    // Restrict the SAME objective to G=diag(1,alpha I_23). Its ridge penalty
+    // is lambda*23*(alpha-1)^2/2, because the slack is not a physical channel.
+    // The slack coordinate is display padding, fixed at G[0][0]=1 in both
+    // matrix and scalar models. Only the 23 physical forecast channels share alpha.
+    const trace=a=>a.reduce((sum,row,i)=>sum+(i===0?0:row[i]),0);
     return trace(stats.T)/trace(stats.S);
   }
   function gradientSteps(g,stats,count) {
@@ -528,246 +485,357 @@ summary span { color:#a4aba4; }
     for (let i=0;i<N;i++) for (let j=0;j<N;j++) loss += RIDGE/2*(g[i][j]-(i===j?1:0))**2;
     return loss;
   }
-  function recommendations(gain) {
+
+  function buildModel(){
+    const children=Array.from({length:N},()=>[]),parent=Array(N).fill(-1),parentEdge=Array(N).fill(-1);
+    const edgeData=EDGES.map(([from,to],index)=>{
+      const rOhm=.45+.15*(index%4),xOhm=.30+.08*(index%3),zBase=BASE_KV*BASE_KV/BASE_MVA;
+      children[from-1].push(to-1);parent[to-1]=from-1;parentEdge[to-1]=index;
+      return{from,to,rOhm,xOhm,rPu:rOhm/zBase,xPu:xOhm/zBase};
+    });
+    const order=[0];for(let k=0;k<order.length;k++)order.push(...children[order[k]]);
+    const paths=zeros(N,N-1);
+    for(const i of order.slice(1)){paths[i]=paths[parent[i]].slice();paths[i][parentEdge[i]]=1;}
+    const resistance=zeros(),reactance=zeros();
+    for(let i=1;i<N;i++)for(let j=1;j<N;j++)for(let e=0;e<N-1;e++){
+      resistance[i][j]+=paths[i][e]*paths[j][e]*edgeData[e].rPu;
+      reactance[i][j]+=paths[i][e]*paths[j][e]*edgeData[e].xPu;
+    }
+    const baseP=BUS_PROFILES.map(p=>(p.baseDemandKw-p.baseGenerationKw)/POWER_BASE_KW);
+    const baseQ=BUS_PROFILES.map(p=>p.baseDemandKw*PF_RATIO/POWER_BASE_KW);
+    const baseDrop=matvec(resistance,baseP).map((v,i)=>-v-matvec(reactance,baseQ)[i]);
+    const referenceVoltage=baseDrop.map(v=>1+v);
+    // Magnitude LinDistFlow has no factor two. The corresponding squared
+    // voltage equation has 2R and 2X instead.
+    const powerToVoltage=resistance.map((row,i)=>row.map((r,j)=>-r-reactance[i][j]*BUS_PROFILES[j].reactiveRatio));
+    const F=powerToVoltage.slice(1),X=reactance.slice(1).map(row=>INVERTER_BUSES.map(bus=>row[bus-1]));
+    const A=eye(N-1).map(row=>row.map(v=>LAG*v));
+    const B=X.map(row=>row.map(v=>(1-LAG)*v));
+    const Q=eye(N-1).map(row=>row.map(v=>35*v)),R=eye(M).map(row=>row.map(v=>.08*v));
+    const at=transpose(A),bt=transpose(B);
+    let P=copy(Q),residual=Infinity,iterations=0;
+    for(;iterations<2000;iterations++){
+      const btp=multiply(bt,P),S=combine(R,multiply(btp,B));
+      const gain=solveSPD(S,multiply(btp,A));
+      const next=combine(combine(Q,multiply(at,multiply(P,A))),multiply(at,multiply(P,multiply(B,gain))),1,-1);
+      residual=frobenius(combine(next,P,1,-1));P=next;
+      if(residual<1e-12)break;
+    }
+    const S=combine(R,multiply(bt,multiply(P,B)));
+    const K=solveSPD(S,multiply(bt,multiply(P,A))).map(row=>row.map(v=>-v));
+    const closedLoop=combine(A,multiply(B,K)),act=transpose(closedLoop);
+    const previewGains=[];let response=P;
+    for(let j=0;j<PREVIEW;j++){
+      previewGains.push(solveSPD(S,multiply(bt,response)).map(row=>row.map(v=>-v)));
+      response=multiply(act,response);
+    }
+    // Raw power forecasts are sealed. Their derived voltage disturbance
+    // predictions use the currently observed power and the same issued future
+    // power forecasts. Collect coefficients of each predicted power vector.
+    const powerPreviewGains=previewGains.map((gain,j)=>multiply(
+      j+1<PREVIEW?combine(gain,previewGains[j+1],1,-LAG):gain,F));
+    const distances=zeros();
+    for(let i=0;i<N;i++)for(let j=0;j<N;j++)for(let e=0;e<N-1;e++)distances[i][j]+=Math.abs(paths[i][e]-paths[j][e]);
+    return deepFreeze({A,B,Q,R,P,K,S,X,F,resistance,reactance,powerToVoltage,paths,
+      baseP,baseQ,baseDrop,referenceVoltage,initialVoltage:referenceVoltage,
+      previewGains,powerPreviewGains,edgeData,order,parent,parentEdge,children,distances,
+      inverterBuses:INVERTER_BUSES,lag:LAG,qLimit:Q_LIMIT,inverterRating:S_RATING,
+      baseKv:BASE_KV,baseMva:BASE_MVA,sampleSeconds:SAMPLE_SECONDS,tauSeconds:TAU_SECONDS,
+      variant:'Synthetic radial LinDistFlow feeder with inverter lag',
+      costReference:'Nominal feasible voltage profile',dareResidual:residual,
+      dareIterations:iterations+1,closedLoopNormInf:normInf(closedLoop)});
+  }
+  const model=buildModel();
+  function padInput(values){const padded=Array(N).fill(0);INVERTER_BUSES.forEach((bus,i)=>padded[bus-1]=values[i]);return padded;}
+  function paddedGain(gain){const out=zeros();INVERTER_BUSES.forEach((bus,i)=>out[bus-1]=gain[i].slice());return out;}
+  function recommendations(gain){
     const result=[];
-    for (let receiver=0;receiver<N;receiver++) {
+    for(const receiver of INVERTER_BUSES){
       const ranked=[];
-      for (let source=0;source<N;source++) if (source!==receiver)
-        ranked.push({from:source+1,to:receiver+1,weight:gain[receiver][source]**2});
-      ranked.sort((a,b)=>b.weight-a.weight||a.from-b.from);
-      result.push(...ranked.slice(0,3));
+      for(let source=2;source<=N;source++)if(source!==receiver){
+        const weight=gain[receiver-1][source-1]**2;
+        if(weight>1e-20)ranked.push({from:source,to:receiver,weight});
+      }
+      ranked.sort((a,b)=>b.weight-a.weight||a.from-b.from);result.push(...ranked.slice(0,3));
     }
     return result;
   }
-  function edgeChanges(before,after) {
-    const first=new Set(before.map(e=>e.from+','+e.to));
-    const second=new Set(after.map(e=>e.from+','+e.to));
-    let count=0;
-    for (const key of first) if (!second.has(key)) count++;
-    for (const key of second) if (!first.has(key)) count++;
-    return count/2;
+  function edgeChanges(before,after){
+    const a=new Set(before.map(e=>e.from+','+e.to)),b=new Set(after.map(e=>e.from+','+e.to));
+    let changes=0;for(const key of a)if(!b.has(key))changes++;for(const key of b)if(!a.has(key))changes++;
+    return changes/2;
+  }
+  function boundedPowerDeviation(bus,value){
+    const p=BUS_PROFILES[bus-1];
+    if(bus===1)return 0;
+    if(p.role==='Solar')return Math.max((p.baseGenerationKw-p.activePowerLimitKw)/1000,Math.min(p.baseGenerationKw/1000,value));
+    if(p.role==='Battery')return Math.max(-p.activePowerLimitKw/1000,Math.min(p.activePowerLimitKw/1000,value));
+    return Math.max(-p.baseDemandKw/1000,value);
+  }
+  function physicalPower(deviation){
+    const loadP=model.baseP.map((v,i)=>(v+deviation[i])*1000);
+    const loadQ=model.baseQ.map((v,i)=>(v+BUS_PROFILES[i].reactiveRatio*deviation[i])*1000);
+    const demandP=BUS_PROFILES.map((p,i)=>p.role==='Solar'?p.baseDemandKw:
+      p.role==='Battery'?p.baseDemandKw+Math.max(0,deviation[i]*1000):p.baseDemandKw+deviation[i]*1000);
+    const generationP=BUS_PROFILES.map((p,i)=>p.role==='Solar'?p.baseGenerationKw-deviation[i]*1000:
+      p.role==='Battery'?Math.max(0,-deviation[i]*1000):0);
+    const inverterP=BUS_PROFILES.map((p,i)=>p.role==='Solar'?generationP[i]:p.role==='Battery'?-deviation[i]*1000:0);
+    return{loadP,loadQ,demandP,generationP,inverterP};
+  }
+  function voltageFrom(deviation,q){
+    const voltageEffect=matvec(model.powerToVoltage,deviation);
+    const qEffect=matvec(model.reactance,padInput(q));
+    return model.baseDrop.map((v,i)=>v+voltageEffect[i]+qEffect[i]);
+  }
+  function branchFlows(loadP,loadQ,q){
+    const p=loadP.slice(),reactive=loadQ.map((v,i)=>v-padInput(q)[i]*1000),flows=Array(N-1);
+    for(const bus of model.order.slice(1).reverse()){
+      flows[model.parentEdge[bus]]={pKw:p[bus],qKvar:reactive[bus]};
+      p[model.parent[bus]]+=p[bus];reactive[model.parent[bus]]+=reactive[bus];
+    }
+    return flows;
+  }
+  // Independent balanced constant-power AC reference. This verifies the linear
+  // approximation; the interactive plant itself remains linear DistFlow.
+  function radialAC(loadP,loadQ,inverterQ=Array(N).fill(0),tolerance=1e-11){
+    let vr=Array(N).fill(1),vi=Array(N).fill(0),ir=[],ii=[],converged=false,iterations=0;
+    for(;iterations<100;iterations++){
+      const oldR=vr.slice(),oldI=vi.slice();ir=Array(N).fill(0);ii=Array(N).fill(0);
+      for(let i=1;i<N;i++){
+        const p=loadP[i]/1000,q=(loadQ[i]-inverterQ[i])/1000,den=vr[i]**2+vi[i]**2;
+        if(!(den>1e-12))return{converged:false,iterations,voltage:vr.map((v,i)=>Math.hypot(v,vi[i]))};
+        ir[i]=(p*vr[i]+q*vi[i])/den;ii[i]=(p*vi[i]-q*vr[i])/den;
+      }
+      for(const bus of model.order.slice(1).reverse()){ir[model.parent[bus]]+=ir[bus];ii[model.parent[bus]]+=ii[bus];}
+      for(const bus of model.order.slice(1)){
+        const edge=model.edgeData[model.parentEdge[bus]],parent=model.parent[bus];
+        vr[bus]=vr[parent]-(edge.rPu*ir[bus]-edge.xPu*ii[bus]);
+        vi[bus]=vi[parent]-(edge.rPu*ii[bus]+edge.xPu*ir[bus]);
+      }
+      if(Math.max(...vr.map((v,i)=>Math.hypot(v-oldR[i],vi[i]-oldI[i])))<tolerance){converged=true;iterations++;break;}
+    }
+    let lossesKw=0,lossesKvar=0;
+    for(const bus of model.order.slice(1)){
+      const edge=model.edgeData[model.parentEdge[bus]],current=ir[bus]**2+ii[bus]**2;
+      lossesKw+=edge.rPu*current*1000;lossesKvar+=edge.xPu*current*1000;
+    }
+    return{converged,iterations,voltage:vr.map((v,i)=>Math.hypot(v,vi[i])),
+      slackKw:ir[0]*1000,slackKvar:-ii[0]*1000,lossesKw,lossesKvar};
   }
 
-  class Simulation {
-    constructor(options={}) {
-      const presetId=options.preset===undefined?'mixed':options.preset;
-      const preset=FORECAST_PRESETS.find(item=>item.id===presetId);
-      if (!preset) throw new RangeError('Forecast preset must be reliable, uniform, or mixed');
+  class Simulation{
+    constructor(options={}){
+      const id=options.preset===undefined?'mixed':options.preset;
+      const preset=FORECAST_PRESETS.find(p=>p.id===id);
+      if(!preset)throw new RangeError('Forecast preset must be reliable, uniform, or mixed');
       this.preset=preset;
       this.options={seed:options.seed===undefined?20261013:options.seed,
-        horizon:options.horizon===undefined?480:options.horizon,preset:preset.id,
+        horizon:options.horizon===undefined?480:options.horizon,preset:id,
         faultBuses:options.faultBuses===undefined?preset.faultBuses.slice():options.faultBuses.slice()};
-      if (!Number.isInteger(this.options.horizon)||this.options.horizon<1) throw new Error('Invalid horizon');
+      if(!Number.isInteger(this.options.horizon)||this.options.horizon<1)throw new Error('Invalid horizon');
       this.reset();
     }
-    reset() {
-      this.random=seededRandom(this.options.seed);
-      this.t=0; this.mode='running'; this.G=eye(); this.scalarGain=1;
-      this.states=Object.fromEntries(CONTROLLERS.map(key=>[key,Array(N).fill(0)]));
+    reset(){
+      this.random=seededRandom(this.options.seed);this.t=0;this.mode='running';this.G=eye();this.scalarGain=1;
+      this.powerDeviation=Array(N).fill(0);this.power=physicalPower(this.powerDeviation);
+      this.q=Object.fromEntries(CONTROLLERS.map(key=>[key,Array(M).fill(0)]));
+      this.command=Object.fromEntries(CONTROLLERS.map(key=>[key,Array(M).fill(0)]));
+      this.saturation=Object.fromEntries(CONTROLLERS.map(key=>[key,Array(N).fill(false)]));
+      this.states=Object.fromEntries(CONTROLLERS.map(key=>[key,model.baseDrop.slice()]));
+      this.costStates=Object.fromEntries(CONTROLLERS.map(key=>[key,model.baseDrop.slice()]));
       this.cumulative=Object.fromEntries(CONTROLLERS.map(key=>[key,0]));
       this.stage=Object.fromEntries(CONTROLLERS.map(key=>[key,0]));
-      this.faults=new Set(this.options.faultBuses.map(bus=>this.checkBus(bus)));
+      this.faults=new Set(this.options.faultBuses.map(bus=>this.checkBus(bus)).filter(bus=>bus!==1));
       this.latent=Array.from({length:N+1},()=>this.random.normal());
-      this.pulses=[]; this.samples=[]; this.history=[]; this.eventLog=[];
-      this.forecasts=[]; this.sealPreview();
-      this.lastPreview=[]; this.costStates=Object.fromEntries(Object.entries(this.states).map(([k,v])=>[k,v.slice()]));
+      this.pulses=[];this.samples=[];this.history=[];this.eventLog=[];this.forecasts=[];this.lastPreview=[];
+      this.lastPulseApplications=[];this.sealPreview();
       this.learning={updates:0,windowStart:null,windowEnd:null,windowSize:0,
         beforeLoss:null,afterLoss:null,gradientNorm:null,rawRms:null,calibratedRms:null};
-      this.lastSample=null; this.lastInputs=null; this.fit=null; this.fitHistory=[];
-      this.fitError=null; this.fitObjective=null; this.fitIteration=0;
-      this.directGain=multiply(model.H,this.G).map(row=>row.map(v=>-v));
-      this.recommendations=recommendations(this.directGain);
-      this.drift=0; this.changedEdges=0; this.sinceStable=0;
-      this.lastTrainingTime=null; this.lastTrainingSampleCount=0;
+      this.lastSample=null;this.lastInputs=null;this.fit=null;this.fitHistory=[];
+      this.fitError=null;this.fitObjective=null;this.fitIteration=0;
+      this.directGain=paddedGain(model.powerPreviewGains[0]);this.recommendations=recommendations(this.directGain);
+      this.drift=0;this.changedEdges=0;this.sinceStable=0;this.lastTrainingTime=null;this.lastTrainingSampleCount=0;
       return this.snapshot();
     }
-    checkBus(bus) {
-      if (!Number.isInteger(bus)||bus<1||bus>N) throw new Error('Bus must be an integer from 1 through 24');
-      return bus;
-    }
-    queuePulse(bus,strength=PULSE_DEFAULT) {
+    checkBus(bus){if(!Number.isInteger(bus)||bus<1||bus>N)throw new Error('Bus must be an integer from 1 through 24');return bus;}
+    queuePulse(bus,strength=PULSE_DEFAULT){
       this.checkBus(bus);
-      if (!Number.isFinite(strength)||strength<PULSE_MIN||strength>PULSE_MAX)
-        throw new RangeError('Pulse strength must be from 0.005 through 0.15 per unit');
-      if (this.mode==='completed') this.extend();
-      if (this.mode!=='running') return false;
+      if(!Number.isFinite(strength)||strength<PULSE_MIN||strength>PULSE_MAX)throw new RangeError('Pulse strength must be from 10 through 150 kW');
+      if(bus===1)return false;
+      if(this.mode==='completed')this.extend();
+      if(this.mode!=='running')return false;
       const profile=BUS_PROFILES[bus-1];
-      this.pulses.push({bus,strength,age:0,t:this.t,...profile});
-      this.eventLog.push(deepFreeze({t:this.t,type:'pulse',bus,strength,
-        role:profile.role,eventName:profile.eventName,decay:profile.decay,steps:profile.steps,
-        message:profile.eventName+' of '+strength+' per unit at bus '+bus}));
-      return true;
+      this.pulses.push({bus,strength,age:0,t:this.t,...profile,requestedKw:strength,appliedKw:null});
+      this.eventLog.push(deepFreeze({t:this.t,type:'pulse',bus,strength,units:'kW',role:profile.role,
+        eventName:profile.eventName,decay:profile.decay,steps:profile.steps,
+        message:profile.eventName+' requested '+strength+' kW at bus '+bus}));return true;
     }
-    extend(steps=480) {
-      if (!Number.isInteger(steps)||steps<1) throw new RangeError('Extension must be a positive number of steps');
-      this.options.horizon+=steps;
-      if (this.mode==='completed') this.mode='running';
-      this.sealPreview();
-      return this.snapshot();
+    extend(steps=480){
+      if(!Number.isInteger(steps)||steps<1)throw new RangeError('Extension must be a positive number of steps');
+      this.options.horizon+=steps;if(this.mode==='completed')this.mode='running';this.sealPreview();return this.snapshot();
     }
-    sealPreview() {
+    sealPreview(){
       const end=Math.min(this.options.horizon,this.t+PREVIEW);
-      while (this.forecasts.length<end) {
-        const rho=0.72, innovation=Math.sqrt(1-rho*rho);
+      while(this.forecasts.length<end){
+        const rho=.72,innovation=Math.sqrt(1-rho*rho);
         this.latent=this.latent.map(v=>rho*v+innovation*this.random.normal());
-        const base=Array.from({length:N},(_,i)=>AMPLITUDE*(0.35*this.latent[0]+0.65*this.latent[i+1]));
+        const base=Array.from({length:N},(_,i)=>i===0?0:AMPLITUDE*(.35*this.latent[0]+.65*this.latent[i+1]));
         const forecast=base.map((v,i)=>{
-          const faulty=this.faults.has(i+1);
-          return (faulty?this.preset.faultyGain:this.preset.gain)*v
-            +AMPLITUDE*(faulty?this.preset.faultyNoise:this.preset.noise)*this.random.normal();
+          const faulty=this.faults.has(i+1),noise=this.random.normal();
+          return i===0?0:(faulty?this.preset.faultyGain:this.preset.gain)*v
+            +AMPLITUDE*(faulty?this.preset.faultyNoise:this.preset.noise)*noise;
         });
-        this.forecasts.push(deepFreeze({t:this.forecasts.length,base,forecast}));
+        this.forecasts.push(deepFreeze({t:this.forecasts.length,base,forecast,units:'pu active power on 1 MVA'}));
       }
     }
-    toggleFault(bus) {
-      this.checkBus(bus);
-      if (this.mode!=='running') return false;
-      if (this.faults.has(bus)) this.faults.delete(bus); else this.faults.add(bus);
+    toggleFault(bus){
+      this.checkBus(bus);if(bus===1||this.mode!=='running')return false;
+      if(this.faults.has(bus))this.faults.delete(bus);else this.faults.add(bus);
       this.eventLog.push(deepFreeze({t:this.t,type:'forecast',bus,faulty:this.faults.has(bus),
-        message:'Forecast at bus '+bus+(this.faults.has(bus)?' corrupted':' repaired')}));
-      return this.faults.has(bus);
+        message:'Future power forecasts at bus '+bus+(this.faults.has(bus)?' corrupted':' repaired')}));return this.faults.has(bus);
     }
-    updateGain(g) {
-      const gain=multiply(model.H,g).map(row=>row.map(v=>-v));
-      const next=recommendations(gain);
+    updateGain(g){
+      const gain=paddedGain(multiply(model.powerPreviewGains[0],g)),next=recommendations(gain);
       this.drift=frobenius(combine(gain,this.directGain,1,-1))/Math.max(frobenius(this.directGain),1e-12);
-      this.changedEdges=edgeChanges(this.recommendations,next);
-      this.sinceStable=this.changedEdges===0?this.sinceStable+1:0;
-      this.G=g; this.directGain=gain; this.recommendations=next;
+      this.changedEdges=edgeChanges(this.recommendations,next);this.sinceStable=this.changedEdges===0?this.sinceStable+1:0;
+      this.G=g;this.directGain=gain;this.recommendations=next;
     }
-    step() {
-      if (this.mode!=='running') return this.snapshot();
-      if (this.t>=this.options.horizon) { this.mode='completed'; return this.snapshot(); }
-      // History stops at t minus one. No current target is available to this update.
-      this.lastTrainingTime=this.samples.length?this.samples[this.samples.length-1].t:null;
-      this.lastTrainingSampleCount=this.samples.length;
-      if (this.samples.length>=WARMUP) {
-        const stats=statistics(this.samples);
-        const beforeLoss=objective(this.G,this.samples);
-        this.updateGain(exactGain(stats));
-        this.scalarGain=exactScalarGain(stats);
-        this.learning={...this.learning,updates:this.learning.updates+1,
-          windowStart:this.samples[0].t,windowEnd:this.samples.at(-1).t,
-          windowSize:this.samples.length,beforeLoss,afterLoss:objective(this.G,this.samples),
-          gradientNorm:frobenius(combine(multiply(this.G,stats.S),stats.T,1,-1))};
-      } else { this.drift=0; this.changedEdges=0; this.sinceStable++; }
-
-      // Forecasts become immutable when they first enter the visible five
-      // sample preview. New pulses never rewrite any of these predictions.
-      this.sealPreview();
-      const {base,forecast}=this.forecasts[this.t];
-      this.lastPreview=this.forecasts.slice(this.t,Math.min(this.t+PREVIEW,this.options.horizon));
-      // Unexpected demand is realized only after the forecast has been sealed.
-      const disturbance=base.slice(), pulse=Array(N).fill(0);
-      for (const event of this.pulses) {
-        const value=-event.strength*Math.exp(-event.age/event.decay);
-        disturbance[event.bus-1]+=value; pulse[event.bus-1]+=value; event.age++;
-      }
+    step(){
+      if(this.mode!=='running')return this.snapshot();
+      if(this.t>=this.options.horizon){this.mode='completed';return this.snapshot();}
+      this.lastTrainingTime=this.samples.length?this.samples.at(-1).t:null;this.lastTrainingSampleCount=this.samples.length;
+      if(this.samples.length>=WARMUP){
+        const stats=statistics(this.samples),beforeLoss=objective(this.G,this.samples);
+        this.updateGain(exactGain(stats));this.scalarGain=exactScalarGain(stats);
+        this.learning={...this.learning,updates:this.learning.updates+1,windowStart:this.samples[0].t,
+          windowEnd:this.samples.at(-1).t,windowSize:this.samples.length,beforeLoss,
+          afterLoss:objective(this.G,this.samples),gradientNorm:frobenius(combine(multiply(this.G,stats.S),stats.T,1,-1))};
+      }else{this.drift=0;this.changedEdges=0;this.sinceStable++;}
+      this.sealPreview();this.lastPreview=this.forecasts.slice(this.t,Math.min(this.t+PREVIEW,this.options.horizon));
+      const issued=this.forecasts[this.t],forecast=issued.forecast;
+      const background=issued.base.map((v,i)=>boundedPowerDeviation(i+1,v));
+      const requested=Array(N).fill(0);
+      for(const event of this.pulses){event.requestedKw=event.strength*Math.exp(-event.age/event.decay);requested[event.bus-1]+=event.requestedKw;}
+      const disturbance=background.map((v,i)=>boundedPowerDeviation(i+1,v+requested[i]/1000));
+      const pulse=disturbance.map((v,i)=>(v-background[i])*1000);
+      this.lastPulseApplications=[];
+      for(let i=1;i<N;i++)if(requested[i]>0)this.lastPulseApplications.push({bus:i+1,requestedKw:requested[i],
+        appliedKw:pulse[i],capped:pulse[i]<requested[i]-1e-9,eventName:BUS_PROFILES[i].eventName});
+      for(const event of this.pulses){event.appliedKw=requested[event.bus-1]?event.requestedKw*pulse[event.bus-1]/requested[event.bus-1]:0;event.age++;}
       this.pulses=this.pulses.filter(event=>event.age<event.steps);
-      const sample=deepFreeze({t:this.t,forecast,disturbance,base,pulse,
-        z:forecast.map(v=>v/AMPLITUDE),y:disturbance.map(v=>v/AMPLITUDE)});
-      const preview=Object.fromEntries(CONTROLLERS.map(key=>[key,Array(N).fill(0)]));
+      const currentEffect=matvec(model.F,this.powerDeviation),nextEffect=matvec(model.F,disturbance);
+      const voltageDisturbance=[0,...nextEffect.map((v,i)=>v-LAG*currentEffect[i])];
+      const sample=deepFreeze({t:this.t,forecast,disturbance,base:background,pulse,
+        voltageDisturbance,observedPower:this.powerDeviation.slice(),
+        anchorForecast:this.t>0?this.forecasts[this.t-1].forecast:Array(N).fill(0),
+        pulseApplications:this.lastPulseApplications.map(p=>({...p})),
+        units:'pu active power on 1 MVA',pulseUnits:'kW',z:forecast.map(v=>v/AMPLITUDE),y:disturbance.map(v=>v/AMPLITUDE)});
+      // Condition every method on the currently observed physical power.
+      // The sealed forecast for that observation supplies an innovation anchor.
+      // Future level predictions are d_current+G*(h_future-h_current).
+      // Causal G=0 therefore holds current power rather than assuming it vanishes.
+      const anchorForecast=this.t>0?this.forecasts[this.t-1].forecast:Array(N).fill(0);
+      const common=Array(M).fill(0);
+      for(let j=0;j<this.lastPreview.length;j++){
+        const held=matvec(model.previewGains[j],currentEffect.map(v=>(1-LAG)*v));
+        for(let i=0;i<M;i++)common[i]+=held[i];
+      }
+      const preview=Object.fromEntries(CONTROLLERS.map(key=>[key,Array(M).fill(0)]));
       this.lastPreview.forEach((prediction,index)=>{
-        const staticInput=matvec(model.previewGains[index],prediction.forecast);
-        const adaptiveInput=matvec(model.previewGains[index],matvec(this.G,prediction.forecast));
-        for(let i=0;i<N;i++) {
-          preview.online[i]+=adaptiveInput[i]; preview.static[i]+=staticInput[i];
-          preview.scalar[i]+=this.scalarGain*staticInput[i];
-        }
+        const powerGain=this.lastPreview.length<PREVIEW&&index===this.lastPreview.length-1
+          ?multiply(model.previewGains[index],model.F):model.powerPreviewGains[index];
+        const increment=prediction.forecast.map((v,i)=>v-anchorForecast[i]);
+        const staticInput=matvec(powerGain,increment);
+        const adaptiveInput=matvec(powerGain,matvec(this.G,increment));
+        for(let i=0;i<M;i++){preview.online[i]+=adaptiveInput[i];preview.static[i]+=staticInput[i];preview.scalar[i]+=this.scalarGain*staticInput[i];}
       });
       const calibrated=matvec(this.G,forecast);
-      this.learning.rawRms=Math.sqrt(squared(forecast.map((v,i)=>v-disturbance[i]))/N);
-      this.learning.calibratedRms=Math.sqrt(squared(calibrated.map((v,i)=>v-disturbance[i]))/N);
-      this.costStates=Object.fromEntries(Object.entries(this.states).map(([k,v])=>[k,v.slice()]));
-      const inputs={}, rms={};
-      for (const key of CONTROLLERS) {
-        const x=this.states[key], feedback=matvec(model.K,x);
-        const u=feedback.map((v,i)=>v+preview[key][i]);
-        this.stage[key]=35*squared(x)+0.08*squared(u);
-        this.cumulative[key]+=this.stage[key];
-        const ax=matvec(model.A,x);
-        this.states[key]=ax.map((v,i)=>v+u[i]+disturbance[i]);
-        inputs[key]=u;
-        rms[key]=Math.sqrt(squared(this.states[key])/N);
+      this.learning.rawRms=Math.sqrt(squared(forecast.map((v,i)=>v-disturbance[i]))/(N-1));
+      this.learning.calibratedRms=Math.sqrt(squared(calibrated.map((v,i)=>v-disturbance[i]))/(N-1));
+      this.costStates=Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].slice()]));
+      const inputs={},rms={},regulationRms={};
+      for(const key of CONTROLLERS){
+        const x=this.states[key].slice(1).map((v,i)=>v-model.baseDrop[i+1]);
+        const feedback=matvec(model.K,x);
+        const raw=feedback.map((v,i)=>v+common[i]+preview[key][i]);
+        const bounded=raw.map(v=>Math.max(-Q_LIMIT,Math.min(Q_LIMIT,v)));
+        this.command[key]=bounded;this.saturation[key]=padInput(raw.map((v,i)=>Math.abs(v-bounded[i])>1e-12));
+        this.stage[key]=35*squared(x)+.08*squared(bounded);this.cumulative[key]+=this.stage[key];
+        this.q[key]=this.q[key].map((v,i)=>LAG*v+(1-LAG)*bounded[i]);
+        this.states[key]=voltageFrom(disturbance,this.q[key]);inputs[key]=padInput(bounded);
+        rms[key]=Math.sqrt(squared(this.states[key].slice(1))/(N-1));
+        regulationRms[key]=Math.sqrt(squared(this.states[key].slice(1).map((v,i)=>v-model.baseDrop[i+1]))/(N-1));
       }
-      this.lastInputs=deepFreeze(inputs); this.lastSample=sample;
-      this.samples.push(sample); if (this.samples.length>WINDOW) this.samples.shift();
+      this.powerDeviation=disturbance.slice();this.power=physicalPower(disturbance);
+      this.lastInputs=deepFreeze(inputs);this.lastSample=sample;this.samples.push(sample);if(this.samples.length>WINDOW)this.samples.shift();
       this.t++;
-      this.history.push(deepFreeze({t:this.t,costTime:sample.t,stateTime:this.t,
-        ...this.cumulative,stage:{...this.stage},rms,pulse:sample.pulse,
-        costStates:this.costStates,
-        states:Object.fromEntries(Object.entries(this.states).map(([k,v])=>[k,v.slice()])),
+      this.history.push(deepFreeze({t:this.t,costTime:sample.t,stateTime:this.t,...this.cumulative,
+        stage:{...this.stage},rms,regulationRms,pulse:sample.pulse,costStates:this.costStates,
+        states:Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].slice()])),
+        regulationStates:Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].map((v,i)=>v-model.baseDrop[i])])),
         rawForecastRms:this.learning.rawRms,calibratedForecastRms:this.learning.calibratedRms,
-        fitBefore:this.learning.beforeLoss,fitAfter:this.learning.afterLoss,
-        fitResidual:this.learning.gradientNorm,
-        drift:this.drift,changedEdges:this.changedEdges,
-        calibrationLoss:objective(this.G,this.samples)}));
-      if (this.t>=this.options.horizon) this.mode='completed';
-      return this.snapshot();
+        fitBefore:this.learning.beforeLoss,fitAfter:this.learning.afterLoss,fitResidual:this.learning.gradientNorm,
+        drift:this.drift,changedEdges:this.changedEdges,calibrationLoss:objective(this.G,this.samples)}));
+      if(this.t>=this.options.horizon)this.mode='completed';return this.snapshot();
     }
-    freeze() {
-      if (this.samples.length<WARMUP) return false;
-      if (this.mode==='frozen'||this.mode==='fitting'||this.mode==='converged') return this.snapshot();
-      const stats=statistics(this.samples.slice());
-      const optimum=exactGain(stats);
+    freeze(){
+      if(this.samples.length<WARMUP)return false;
+      if(['frozen','fitting','converged'].includes(this.mode))return this.snapshot();
+      const stats=statistics(this.samples.slice()),optimum=exactGain(stats);
       this.fit={...stats,optimum,scale:Math.max(frobenius(optimum),1e-12)};
-      this.fitIteration=0; this.fitHistory=[]; this.mode='frozen';
-      this.sinceStable=0; this.changedEdges=0;
-      this.measureFit();
-      this.eventLog.push(deepFreeze({t:this.t,type:'freeze',message:'Observation window frozen for optimizer convergence'}));
-      return this.snapshot();
+      this.fitIteration=0;this.fitHistory=[];this.mode='frozen';this.sinceStable=0;this.changedEdges=0;this.measureFit();
+      this.eventLog.push(deepFreeze({t:this.t,type:'freeze',message:'Power observation window frozen for optimizer convergence'}));return this.snapshot();
     }
-    measureFit() {
-      this.fitError=frobenius(combine(this.G,this.fit.optimum,1,-1))/this.fit.scale;
-      this.fitObjective=objective(this.G,this.fit.samples);
-      this.fitHistory.push(deepFreeze({iteration:this.fitIteration,error:this.fitError,
-        objective:this.fitObjective,changedEdges:this.changedEdges}));
+    measureFit(){
+      this.fitError=frobenius(combine(this.G,this.fit.optimum,1,-1))/this.fit.scale;this.fitObjective=objective(this.G,this.fit.samples);
+      this.fitHistory.push(deepFreeze({iteration:this.fitIteration,error:this.fitError,objective:this.fitObjective,changedEdges:this.changedEdges}));
     }
-    fitStep(count=12) {
-      if (!this.fit||this.mode==='running'||this.mode==='completed'||this.mode==='converged') return this.snapshot();
-      if (!Number.isInteger(count)||count<1) throw new Error('Iteration count must be positive');
-      this.mode='fitting';
-      this.updateGain(gradientSteps(this.G,this.fit,count));
-      this.fitIteration+=count; this.measureFit();
-      if (this.fitError<TOLERANCE) this.mode='converged';
-      return this.snapshot();
+    fitStep(count=12){
+      if(!this.fit||['running','completed','converged'].includes(this.mode))return this.snapshot();
+      if(!Number.isInteger(count)||count<1)throw new Error('Iteration count must be positive');
+      this.mode='fitting';this.updateGain(gradientSteps(this.G,this.fit,count));this.fitIteration+=count;this.measureFit();
+      if(this.fitError<TOLERANCE)this.mode='converged';return this.snapshot();
     }
-    resume() {
-      this.mode=this.t>=this.options.horizon?'completed':'running';
-      this.fit=null; this.fitError=null; this.fitObjective=null;
-      this.fitIteration=0; this.fitHistory=[];
-      this.drift=0; this.changedEdges=0; this.sinceStable=0;
-      return this.snapshot();
+    resume(){
+      this.mode=this.t>=this.options.horizon?'completed':'running';this.fit=null;this.fitError=null;this.fitObjective=null;
+      this.fitIteration=0;this.fitHistory=[];this.drift=0;this.changedEdges=0;this.sinceStable=0;return this.snapshot();
     }
-    snapshot() {
-      return {t:this.t,costTime:this.lastSample?this.lastSample.t:null,stateTime:this.t,
-        horizon:this.options.horizon,mode:this.mode,seed:this.options.seed,
-        preset:this.options.preset,presetLabel:this.preset.label,scalarGain:this.scalarGain,
-        costStates:Object.fromEntries(Object.entries(this.costStates).map(([k,v])=>[k,v.slice()])),
+    snapshot(){
+      const voltages=Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].map(v=>1+v)]));
+      const inverterQ=Object.fromEntries(CONTROLLERS.map(key=>[key,padInput(this.q[key]).map(v=>v*1000)]));
+      const commandQ=Object.fromEntries(CONTROLLERS.map(key=>[key,padInput(this.command[key]).map(v=>v*1000)]));
+      const flows=Object.fromEntries(CONTROLLERS.map(key=>[key,branchFlows(this.power.loadP,this.power.loadQ,this.q[key])]));
+      return{t:this.t,costTime:this.lastSample?this.lastSample.t:null,stateTime:this.t,horizon:this.options.horizon,
+        mode:this.mode,seed:this.options.seed,preset:this.options.preset,presetLabel:this.preset.label,scalarGain:this.scalarGain,
+        initialVoltage:model.initialVoltage.slice(),referenceVoltage:model.referenceVoltage.slice(),initialStates:model.baseDrop.slice(),
+        voltage:voltages.online.slice(),voltages,inverterQ,commandQ,
+        saturation:Object.fromEntries(CONTROLLERS.map(key=>[key,this.saturation[key].map(Boolean)])),
+        ...Object.fromEntries(Object.entries(this.power).map(([key,value])=>[key,value.slice()])),
+        powerDeviation:this.powerDeviation.slice(),
+        edgeData:model.edgeData.map((edge,i)=>({...edge,pKw:flows.online[i].pKw,
+          qKvar:Object.fromEntries(CONTROLLERS.map(key=>[key,flows[key][i].qKvar]))})),
+        lastPulseApplications:this.lastPulseApplications.map(p=>({...p})),
+        costStates:Object.fromEntries(CONTROLLERS.map(key=>[key,this.costStates[key].slice()])),
         learning:{...this.learning},lastPreview:this.lastPreview.slice(),
-        pendingPulses:this.pulses.filter(event=>event.age===0).map(event=>({...event})),
-        activePulses:this.pulses.filter(event=>event.age>0).map(event=>({...event})),
-        states:Object.fromEntries(Object.entries(this.states).map(([k,v])=>[k,v.slice()])),
-        cumulative:{...this.cumulative},stage:{...this.stage},costs:{...this.cumulative},
-        history:this.history.slice(),G:copy(this.G),directGain:copy(this.directGain),
+        pendingPulses:this.pulses.filter(e=>e.age===0).map(e=>({...e})),activePulses:this.pulses.filter(e=>e.age>0).map(e=>({...e})),
+        states:Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].slice()])),
+        regulationStates:Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].map((v,i)=>v-model.baseDrop[i])])),
+        cumulative:{...this.cumulative},stage:{...this.stage},costs:{...this.cumulative},history:this.history.slice(),G:copy(this.G),directGain:copy(this.directGain),
         recommendations:this.recommendations.map(e=>({...e})),
-        localChannels:Array.from({length:N},(_,i)=>({from:i+1,to:i+1,weight:this.directGain[i][i]**2})),
-        faults:[...this.faults].sort((a,b)=>a-b),eventLog:this.eventLog.slice(),
-        lastSample:this.lastSample,lastInputs:this.lastInputs,
-        drift:this.drift,changedEdges:this.changedEdges,sinceStable:this.sinceStable,
-        sampleCount:this.samples.length,lastTrainingTime:this.lastTrainingTime,
-        lastTrainingSampleCount:this.lastTrainingSampleCount,
-        fitError:this.fitError,fitObjective:this.fitObjective,fitIteration:this.fitIteration,
-        fitHistory:this.fitHistory.slice(),canFreeze:this.samples.length>=WARMUP};
+        localChannels:INVERTER_BUSES.map(bus=>({from:bus,to:bus,weight:this.directGain[bus-1][bus-1]**2})),
+        faults:[...this.faults].sort((a,b)=>a-b),eventLog:this.eventLog.slice(),lastSample:this.lastSample,lastInputs:this.lastInputs,
+        drift:this.drift,changedEdges:this.changedEdges,sinceStable:this.sinceStable,sampleCount:this.samples.length,
+        lastTrainingTime:this.lastTrainingTime,lastTrainingSampleCount:this.lastTrainingSampleCount,
+        fitError:this.fitError,fitObjective:this.fitObjective,fitIteration:this.fitIteration,fitHistory:this.fitHistory.slice(),canFreeze:this.samples.length>=WARMUP};
     }
   }
-
-  return {Simulation,model,constants:deepFreeze({N,edges:EDGES,amplitude:AMPLITUDE,
-    ridge:RIDGE,rawRidge:RAW_RIDGE,preview:PREVIEW,window:WINDOW,warmup:WARMUP,
-    busProfiles:BUS_PROFILES,controllers:CONTROLLERS,forecastPresets:FORECAST_PRESETS,
-    tolerance:TOLERANCE,horizon:480,
-    pulseDefault:PULSE_DEFAULT,pulseMin:PULSE_MIN,pulseMax:PULSE_MAX}),
-    math:{zeros,eye,transpose,multiply,matvec,combine,frobenius,normInf,solveSPD,objective,statistics,exactGain,exactScalarGain,recommendations}};
+  return{Simulation,model,constants:deepFreeze({N,M,edges:EDGES,edgeData:model.edgeData,inverterBuses:INVERTER_BUSES,
+    amplitude:AMPLITUDE,ridge:RIDGE,rawRidge:RAW_RIDGE,preview:PREVIEW,window:WINDOW,warmup:WARMUP,
+    busProfiles:BUS_PROFILES,controllers:CONTROLLERS,forecastPresets:FORECAST_PRESETS,tolerance:TOLERANCE,horizon:480,
+    pulseDefault:PULSE_DEFAULT,pulseMin:PULSE_MIN,pulseMax:PULSE_MAX,pulseUnits:'kW',powerBaseKw:POWER_BASE_KW,
+    baseKv:BASE_KV,baseMva:BASE_MVA,sampleSeconds:SAMPLE_SECONDS,tauSeconds:TAU_SECONDS,inverterKvar:70}),
+    math:{zeros,eye,transpose,multiply,matvec,combine,frobenius,normInf,solveSPD,objective,statistics,exactGain,exactScalarGain,
+      recommendations,physicalPower,voltageFrom,branchFlows,radialAC,padInput}};
 });
 </script>
 <script>/* Native SVG equipment for the power network.
@@ -778,8 +846,9 @@ summary span { color:#a4aba4; }
  *
  * PowerEquipment.update(host, {
  *   voltage: 1.0,       // Actual bus voltage in per unit, not voltage deviation.
- *   input: 0,          // Actual current controller input at this bus.
- *   inputScale: 0.02,  // Display reference for the magnitude of control effort.
+ *   referenceVoltage: 1.0, // Nominal feeder voltage for this bus in per unit.
+ *   input: 0,          // Actual inverter reactive output at this bus in kvar.
+ *   inputScale: 100,   // Inverter reactive capability in kvar for the effort display.
  *   selected: false,
  *   activePulse: false,
  *   queuedPulses: 0,   // Requests waiting for the next physical model sample.
@@ -787,7 +856,7 @@ summary span { color:#a4aba4; }
  *   phase: 0           // Optional simulation step. Recorded, not invented motion.
  * })
  *
- * The battery bars display control effort, never battery state of charge.
+ * The battery bars display reactive inverter effort, never battery state of charge.
  * Voltage changes the surrounding ring and window light. No visual state feeds
  * back into the physical model. Hit area radius 21. Equipment radius 13.5.
  */
@@ -841,7 +910,7 @@ summary span { color:#a4aba4; }
         glyph.append('rect').attr('class', 'pe-effort-segment').attr('data-segment', i).attr('x', -5.2).attr('y', 5.8 - i * 4.1).attr('width', 10.4).attr('height', 2.7).attr('rx', .7);
       }
       path(glyph, 'pe-control-arrow', 'M-2.3-4.4H2.3M.3-6.3L2.4-4.4L.3-2.5');
-      path(glyph, 'pe-disconnect', 'M-7 7L7-7');
+      path(glyph, 'pe-charging-surge', 'M-13-4V4M-16 1L-13 4L-10 1');
     } else {
       path(glyph, 'pe-station-base', 'M-11 10H11M-8 10V7H8V10');
       glyph.append('rect').attr('class', 'pe-transformer').attr('x', -9).attr('y', -3).attr('width', 18).attr('height', 10).attr('rx', 2);
@@ -875,11 +944,12 @@ summary span { color:#a4aba4; }
     if (equipment.empty()) equipment = render(host, data.role || 'Homes');
     const voltage = finite(data.voltage, 1);
     const input = finite(data.input, 0);
-    const inputScale = Math.max(Math.abs(finite(data.inputScale, .02)), 1e-9);
+    const inputScale = Math.max(Math.abs(finite(data.inputScale, 100)), 1e-9);
     const effort = clamp(Math.abs(input) / inputScale);
     const queuedPulses = Math.max(0, Math.floor(finite(data.queuedPulses, 0)));
-    const stress = clamp(Math.abs(voltage - 1) / .05);
-    const voltageColor = stress > .6 ? '#be793e' : stress > .25 ? '#859454' : '#4c816b';
+    const reference = finite(data.referenceVoltage, 1);
+    const stress = clamp(Math.abs(voltage - reference) / .025);
+    const voltageColor = voltage < .95 || voltage > 1.05 || stress > .6 ? '#be793e' : stress > .25 ? '#859454' : '#4c816b';
     equipment.attr('data-voltage', voltage).attr('data-control', input)
       .attr('data-phase', finite(data.phase, 0)).attr('data-pulse-active', String(Boolean(data.activePulse)))
       .classed('pe-selected', Boolean(data.selected)).classed('pe-pulse-active', Boolean(data.activePulse))
@@ -930,7 +1000,7 @@ summary span { color:#a4aba4; }
     { key:'causal', label:'Feedback only', color:'var(--viz-series-3)', dash:'1 4', shape:d3.symbolTriangle }
   ];
   const visible = new Set(series.map(s => s.key));
-  let selectedBus = 6;
+  let selectedBus = 7;
   let playing = false;
   let comparing = false;
   let timer = null;
@@ -953,7 +1023,36 @@ summary span { color:#a4aba4; }
   }
   const matrixColors = { connected:'var(--primary)', added:'var(--matrix-added, #328a9c)', removed:'var(--matrix-removed, #d39955)', local:'#b8c2bc', inactive:'#eff2ef' };
   const busRole = bus => PowerDemo.constants.busProfiles?.[bus-1]?.role || (bus === 1 ? 'Substation' : [5,7,14,21].includes(bus) ? 'Solar' : [8,12,18,24].includes(bus) ? 'Battery' : 'Homes');
-  function pulseMagnitude(value) { return Number(value).toFixed(3); }
+  function pulseMagnitude(value) { return Math.round(Number(value))+' kW'; }
+  function costFormat(value) { return value===0 ? '0' : d3.format('.4~g')(value); }
+  function busVoltage(bus,key='online',state=snapshot) {
+    if(key==='online' && Array.isArray(state.voltage)) return state.voltage[bus-1];
+    return state.voltage?.[key]?.[bus-1] ?? 1+(state.states?.[key]?.[bus-1] || 0);
+  }
+  function referenceVoltage(bus) { return snapshot.referenceVoltage?.[bus-1] ?? snapshot.initialVoltage?.[bus-1] ?? 1; }
+  function hasInverter(bus) { return (snapshot.localChannels || []).some(edge=>edge.to===bus); }
+  function reactivePower(bus,key='online') { return snapshot.inverterQ?.[key]?.[bus-1] || 0; }
+  function reactiveCommand(bus,key='online') { return snapshot.commandQ?.[key]?.[bus-1] || 0; }
+  function powerDescription(bus) {
+    if(bus===1) return 'Fixed slack';
+    const role=busRole(bus), demand=snapshot.demandP?.[bus-1], generation=snapshot.generationP?.[bus-1], battery=snapshot.inverterP?.[bus-1];
+    if(role==='Solar' && Number.isFinite(generation)) return 'PV '+generation.toFixed(0)+' kW';
+    if(role==='Battery' && Number.isFinite(battery)) return Math.abs(battery)<.05 ? 'Battery idle' : (battery<0?'Charging ':'Discharging ')+Math.abs(battery).toFixed(0)+' kW';
+    if(Number.isFinite(demand)) return 'Load '+demand.toFixed(0)+' kW';
+    const p=snapshot.loadP?.[bus-1];
+    return Number.isFinite(p) ? Math.abs(p).toFixed(0)+' kW '+(p<0?'export':'load') : '';
+  }
+  function appliedPulse(bus) {
+    const applications=(snapshot.lastPulseApplications || snapshot.lastSample?.pulseApplications || []).filter(item=>item.bus===bus);
+    if(!applications.length) return null;
+    return {requested:applications.reduce((sum,item)=>sum+item.requestedKw,0),applied:applications.reduce((sum,item)=>sum+item.appliedKw,0),capped:applications.some(item=>item.capped)};
+  }
+  function appliedPulseLabel(bus) {
+    const power=appliedPulse(bus);
+    if(!power) return 'Pulse active';
+    return disturbanceName(bus)+' '+d3.format('.3~g')(power.applied)+(power.capped?' of '+d3.format('.3~g')(power.requested):'')+' kW applied';
+  }
+  function disturbanceName(bus) { return busRole(bus)==='Solar' ? 'PV loss' : busRole(bus)==='Battery' ? 'Charging surge' : 'Load surge'; }
   const positions = [
     [.03,.48],[.12,.28],[.27,.28],[.43,.16],[.43,.01],[.60,.12],
     [.77,.03],[.61,.31],[.27,.48],[.44,.38],[.44,.57],[.61,.49],
@@ -992,19 +1091,19 @@ summary span { color:#a4aba4; }
     restored = true;
     if (!window.openai?.setWidgetState) return;
     const state = {
-      modelContent: { scenario:'Synthetic 24 node network control', variant:'Shared response calibration with fixed graph and deployed links', step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
-      privateContent: { version:5, preset:snapshot.preset, view:$('view').value, pulseStrength:$('strength').value, t:journal.length <= 2000 ? snapshot.t : 0, journal:journal.length <= 2000 ? journal : [], selectedBus, speed:$('speed').value, allLinks:$('all-links').checked, fitSteps:journal.length <= 2000 ? fitSteps : 0, fitting:journal.length <= 2000 && isFit() }
+      modelContent: { scenario:'24 bus LinDistFlow voltage regulation', variant:'Shared forecast calibration with reactive inverter control', step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
+      privateContent: { version:6, preset:snapshot.preset, view:$('view').value, pulseStrength:$('strength').value, t:journal.length <= 2000 ? snapshot.t : 0, journal:journal.length <= 2000 ? journal : [], selectedBus, speed:$('speed').value, allLinks:$('all-links').checked, fitSteps:journal.length <= 2000 ? fitSteps : 0, fitting:journal.length <= 2000 && isFit() }
     };
     window.openai.setWidgetState(state).catch(() => {});
   }
   function hydrate(saved) {
     const data = saved?.privateContent;
-    if (restored || !data || data.version !== 5) return;
+    if (restored || !data || data.version !== 6) return;
     restored = true;
-    selectedBus = Math.max(1, Math.min(24, Number(data.selectedBus) || 6));
+    selectedBus = Math.max(1, Math.min(24, Number(data.selectedBus) || 7));
     $('bus').value = String(selectedBus);
     $('speed').value = ['0.5','1','2','4'].includes(data.speed) ? data.speed : '1';
-    if (['0.01','0.02','0.03'].includes(data.pulseStrength)) $('strength').value = data.pulseStrength;
+    if (['50','100','150'].includes(data.pulseStrength)) $('strength').value = data.pulseStrength;
     $('all-links').checked = !!data.allLinks;
     const items = Array.isArray(data.journal) ? data.journal.slice(0,2000) : [];
     const t = Math.max(0, Math.min(100000, Math.floor(Number(data.t) || 0)));
@@ -1023,11 +1122,12 @@ summary span { color:#a4aba4; }
         }
         if (!Number.isInteger(item.bus) || item.bus < 1 || item.bus > 24) continue;
         if (item.type === 'pulse') {
-          const strength = Number.isFinite(item.strength) && item.strength >= 0.005 && item.strength <= 0.03 ? item.strength : 0.02;
+          if (item.bus===1) continue;
+          const strength = [50,100,150].includes(item.strength) ? item.strength : 100;
           simulation.queuePulse(item.bus, strength);
           item.strength = strength;
         }
-        else if (item.type === 'fault') simulation.toggleFault(item.bus);
+        else if (item.type === 'fault' && item.bus!==1) simulation.toggleFault(item.bus);
         else continue;
         journal.push(item);
       }
@@ -1063,7 +1163,7 @@ summary span { color:#a4aba4; }
     snapshot = simulation.snapshot();
     if (!isFit() && lastPulse && snapshot.t>lastPulse.t) {
       const active=pulseStatus(lastPulse.bus).active;
-      announce((active?'Pulse applied':'Pulse ended')+' · Bus '+lastPulse.bus+' · t = '+snapshot.t);
+      announce((active?'Pulse applied':'Pulse ended')+' · Bus '+lastPulse.bus+' · t = '+snapshot.t+' s');
     }
     if (snapshot.mode === 'completed') { stop(); announce('Run or Step to continue'); }
     if (snapshot.mode === 'converged') { stop(); announce('Fit converged · Return to simulation'); }
@@ -1074,7 +1174,7 @@ summary span { color:#a4aba4; }
     stop(); simulation.reset();
     snapshot = simulation.snapshot(); journal = []; fitSteps = 0; pin = null; lastPulse = null;
     captureMatrixReference();
-    actionNote('Click a bus to add a state pulse.');
+    actionNote('Click a bus to disturb its power.');
   }
   function toggleRun() {
     if (comparing) return;
@@ -1083,7 +1183,7 @@ summary span { color:#a4aba4; }
       if (snapshot.mode === 'completed') { simulation.extend(); snapshot=simulation.snapshot(); }
       if (snapshot.mode === 'converged') resumePlant();
       playing = true;
-      announce(isFit() ? 'Fitting the frozen observations' : 'Regulating the synthetic state');
+      announce(isFit() ? 'Fitting the frozen observations' : 'Regulating feeder voltage');
       tick();
       if (playing) schedule();
     }
@@ -1112,7 +1212,7 @@ summary span { color:#a4aba4; }
         announce('Comparing '+(snapshot.t-start)+' / 180 steps');
         if ((done+12)%36===0) render();
       }
-      announce('180 steps added · t = '+snapshot.t);
+      announce('180 seconds added · t = '+snapshot.t+' s');
     } finally {
       comparing=false; render(); save();
     }
@@ -1138,9 +1238,9 @@ summary span { color:#a4aba4; }
     return {queued,active:events.some(item=>item.age>0),
       id:latest ? latest.t+'_'+applied.length : null};
   }
-  function canAttack() { return !comparing; }
+  function canAttack(bus=selectedBus) { return !comparing && bus!==1; }
   function pulse(bus = selectedBus) {
-    if (comparing) return;
+    if (!canAttack(bus)) return;
     // A click schedules an unexpected disturbance for the next control sample.
     // It never advances plant time or removes an earlier attack.
     resumePlant();
@@ -1155,13 +1255,13 @@ summary span { color:#a4aba4; }
     snapshot=simulation.snapshot();
     lastPulse={bus:selectedBus,strength,t:pulseStep,before};
     const count=pulseStatus(bus).queued;
-    const message=count+' '+(count===1?'pulse':'pulses')+' queued at bus '+bus;
+    const message=disturbanceName(bus)+' · '+pulseMagnitude(strength)+' queued'+(count>1?' × '+count:'')+' at bus '+bus;
     announce(message+' · t = '+pulseStep);
     actionNote(playing ? 'Queued for the next sample' : 'Queued at t '+pulseStep+' · Run or Step');
     render(); save();
   }
   function fault() {
-    if (comparing) return;
+    if (!canAttack(selectedBus)) return;
     resumePlant();
     captureMatrixReference();
     simulation.toggleFault(selectedBus); journal.push({t:snapshot.t,type:'fault',bus:selectedBus});
@@ -1181,7 +1281,7 @@ summary span { color:#a4aba4; }
       if (!simulation.freeze()) return;
       snapshot = simulation.snapshot(); fitSteps = 0;
       if ($('view')) $('view').value='learning';
-      playing = true; schedule(); announce('Data frozen · State and cost are held');
+      playing = true; schedule(); announce('Data frozen · Voltage and cost are held');
     }
     render(); save();
   });
@@ -1213,7 +1313,7 @@ summary span { color:#a4aba4; }
   }
   function renderControls() {
     const frozen=isFit();
-    $('clock').textContent='t = '+snapshot.t;
+    $('clock').textContent='t = '+snapshot.t+' s';
     $('learning').textContent=frozen?'Plant held · '+snapshot.mode:snapshot.t<30?'Learning begins at t 30':'Learning from revealed samples';
     $('run').textContent=playing?'Pause':frozen && snapshot.mode!=='converged'?'Fit':'Run';
     $('run').disabled=comparing;
@@ -1223,21 +1323,21 @@ summary span { color:#a4aba4; }
     $('restart').disabled=comparing;
     $('run').setAttribute('aria-label',playing?'Pause simulation':frozen?'Run frozen fit':'Run simulation');
     $('run').setAttribute('aria-pressed',String(playing));
-    if ($('pulse-label')) $('pulse-label').textContent='Attack bus '+selectedBus;
+    if ($('pulse-label')) $('pulse-label').textContent=selectedBus===1?'Fixed substation':'Attack bus '+selectedBus;
     $('step').textContent=frozen?'One fit step':'Step';
     $('step').disabled=comparing || snapshot.mode==='converged';
     $('freeze').textContent=frozen?'Return to simulation':'Freeze and converge';
     $('freeze').disabled=comparing || !snapshot.canFreeze;
-    $('pulse').disabled=comparing; $('strength').disabled=comparing; $('fault').disabled=comparing;
+    $('pulse').disabled=!canAttack(selectedBus); $('strength').disabled=comparing; $('fault').disabled=!canAttack(selectedBus);
     $('fault').textContent=(snapshot.faults.includes(selectedBus)?'Repair':'Corrupt')+' forecast';
     $('fit-title').textContent=frozen?'Convergence on frozen data':'Online adaptation';
     $('fit-detail').textContent=frozen?'Error '+d3.format('.2~g')(100*(snapshot.fitError || 0))+'%':snapshot.t<30?'Learning begins at t 30':'Rolling data changes the target';
     $('mode-note').textContent=frozen?'Exact ridge solution on a fixed observation window':'Freeze the observations to see convergence';
     const i=selectedBus-1, sample=snapshot.lastSample;
     const write=(id,value)=>{if($(id))$(id).textContent=value;};
-    write('flow-predict',sample ? 'ŵ '+d3.format('+.3f')(sample.forecast[i]) : 'Awaiting sample');
-    write('flow-control',snapshot.lastInputs ? 'u '+d3.format('+.3f')(snapshot.lastInputs.online[i]) : 'Fixed feedback K');
-    write('flow-observe',sample ? 'w '+d3.format('+.3f')(sample.disturbance[i]) : 'Revealed after action');
+    write('flow-predict',selectedBus===1 ? 'Fixed slack' : sample ? 'ΔP̂ '+d3.format('+.0f')(1000*sample.forecast[i])+' kW' : 'Awaiting forecast');
+    write('flow-control',hasInverter(selectedBus) ? 'Q* '+d3.format('+.0f')(reactiveCommand(selectedBus))+' kvar' : 'No inverter');
+    write('flow-observe',selectedBus===1 ? busVoltage(1).toFixed(3)+' pu' : sample ? 'ΔP '+d3.format('+.0f')(1000*sample.disturbance[i])+' kW' : 'Awaiting load');
     write('flow-update',frozen ? snapshot.fitIteration+' iterations' : snapshot.t<30 ? snapshot.t+'/30 samples' : 'ΔG '+d3.format('.2~g')(100*snapshot.drift)+'%');
     renderLearningView();
   }
@@ -1246,10 +1346,10 @@ summary span { color:#a4aba4; }
     const width = Math.max(240, el.getBoundingClientRect().width);
     const height = 220;
     const svg = d3.select(el).attr('viewBox', '0 0 ' + width + ' ' + height).attr('height', height)
-      .attr('role','group').attr('aria-label','Illustrative network. Activate a bus to inject an abstract state disturbance.');
+      .attr('role','group').attr('aria-label','Radial power feeder. Activate a bus to disturb load, solar output, or battery charging.');
     const point = bus => [25 + positions[bus - 1][0] * (width - 54), 26 + positions[bus - 1][1] * (height - 54)];
     if (svg.select('defs').empty()) {
-      svg.append('title').text('Illustrative tree with learned prediction source recommendations');
+      svg.append('title').text('Radial electrical feeder and learned communication recommendations');
       const defs = svg.append('defs');
       for (const [name,fill] of [['retained',color('var(--viz-series-1)')],['added',color(matrixColors.added)],['removed',color(matrixColors.removed)]]) {
         defs.append('marker').attr('id','pr-arrow-'+name).attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerUnits','userSpaceOnUse').attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto').append('path').attr('d','M 0 0 L 10 5 L 0 10 Z').attr('fill',fill);
@@ -1299,8 +1399,8 @@ summary span { color:#a4aba4; }
       return g;
     }).attr('transform',bus => 'translate('+point(bus).join(',')+')')
       .attr('data-bus',bus => bus).attr('data-role',bus => busRole(bus))
-      .attr('aria-label',bus => 'Inject pulse at bus '+bus)
-      .attr('aria-description',bus => busRole(bus)+', '+(1+snapshot.states.online[bus-1]).toFixed(3)+(pulseStatus(bus).queued ? ', pulse queued' : ''))
+      .attr('aria-label',bus => bus===1 ? 'Fixed substation at bus 1' : 'Inject pulse at bus '+bus)
+      .attr('aria-description',bus => busRole(bus)+', '+busVoltage(bus).toFixed(4)+' pu'+(pulseStatus(bus).queued ? ', pulse queued' : ''))
       .attr('aria-disabled',bus => String(!canAttack(bus)))
       .style('cursor',bus=>canAttack(bus) ? 'pointer' : 'default')
       .on('click',(event,bus) => { event.preventDefault(); event.stopPropagation(); pulse(bus); })
@@ -1319,32 +1419,35 @@ summary span { color:#a4aba4; }
       if (!window.PowerEquipment) return;
       const status=pulseStatus(bus);
       PowerEquipment.update(d3.select(this),{
-        voltage:1+snapshot.states.online[bus-1],input:snapshot.lastInputs?.online[bus-1] || 0,
-        inputScale:.02,selected:bus===selectedBus,activePulse:status.active,queuedPulses:status.queued,
+        voltage:busVoltage(bus),referenceVoltage:referenceVoltage(bus),input:reactivePower(bus),
+        inputScale:PowerDemo.constants.busProfiles?.[bus-1]?.inverterKvar || 100,selected:bus===selectedBus,activePulse:status.active,queuedPulses:status.queued,
         pulseId:status.id,phase:snapshot.t
       });
     });
     nodes.select('.bus-number').attr('text-anchor','middle').attr('x',0).attr('y',27)
       .style('fill','var(--muted-foreground)').style('font-size','9px').text(bus=>bus);
     nodes.select('.fault-mark').attr('x',17).attr('y',-12).text(bus=>snapshot.faults.includes(bus)?'×':'');
-    nodes.select('title').text(bus=>busRole(bus)+' · Bus '+bus+' · '+(1+snapshot.states.online[bus-1]).toFixed(3)+'. Click to queue a '+pulseMagnitude($('strength').value)+' pulse. Repeated clicks stack.');
+    nodes.select('title').text(bus=>busRole(bus)+' · Bus '+bus+' · '+busVoltage(bus).toFixed(4)+' pu · '+powerDescription(bus)+(hasInverter(bus)?' · Q '+reactivePower(bus).toFixed(0)+' kvar':'')+'. '+(bus===1?'Fixed voltage substation.':disturbanceName(bus)+' '+pulseMagnitude($('strength').value)+' requested. Repeated clicks stack within equipment limits.'));
     showBusDetail(selectedBus);
-    const voltages=snapshot.states.online.map(value=>1+value);
+    const voltages=d3.range(1,25).map(bus=>busVoltage(bus));
     const low=Math.min(...voltages), high=Math.max(...voltages);
     const inRange=low>=.95 && high<=1.05;
-    if (lastPulse && snapshot.t>lastPulse.t) actionNote(pulseStatus(lastPulse.bus).active ? 'Pulse active · Repeat any time' : inRange ? 'State restored · Click to attack' : 'Controller restoring state');
-    if ($('voltage-range')) $('voltage-range').textContent=low.toFixed(3)+' to '+high.toFixed(3);
+    const nearNominal=voltages.every((voltage,index)=>Math.abs(voltage-referenceVoltage(index+1))<.001);
+    if (lastPulse && snapshot.t>lastPulse.t) actionNote(pulseStatus(lastPulse.bus).active ? appliedPulseLabel(lastPulse.bus) : nearNominal ? 'Near nominal profile · Click to attack' : 'Restoring the nominal profile');
+    if ($('voltage-range')) $('voltage-range').textContent=low.toFixed(3)+' to '+high.toFixed(3)+' pu';
     if ($('voltage-status')) {
-      $('voltage-status').title=inRange ? 'Within target' : 'Restoring state';
+      $('voltage-status').title=inRange ? 'Within illustrative band' : 'Restoring voltage';
       $('voltage-status').dataset.state=inRange ? 'stable' : 'recovering';
     }
     const sources = recommendations.filter(e => e.to === selectedBus).map(e => e.from).join(', ');
-    $('topology-label').textContent = $('all-links').checked ? 'All learned links' : 'Sources '+sources+' → bus '+selectedBus;
+    $('topology-label').textContent = $('all-links').checked ? 'All learned links' : hasInverter(selectedBus) ? 'Sources '+sources+' → inverter '+selectedBus : 'No inverter at bus '+selectedBus;
     $('links-detail').textContent = 'Recommendations · Electrical feeder remains fixed';
   }
   function showBusDetail(bus,hovered=false) {
-    const voltage=1+snapshot.states.online[bus-1], status=pulseStatus(bus);
-    $('bus-detail').textContent=busRole(bus)+' · Bus '+bus+' · '+voltage.toFixed(3)+(status.queued?' · '+status.queued+' queued':hovered?' · Click to attack':'');
+    const status=pulseStatus(bus);
+    $('bus-detail').textContent='Bus '+bus+' · '+busVoltage(bus).toFixed(4)+' pu · '+powerDescription(bus)
+      +(hasInverter(bus)?' · Q '+reactivePower(bus).toFixed(0)+' kvar':'')
+      +(status.queued?' · '+status.queued+' queued':hovered && canAttack(bus)?' · Click to attack':'');
   }
 
   function drawMatrix() {
@@ -1363,7 +1466,7 @@ summary span { color:#a4aba4; }
     const removed = [...matrixReference.edges].filter(key => !current.has(key));
     const sources = recommendations.filter(edge => edge.to === selectedBus).map(edge => edge.from).sort((a,b) => a-b);
     const changes = added.length + ' added · ' + removed.length + ' removed';
-    const detail = 'Bus ' + selectedBus + ' ← ' + sources.join(', ');
+    const detail = hasInverter(selectedBus) ? 'Inverter '+selectedBus+' ← '+sources.join(', ') : 'No inverter at bus '+selectedBus;
     if ($('matrix-reference')) $('matrix-reference').textContent = 'Changes since step ' + matrixReference.t;
     if ($('matrix-detail')) $('matrix-detail').textContent = detail;
     if ($('matrix-changes')) $('matrix-changes').textContent = changes;
@@ -1386,9 +1489,10 @@ summary span { color:#a4aba4; }
     svg.select('.matrix-columns').selectAll('text').data(d3.range(1,25)).join('text')
       .attr('x',bus=>left+(bus-.5)*cellSize).attr('y',top-7).attr('text-anchor','middle')
       .attr('fill','var(--muted-foreground)').attr('font-size',8).text(bus=>bus);
+    const localChannels=new Set((snapshot.localChannels || []).map(recommendationKey));
     const cells = d3.range(1,25).flatMap(receiver => d3.range(1,25).map(source => {
       const key = receiver+','+source;
-      const local = receiver === source;
+      const local = localChannels.has(key);
       const connected = local || current.has(key);
       const change = local ? 'local' : current.has(key) ? (matrixReference.edges.has(key) ? 'retained' : 'added') : matrixReference.edges.has(key) ? 'removed' : 'inactive';
       return {receiver,source,connected,change};
@@ -1406,7 +1510,7 @@ summary span { color:#a4aba4; }
       .attr('fill',d=>color(d.change==='removed' ? 'var(--background)' : d.change==='retained' ? matrixColors.connected : matrixColors[d.change] || matrixColors.inactive))
       .attr('stroke',d=>d.change==='removed' ? color(matrixColors.removed) : 'transparent')
       .attr('stroke-width',d=>d.change==='removed' ? 1.4 : 0);
-    marks.select('title').text(d=>d.source===d.receiver ? 'Bus '+d.receiver+' local information' : 'Source '+d.source+' to receiver '+d.receiver+' · '+(d.change==='inactive'?'Not recommended':d.change==='retained'?'Connected':d.change==='added'?'Added since reference':'Removed since reference'));
+    marks.select('title').text(d=>d.change==='local' ? 'Inverter '+d.receiver+' local information' : 'Source '+d.source+' to receiver '+d.receiver+' · '+(d.change==='inactive'?'Not recommended':d.change==='retained'?'Connected':d.change==='added'?'Added since reference':'Removed since reference'));
     svg.select('.matrix-selected-row').attr('x',left-.8).attr('y',top+(selectedBus-1)*cellSize-.5)
       .attr('width',side+1.6).attr('height',cellSize+1).attr('rx',1).attr('stroke','var(--foreground)').attr('stroke-width',1);
     const rows=svg.select('.matrix-rows').selectAll('g').data(d3.range(1,25)).join(enter=>{
@@ -1556,7 +1660,7 @@ summary span { color:#a4aba4; }
       .attr('text-anchor','middle').attr('font-size',10).attr('fill','var(--muted-foreground)');
     animate(labels).attr('x',group=>group.x);
     labels.select('tspan').text(group=>[...new Set(group.items.map(item=>item.type==='pulse'?'D':'E'))].sort().join('/'));
-    labels.select('title').text(group=>group.items.map(item=>item.type==='pulse' ? Number(item.strength || .025).toFixed(3)+' pulse at bus '+item.bus+' enters state x at t '+(item.t+1)+'. Its state cost is charged at t '+(item.t+1)+', on the following step.' : 'Forecast change at bus '+item.bus+' · Step '+(item.t+1)).join(' '));
+    labels.select('title').text(group=>group.items.map(item=>item.type==='pulse' ? pulseMagnitude(item.strength || 100)+' pulse at bus '+item.bus+' changes feeder voltage at t '+(item.t+1)+' s. Its voltage cost is charged at t '+(item.t+1)+' s, on the following sample.' : 'Forecast change at bus '+item.bus+' · Step '+(item.t+1)).join(' '));
   }
   function drawCost() {
     const observations=[{x:0,...Object.fromEntries(series.map(item=>[item.key,0]))},...snapshot.history.map(d=>({x:d.t,...Object.fromEntries(series.map(item=>[item.key,d[item.key]]))}))];
@@ -1565,14 +1669,14 @@ summary span { color:#a4aba4; }
     const chart=chartBase($('cost'),observations,items.map(s=>s.key),'Total cost','Time t',140);
     drawInterventions(chart);
     drawSeries(chart,observations,items);
-    hover(chart,observations,items,'Step');
+    hover(chart,observations,items,'Time (s)');
     const c=snapshot.cumulative;
     $('cost-detail').replaceChildren();
     for (const item of series) {
       const row=document.createElement('tr'), label=document.createElement('th'), value=document.createElement('td'), difference=document.createElement('td');
       const swatch=document.createElement('span'); swatch.className='pr-swatch '+item.key;
       label.scope='row'; label.append(swatch,document.createTextNode(item.label));
-      value.textContent=d3.format('.4f')(c[item.key]);
+      value.textContent=costFormat(c[item.key]);
       value.dataset.cost=String(c[item.key]);
       difference.textContent=item.key==='causal' ? 'Reference' : comparativeCost(c[item.key],c.causal);
       row.dataset.method=item.key; row.append(label,value,difference); $('cost-detail').append(row);
@@ -1595,16 +1699,16 @@ summary span { color:#a4aba4; }
     let observations=snapshot.history.filter(item=>(item.costTime ?? item.t-1)>=domain[0]).map(item=>({x:item.costTime ?? item.t-1,...item.stage}));
     if(!observations.length) observations=[{x:0,...Object.fromEntries(series.map(item=>[item.key,0]))}];
     const items=series.filter(item=>visible.has(item.key));
-    const chart=chartBase($('stage'),observations,items.map(item=>item.key),'Cost','Time t',110,{xDomain:domain});
+    const chart=chartBase($('stage'),observations,items.map(item=>item.key),'Cost','Time (s)',110,{xDomain:domain});
     drawInterventions(chart); drawSeries(chart,observations,items,true); hover(chart,observations,items,'Cost at t');
-    $('stage-detail').textContent='Cost at t '+Math.max(0,snapshot.t-1)+' · '+d3.format('.4f')(snapshot.stage.online);
-    if ($('live-cost')) $('live-cost').textContent=d3.format('.4f')(snapshot.stage.online);
-    let summary='Select a bus · State and cost share time t';
+    $('stage-detail').textContent='Cost at t '+Math.max(0,snapshot.t-1)+' · '+costFormat(snapshot.stage.online);
+    if ($('live-cost')) $('live-cost').textContent=costFormat(snapshot.stage.online);
+    let summary='Voltage and cost share time t';
     if(lastPulse) {
       const charge=snapshot.history.find(item=>(item.costTime ?? item.t-1)===lastPulse.t+1);
       lastPulse.charged=!!charge;
       if(charge) lastPulse.after=charge.stage.online;
-      summary=snapshot.t===lastPulse.t ? 'Queued at t '+lastPulse.t+' · Run or Step' : charge ? 'Cost '+d3.format('.3~g')(lastPulse.before)+' → '+d3.format('.3~g')(charge.stage.online) : 'State changed · Cost appears on next step';
+      summary=snapshot.t===lastPulse.t ? 'Queued at t '+lastPulse.t+' · Run or Step' : charge ? 'Cost '+d3.format('.3~g')(lastPulse.before)+' → '+d3.format('.3~g')(charge.stage.online) : 'Voltage changed · Cost appears next step';
     }
     if ($('impact-note')) $('impact-note').textContent=summary;
     if ($('pulse-summary')) $('pulse-summary').textContent=summary;
@@ -1616,22 +1720,24 @@ summary span { color:#a4aba4; }
       x:item.stateTime ?? item.t,
       ...Object.fromEntries(series.map(s=>[s.key,1+(item.states?.[s.key]?.[index] || 0)]))
     }));
-    if(domain[0]===0) observations.unshift({x:0,...Object.fromEntries(series.map(item=>[item.key,1]))});
+    if(domain[0]===0) observations.unshift({x:0,...Object.fromEntries(series.map(item=>[item.key, snapshot.initialVoltage?.[index] ?? 1+(snapshot.initialStates?.[item.key]?.[index] ?? snapshot.history[0]?.costStates?.[item.key]?.[index] ?? snapshot.states[item.key][index])]))});
     if(!observations.length) observations=[{x:snapshot.t,...Object.fromEntries(series.map(s=>[s.key,1+snapshot.states[s.key][index]]))}];
     const items=series.filter(item=>visible.has(item.key));
     const values=observations.flatMap(item=>items.map(s=>item[s.key]));
-    const low=Math.min(.95,...values),high=Math.max(1.05,...values);
-    const margin=(high-low)*.05;
-    const chart=chartBase(el,observations,items.map(s=>s.key),'Normalized state','Time t',110,{xDomain:domain,yDomain:[low-margin,high+margin],yFormat:'.2f'});
+    const reference=referenceVoltage(selectedBus);
+    const low=Math.min(reference,...values),high=Math.max(reference,...values);
+    const margin=Math.max(.001,(high-low)*.12);
+    const chart=chartBase(el,observations,items.map(s=>s.key),'Voltage (pu)','Time (s)',110,{xDomain:domain,yDomain:[low-margin,high+margin],yFormat:'.4f'});
     chart.marks.selectAll('rect.goal-band').data([null]).join('rect').attr('class','goal-band')
       .attr('x',chart.frame.x).attr('width',chart.frame.w).attr('y',chart.y(1.05)).attr('height',chart.y(.95)-chart.y(1.05))
       .attr('fill','var(--primary)').attr('opacity',.055).lower();
-    chart.marks.selectAll('line.voltage-target').data([.95,1,1.05]).join('line').attr('class','voltage-target')
+    chart.marks.selectAll('line.voltage-target').data([.95,reference,1.05]).join('line').attr('class','voltage-target')
       .attr('x1',chart.frame.x).attr('x2',chart.frame.x+chart.frame.w).attr('y1',d=>chart.y(d)).attr('y2',d=>chart.y(d))
-      .attr('stroke','var(--primary)').attr('stroke-opacity',d=>d===1?.35:.18).attr('stroke-dasharray','3 4');
-    drawInterventions(chart); drawSeries(chart,observations,items,true); hover(chart,observations,items,'State at t');
-    if($('voltage-detail'))$('voltage-detail').textContent='Bus '+selectedBus;
-    if($('state-value'))$('state-value').textContent=(1+snapshot.states.online[index]).toFixed(3);
+      .attr('stroke','var(--primary)').attr('stroke-opacity',d=>d===reference?.5:.18).attr('stroke-dasharray','3 4');
+    drawInterventions(chart); drawSeries(chart,observations,items,true); hover(chart,observations,items,'Voltage at t');
+    if($('voltage-detail'))$('voltage-detail').textContent='Bus '+selectedBus+' voltage';
+    if($('voltage-reference'))$('voltage-reference').textContent='Nominal '+reference.toFixed(4)+' pu';
+    if($('state-value'))$('state-value').textContent=busVoltage(selectedBus).toFixed(4)+' pu';
   }
   function drawConvergence() {
     if (!$('convergence') || $('convergence').hidden) return;
@@ -1659,14 +1765,14 @@ summary span { color:#a4aba4; }
     else observations=[{x:0,value:0},...snapshot.history.map(d=>({x:d.costTime ?? d.t-1,value:100*d.drift}))];
     if(!observations.length) observations=[{x:0,value:100*(snapshot.fitError || 0)}];
     $('convergence').setAttribute('aria-label',frozen?'Relative Frobenius error to the exact solution on frozen samples':'Relative Frobenius change in the shared response on each control step');
-    const chart=chartBase($('convergence'),observations,['value'],frozen?'Solution error (%)':'Gain change (%)',frozen?'Gradient iteration':'Time t',140);
+    const chart=chartBase($('convergence'),observations,['value'],frozen?'Solution error (%)':'Gain change (%)',frozen?'Gradient iteration':'Time (s)',140);
     if (!frozen) drawInterventions(chart);
     else {
       chart.marks.select('.intervention-markers').selectAll('line').remove();
       chart.svg.select('.intervention-labels').selectAll('text').remove();
     }
     drawSeries(chart,observations,[{key:'value',color:'var(--viz-series-1)'}]);
-    hover(chart,observations,[{key:'value',label:frozen?'Solution error (%)':'Gain change (%)',color:'var(--viz-series-1)'}],frozen?'Iteration':'Step');
+    hover(chart,observations,[{key:'value',label:frozen?'Solution error (%)':'Gain change (%)',color:'var(--viz-series-1)'}],frozen?'Iteration':'Time (s)');
   }
   function render() {
     $('tooltip').style.display='none'; pin=null;
