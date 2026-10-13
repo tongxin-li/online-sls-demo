@@ -10,15 +10,17 @@
     return;
   }
   const d3 = window.d3;
-  const simulation = new PowerDemo.Simulation();
+  let simulation = new PowerDemo.Simulation({preset:'mixed'});
   const series = [
-    { key:'online', label:'Adaptive', color:'var(--viz-series-1)', dash:null },
-    { key:'static', label:'Fixed prediction', color:'var(--viz-series-2)', dash:'7 4' },
-    { key:'causal', label:'Feedback only', color:'var(--viz-series-3)', dash:'2 4' }
+    { key:'online', label:'Adaptive', color:'var(--viz-series-1)', dash:null, shape:d3.symbolCircle },
+    { key:'scalar', label:'Scalar adaptation', color:'var(--viz-series-4)', dash:'8 3', shape:d3.symbolSquare },
+    { key:'static', label:'Fixed prediction', color:'var(--viz-series-2)', dash:'5 3 1 3', shape:d3.symbolDiamond },
+    { key:'causal', label:'Feedback only', color:'var(--viz-series-3)', dash:'1 4', shape:d3.symbolTriangle }
   ];
   const visible = new Set(series.map(s => s.key));
   let selectedBus = 6;
   let playing = false;
+  let comparing = false;
   let timer = null;
   let snapshot = simulation.snapshot();
   let journal = [];
@@ -79,13 +81,13 @@
     if (!window.openai?.setWidgetState) return;
     const state = {
       modelContent: { scenario:'Synthetic 24 node network control', variant:'Shared response calibration with fixed graph and deployed links', step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
-      privateContent: { version:4, pulseStrength:$('strength').value, t:journal.length <= 2000 ? snapshot.t : 0, journal:journal.length <= 2000 ? journal : [], selectedBus, speed:$('speed').value, allLinks:$('all-links').checked, fitSteps:journal.length <= 2000 ? fitSteps : 0, fitting:journal.length <= 2000 && isFit() }
+      privateContent: { version:5, preset:snapshot.preset, view:$('view').value, pulseStrength:$('strength').value, t:journal.length <= 2000 ? snapshot.t : 0, journal:journal.length <= 2000 ? journal : [], selectedBus, speed:$('speed').value, allLinks:$('all-links').checked, fitSteps:journal.length <= 2000 ? fitSteps : 0, fitting:journal.length <= 2000 && isFit() }
     };
     window.openai.setWidgetState(state).catch(() => {});
   }
   function hydrate(saved) {
     const data = saved?.privateContent;
-    if (restored || !data || data.version !== 4) return;
+    if (restored || !data || data.version !== 5) return;
     restored = true;
     selectedBus = Math.max(1, Math.min(24, Number(data.selectedBus) || 6));
     $('bus').value = String(selectedBus);
@@ -94,7 +96,10 @@
     $('all-links').checked = !!data.allLinks;
     const items = Array.isArray(data.journal) ? data.journal.slice(0,2000) : [];
     const t = Math.max(0, Math.min(100000, Math.floor(Number(data.t) || 0)));
-    simulation.reset();
+    const preset=['reliable','uniform','mixed'].includes(data.preset) ? data.preset : 'mixed';
+    simulation=new PowerDemo.Simulation({preset});
+    $('preset').value=preset;
+    $('view').value=data.view==='learning' ? 'learning' : 'cost';
     journal = [];
     for (let step = 0; step <= t; step++) {
       if (simulation.mode === 'completed') simulation.extend();
@@ -160,6 +165,7 @@
     actionNote('Click a bus to add a state pulse.');
   }
   function toggleRun() {
+    if (comparing) return;
     if (playing) { stop(); announce('Paused'); save(); }
     else {
       if (snapshot.mode === 'completed') { simulation.extend(); snapshot=simulation.snapshot(); }
@@ -172,13 +178,40 @@
     render();
   }
   $('run').addEventListener('click', toggleRun);
+  $('preset').addEventListener('change', () => {
+    stop(); simulation=new PowerDemo.Simulation({preset:$('preset').value});
+    resetExperiment(); $('view').value='cost';
+    announce(snapshot.presetLabel+' · Reset to t 0'); render(); save();
+  });
+  $('compare').addEventListener('click', async () => {
+    if (comparing) return;
+    stop(); resumePlant(); comparing=true; $('view').value='cost';
+    const start=snapshot.t;
+    try {
+      for (let done=0; done<180; done+=12) {
+        // Yield between batches so progress and controls remain responsive.
+        renderControls();
+        await new Promise(resolve=>setTimeout(resolve,0));
+        for (let k=0;k<12;k++) {
+          if (simulation.mode==='completed') simulation.extend();
+          simulation.step();
+        }
+        snapshot=simulation.snapshot();
+        announce('Comparing '+(snapshot.t-start)+' / 180 steps');
+        if ((done+12)%36===0) render();
+      }
+      announce('180 steps added · t = '+snapshot.t);
+    } finally {
+      comparing=false; render(); save();
+    }
+  });
   $('step').addEventListener('click', () => { stop(); if(snapshot.mode==='completed'){simulation.extend();snapshot=simulation.snapshot();} tick(); save(); });
   $('restart').addEventListener('click', () => {
     resetExperiment(); announce('Ready'); render(); save();
   });
   $('speed').addEventListener('change', () => { if (playing) { clearTimeout(timer); schedule(); } save(); });
   $('strength').addEventListener('change', () => { drawNetwork(); save(); });
-  if ($('view')) $('view').addEventListener('change', () => { renderLearningView(); drawConvergence(); drawCost(); });
+  if ($('view')) $('view').addEventListener('change', () => { renderLearningView(); drawConvergence(); drawCost(); save(); });
   $('bus').addEventListener('change', () => selectBus(Number($('bus').value)));
   $('all-links').addEventListener('change', () => { drawNetwork(); save(); });
   if ($('reference')) $('reference').addEventListener('click', () => {
@@ -193,8 +226,9 @@
     return {queued,active:events.some(item=>item.age>0),
       id:latest ? latest.t+'_'+applied.length : null};
   }
-  function canAttack() { return true; }
+  function canAttack() { return !comparing; }
   function pulse(bus = selectedBus) {
+    if (comparing) return;
     // A click schedules an unexpected disturbance for the next control sample.
     // It never advances plant time or removes an earlier attack.
     resumePlant();
@@ -215,6 +249,7 @@
     render(); save();
   }
   function fault() {
+    if (comparing) return;
     resumePlant();
     captureMatrixReference();
     simulation.toggleFault(selectedBus); journal.push({t:snapshot.t,type:'fault',bus:selectedBus});
@@ -261,6 +296,7 @@
     if ($('cost')) { $('cost').hidden=!showCost; $('cost').style.display=showCost?'':'none'; }
     if ($('convergence')) { $('convergence').hidden=showCost; $('convergence').style.display=showCost?'none':''; }
     if ($('learning-flow')) $('learning-flow').hidden=showCost;
+    if ($('learning-title')) $('learning-title').textContent=showCost ? 'Cost comparison' : 'Inside the controller';
     if ($('learning-kind')) $('learning-kind').textContent=showCost ? 'Accumulated quadratic cost' : isFit() ? 'Frozen data · Solution error' : 'Live data · Gain update size';
   }
   function renderControls() {
@@ -268,15 +304,19 @@
     $('clock').textContent='t = '+snapshot.t;
     $('learning').textContent=frozen?'Plant held · '+snapshot.mode:snapshot.t<30?'Learning begins at t 30':'Learning from revealed samples';
     $('run').textContent=playing?'Pause':frozen && snapshot.mode!=='converged'?'Fit':'Run';
-    $('run').disabled=false;
+    $('run').disabled=comparing;
+    $('compare').disabled=comparing;
+    $('compare').textContent=comparing ? 'Running…' : 'Run 180 steps';
+    $('preset').disabled=comparing;
+    $('restart').disabled=comparing;
     $('run').setAttribute('aria-label',playing?'Pause simulation':frozen?'Run frozen fit':'Run simulation');
     $('run').setAttribute('aria-pressed',String(playing));
     if ($('pulse-label')) $('pulse-label').textContent='Attack bus '+selectedBus;
     $('step').textContent=frozen?'One fit step':'Step';
-    $('step').disabled=snapshot.mode==='converged';
+    $('step').disabled=comparing || snapshot.mode==='converged';
     $('freeze').textContent=frozen?'Return to simulation':'Freeze and converge';
-    $('freeze').disabled=!snapshot.canFreeze;
-    $('pulse').disabled=false; $('strength').disabled=false; $('fault').disabled=false;
+    $('freeze').disabled=comparing || !snapshot.canFreeze;
+    $('pulse').disabled=comparing; $('strength').disabled=comparing; $('fault').disabled=comparing;
     $('fault').textContent=(snapshot.faults.includes(selectedBus)?'Repair':'Corrupt')+' forecast';
     $('fit-title').textContent=frozen?'Convergence on frozen data':'Online adaptation';
     $('fit-detail').textContent=frozen?'Error '+d3.format('.2~g')(100*(snapshot.fitError || 0))+'%':snapshot.t<30?'Learning begins at t 30':'Rolling data changes the target';
@@ -500,7 +540,7 @@
     const [xmin,xmax]=d3.extent(observations,d=>d.x);
     const [ymin,ymax]=d3.extent(observations.flatMap(d=>keys.map(k=>d[k])).filter(Number.isFinite));
     const yl=Math.min(0,ymin || 0);
-    const yh=Math.max(yl + 1e-6,ymax || 0);
+    const yh=Number.isFinite(ymax) && ymax>yl ? ymax : yl+1;
     const pad=(yh-yl)*.1;
     const x=d3.scaleLinear().domain(options.xDomain || [xmin || 0,(xmax === xmin ? (xmin || 0)+1 : xmax) || 1]).range([frame.x+2,frame.x+frame.w-2]);
     const y=d3.scaleLinear().domain(options.yDomain || [yl,yh+pad]).range([frame.y+frame.h-2,frame.y+2]);
@@ -516,20 +556,38 @@
     return {svg,marks,x,y,frame,width,height};
   }
   function drawSeries(chart, observations, items, showCurrent = false) {
-    const lines = chart.marks.selectAll('path.data-series').data(items,item => item.key).join(
+    // Put the adaptive curve last while preserving exact overlaps and sample values.
+    const paintOrder=items.filter(item=>item.key!=='online').concat(items.filter(item=>item.key==='online'));
+    const lines = chart.marks.selectAll('path.data-series').data(paintOrder,item => item.key).join(
       enter => enter.append('path').attr('class','data-series').attr('fill','none'),
       update => update,
       exit => exit.remove()
-    ).attr('data-series-key',item => item.key).attr('stroke',item => item.color)
-      .attr('stroke-width',item => item.key === 'online' ? 2.3 : 1.65).attr('stroke-dasharray',item => item.dash || null)
+    ).order().attr('data-series-key',item => item.key).attr('stroke',item => item.color)
+      .attr('stroke-width',item => item.key === 'online' ? 2.2 : 1.8).attr('stroke-dasharray',item => item.dash || null)
       .attr('stroke-linejoin','round').attr('stroke-linecap','round');
     animate(lines).attr('d',item => d3.line().defined(d => Number.isFinite(d[item.key])).x(d=>chart.x(d.x)).y(d=>chart.y(d[item.key]))(observations));
+    // Different symbols occupy different actual samples, exposing coincident curves
+    // without shifting their coordinates or inventing numerical separation.
+    const stride=Math.max(8,Math.ceil(observations.length/4));
+    const symbols=items.flatMap(item=> {
+      const index=series.findIndex(s=>s.key===item.key);
+      if(index<0 || observations.length<2) return [];
+      const offset=index*2;
+      return observations.filter((sample,i)=>i%stride===offset && Number.isFinite(sample[item.key])).map(sample=>({item,sample,key:item.key+'_'+sample.x}));
+    });
+    const points=chart.marks.selectAll('path.sample-symbol').data(symbols,point=>point.key).join('path')
+      .attr('class','sample-symbol').attr('data-series-key',point=>point.item.key)
+      .attr('d',point=>d3.symbol().type(point.item.shape || d3.symbolCircle).size(23)())
+      .attr('fill','var(--background)').attr('stroke',point=>point.item.color).attr('stroke-width',1.3)
+      .attr('pointer-events','none').raise();
+    animate(points).attr('transform',point=>'translate('+chart.x(point.sample.x)+','+chart.y(point.sample[point.item.key])+')');
     const latest = observations[observations.length-1];
-    const dots = chart.marks.selectAll('circle.latest-value').data(showCurrent && latest ? items : [],item => item.key).join('circle')
-      .attr('class','latest-value').attr('r',item => item.key === 'online' ? 3.5 : 2.5)
-      .attr('fill',item => item.color).attr('stroke','var(--background)').attr('stroke-width',1);
+    const dots = chart.marks.selectAll('circle.latest-value').data(showCurrent && latest ? paintOrder : [],item => item.key).join('circle')
+      .attr('class','latest-value').attr('r',item => item.key === 'online' ? 2.7 : 2)
+      .attr('fill',item => item.color).attr('stroke','var(--background)').attr('stroke-width',.8).order();
     if(latest) animate(dots).attr('cx',chart.x(latest.x)).attr('cy',item => chart.y(latest[item.key]));
   }
+
   function hover(chart,observations,items,xLabel) {
     const {svg,x,y,frame}=chart;
     const tip=$('tooltip');
@@ -589,28 +647,41 @@
     labels.select('title').text(group=>group.items.map(item=>item.type==='pulse' ? Number(item.strength || .025).toFixed(3)+' pulse at bus '+item.bus+' enters state x at t '+(item.t+1)+'. Its state cost is charged at t '+(item.t+1)+', on the following step.' : 'Forecast change at bus '+item.bus+' · Step '+(item.t+1)).join(' '));
   }
   function drawCost() {
-    const observations=[{x:0,online:0,static:0,causal:0},...snapshot.history.map(d=>({x:d.t,online:d.online,static:d.static,causal:d.causal}))];
+    const observations=[{x:0,...Object.fromEntries(series.map(item=>[item.key,0]))},...snapshot.history.map(d=>({x:d.t,...Object.fromEntries(series.map(item=>[item.key,d[item.key]]))}))];
     const items=series.filter(s=>visible.has(s.key));
     if ($('cost').hidden) return;
-    const chart=chartBase($('cost'),observations,items.map(s=>s.key),'Cost','Time t',140);
+    const chart=chartBase($('cost'),observations,items.map(s=>s.key),'Total cost','Time t',140);
     drawInterventions(chart);
     drawSeries(chart,observations,items);
     hover(chart,observations,items,'Step');
     const c=snapshot.cumulative;
     $('cost-detail').replaceChildren();
     for (const item of series) {
-      const group=document.createElement('span'),label=document.createElement('span'),value=document.createElement('strong');
-      group.className='pr-cost-value'; label.className='pr-cost-name';
-      label.textContent=item.label; value.textContent=d3.format('.4f')(c[item.key]);
-      group.append(label,value); $('cost-detail').append(group);
+      const row=document.createElement('tr'), label=document.createElement('th'), value=document.createElement('td'), difference=document.createElement('td');
+      const swatch=document.createElement('span'); swatch.className='pr-swatch '+item.key;
+      label.scope='row'; label.append(swatch,document.createTextNode(item.label));
+      value.textContent=d3.format('.4f')(c[item.key]);
+      value.dataset.cost=String(c[item.key]);
+      difference.textContent=item.key==='causal' ? 'Reference' : comparativeCost(c[item.key],c.causal);
+      row.dataset.method=item.key; row.append(label,value,difference); $('cost-detail').append(row);
     }
+    const scalarComparison=comparativeCost(c.online,c.scalar);
+    $('comparison-summary').textContent=c.scalar>1e-12
+      ? scalarComparison==='Equal' ? 'Adaptive and scalar costs are equal' : 'Adaptive cost is '+scalarComparison+' than scalar'
+      : 'Run to compare adaptive and scalar costs';
   }
+  function comparativeCost(value,reference) {
+    if (!(reference>1e-12)) return 'Pending';
+    const percent=100*(value-reference)/reference;
+    return Math.abs(percent)<.05 ? 'Equal' : d3.format('.1f')(Math.abs(percent))+'% '+(percent<0?'lower':'higher');
+  }
+
   function responseWindow() { return [Math.max(0,snapshot.t-30),Math.max(1,snapshot.t)]; }
   function drawStage() {
     if (!$('stage')) return;
     const domain=responseWindow();
     let observations=snapshot.history.filter(item=>(item.costTime ?? item.t-1)>=domain[0]).map(item=>({x:item.costTime ?? item.t-1,...item.stage}));
-    if(!observations.length) observations=[{x:0,online:0,static:0,causal:0}];
+    if(!observations.length) observations=[{x:0,...Object.fromEntries(series.map(item=>[item.key,0]))}];
     const items=series.filter(item=>visible.has(item.key));
     const chart=chartBase($('stage'),observations,items.map(item=>item.key),'Cost','Time t',110,{xDomain:domain});
     drawInterventions(chart); drawSeries(chart,observations,items,true); hover(chart,observations,items,'Cost at t');
@@ -633,7 +704,7 @@
       x:item.stateTime ?? item.t,
       ...Object.fromEntries(series.map(s=>[s.key,1+(item.states?.[s.key]?.[index] || 0)]))
     }));
-    if(domain[0]===0) observations.unshift({x:0,online:1,static:1,causal:1});
+    if(domain[0]===0) observations.unshift({x:0,...Object.fromEntries(series.map(item=>[item.key,1]))});
     if(!observations.length) observations=[{x:snapshot.t,...Object.fromEntries(series.map(s=>[s.key,1+snapshot.states[s.key][index]]))}];
     const items=series.filter(item=>visible.has(item.key));
     const values=observations.flatMap(item=>items.map(s=>item[s.key]));

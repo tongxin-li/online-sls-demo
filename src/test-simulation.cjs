@@ -5,7 +5,7 @@ const {Simulation, model, constants, math} = require('./simulation.js');
 const {multiply,transpose,combine,frobenius,matvec,solveSPD,eye}=math;
 const distance=(a,b)=>frobenius(combine(a,b,1,-1));
 const vectorDistance=(a,b)=>Math.hypot(...a.map((v,i)=>v-b[i]));
-const controllers=['online','static','causal'];
+const controllers=['online','scalar','static','causal'];
 const run=(sim,n)=>{for(let i=0;i<n;i++)sim.step();return sim.snapshot();};
 
 // The model is the paper's densely coupled communication experiment. It is
@@ -57,7 +57,13 @@ test('all controllers use identical disturbances and the static controller uses 
       const recovered=next.states[key].map((v,i)=>v-ax[i]-next.lastInputs[key][i]);
       assert.ok(vectorDistance(recovered,next.lastSample.disturbance)<1e-15);
     }
-    if(t<constants.warmup) assert.deepEqual(next.states.online,next.states.static);
+    if(t<constants.warmup) {
+      assert.deepEqual(next.states.online,next.states.static);
+      assert.deepEqual(next.states.scalar,next.states.static);
+      assert.deepEqual(next.lastInputs.scalar,next.lastInputs.static);
+      assert.equal(next.stage.scalar,next.stage.static);
+      assert.equal(next.scalarGain,1);
+    }
   }
 });
 
@@ -203,7 +209,7 @@ test('fault toggles never rewrite forecasts that have already entered a preview'
 });
 
 test('cost is the finite unmodified sum of quadratic stage costs with a correctly truncated final preview',()=>{
-  const sim=new Simulation(),sums={online:0,static:0,causal:0};
+  const sim=new Simulation(),sums={online:0,scalar:0,static:0,causal:0};
   for(let t=0;t<480;t++) {
     if(t===80)sim.queuePulse(8);
     if(t===160)sim.toggleFault(8);
@@ -276,4 +282,83 @@ test('seed and interventions replay exactly and snapshot arrays cannot mutate th
   const intact=sim.snapshot();assert.notEqual(intact.states.online[0],100);
   assert.notEqual(intact.costStates.online[0],100);assert.notEqual(intact.G[0][0],100);
   assert.notEqual(intact.learning.updates,1000);
+});
+
+
+test('scalar fitting minimizes the same matrix objective with the full N ridge penalty',()=>{
+  const sim=new Simulation();run(sim,30);
+  const pairs=sim.samples.slice(),stats=math.statistics(pairs);
+  let yz=0,zz=0;
+  for(const pair of pairs)for(let i=0;i<constants.N;i++) {
+    yz+=pair.y[i]*pair.z[i]/pairs.length; zz+=pair.z[i]*pair.z[i]/pairs.length;
+  }
+  const expected=(yz+constants.N*constants.ridge)/(zz+constants.N*constants.ridge);
+  const alpha=math.exactScalarGain(stats),scalar=a=>eye().map(row=>row.map(v=>a*v));
+  assert.ok(Math.abs(alpha-expected)<1e-14);
+  assert.ok(Math.abs((zz+constants.N*constants.ridge)*alpha-yz-constants.N*constants.ridge)<1e-12);
+  const optimum=math.objective(scalar(alpha),pairs);
+  for(const offset of [-.2,-.01,.01,.2]) assert.ok(math.objective(scalar(alpha+offset),pairs)>optimum);
+  assert.ok(math.objective(math.exactGain(stats),pairs)<=optimum+1e-12);
+  const snapshot=sim.step();
+  assert.ok(Math.abs(snapshot.scalarGain-alpha)<1e-14);
+  let expectedInput=matvec(model.K,snapshot.costStates.scalar);
+  snapshot.lastPreview.forEach((prediction,index)=>{
+    const ff=matvec(model.previewGains[index],prediction.forecast);
+    expectedInput=expectedInput.map((v,i)=>v+alpha*ff[i]);
+  });
+  assert.ok(vectorDistance(snapshot.lastInputs.scalar,expectedInput)<1e-15);
+});
+
+test('scalar fitting shares the same revealed window and cannot consume the current attack',()=>{
+  const clean=new Simulation(),attacked=new Simulation();run(clean,70);run(attacked,70);
+  const expected=math.exactScalarGain(math.statistics(clean.samples));
+  attacked.queuePulse(7,.03);
+  const a=clean.step(),b=attacked.step();
+  assert.equal(a.scalarGain,b.scalarGain);
+  assert.ok(Math.abs(a.scalarGain-expected)<1e-14);
+  assert.equal(a.lastTrainingSampleCount,60);
+  assert.equal(a.lastTrainingTime,69);
+  assert.notEqual(clean.step().scalarGain,attacked.step().scalarGain);
+});
+
+test('named presets alter forecast quality without altering seeds or realized disturbances',()=>{
+  const simulations=constants.forecastPresets.map(preset=>new Simulation({seed:17,preset:preset.id,horizon:50}));
+  assert.deepEqual(constants.forecastPresets.map(p=>p.id),['reliable','uniform','mixed']);
+  assert.deepEqual(new Simulation().snapshot().faults,[3,6,9,12,15,18,21,24]);
+  assert.equal(new Simulation().snapshot().preset,'mixed');
+  assert.throws(()=>new Simulation({preset:'unknown'}),RangeError);
+  const traces=[];
+  for(let t=0;t<50;t++) {
+    const snapshots=simulations.map(sim=>sim.step());
+    for(const snap of snapshots) assert.deepEqual(snap.lastSample.disturbance,snapshots[0].lastSample.disturbance);
+    const [reliable,uniform,mixed]=snapshots.map(snap=>snap.lastSample);
+    for(let i=0;i<24;i++) {
+      // Exactly the same Gaussian forecast error draw is rescaled by each preset.
+      const standardNoise=(reliable.forecast[i]-reliable.base[i])/(constants.amplitude*.05);
+      const expectedUniform=.65*reliable.base[i]+constants.amplitude*.65*standardNoise;
+      const faulty=[3,6,9,12,15,18,21,24].includes(i+1);
+      const expectedMixed=(faulty?.15:1)*reliable.base[i]+constants.amplitude*(faulty?1.6:.05)*standardNoise;
+      assert.ok(Math.abs(uniform.forecast[i]-expectedUniform)<1e-15);
+      assert.ok(Math.abs(mixed.forecast[i]-expectedMixed)<1e-15);
+    }
+    traces.push(snapshots);
+  }
+  simulations.forEach((sim,index)=>{
+    const final=sim.snapshot();sim.reset();run(sim,50);
+    assert.deepEqual(sim.snapshot(),final);
+    assert.equal(final.preset,constants.forecastPresets[index].id);
+  });
+});
+
+test('preset fault toggles modify only unexposed forecasts and reset restores the chosen preset',()=>{
+  for(const preset of constants.forecastPresets) {
+    const clean=new Simulation({preset:preset.id}),changed=new Simulation({preset:preset.id});
+    const initial=changed.snapshot();
+    changed.toggleFault(4);
+    for(let t=0;t<5;t++)assert.deepEqual(clean.step().lastSample.forecast,changed.step().lastSample.forecast);
+    const a=clean.step(),b=changed.step();
+    assert.notEqual(a.lastSample.forecast[3],b.lastSample.forecast[3]);
+    assert.deepEqual(a.lastSample.disturbance,b.lastSample.disturbance);
+    changed.reset();assert.deepEqual(changed.snapshot(),initial);
+  }
 });

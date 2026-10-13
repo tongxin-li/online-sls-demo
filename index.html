@@ -12,7 +12,7 @@
 body.research-site {
   --background:#fff; --foreground:#24352e; --primary:#245c48; --primary-foreground:#fff;
   --muted:#f4f6f2; --muted-foreground:#7c847e; --border:#e6eae4; --popover:#fff;
-  --viz-series-1:#245c48; --viz-series-2:#94a4b6; --viz-series-3:#bbb4aa;
+  --viz-series-1:#245c48; --viz-series-2:#b26a20; --viz-series-3:#845b9a; --viz-series-4:#246ba8;
   --matrix-added:#328a9c; --matrix-removed:#d39955; --attack:#c87938;
   margin:0; min-width:320px; color:var(--foreground); background:#fbfcfa;
   font:14px/1.45 'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
@@ -88,9 +88,14 @@ select { background:#fff; border:1px solid var(--border); border-radius:5px; pad
 .pr-bottomline { display:flex; align-items:center; justify-content:space-between; gap:20px; min-height:38px; }
 .pr-legend button { display:flex; align-items:center; gap:5px; padding:3px 0; background:transparent; border:0; font-size:11px; color:var(--muted-foreground); }
 .pr-legend button[aria-pressed='false'] { opacity:.35; }
-.pr-swatch { width:15px; border-top:2px solid var(--viz-series-1); }
-.pr-swatch.static { border-color:var(--viz-series-2); border-top-style:dashed; }
-.pr-swatch.causal { border-color:var(--viz-series-3); border-top-style:dotted; }
+.pr-swatch { position:relative; display:inline-block; width:21px; border-top:2px solid var(--viz-series-1); margin-right:2px; color:var(--viz-series-1); }
+.pr-swatch::after { content:""; position:absolute; width:5px; height:5px; top:-3px; left:8px; background:currentColor; border-radius:50%; }
+.pr-swatch.scalar { border-color:var(--viz-series-4); border-top-style:dashed; color:var(--viz-series-4); }
+.pr-swatch.scalar::after { border-radius:0; }
+.pr-swatch.static { border-color:var(--viz-series-2); border-top-style:dashed; color:var(--viz-series-2); }
+.pr-swatch.static::after { border-radius:0; transform:rotate(45deg); }
+.pr-swatch.causal { border-color:var(--viz-series-3); border-top-style:dotted; color:var(--viz-series-3); }
+.pr-swatch.causal::after { width:0; height:0; top:-4px; background:transparent; border:3px solid transparent; border-bottom:5px solid currentColor; border-top:0; border-radius:0; }
 #pr-event { font-size:10px; color:var(--muted-foreground); text-align:right; }
 .pr-adaptation { border-top:1px solid var(--border); }
 summary { display:flex; align-items:center; gap:8px; padding:10px 0; font-size:11px; color:var(--muted-foreground); list-style:none; }
@@ -149,6 +154,26 @@ summary span { color:#a4aba4; }
 .pr-scope { font-size:10px; color:#8c968e; }
 #pr-stage .intervention-label { fill:var(--attack); }
 @media(max-width:650px) { .pr-algorithm-flow { gap:6px; } .pr-algorithm-flow span:last-child { font-size:8px; } .pr-controlbar .pr-toolbar { gap:8px; } #pr-clock { margin-left:auto; } .research-methods-body { grid-template-columns:1fr; gap:8px; } }
+
+.pr-comparison-controls { display:flex; align-items:center; gap:12px; padding:0 0 10px; flex-wrap:wrap; }
+.pr-comparison-controls label { display:inline-flex; align-items:center; gap:8px; color:var(--muted-foreground); font-size:11px; }
+.pr-comparison-controls select { min-height:30px; padding:4px 8px; }
+.btn-compare { min-height:30px; padding:4px 10px; color:var(--primary); border-color:#cfdcd2; background:#f6f9f5; }
+.pr-cost-table { width:100%; border-collapse:collapse; margin:2px 0 5px; font-size:10px; }
+.pr-cost-table th,.pr-cost-table td { padding:3px 0; text-align:right; font-weight:400; }
+.pr-cost-table thead th { color:var(--muted-foreground); font-size:9px; padding-bottom:5px; border-bottom:1px solid var(--border); }
+.pr-cost-table th:first-child { text-align:left; }
+.pr-cost-table tbody th { color:var(--foreground); }
+.pr-cost-table tbody tr:first-child th,.pr-cost-table tbody tr:first-child td { font-weight:500; }
+.pr-cost-table tbody td:last-child { color:var(--muted-foreground); }
+.pr-cost-table .pr-swatch { width:17px; vertical-align:middle; margin-right:8px; }
+.pr-cost-table .pr-swatch::after { left:6px; }
+.pr-comparison-summary { font-size:11px; color:var(--foreground); margin:6px 0 2px; min-height:16px; }
+.pr-comparison-note,.pr-overlap-note { font-size:9px; color:var(--muted-foreground); }
+.pr-overlap-note { margin:0 0 8px; }
+.pr-legend { gap:15px; }
+@media(max-width:900px) { .pr-bottomline { flex-wrap:wrap; gap:3px; padding:6px 0; } .pr-legend { gap:11px; } }
+@media(max-width:650px) { .pr-comparison-controls { gap:8px; } .pr-comparison-controls>.pr-caption { flex-basis:100%; font-size:9px; } .pr-legend { gap:8px 14px; } .pr-cost-table { font-size:10px; } }
 
 /* Equipment marks stay decorative. The enclosing bus owns interaction. */
 .pe-host { -webkit-user-select:none; user-select:none; touch-action:manipulation; }
@@ -245,6 +270,11 @@ summary span { color:#a4aba4; }
       <button type="button" class="btn btn-attack" id="pr-pulse" aria-keyshortcuts="D"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14 2 5 14h6l-1 8 9-13h-6z"/></svg><span id="pr-pulse-label">Attack bus 6</span></button>
     </div>
   </div>
+  <div class="pr-comparison-controls">
+    <label for="pr-preset">Forecasts <select id="pr-preset" aria-label="Forecast preset"><option value="reliable">Reliable forecasts</option><option value="uniform">Uniform noise</option><option value="mixed" selected>Mixed reliability</option></select></label>
+    <button type="button" class="btn btn-compare" id="pr-compare" title="Advance 180 additional control samples and keep all accumulated costs">Run 180 steps</button>
+    <span class="pr-caption">Changing forecasts resets the experiment</span>
+  </div>
   <div class="pr-mission"><span><span class="pr-status-dot" id="pr-voltage-status" aria-hidden="true"></span>State reference <strong>1.00</strong><span class="pr-target"> · Target 0.95 to 1.05</span></span><span id="pr-voltage-range" class="tabular-nums"></span></div>
   <div class="pr-dashboard">
     <section class="pr-panel pr-network-panel" aria-labelledby="pr-network-title">
@@ -266,8 +296,8 @@ summary span { color:#a4aba4; }
       <div id="pr-stage-detail" class="pr-panel-foot tabular-nums"></div>
     </section>
     <section class="pr-panel pr-learning-panel" aria-labelledby="pr-learning-title">
-      <div class="pr-subhead"><h2 id="pr-learning-title">Inside the controller</h2><select id="pr-view" aria-label="Controller view"><option value="learning">Learning</option><option value="cost">Total cost</option></select></div>
-      <div id="pr-learning-content">
+      <div class="pr-subhead"><h2 id="pr-learning-title">Cost comparison</h2><select id="pr-view" aria-label="Controller view"><option value="cost" selected>Cost comparison</option><option value="learning">Learning</option></select></div>
+      <div id="pr-learning-content" hidden>
         <div class="pr-algorithm-flow" id="pr-learning-flow" aria-label="Shared matrix learning cycle">
           <div><span class="pr-flow-index">01</span><strong>Forecast</strong><span id="pr-flow-predict">5 steps</span></div>
           <div><span class="pr-flow-index">02</span><strong>Control</strong><span id="pr-flow-control">Feedback + preview</span></div>
@@ -278,13 +308,14 @@ summary span { color:#a4aba4; }
         <svg class="pr-chart" id="pr-convergence" role="img" aria-label="Learning diagnostic over time"></svg>
         <p id="pr-mode-note" class="pr-caption"></p>
       </div>
-      <div id="pr-cost-content" hidden><svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative quadratic cost of three controllers"></svg><div id="pr-cost-detail" class="pr-cost-totals tabular-nums"></div><p class="pr-caption">Identical disturbances · Lower is better</p></div>
+      <div id="pr-cost-content"><svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative quadratic cost of the adaptive method and three baselines"></svg><table class="pr-cost-table tabular-nums" aria-label="Cumulative controller costs"><thead><tr><th scope="col">Method</th><th scope="col">Total cost</th><th scope="col">vs feedback</th></tr></thead><tbody id="pr-cost-detail"></tbody></table><p id="pr-comparison-summary" class="pr-comparison-summary" aria-live="polite">Run to compare adaptive and scalar costs</p><p class="pr-caption pr-comparison-note">All samples and pulses included · Lower is better</p></div>
     </section>
   </div>
   <div class="pr-bottomline">
-    <div class="pr-legend" aria-label="Visible cost series"><button type="button" data-series="online" aria-pressed="true"><span class="pr-swatch"></span>Adaptive</button><button type="button" data-series="static" aria-pressed="true"><span class="pr-swatch static"></span>Fixed prediction</button><button type="button" data-series="causal" aria-pressed="true"><span class="pr-swatch causal"></span>Feedback only</button></div>
+    <div class="pr-legend" aria-label="Adaptive method and three baselines"><button type="button" data-series="online" aria-pressed="true"><span class="pr-swatch online"></span>Adaptive</button><button type="button" data-series="scalar" aria-pressed="true"><span class="pr-swatch scalar"></span>Scalar adaptation</button><button type="button" data-series="static" aria-pressed="true"><span class="pr-swatch static"></span>Fixed prediction</button><button type="button" data-series="causal" aria-pressed="true"><span class="pr-swatch causal"></span>Feedback only</button></div>
     <span id="pr-event" role="status" aria-live="polite">Ready · Space to run</span>
   </div>
+  <p class="pr-overlap-note">1 adaptive method + 3 baselines · Prediction curves overlap before learning at t 30</p>
   <details class="pr-adaptation" id="pr-adaptation">
     <summary>Experiment settings <span aria-hidden="true">+</span></summary>
     <div class="pr-settings"><label>Bus <select id="pr-bus" aria-label="Selected bus"></select></label><button type="button" class="btn" id="pr-fault">Repair forecast</button><button type="button" class="btn" id="pr-reference">Set reference</button><label class="form-check"><input type="checkbox" id="pr-all-links">All prediction links</label></div>
@@ -298,7 +329,7 @@ summary span { color:#a4aba4; }
 <footer class="research-footer">
   <details class="research-methods" id="about-demo"><summary>Dynamics and relation to the paper <span aria-hidden="true">+</span></summary><div class="research-methods-body">
     <section><h3>Synthetic benchmark dynamics</h3><div class="pr-equation">xₜ₊₁ = Axₜ + uₜ + wₜ &nbsp; · &nbsp; yₜ = 1 + xₜ</div><p>A = 0.4I + 0.58D<sup>−½</sup>WD<sup>−½</sup>, where Wᵢⱼ = exp(−dᵢⱼ / 2) for different buses, Wᵢᵢ = 0, and D contains row sums of W. This reproduces the paper’s synthetic communication benchmark. A is based on graph distance, not electrical impedance. Every node has an unconstrained direct input B = I. There is no power flow equation, power balance, fixed slack bus or inverter capability model. The displayed value y is an abstract normalized state, not a computed physical voltage.</p><p>The stage cost is cₜ = 35‖xₜ‖² + 0.08‖uₜ‖². An unexpected pulse enters xₜ₊₁, so its state cost appears at the following sample. The plots preserve that timing.</p><p>Equipment artwork gives different decay profiles to abstract additive disturbances. A click does not represent a specified load change in kW or an inverter response in kvar. Repeated clicks add disturbances, including several at the same paused step. States are never clipped. The target band is illustrative.</p></section>
-    <section><h3>What is being learned</h3><p>This is a shared matrix experimental variant. A fixed LQR feedback gain regulates the abstract state. A learned matrix G adjusts five previewed disturbance samples, using the latest 60 revealed samples and starting at step 30. The displayed links rank prediction gains. They are recommendations only. The illustrated tree stays fixed and the dense controller continues to use all sources.</p><div class="pr-equation">Forecast → control → observe wₜ → fit G → next control</div><p>Live data keeps changing, so gain changes need not decay monotonically. Freeze data holds the plant and fits the same ridge objective repeatedly, showing error relative to its exact minimizer.</p><h3>Algorithm 1 in the paper</h3><div class="pr-equation">Φ̂(t+1) = Π<sub>F<sub>d</sub></sub>[Φ̂(t) − η∇h̃<sub>t−d</sub>(Φ̂(t−d))]</div><p>The full algorithm updates completed FIR response windows with a delayed gradient and projection. Its theorem concerns a fixed completed prefix. This browser experiment uses a restricted shared gain and a declared ridge fit, rather than reproducing that full update or its convergence guarantee.</p></section>
+    <section><h3>What is being learned</h3><p>This is a shared matrix experimental variant. A fixed LQR feedback gain regulates the abstract state. A learned matrix G adjusts five previewed disturbance samples, using the latest 60 revealed samples and starting at step 30. The displayed links rank prediction gains. They are recommendations only. The illustrated tree stays fixed and the dense controller continues to use all sources.</p><div class="pr-equation">Forecast → control → observe wₜ → fit G → next control</div><p>Live data keeps changing, so gain changes need not decay monotonically. Freeze data holds the plant and fits the same ridge objective repeatedly, showing error relative to its exact minimizer.</p><h3>Four controllers</h3><p>Adaptive fits a matrix. Scalar adaptation fits one common multiplier using the same objective and observations. Fixed prediction keeps its original gains. Feedback only ignores forecasts. The three predictive controllers coincide until learning starts at step 30. All four receive identical disturbances, including every clicked pulse.</p><p>Reliable, uniformly corrupted and mixed reliability forecasts test different conditions. Unexpected pulses are absent from every forecast and test recovery. They do not directly test the benefit of recognizing unreliable prediction channels. The comparison includes every sample and reports higher costs as well as lower ones. No controller is guaranteed to win.</p><h3>Algorithm 1 in the paper</h3><div class="pr-equation">Φ̂(t+1) = Π<sub>F<sub>d</sub></sub>[Φ̂(t) − η∇h̃<sub>t−d</sub>(Φ̂(t−d))]</div><p>The full algorithm updates completed FIR response windows with a delayed gradient and projection. Its theorem concerns a fixed completed prefix. This browser experiment uses a restricted shared gain and a declared ridge fit, rather than reproducing that full update or its convergence guarantee.</p></section>
   </div></details><span class="research-colophon">O PredSLS · Shared matrix experiment</span>
 </footer>
 
@@ -318,6 +349,17 @@ summary span { color:#a4aba4; }
   'use strict';
 
   const N = 24;
+  const CONTROLLERS = ['online','scalar','static','causal'];
+  // Every preset uses the same latent disturbance process and Gaussian draws.
+  // Only the forecast channel gain and error standard deviation change.
+  const FORECAST_PRESETS = [
+    {id:'reliable',label:'Reliable forecasts',faultBuses:[],gain:1,noise:0.05,
+      faultyGain:0.15,faultyNoise:1.6},
+    {id:'uniform',label:'Uniform corruption',faultBuses:Array.from({length:N},(_,i)=>i+1),
+      gain:1,noise:0.05,faultyGain:0.65,faultyNoise:0.65},
+    {id:'mixed',label:'Mixed reliability',faultBuses:[3,6,9,12,15,18,21,24],
+      gain:1,noise:0.05,faultyGain:0.15,faultyNoise:1.6}
+  ];
   const AMPLITUDE = 0.006;
   const RAW_RIDGE = 1.27e-5;
   // Mean squared forecast loss is normalized by AMPLITUDE squared. The raw
@@ -462,6 +504,12 @@ summary span { color:#a4aba4; }
     return {S,T,stepSize:0.95/normInf(S),samples};
   }
   function exactGain(stats) { return transpose(solveSPD(stats.S,transpose(stats.T))); }
+  function exactScalarGain(stats) {
+    // Restrict the SAME objective to G=alpha I. Its ridge penalty is
+    // lambda*N*(alpha-1)^2/2, hence the N*lambda term in both traces.
+    const trace=a=>a.reduce((sum,row,i)=>sum+row[i],0);
+    return trace(stats.T)/trace(stats.S);
+  }
   function gradientSteps(g,stats,count) {
     let result=g;
     for (let k=0;k<count;k++) {
@@ -502,18 +550,22 @@ summary span { color:#a4aba4; }
 
   class Simulation {
     constructor(options={}) {
+      const presetId=options.preset===undefined?'mixed':options.preset;
+      const preset=FORECAST_PRESETS.find(item=>item.id===presetId);
+      if (!preset) throw new RangeError('Forecast preset must be reliable, uniform, or mixed');
+      this.preset=preset;
       this.options={seed:options.seed===undefined?20261013:options.seed,
-        horizon:options.horizon===undefined?480:options.horizon,
-        faultBuses:options.faultBuses===undefined?[3,6,9,12,15,18,21,24]:options.faultBuses.slice()};
+        horizon:options.horizon===undefined?480:options.horizon,preset:preset.id,
+        faultBuses:options.faultBuses===undefined?preset.faultBuses.slice():options.faultBuses.slice()};
       if (!Number.isInteger(this.options.horizon)||this.options.horizon<1) throw new Error('Invalid horizon');
       this.reset();
     }
     reset() {
       this.random=seededRandom(this.options.seed);
-      this.t=0; this.mode='running'; this.G=eye();
-      this.states={online:Array(N).fill(0),static:Array(N).fill(0),causal:Array(N).fill(0)};
-      this.cumulative={online:0,static:0,causal:0};
-      this.stage={online:0,static:0,causal:0};
+      this.t=0; this.mode='running'; this.G=eye(); this.scalarGain=1;
+      this.states=Object.fromEntries(CONTROLLERS.map(key=>[key,Array(N).fill(0)]));
+      this.cumulative=Object.fromEntries(CONTROLLERS.map(key=>[key,0]));
+      this.stage=Object.fromEntries(CONTROLLERS.map(key=>[key,0]));
       this.faults=new Set(this.options.faultBuses.map(bus=>this.checkBus(bus)));
       this.latent=Array.from({length:N+1},()=>this.random.normal());
       this.pulses=[]; this.samples=[]; this.history=[]; this.eventLog=[];
@@ -561,7 +613,8 @@ summary span { color:#a4aba4; }
         const base=Array.from({length:N},(_,i)=>AMPLITUDE*(0.35*this.latent[0]+0.65*this.latent[i+1]));
         const forecast=base.map((v,i)=>{
           const faulty=this.faults.has(i+1);
-          return (faulty?0.15:1)*v+AMPLITUDE*(faulty?1.6:0.05)*this.random.normal();
+          return (faulty?this.preset.faultyGain:this.preset.gain)*v
+            +AMPLITUDE*(faulty?this.preset.faultyNoise:this.preset.noise)*this.random.normal();
         });
         this.forecasts.push(deepFreeze({t:this.forecasts.length,base,forecast}));
       }
@@ -592,6 +645,7 @@ summary span { color:#a4aba4; }
         const stats=statistics(this.samples);
         const beforeLoss=objective(this.G,this.samples);
         this.updateGain(exactGain(stats));
+        this.scalarGain=exactScalarGain(stats);
         this.learning={...this.learning,updates:this.learning.updates+1,
           windowStart:this.samples[0].t,windowEnd:this.samples.at(-1).t,
           windowSize:this.samples.length,beforeLoss,afterLoss:objective(this.G,this.samples),
@@ -612,12 +666,13 @@ summary span { color:#a4aba4; }
       this.pulses=this.pulses.filter(event=>event.age<event.steps);
       const sample=deepFreeze({t:this.t,forecast,disturbance,base,pulse,
         z:forecast.map(v=>v/AMPLITUDE),y:disturbance.map(v=>v/AMPLITUDE)});
-      const preview={online:Array(N).fill(0),static:Array(N).fill(0),causal:Array(N).fill(0)};
+      const preview=Object.fromEntries(CONTROLLERS.map(key=>[key,Array(N).fill(0)]));
       this.lastPreview.forEach((prediction,index)=>{
         const staticInput=matvec(model.previewGains[index],prediction.forecast);
         const adaptiveInput=matvec(model.previewGains[index],matvec(this.G,prediction.forecast));
         for(let i=0;i<N;i++) {
           preview.online[i]+=adaptiveInput[i]; preview.static[i]+=staticInput[i];
+          preview.scalar[i]+=this.scalarGain*staticInput[i];
         }
       });
       const calibrated=matvec(this.G,forecast);
@@ -625,7 +680,7 @@ summary span { color:#a4aba4; }
       this.learning.calibratedRms=Math.sqrt(squared(calibrated.map((v,i)=>v-disturbance[i]))/N);
       this.costStates=Object.fromEntries(Object.entries(this.states).map(([k,v])=>[k,v.slice()]));
       const inputs={}, rms={};
-      for (const key of ['online','static','causal']) {
+      for (const key of CONTROLLERS) {
         const x=this.states[key], feedback=matvec(model.K,x);
         const u=feedback.map((v,i)=>v+preview[key][i]);
         this.stage[key]=35*squared(x)+0.08*squared(u);
@@ -687,6 +742,7 @@ summary span { color:#a4aba4; }
     snapshot() {
       return {t:this.t,costTime:this.lastSample?this.lastSample.t:null,stateTime:this.t,
         horizon:this.options.horizon,mode:this.mode,seed:this.options.seed,
+        preset:this.options.preset,presetLabel:this.preset.label,scalarGain:this.scalarGain,
         costStates:Object.fromEntries(Object.entries(this.costStates).map(([k,v])=>[k,v.slice()])),
         learning:{...this.learning},lastPreview:this.lastPreview.slice(),
         pendingPulses:this.pulses.filter(event=>event.age===0).map(event=>({...event})),
@@ -708,9 +764,10 @@ summary span { color:#a4aba4; }
 
   return {Simulation,model,constants:deepFreeze({N,edges:EDGES,amplitude:AMPLITUDE,
     ridge:RIDGE,rawRidge:RAW_RIDGE,preview:PREVIEW,window:WINDOW,warmup:WARMUP,
-    busProfiles:BUS_PROFILES,tolerance:TOLERANCE,horizon:480,
+    busProfiles:BUS_PROFILES,controllers:CONTROLLERS,forecastPresets:FORECAST_PRESETS,
+    tolerance:TOLERANCE,horizon:480,
     pulseDefault:PULSE_DEFAULT,pulseMin:PULSE_MIN,pulseMax:PULSE_MAX}),
-    math:{zeros,eye,transpose,multiply,matvec,combine,frobenius,normInf,solveSPD,objective,statistics,exactGain,recommendations}};
+    math:{zeros,eye,transpose,multiply,matvec,combine,frobenius,normInf,solveSPD,objective,statistics,exactGain,exactScalarGain,recommendations}};
 });
 </script>
 <script>/* Native SVG equipment for the power network.
@@ -865,15 +922,17 @@ summary span { color:#a4aba4; }
     return;
   }
   const d3 = window.d3;
-  const simulation = new PowerDemo.Simulation();
+  let simulation = new PowerDemo.Simulation({preset:'mixed'});
   const series = [
-    { key:'online', label:'Adaptive', color:'var(--viz-series-1)', dash:null },
-    { key:'static', label:'Fixed prediction', color:'var(--viz-series-2)', dash:'7 4' },
-    { key:'causal', label:'Feedback only', color:'var(--viz-series-3)', dash:'2 4' }
+    { key:'online', label:'Adaptive', color:'var(--viz-series-1)', dash:null, shape:d3.symbolCircle },
+    { key:'scalar', label:'Scalar adaptation', color:'var(--viz-series-4)', dash:'8 3', shape:d3.symbolSquare },
+    { key:'static', label:'Fixed prediction', color:'var(--viz-series-2)', dash:'5 3 1 3', shape:d3.symbolDiamond },
+    { key:'causal', label:'Feedback only', color:'var(--viz-series-3)', dash:'1 4', shape:d3.symbolTriangle }
   ];
   const visible = new Set(series.map(s => s.key));
   let selectedBus = 6;
   let playing = false;
+  let comparing = false;
   let timer = null;
   let snapshot = simulation.snapshot();
   let journal = [];
@@ -934,13 +993,13 @@ summary span { color:#a4aba4; }
     if (!window.openai?.setWidgetState) return;
     const state = {
       modelContent: { scenario:'Synthetic 24 node network control', variant:'Shared response calibration with fixed graph and deployed links', step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
-      privateContent: { version:4, pulseStrength:$('strength').value, t:journal.length <= 2000 ? snapshot.t : 0, journal:journal.length <= 2000 ? journal : [], selectedBus, speed:$('speed').value, allLinks:$('all-links').checked, fitSteps:journal.length <= 2000 ? fitSteps : 0, fitting:journal.length <= 2000 && isFit() }
+      privateContent: { version:5, preset:snapshot.preset, view:$('view').value, pulseStrength:$('strength').value, t:journal.length <= 2000 ? snapshot.t : 0, journal:journal.length <= 2000 ? journal : [], selectedBus, speed:$('speed').value, allLinks:$('all-links').checked, fitSteps:journal.length <= 2000 ? fitSteps : 0, fitting:journal.length <= 2000 && isFit() }
     };
     window.openai.setWidgetState(state).catch(() => {});
   }
   function hydrate(saved) {
     const data = saved?.privateContent;
-    if (restored || !data || data.version !== 4) return;
+    if (restored || !data || data.version !== 5) return;
     restored = true;
     selectedBus = Math.max(1, Math.min(24, Number(data.selectedBus) || 6));
     $('bus').value = String(selectedBus);
@@ -949,7 +1008,10 @@ summary span { color:#a4aba4; }
     $('all-links').checked = !!data.allLinks;
     const items = Array.isArray(data.journal) ? data.journal.slice(0,2000) : [];
     const t = Math.max(0, Math.min(100000, Math.floor(Number(data.t) || 0)));
-    simulation.reset();
+    const preset=['reliable','uniform','mixed'].includes(data.preset) ? data.preset : 'mixed';
+    simulation=new PowerDemo.Simulation({preset});
+    $('preset').value=preset;
+    $('view').value=data.view==='learning' ? 'learning' : 'cost';
     journal = [];
     for (let step = 0; step <= t; step++) {
       if (simulation.mode === 'completed') simulation.extend();
@@ -1015,6 +1077,7 @@ summary span { color:#a4aba4; }
     actionNote('Click a bus to add a state pulse.');
   }
   function toggleRun() {
+    if (comparing) return;
     if (playing) { stop(); announce('Paused'); save(); }
     else {
       if (snapshot.mode === 'completed') { simulation.extend(); snapshot=simulation.snapshot(); }
@@ -1027,13 +1090,40 @@ summary span { color:#a4aba4; }
     render();
   }
   $('run').addEventListener('click', toggleRun);
+  $('preset').addEventListener('change', () => {
+    stop(); simulation=new PowerDemo.Simulation({preset:$('preset').value});
+    resetExperiment(); $('view').value='cost';
+    announce(snapshot.presetLabel+' · Reset to t 0'); render(); save();
+  });
+  $('compare').addEventListener('click', async () => {
+    if (comparing) return;
+    stop(); resumePlant(); comparing=true; $('view').value='cost';
+    const start=snapshot.t;
+    try {
+      for (let done=0; done<180; done+=12) {
+        // Yield between batches so progress and controls remain responsive.
+        renderControls();
+        await new Promise(resolve=>setTimeout(resolve,0));
+        for (let k=0;k<12;k++) {
+          if (simulation.mode==='completed') simulation.extend();
+          simulation.step();
+        }
+        snapshot=simulation.snapshot();
+        announce('Comparing '+(snapshot.t-start)+' / 180 steps');
+        if ((done+12)%36===0) render();
+      }
+      announce('180 steps added · t = '+snapshot.t);
+    } finally {
+      comparing=false; render(); save();
+    }
+  });
   $('step').addEventListener('click', () => { stop(); if(snapshot.mode==='completed'){simulation.extend();snapshot=simulation.snapshot();} tick(); save(); });
   $('restart').addEventListener('click', () => {
     resetExperiment(); announce('Ready'); render(); save();
   });
   $('speed').addEventListener('change', () => { if (playing) { clearTimeout(timer); schedule(); } save(); });
   $('strength').addEventListener('change', () => { drawNetwork(); save(); });
-  if ($('view')) $('view').addEventListener('change', () => { renderLearningView(); drawConvergence(); drawCost(); });
+  if ($('view')) $('view').addEventListener('change', () => { renderLearningView(); drawConvergence(); drawCost(); save(); });
   $('bus').addEventListener('change', () => selectBus(Number($('bus').value)));
   $('all-links').addEventListener('change', () => { drawNetwork(); save(); });
   if ($('reference')) $('reference').addEventListener('click', () => {
@@ -1048,8 +1138,9 @@ summary span { color:#a4aba4; }
     return {queued,active:events.some(item=>item.age>0),
       id:latest ? latest.t+'_'+applied.length : null};
   }
-  function canAttack() { return true; }
+  function canAttack() { return !comparing; }
   function pulse(bus = selectedBus) {
+    if (comparing) return;
     // A click schedules an unexpected disturbance for the next control sample.
     // It never advances plant time or removes an earlier attack.
     resumePlant();
@@ -1070,6 +1161,7 @@ summary span { color:#a4aba4; }
     render(); save();
   }
   function fault() {
+    if (comparing) return;
     resumePlant();
     captureMatrixReference();
     simulation.toggleFault(selectedBus); journal.push({t:snapshot.t,type:'fault',bus:selectedBus});
@@ -1116,6 +1208,7 @@ summary span { color:#a4aba4; }
     if ($('cost')) { $('cost').hidden=!showCost; $('cost').style.display=showCost?'':'none'; }
     if ($('convergence')) { $('convergence').hidden=showCost; $('convergence').style.display=showCost?'none':''; }
     if ($('learning-flow')) $('learning-flow').hidden=showCost;
+    if ($('learning-title')) $('learning-title').textContent=showCost ? 'Cost comparison' : 'Inside the controller';
     if ($('learning-kind')) $('learning-kind').textContent=showCost ? 'Accumulated quadratic cost' : isFit() ? 'Frozen data · Solution error' : 'Live data · Gain update size';
   }
   function renderControls() {
@@ -1123,15 +1216,19 @@ summary span { color:#a4aba4; }
     $('clock').textContent='t = '+snapshot.t;
     $('learning').textContent=frozen?'Plant held · '+snapshot.mode:snapshot.t<30?'Learning begins at t 30':'Learning from revealed samples';
     $('run').textContent=playing?'Pause':frozen && snapshot.mode!=='converged'?'Fit':'Run';
-    $('run').disabled=false;
+    $('run').disabled=comparing;
+    $('compare').disabled=comparing;
+    $('compare').textContent=comparing ? 'Running…' : 'Run 180 steps';
+    $('preset').disabled=comparing;
+    $('restart').disabled=comparing;
     $('run').setAttribute('aria-label',playing?'Pause simulation':frozen?'Run frozen fit':'Run simulation');
     $('run').setAttribute('aria-pressed',String(playing));
     if ($('pulse-label')) $('pulse-label').textContent='Attack bus '+selectedBus;
     $('step').textContent=frozen?'One fit step':'Step';
-    $('step').disabled=snapshot.mode==='converged';
+    $('step').disabled=comparing || snapshot.mode==='converged';
     $('freeze').textContent=frozen?'Return to simulation':'Freeze and converge';
-    $('freeze').disabled=!snapshot.canFreeze;
-    $('pulse').disabled=false; $('strength').disabled=false; $('fault').disabled=false;
+    $('freeze').disabled=comparing || !snapshot.canFreeze;
+    $('pulse').disabled=comparing; $('strength').disabled=comparing; $('fault').disabled=comparing;
     $('fault').textContent=(snapshot.faults.includes(selectedBus)?'Repair':'Corrupt')+' forecast';
     $('fit-title').textContent=frozen?'Convergence on frozen data':'Online adaptation';
     $('fit-detail').textContent=frozen?'Error '+d3.format('.2~g')(100*(snapshot.fitError || 0))+'%':snapshot.t<30?'Learning begins at t 30':'Rolling data changes the target';
@@ -1355,7 +1452,7 @@ summary span { color:#a4aba4; }
     const [xmin,xmax]=d3.extent(observations,d=>d.x);
     const [ymin,ymax]=d3.extent(observations.flatMap(d=>keys.map(k=>d[k])).filter(Number.isFinite));
     const yl=Math.min(0,ymin || 0);
-    const yh=Math.max(yl + 1e-6,ymax || 0);
+    const yh=Number.isFinite(ymax) && ymax>yl ? ymax : yl+1;
     const pad=(yh-yl)*.1;
     const x=d3.scaleLinear().domain(options.xDomain || [xmin || 0,(xmax === xmin ? (xmin || 0)+1 : xmax) || 1]).range([frame.x+2,frame.x+frame.w-2]);
     const y=d3.scaleLinear().domain(options.yDomain || [yl,yh+pad]).range([frame.y+frame.h-2,frame.y+2]);
@@ -1371,20 +1468,38 @@ summary span { color:#a4aba4; }
     return {svg,marks,x,y,frame,width,height};
   }
   function drawSeries(chart, observations, items, showCurrent = false) {
-    const lines = chart.marks.selectAll('path.data-series').data(items,item => item.key).join(
+    // Put the adaptive curve last while preserving exact overlaps and sample values.
+    const paintOrder=items.filter(item=>item.key!=='online').concat(items.filter(item=>item.key==='online'));
+    const lines = chart.marks.selectAll('path.data-series').data(paintOrder,item => item.key).join(
       enter => enter.append('path').attr('class','data-series').attr('fill','none'),
       update => update,
       exit => exit.remove()
-    ).attr('data-series-key',item => item.key).attr('stroke',item => item.color)
-      .attr('stroke-width',item => item.key === 'online' ? 2.3 : 1.65).attr('stroke-dasharray',item => item.dash || null)
+    ).order().attr('data-series-key',item => item.key).attr('stroke',item => item.color)
+      .attr('stroke-width',item => item.key === 'online' ? 2.2 : 1.8).attr('stroke-dasharray',item => item.dash || null)
       .attr('stroke-linejoin','round').attr('stroke-linecap','round');
     animate(lines).attr('d',item => d3.line().defined(d => Number.isFinite(d[item.key])).x(d=>chart.x(d.x)).y(d=>chart.y(d[item.key]))(observations));
+    // Different symbols occupy different actual samples, exposing coincident curves
+    // without shifting their coordinates or inventing numerical separation.
+    const stride=Math.max(8,Math.ceil(observations.length/4));
+    const symbols=items.flatMap(item=> {
+      const index=series.findIndex(s=>s.key===item.key);
+      if(index<0 || observations.length<2) return [];
+      const offset=index*2;
+      return observations.filter((sample,i)=>i%stride===offset && Number.isFinite(sample[item.key])).map(sample=>({item,sample,key:item.key+'_'+sample.x}));
+    });
+    const points=chart.marks.selectAll('path.sample-symbol').data(symbols,point=>point.key).join('path')
+      .attr('class','sample-symbol').attr('data-series-key',point=>point.item.key)
+      .attr('d',point=>d3.symbol().type(point.item.shape || d3.symbolCircle).size(23)())
+      .attr('fill','var(--background)').attr('stroke',point=>point.item.color).attr('stroke-width',1.3)
+      .attr('pointer-events','none').raise();
+    animate(points).attr('transform',point=>'translate('+chart.x(point.sample.x)+','+chart.y(point.sample[point.item.key])+')');
     const latest = observations[observations.length-1];
-    const dots = chart.marks.selectAll('circle.latest-value').data(showCurrent && latest ? items : [],item => item.key).join('circle')
-      .attr('class','latest-value').attr('r',item => item.key === 'online' ? 3.5 : 2.5)
-      .attr('fill',item => item.color).attr('stroke','var(--background)').attr('stroke-width',1);
+    const dots = chart.marks.selectAll('circle.latest-value').data(showCurrent && latest ? paintOrder : [],item => item.key).join('circle')
+      .attr('class','latest-value').attr('r',item => item.key === 'online' ? 2.7 : 2)
+      .attr('fill',item => item.color).attr('stroke','var(--background)').attr('stroke-width',.8).order();
     if(latest) animate(dots).attr('cx',chart.x(latest.x)).attr('cy',item => chart.y(latest[item.key]));
   }
+
   function hover(chart,observations,items,xLabel) {
     const {svg,x,y,frame}=chart;
     const tip=$('tooltip');
@@ -1444,28 +1559,41 @@ summary span { color:#a4aba4; }
     labels.select('title').text(group=>group.items.map(item=>item.type==='pulse' ? Number(item.strength || .025).toFixed(3)+' pulse at bus '+item.bus+' enters state x at t '+(item.t+1)+'. Its state cost is charged at t '+(item.t+1)+', on the following step.' : 'Forecast change at bus '+item.bus+' · Step '+(item.t+1)).join(' '));
   }
   function drawCost() {
-    const observations=[{x:0,online:0,static:0,causal:0},...snapshot.history.map(d=>({x:d.t,online:d.online,static:d.static,causal:d.causal}))];
+    const observations=[{x:0,...Object.fromEntries(series.map(item=>[item.key,0]))},...snapshot.history.map(d=>({x:d.t,...Object.fromEntries(series.map(item=>[item.key,d[item.key]]))}))];
     const items=series.filter(s=>visible.has(s.key));
     if ($('cost').hidden) return;
-    const chart=chartBase($('cost'),observations,items.map(s=>s.key),'Cost','Time t',140);
+    const chart=chartBase($('cost'),observations,items.map(s=>s.key),'Total cost','Time t',140);
     drawInterventions(chart);
     drawSeries(chart,observations,items);
     hover(chart,observations,items,'Step');
     const c=snapshot.cumulative;
     $('cost-detail').replaceChildren();
     for (const item of series) {
-      const group=document.createElement('span'),label=document.createElement('span'),value=document.createElement('strong');
-      group.className='pr-cost-value'; label.className='pr-cost-name';
-      label.textContent=item.label; value.textContent=d3.format('.4f')(c[item.key]);
-      group.append(label,value); $('cost-detail').append(group);
+      const row=document.createElement('tr'), label=document.createElement('th'), value=document.createElement('td'), difference=document.createElement('td');
+      const swatch=document.createElement('span'); swatch.className='pr-swatch '+item.key;
+      label.scope='row'; label.append(swatch,document.createTextNode(item.label));
+      value.textContent=d3.format('.4f')(c[item.key]);
+      value.dataset.cost=String(c[item.key]);
+      difference.textContent=item.key==='causal' ? 'Reference' : comparativeCost(c[item.key],c.causal);
+      row.dataset.method=item.key; row.append(label,value,difference); $('cost-detail').append(row);
     }
+    const scalarComparison=comparativeCost(c.online,c.scalar);
+    $('comparison-summary').textContent=c.scalar>1e-12
+      ? scalarComparison==='Equal' ? 'Adaptive and scalar costs are equal' : 'Adaptive cost is '+scalarComparison+' than scalar'
+      : 'Run to compare adaptive and scalar costs';
   }
+  function comparativeCost(value,reference) {
+    if (!(reference>1e-12)) return 'Pending';
+    const percent=100*(value-reference)/reference;
+    return Math.abs(percent)<.05 ? 'Equal' : d3.format('.1f')(Math.abs(percent))+'% '+(percent<0?'lower':'higher');
+  }
+
   function responseWindow() { return [Math.max(0,snapshot.t-30),Math.max(1,snapshot.t)]; }
   function drawStage() {
     if (!$('stage')) return;
     const domain=responseWindow();
     let observations=snapshot.history.filter(item=>(item.costTime ?? item.t-1)>=domain[0]).map(item=>({x:item.costTime ?? item.t-1,...item.stage}));
-    if(!observations.length) observations=[{x:0,online:0,static:0,causal:0}];
+    if(!observations.length) observations=[{x:0,...Object.fromEntries(series.map(item=>[item.key,0]))}];
     const items=series.filter(item=>visible.has(item.key));
     const chart=chartBase($('stage'),observations,items.map(item=>item.key),'Cost','Time t',110,{xDomain:domain});
     drawInterventions(chart); drawSeries(chart,observations,items,true); hover(chart,observations,items,'Cost at t');
@@ -1488,7 +1616,7 @@ summary span { color:#a4aba4; }
       x:item.stateTime ?? item.t,
       ...Object.fromEntries(series.map(s=>[s.key,1+(item.states?.[s.key]?.[index] || 0)]))
     }));
-    if(domain[0]===0) observations.unshift({x:0,online:1,static:1,causal:1});
+    if(domain[0]===0) observations.unshift({x:0,...Object.fromEntries(series.map(item=>[item.key,1]))});
     if(!observations.length) observations=[{x:snapshot.t,...Object.fromEntries(series.map(s=>[s.key,1+snapshot.states[s.key][index]]))}];
     const items=series.filter(item=>visible.has(item.key));
     const values=observations.flatMap(item=>items.map(s=>item[s.key]));

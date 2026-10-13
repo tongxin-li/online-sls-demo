@@ -40,6 +40,27 @@ The visible cycle shows a forecast, the applied control, the recovered disturban
 
 The graph and matrix rank three remote sources per receiver using prediction gain magnitude. They are recommendations. They do not change the illustrated tree or the deployed dense controller. The paper's offline discovery and resynthesis experiment is not reproduced here.
 
+## Controller comparison
+
+The demo now compares Adaptive with three baselines
+
+| Controller | Prediction calibration |
+| --- | --- |
+| Adaptive | Full shared matrix G fitted from past observations |
+| Scalar adaptation | One shared scalar alpha fitted from the same observations |
+| Fixed prediction | Identity calibration throughout the run |
+| Feedback only | No prediction input |
+
+Scalar uses the same mean ridge objective restricted to G = alpha I. If S and T are the regularized normalized covariance and cross covariance, alpha = trace(T) / trace(S). Equivalently, both the numerator and denominator include N times the ridge coefficient. Both adaptive methods start at t = 30 and use the same preceding 60 samples.
+
+Adaptive, Scalar adaptation and Fixed prediction are identical before learning begins. The plot preserves exact overlap. Distinct colors, dash patterns, sample symbols and numerical cost rows identify the controllers without changing their values.
+
+The forecast presets use a common latent disturbance process and identical Gaussian draws for any given seed. Reliable forecasts use gain 1 and noise scale 0.05 at all sources. Uniform corruption uses gain 0.65 and noise scale 0.65 at all sources. Mixed reliability retains the previous demo setup, with gain 0.15 and noise scale 1.6 at buses 3, 6, 9, 12, 15, 18, 21 and 24, and reliable forecasts elsewhere. These parameters follow the types of conditions in the manuscript. This browser experiment is not a reproduction of the paper's reported cost ratios.
+
+The preset selector starts a fresh experiment. Run 180 steps advances the current experiment without dropping its history or interventions. Cost comparison is the default view. Every cost row includes all samples from t = 0, and differences are signed so higher adaptive cost remains visible. The Learning view retains the fixed data convergence diagnostic.
+
+Unexpected clicked pulses are absent from all forecasts. They test recovery and can dominate prediction related cost differences. The shared matrix method is intended to retain useful sources while suppressing unreliable ones. Its advantage is conditional and must be evaluated against Scalar as well as Feedback only.
+
 ## Interaction
 
 Run advances one control sample per second by default. Step advances a single sample. Clicking a bus queues an abstract additive state disturbance at the current time. Paused attacks wait for Run or Step. Several attacks at the same bus and time add exactly. There is no cooldown and a completed horizon can extend without discarding history.
@@ -57,7 +78,21 @@ Each event contributes `-strength * exp(-age / decay)` at its bus. Role icons do
 
 The default pulse is 0.02 normalized units with 0.01 and 0.03 alternatives. Single pulses in the seeded validation stay close to the displayed 0.95 to 1.05 illustrative state band. Repeated disturbances may leave that range. The model has no AC power flow, actuator saturation or hard voltage constraint.
 
-The experiment starts at zero so initial learning is visible. Version 4 browser state preserves repeated interventions at the same time. Older versions start fresh because their preview and learning definitions differ.
+The experiment starts at zero so initial learning is visible. Version 5 browser state preserves repeated interventions at the same time. Older versions start fresh because their preview and learning definitions differ.
+
+## Reproducible paired comparison
+
+The table reports mean cumulative cost across seeds 1 through 20, with 180 samples per run and no clicked pulses. Warmup is included. Every controller receives exactly the same disturbances and forecasts for a given seed. Parameters were not changed to produce these results.
+
+| Forecasts | Adaptive | Scalar adaptation | Fixed prediction | Feedback only |
+| --- | --- | --- | --- | --- |
+| Reliable | 0.021498 | 0.020294 | 0.020335 | 2.968790 |
+| Uniform corruption | 2.181798 | 2.113740 | 2.656043 | 2.968790 |
+| Mixed reliability | 1.662154 | 2.891628 | 5.323677 | 2.968790 |
+
+For mixed reliability, the adaptive mean is 42.52 percent below Scalar, 68.78 percent below Fixed prediction and 44.01 percent below Feedback only. It wins all 20 paired mixed runs against each baseline. Scalar has the lower mean under both reliable and uniform forecasts. These are measurements of this browser benchmark, not the paper's experimental percentages or a guarantee about other systems.
+
+[All paired runs and settings](benchmark-results.json) are included. Reproduce them with `node src/benchmark.cjs --json`. The benchmark ends at 180 and truncates the final preview. The interactive run continues beyond 180 and retains its available preview. Its cost readouts are always computed from that live run.
 
 ## Build and validate
 
@@ -69,6 +104,6 @@ node src/test-simulation.cjs
 python3 -m http.server 8000
 ```
 
-Sixteen numerical tests cover the plant and Riccati equation, preview coefficients, immutable forecasts, causal exact fitting, distinct equipment profiles, repeated pulse superposition, timing, voltage ranges, horizon extension, fixed objective convergence and deterministic replay.
+Numerical tests cover the plant and Riccati equation, preview coefficients, immutable forecasts, causal exact fitting, distinct equipment profiles, repeated pulse superposition, timing, state ranges, horizon extension, fixed objective convergence and deterministic replay.
 
 The source files are in `src`. Equipment artwork is native SVG in `equipment.js` and `equipment.css`. The page contains no private manuscript files or experimental datasets.
