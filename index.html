@@ -1,0 +1,3114 @@
+<!doctype html>
+<html lang="en" data-visualize-standalone>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; style-src 'unsafe-inline' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; img-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; media-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; worker-src blob:; connect-src blob: data:; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>O PredSLS · Online learning for voltage regulation</title>
+<style>:root {
+  color-scheme: light dark;
+  background-color: var(
+    --background,
+    var(--color-background-primary, light-dark(rgb(255 255 255), rgb(24 24 24)))
+  ) !important;
+
+  /* Agent-facing contract; keep in sync with SKILL.md. */
+  --background: var(
+    --color-background-primary,
+    light-dark(rgb(255 255 255), rgb(24 24 24))
+  );
+  --foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --card: color-mix(in oklab, var(--foreground) 5%, var(--background));
+  --card-foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --popover: var(
+    --color-background-secondary,
+    light-dark(rgb(255 255 255), rgb(45 45 45))
+  );
+  --popover-foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --primary: var(
+    --color-text-info,
+    light-dark(rgb(51 156 255), rgb(131 195 255))
+  );
+  --primary-foreground: var(
+    --color-text-inverse,
+    light-dark(rgb(255 255 255), rgb(13 13 13))
+  );
+  --secondary: var(
+    --color-background-secondary,
+    light-dark(rgb(255 255 255 / 96%), rgb(54 54 54 / 96%))
+  );
+  --secondary-foreground: var(
+    --color-text-primary,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --muted: color-mix(in srgb, var(--foreground) 10%, transparent);
+  --muted-foreground: var(
+    --color-text-secondary,
+    light-dark(rgb(26 28 31 / 49.4%), rgb(255 255 255 / 49.8%))
+  );
+  --accent: var(
+    --color-background-info,
+    light-dark(rgb(229 242 255), rgb(13 39 63))
+  );
+  --accent-foreground: var(
+    --color-text-info,
+    light-dark(rgb(51 156 255), rgb(131 195 255))
+  );
+  --destructive: var(
+    --color-text-warning,
+    light-dark(rgb(226 85 7), rgb(255 133 73))
+  );
+  --border: var(
+    --color-border-secondary,
+    light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%))
+  );
+  --input: var(
+    --color-border-primary,
+    light-dark(
+      rgb(26 28 31 / 11.8%),
+      color-mix(in oklab, rgb(0 0 0) 10%, transparent)
+    )
+  );
+  --ring: var(
+    --color-ring-primary,
+    light-dark(rgb(51 156 255), rgb(131 195 255 / 76%))
+  );
+  --font-size-base: var(--font-text-md-size, 16px);
+  --blue: light-dark(rgb(51 156 255), rgb(51 156 255));
+  --orange: light-dark(rgb(226 85 7), rgb(251 106 34));
+  --green: light-dark(rgb(0 162 64), rgb(64 201 119));
+  --red: light-dark(rgb(224 46 42), rgb(255 103 100));
+  --purple: light-dark(rgb(146 79 247), rgb(173 123 249));
+  --yellow: light-dark(rgb(255 195 0), rgb(255 210 64));
+  --viz-series-1: var(--primary);
+  --viz-series-2: light-dark(rgb(243 136 59), rgb(245 154 86));
+  --viz-series-3: light-dark(rgb(93 201 119), rgb(116 213 139));
+  --viz-series-4: light-dark(rgb(235 119 177), rgb(240 143 192));
+  --viz-series-5: light-dark(rgb(155 121 236), rgb(170 145 239));
+  --viz-series-6: light-dark(rgb(58 185 177), rgb(90 203 194));
+
+  /* Internal implementation variables; not part of the agent contract. */
+  --font-sans:
+    -apple-system-body, ui-sans-serif, -apple-system, system-ui, "Segoe UI",
+    Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji",
+    "Segoe UI Symbol";
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+  --font-size-normal: max(11px, var(--font-size-base));
+  --font-size-tooltip: calc(var(--font-size-base) - 1px);
+  --font-size-small: max(11px, calc(var(--font-size-base) - 2px));
+  --font-size-h1: calc(var(--font-size-normal) * 1.7142857143);
+  --font-size-h2: calc(var(--font-size-normal) * 1.4285714286);
+  --font-size-h3: calc(var(--font-size-normal) * 1.2857142857);
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --icon-size: 16px;
+  --line-height-normal: calc(var(--font-size-normal) * 1.5);
+  --line-height-tooltip: calc(var(--font-size-tooltip) * 1.4285714286);
+  --line-height-small: calc(var(--font-size-small) + 4px);
+  --corner-shape: round;
+  --radius: var(--border-radius-lg, 8px);
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: calc(var(--radius) * 0.75);
+  --radius-lg: var(--radius);
+  --radius-2xl: calc(var(--radius) * 2);
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px -1px rgb(0 0 0 / 8%);
+  --checkmark-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 17 17'%3E%3Cpath d='M12.8961 3.64101C13.1297 3.41418 13.4984 3.37523 13.7779 3.56581C14.0571 3.75635 14.1554 4.11331 14.0299 4.41347L13.9615 4.53847L7.71151 13.7045C7.59411 13.8767 7.4063 13.9877 7.19881 14.0072C6.99136 14.0267 6.78564 13.9533 6.63826 13.806L2.88826 10.056L2.79842 9.9457C2.6192 9.67407 2.64927 9.30496 2.88826 9.06581C3.12738 8.82669 3.49647 8.79676 3.76815 8.97597L3.8785 9.06581L7.03084 12.2182L12.8053 3.74941L12.8961 3.64101Z'/%3E%3C/svg%3E");
+
+  /* Legacy aliases; not part of the current agent contract. */
+  --viz-bg: transparent;
+  --viz-panel: var(--card);
+  --viz-border: var(--border);
+  --viz-text: var(--foreground);
+  --viz-muted: var(--muted-foreground);
+  --viz-accent: var(--primary);
+  --viz-accent-text: var(--primary-foreground);
+  --viz-accent-bg: var(--accent);
+  --viz-font-size: var(--font-size-base);
+  --viz-warning: var(--destructive);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html > body {
+  /* Preserve MCP aliases for older inline renderers without creating :root cycles. */
+  --color-background-primary: var(
+    --background,
+    light-dark(rgb(255 255 255), rgb(24 24 24))
+  );
+  --color-text-primary: var(
+    --foreground,
+    light-dark(rgb(26 28 31), rgb(255 255 255))
+  );
+  --color-border-secondary: var(
+    --border,
+    light-dark(rgb(26 28 31 / 8%), rgb(255 255 255 / 8.2%))
+  );
+
+  margin: 0;
+  padding: var(--visualize-paint-gutter, 0px);
+  color: var(--foreground);
+  background: transparent !important;
+  font-family: var(--font-sans) !important;
+  -webkit-font-smoothing: antialiased;
+  font-size: var(--font-size-base);
+  line-height: calc(var(--font-size-base) * 1.625);
+  font-weight: var(--font-weight-normal);
+}
+
+.cursor-interaction {
+  cursor: var(--cursor-interaction, pointer);
+}
+
+a {
+  color: color-mix(in srgb, var(--viz-accent) 80%, var(--viz-text) 20%);
+  cursor: var(--cursor-interaction, pointer);
+  text-decoration: none;
+  text-underline-offset: 2px;
+  font-weight: inherit;
+}
+
+a:is(:hover, :focus-visible) {
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 0.5px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin-block: 0;
+}
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+li,
+.table {
+  font-family: var(--font-sans);
+}
+
+h1 {
+  font-size: calc(var(--font-size-base) * 1.5);
+  line-height: 1.3333333333;
+}
+
+h2 {
+  font-size: calc(var(--font-size-base) * 1.25);
+  line-height: 1.4;
+}
+h3 {
+  font-size: calc(var(--font-size-base) * 1.125);
+  line-height: 1.5555555556;
+}
+h4 {
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+}
+h5,
+h6 {
+  font-size: var(--font-size-base);
+  line-height: calc(var(--font-size-base) * 1.625);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+b,
+strong,
+th {
+  font-weight: 600;
+}
+
+code:not(pre code) {
+  display: inline;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  corner-shape: var(--corner-shape);
+  background: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  overflow-wrap: anywhere;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  word-break: break-word;
+}
+pre,
+pre code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.table {
+  width: 100%;
+  color: var(--foreground);
+  font: inherit;
+  text-align: start;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: calc(var(--font-size-base) * 0.875);
+  line-height: calc(var(--font-size-base) * 1.625);
+  font-family: var(--font-sans);
+}
+
+.table :is(th, td) {
+  padding-block: 10px;
+  padding-inline: 0 24px;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid var(--border);
+  text-align: start;
+  vertical-align: top;
+  border-bottom-color: color-mix(in srgb, var(--foreground) 5%, transparent);
+}
+.table :is(th, td):not(:last-child) {
+  padding-inline-end: calc(var(--font-size-base) * 1.5);
+}
+
+.table-responsive > .table :is(th, td) {
+  overflow-wrap: break-word;
+}
+
+.table :is(th, td):last-child {
+  padding-inline-end: 0;
+}
+
+.table :is(caption, thead th) {
+  font-weight: 600;
+}
+
+.table thead :is(th, td) {
+  border-bottom-color: var(--border-strong, var(--input));
+  padding-block: calc(var(--font-size-base) / 2);
+  line-height: var(--font-size-base);
+}
+
+.table tbody tr:last-child :is(th, td) {
+  border-bottom: 0;
+}
+.table tbody :is(th, td) {
+  padding-block: calc(var(--font-size-base) * 0.625);
+}
+
+.table.table-sm :is(th, td) {
+  padding-block: 8px;
+}
+
+.table.table-sm :is(th, td):not(:last-child) {
+  padding-inline-end: 16px;
+}
+
+.table :is(.text-end, [align="right"]) {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.table :is(.text-center, [align="center"]) {
+  text-align: center;
+}
+
+.table .text-nowrap {
+  white-space: nowrap;
+}
+
+#widget {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  background: transparent !important;
+}
+
+.card {
+  min-width: 0;
+  padding: 12px;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  border-radius: var(--radius-2xl);
+  corner-shape: var(--corner-shape);
+  color: var(--card-foreground);
+  background: var(--card);
+}
+
+.widget {
+  min-width: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--radius-lg);
+  corner-shape: var(--corner-shape);
+  box-shadow: 0 0 0 0.5px var(--border-strong, var(--border));
+  color: var(--foreground);
+  background: var(--background);
+}
+
+#widget > :not(.card, .widget, .progress) {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.tooltip {
+  position: fixed;
+  z-index: 50;
+  top: 0;
+  left: 0;
+  width: max-content;
+  max-width: min(
+    20rem,
+    var(--tooltip-available-width, calc(100vw - 10px)),
+    calc(100vw - 10px)
+  );
+  max-height: min(
+    var(--tooltip-available-height, calc(100vh - 10px)),
+    calc(100vh - 10px)
+  );
+  border: 1px solid var(--border);
+  corner-shape: var(--corner-shape);
+  overflow-wrap: break-word;
+  white-space: normal;
+  pointer-events: none;
+  user-select: none;
+  font-family: var(--font-sans);
+  padding: 5px 12px;
+  border-color: color-mix(
+    in oklab,
+    light-dark(var(--primary-foreground), var(--foreground)) 5%,
+    transparent
+  );
+  border-radius: var(--radius-2xl);
+  color: light-dark(var(--primary-foreground), var(--foreground));
+  background: light-dark(var(--foreground), var(--popover));
+  box-shadow: 0 8px 18px rgb(15 23 42 / 20%);
+  letter-spacing: -0.15px;
+  font-size: calc(var(--font-size-base) * 14 / 16);
+  font-size: round(nearest, calc(var(--font-size-base) * 14 / 16), 1px);
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+}
+
+.viz-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(max(180px, 24%), 1fr));
+  gap: 10px;
+}
+
+.viz-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.viz-stat-value {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+}
+
+.viz-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+hr {
+  width: 100%;
+  height: 1px;
+  margin-block: 6px;
+  border: 0;
+  background: var(--border);
+}
+
+.nav {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 4px;
+}
+
+.progress {
+  display: flex;
+  height: 8px;
+  margin-block: calc((var(--line-height-normal, 1.5em) - 8px) / 2);
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--muted);
+}
+
+.progress-bar:only-child {
+  border-radius: var(--radius-full);
+}
+
+.progress-bar {
+  height: 100%;
+  flex-shrink: 0;
+  border: 0;
+  background: var(--viz-series-1);
+}
+
+.viz-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  color: color-mix(in srgb, var(--foreground) 40%, var(--muted-foreground));
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  font-family: var(--font-sans);
+  font-size: calc(var(--font-size-base) * 14 / 16);
+  font-size: round(nearest, calc(var(--font-size-base) * 14 / 16), 1px);
+  font-weight: var(--font-weight-normal);
+  line-height: 1;
+}
+
+small,
+.text-small {
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+
+.text-muted {
+  color: var(--muted-foreground);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.viz-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.viz-controls > .form-label {
+  display: grid;
+  min-width: min(100%, 260px);
+  flex: 1 1 280px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 2px 12px;
+  margin-bottom: 0;
+}
+
+.viz-controls > .form-label > :is(.form-control, .form-range, .form-select) {
+  grid-column: 1 / -1;
+}
+
+.btn,
+.nav-link,
+.form-check-input,
+.form-control,
+.form-range,
+.form-select {
+  font: inherit;
+}
+
+/* Match inline alignment without overriding a containing flex or grid layout. */
+.btn,
+.nav-link,
+.form-control,
+.form-select,
+.form-range,
+.form-check {
+  vertical-align: middle;
+}
+
+.btn,
+.nav-link {
+  appearance: button;
+  display: inline-flex;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0 8px;
+  -webkit-app-region: no-drag;
+  border: 1px solid var(--input);
+  corner-shape: var(--corner-shape);
+  cursor: var(--cursor-interaction, pointer);
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-font-smoothing: inherit;
+  font-family: var(--font-sans);
+  height: fit-content;
+  min-height: calc(12px + 2 * var(--control-spacing, 12px));
+  padding-inline: var(--control-spacing, 12px);
+  border-color: transparent;
+  border-radius: var(--radius-full);
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  font-size: calc(var(--font-size-base) * 14 / 16);
+  font-size: round(nearest, calc(var(--font-size-base) * 14 / 16), 1px);
+  font-weight: var(--font-weight-normal);
+  line-height: 18px;
+}
+
+.btn {
+  border-color: var(--border);
+  color: var(--secondary-foreground);
+  background: var(--secondary);
+}
+
+.btn:is(.btn-block, .viz-tile) {
+  inline-size: 100%;
+}
+
+.btn.viz-tile {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+a.btn {
+  cursor: var(--cursor-interaction, pointer);
+  text-decoration: none;
+}
+
+.btn:not(:disabled):hover {
+  background: light-dark(
+    color-mix(in srgb, var(--foreground) 5.5%, transparent),
+    color-mix(in srgb, var(--foreground) 8%, transparent)
+  );
+}
+
+.nav-link:not(:disabled):not([aria-disabled="true"]):hover {
+  background: color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+
+.btn-primary {
+  border-color: var(--border);
+  color: var(--primary-foreground);
+  background: var(--foreground);
+  background-clip: border-box;
+}
+
+.btn-primary .text-muted {
+  color: color-mix(in srgb, var(--primary-foreground) 50%, transparent);
+}
+
+.btn-primary:not(:disabled):hover {
+  background: color-mix(in srgb, var(--foreground) 80%, transparent);
+  background-clip: border-box;
+}
+
+.btn-ghost {
+  border-color: transparent;
+  color: var(--muted-foreground);
+  background: transparent;
+}
+
+.btn-ghost:not(:disabled):hover {
+  color: var(--muted-foreground);
+  background: light-dark(
+    color-mix(in srgb, var(--foreground) 5.5%, transparent),
+    color-mix(in srgb, var(--foreground) 8%, transparent)
+  );
+}
+
+.nav-pills .nav-link {
+  min-width: 0;
+  border-color: transparent;
+  color: var(--muted-foreground);
+  background: transparent;
+}
+
+.nav-justified .nav-link {
+  flex: 1 1 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.nav-pills .nav-link.active {
+  color: var(--foreground);
+  background: var(--muted);
+}
+
+/* Shared preview chrome; product styles stay inside each variant. */
+.viz-dotted-background {
+  background-image: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--foreground) 14%, transparent) 0.8px,
+    transparent 0.8px
+  );
+  background-position: center;
+  background-size: 16px 16px;
+}
+
+.viz-carousel {
+  position: relative;
+  min-width: 0;
+}
+
+.viz-carousel:has(> .viz-carousel-controls) {
+  min-height: calc(60px + var(--viz-carousel-picker-height, 0px));
+  padding-bottom: 60px;
+}
+
+.viz-carousel > [data-variant][hidden] {
+  display: none !important;
+}
+
+.viz-carousel > [data-variant] {
+  isolation: isolate;
+}
+
+.viz-carousel-controls {
+  --viz-carousel-hover: light-dark(
+    color-mix(in srgb, var(--foreground) 5.4%, transparent),
+    color-mix(in srgb, var(--foreground) 7.8%, transparent)
+  );
+  position: absolute;
+  z-index: 2;
+  bottom: 8px;
+  left: 50%;
+  display: flex;
+  width: max-content;
+  /* Leave room for the host's design-controls launcher at the trailing edge. */
+  max-width: calc(100% - 96px);
+  align-items: center;
+  gap: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-sans);
+  /* Match the settings dropdown chrome independently of the content font size. */
+  font-size: 13px;
+  font-weight: var(--font-weight-normal);
+  line-height: 18px;
+  transform: translateX(-50%);
+  user-select: none;
+}
+
+/* Keep authored mockup button styles out of the shared carousel chrome. */
+.viz-carousel-controls button,
+.viz-carousel-picker > summary {
+  display: flex !important;
+  height: auto !important;
+  min-height: 30px;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px;
+  padding: 0 6px !important;
+  -webkit-app-region: no-drag;
+  border: 0 !important;
+  border-radius: 14px !important;
+  color: inherit !important;
+  background: transparent !important;
+  font: inherit !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.viz-carousel-controls > button,
+.viz-carousel-picker > summary {
+  position: relative;
+  isolation: isolate;
+}
+
+.viz-carousel-controls > button {
+  --icon-size: 16px;
+  width: 30px !important;
+  padding: 0 !important;
+}
+
+.viz-carousel-picker > summary {
+  padding-inline: 12px !important;
+}
+
+.viz-carousel-controls .viz-carousel-caret {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  margin: 0;
+  color: inherit;
+  transform: rotate(180deg);
+}
+
+.viz-carousel-controls > button > svg,
+.viz-carousel-controls .viz-carousel-caret,
+.viz-carousel-count {
+  opacity: 0.5;
+}
+
+.viz-carousel-controls > button::before,
+.viz-carousel-picker > summary::before {
+  position: absolute;
+  z-index: -1;
+  inset: 3px;
+  border-radius: 12px;
+  content: "";
+  pointer-events: none;
+}
+
+.viz-carousel-controls > button:hover::before,
+.viz-carousel-picker > summary:hover::before {
+  background: var(--viz-carousel-hover);
+}
+
+.viz-carousel-controls > button,
+.viz-carousel-controls [data-lucide],
+.viz-carousel-controls .lucide {
+  flex-shrink: 0;
+}
+
+.viz-carousel-picker {
+  min-width: 0;
+}
+
+.viz-carousel-picker > summary {
+  min-width: 0;
+  list-style: none;
+}
+
+.viz-carousel-picker > summary::-webkit-details-marker {
+  display: none;
+}
+
+.viz-carousel-count {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.viz-carousel-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.viz-carousel-options {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 4px);
+  left: 0;
+  display: flex;
+  max-height: 240px;
+  flex-direction: column;
+  gap: 2px;
+  overflow: auto;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--background);
+  box-shadow: 0 4px 12px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 25%));
+}
+
+.viz-carousel-options > button {
+  border-radius: max(0px, calc(var(--radius-lg) - 5px)) !important;
+  width: 100% !important;
+  min-height: 28px;
+  justify-content: flex-start !important;
+  padding: 4px 8px !important;
+  font-size: var(--font-size-small) !important;
+  text-align: start;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.viz-carousel-options > [aria-current="true"],
+.viz-carousel-options > button:hover {
+  background: var(--viz-carousel-hover) !important;
+}
+
+.btn:disabled,
+.nav-link:disabled,
+.nav-link[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+[data-lucide] {
+  stroke-width: 1.6;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--foreground);
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  padding: 0 8px;
+  outline: none;
+  border: 1px solid var(--input);
+  corner-shape: var(--corner-shape);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  height: calc(12px + 2 * var(--control-spacing, 12px));
+  min-height: calc(12px + 2 * var(--control-spacing, 12px));
+  padding-inline: calc(4px + var(--control-spacing, 12px) / 2);
+  border-color: var(--input);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--popover) 96%, transparent);
+  font-size: calc(var(--font-size-base) * 14 / 16);
+  font-size: round(nearest, calc(var(--font-size-base) * 14 / 16), 1px);
+  font-weight: var(--font-weight-normal);
+  line-height: 1.4285714286;
+}
+.form-control:is(
+  [type="file"],
+  [type="date"],
+  [type="datetime-local"],
+  [type="month"],
+  [type="week"],
+  [type="color"]
+) {
+  height: calc(12px + 2 * var(--control-spacing, 12px));
+  min-height: calc(12px + 2 * var(--control-spacing, 12px));
+  line-height: 18px;
+}
+.form-control:is(
+  [type="date"],
+  [type="datetime-local"],
+  [type="month"],
+  [type="week"]
+) {
+  padding-inline: var(--control-spacing, 12px);
+}
+
+.form-control::placeholder {
+  color: var(--muted-foreground);
+}
+
+.form-control[type="file"] {
+  overflow: hidden;
+  cursor: var(--cursor-interaction, pointer);
+  padding: 0;
+}
+
+.form-control[type="file"]::file-selector-button {
+  padding: 0 8px;
+  border: 0;
+  border-right: 1px solid var(--input);
+  color: var(--secondary-foreground);
+  background: var(--secondary);
+  cursor: inherit;
+  font: inherit;
+  min-height: calc(10px + 2 * var(--control-spacing, 12px));
+  padding-inline: var(--control-spacing, 12px);
+  margin-inline-end: var(--control-spacing, 12px);
+}
+
+.form-control[type="file"]:not(:disabled):hover::file-selector-button {
+  background: color-mix(in srgb, var(--foreground) 6%, var(--secondary));
+}
+
+.form-control-color[type="color"] {
+  width: 40px;
+  height: calc(12px + 2 * var(--control-spacing, 12px));
+  padding: 3px;
+  cursor: var(--cursor-interaction, pointer);
+}
+
+.form-control-color[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.form-control-color[type="color"]::-webkit-color-swatch {
+  border: 0;
+  border-radius: calc(var(--radius-lg) - 4px);
+  corner-shape: var(--corner-shape);
+}
+
+textarea.form-control {
+  height: auto;
+  resize: vertical;
+  min-height: 96px;
+  padding: 8px 10px;
+}
+
+.form-control:focus-visible {
+  border-color: var(--ring);
+  box-shadow: none;
+}
+.form-control:disabled {
+  color: var(--muted-foreground);
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  opacity: 1;
+}
+.form-control[aria-invalid="true"] {
+  border-color: var(--red);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--red) 20%, transparent);
+}
+
+.form-control:disabled,
+.form-select:disabled {
+  cursor: not-allowed;
+}
+
+.form-select {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: fit-content;
+  min-height: calc(12px + 2 * var(--control-spacing, 12px));
+  margin: 0;
+  /* The secondary icon role is 14px at compact density and 16px at web density. */
+  --icon-size: calc(10px + var(--control-spacing, 12px) / 2);
+  /* Settings dropdowns retain a 12px inset and a 4px text-to-chevron gap. */
+  padding: 0 calc(16px + var(--icon-size)) 0 12px;
+  outline: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  corner-shape: var(--corner-shape);
+  color: var(--foreground);
+  background-color: var(--secondary);
+  background-image:
+    linear-gradient(
+      45deg,
+      transparent calc(50% - 0.6px),
+      var(--muted-foreground) calc(50% - 0.6px) calc(50% + 0.6px),
+      transparent calc(50% + 0.6px)
+    ),
+    linear-gradient(
+      135deg,
+      transparent calc(50% - 0.6px),
+      var(--muted-foreground) calc(50% - 0.6px) calc(50% + 0.6px),
+      transparent calc(50% + 0.6px)
+    );
+  background-position:
+    calc(100% - 12px - var(--icon-size) / 2) 50%,
+    calc(100% - 12px - var(--icon-size) * 0.18) 50%;
+  background-repeat: no-repeat;
+  background-size: calc(var(--icon-size) * 0.32) calc(var(--icon-size) * 0.32);
+  cursor: var(--cursor-interaction, default);
+  font-size: calc(var(--font-size-base) * 14 / 16);
+  font-size: round(nearest, calc(var(--font-size-base) * 14 / 16), 1px);
+  font-weight: var(--font-weight-normal);
+  line-height: 18px;
+}
+
+.form-select option {
+  color: var(--popover-foreground);
+  background-color: var(--popover);
+}
+
+.form-select:not(:disabled):hover {
+  background-color: light-dark(
+    color-mix(in srgb, var(--foreground) 5.5%, transparent),
+    color-mix(in srgb, var(--foreground) 8%, transparent)
+  );
+}
+
+.form-select:focus-visible {
+  box-shadow: 0 0 0 2px var(--ring);
+}
+.form-select:disabled {
+  opacity: 0.4;
+}
+
+.form-check {
+  display: flex;
+  min-height: calc(12px + 2 * var(--control-spacing, 12px));
+  align-items: center;
+  gap: 6px;
+}
+
+.form-check-input {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  margin: 0;
+  border: 1px solid var(--input);
+  color: var(--primary-foreground);
+  background-color: transparent;
+  cursor: var(--cursor-interaction, default);
+  transition:
+    background-color 150ms,
+    border-color 150ms,
+    box-shadow 150ms;
+}
+
+.form-check:not(.form-switch) .form-check-input[type="checkbox"] {
+  corner-shape: round;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  width: calc(10px + var(--control-spacing, 12px) / 2);
+  height: calc(10px + var(--control-spacing, 12px) / 2);
+  border-color: var(--border-strong, var(--input));
+  border-radius: calc(var(--radius-sm) / 2);
+  background-color: transparent;
+  color: var(--foreground);
+}
+
+.form-check:not(.form-switch)
+  .form-check-input:not(:disabled):not(:checked):hover {
+  background-color: var(--card);
+}
+
+.form-check:not(.form-switch)
+  .form-check-input[type="checkbox"]:is(:checked, :indeterminate) {
+  border-color: var(--border-strong, var(--input));
+  background-color: color-mix(in srgb, var(--popover) 96%, transparent);
+}
+
+.form-check:not(.form-switch)
+  .form-check-input[type="checkbox"]:checked::before {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--primary-foreground);
+  content: "";
+  mask: var(--checkmark-image) center / 12px 12px no-repeat;
+  background-color: var(--foreground);
+}
+.form-check:not(.form-switch)
+  .form-check-input[type="checkbox"]:indeterminate::before {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 65%;
+  height: 6.65%;
+  margin: auto;
+  border-radius: var(--radius-full);
+  background: var(--foreground);
+  mask: none;
+  content: "";
+}
+
+.form-check-input[type="radio"] {
+  border-radius: var(--radius-full);
+  width: 16px;
+  height: 16px;
+  border: 0;
+  box-shadow: inset 0 0 0 1px var(--input);
+}
+
+.form-check-input[type="radio"]:checked {
+  border: 0;
+  background: radial-gradient(
+    circle,
+    var(--primary-foreground) 0 3px,
+    var(--foreground) 3px
+  );
+  box-shadow: none;
+}
+
+.form-check:not(.form-switch) .form-check-input:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.form-check:not(.form-switch) .form-check-input[type="checkbox"]:focus-visible {
+  border-color: var(--ring);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.form-check:not(.form-switch) .form-check-input:disabled {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.form-check:not(.form-switch) .form-check-input:disabled + .form-check-label {
+  cursor: not-allowed;
+}
+.form-check:not(.form-switch) .form-check-input[type="radio"]:disabled,
+.form-check:not(.form-switch)
+  .form-check-input[type="radio"]:disabled
+  + .form-check-label {
+  opacity: 0.5;
+}
+
+.form-switch .form-check-input:disabled,
+.form-switch .form-check-input:disabled + .form-check-label {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-check-label {
+  color: var(--foreground);
+  cursor: var(--cursor-interaction, default);
+}
+
+.form-switch .form-check-input {
+  position: relative;
+  width: 32px;
+  height: 20px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--muted);
+  box-shadow: none;
+  transition: background-color 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.form-switch .form-check-input::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 1px solid light-dark(var(--primary-foreground), var(--foreground));
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
+  content: "";
+  transform: translate(2px, -50%);
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+  border-color: #fff;
+  background: #fff;
+}
+
+.form-switch .form-check-input:checked {
+  background: var(--blue);
+}
+
+.form-switch .form-check-input:checked::before {
+  transform: translate(14px, -50%);
+}
+
+.form-switch .form-check-input:focus-visible {
+  box-shadow: 0 0 0 2px var(--ring);
+  outline: none;
+}
+
+.form-range {
+  appearance: none;
+  display: block;
+  width: 100%;
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  accent-color: var(--primary);
+  height: calc(12px + 2 * var(--control-spacing, 12px));
+  min-height: calc(12px + 2 * var(--control-spacing, 12px));
+  outline: none;
+  border-radius: var(--radius-full);
+  color: var(--foreground);
+  background: transparent;
+}
+
+.form-range::-webkit-slider-runnable-track {
+  background: var(--form-range-track, var(--border));
+  height: 2px;
+  border-radius: var(--radius-full);
+}
+
+.form-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  margin-top: -9px;
+  border-color: transparent;
+  background: currentColor;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Outline the native track and thumb, preserving the larger input hit area. */
+.form-range:focus-visible::-webkit-slider-runnable-track {
+  outline: 2px auto Highlight;
+  outline-color: -webkit-focus-ring-color;
+}
+
+.form-range::-moz-range-track {
+  background: var(--form-range-track, var(--border));
+  height: 2px;
+  border-radius: var(--radius-full);
+}
+
+.form-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  border-color: transparent;
+  background: currentColor;
+  box-shadow: var(--shadow-sm);
+}
+
+.form-range:focus-visible::-moz-range-thumb {
+  outline: 2px solid Highlight;
+  outline-offset: 2px;
+}
+
+.form-range:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.btn:not(.btn-primary, .viz-tile):is(
+  [aria-pressed="true"],
+  [aria-selected="true"],
+  .is-selected
+) {
+  border-color: transparent;
+  color: var(--primary-foreground);
+  background: var(--blue);
+}
+
+.btn.viz-tile:is([aria-pressed="true"], [aria-selected="true"], .is-selected) {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+.btn:focus-visible,
+.nav-link:focus-visible {
+  outline-offset: 2px;
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.viz-carousel-controls :is(button, summary):focus-visible {
+  outline: 2px solid var(--ring) !important;
+  outline-offset: 2px !important;
+}
+
+/* Web recipes are the default, including on renderers without inline style queries. */
+@supports (border-radius: if(style(--corner-shape: round): 1px; else: 2px)) {
+  /* Match the host's proportional text-sm scale at every text preference. */
+  .tooltip,
+  .viz-badge,
+  .btn,
+  .nav-link,
+  .form-control,
+  .form-select {
+    font-size: if(
+      style(--corner-shape: round): round(
+          nearest,
+          calc(var(--font-size-base) * 14 / 16),
+          1px
+        );
+        else: round(nearest, calc(var(--font-size-base) * 13 / 14), 1px)
+    );
+  }
+
+  .btn,
+  .nav-link,
+  .form-select {
+    border-radius: if(
+      style(--corner-shape: round): var(--radius-full); else: var(--radius-lg)
+    );
+  }
+
+  .form-check:not(.form-switch) .form-check-input[type="checkbox"] {
+    border-radius: if(
+      style(--corner-shape: round): calc(var(--radius-sm) / 2);
+        else: calc(var(--radius-lg) * 0.4)
+    );
+  }
+
+  .tooltip {
+    font-weight: if(
+      style(--corner-shape: round): 600; else: var(--font-weight-normal)
+    );
+  }
+}
+
+@media (pointer: coarse) {
+  .viz-carousel:has(> .viz-carousel-controls) {
+    min-height: calc(76px + var(--viz-carousel-picker-height, 0px));
+    padding-bottom: 76px;
+  }
+
+  .btn,
+  .nav-link,
+  .viz-carousel-controls button,
+  .viz-carousel-picker > summary,
+  .form-control,
+  .form-select {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Keep small-screen WebKit from zooming when a text field receives focus. */
+  .form-control,
+  .form-select {
+    font-size: max(16px, calc(var(--font-size-base) * 14 / 16));
+    font-size: max(
+      16px,
+      round(nearest, calc(var(--font-size-base) * 14 / 16), 1px)
+    );
+  }
+  .form-control:is(
+    [type="file"],
+    [type="date"],
+    [type="datetime-local"],
+    [type="month"],
+    [type="week"],
+    [type="time"],
+    [type="color"]
+  ) {
+    height: 44px;
+    min-height: 44px;
+    font-size: max(16px, calc(var(--font-size-base) * 14 / 16));
+    font-size: max(
+      16px,
+      round(nearest, calc(var(--font-size-base) * 14 / 16), 1px)
+    );
+  }
+
+  .form-control[type="file"]::file-selector-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .form-control-color[type="color"] {
+    width: 44px;
+    height: 44px;
+  }
+
+  .form-control:is(
+    [type="date"],
+    [type="datetime-local"],
+    [type="month"],
+    [type="time"],
+    [type="week"]
+  ) {
+    min-width: 0;
+    max-width: 100%;
+    padding-block: 8px;
+  }
+
+  .form-check {
+    min-height: 44px;
+    padding-inline: 15px;
+  }
+
+  .form-check-input {
+    position: relative;
+  }
+
+  .form-check-input::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    content: "";
+    transform: translate(-50%, -50%);
+  }
+
+  .form-check-label {
+    display: inline-flex;
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+  }
+
+  .form-range {
+    height: 44px;
+    touch-action: pan-y;
+  }
+}
+
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+#widget > svg {
+  width: 100%;
+}
+
+/* Model-authored chart rules can otherwise stretch icons after these styles load. */
+svg.lucide {
+  display: block;
+  width: var(--icon-size) !important;
+  height: var(--icon-size) !important;
+  flex: none;
+  margin: 0 !important;
+  stroke-width: 1.6;
+}
+
+.text-warning,
+.text-destructive {
+  color: var(--destructive);
+}
+
+html>body{padding:0}</style>
+<meta name="description" content="Explore online prediction adaptation in a synthetic 24 bus voltage regulation experiment. Compare control costs and learned communication recommendations.">
+<style>/* Standalone academic presentation for the existing research demonstrator. */
+body.research-site {
+  --background: #fdfdfb;
+  --foreground: #192b3e;
+  --primary: #147d82;
+  --primary-foreground: #ffffff;
+  --muted: #f0f3f3;
+  --muted-foreground: #65737e;
+  --border: #d9e0e3;
+  --popover: #ffffff;
+  --popover-foreground: #192b3e;
+  --viz-series-1: #147d82;
+  --viz-series-2: #bd7049;
+  --viz-series-3: #667a9a;
+  --research-ink: #192b3e;
+  --research-muted: #65737e;
+  --research-rule: #d9e0e3;
+  --research-serif: Georgia, 'Times New Roman', serif;
+  margin: 0;
+  min-width: 280px;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.research-site *, .research-site *::before, .research-site *::after { box-sizing: border-box; }
+.research-site a { color: inherit; text-decoration: none; }
+.research-site button, .research-site select, .research-site input { font: inherit; }
+.research-site button, .research-site select, .research-site summary, .research-site .cursor-interaction { cursor: pointer; }
+.research-site button, .research-site select { touch-action: manipulation; }
+.research-site :focus-visible { outline: 3px solid #71b6b7; outline-offset: 4px; }
+.research-site .research-header,
+.research-site #power-response-demo,
+.research-site .research-footer { width: calc(100% - 80px); max-width: 1200px; margin-left: auto; margin-right: auto; }
+.research-site .research-masthead { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 47px; border-bottom: 1px solid var(--research-rule); }
+.research-site .research-wordmark { display: inline-flex; align-items: center; gap: 7px; font-family: var(--research-serif); font-size: 23px; letter-spacing: -1px; white-space: nowrap; }
+.research-site .research-wordmark > span:first-child { font-style: italic; }
+.research-site .research-wordmark-rule { height: 19px; width: 1px; margin: 0 8px 0 12px; background: var(--research-rule); }
+.research-site .research-wordmark-note { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 10px; font-weight: 550; letter-spacing: 1.3px; text-transform: uppercase; color: var(--research-muted); }
+.research-site .research-source { display: inline-flex; align-items: center; gap: 10px; font-size: 12px; color: var(--research-muted); white-space: nowrap; }
+.research-site .research-source span { font-size: 16px; color: var(--primary); }
+.research-site .research-source:hover { color: var(--primary); }
+.research-site .research-introduction { padding: 15px 0 19px; }
+.research-site .research-eyebrow { color: var(--primary); font-size: 10px; line-height: 1.4; font-weight: 650; letter-spacing: 1.6px; text-transform: uppercase; }
+.research-site .research-eyebrow span { margin: 0 8px; color: #96a5ab; }
+.research-site .research-introduction h1 { margin: 5px 0 6px; font-family: var(--research-serif); font-size: clamp(28px, 3.1vw, 39px); line-height: 1.12; letter-spacing: -1.2px; font-weight: 400; }
+.research-site .research-introduction p { margin: 0; max-width: 950px; color: var(--research-muted); font-size: 14px; line-height: 1.6; }
+.research-site #power-response-demo { border-top: 2px solid var(--research-ink); padding-top: 17px; }
+.research-site #power-response-demo .text-small { font-size: 12px; line-height: 1.55; color: var(--research-muted); }
+.research-site #power-response-demo .tabular-nums { font-variant-numeric: tabular-nums; }
+.research-site #power-response-demo .pr-heading { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 14px; row-gap: 3px; margin: 0 0 13px; padding: 0; }
+.research-site #power-response-demo .pr-heading h2 { margin: 0; font-size: 15px; line-height: 1.4; font-weight: 650; letter-spacing: -.2px; }
+.research-site #power-response-demo .pr-heading .text-small { font-size: 11px; }
+.research-site #power-response-demo .pr-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin: 0; padding: 10px 0; }
+.research-site #power-response-demo .pr-toolbar + .pr-toolbar { padding-top: 9px; padding-bottom: 14px; border-bottom: 1px solid var(--research-rule); }
+.research-site #power-response-demo .pr-toolbar::before { content: 'SIMULATION'; flex: 0 0 96px; color: var(--research-muted); font-size: 10px; font-weight: 650; letter-spacing: 1.5px; }
+.research-site #power-response-demo .pr-toolbar + .pr-toolbar::before { content: 'INTERVENTION'; }
+.research-site #power-response-demo .btn { appearance: none; display: inline-flex; justify-content: center; align-items: center; min-height: 37px; padding: 7px 13px; color: var(--research-ink); background: #ffffff; border: 1px solid #cdd7dc; border-radius: 4px; font-size: 12px; font-weight: 550; line-height: 1.4; white-space: nowrap; box-shadow: 0 1px 1px #192b3e04; transition: background-color .15s, border-color .15s, transform .15s; }
+.research-site #power-response-demo .btn:hover:not(:disabled) { border-color: #78999f; background: #f2f7f7; }
+.research-site #power-response-demo .btn:active:not(:disabled) { transform: translateY(1px); }
+.research-site #power-response-demo .btn-primary { min-width: 133px; color: var(--primary-foreground); background: var(--primary); border-color: var(--primary); }
+.research-site #power-response-demo .btn-primary:hover:not(:disabled) { color: #ffffff; background: #116b70; border-color: #116b70; }
+.research-site #power-response-demo .btn-ghost { color: var(--research-muted); background: transparent; border-color: transparent; box-shadow: none; }
+.research-site #power-response-demo .btn:disabled { cursor: default; opacity: .42; box-shadow: none; }
+.research-site #power-response-demo #pr-freeze { margin-left: auto; }
+.research-site #power-response-demo .pr-field { gap: 7px; }
+.research-site #power-response-demo .pr-toolbar:first-of-type .pr-field { margin-left: 5px; }
+.research-site #power-response-demo .form-label { color: var(--research-muted); font-size: 12px; font-weight: 450; }
+.research-site #power-response-demo .form-select { min-height: 37px; max-width: 155px; padding: 6px 28px 6px 10px; color: var(--research-ink); background-color: #ffffff; border: 1px solid #cdd7dc; border-radius: 4px; font-size: 12px; line-height: 1.4; }
+.research-site #power-response-demo #pr-bus { min-width: 66px; }
+.research-site #power-response-demo .pr-status { display: flex; flex-wrap: wrap; align-items: center; column-gap: 22px; row-gap: 5px; padding: 11px 0; margin: 0 0 20px; font-size: 11px; color: var(--research-muted); }
+.research-site #power-response-demo #pr-clock { color: var(--research-ink); font-weight: 650; letter-spacing: .1px; }
+.research-site #power-response-demo #pr-clock::before { content: ''; display: inline-block; vertical-align: middle; width: 6px; height: 6px; margin: 0 8px 2px 0; border-radius: 50%; background: var(--primary); }
+.research-site #power-response-demo #pr-event { margin-left: auto; color: var(--primary); }
+.research-site #power-response-demo .pr-panels { grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr); gap: 27px; }
+.research-site #power-response-demo .pr-panel + .pr-panel { border-left: 1px solid var(--research-rule); padding-left: 27px; }
+.research-site #power-response-demo .pr-panel h3,
+.research-site #power-response-demo .pr-fit h3 { font-family: var(--research-serif); font-size: 21px; line-height: 1.3; font-weight: 400; letter-spacing: -.4px; margin: 0 0 8px; }
+.research-site #power-response-demo #pr-network-title::before,
+.research-site #power-response-demo #pr-cost-title::before,
+.research-site #power-response-demo #pr-fit-title::before { display: block; margin-bottom: 5px; color: var(--primary); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 9px; line-height: 1.4; font-weight: 650; letter-spacing: 1.7px; }
+.research-site #power-response-demo #pr-network-title::before { content: 'FIGURE 01'; }
+.research-site #power-response-demo #pr-cost-title::before { content: 'FIGURE 02'; }
+.research-site #power-response-demo #pr-fit-title::before { content: 'FIGURE 03'; }
+.research-site #power-response-demo .pr-subhead { align-items: end; gap: 8px; }
+.research-site #power-response-demo .form-check { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 9px; white-space: nowrap; cursor: pointer; }
+.research-site #power-response-demo .form-check-input { accent-color: var(--primary); width: 13px; height: 13px; margin: 0; }
+.research-site #power-response-demo .form-check-label { font-size: 10px; }
+.research-site #power-response-demo .pr-chart { overflow: visible; }
+.research-site #power-response-demo .pr-chart text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 10px; fill: var(--research-muted); }
+.research-site #power-response-demo .pr-chart text.axis-title { font-size: 11px; fill: var(--research-ink); }
+.research-site #power-response-demo .pr-chart .grid line { stroke: #e9edef; stroke-dasharray: 2 4; }
+.research-site #power-response-demo .pr-chart .domain { stroke: #bdc9cf; }
+.research-site #power-response-demo .pr-chart .bus-number { font-size: 10px; font-weight: 550; }
+.research-site #power-response-demo .pr-chart .fault-mark { fill: var(--viz-series-2); font-size: 13px; font-weight: 600; }
+.research-site #power-response-demo .pr-legend { gap: 7px 17px; margin: 7px 0 13px; min-height: 19px; }
+.research-site #power-response-demo .pr-legend button { color: var(--research-muted); font-size: 11px; line-height: 1.5; font-weight: 500; }
+.research-site #power-response-demo .pr-legend button[aria-pressed='true'] { color: var(--research-ink); }
+.research-site #power-response-demo .pr-swatch { width: 18px; }
+.research-site #power-response-demo .pr-detail { min-height: 20px; margin: 9px 0 7px; color: var(--research-ink); font-size: 12px; }
+.research-site #power-response-demo #pr-bus-detail { display: inline-block; padding: 5px 8px; background: #eef5f4; border-left: 2px solid #93bcbb; font-size: 11px; }
+.research-site #power-response-demo .pr-note { margin-top: 4px; }
+.research-site #power-response-demo .pr-fit { margin-top: 27px; padding-top: 23px; border-top: 1px solid var(--research-rule); }
+.research-site #power-response-demo #pr-fit-detail { margin-bottom: 10px; }
+.research-site #power-response-demo #pr-mode-note { margin: 3px 0 0; }
+.research-site #power-response-demo .pr-tooltip { border-color: #cad7db; border-radius: 4px; padding: 11px 14px; box-shadow: 0 6px 24px #192b3e12; font-size: 11px; }
+.research-site #power-response-demo .pr-tooltip div { gap: 22px; padding: 2px 0; }
+.research-site #power-response-demo #pr-error { border: 1px solid #dcc4b4; padding: 12px; background: #faf4ef; }
+.research-site .research-footer { margin-top: 28px; border-top: 2px solid var(--research-ink); }
+.research-site .research-reading-guide { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 45px; padding: 20px 0 21px; }
+.research-site .research-reading-guide h2 { font-size: 11px; font-weight: 650; line-height: 1.5; margin: 0 0 6px; letter-spacing: .2px; }
+.research-site .research-reading-guide p { margin: 0; color: var(--research-muted); font-size: 12px; line-height: 1.75; }
+.research-site kbd { display: inline-block; padding: 0 4px; min-width: 18px; border: 1px solid #d3dade; border-bottom-width: 2px; border-radius: 3px; background: #ffffff; color: #526674; font: 10px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-align: center; vertical-align: 1px; }
+.research-site .research-methods { border-top: 1px solid var(--research-rule); border-bottom: 1px solid var(--research-rule); }
+.research-site .research-methods summary { display: flex; align-items: center; gap: 20px; min-height: 47px; list-style: none; font-size: 12px; font-weight: 600; }
+.research-site .research-methods summary::-webkit-details-marker { display: none; }
+.research-site .research-methods-caption { font-size: 11px; font-weight: 400; color: var(--research-muted); }
+.research-site .research-expand { position: relative; width: 12px; height: 12px; flex: 0 0 12px; margin-left: auto; }
+.research-site .research-expand::before, .research-site .research-expand::after { content: ''; position: absolute; top: 5px; left: 0; width: 12px; height: 1px; background: var(--research-muted); }
+.research-site .research-expand::after { transform: rotate(90deg); transition: transform .15s; }
+.research-site details[open] .research-expand::after { transform: rotate(0deg); }
+.research-site .research-methods-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 45px; padding: 2px 0 23px; }
+.research-site .research-methods-body h3 { font-family: var(--research-serif); font-size: 18px; line-height: 1.4; font-weight: 400; margin: 0 0 8px; }
+.research-site .research-methods-body p { margin: 0 0 8px; color: var(--research-muted); font-size: 12px; line-height: 1.75; }
+.research-site .research-equation { margin: 12px 0; padding: 12px; background: #f1f5f4; color: var(--research-ink); font-family: var(--research-serif); font-size: 20px; font-style: italic; letter-spacing: .2px; text-align: center; }
+.research-site .research-equation sub { font-size: 11px; }
+.research-site .research-colophon { display: flex; justify-content: space-between; gap: 12px; padding: 16px 0 25px; color: #7b8790; font-size: 10px; line-height: 1.6; }
+.research-site .research-colophon span > span { padding: 0 4px; }
+@media (min-width: 1400px) {
+  .research-site .research-header, .research-site #power-response-demo, .research-site .research-footer { max-width: 1200px; }
+}
+@media (max-width: 900px) {
+  .research-site .research-header, .research-site #power-response-demo, .research-site .research-footer { width: calc(100% - 48px); }
+  .research-site .research-wordmark-note { font-size: 9px; letter-spacing: 1px; }
+  .research-site #power-response-demo .pr-toolbar::before { flex-basis: 86px; font-size: 9px; }
+  .research-site #power-response-demo #pr-freeze { margin-left: 0; }
+  .research-site #power-response-demo .pr-status { column-gap: 15px; }
+  .research-site #power-response-demo #pr-event { margin-left: 0; }
+  .research-site #power-response-demo .pr-panels { gap: 20px; }
+  .research-site #power-response-demo .pr-panel + .pr-panel { padding-left: 20px; }
+  .research-site #power-response-demo .pr-subhead { align-items: start; }
+  .research-site #power-response-demo .form-check { margin-top: 3px; }
+}
+@media (max-width: 720px) {
+  .research-site .research-header, .research-site #power-response-demo, .research-site .research-footer { width: calc(100% - 36px); }
+  .research-site .research-masthead { min-height: 55px; gap: 10px; }
+  .research-site .research-wordmark-note, .research-site .research-wordmark-rule { display: none; }
+  .research-site .research-wordmark { font-size: 22px; }
+  .research-site .research-introduction { padding: 23px 0 24px; }
+  .research-site .research-eyebrow { font-size: 9px; letter-spacing: 1.1px; }
+  .research-site .research-introduction h1 { max-width: 480px; font-size: 34px; letter-spacing: -1px; line-height: 1.15; margin-top: 9px; }
+  .research-site .research-introduction p { font-size: 13px; max-width: 510px; }
+  .research-site #power-response-demo .pr-heading { margin-bottom: 10px; }
+  .research-site #power-response-demo .pr-toolbar { column-gap: 7px; row-gap: 8px; padding: 11px 0; }
+  .research-site #power-response-demo .pr-toolbar::before { flex-basis: 100%; margin-bottom: 0; }
+  .research-site #power-response-demo .pr-toolbar + .pr-toolbar { padding-top: 4px; }
+  .research-site #power-response-demo .btn { min-height: 39px; padding-left: 11px; padding-right: 11px; }
+  .research-site #power-response-demo .form-select { min-height: 39px; }
+  .research-site #power-response-demo .pr-status { margin-bottom: 17px; font-size: 10px; padding-top: 13px; }
+  .research-site #power-response-demo #pr-event { width: 100%; }
+  .research-site #power-response-demo .pr-panels { grid-template-columns: minmax(0, 1fr); gap: 25px; }
+  .research-site #power-response-demo .pr-panel + .pr-panel { border-left: 0; padding-left: 0; border-top: 1px solid var(--research-rule); padding-top: 22px; }
+  .research-site #power-response-demo .pr-subhead { align-items: end; }
+  .research-site #power-response-demo .form-check { margin-top: 0; }
+  .research-site #power-response-demo .pr-chart text { font-size: 10px; }
+  .research-site #power-response-demo .pr-fit { margin-top: 25px; padding-top: 22px; }
+  .research-site #power-response-demo #pr-fit-detail { margin-bottom: 6px; }
+  .research-site #power-response-demo .pr-legend { margin-bottom: 7px; }
+  .research-site .research-reading-guide { grid-template-columns: 1fr; gap: 18px; padding: 21px 0; }
+  .research-site .research-methods summary { flex-wrap: wrap; gap: 2px 8px; padding: 11px 0; }
+  .research-site .research-methods-caption { flex: 1 1 auto; font-size: 10px; }
+  .research-site .research-methods-body { grid-template-columns: 1fr; gap: 17px; padding-top: 6px; }
+  .research-site .research-colophon { flex-direction: column; gap: 3px; }
+}
+@media (max-width: 380px) {
+  .research-site .research-header, .research-site #power-response-demo, .research-site .research-footer { width: calc(100% - 28px); }
+  .research-site .research-eyebrow span { margin: 0 3px; }
+  .research-site .research-introduction h1 { font-size: 31px; }
+  .research-site .research-eyebrow { max-width: 260px; line-height: 1.8; }
+  .research-site #power-response-demo .pr-toolbar { gap: 7px; }
+  .research-site #power-response-demo .btn { padding-left: 9px; padding-right: 9px; font-size: 11px; }
+  .research-site #power-response-demo .btn-primary { min-width: 124px; }
+  .research-site #power-response-demo .pr-toolbar > .pr-field { gap: 5px; }
+  .research-site #power-response-demo .pr-legend { gap: 5px 12px; }
+  .research-site #power-response-demo .pr-legend button { font-size: 10px; }
+  .research-site .research-methods-caption { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .research-site *, .research-site *::before, .research-site *::after { transition: none !important; scroll-behavior: auto !important; }
+}
+@media print {
+  body.research-site { background: #ffffff; }
+  .research-site .research-header, .research-site #power-response-demo, .research-site .research-footer { width: 100%; max-width: none; }
+  .research-site .research-source, .research-site #power-response-demo .pr-toolbar, .research-site #power-response-demo .form-check { display: none; }
+  .research-site .research-introduction { padding-top: 15px; }
+  .research-site #power-response-demo .pr-panel, .research-site #power-response-demo .pr-fit, .research-site .research-reading-guide { break-inside: avoid; }
+  .research-site #power-response-demo .pr-tooltip { display: none !important; }
+  .research-site .research-colophon { padding-bottom: 0; }
+}
+.research-site #power-response-demo .pr-chart text { font-size:12px; }
+.research-site #power-response-demo .pr-chart .bus-number { font-size:11px; }
+.research-site #power-response-demo #pr-cost-detail { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:12px; padding-top:12px; border-top:1px solid var(--research-rule); }
+.research-site #power-response-demo .pr-cost-name { font-size:11px; color:var(--research-muted); }
+.research-site #power-response-demo .pr-cost-value strong { font-family:var(--research-serif); font-size:25px; font-weight:400; letter-spacing:-.4px; }
+@media(pointer:coarse) {
+  .research-site #power-response-demo .btn, .research-site #power-response-demo .form-select { min-height:44px; }
+  .research-site #power-response-demo .form-select { font-size:16px; }
+  .research-site #power-response-demo .form-check { min-height:44px; }
+}
+
+html { color-scheme: light; background: #fdfdfb !important; }
+</style>
+</head>
+<body class="research-site">
+<script>
+(() => {
+  const key = 'online-sls-demo-v1';
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(key)); } catch (_) {}
+  window.openai = {
+    widgetState: saved,
+    setWidgetState: async value => {
+      window.openai.widgetState = value;
+      try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {}
+    }
+  };
+})();
+</script>
+<header class="research-header">
+  <div class="research-masthead">
+    <a class="research-wordmark" href="#power-response-demo" aria-label="O PredSLS interactive experiment">O <span>PredSLS</span><span class="research-wordmark-rule" aria-hidden="true"></span><span class="research-wordmark-note">Online system level synthesis</span></a>
+    <a class="research-source" href="https://github.com/tongxin-li/online-sls-demo" target="_blank" rel="noopener noreferrer">Source code <span aria-hidden="true">↗</span></a>
+  </div>
+  <div class="research-introduction">
+    <div class="research-eyebrow">Interactive research demonstrator <span aria-hidden="true">·</span> Synthetic power network</div>
+    <h1>Online learning for voltage regulation</h1>
+    <p>Introduce a disturbance. Follow the control cost, learned prediction sources, and adaptation across a 24 bus network.</p>
+  </div>
+</header>
+
+<main id="power-response-demo">
+  <style>
+    #power-response-demo { position:relative; color:var(--foreground); }
+    #power-response-demo .pr-heading { padding-right:96px; margin-bottom:16px; }
+    #power-response-demo .pr-heading h2 { margin-bottom:4px; }
+    #power-response-demo .pr-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:12px 0; }
+    #power-response-demo .pr-field { display:flex; align-items:center; gap:8px; }
+    #power-response-demo .pr-field label { margin:0; }
+    #power-response-demo .pr-field select { max-width:180px; }
+    #power-response-demo .pr-status { display:flex; flex-wrap:wrap; gap:8px 24px; margin:14px 0 20px; }
+    #power-response-demo .pr-panels { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.12fr); gap:28px; }
+    #power-response-demo .pr-panel { min-width:0; }
+    #power-response-demo .pr-panel h3 { margin:0 0 8px; }
+    #power-response-demo .pr-subhead { display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; min-height:30px; }
+    #power-response-demo .pr-chart { width:100%; display:block; overflow:visible; }
+    #power-response-demo .pr-chart text { fill:var(--foreground); font-size:12px; font-weight:400; }
+    #power-response-demo .pr-chart .domain, #power-response-demo .pr-chart .tick line { stroke:var(--border); }
+    #power-response-demo .pr-chart .grid line { stroke:var(--border); }
+    #power-response-demo .pr-chart .grid .domain { display:none; }
+    #power-response-demo .pr-legend { display:flex; flex-wrap:wrap; gap:8px 16px; margin:4px 0 10px; }
+    #power-response-demo .pr-legend button { display:inline-flex; align-items:center; gap:7px; padding:0; border:0; border-radius:0; background:transparent; color:var(--foreground); font:inherit; }
+    #power-response-demo .pr-legend button[aria-pressed="true"] { background:transparent; color:var(--foreground); }
+    #power-response-demo .pr-legend button[aria-pressed="false"] { opacity:.45; }
+    #power-response-demo .pr-swatch { width:20px; height:0; border-top:2px solid var(--viz-series-1); display:inline-block; }
+    #power-response-demo .pr-detail { min-height:24px; margin:8px 0; }
+    #power-response-demo #pr-cost-detail { display:flex; flex-wrap:wrap; gap:12px 24px; }
+    #power-response-demo .pr-cost-value { display:flex; flex-direction:column; gap:3px; }
+    #power-response-demo .pr-cost-name { font-size:12px; }
+    #power-response-demo .pr-fit { margin-top:24px; }
+    #power-response-demo .pr-note { margin-top:6px; }
+    #power-response-demo .pr-tooltip { position:absolute; display:none; pointer-events:none; z-index:10; padding:10px 12px; background:var(--popover); color:var(--popover-foreground); border:1px solid var(--border); border-radius:6px; }
+    #power-response-demo .pr-tooltip div { display:flex; justify-content:space-between; gap:18px; }
+    #power-response-demo [hidden] { display:none !important; }
+    @media(max-width:720px) {
+      #power-response-demo .pr-panels { grid-template-columns:minmax(0,1fr); gap:24px; }
+      #power-response-demo .pr-heading { padding-right:0; }
+    }
+    @media(pointer:coarse) {
+      #power-response-demo .pr-legend button { min-height:44px; }
+    }
+  </style>
+  <div class="pr-heading">
+    <h2>Adaptive voltage regulation</h2>
+    <div class="text-small">24 bus synthetic feeder · Illustrative shared response variant</div>
+  </div>
+  <div class="pr-toolbar">
+    <button type="button" class="btn btn-primary" id="pr-run">Run simulation</button>
+    <button type="button" class="btn" id="pr-step">One step</button>
+    <button type="button" class="btn btn-ghost" id="pr-restart">Start again</button>
+    <div class="pr-field"><label class="form-label" for="pr-speed">Speed</label><select class="form-select" id="pr-speed"><option value="4">4 steps/s</option><option value="12" selected>12 steps/s</option><option value="30">30 steps/s</option></select></div>
+  </div>
+  <div class="pr-toolbar">
+    <div class="pr-field"><label class="form-label" for="pr-bus">Bus</label><select class="form-select" id="pr-bus" aria-label="Selected bus"></select></div>
+    <button type="button" class="btn" id="pr-pulse" aria-keyshortcuts="D">Load pulse · D</button>
+    <button type="button" class="btn" id="pr-fault" aria-keyshortcuts="E">Repair forecast · E</button>
+    <button type="button" class="btn" id="pr-freeze">Freeze data and fit</button>
+  </div>
+  <div class="pr-status tabular-nums">
+    <span id="pr-clock">Step 0 / 480</span>
+    <span id="pr-learning">Learning starts after 30 samples</span>
+    <span id="pr-event" role="status" aria-live="polite">Ready · Space to run or pause</span>
+  </div>
+  <div class="pr-panels">
+    <section class="pr-panel" aria-labelledby="pr-network-title">
+      <div class="pr-subhead"><h3 id="pr-network-title">Prediction topology</h3><label class="form-check"><input class="form-check-input" type="checkbox" id="pr-all-links"><span class="form-check-label text-small">All receivers</span></label></div>
+      <div class="text-small" id="pr-topology-label">Recommended sources for bus 6</div>
+      <svg class="pr-chart" id="pr-network" role="img" aria-label="Fixed radial feeder and recommended directed prediction links"></svg>
+      <div class="pr-detail tabular-nums" id="pr-bus-detail"></div>
+      <div class="text-small">Gray lines are physical · Arrows are recommendations · × faulty forecast</div>
+      <div class="text-small">Halos indicate the magnitude of voltage deviation</div>
+      <div class="text-small">Dense communication remains active for control</div>
+      <div class="pr-note text-small" id="pr-links-detail">3 remote sources per receiver · Deployed links remain fixed</div>
+    </section>
+    <section class="pr-panel" aria-labelledby="pr-cost-title">
+      <h3 id="pr-cost-title">Cumulative control cost</h3>
+      <div class="pr-legend" aria-label="Visible cost series">
+        <button type="button" class="cursor-interaction" data-series="online" aria-pressed="true"><span class="pr-swatch"></span>Adaptive</button>
+        <button type="button" class="cursor-interaction" data-series="static" aria-pressed="true"><span class="pr-swatch" style="border-color:var(--viz-series-2);border-top-style:dashed"></span>Static prediction</button>
+        <button type="button" class="cursor-interaction" data-series="causal" aria-pressed="true"><span class="pr-swatch" style="border-color:var(--viz-series-3);border-top-style:dotted"></span>Causal</button>
+      </div>
+      <svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative quadratic cost of three controllers on the same disturbances"></svg>
+      <div class="pr-detail tabular-nums" id="pr-cost-detail"></div>
+      <div class="text-small">Stage cost includes voltage error and control effort</div>
+    </section>
+  </div>
+  <section class="pr-fit" aria-labelledby="pr-fit-title">
+    <div class="pr-subhead"><h3 id="pr-fit-title">Online adaptation</h3><span class="text-small tabular-nums" id="pr-fit-detail">Rolling window of 60 revealed samples</span></div>
+    <svg class="pr-chart" id="pr-convergence" role="img" aria-label="Relative change of the shared prediction response over time"></svg>
+    <div class="text-small" id="pr-mode-note">Freeze data to inspect convergence to a fixed ridge solution</div>
+  </section>
+  <div class="pr-tooltip text-small tabular-nums" role="tooltip" id="pr-tooltip"></div>
+  <div role="alert" id="pr-error" hidden></div>
+</main>
+<footer class="research-footer">
+  <div class="research-reading-guide">
+    <div>
+      <h2>Explore the experiment</h2>
+      <p>Select a bus in the network. Press <kbd>D</kbd> to add an unexpected load pulse or <kbd>E</kbd> to change forecast reliability. Use <kbd>Space</kbd> to run or pause. Freeze the data to observe numerical convergence.</p>
+    </div>
+    <div>
+      <h2>Interpret the figures</h2>
+      <p>All three controllers face the same disturbances. Arrows show learned source recommendations. The physical feeder and deployed communication remain fixed throughout the experiment.</p>
+    </div>
+  </div>
+  <details class="research-methods">
+    <summary><span>Model and scope</span><span class="research-methods-caption">A reduced illustration of shared adaptation</span><span class="research-expand" aria-hidden="true"></span></summary>
+    <div class="research-methods-body">
+      <section>
+        <h3>A linear voltage surrogate</h3>
+        <p>The state is voltage deviation from nominal. Each bus has an equivalent control input. Tree distances define a dense linear coupling model.</p>
+        <div class="research-equation" aria-label="State at the next step equals A times the state plus the control input plus the disturbance">x<sub>t+1</sub> = Ax<sub>t</sub> + u<sub>t</sub> + w<sub>t</sub></div>
+        <p>Values use per unit coordinates and abstract control intervals. This illustration does not calculate AC power flow, actuator saturation, or hard voltage limits.</p>
+      </section>
+      <section>
+        <h3>Shared prediction adaptation</h3>
+        <p>A shared matrix calibrates forecasts using the latest 60 revealed samples. This reduced ridge loss illustrates online learning and differs from the full manuscript algorithm and its theoretical guarantees.</p>
+        <div class="research-equation" aria-label="Adaptive control equals state feedback minus the calibrated preview correction">u<sub>t</sub> = Kx<sub>t</sub> − HG<sub>t</sub>ŵ<sub>t</sub></div>
+        <p>The plots accumulate quadratic stage cost. They do not report formal regret. Frozen fitting measures convergence to a fixed numerical solution. Online data and source rankings can continue to change.</p>
+      </section>
+    </div>
+  </details>
+  <div class="research-colophon"><span>O PredSLS <span aria-hidden="true">·</span> Interactive numerical illustration</span><span>Deterministic initial conditions <span aria-hidden="true">·</span> Runs in your browser</span></div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+
+<script>
+/* Illustrative shared response calibration for the interactive voltage demo.
+ * This is not the full FIR projected response algorithm or its regret theorem.
+ * Every controller receives the same immutable disturbance and forecast pair.
+ * Costs use x_t' Q x_t + u_t' R u_t, with no terminal cost.
+ */
+(function (root, factory) {
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.PowerDemo = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+
+  const N = 24;
+  const AMPLITUDE = 0.006;
+  const RIDGE = 0.03;
+  const WINDOW = 60;
+  const WARMUP = 30;
+  const TOLERANCE = 1e-5;
+  const EDGES = [[1,2],[2,3],[3,4],[4,5],[4,6],[6,7],[4,8],
+    [3,9],[9,10],[9,11],[11,12],[1,15],[15,13],[13,14],[13,16],
+    [16,17],[16,18],[18,19],[19,20],[20,21],[18,22],[22,23],[23,24]];
+
+  function zeros(n = N, m = n) { return Array.from({length:n}, () => Array(m).fill(0)); }
+  function eye(n = N) { const a = zeros(n); for (let i=0;i<n;i++) a[i][i]=1; return a; }
+  function copy(a) { return a.map(row => row.slice()); }
+  function transpose(a) { return a[0].map((_,j) => a.map(row => row[j])); }
+  function multiply(a,b) {
+    const c = zeros(a.length,b[0].length);
+    for (let i=0;i<a.length;i++) for (let k=0;k<b.length;k++) {
+      const v = a[i][k];
+      for (let j=0;j<b[0].length;j++) c[i][j] += v*b[k][j];
+    }
+    return c;
+  }
+  function matvec(a,x) { return a.map(row => row.reduce((v,e,j) => v+e*x[j],0)); }
+  function combine(a,b,alpha=1,beta=1) { return a.map((row,i) => row.map((v,j) => alpha*v+beta*b[i][j])); }
+  function frobenius(a) { return Math.sqrt(a.reduce((s,row) => s+row.reduce((t,v) => t+v*v,0),0)); }
+  function normInf(a) { return Math.max(...a.map(row => row.reduce((s,v) => s+Math.abs(v),0))); }
+  function squared(x) { return x.reduce((s,v) => s+v*v,0); }
+  function deepFreeze(x) {
+    if (x && typeof x === 'object' && !Object.isFrozen(x)) {
+      Object.values(x).forEach(deepFreeze); Object.freeze(x);
+    }
+    return x;
+  }
+
+  // Solve A X = B for symmetric positive definite A without explicit inversion.
+  function solveSPD(a,b) {
+    const n=a.length, m=b[0].length, l=zeros(n), y=zeros(n,m), x=zeros(n,m);
+    for (let i=0;i<n;i++) for (let j=0;j<=i;j++) {
+      let v=a[i][j];
+      for (let k=0;k<j;k++) v -= l[i][k]*l[j][k];
+      if (i===j) {
+        if (!(v>0)) throw new Error('Matrix must be positive definite');
+        l[i][j]=Math.sqrt(v);
+      } else l[i][j]=v/l[j][j];
+    }
+    for (let i=0;i<n;i++) for (let j=0;j<m;j++) {
+      let v=b[i][j];
+      for (let k=0;k<i;k++) v -= l[i][k]*y[k][j];
+      y[i][j]=v/l[i][i];
+    }
+    for (let i=n-1;i>=0;i--) for (let j=0;j<m;j++) {
+      let v=y[i][j];
+      for (let k=i+1;k<n;k++) v -= l[k][i]*x[k][j];
+      x[i][j]=v/l[i][i];
+    }
+    return x;
+  }
+
+  function buildModel() {
+    const adjacency=Array.from({length:N},()=>[]);
+    for (const [a,b] of EDGES) { adjacency[a-1].push(b-1); adjacency[b-1].push(a-1); }
+    const distances=zeros();
+    for (let i=0;i<N;i++) {
+      const d=Array(N).fill(-1), queue=[i]; d[i]=0;
+      for (let q=0;q<queue.length;q++) for (const j of adjacency[queue[q]]) {
+        if (d[j]<0) { d[j]=d[queue[q]]+1; queue.push(j); }
+      }
+      distances[i]=d;
+    }
+    const w=distances.map((row,i)=>row.map((d,j)=>i===j?0:Math.exp(-d/2)));
+    const degree=w.map(row=>row.reduce((s,v)=>s+v,0));
+    const A=w.map((row,i)=>row.map((v,j)=>(i===j?0.4:0)+0.58*v/Math.sqrt(degree[i]*degree[j])));
+    const Q=eye().map(row=>row.map(v=>35*v));
+    const R=eye().map(row=>row.map(v=>0.08*v));
+    const at=transpose(A);
+    let P=copy(Q), residual=Infinity, iterations=0;
+    for (;iterations<500;iterations++) {
+      const H=solveSPD(combine(R,P),P);
+      const next=combine(Q,multiply(at,multiply(combine(P,multiply(P,H),1,-1),A)));
+      residual=frobenius(combine(next,P,1,-1));
+      P=next;
+      if (residual<1e-12) break;
+    }
+    const H=solveSPD(combine(R,P),P);
+    const K=multiply(H,A).map(row=>row.map(v=>-v));
+    return deepFreeze({A,B:eye(),Q,R,P,H,K,distances,dareResidual:residual,
+      dareIterations:iterations+1,closedLoopNormInf:normInf(combine(A,K))});
+  }
+  const model=buildModel();
+
+  function seededRandom(seed) {
+    let state=seed>>>0;
+    function uniform() {
+      state += 0x6D2B79F5;
+      let z=state;
+      z=Math.imul(z^(z>>>15),z|1);
+      z ^= z+Math.imul(z^(z>>>7),z|61);
+      return ((z^(z>>>14))>>>0)/4294967296;
+    }
+    let spare=null;
+    return {normal() {
+      if (spare!==null) { const x=spare; spare=null; return x; }
+      const r=Math.sqrt(-2*Math.log(Math.max(Number.MIN_VALUE,uniform())));
+      const theta=2*Math.PI*uniform();
+      spare=r*Math.sin(theta); return r*Math.cos(theta);
+    }};
+  }
+
+  function statistics(samples) {
+    const S=zeros(), T=zeros();
+    for (const sample of samples) for (let i=0;i<N;i++) for (let j=0;j<N;j++) {
+      S[i][j] += sample.z[i]*sample.z[j]/samples.length;
+      T[i][j] += sample.y[i]*sample.z[j]/samples.length;
+    }
+    for (let i=0;i<N;i++) { S[i][i]+=RIDGE; T[i][i]+=RIDGE; }
+    // The largest absolute row sum bounds the covariance spectral norm.
+    return {S,T,stepSize:0.95/normInf(S),samples};
+  }
+  function gradientSteps(g,stats,count) {
+    let result=g;
+    for (let k=0;k<count;k++) {
+      const gradient=combine(multiply(result,stats.S),stats.T,1,-1);
+      result=combine(result,gradient,1,-stats.stepSize);
+    }
+    return result;
+  }
+  function objective(g,samples) {
+    if (!samples.length) return 0;
+    let loss=0;
+    for (const pair of samples) {
+      const predicted=matvec(g,pair.z);
+      for (let i=0;i<N;i++) loss += (predicted[i]-pair.y[i])**2/(2*samples.length);
+    }
+    for (let i=0;i<N;i++) for (let j=0;j<N;j++) loss += RIDGE/2*(g[i][j]-(i===j?1:0))**2;
+    return loss;
+  }
+  function recommendations(gain) {
+    const result=[];
+    for (let receiver=0;receiver<N;receiver++) {
+      const ranked=[];
+      for (let source=0;source<N;source++) if (source!==receiver)
+        ranked.push({from:source+1,to:receiver+1,weight:gain[receiver][source]**2});
+      ranked.sort((a,b)=>b.weight-a.weight||a.from-b.from);
+      result.push(...ranked.slice(0,3));
+    }
+    return result;
+  }
+  function edgeChanges(before,after) {
+    const first=new Set(before.map(e=>e.from+','+e.to));
+    const second=new Set(after.map(e=>e.from+','+e.to));
+    let count=0;
+    for (const key of first) if (!second.has(key)) count++;
+    for (const key of second) if (!first.has(key)) count++;
+    return count/2;
+  }
+
+  class Simulation {
+    constructor(options={}) {
+      this.options={seed:options.seed===undefined?20261013:options.seed,
+        horizon:options.horizon===undefined?480:options.horizon,
+        faultBuses:options.faultBuses===undefined?[3,6,9,12,15,18,21,24]:options.faultBuses.slice()};
+      if (!Number.isInteger(this.options.horizon)||this.options.horizon<1) throw new Error('Invalid horizon');
+      this.reset();
+    }
+    reset() {
+      this.random=seededRandom(this.options.seed);
+      this.t=0; this.mode='running'; this.G=eye();
+      this.states={online:Array(N).fill(0),static:Array(N).fill(0),causal:Array(N).fill(0)};
+      this.cumulative={online:0,static:0,causal:0};
+      this.stage={online:0,static:0,causal:0};
+      this.faults=new Set(this.options.faultBuses.map(bus=>this.checkBus(bus)));
+      this.latent=Array.from({length:N+1},()=>this.random.normal());
+      this.pulses=[]; this.samples=[]; this.history=[]; this.eventLog=[];
+      this.lastSample=null; this.lastInputs=null; this.fit=null; this.fitHistory=[];
+      this.fitError=null; this.fitObjective=null; this.fitIteration=0;
+      this.directGain=multiply(model.H,this.G).map(row=>row.map(v=>-v));
+      this.recommendations=recommendations(this.directGain);
+      this.drift=0; this.changedEdges=0; this.sinceStable=0;
+      this.lastTrainingTime=null; this.lastTrainingSampleCount=0;
+      return this.snapshot();
+    }
+    checkBus(bus) {
+      if (!Number.isInteger(bus)||bus<1||bus>N) throw new Error('Bus must be an integer from 1 through 24');
+      return bus;
+    }
+    queuePulse(bus) {
+      this.checkBus(bus);
+      if (this.mode!=='running') return false;
+      this.pulses.push({bus,age:0});
+      this.eventLog.push(deepFreeze({t:this.t,type:'pulse',bus,message:'Net load spike at bus '+bus}));
+      return true;
+    }
+    toggleFault(bus) {
+      this.checkBus(bus);
+      if (this.mode!=='running') return false;
+      if (this.faults.has(bus)) this.faults.delete(bus); else this.faults.add(bus);
+      this.eventLog.push(deepFreeze({t:this.t,type:'forecast',bus,faulty:this.faults.has(bus),
+        message:'Forecast at bus '+bus+(this.faults.has(bus)?' corrupted':' repaired')}));
+      return this.faults.has(bus);
+    }
+    updateGain(g) {
+      const gain=multiply(model.H,g).map(row=>row.map(v=>-v));
+      const next=recommendations(gain);
+      this.drift=frobenius(combine(gain,this.directGain,1,-1))/Math.max(frobenius(this.directGain),1e-12);
+      this.changedEdges=edgeChanges(this.recommendations,next);
+      this.sinceStable=this.changedEdges===0?this.sinceStable+1:0;
+      this.G=g; this.directGain=gain; this.recommendations=next;
+    }
+    step() {
+      if (this.mode!=='running') return this.snapshot();
+      if (this.t>=this.options.horizon) { this.mode='completed'; return this.snapshot(); }
+      // History stops at t minus one. No current target is available to this update.
+      this.lastTrainingTime=this.samples.length?this.samples[this.samples.length-1].t:null;
+      this.lastTrainingSampleCount=this.samples.length;
+      if (this.samples.length>=WARMUP) this.updateGain(gradientSteps(this.G,statistics(this.samples),4));
+      else { this.drift=0; this.changedEdges=0; this.sinceStable++; }
+
+      const rho=0.72, innovation=Math.sqrt(1-rho*rho);
+      this.latent=this.latent.map(v=>rho*v+innovation*this.random.normal());
+      const base=Array.from({length:N},(_,i)=>AMPLITUDE*(0.35*this.latent[0]+0.65*this.latent[i+1]));
+      const forecast=base.map((v,i)=>{
+        const faulty=this.faults.has(i+1);
+        return (faulty?0.15:1)*v+AMPLITUDE*(faulty?1.6:0.05)*this.random.normal();
+      });
+      // Unexpected demand is realized only after the forecast has been sealed.
+      const disturbance=base.slice(), pulse=Array(N).fill(0);
+      for (const event of this.pulses) {
+        const value=-0.025*Math.exp(-event.age/3);
+        disturbance[event.bus-1]+=value; pulse[event.bus-1]+=value; event.age++;
+      }
+      this.pulses=this.pulses.filter(event=>event.age<12);
+      const sample=deepFreeze({t:this.t,forecast,disturbance,base,pulse,
+        z:forecast.map(v=>v/AMPLITUDE),y:disturbance.map(v=>v/AMPLITUDE)});
+      const preview={online:matvec(this.directGain,forecast),
+        static:matvec(model.H,forecast).map(v=>-v),causal:Array(N).fill(0)};
+      const inputs={}, rms={};
+      for (const key of ['online','static','causal']) {
+        const x=this.states[key], feedback=matvec(model.K,x);
+        const u=feedback.map((v,i)=>v+preview[key][i]);
+        this.stage[key]=35*squared(x)+0.08*squared(u);
+        this.cumulative[key]+=this.stage[key];
+        const ax=matvec(model.A,x);
+        this.states[key]=ax.map((v,i)=>v+u[i]+disturbance[i]);
+        inputs[key]=u;
+        rms[key]=Math.sqrt(squared(this.states[key])/N);
+      }
+      this.lastInputs=deepFreeze(inputs); this.lastSample=sample;
+      this.samples.push(sample); if (this.samples.length>WINDOW) this.samples.shift();
+      this.t++;
+      this.history.push(deepFreeze({t:this.t,...this.cumulative,stage:{...this.stage},rms,
+        drift:this.drift,changedEdges:this.changedEdges,
+        calibrationLoss:objective(this.G,this.samples)}));
+      if (this.t>=this.options.horizon) this.mode='completed';
+      return this.snapshot();
+    }
+    freeze() {
+      if (this.samples.length<WARMUP) return false;
+      if (this.mode==='frozen'||this.mode==='fitting'||this.mode==='converged') return this.snapshot();
+      const stats=statistics(this.samples.slice());
+      const optimum=transpose(solveSPD(stats.S,transpose(stats.T)));
+      this.fit={...stats,optimum,scale:Math.max(frobenius(optimum),1e-12)};
+      this.fitIteration=0; this.fitHistory=[]; this.mode='frozen';
+      this.sinceStable=0; this.changedEdges=0;
+      this.measureFit();
+      this.eventLog.push(deepFreeze({t:this.t,type:'freeze',message:'Observation window frozen for optimizer convergence'}));
+      return this.snapshot();
+    }
+    measureFit() {
+      this.fitError=frobenius(combine(this.G,this.fit.optimum,1,-1))/this.fit.scale;
+      this.fitObjective=objective(this.G,this.fit.samples);
+      this.fitHistory.push(deepFreeze({iteration:this.fitIteration,error:this.fitError,
+        objective:this.fitObjective,changedEdges:this.changedEdges}));
+    }
+    fitStep(count=12) {
+      if (!this.fit||this.mode==='running'||this.mode==='completed'||this.mode==='converged') return this.snapshot();
+      if (!Number.isInteger(count)||count<1) throw new Error('Iteration count must be positive');
+      this.mode='fitting';
+      this.updateGain(gradientSteps(this.G,this.fit,count));
+      this.fitIteration+=count; this.measureFit();
+      if (this.fitError<TOLERANCE) this.mode='converged';
+      return this.snapshot();
+    }
+    resume() {
+      this.mode=this.t>=this.options.horizon?'completed':'running';
+      this.fit=null; this.fitError=null; this.fitObjective=null;
+      this.fitIteration=0; this.fitHistory=[];
+      this.drift=0; this.changedEdges=0; this.sinceStable=0;
+      return this.snapshot();
+    }
+    snapshot() {
+      return {t:this.t,horizon:this.options.horizon,mode:this.mode,seed:this.options.seed,
+        states:Object.fromEntries(Object.entries(this.states).map(([k,v])=>[k,v.slice()])),
+        cumulative:{...this.cumulative},stage:{...this.stage},costs:{...this.cumulative},
+        history:this.history.slice(),G:copy(this.G),directGain:copy(this.directGain),
+        recommendations:this.recommendations.map(e=>({...e})),
+        localChannels:Array.from({length:N},(_,i)=>({from:i+1,to:i+1,weight:this.directGain[i][i]**2})),
+        faults:[...this.faults].sort((a,b)=>a-b),eventLog:this.eventLog.slice(),
+        lastSample:this.lastSample,lastInputs:this.lastInputs,
+        drift:this.drift,changedEdges:this.changedEdges,sinceStable:this.sinceStable,
+        sampleCount:this.samples.length,lastTrainingTime:this.lastTrainingTime,
+        lastTrainingSampleCount:this.lastTrainingSampleCount,
+        fitError:this.fitError,fitObjective:this.fitObjective,fitIteration:this.fitIteration,
+        fitHistory:this.fitHistory.slice(),canFreeze:this.samples.length>=WARMUP};
+    }
+  }
+
+  return {Simulation,model,constants:deepFreeze({N,edges:EDGES,amplitude:AMPLITUDE,
+    ridge:RIDGE,window:WINDOW,warmup:WARMUP,tolerance:TOLERANCE,horizon:480}),
+    math:{zeros,eye,transpose,multiply,matvec,combine,frobenius,normInf,solveSPD,objective,statistics,recommendations}};
+});
+
+</script>
+
+<script>
+(function () {
+  'use strict';
+  const root = document.getElementById('power-response-demo');
+  const $ = id => root.querySelector('#pr-' + id);
+  const error = $('error');
+  if (!window.d3 || !window.PowerDemo) {
+    error.hidden = false;
+    error.textContent = 'The chart library could not load. Reopen with an internet connection.';
+    root.querySelectorAll('button').forEach(b => { b.disabled = true; });
+    return;
+  }
+  const d3 = window.d3;
+  const simulation = new PowerDemo.Simulation();
+  // Begin with a short deterministic history so every plot is immediately useful.
+  for (let i=0;i<60;i++) simulation.step();
+  const series = [
+    { key:'online', label:'Adaptive', color:'var(--viz-series-1)', dash:null },
+    { key:'static', label:'Static prediction', color:'var(--viz-series-2)', dash:'7 4' },
+    { key:'causal', label:'Causal', color:'var(--viz-series-3)', dash:'2 4' }
+  ];
+  const visible = new Set(series.map(s => s.key));
+  let selectedBus = 6;
+  let playing = false;
+  let timer = null;
+  let snapshot = simulation.snapshot();
+  let journal = [];
+  let fitSteps = 0;
+  let restored = false;
+  let pin = null;
+  const positions = [
+    [.03,.48],[.12,.28],[.27,.28],[.43,.16],[.43,.01],[.60,.12],
+    [.77,.03],[.61,.31],[.27,.48],[.44,.38],[.44,.57],[.61,.49],
+    [.28,.76],[.28,.96],[.12,.68],[.45,.78],[.45,.96],[.62,.76],
+    [.77,.64],[.91,.52],[.97,.35],[.77,.91],[.91,.84],[.98,.68]
+  ];
+  for (let bus = 1; bus <= 24; bus++) {
+    const option = document.createElement('option');
+    option.value = String(bus);
+    option.textContent = String(bus);
+    $('bus').append(option);
+  }
+  $('bus').value = String(selectedBus);
+  function isFit() { return ['frozen','fitting','converged'].includes(snapshot.mode); }
+  function announce(message) { $('event').textContent = message; }
+  function save() {
+    restored = true;
+    if (!window.openai?.setWidgetState) return;
+    const state = {
+      modelContent: { scenario:'Synthetic 24 bus voltage regulation', variant:'Shared response calibration with fixed physical and deployed links', step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
+      privateContent: { version:1, t:journal.length <= 200 ? snapshot.t : 0, journal:journal.length <= 200 ? journal : [], selectedBus, speed:$('speed').value, allLinks:$('all-links').checked, fitSteps:journal.length <= 200 ? fitSteps : 0, fitting:journal.length <= 200 && isFit() }
+    };
+    window.openai.setWidgetState(state).catch(() => {});
+  }
+  function hydrate(saved) {
+    const data = saved?.privateContent;
+    if (restored || !data || data.version !== 1) return;
+    restored = true;
+    selectedBus = Math.max(1, Math.min(24, Number(data.selectedBus) || 6));
+    $('bus').value = String(selectedBus);
+    if (['4','12','30'].includes(data.speed)) $('speed').value = data.speed;
+    $('all-links').checked = !!data.allLinks;
+    const items = Array.isArray(data.journal) ? data.journal.slice(0,200) : [];
+    const t = Math.max(0, Math.min(480, Math.floor(Number(data.t) || 0)));
+    simulation.reset();
+    journal = [];
+    for (let step = 0; step <= t; step++) {
+      for (const item of items.filter(v => v.t === step)) {
+        if (item.type === 'fit' && step >= 30) {
+          simulation.freeze();
+          for (let k=0; k<Math.min(3000,Math.max(0,Math.floor(item.count || 0))); k++) simulation.fitStep();
+          simulation.resume(); journal.push(item); continue;
+        }
+        if (!Number.isInteger(item.bus) || item.bus < 1 || item.bus > 24) continue;
+        if (item.type === 'pulse') simulation.queuePulse(item.bus);
+        else if (item.type === 'fault') simulation.toggleFault(item.bus);
+        else continue;
+        journal.push(item);
+      }
+      if (step < t) simulation.step();
+    }
+    fitSteps = 0;
+    if (data.fitting && t >= 30) {
+      simulation.freeze();
+      const count = Math.min(3000, Math.max(0, Number(data.fitSteps) || 0));
+      for (let i = 0; i < count; i++) { simulation.fitStep(); fitSteps++; }
+    }
+    snapshot = simulation.snapshot();
+    announce('Saved experiment restored · Paused');
+  }
+  function stop() {
+    playing = false;
+    if (timer) clearTimeout(timer);
+    timer = null;
+  }
+  function schedule() {
+    if (!playing) return;
+    timer = setTimeout(() => {
+      tick();
+      if (playing) schedule();
+    }, 1000 / Number($('speed').value));
+  }
+  function tick() {
+    if (isFit()) { simulation.fitStep(); fitSteps++; }
+    else simulation.step();
+    snapshot = simulation.snapshot();
+    if (snapshot.mode === 'completed') { stop(); announce('Episode complete · Freeze the data to inspect convergence'); }
+    if (snapshot.mode === 'converged') { stop(); announce('Frozen fit converged · Relative error below 0.001%'); }
+    render();
+    if (snapshot.t % 30 === 0 || !playing) save();
+  }
+  function toggleRun() {
+    if (playing) { stop(); announce(isFit() ? 'Fit paused' : 'Simulation paused'); save(); }
+    else if (snapshot.mode !== 'completed' && snapshot.mode !== 'converged') {
+      playing = true;
+      announce(isFit() ? 'Fitting the frozen sample window' : 'Simulation running');
+      schedule();
+    }
+    renderControls();
+  }
+  $('run').addEventListener('click', toggleRun);
+  $('step').addEventListener('click', () => { stop(); tick(); save(); });
+  $('restart').addEventListener('click', () => {
+    stop(); simulation.reset(); snapshot = simulation.snapshot(); journal = []; fitSteps = 0; pin = null;
+    announce('Same seed restored · Ready'); render(); save();
+  });
+  $('speed').addEventListener('change', save);
+  $('bus').addEventListener('change', () => { selectedBus = Number($('bus').value); render(); save(); });
+  $('all-links').addEventListener('change', () => { drawNetwork(); save(); });
+  function pulse() {
+    if ($('pulse').disabled) return;
+    simulation.queuePulse(selectedBus); journal.push({ t:snapshot.t, type:'pulse', bus:selectedBus });
+    snapshot = simulation.snapshot();
+    announce('Load pulse queued at bus ' + selectedBus + ' · Unforecasted voltage sag'); render(); save();
+  }
+  function fault() {
+    if ($('fault').disabled) return;
+    simulation.toggleFault(selectedBus); journal.push({ t:snapshot.t, type:'fault', bus:selectedBus });
+    snapshot = simulation.snapshot();
+    announce('Bus ' + selectedBus + (snapshot.faults.includes(selectedBus) ? ' forecast corrupted' : ' forecast repaired'));
+    render(); save();
+  }
+  $('pulse').addEventListener('click', pulse);
+  $('fault').addEventListener('click', fault);
+  $('freeze').addEventListener('click', () => {
+    stop();
+    if (isFit()) {
+      simulation.resume(); snapshot = simulation.snapshot();
+      // A refit changes future actions. Preserve this in the replay journal.
+      journal.push({ t:snapshot.t, type:'fit', count:fitSteps });
+      fitSteps = 0;
+      announce(snapshot.mode === 'completed' ? 'Episode complete' : 'Live data resumed · Press Run to continue');
+    } else {
+      simulation.freeze(); snapshot = simulation.snapshot(); fitSteps = 0;
+      playing = true; schedule(); announce('Data frozen · Plant time and cumulative cost are held');
+    }
+    render(); save();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.repeat || e.altKey || e.ctrlKey || e.metaKey || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    const key = e.key.toLowerCase();
+    if (key === 'd') { e.preventDefault(); pulse(); }
+    else if (key === 'e') { e.preventDefault(); fault(); }
+    else if (key === ' ' && e.target.tagName !== 'BUTTON') { e.preventDefault(); toggleRun(); }
+  });
+  root.querySelectorAll('[data-series]').forEach(button => {
+    button.addEventListener('click', () => {
+      const key = button.dataset.series;
+      if (visible.has(key) && visible.size > 1) visible.delete(key);
+      else visible.add(key);
+      button.setAttribute('aria-pressed', visible.has(key) ? 'true' : 'false');
+      drawCost();
+    });
+  });
+  function renderControls() {
+    const frozen = isFit();
+    $('clock').textContent = 'Step ' + snapshot.t + ' / ' + snapshot.horizon;
+    $('learning').textContent = frozen ? 'Plant held · ' + snapshot.mode : snapshot.t < 30 ? 'Learning starts after 30 samples' : 'Learning from revealed samples';
+    $('run').textContent = playing ? (frozen ? 'Pause fit' : 'Pause simulation') : (frozen ? 'Continue fit' : 'Run simulation');
+    $('run').disabled = ['converged','completed'].includes(snapshot.mode);
+    $('step').textContent = frozen ? 'One fit step' : 'One step';
+    $('step').disabled = ['converged','completed'].includes(snapshot.mode);
+    $('freeze').textContent = frozen ? 'Return to simulation' : 'Freeze data and fit';
+    $('freeze').disabled = snapshot.t < 30;
+    $('pulse').disabled = frozen || snapshot.mode === 'completed';
+    $('fault').disabled = frozen || snapshot.mode === 'completed';
+    $('fault').textContent = (snapshot.faults.includes(selectedBus) ? 'Repair' : 'Corrupt') + ' forecast · E';
+    $('fit-title').textContent = frozen ? 'Convergence on frozen data' : 'Online adaptation';
+    $('fit-detail').textContent = frozen ? 'Relative solution error ' + d3.format('.2~g')(100*(snapshot.fitError || 0)) + '%' : 'Rolling window of 60 revealed samples';
+    $('mode-note').textContent = frozen ? 'A fixed ridge objective · Numerical convergence of this reduced model' : 'Freeze data to inspect convergence to a fixed ridge solution';
+  }
+  function drawNetwork() {
+    const el = $('network');
+    const width = Math.max(240, el.getBoundingClientRect().width);
+    const height = 292;
+    const svg = d3.select(el).attr('viewBox', '0 0 ' + width + ' ' + height).attr('height', height);
+    const point = bus => [22 + positions[bus - 1][0] * (width - 48), 26 + positions[bus - 1][1] * (height - 54)];
+    if (svg.select('defs').empty()) {
+      svg.append('title').text('Fixed electrical feeder with learned prediction source recommendations');
+      const defs = svg.append('defs');
+      defs.append('marker').attr('id','pr-arrow').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerUnits','userSpaceOnUse').attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto').append('path').attr('d','M 0 0 L 10 5 L 0 10 Z').attr('fill','var(--viz-series-1)');
+      svg.append('g').attr('class','physical');
+      svg.append('g').attr('class','recommended');
+      svg.append('g').attr('class','nodes');
+    }
+    svg.select('.physical').selectAll('line').data(PowerDemo.constants.edges).join('line')
+      .attr('x1',e => point(e[0])[0]).attr('y1',e => point(e[0])[1]).attr('x2',e => point(e[1])[0]).attr('y2',e => point(e[1])[1])
+      .attr('stroke','var(--foreground)').attr('stroke-opacity',.2).attr('stroke-width',1.4);
+    const recommendations = snapshot.recommendations || [];
+    const edges = $('all-links').checked ? recommendations : recommendations.filter(e => e.to === selectedBus);
+    const extent = d3.extent(recommendations,e => e.weight);
+    const strength = d3.scaleSqrt().domain([0,Math.max(extent[1] || 0,1e-12)]).range([1,3.5]);
+    function arc(e) {
+      const a = point(e.from), b = point(e.to), dx=b[0]-a[0], dy=b[1]-a[1], dist=Math.hypot(dx,dy)||1;
+      const offset = e.from < e.to ? 1 : -1;
+      const c=[(a[0]+b[0])/2 - dy*.18*offset, (a[1]+b[1])/2 + dx*.18*offset];
+      const da = Math.hypot(c[0]-a[0],c[1]-a[1]) || 1, db=Math.hypot(b[0]-c[0],b[1]-c[1]) || 1;
+      const start=[a[0]+12*(c[0]-a[0])/da,a[1]+12*(c[1]-a[1])/da];
+      const end=[b[0]-14*(b[0]-c[0])/db,b[1]-14*(b[1]-c[1])/db];
+      return 'M'+start.join(',')+' Q'+c.join(',')+' '+end.join(',');
+    }
+    svg.select('.recommended').selectAll('path').data(edges,e => e.from+'_'+e.to).join('path')
+      .attr('d',arc).attr('fill','none').attr('stroke','var(--viz-series-1)').attr('stroke-width',e => strength(e.weight))
+      .attr('opacity',e => e.to === selectedBus ? .9 : .16).attr('marker-end','url(#pr-arrow)');
+    const nodes = svg.select('.nodes').selectAll('g').data(d3.range(1,25)).join(enter => {
+      const g=enter.append('g').attr('class','cursor-interaction');
+      g.append('circle').attr('class','voltage-halo'); g.append('circle').attr('class','bus-dot'); g.append('text').attr('class','bus-number'); g.append('text').attr('class','fault-mark'); g.append('title');
+      return g;
+    }).attr('transform',bus => 'translate('+point(bus).join(',')+')');
+    nodes.on('click',(_e,bus) => { selectedBus=bus; $('bus').value=String(bus); render(); save(); });
+    nodes.select('.voltage-halo').attr('r',bus => 12+Math.min(10,Math.abs(snapshot.states.online[bus-1])*400)).attr('fill','var(--viz-series-1)').attr('fill-opacity',.12);
+    nodes.select('.bus-dot').attr('r',11).attr('fill',bus => bus === selectedBus ? 'var(--primary)' : 'var(--background)').attr('stroke','var(--border)').attr('stroke-width',1);
+    nodes.select('.bus-number').attr('text-anchor','middle').attr('dy','.35em').style('fill',bus => bus === selectedBus ? 'var(--primary-foreground)' : 'var(--foreground)').text(bus => bus);
+    nodes.select('.fault-mark').attr('x',13).attr('y',-9).text(bus => snapshot.faults.includes(bus) ? '×' : '');
+    nodes.select('title').text(bus => 'Bus '+bus+' voltage '+(1+snapshot.states.online[bus-1]).toFixed(4)+' pu'+(snapshot.faults.includes(bus)?' with faulty forecast':''));
+    const voltage = 1 + snapshot.states.online[selectedBus - 1];
+    $('bus-detail').textContent = 'Bus '+selectedBus+' · '+voltage.toFixed(4)+' pu · '+(snapshot.faults.includes(selectedBus)?'Faulty forecast':'Reliable forecast');
+    const sources = recommendations.filter(e => e.to === selectedBus).map(e => e.from).join(', ');
+    $('topology-label').textContent = $('all-links').checked ? '72 recommended remote links · Selected receiver highlighted' : 'Sources '+sources+' → bus '+selectedBus;
+    $('links-detail').textContent = snapshot.changedEdges+' link '+(snapshot.changedEdges === 1 ? 'replacement' : 'replacements')+' this update · Deployed links fixed';
+  }
+  function chartBase(el, observations, keys, yTitle, xTitle, height) {
+    const width = Math.max(240,el.getBoundingClientRect().width);
+    const margin = {left:68,right:18,top:16,bottom:48};
+    const frame={x:margin.left,y:margin.top,w:width-margin.left-margin.right,h:height-margin.top-margin.bottom};
+    const svg=d3.select(el).attr('viewBox','0 0 '+width+' '+height).attr('height',height);
+    svg.selectAll('*').remove();
+    svg.append('title').text(el.getAttribute('aria-label'));
+    const [xmin,xmax]=d3.extent(observations,d=>d.x);
+    const [ymin,ymax]=d3.extent(observations.flatMap(d=>keys.map(k=>d[k])).filter(Number.isFinite));
+    let yl=Math.min(0,ymin || 0), yh=ymax || 0;
+    if (yl === yh) yh=yl+1;
+    const pad=(yh-yl)*.06;
+    const x=d3.scaleLinear().domain([xmin || 0,(xmax === xmin ? (xmin || 0)+1 : xmax) || 1]).range([frame.x+2,frame.x+frame.w-2]);
+    const y=d3.scaleLinear().domain([yl,yh+pad]).range([frame.y+frame.h-2,frame.y+2]);
+    svg.append('rect').attr('data-chart-frame','').attr('x',frame.x).attr('y',frame.y).attr('width',frame.w).attr('height',frame.h).attr('fill','none').attr('stroke','var(--border)');
+    svg.append('g').attr('class','grid').attr('transform','translate('+frame.x+',0)').call(d3.axisLeft(y).ticks(4).tickSize(-frame.w).tickFormat('')).selectAll('text').remove();
+    const xticks = x.ticks(width < 400 ? 3 : 5).filter(Number.isInteger);
+    svg.append('g').attr('class','x-axis').attr('transform','translate(0,'+(frame.y+frame.h)+')').call(d3.axisBottom(x).tickValues(xticks).tickSize(4).tickFormat(d3.format('d')));
+    svg.append('g').attr('class','y-axis').attr('transform','translate('+frame.x+',0)').call(d3.axisLeft(y).ticks(4).tickSize(4).tickFormat(d3.format('.3~g')));
+    svg.append('text').attr('class','axis-title').attr('data-axis','x').attr('x',frame.x+frame.w/2).attr('y',height-5).attr('text-anchor','middle').text(xTitle);
+    svg.append('text').attr('class','axis-title').attr('data-axis','y').attr('transform','translate(14,'+(frame.y+frame.h/2)+') rotate(-90)').attr('text-anchor','middle').text(yTitle);
+    const clip='pr-clip-'+el.id;
+    svg.append('defs').append('clipPath').attr('id',clip).append('rect').attr('x',frame.x).attr('y',frame.y).attr('width',frame.w).attr('height',frame.h);
+    const marks=svg.append('g').attr('clip-path','url(#'+clip+')');
+    return {svg,marks,x,y,frame,width,height};
+  }
+  function hover(chart,observations,items,xLabel) {
+    const {svg,x,y,frame}=chart;
+    const tip=$('tooltip');
+    const guide=svg.append('line').attr('data-chart-hover-guide','').attr('y1',frame.y).attr('y2',frame.y+frame.h).attr('stroke','var(--foreground)').attr('stroke-opacity',.3).attr('display','none');
+    const dots=svg.append('g');
+    const overlay=svg.append('rect').attr('data-chart-hit','').attr('data-chart-hover-overlay','cross-series').attr('x',frame.x).attr('y',frame.y).attr('width',frame.w).attr('height',frame.h).attr('fill','transparent');
+    function show(event) {
+      const pointer=d3.pointer(event,svg.node());
+      const px=Math.max(x.range()[0],Math.min(x.range()[1],pointer[0]));
+      const xv=x.invert(px);
+      const near=d3.bisector(d=>d.x).center(observations,xv);
+      let lo=near, hi=near;
+      if (observations[near].x > xv) lo=Math.max(0,near-1);
+      else hi=Math.min(observations.length-1,near+1);
+      const a=observations[lo],b=observations[hi],fraction=a.x===b.x?0:(xv-a.x)/(b.x-a.x);
+      const values=items.map(s=>({...s,value:a[s.key]+fraction*(b[s.key]-a[s.key])}));
+      guide.attr('x1',px).attr('x2',px).attr('display',null);
+      dots.selectAll('circle').data(values).join('circle').attr('data-chart-hover-marker','').attr('r',3).attr('cx',px).attr('cy',d=>y(d.value)).attr('fill',d=>d.color);
+      tip.replaceChildren();
+      const title=document.createElement('span'); title.textContent=xLabel+' '+d3.format('.1f')(xv); tip.append(title);
+      values.forEach(s=>{const row=document.createElement('div'),label=document.createElement('span'),value=document.createElement('span');label.textContent=s.label;value.textContent=d3.format('.4~g')(s.value);row.append(label,value);tip.append(row);});
+      tip.style.display='block';
+      const bounds=root.getBoundingClientRect();
+      const sx=event.clientX-bounds.left, sy=event.clientY-bounds.top;
+      tip.style.left=Math.max(0,Math.min(root.clientWidth-tip.offsetWidth,sx+12))+'px';
+      tip.style.top=Math.max(0,sy-tip.offsetHeight-12)+'px';
+    }
+    overlay.on('pointermove',event=>{if(!pin)show(event);}).on('pointerleave',()=>{if(!pin){tip.style.display='none';guide.attr('display','none');dots.selectAll('*').remove();}}).on('click',event=>{pin=pin?null:svg.node().id;show(event);});
+  }
+  function tidyTicks(svg) {
+    const nodes=svg.selectAll('.x-axis .tick text').nodes();
+    for(let i=1;i<nodes.length;i++){const a=nodes[i-1].getBoundingClientRect(),b=nodes[i].getBoundingClientRect();if(a.right+4>b.left) nodes[i].style.display='none';}
+    const yLabels=svg.selectAll('.y-axis .tick text').nodes();
+    for(let i=1;i<yLabels.length;i++){const a=yLabels[i-1].getBoundingClientRect(),b=yLabels[i].getBoundingClientRect();if(b.bottom+4>a.top) yLabels[i].style.display='none';}
+  }
+  function drawCost() {
+    const observations=[{x:0,online:0,static:0,causal:0},...snapshot.history.map(d=>({x:d.t,online:d.online,static:d.static,causal:d.causal}))];
+    const items=series.filter(s=>visible.has(s.key));
+    const chart=chartBase($('cost'),observations,series.map(s=>s.key),'Cost (weighted pu²)','Control step',292);
+    items.forEach(s=>chart.marks.append('path').datum(observations).attr('fill','none').attr('stroke',s.color).attr('stroke-width',2).attr('stroke-dasharray',s.dash).attr('d',d3.line().x(d=>chart.x(d.x)).y(d=>chart.y(d[s.key]))));
+    hover(chart,observations,items,'Step');
+    tidyTicks(chart.svg);
+    const c=snapshot.cumulative;
+    $('cost-detail').replaceChildren();
+    for (const item of series) {
+      const group=document.createElement('span'),label=document.createElement('span'),value=document.createElement('strong');
+      group.className='pr-cost-value'; label.className='pr-cost-name';
+      label.textContent=item.label; value.textContent=d3.format('.4f')(c[item.key]);
+      group.append(label,value); $('cost-detail').append(group);
+    }
+  }
+  function drawConvergence() {
+    const frozen=isFit();
+    let observations;
+    if(frozen) observations=snapshot.fitHistory.map(d=>({x:d.iteration,value:100*d.error}));
+    else observations=[{x:0,value:0},...snapshot.history.map(d=>({x:d.t,value:100*d.drift}))];
+    if(!observations.length) observations=[{x:0,value:100*(snapshot.fitError || 0)}];
+    $('convergence').setAttribute('aria-label',frozen?'Relative Frobenius error to the exact solution on frozen samples':'Relative Frobenius change in the shared response on each control step');
+    const chart=chartBase($('convergence'),observations,['value'],frozen?'Solution error (%)':'Response change (%)',frozen?'Gradient iteration':'Control step',204);
+    chart.marks.append('path').datum(observations).attr('fill','none').attr('stroke','var(--viz-series-1)').attr('stroke-width',2).attr('d',d3.line().x(d=>chart.x(d.x)).y(d=>chart.y(d.value)));
+    hover(chart,observations,[{key:'value',label:frozen?'Solution error (%)':'Response change (%)',color:'var(--viz-series-1)'}],frozen?'Iteration':'Step');
+    tidyTicks(chart.svg);
+  }
+  function render() {
+    $('tooltip').style.display='none'; pin=null;
+    renderControls(); drawNetwork(); drawCost(); drawConvergence();
+  }
+  announce('60 sample warm start · Space to run or pause');
+  hydrate(window.openai?.widgetState);
+  window.addEventListener('openai:set_globals',e=>{if(!playing&&!restored&&!journal.length){hydrate(e.detail?.globals?.widgetState);render();}});
+  new ResizeObserver(()=>render()).observe(root);
+  render();
+  // A read only inspection hook supports deterministic browser verification.
+  root.powerDemo = { getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,playing,fitSteps,journal:[...journal]}) };
+})();
+
+</script>
+
+<script src="https://unpkg.com/@floating-ui/core@1.7.3/dist/floating-ui.core.umd.min.js"></script>
+<script src="https://unpkg.com/@floating-ui/dom@1.7.4/dist/floating-ui.dom.umd.min.js"></script>
+<script>
+(() => {
+  if (window.FloatingUIDOM == null) {
+    return;
+  }
+  const { autoUpdate, computePosition, flip, offset, shift, size } =
+    window.FloatingUIDOM;
+  const tooltipPlacements = new Set(["top", "right", "bottom", "left"]);
+  const tooltipId = `codex-visualization-tooltip-${
+    window.crypto?.randomUUID?.() ?? Date.now().toString(36)
+  }`;
+  const tooltipGap = 5;
+  const hoverDelay = 700;
+  const skipDelay = 300;
+  let activeTrigger = null;
+  let pendingTrigger = null;
+  let tooltip = null;
+  let openTimeout = null;
+  let autoUpdateCleanup = null;
+  let positionRequest = 0;
+  let skipDelayUntil = 0;
+  let lastPointerWasTouch = false;
+  let pinnedByTouch = false;
+
+  const getTrigger = (event) => {
+    for (const target of event.composedPath()) {
+      if (target?.nodeType === Node.ELEMENT_NODE) {
+        const trigger = target.closest("[data-tooltip]");
+        if (trigger) return trigger;
+      }
+    }
+    return null;
+  };
+  const containsTarget = (trigger, target) =>
+    target?.nodeType != null && trigger.contains(target);
+  const getContent = (trigger) =>
+    trigger.getAttribute("data-tooltip")?.trim() ?? "";
+  const getPlacement = (trigger) => {
+    const placement = trigger.getAttribute("data-tooltip-placement");
+    return tooltipPlacements.has(placement) ? placement : "top";
+  };
+  const getTooltip = () => {
+    if (tooltip == null) {
+      tooltip = document.createElement("div");
+      tooltip.id = tooltipId;
+      tooltip.className = "tooltip";
+      tooltip.setAttribute("role", "tooltip");
+    }
+    return tooltip;
+  };
+  const setDescribedBy = (trigger, described) => {
+    const ids = new Set(
+      (trigger.getAttribute("aria-describedby") ?? "")
+        .split(/\s+/)
+        .filter(Boolean),
+    );
+    if (described) {
+      ids.add(tooltipId);
+    } else {
+      ids.delete(tooltipId);
+    }
+    if (ids.size === 0) {
+      trigger.removeAttribute("aria-describedby");
+    } else {
+      trigger.setAttribute("aria-describedby", [...ids].join(" "));
+    }
+  };
+  const clearOpenTimeout = () => {
+    if (openTimeout != null) {
+      window.clearTimeout(openTimeout);
+      openTimeout = null;
+    }
+    pendingTrigger = null;
+  };
+  const closeTooltip = (activateSkipDelay = true) => {
+    clearOpenTimeout();
+    pinnedByTouch = false;
+    positionRequest += 1;
+    autoUpdateCleanup?.();
+    autoUpdateCleanup = null;
+    if (activeTrigger == null) {
+      return;
+    }
+    setDescribedBy(activeTrigger, false);
+    activeTrigger = null;
+    tooltip?.remove();
+    if (activateSkipDelay) {
+      skipDelayUntil = Date.now() + skipDelay;
+    }
+  };
+  const updatePosition = (trigger, floating) => {
+    const request = ++positionRequest;
+    void computePosition(trigger, floating, {
+      middleware: [
+        offset(tooltipGap),
+        flip({ padding: tooltipGap }),
+        shift({ padding: tooltipGap }),
+        size({
+          padding: tooltipGap,
+          apply({ availableHeight, availableWidth, elements }) {
+            elements.floating.style.setProperty(
+              "--tooltip-available-width",
+              `${Math.max(0, availableWidth)}px`,
+            );
+            elements.floating.style.setProperty(
+              "--tooltip-available-height",
+              `${Math.max(0, availableHeight)}px`,
+            );
+          },
+        }),
+      ],
+      placement: getPlacement(trigger),
+      strategy: "fixed",
+    })
+      .then(({ x, y }) => {
+        if (activeTrigger !== trigger || request !== positionRequest) {
+          return;
+        }
+        const scale = window.devicePixelRatio || 1;
+        floating.style.transform = `translate(${Math.round(x * scale) / scale}px, ${Math.round(y * scale) / scale}px)`;
+        floating.style.visibility = "visible";
+      })
+      .catch(() => {
+        if (activeTrigger === trigger && request === positionRequest) {
+          closeTooltip(false);
+        }
+      });
+  };
+  const openTooltip = (trigger) => {
+    const content = getContent(trigger);
+    if (!trigger.isConnected || content.length === 0) {
+      return;
+    }
+    clearOpenTimeout();
+    if (activeTrigger === trigger) {
+      return;
+    }
+    closeTooltip();
+    const floating = getTooltip();
+    floating.textContent = content;
+    floating.style.visibility = "hidden";
+    floating.style.transform = "translate(0, 0)";
+    document.body.appendChild(floating);
+    activeTrigger = trigger;
+    setDescribedBy(trigger, true);
+    autoUpdateCleanup = autoUpdate(trigger, floating, () => {
+      updatePosition(trigger, floating);
+    });
+  };
+  const requestOpen = (trigger, immediate = false) => {
+    if (
+      getContent(trigger).length === 0 ||
+      activeTrigger === trigger ||
+      pendingTrigger === trigger
+    ) {
+      return;
+    }
+    clearOpenTimeout();
+    pendingTrigger = trigger;
+    const delay =
+      immediate || activeTrigger != null || Date.now() < skipDelayUntil
+        ? 0
+        : hoverDelay;
+    if (delay === 0) {
+      openTooltip(trigger);
+      return;
+    }
+    openTimeout = window.setTimeout(() => {
+      openTimeout = null;
+      pendingTrigger = null;
+      openTooltip(trigger);
+    }, delay);
+  };
+  const handlePointerOpen = (event) => {
+    if (event.pointerType === "touch") {
+      return;
+    }
+    const trigger = getTrigger(event);
+    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
+      return;
+    }
+    requestOpen(trigger);
+  };
+  const handlePointer = (event) => {
+    lastPointerWasTouch =
+      event.type === "pointerdown" && event.pointerType === "touch";
+  };
+  const handleTouchClick = (event) => {
+    const isTouch = event.pointerType === "touch" || lastPointerWasTouch;
+    lastPointerWasTouch = false;
+    if (!isTouch || event.detail === 0) {
+      return;
+    }
+    const trigger = getTrigger(event);
+    if (
+      trigger == null ||
+      !trigger.isConnected ||
+      getContent(trigger).length === 0 ||
+      (pinnedByTouch && activeTrigger === trigger)
+    ) {
+      if (pinnedByTouch) {
+        closeTooltip();
+      }
+      return;
+    }
+    openTooltip(trigger);
+    pinnedByTouch = activeTrigger === trigger;
+    window.setTimeout(() => {
+      if (activeTrigger === trigger && !trigger.isConnected) {
+        closeTooltip(false);
+      }
+    }, 0);
+  };
+  const handleLeave = (event) => {
+    if (pinnedByTouch) {
+      return;
+    }
+    const trigger = getTrigger(event);
+    if (trigger == null || containsTarget(trigger, event.relatedTarget)) {
+      return;
+    }
+    if (activeTrigger === trigger || pendingTrigger === trigger) {
+      closeTooltip();
+    }
+  };
+  const handleFocusIn = (event) => {
+    const trigger = getTrigger(event);
+    if (trigger?.matches(":focus-visible")) {
+      requestOpen(trigger, true);
+    }
+  };
+  const handleKeyDown = (event) => {
+    if (event.key === "Escape") {
+      closeTooltip();
+    }
+  };
+  const handleContextMenu = (event) => {
+    lastPointerWasTouch = false;
+    const trigger = getTrigger(event);
+    if (activeTrigger === trigger || pendingTrigger === trigger) {
+      closeTooltip();
+    }
+  };
+  const handlers = {
+    pointerover: handlePointerOpen,
+    pointerdown: handlePointer,
+    pointercancel: handlePointer,
+    click: handleTouchClick,
+    pointerout: handleLeave,
+    focusin: handleFocusIn,
+    focusout: handleLeave,
+    keydown: handleKeyDown,
+    contextmenu: handleContextMenu,
+  };
+  const roots = new Map();
+  const handledEvents = new WeakSet();
+  const handleEvent = (event) => {
+    if (handledEvents.has(event)) return;
+    handledEvents.add(event);
+    handlers[event.type](event);
+  };
+  const discoverRoots = (node) => {
+    if (node.shadowRoot) listen(node.shadowRoot);
+    for (const element of node.querySelectorAll("*")) {
+      if (element.shadowRoot) listen(element.shadowRoot);
+    }
+  };
+  const listen = (root) => {
+    if (roots.has(root)) return;
+    for (const type of Object.keys(handlers)) root.addEventListener(type, handleEvent);
+    const observer = new window.MutationObserver((records) => {
+      for (const { addedNodes } of records) {
+        for (const node of addedNodes) {
+          if (node.nodeType === Node.ELEMENT_NODE) discoverRoots(node);
+        }
+      }
+      for (const [root, cleanup] of roots) {
+        if (root.host && !root.host.isConnected) {
+          cleanup();
+          roots.delete(root);
+        }
+      }
+      if (activeTrigger && !activeTrigger.isConnected) closeTooltip(false);
+    });
+    observer.observe(root, { childList: true, subtree: true });
+    roots.set(root, () => {
+      observer.disconnect();
+      for (const type of Object.keys(handlers)) root.removeEventListener(type, handleEvent);
+    });
+    discoverRoots(root);
+  };
+  const destroy = () => {
+    closeTooltip(false);
+    lastPointerWasTouch = false;
+    for (const cleanup of roots.values()) cleanup();
+    roots.clear();
+    tooltip = null;
+  };
+
+  // Events between children of one shadow root never reach the document.
+  listen(document);
+  window.addEventListener("pagehide", destroy, { once: true });
+})();
+</script>
+<script id="codex-visualization-tabs">
+(() => {
+  const selector = '.nav[role="tablist"] [role="tab"]';
+  const disabled = ':disabled,[aria-disabled="true"]';
+  const selectTab = (selected) => {
+    const panelId = selected.getAttribute("aria-controls");
+    for (const tab of selected.closest('[role="tablist"]').querySelectorAll('[role="tab"]')) {
+      const active = tab === selected;
+      tab.classList.toggle("active", active);
+      tab.setAttribute("aria-selected", String(active));
+      const id = tab.getAttribute("aria-controls");
+      const panel = id && document.getElementById(id);
+      if (panel != null) {
+        panel.hidden = id !== panelId;
+        if (!panel.hidden && selected.id) {
+          panel.setAttribute("aria-labelledby", selected.id);
+        }
+      }
+    }
+  };
+  const interact = (event) => {
+    const tab = event.target?.closest?.(selector);
+    if (event.defaultPrevented || tab == null || tab.matches(disabled)) {
+      return;
+    }
+    if (event.type === "click") {
+      selectTab(tab);
+      return;
+    }
+    const tabs = Array.from(
+      tab.closest('[role="tablist"]').querySelectorAll('[role="tab"]'),
+    ).filter((candidate) => !candidate.matches(disabled));
+    const current = tabs.indexOf(tab);
+    let next;
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      next = (current + 1) % tabs.length;
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      next = (current + tabs.length - 1) % tabs.length;
+    } else if (event.key === "Home") {
+      next = 0;
+    } else if (event.key === "End") {
+      next = tabs.length - 1;
+    } else {
+      return;
+    }
+    event.preventDefault();
+    tabs[next].focus();
+    selectTab(tabs[next]);
+  };
+
+  for (const list of document.querySelectorAll('.nav[role="tablist"]')) {
+    const selected =
+      list.querySelector('[role="tab"][aria-selected="true"]') ??
+      list.querySelector('[role="tab"].active') ??
+      list.querySelector('[role="tab"]');
+    if (selected != null) {
+      selectTab(selected);
+    }
+  }
+  document.addEventListener("click", interact);
+  document.addEventListener("keydown", interact);
+  window.addEventListener("pagehide", () => {
+    document.removeEventListener("click", interact);
+    document.removeEventListener("keydown", interact);
+  }, { once: true });
+})();
+</script>
+<script id="codex-visualization-carousel">
+  (() => {
+    for (const root of document.querySelectorAll(".viz-carousel")) {
+      const panels = Array.from(
+        root.querySelectorAll(":scope > [data-variant]"),
+      );
+      if (panels.length === 0) {
+        continue;
+      }
+      root.setAttribute("role", "group");
+      panels.forEach((panel, index) => {
+        panel.hidden = index !== 0;
+        panel.setAttribute("role", "group");
+        if (!panel.hasAttribute("aria-label")) {
+          panel.setAttribute("aria-label", panel.dataset.variant);
+        }
+      });
+      root.dataset.activeVariant = panels[0].dataset.variant;
+      if (panels.length === 1) {
+        continue;
+      }
+
+      const controls = document.createElement("div");
+      controls.className = "viz-carousel-controls";
+      // Portable copy of the settings dropdown's legacy glyph; no 14px icon-package preset matches it.
+      // https://github.com/openai/openai/blob/master/codex/codex-apps/webview/src/icons/chevron.svg
+      controls.innerHTML = `
+      <button type="button" class="viz-carousel-previous cursor-interaction"><i data-lucide="chevron-left" aria-hidden="true"></i></button>
+      <details class="viz-carousel-picker">
+        <summary class="cursor-interaction">
+          <span class="viz-carousel-count tabular-nums"></span>
+          <span class="viz-carousel-name"></span>
+          <svg class="viz-carousel-caret" width="14" height="14" viewBox="0 0 20 21" fill="none" aria-hidden="true" focusable="false">
+            <path d="M15.2793 7.71101C15.539 7.45131 15.961 7.45131 16.2207 7.71101C16.4804 7.97071 16.4804 8.39272 16.2207 8.65242L10.4707 14.4024C10.211 14.6621 9.78902 14.6621 9.52932 14.4024L3.77932 8.65242L3.69436 8.54792C3.52385 8.28979 3.55205 7.93828 3.77932 7.71101C4.00659 7.48374 4.3581 7.45554 4.61623 7.62605L4.72073 7.71101L10 12.9903L15.2793 7.71101Z" fill="currentColor" stroke="currentColor" stroke-width="0.6" />
+          </svg>
+        </summary>
+        <div class="viz-carousel-options"></div>
+      </details>
+      <button type="button" class="viz-carousel-next cursor-interaction"><i data-lucide="chevron-right" aria-hidden="true"></i></button>`;
+      const previous = controls.querySelector(".viz-carousel-previous");
+      const next = controls.querySelector(".viz-carousel-next");
+      const picker = controls.querySelector(".viz-carousel-picker");
+      const summary = picker.querySelector("summary");
+      const count = controls.querySelector(".viz-carousel-count");
+      const name = controls.querySelector(".viz-carousel-name");
+      const options = controls.querySelector(".viz-carousel-options");
+      const status = document.createElement("span");
+      status.className = "sr-only";
+      status.setAttribute("role", "status");
+      status.setAttribute("aria-live", "polite");
+      status.setAttribute("aria-atomic", "true");
+      previous.setAttribute(
+        "aria-label",
+        root.dataset.previousLabel ?? "Previous variant",
+      );
+      next.setAttribute("aria-label", root.dataset.nextLabel ?? "Next variant");
+
+      let active = 0;
+      let mousePointerId = null;
+      let summaryPointerHandled = false;
+      summary.addEventListener("pointerdown", (event) => {
+        summaryPointerHandled =
+          event.pointerType === "mouse" && event.button === 0 && !event.ctrlKey;
+        if (!summaryPointerHandled) {
+          return;
+        }
+        event.preventDefault();
+        summary.focus({ preventScroll: true });
+        picker.open = !picker.open;
+        mousePointerId = picker.open ? event.pointerId : null;
+      });
+      summary.addEventListener("click", (event) => {
+        if (summaryPointerHandled && event.detail > 0) {
+          event.preventDefault();
+        }
+      });
+      const choices = panels.map((panel, index) => {
+        const choice = document.createElement("button");
+        choice.type = "button";
+        choice.className = "cursor-interaction";
+        choice.textContent = panel.dataset.variant;
+        choice.addEventListener("click", () => {
+          select(index);
+          summary.focus();
+        });
+        choice.addEventListener("pointerup", (event) => {
+          if (
+            picker.open &&
+            event.pointerType === "mouse" &&
+            event.button === 0 &&
+            event.pointerId === mousePointerId
+          ) {
+            choice.click();
+          }
+        });
+        options.appendChild(choice);
+        return choice;
+      });
+      const select = (index) => {
+        const changed = active !== index;
+        active = index;
+        panels.forEach((panel, position) => {
+          panel.hidden = position !== active;
+          choices[position].setAttribute(
+            "aria-current",
+            String(position === active),
+          );
+        });
+        root.dataset.activeVariant = panels[active].dataset.variant;
+        count.textContent = `${active + 1} / ${panels.length}`;
+        name.textContent = panels[active].dataset.variant;
+        picker.open = false;
+        mousePointerId = null;
+        if (changed) {
+          status.textContent = `${count.textContent}: ${name.textContent}`;
+        }
+      };
+      previous.addEventListener("click", () =>
+        select((active + panels.length - 1) % panels.length),
+      );
+      next.addEventListener("click", () =>
+        select((active + 1) % panels.length),
+      );
+      picker.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && picker.open) {
+          event.preventDefault();
+          picker.open = false;
+          mousePointerId = null;
+          summary.focus();
+          return;
+        }
+        if (event.altKey || event.ctrlKey || event.metaKey) {
+          return;
+        }
+        const index = choices.indexOf(document.activeElement);
+        let nextIndex;
+        if (event.key === "ArrowDown") {
+          nextIndex = index < 0 ? active : (index + 1) % choices.length;
+        } else if (event.key === "ArrowUp") {
+          nextIndex = index < 0 ? active : (index + choices.length - 1) % choices.length;
+        } else if (picker.open && event.key === "Home") {
+          nextIndex = 0;
+        } else if (picker.open && event.key === "End") {
+          nextIndex = choices.length - 1;
+        } else {
+          return;
+        }
+        event.preventDefault();
+        picker.open = true;
+        choices[nextIndex].focus();
+      });
+      picker.addEventListener("focusout", (event) => {
+        if (!picker.contains(event.relatedTarget)) {
+          picker.open = false;
+          mousePointerId = null;
+        }
+      });
+      const dismiss = (event) => {
+        if (!summary.contains(event.target)) {
+          mousePointerId = null;
+        }
+        if (!picker.contains(event.target)) {
+          picker.open = false;
+        }
+      };
+      const endPointerSelection = () => {
+        mousePointerId = null;
+      };
+      const sizePicker = () => {
+        root.style.setProperty(
+          "--viz-carousel-picker-height",
+          `${picker.open ? options.offsetHeight : 0}px`,
+        );
+      };
+      picker.addEventListener("toggle", sizePicker);
+      window.addEventListener("resize", sizePicker);
+      document.addEventListener("pointerdown", dismiss);
+      document.addEventListener("pointerup", endPointerSelection);
+      document.addEventListener("pointercancel", endPointerSelection);
+      window.addEventListener("blur", endPointerSelection);
+      window.addEventListener(
+        "pagehide",
+        () => {
+          document.removeEventListener("pointerdown", dismiss);
+          document.removeEventListener("pointerup", endPointerSelection);
+          document.removeEventListener("pointercancel", endPointerSelection);
+          window.removeEventListener("blur", endPointerSelection);
+          window.removeEventListener("resize", sizePicker);
+        },
+        { once: true },
+      );
+      root.append(controls, status);
+      select(0);
+    }
+  })();
+</script>
+<script id="codex-visualization-lucide" async src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.js"></script>
+<script>
+(() => {
+  const initialize = () => {
+    globalThis.lucide?.createIcons({ attrs: { width: 16, height: 16 } });
+  };
+  if (globalThis.lucide != null) {
+    initialize();
+    return;
+  }
+  document
+    .getElementById("codex-visualization-lucide")
+    ?.addEventListener("load", initialize, { once: true });
+})();
+</script>
+
+</body>
+</html>

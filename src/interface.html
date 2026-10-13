@@ -1,0 +1,94 @@
+<div id="power-response-demo">
+  <style>
+    #power-response-demo { position:relative; color:var(--foreground); }
+    #power-response-demo .pr-heading { padding-right:96px; margin-bottom:16px; }
+    #power-response-demo .pr-heading h2 { margin-bottom:4px; }
+    #power-response-demo .pr-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:12px 0; }
+    #power-response-demo .pr-field { display:flex; align-items:center; gap:8px; }
+    #power-response-demo .pr-field label { margin:0; }
+    #power-response-demo .pr-field select { max-width:180px; }
+    #power-response-demo .pr-status { display:flex; flex-wrap:wrap; gap:8px 24px; margin:14px 0 20px; }
+    #power-response-demo .pr-panels { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.12fr); gap:28px; }
+    #power-response-demo .pr-panel { min-width:0; }
+    #power-response-demo .pr-panel h3 { margin:0 0 8px; }
+    #power-response-demo .pr-subhead { display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; min-height:30px; }
+    #power-response-demo .pr-chart { width:100%; display:block; overflow:visible; }
+    #power-response-demo .pr-chart text { fill:var(--foreground); font-size:12px; font-weight:400; }
+    #power-response-demo .pr-chart .domain, #power-response-demo .pr-chart .tick line { stroke:var(--border); }
+    #power-response-demo .pr-chart .grid line { stroke:var(--border); }
+    #power-response-demo .pr-chart .grid .domain { display:none; }
+    #power-response-demo .pr-legend { display:flex; flex-wrap:wrap; gap:8px 16px; margin:4px 0 10px; }
+    #power-response-demo .pr-legend button { display:inline-flex; align-items:center; gap:7px; padding:0; border:0; border-radius:0; background:transparent; color:var(--foreground); font:inherit; }
+    #power-response-demo .pr-legend button[aria-pressed="true"] { background:transparent; color:var(--foreground); }
+    #power-response-demo .pr-legend button[aria-pressed="false"] { opacity:.45; }
+    #power-response-demo .pr-swatch { width:20px; height:0; border-top:2px solid var(--viz-series-1); display:inline-block; }
+    #power-response-demo .pr-detail { min-height:24px; margin:8px 0; }
+    #power-response-demo #pr-cost-detail { display:flex; flex-wrap:wrap; gap:12px 24px; }
+    #power-response-demo .pr-cost-value { display:flex; flex-direction:column; gap:3px; }
+    #power-response-demo .pr-cost-name { font-size:12px; }
+    #power-response-demo .pr-fit { margin-top:24px; }
+    #power-response-demo .pr-note { margin-top:6px; }
+    #power-response-demo .pr-tooltip { position:absolute; display:none; pointer-events:none; z-index:10; padding:10px 12px; background:var(--popover); color:var(--popover-foreground); border:1px solid var(--border); border-radius:6px; }
+    #power-response-demo .pr-tooltip div { display:flex; justify-content:space-between; gap:18px; }
+    #power-response-demo [hidden] { display:none !important; }
+    @media(max-width:720px) {
+      #power-response-demo .pr-panels { grid-template-columns:minmax(0,1fr); gap:24px; }
+      #power-response-demo .pr-heading { padding-right:0; }
+    }
+    @media(pointer:coarse) {
+      #power-response-demo .pr-legend button { min-height:44px; }
+    }
+  </style>
+  <div class="pr-heading">
+    <h2>Adaptive voltage regulation</h2>
+    <div class="text-small">24 bus synthetic feeder · Illustrative shared response variant</div>
+  </div>
+  <div class="pr-toolbar">
+    <button type="button" class="btn btn-primary" id="pr-run">Run simulation</button>
+    <button type="button" class="btn" id="pr-step">One step</button>
+    <button type="button" class="btn btn-ghost" id="pr-restart">Start again</button>
+    <div class="pr-field"><label class="form-label" for="pr-speed">Speed</label><select class="form-select" id="pr-speed"><option value="4">4 steps/s</option><option value="12" selected>12 steps/s</option><option value="30">30 steps/s</option></select></div>
+  </div>
+  <div class="pr-toolbar">
+    <div class="pr-field"><label class="form-label" for="pr-bus">Bus</label><select class="form-select" id="pr-bus" aria-label="Selected bus"></select></div>
+    <button type="button" class="btn" id="pr-pulse" aria-keyshortcuts="D">Load pulse · D</button>
+    <button type="button" class="btn" id="pr-fault" aria-keyshortcuts="E">Repair forecast · E</button>
+    <button type="button" class="btn" id="pr-freeze">Freeze data and fit</button>
+  </div>
+  <div class="pr-status tabular-nums">
+    <span id="pr-clock">Step 0 / 480</span>
+    <span id="pr-learning">Learning starts after 30 samples</span>
+    <span id="pr-event" role="status" aria-live="polite">Ready · Space to run or pause</span>
+  </div>
+  <div class="pr-panels">
+    <section class="pr-panel" aria-labelledby="pr-network-title">
+      <div class="pr-subhead"><h3 id="pr-network-title">Prediction topology</h3><label class="form-check"><input class="form-check-input" type="checkbox" id="pr-all-links"><span class="form-check-label text-small">All receivers</span></label></div>
+      <div class="text-small" id="pr-topology-label">Recommended sources for bus 6</div>
+      <svg class="pr-chart" id="pr-network" role="img" aria-label="Fixed radial feeder and recommended directed prediction links"></svg>
+      <div class="pr-detail tabular-nums" id="pr-bus-detail"></div>
+      <div class="text-small">Gray lines are physical · Arrows are recommendations · × faulty forecast</div>
+      <div class="text-small">Halos indicate the magnitude of voltage deviation</div>
+      <div class="text-small">Dense communication remains active for control</div>
+      <div class="pr-note text-small" id="pr-links-detail">3 remote sources per receiver · Deployed links remain fixed</div>
+    </section>
+    <section class="pr-panel" aria-labelledby="pr-cost-title">
+      <h3 id="pr-cost-title">Cumulative control cost</h3>
+      <div class="pr-legend" aria-label="Visible cost series">
+        <button type="button" class="cursor-interaction" data-series="online" aria-pressed="true"><span class="pr-swatch"></span>Adaptive</button>
+        <button type="button" class="cursor-interaction" data-series="static" aria-pressed="true"><span class="pr-swatch" style="border-color:var(--viz-series-2);border-top-style:dashed"></span>Static prediction</button>
+        <button type="button" class="cursor-interaction" data-series="causal" aria-pressed="true"><span class="pr-swatch" style="border-color:var(--viz-series-3);border-top-style:dotted"></span>Causal</button>
+      </div>
+      <svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative quadratic cost of three controllers on the same disturbances"></svg>
+      <div class="pr-detail tabular-nums" id="pr-cost-detail"></div>
+      <div class="text-small">Stage cost includes voltage error and control effort</div>
+    </section>
+  </div>
+  <section class="pr-fit" aria-labelledby="pr-fit-title">
+    <div class="pr-subhead"><h3 id="pr-fit-title">Online adaptation</h3><span class="text-small tabular-nums" id="pr-fit-detail">Rolling window of 60 revealed samples</span></div>
+    <svg class="pr-chart" id="pr-convergence" role="img" aria-label="Relative change of the shared prediction response over time"></svg>
+    <div class="text-small" id="pr-mode-note">Freeze data to inspect convergence to a fixed ridge solution</div>
+  </section>
+  <div class="pr-tooltip text-small tabular-nums" role="tooltip" id="pr-tooltip"></div>
+  <div role="alert" id="pr-error" hidden></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
