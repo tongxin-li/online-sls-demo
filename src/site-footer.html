@@ -4,7 +4,7 @@
     <div class="research-methods-body">
       <section>
         <h3>A linear voltage surrogate</h3>
-        <p>Select a bus, then press D for a load pulse or E to change forecast reliability. Press Space to run or pause. The state is voltage deviation from nominal. Each bus has an equivalent control input. Tree distances define a dense linear coupling model.</p>
+        <p>Choose a bus and click Add disturbance, or press D, to inject an unexpected load pulse. The experiment starts immediately. Press E to change forecast reliability and Space to pause or resume. The state is voltage deviation from nominal. Each bus has an equivalent control input. Tree distances define a dense linear coupling model.</p>
         <div class="research-equation" aria-label="State at the next step equals A times the state plus the control input plus the disturbance">x<sub>t+1</sub> = Ax<sub>t</sub> + u<sub>t</sub> + w<sub>t</sub></div>
         <p>Values use per unit coordinates and abstract control intervals. This illustration does not calculate AC power flow, actuator saturation, or hard voltage limits.</p>
       </section>
@@ -12,7 +12,7 @@
         <h3>Shared prediction adaptation</h3>
         <p>A shared matrix calibrates forecasts using the latest 60 revealed samples. This reduced ridge loss illustrates online learning and differs from the full manuscript algorithm and its theoretical guarantees.</p>
         <div class="research-equation" aria-label="Adaptive control equals state feedback minus the calibrated preview correction">u<sub>t</sub> = Kx<sub>t</sub> − HG<sub>t</sub>ŵ<sub>t</sub></div>
-        <p>Arrow width encodes prediction score. Node halos indicate voltage deviation. The physical feeder and deployed communication stay fixed. The plots accumulate quadratic stage cost. They do not report formal regret. Frozen fitting measures convergence to a fixed numerical solution. Online data and source rankings can continue to change.</p>
+        <p>The matrix shows three recommended remote sources per receiver. Rows are receivers and columns are sources. Teal cells mark added links and amber outlines mark removed links since the reference step. Add a disturbance or choose Set reference to begin a new comparison. Arrow width encodes prediction score. Node halos indicate voltage deviation. The physical feeder and deployed communication stay fixed. The plots accumulate quadratic stage cost. They do not report formal regret. Frozen fitting measures convergence to a fixed numerical solution. Online data and source rankings can continue to change.</p>
       </section>
     </div>
   </details>

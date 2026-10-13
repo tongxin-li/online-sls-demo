@@ -11,128 +11,169 @@
 <style>html { color-scheme: light; background: #fff; scroll-behavior: smooth; }
 body.research-site {
   --background: #fff;
-  --foreground: #25252a;
+  --foreground: #28272c;
   --primary: #840028;
   --primary-foreground: #fff;
-  --muted: #f7f7f8;
-  --muted-foreground: #696970;
-  --border: #e5e5e8;
+  --muted: #f7f6f6;
+  --muted-foreground: #716e74;
+  --border: #e6e3e5;
   --popover: #fff;
-  --popover-foreground: #25252a;
+  --popover-foreground: #28272c;
   --viz-series-1: #840028;
-  --viz-series-2: #477da0;
-  --viz-series-3: #8c8c95;
+  --viz-series-2: #527b98;
+  --viz-series-3: #939198;
+  --matrix-added: #25796e;
+  --matrix-removed: #c18a43;
   margin: 0;
   min-width: 280px;
   background: var(--background);
   color: var(--foreground);
-  font: 14px/1.6 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font: 15px/1.6 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
-.research-site *, .research-site *::before, .research-site *::after { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; }
 .research-site a { color: var(--primary); text-decoration: none; }
 .research-site a:hover { text-decoration: underline; text-underline-offset: 3px; }
-.research-site button, .research-site input, .research-site select { font: inherit; }
+.research-site button, .research-site input, .research-site select { font-family: inherit; }
 .research-site button, .research-site select, .research-site summary, .research-site .cursor-interaction { cursor: pointer; touch-action: manipulation; }
 .research-site :focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
-.research-site .research-header, .research-site #power-response-demo, .research-site .research-footer { width: calc(100% - 64px); max-width: 1180px; margin: 0 auto; }
-.research-site .research-header { padding: 34px 0 20px; }
-.research-site .research-title-row { display: flex; justify-content: space-between; align-items: center; gap: 24px; }
-.research-site h1 { font-size: 27px; line-height: 1.3; font-weight: 600; letter-spacing: -.7px; margin: 0; color: #111; }
-.research-site .research-header nav { display: flex; gap: 23px; flex-shrink: 0; font-size: 13px; }
-.research-site .research-header p { font-size: 14px; color: var(--muted-foreground); margin: 8px 0 0; }
-.research-site #power-response-demo .pr-heading { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); }
-.research-site #power-response-demo .text-small { font-size: 12px; line-height: 1.6; color: var(--muted-foreground); }
-.research-site #power-response-demo .tabular-nums { font-variant-numeric: tabular-nums; }
-.research-site #power-response-demo .pr-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 22px; padding: 13px 15px; background: var(--muted); border-radius: 7px; }
-.research-site #power-response-demo .pr-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; }
-.research-site #power-response-demo .btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 35px; padding: 7px 11px; border: 1px solid #d9d9df; border-radius: 5px; color: var(--foreground); background: #fff; box-shadow: none; font-size: 12px; font-weight: 500; line-height: 1.35; white-space: nowrap; transition: border-color .12s, background-color .12s; }
-.research-site #power-response-demo .btn:hover:not(:disabled) { background: #f1f1f4; border-color: #a8a8b0; }
-.research-site #power-response-demo .btn-primary { min-width: 117px; background: var(--primary); border-color: var(--primary); color: #fff; }
-.research-site #power-response-demo .btn-primary:hover:not(:disabled) { background: #670020; border-color: #670020; }
-.research-site #power-response-demo .btn-ghost { background: transparent; border-color: transparent; color: var(--muted-foreground); }
-.research-site #power-response-demo .btn:disabled { opacity: .4; cursor: default; }
-.research-site #power-response-demo .pr-field { display: flex; align-items: center; gap: 7px; }
-.research-site #power-response-demo .form-label { font-size: 12px; font-weight: 400; color: var(--muted-foreground); margin: 0; }
-.research-site #power-response-demo .form-select { appearance: auto; min-height: 35px; padding: 6px 7px; border: 1px solid #d9d9df; border-radius: 5px; background: #fff; color: var(--foreground); font-size: 12px; }
-.research-site #power-response-demo #pr-bus { min-width: 51px; }
-.research-site #power-response-demo #pr-pulse::after, .research-site #power-response-demo #pr-fault::after { font-size: 10px; line-height: 1.3; color: var(--muted-foreground); padding: 1px 4px; border: 1px solid var(--border); border-radius: 3px; }
-.research-site #power-response-demo #pr-pulse::after { content: 'D'; }
-.research-site #power-response-demo #pr-fault::after { content: 'E'; }
-.research-site #power-response-demo .pr-status { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 20px; margin: 0 0 19px; padding: 11px 1px 0; font-size: 11px; color: var(--muted-foreground); }
-.research-site #power-response-demo #pr-clock { color: var(--foreground); font-weight: 500; }
-.research-site #power-response-demo #pr-event { margin-left: auto; }
-.research-site #power-response-demo .pr-panels { display: grid; grid-template-columns: minmax(0,1.03fr) minmax(0,1fr); gap: 42px; }
-.research-site #power-response-demo .pr-panel h3, .research-site #power-response-demo .pr-fit h3 { margin: 0 0 7px; font: 600 17px/1.4 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: -.3px; color: #222; }
-.research-site #power-response-demo .pr-subhead { align-items: baseline; min-height: 0; gap: 6px 12px; }
-.research-site #power-response-demo .form-check { display: inline-flex; align-items: center; gap: 6px; margin: 0; font-size: 12px; white-space: nowrap; cursor: pointer; }
-.research-site #power-response-demo .form-check-input { width: 13px; height: 13px; margin: 0; accent-color: var(--primary); }
-.research-site #power-response-demo #pr-topology-label { font-size: 11px; }
-.research-site #power-response-demo .pr-chart text { fill: var(--foreground); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 12px; }
-.research-site #power-response-demo .pr-chart .bus-number { font-size: 11px; }
-.research-site #power-response-demo .pr-chart .fault-mark { fill: var(--muted-foreground); font-size: 12px; }
-.research-site #power-response-demo .pr-chart .grid line { stroke-opacity: .6; }
-.research-site #power-response-demo .pr-chart .domain { stroke-opacity: .9; }
-.research-site #power-response-demo .pr-legend { gap: 5px 17px; margin: 0 0 4px; min-height: 25px; }
-.research-site #power-response-demo .pr-legend button, .research-site #power-response-demo .pr-legend button[aria-pressed='true'] { background: transparent; color: var(--foreground); font-size: 11px; font-weight: 400; min-height: 25px; }
-.research-site #power-response-demo .pr-swatch { width: 18px; }
-.research-site #power-response-demo .pr-detail { font-size: 12px; color: var(--foreground); margin: 8px 0 5px; }
-.research-site #power-response-demo #pr-bus-detail { padding: 8px 0 0; border-top: 1px solid var(--border); }
-.research-site #power-response-demo .pr-network-caption { margin-top: 4px; font-size: 11px; }
-.research-site #power-response-demo .pr-network-caption p { margin: 0; }
-.research-site #power-response-demo .pr-note { margin-top: 4px; font-size: 11px; }
-.research-site #power-response-demo #pr-cost-detail { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; padding-top: 8px; border-top: 1px solid var(--border); margin: 8px 0 5px; }
-.research-site #power-response-demo .pr-cost-value { display: flex; flex-direction: column; gap: 1px; }
-.research-site #power-response-demo .pr-cost-name { font-size: 11px; color: var(--muted-foreground); }
-.research-site #power-response-demo .pr-cost-value strong { font-size: 19px; font-weight: 500; letter-spacing: -.5px; }
-.research-site #power-response-demo .pr-fit { margin-top: 23px; padding-top: 18px; border-top: 1px solid var(--border); }
-.research-site #power-response-demo #pr-fit-detail { font-size: 11px; }
-.research-site #power-response-demo #pr-mode-note { margin-top: 3px; font-size: 11px; }
-.research-site #power-response-demo .pr-tooltip { background: #fff; color: var(--foreground); border: 1px solid #ddd; border-radius: 5px; box-shadow: 0 3px 12px #0000000c; font-size: 12px; }
-.research-site #power-response-demo #pr-error { color: var(--primary); padding: 18px 0; }
-.research-site .research-footer { margin-top: 24px; border-top: 1px solid var(--border); }
-.research-site .research-methods summary { display: flex; align-items: center; gap: 15px; padding: 15px 0; color: var(--primary); font-size: 13px; cursor: pointer; list-style: none; }
-.research-site .research-methods summary::-webkit-details-marker { display: none; }
-.research-site .research-methods-caption { font-size: 12px; color: var(--muted-foreground); }
-.research-site .research-expand { margin-left: auto; font-size: 18px; }
-.research-site .research-expand::before { content: '+'; }
-.research-site details[open] .research-expand::before { content: '−'; }
-.research-site .research-methods-body { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; padding: 12px 0 20px; }
-.research-site .research-methods-body h3 { font-size: 15px; font-weight: 600; margin: 0 0 9px; }
-.research-site .research-methods-body p { font-size: 13px; color: var(--muted-foreground); margin: 0 0 10px; }
-.research-site .research-equation { font-family: Georgia, serif; font-size: 22px; font-style: italic; margin: 18px 0; }
-.research-site .research-equation sub { font-size: 12px; }
-.research-site .research-colophon { display: flex; justify-content: space-between; gap: 14px; padding: 12px 0 24px; font-size: 11px; color: var(--muted-foreground); }
-@media(max-width:1100px) {
-  .research-site #power-response-demo .pr-controls { justify-content: flex-start; }
-  .research-site #power-response-demo .pr-panels { gap: 28px; }
+.research-header, #power-response-demo, .research-footer { width: calc(100% - 80px); max-width: 1080px; margin: 0 auto; }
+.research-header { padding: 40px 0 28px; }
+.research-title-row { display: flex; justify-content: space-between; align-items: baseline; gap: 24px; }
+h1 { font-size: 30px; line-height: 1.3; font-weight: 550; letter-spacing: -.9px; margin: 0; color: #171619; }
+.research-header nav { display: flex; gap: 24px; flex-shrink: 0; font-size: 13px; }
+.research-header p { color: var(--muted-foreground); margin: 8px 0 0; }
+#power-response-demo { position: relative; }
+#power-response-demo [hidden] { display: none !important; }
+.tabular-nums { font-variant-numeric: tabular-nums; }
+.pr-experiment { padding: 22px 0 20px; border-top: 1px solid var(--border); }
+.pr-instruction { font-size: 15px; font-weight: 500; margin-bottom: 14px; }
+.pr-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 16px; min-height: 36px; padding: 7px 12px; border: 1px solid var(--border); border-radius: 4px; background: #fff; color: var(--foreground); font-size: 12px; font-weight: 500; line-height: 1.4; white-space: nowrap; transition: background-color .15s, border-color .15s; }
+.btn:hover:not(:disabled) { border-color: #aaa3a8; background: #faf9fa; }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); min-height: 46px; padding: 12px 20px; font-size: 14px; }
+.btn-primary:hover:not(:disabled) { background: #670020; border-color: #670020; }
+#pr-pulse::after, #pr-fault::after { font-size: 12px; font-weight: 400; border: 1px solid currentColor; border-radius: 3px; padding: 0 5px; opacity: .65; }
+#pr-pulse::after { content: 'D'; }
+#pr-fault::after { content: 'E'; }
+#pr-fault { min-height: 46px; font-size: 13px; }
+.btn-play { border-color: #9e979d; min-width: 130px; }
+.btn-quiet { background: transparent; border-color: transparent; color: var(--muted-foreground); padding: 5px 8px; }
+.btn-quiet:hover:not(:disabled) { background: #f7f6f6; border-color: transparent; color: var(--foreground); }
+.pr-field { display: flex; align-items: center; gap: 10px; }
+.pr-field label { font-size: 12px; color: var(--muted-foreground); }
+.pr-field select { min-height: 36px; color: var(--foreground); background: #fff; padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; }
+#pr-bus { min-width: 62px; min-height: 46px; font-size: 14px; }
+.pr-action-note { margin: 10px 0 0; color: var(--muted-foreground); font-size: 12px; min-height: 20px; }
+.pr-playback { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 11px 0; }
+.pr-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+.pr-speed-field { margin-left: 10px; }
+.pr-speed-field select { border-color: transparent; padding-right: 0; }
+.pr-status { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; font-size: 12px; color: var(--muted-foreground); }
+#pr-clock { color: var(--foreground); font-weight: 500; }
+.pr-event { font-size: 12px; color: var(--muted-foreground); margin: 8px 0 25px; min-height: 18px; }
+.pr-panels { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 48px; }
+.pr-panel { min-width: 0; }
+.pr-subhead { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px; min-height: 36px; }
+.pr-panel h2 { margin: 0; font-size: 18px; font-weight: 550; letter-spacing: -.4px; line-height: 1.4; color: #19181c; }
+.pr-caption { margin: 4px 0; font-size: 12px; line-height: 1.6; color: var(--muted-foreground); }
+.form-check { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted-foreground); cursor: pointer; }
+.form-check input { width: 13px; height: 13px; margin: 0; accent-color: var(--primary); }
+.pr-chart { width: 100%; display: block; overflow: visible; }
+.pr-chart text { fill: var(--foreground); font-family: inherit; font-size: 12px; font-weight: 400; }
+.pr-chart .bus-number { font-size: 10px; }
+.pr-chart .fault-mark { fill: var(--muted-foreground); }
+.pr-chart .domain, .pr-chart .tick line, .pr-chart .grid line { stroke: var(--border); }
+.pr-chart .grid line { stroke-opacity: .65; }
+.pr-chart .grid .domain { display: none; }
+.pr-detail { font-size: 12px; min-height: 20px; margin: 8px 0; }
+#pr-bus-detail { margin-top: 0; padding-top: 10px; border-top: 1px solid var(--border); }
+.pr-network-key, .pr-matrix-key { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 16px; font-size: 10px; color: var(--muted-foreground); }
+.pr-network-key > span, .pr-matrix-key > span { display: inline-flex; align-items: center; gap: 5px; }
+.pr-line-key { display: inline-block; width: 15px; border-top: 1px solid #a7a2a6; }
+.pr-arrow-key { color: var(--primary); font-style: normal; font-size: 18px; line-height: 10px; }
+.pr-cell-key { display: inline-block; width: 9px; height: 9px; }
+.pr-cell-key.connected { background: var(--primary); }
+.pr-cell-key.added { background: var(--matrix-added); }
+.pr-cell-key.removed { background: #fff; border: 1.5px solid var(--matrix-removed); }
+.pr-cell-key.self { background: #bdb8bd; }
+.pr-matrix-key { padding-top: 10px; border-top: 1px solid var(--border); }
+.pr-matrix-summary { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 8px 0 0; font-size: 12px; }
+#pr-matrix-reference { color: var(--muted-foreground); }
+#pr-matrix-changes { margin-left: auto; }
+.pr-scope-note { margin: 18px 0 0; color: var(--muted-foreground); font-size: 12px; }
+.pr-results { border-top: 1px solid var(--border); margin-top: 22px; padding-top: 22px; }
+.pr-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 15px; min-height: 28px; margin: 4px 0; }
+.pr-legend button { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; background: transparent; color: var(--foreground); font-size: 10px; min-height: 24px; }
+.pr-legend button[aria-pressed='false'] { opacity: .4; }
+.pr-swatch { display: inline-block; width: 17px; height: 0; border-top: 2px solid var(--viz-series-1); }
+#pr-fit-detail { display: flex; align-items: center; min-height: 28px; }
+#pr-cost-detail { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; padding-top: 10px; border-top: 1px solid var(--border); }
+.pr-cost-value { display: flex; flex-direction: column; gap: 2px; }
+.pr-cost-name { font-size: 10px; color: var(--muted-foreground); }
+.pr-cost-value strong { font-size: 20px; font-weight: 500; letter-spacing: -.5px; }
+#pr-mode-note { padding-top: 10px; border-top: 1px solid var(--border); margin-top: 8px; }
+.pr-tooltip { position: absolute; display: none; pointer-events: none; z-index: 10; padding: 10px 12px; border: 1px solid var(--border); border-radius: 4px; background: #fff; box-shadow: 0 3px 12px #00000008; font-size: 12px; }
+.pr-tooltip div { display: flex; justify-content: space-between; gap: 18px; }
+#pr-error { color: var(--primary); padding: 18px 0; }
+.research-footer { margin-top: 30px; border-top: 1px solid var(--border); }
+.research-methods summary { display: flex; align-items: center; gap: 15px; padding: 16px 0; color: var(--primary); font-size: 12px; list-style: none; }
+.research-methods summary::-webkit-details-marker { display: none; }
+.research-methods-caption { font-size: 12px; color: var(--muted-foreground); }
+.research-expand { margin-left: auto; font-size: 18px; }
+.research-expand::before { content: '+'; }
+details[open] .research-expand::before { content: '−'; }
+.research-methods-body { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; padding: 12px 0 20px; }
+.research-methods-body h3 { font-size: 15px; font-weight: 500; margin: 0 0 9px; }
+.research-methods-body p { font-size: 12px; color: var(--muted-foreground); margin: 0 0 10px; }
+.research-equation { font-family: Georgia, serif; font-size: 22px; font-style: italic; margin: 18px 0; }
+.research-equation sub { font-size: 12px; }
+.research-colophon { display: flex; justify-content: space-between; gap: 14px; padding: 12px 0 28px; font-size: 10px; color: var(--muted-foreground); }
+@media(max-width:900px) {
+  .pr-panels, .research-methods-body { gap: 28px; }
+  #pr-learning { display: none; }
 }
 @media(max-width:720px) {
-  .research-site .research-header, .research-site #power-response-demo, .research-site .research-footer { width: calc(100% - 36px); }
-  .research-site .research-header { padding: 23px 0 18px; }
-  .research-site .research-title-row { align-items: flex-start; flex-wrap: wrap; gap: 10px; }
-  .research-site h1 { font-size: 24px; }
-  .research-site .research-header nav { gap: 20px; font-size: 12px; }
-  .research-site .research-header p { font-size: 13px; }
-  .research-site #power-response-demo .pr-controls { padding: 11px; gap: 11px; }
-  .research-site #power-response-demo .pr-toolbar { gap: 7px; }
-  .research-site #power-response-demo .btn { padding: 7px 10px; }
-  .research-site #power-response-demo .pr-status { gap: 4px 14px; margin-bottom: 18px; }
-  .research-site #power-response-demo #pr-event { flex-basis: 100%; margin-left: 0; }
-  .research-site #power-response-demo .pr-panels { grid-template-columns: 1fr; gap: 25px; }
-  .research-site #power-response-demo .pr-cost-panel { border-top: 1px solid var(--border); padding-top: 18px; }
-  .research-site #power-response-demo .pr-fit { margin-top: 23px; }
-  .research-site #power-response-demo .pr-legend { gap: 6px 14px; }
-  .research-site .research-methods summary { flex-wrap: wrap; gap: 5px 12px; }
-  .research-site .research-methods-body { grid-template-columns: 1fr; gap: 20px; }
-  .research-site .research-colophon { flex-wrap: wrap; gap: 5px; }
+  .research-header, #power-response-demo, .research-footer { width: calc(100% - 36px); }
+  .research-header { padding: 25px 0 22px; }
+  .research-title-row { flex-wrap: wrap; gap: 8px; }
+  h1 { font-size: 26px; }
+  .research-header nav { font-size: 12px; gap: 20px; }
+  .research-header p { font-size: 13px; }
+  .pr-instruction { font-size: 13px; }
+  .pr-actions { gap: 10px; }
+  .pr-actions .pr-field { width: 100%; }
+  #pr-bus { min-height: 38px; }
+  .btn-primary { padding: 12px 15px; }
+  .pr-playback { gap: 8px; }
+  .pr-toolbar { gap: 2px; }
+  .btn-play { min-width: 114px; }
+  .pr-speed-field { margin-left: 5px; gap: 1px; }
+  .pr-status { width: 100%; padding-top: 2px; }
+  #pr-learning { display: inline; }
+  .pr-event { margin-bottom: 20px; }
+  .pr-panels { grid-template-columns: minmax(0,1fr); gap: 26px; }
+  .pr-matrix-panel, .pr-fit { border-top: 1px solid var(--border); padding-top: 20px; }
+  .pr-panel h2 { font-size: 17px; }
+  .pr-matrix-summary { font-size: 10px; }
+  .pr-results { margin-top: 20px; }
+  .research-methods summary { flex-wrap: wrap; gap: 5px 12px; }
+  .research-methods-body { grid-template-columns: 1fr; gap: 20px; }
+  .research-colophon { flex-wrap: wrap; gap: 5px; }
 }
 @media(pointer:coarse) {
-  .research-site #power-response-demo .btn, .research-site #power-response-demo .form-select { min-height: 44px; }
-  .research-site #power-response-demo .form-select { font-size: 16px; }
-  .research-site #power-response-demo .form-check, .research-site #power-response-demo .pr-legend button { min-height: 44px; }
+  .btn, .pr-field select, #pr-bus { min-height: 44px; }
+  .pr-field select { font-size: 16px; }
+  .form-check, .pr-legend button { min-height: 44px; }
 }
 @media(prefers-reduced-motion:reduce) { html { scroll-behavior: auto; } .research-site * { transition: none !important; } }
+.pr-chart .matrix-columns text { font-size: 9px; fill: var(--muted-foreground); }
+.pr-chart .matrix-rows text { font-size: 10px; fill: var(--muted-foreground); }
+.pr-chart .matrix-rows [aria-pressed='true'] text { fill: #fff; }
+.pr-chart .matrix-axis { font-size: 11px; fill: var(--muted-foreground); }
+
+@media(max-width:720px) { #pr-fault { gap: 10px; padding: 8px 10px; font-size: 12px; } }
 </style>
 </head>
 <body class="research-site">
@@ -155,112 +196,81 @@ body.research-site {
     <h1>Online predictive control</h1>
     <nav aria-label="Page navigation">
       <a href="#about-demo">About</a>
-      <a href="https://github.com/tongxin-li/online-sls-demo" target="_blank" rel="noopener noreferrer">Source code ↗</a>
+      <a href="https://github.com/tongxin-li/online-sls-demo" target="_blank" rel="noopener noreferrer">Code ↗</a>
     </nav>
   </div>
-  <p>Inject a disturbance and watch the controller adapt across a 24 bus power network.</p>
+  <p>A 24 bus experiment in shared online adaptation.</p>
 </header>
 
 <main id="power-response-demo">
-  <style>
-    #power-response-demo { position:relative; color:var(--foreground); }
-    #power-response-demo .pr-heading { padding-right:96px; margin-bottom:16px; }
-    #power-response-demo .pr-heading h2 { margin-bottom:4px; }
-    #power-response-demo .pr-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:12px 0; }
-    #power-response-demo .pr-field { display:flex; align-items:center; gap:8px; }
-    #power-response-demo .pr-field label { margin:0; }
-    #power-response-demo .pr-field select { max-width:180px; }
-    #power-response-demo .pr-status { display:flex; flex-wrap:wrap; gap:8px 24px; margin:14px 0 20px; }
-    #power-response-demo .pr-panels { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.12fr); gap:28px; }
-    #power-response-demo .pr-panel { min-width:0; }
-    #power-response-demo .pr-panel h3 { margin:0 0 8px; }
-    #power-response-demo .pr-subhead { display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; min-height:30px; }
-    #power-response-demo .pr-chart { width:100%; display:block; overflow:visible; }
-    #power-response-demo .pr-chart text { fill:var(--foreground); font-size:12px; font-weight:400; }
-    #power-response-demo .pr-chart .domain, #power-response-demo .pr-chart .tick line { stroke:var(--border); }
-    #power-response-demo .pr-chart .grid line { stroke:var(--border); }
-    #power-response-demo .pr-chart .grid .domain { display:none; }
-    #power-response-demo .pr-legend { display:flex; flex-wrap:wrap; gap:8px 16px; margin:4px 0 10px; }
-    #power-response-demo .pr-legend button { display:inline-flex; align-items:center; gap:7px; padding:0; border:0; border-radius:0; background:transparent; color:var(--foreground); font:inherit; }
-    #power-response-demo .pr-legend button[aria-pressed="true"] { background:transparent; color:var(--foreground); }
-    #power-response-demo .pr-legend button[aria-pressed="false"] { opacity:.45; }
-    #power-response-demo .pr-swatch { width:20px; height:0; border-top:2px solid var(--viz-series-1); display:inline-block; }
-    #power-response-demo .pr-detail { min-height:24px; margin:8px 0; }
-    #power-response-demo #pr-cost-detail { display:flex; flex-wrap:wrap; gap:12px 24px; }
-    #power-response-demo .pr-cost-value { display:flex; flex-direction:column; gap:3px; }
-    #power-response-demo .pr-cost-name { font-size:12px; }
-    #power-response-demo .pr-fit { margin-top:24px; }
-    #power-response-demo .pr-note { margin-top:6px; }
-    #power-response-demo .pr-tooltip { position:absolute; display:none; pointer-events:none; z-index:10; padding:10px 12px; background:var(--popover); color:var(--popover-foreground); border:1px solid var(--border); border-radius:6px; }
-    #power-response-demo .pr-tooltip div { display:flex; justify-content:space-between; gap:18px; }
-    #power-response-demo [hidden] { display:none !important; }
-    @media(max-width:720px) {
-      #power-response-demo .pr-panels { grid-template-columns:minmax(0,1fr); gap:24px; }
-      #power-response-demo .pr-heading { padding-right:0; }
-    }
-    @media(pointer:coarse) {
-      #power-response-demo .pr-legend button { min-height:44px; }
-    }
-  </style>
-  <div class="pr-heading">
-    <h2>Adaptive voltage regulation</h2>
-    <div class="text-small">24 bus synthetic feeder · Illustrative shared response variant</div>
+  <section class="pr-experiment" aria-label="Experiment controls">
+    <div class="pr-instruction">Choose a bus. Add a disturbance. Watch the response.</div>
+    <div class="pr-actions">
+      <div class="pr-field"><label for="pr-bus">Target bus</label><select id="pr-bus" aria-label="Selected bus"></select></div>
+      <button type="button" class="btn btn-primary" id="pr-pulse" aria-keyshortcuts="D">Add disturbance</button>
+      <button type="button" class="btn btn-secondary" id="pr-fault" aria-keyshortcuts="E">Repair forecast</button>
+    </div>
+    <p class="pr-action-note" id="pr-action-note" aria-live="polite">A sudden load change at the selected bus. The simulation starts when you click.</p>
+  </section>
+  <div class="pr-playback" aria-label="Playback controls">
+    <div class="pr-toolbar">
+      <button type="button" class="btn btn-play" id="pr-run">Run simulation</button>
+      <button type="button" class="btn btn-quiet" id="pr-step">One step</button>
+      <button type="button" class="btn btn-quiet" id="pr-restart">Reset</button>
+      <div class="pr-field pr-speed-field"><label for="pr-speed">Speed</label><select id="pr-speed"><option value="4">4 steps/s</option><option value="12" selected>12 steps/s</option><option value="30">30 steps/s</option></select></div>
+    </div>
+    <div class="pr-status tabular-nums"><span id="pr-clock">Step 60 / 480</span><span id="pr-learning">Learning from revealed samples</span></div>
   </div>
-  <aside class="pr-controls" aria-label="Experiment controls">
-  <div class="pr-toolbar">
-    <button type="button" class="btn btn-primary" id="pr-run">Run simulation</button>
-    <button type="button" class="btn" id="pr-step">One step</button>
-    <button type="button" class="btn btn-ghost" id="pr-restart">Reset</button>
-    <div class="pr-field"><label class="form-label" for="pr-speed">Speed</label><select class="form-select" id="pr-speed"><option value="4">4 steps/s</option><option value="12" selected>12 steps/s</option><option value="30">30 steps/s</option></select></div>
-  </div>
-  <div class="pr-toolbar">
-    <div class="pr-field"><label class="form-label" for="pr-bus">Bus</label><select class="form-select" id="pr-bus" aria-label="Selected bus"></select></div>
-    <button type="button" class="btn" id="pr-pulse" aria-keyshortcuts="D">Load pulse</button>
-    <button type="button" class="btn" id="pr-fault" aria-keyshortcuts="E">Repair forecast</button>
-    <button type="button" class="btn" id="pr-freeze">Freeze data and fit</button>
-  </div>
-  </aside>
-  <div class="pr-status tabular-nums">
-    <span id="pr-clock">Step 0 / 480</span>
-    <span id="pr-learning">Learning starts after 30 samples</span>
-    <span id="pr-event" role="status" aria-live="polite">Ready · Space to run or pause</span>
-  </div>
-  <div class="pr-panels">
+  <div id="pr-event" class="pr-event" role="status" aria-live="polite">Ready · Space to run or pause</div>
+  <div class="pr-topology pr-panels">
     <section class="pr-panel pr-network-panel" aria-labelledby="pr-network-title">
-      <div class="pr-subhead"><h3 id="pr-network-title">24 bus feeder</h3><label class="form-check"><input class="form-check-input" type="checkbox" id="pr-all-links"><span class="form-check-label text-small">All receivers</span></label></div>
-      <div class="text-small" id="pr-topology-label">Recommended sources for bus 6</div>
+      <div class="pr-subhead"><h2 id="pr-network-title">Power network</h2><label class="form-check"><input type="checkbox" id="pr-all-links"><span>Show all links</span></label></div>
+      <p class="pr-caption" id="pr-topology-label">Prediction sources for bus 6</p>
       <svg class="pr-chart" id="pr-network" role="img" aria-label="Fixed radial feeder and recommended directed prediction links"></svg>
-      <div class="pr-detail tabular-nums" id="pr-bus-detail"></div>
-      <div class="pr-network-caption text-small"><p>Lines show the feeder · Arrows show prediction sources · × faulty forecast</p></div>
-      <div class="pr-note text-small" id="pr-links-detail">3 remote sources per receiver · Deployed links remain fixed</div>
+      <p class="pr-detail tabular-nums" id="pr-bus-detail"></p>
+      <div class="pr-network-key"><span><i class="pr-line-key"></i>Electrical line</span><span><i class="pr-arrow-key">→</i>Prediction link</span><span>× Forecast error</span></div>
+      <p class="pr-caption" id="pr-links-detail">Select a bus to inspect its incoming links.</p>
     </section>
+    <section class="pr-panel pr-matrix-panel" aria-labelledby="pr-matrix-title">
+      <div class="pr-subhead"><h2 id="pr-matrix-title">Communication matrix</h2><button class="btn btn-quiet" type="button" id="pr-reference">Set reference</button></div>
+      <p class="pr-caption">Recommended links · Rows receive from columns</p>
+      <svg class="pr-chart" id="pr-matrix" role="group" aria-label="Communication matrix of recommended prediction links"></svg>
+      <div class="pr-matrix-key" aria-label="Matrix color legend"><span><i class="pr-cell-key connected"></i>Connected</span><span><i class="pr-cell-key added"></i>Added</span><span><i class="pr-cell-key removed"></i>Removed</span><span><i class="pr-cell-key self"></i>Self</span></div>
+      <div class="pr-matrix-summary tabular-nums"><span id="pr-matrix-reference">Changes since step 60</span><span id="pr-matrix-changes">0 added · 0 removed</span></div>
+      <p class="pr-caption" id="pr-matrix-detail">Select a row to inspect a receiver.</p>
+    </section>
+  </div>
+  <p class="pr-scope-note">The graph and matrix show learned link recommendations. The electrical network and deployed communication remain fixed.</p>
+  <div class="pr-results pr-panels">
     <section class="pr-panel pr-cost-panel" aria-labelledby="pr-cost-title">
-      <h3 id="pr-cost-title">Cumulative cost</h3>
+      <div class="pr-subhead"><h2 id="pr-cost-title">Cumulative cost</h2></div>
       <div class="pr-legend" aria-label="Visible cost series">
-        <button type="button" class="cursor-interaction" data-series="online" aria-pressed="true"><span class="pr-swatch"></span>Adaptive</button>
-        <button type="button" class="cursor-interaction" data-series="static" aria-pressed="true"><span class="pr-swatch" style="border-color:var(--viz-series-2);border-top-style:dashed"></span>Static prediction</button>
-        <button type="button" class="cursor-interaction" data-series="causal" aria-pressed="true"><span class="pr-swatch" style="border-color:var(--viz-series-3);border-top-style:dotted"></span>Causal</button>
+        <button type="button" data-series="online" aria-pressed="true"><span class="pr-swatch"></span>Adaptive</button>
+        <button type="button" data-series="static" aria-pressed="true"><span class="pr-swatch" style="border-color:var(--viz-series-2);border-top-style:dashed"></span>Static prediction</button>
+        <button type="button" data-series="causal" aria-pressed="true"><span class="pr-swatch" style="border-color:var(--viz-series-3);border-top-style:dotted"></span>Causal</button>
       </div>
       <svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative quadratic cost of three controllers on the same disturbances"></svg>
       <div class="pr-detail tabular-nums" id="pr-cost-detail"></div>
-      <div class="text-small">Stage cost includes voltage error and control effort</div>
+      <p class="pr-caption">Voltage error and control effort under identical disturbances</p>
+    </section>
+    <section class="pr-panel pr-fit" aria-labelledby="pr-fit-title">
+      <div class="pr-subhead"><h2 id="pr-fit-title">Online adaptation</h2><button type="button" class="btn btn-secondary" id="pr-freeze">Freeze data and fit</button></div>
+      <p class="pr-caption tabular-nums" id="pr-fit-detail">Rolling window of 60 revealed samples</p>
+      <svg class="pr-chart" id="pr-convergence" role="img" aria-label="Relative change of the shared prediction response over time"></svg>
+      <p class="pr-caption" id="pr-mode-note">Freeze data to inspect convergence to a fixed ridge solution</p>
     </section>
   </div>
-  <section class="pr-fit" aria-labelledby="pr-fit-title">
-    <div class="pr-subhead"><h3 id="pr-fit-title">Online adaptation</h3><span class="text-small tabular-nums" id="pr-fit-detail">Rolling window of 60 revealed samples</span></div>
-    <svg class="pr-chart" id="pr-convergence" role="img" aria-label="Relative change of the shared prediction response over time"></svg>
-    <div class="text-small" id="pr-mode-note">Freeze data to inspect convergence to a fixed ridge solution</div>
-  </section>
-  <div class="pr-tooltip text-small tabular-nums" role="tooltip" id="pr-tooltip"></div>
+  <div class="pr-tooltip tabular-nums" role="tooltip" id="pr-tooltip"></div>
   <div role="alert" id="pr-error" hidden></div>
 </main>
+
 <footer class="research-footer">
   <details class="research-methods" id="about-demo">
     <summary><span>About this demo</span><span class="research-methods-caption">O PredSLS · Shared online adaptation</span><span class="research-expand" aria-hidden="true"></span></summary>
     <div class="research-methods-body">
       <section>
         <h3>A linear voltage surrogate</h3>
-        <p>Select a bus, then press D for a load pulse or E to change forecast reliability. Press Space to run or pause. The state is voltage deviation from nominal. Each bus has an equivalent control input. Tree distances define a dense linear coupling model.</p>
+        <p>Choose a bus and click Add disturbance, or press D, to inject an unexpected load pulse. The experiment starts immediately. Press E to change forecast reliability and Space to pause or resume. The state is voltage deviation from nominal. Each bus has an equivalent control input. Tree distances define a dense linear coupling model.</p>
         <div class="research-equation" aria-label="State at the next step equals A times the state plus the control input plus the disturbance">x<sub>t+1</sub> = Ax<sub>t</sub> + u<sub>t</sub> + w<sub>t</sub></div>
         <p>Values use per unit coordinates and abstract control intervals. This illustration does not calculate AC power flow, actuator saturation, or hard voltage limits.</p>
       </section>
@@ -268,7 +278,7 @@ body.research-site {
         <h3>Shared prediction adaptation</h3>
         <p>A shared matrix calibrates forecasts using the latest 60 revealed samples. This reduced ridge loss illustrates online learning and differs from the full manuscript algorithm and its theoretical guarantees.</p>
         <div class="research-equation" aria-label="Adaptive control equals state feedback minus the calibrated preview correction">u<sub>t</sub> = Kx<sub>t</sub> − HG<sub>t</sub>ŵ<sub>t</sub></div>
-        <p>Arrow width encodes prediction score. Node halos indicate voltage deviation. The physical feeder and deployed communication stay fixed. The plots accumulate quadratic stage cost. They do not report formal regret. Frozen fitting measures convergence to a fixed numerical solution. Online data and source rankings can continue to change.</p>
+        <p>The matrix shows three recommended remote sources per receiver. Rows are receivers and columns are sources. Teal cells mark added links and amber outlines mark removed links since the reference step. Add a disturbance or choose Set reference to begin a new comparison. Arrow width encodes prediction score. Node halos indicate voltage deviation. The physical feeder and deployed communication stay fixed. The plots accumulate quadratic stage cost. They do not report formal regret. Frozen fitting measures convergence to a fixed numerical solution. Online data and source rankings can continue to change.</p>
       </section>
     </div>
   </details>
@@ -628,6 +638,8 @@ body.research-site {
   let fitSteps = 0;
   let restored = false;
   let pin = null;
+  let matrixReference = null;
+  const matrixColors = { connected:'#840028', added:'var(--matrix-added, #25796e)', removed:'var(--matrix-removed, #c18a43)', local:'#bdb8bd', inactive:'#f0f1f3' };
   const positions = [
     [.03,.48],[.12,.28],[.27,.28],[.43,.16],[.43,.01],[.60,.12],
     [.77,.03],[.61,.31],[.27,.48],[.44,.38],[.44,.57],[.61,.49],
@@ -643,6 +655,19 @@ body.research-site {
   $('bus').value = String(selectedBus);
   function isFit() { return ['frozen','fitting','converged'].includes(snapshot.mode); }
   function announce(message) { $('event').textContent = message; }
+  function actionNote(message) { if ($('action-note')) $('action-note').textContent = message; }
+  function recommendationKey(edge) { return edge.to + ',' + edge.from; }
+  function captureMatrixReference() {
+    matrixReference = { t:snapshot.t, fitIteration:snapshot.fitIteration, edges:new Set((snapshot.recommendations || []).map(recommendationKey)) };
+  }
+  function selectBus(bus) {
+    selectedBus = bus;
+    $('bus').value = String(bus);
+    render(); save();
+  }
+  function continueAfterAction() {
+    if (!playing) { playing = true; schedule(); }
+  }
   function save() {
     restored = true;
     if (!window.openai?.setWidgetState) return;
@@ -686,6 +711,7 @@ body.research-site {
       for (let i = 0; i < count; i++) { simulation.fitStep(); fitSteps++; }
     }
     snapshot = simulation.snapshot();
+    captureMatrixReference();
     announce('Saved experiment restored · Paused');
   }
   function stop() {
@@ -722,22 +748,37 @@ body.research-site {
   $('step').addEventListener('click', () => { stop(); tick(); save(); });
   $('restart').addEventListener('click', () => {
     stop(); simulation.reset(); snapshot = simulation.snapshot(); journal = []; fitSteps = 0; pin = null;
+    captureMatrixReference();
+    actionNote('A sudden load change at the selected bus. The simulation starts when you click.');
     announce('Same seed restored · Ready'); render(); save();
   });
   $('speed').addEventListener('change', save);
-  $('bus').addEventListener('change', () => { selectedBus = Number($('bus').value); render(); save(); });
+  $('bus').addEventListener('change', () => selectBus(Number($('bus').value)));
   $('all-links').addEventListener('change', () => { drawNetwork(); save(); });
+  if ($('reference')) $('reference').addEventListener('click', () => {
+    captureMatrixReference(); drawMatrix();
+    announce('Connectivity reference saved at step ' + snapshot.t);
+  });
   function pulse() {
     if ($('pulse').disabled) return;
+    captureMatrixReference();
     simulation.queuePulse(selectedBus); journal.push({ t:snapshot.t, type:'pulse', bus:selectedBus });
     snapshot = simulation.snapshot();
-    announce('Load pulse queued at bus ' + selectedBus + ' · Unforecasted voltage sag'); render(); save();
+    continueAfterAction();
+    const message = 'Disturbance added at bus ' + selectedBus + ' for step ' + (snapshot.t + 1);
+    announce(message + ' · Simulation running');
+    actionNote(message + ' · Watch the network and cumulative cost respond');
+    render(); save();
   }
   function fault() {
     if ($('fault').disabled) return;
+    captureMatrixReference();
     simulation.toggleFault(selectedBus); journal.push({ t:snapshot.t, type:'fault', bus:selectedBus });
     snapshot = simulation.snapshot();
-    announce('Bus ' + selectedBus + (snapshot.faults.includes(selectedBus) ? ' forecast corrupted' : ' forecast repaired'));
+    continueAfterAction();
+    const message = 'Forecast at bus ' + selectedBus + (snapshot.faults.includes(selectedBus) ? ' corrupted' : ' repaired') + ' at step ' + snapshot.t;
+    announce(message + ' · Simulation running');
+    actionNote(message + ' · Watch the colored matrix entries change as learning continues');
     render(); save();
   }
   $('pulse').addEventListener('click', pulse);
@@ -757,7 +798,7 @@ body.research-site {
     render(); save();
   });
   document.addEventListener('keydown', e => {
-    if (e.repeat || e.altKey || e.ctrlKey || e.metaKey || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    if (e.defaultPrevented || e.repeat || e.altKey || e.ctrlKey || e.metaKey || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
     const key = e.key.toLowerCase();
     if (key === 'd') { e.preventDefault(); pulse(); }
     else if (key === 'e') { e.preventDefault(); fault(); }
@@ -793,7 +834,7 @@ body.research-site {
     const el = $('network');
     const width = Math.max(240, el.getBoundingClientRect().width);
     const instrument = document.body.classList.contains('research-site');
-    const height = instrument ? 310 : 292;
+    const height = instrument ? 340 : 292;
     const svg = d3.select(el).attr('viewBox', '0 0 ' + width + ' ' + height).attr('height', height);
     const point = bus => [22 + positions[bus - 1][0] * (width - 48), 26 + positions[bus - 1][1] * (height - 54)];
     if (svg.select('defs').empty()) {
@@ -828,7 +869,7 @@ body.research-site {
       g.append('circle').attr('class','voltage-halo'); g.append('circle').attr('class','bus-dot'); g.append('text').attr('class','bus-number'); g.append('text').attr('class','fault-mark'); g.append('title');
       return g;
     }).attr('transform',bus => 'translate('+point(bus).join(',')+')');
-    nodes.on('click',(_e,bus) => { selectedBus=bus; $('bus').value=String(bus); render(); save(); });
+    nodes.on('click',(_e,bus) => selectBus(bus));
     nodes.select('.voltage-halo').attr('r',bus => 12+Math.min(10,Math.abs(snapshot.states.online[bus-1])*400)).attr('fill','var(--viz-series-1)').attr('fill-opacity',.12);
     nodes.select('.bus-dot').attr('r',11).attr('fill',bus => bus === selectedBus ? 'var(--primary)' : 'var(--background)').attr('stroke','var(--border)').attr('stroke-width',1);
     nodes.select('.bus-number').attr('text-anchor','middle').attr('dy','.35em').style('fill',bus => bus === selectedBus ? 'var(--primary-foreground)' : 'var(--foreground)').text(bus => bus);
@@ -838,7 +879,92 @@ body.research-site {
     $('bus-detail').textContent = 'Bus '+selectedBus+' · '+voltage.toFixed(4)+' pu · '+(snapshot.faults.includes(selectedBus)?'Faulty forecast':'Reliable forecast');
     const sources = recommendations.filter(e => e.to === selectedBus).map(e => e.from).join(', ');
     $('topology-label').textContent = $('all-links').checked ? '72 recommended remote links · Selected receiver highlighted' : 'Sources '+sources+' → bus '+selectedBus;
-    $('links-detail').textContent = snapshot.changedEdges+' link '+(snapshot.changedEdges === 1 ? 'replacement' : 'replacements')+' this update · Deployed links fixed';
+    $('links-detail').textContent = 'Gray lines show the electrical feeder · Arrows show recommended sources';
+  }
+  function drawMatrix() {
+    const el = $('matrix');
+    if (!el) return;
+    if (!matrixReference) captureMatrixReference();
+    const width = Math.max(300, el.getBoundingClientRect().width);
+    const height = 340;
+    const side = Math.min(288, width - 66);
+    const cellSize = side / 24;
+    const left = (width - side + 26) / 2;
+    const top = 36;
+    const recommendations = snapshot.recommendations || [];
+    const current = new Set(recommendations.map(recommendationKey));
+    const added = [...current].filter(key => !matrixReference.edges.has(key));
+    const removed = [...matrixReference.edges].filter(key => !current.has(key));
+    const sources = recommendations.filter(edge => edge.to === selectedBus).map(edge => edge.from).sort((a,b) => a-b);
+    const selectedAdded = added.filter(key => Number(key.split(',')[0]) === selectedBus).length;
+    const selectedRemoved = removed.filter(key => Number(key.split(',')[0]) === selectedBus).length;
+    const changes = added.length + ' added · ' + removed.length + ' removed';
+    const detail = 'Bus ' + selectedBus + ' receives from ' + sources.join(', ') + ' · ' + selectedAdded + ' added · ' + selectedRemoved + ' removed';
+    if ($('matrix-reference')) $('matrix-reference').textContent = 'Changes since step ' + matrixReference.t;
+    if ($('matrix-detail')) $('matrix-detail').textContent = detail;
+    if ($('matrix-changes')) $('matrix-changes').textContent = changes;
+    const svg = d3.select(el).attr('viewBox','0 0 '+width+' '+height).attr('height',height)
+      .attr('role','group').attr('aria-label','Recommended communication connectivity matrix')
+      .attr('aria-describedby','pr-matrix-description');
+    if (svg.select('.matrix-cells').empty()) {
+      svg.append('title').text('Recommended connectivity from source columns to receiver rows');
+      svg.append('desc').attr('id','pr-matrix-description');
+      svg.append('text').attr('class','matrix-axis matrix-source-title');
+      svg.append('text').attr('class','matrix-axis matrix-receiver-title');
+      svg.append('g').attr('class','matrix-columns');
+      svg.append('g').attr('class','matrix-cells');
+      svg.append('rect').attr('class','matrix-selected-row').attr('fill','none').attr('pointer-events','none');
+      svg.append('g').attr('class','matrix-rows');
+    }
+    svg.select('desc').text('Each entry represents a recommended source for a receiver. Burgundy entries are retained connections, teal entries are added connections, amber outlines are removed connections, and gray diagonal entries are local information. '+changes+' since step '+matrixReference.t+'. '+detail+'. Use the receiver buttons to select a bus.');
+    svg.select('.matrix-source-title').attr('x',left+side/2).attr('y',12).attr('text-anchor','middle').attr('fill','var(--muted-foreground)').attr('font-size',11).text('Source bus');
+    svg.select('.matrix-receiver-title').attr('transform','translate('+(left-35)+','+(top+side/2)+') rotate(-90)').attr('text-anchor','middle').attr('fill','var(--muted-foreground)').attr('font-size',11).text('Receiver bus');
+    svg.select('.matrix-columns').selectAll('text').data(d3.range(1,25)).join('text')
+      .attr('x',bus=>left+(bus-.5)*cellSize).attr('y',top-7).attr('text-anchor','middle')
+      .attr('fill','var(--muted-foreground)').attr('font-size',9).text(bus=>bus);
+    const cells = d3.range(1,25).flatMap(receiver => d3.range(1,25).map(source => {
+      const key = receiver+','+source;
+      const local = receiver === source;
+      const connected = local || current.has(key);
+      const change = local ? 'local' : current.has(key) ? (matrixReference.edges.has(key) ? 'retained' : 'added') : matrixReference.edges.has(key) ? 'removed' : 'inactive';
+      return {receiver,source,connected,change};
+    }));
+    const marks = svg.select('.matrix-cells').selectAll('rect').data(cells,d=>d.receiver+','+d.source).join(enter=>{
+      const rect=enter.append('rect').attr('class','matrix-cell').style('cursor','pointer');
+      rect.append('title'); return rect;
+    }).attr('x',d=>left+(d.source-1)*cellSize+.8).attr('y',d=>top+(d.receiver-1)*cellSize+.8)
+      .attr('width',Math.max(1,cellSize-1.6)).attr('height',Math.max(1,cellSize-1.6))
+      .attr('data-receiver',d=>d.receiver).attr('data-source',d=>d.source)
+      .attr('data-connected',d=>String(d.connected)).attr('data-change',d=>d.change)
+      .attr('fill',d=>d.change==='retained' ? matrixColors.connected : matrixColors[d.change] || matrixColors.inactive)
+      .attr('stroke',d=>d.change==='removed' ? matrixColors.removed : 'none')
+      .attr('stroke-width',d=>d.change==='removed' ? 1.4 : 0)
+      .on('click',(_event,d)=>selectBus(d.receiver));
+    // Removed recommendations remain outlined until the comparison reference changes.
+    marks.filter(d=>d.change==='removed').attr('fill','var(--background)');
+    marks.select('title').text(d=>d.source===d.receiver ? 'Bus '+d.receiver+' local information' : 'Source '+d.source+' to receiver '+d.receiver+' · '+(d.change==='inactive'?'Not recommended':d.change==='retained'?'Connected':d.change==='added'?'Added since reference':'Removed since reference'));
+    svg.select('.matrix-selected-row').attr('x',left-.8).attr('y',top+(selectedBus-1)*cellSize-.5)
+      .attr('width',side+1.6).attr('height',cellSize+1).attr('rx',1).attr('stroke','var(--foreground)').attr('stroke-width',1);
+    const rows=svg.select('.matrix-rows').selectAll('g').data(d3.range(1,25)).join(enter=>{
+      const group=enter.append('g').attr('role','button').attr('tabindex',0).style('cursor','pointer');
+      group.append('rect').attr('x',-11).attr('width',22).attr('rx',2);
+      group.append('text').attr('text-anchor','middle').attr('dy','.34em');
+      return group;
+    }).attr('transform',bus=>'translate('+(left-13)+','+(top+(bus-.5)*cellSize)+')')
+      .attr('aria-label',bus=>'Select receiver bus '+bus).attr('aria-pressed',bus=>String(bus===selectedBus))
+      .attr('data-receiver',bus=>bus).on('click',(_event,bus)=>selectBus(bus))
+      .on('keydown',(event,bus)=>{
+        if (event.key==='Enter'||event.key===' ') { event.preventDefault(); selectBus(bus); }
+        else if (['ArrowUp','ArrowDown','Home','End'].includes(event.key)) {
+          event.preventDefault();
+          const next = event.key==='Home' ? 1 : event.key==='End' ? 24 : Math.max(1,Math.min(24,bus+(event.key==='ArrowUp'?-1:1)));
+          selectBus(next);
+          svg.select('.matrix-rows').selectAll('g').filter(value=>value===next).node()?.focus();
+        }
+      });
+    rows.select('rect').attr('y',-cellSize/2).attr('height',cellSize).attr('fill',bus=>bus===selectedBus?'var(--primary)':'transparent');
+    rows.select('text').attr('font-size',10).attr('font-weight',bus=>bus===selectedBus?600:400)
+      .attr('fill',bus=>bus===selectedBus?'var(--primary-foreground)':'var(--muted-foreground)').text(bus=>bus);
   }
   function chartBase(el, observations, keys, yTitle, xTitle, height) {
     const width = Math.max(240,el.getBoundingClientRect().width);
@@ -895,6 +1021,32 @@ body.research-site {
     }
     overlay.on('pointermove',event=>{if(!pin)show(event);}).on('pointerleave',()=>{if(!pin){tip.style.display='none';guide.attr('display','none');dots.selectAll('*').remove();}}).on('click',event=>{pin=pin?null:svg.node().id;show(event);});
   }
+  function drawInterventions(chart) {
+    const events = journal.filter(item => ['pulse','fault'].includes(item.type) && item.t < snapshot.t).slice(-8);
+    const groups = [];
+    for (const item of events.slice().sort((a,b)=>a.t-b.t)) {
+      const x = chart.x(item.t+1);
+      const previous = groups[groups.length-1];
+      if (previous && x-previous.right < 22) {
+        previous.items.push(item);
+        previous.right = x;
+      } else groups.push({left:x,right:x,items:[item]});
+    }
+    const markers = chart.marks.append('g').attr('class','intervention-markers');
+    for (const group of groups) {
+      const {items} = group;
+      const x = (group.left+group.right)/2;
+      markers.append('line').attr('x1',x).attr('x2',x).attr('y1',chart.frame.y).attr('y2',chart.frame.y+chart.frame.h)
+        .attr('stroke','var(--muted-foreground)').attr('stroke-opacity',.35).attr('stroke-width',1).attr('stroke-dasharray','3 4');
+      const label = [...new Set(items.map(item=>item.type==='pulse'?'D':'E'))].sort().join('/');
+      chart.svg.append('text').attr('class','intervention-label').attr('x',x).attr('y',chart.frame.y-5)
+        .attr('data-event-count',items.length).attr('data-disturbance-count',items.filter(item=>item.type==='pulse').length)
+        .attr('data-forecast-change-count',items.filter(item=>item.type==='fault').length)
+        .attr('data-event-steps',items.map(item=>item.t+1).join(','))
+        .attr('text-anchor','middle').attr('font-size',10).attr('fill','var(--muted-foreground)').text(label)
+        .append('title').text(items.map(item=>(item.type==='pulse'?'Disturbance':'Forecast change')+' at bus '+item.bus+' · Step '+(item.t+1)).join(' · '));
+    }
+  }
   function tidyTicks(svg) {
     const nodes=svg.selectAll('.x-axis .tick text').nodes();
     for(let i=1;i<nodes.length;i++){const a=nodes[i-1].getBoundingClientRect(),b=nodes[i].getBoundingClientRect();if(a.right+4>b.left) nodes[i].style.display='none';}
@@ -904,7 +1056,8 @@ body.research-site {
   function drawCost() {
     const observations=[{x:0,online:0,static:0,causal:0},...snapshot.history.map(d=>({x:d.t,online:d.online,static:d.static,causal:d.causal}))];
     const items=series.filter(s=>visible.has(s.key));
-    const chart=chartBase($('cost'),observations,series.map(s=>s.key),'Cost (weighted pu²)','Control step',document.body.classList.contains('research-site') ? 310 : 292);
+    const chart=chartBase($('cost'),observations,series.map(s=>s.key),'Cost (weighted pu²)','Control step',document.body.classList.contains('research-site') ? 260 : 292);
+    drawInterventions(chart);
     items.forEach(s=>chart.marks.append('path').datum(observations).attr('fill','none').attr('stroke',s.color).attr('stroke-width',2).attr('stroke-dasharray',s.dash).attr('d',d3.line().x(d=>chart.x(d.x)).y(d=>chart.y(d[s.key]))));
     hover(chart,observations,items,'Step');
     tidyTicks(chart.svg);
@@ -924,17 +1077,20 @@ body.research-site {
     else observations=[{x:0,value:0},...snapshot.history.map(d=>({x:d.t,value:100*d.drift}))];
     if(!observations.length) observations=[{x:0,value:100*(snapshot.fitError || 0)}];
     $('convergence').setAttribute('aria-label',frozen?'Relative Frobenius error to the exact solution on frozen samples':'Relative Frobenius change in the shared response on each control step');
-    const chart=chartBase($('convergence'),observations,['value'],frozen?'Solution error (%)':'Response change (%)',frozen?'Gradient iteration':'Control step',document.body.classList.contains('research-site') ? 175 : 204);
+    const chart=chartBase($('convergence'),observations,['value'],frozen?'Solution error (%)':'Response change (%)',frozen?'Gradient iteration':'Control step',document.body.classList.contains('research-site') ? 260 : 204);
+    if (!frozen) drawInterventions(chart);
     chart.marks.append('path').datum(observations).attr('fill','none').attr('stroke','var(--viz-series-1)').attr('stroke-width',2).attr('d',d3.line().x(d=>chart.x(d.x)).y(d=>chart.y(d.value)));
     hover(chart,observations,[{key:'value',label:frozen?'Solution error (%)':'Response change (%)',color:'var(--viz-series-1)'}],frozen?'Iteration':'Step');
     tidyTicks(chart.svg);
   }
   function render() {
     $('tooltip').style.display='none'; pin=null;
-    renderControls(); drawNetwork(); drawCost(); drawConvergence();
+    renderControls(); drawNetwork(); drawMatrix(); drawCost(); drawConvergence();
   }
-  announce('60 sample warm start · Space to run or pause');
+  announce('Ready at step 60 · Add a disturbance to begin');
   hydrate(window.openai?.widgetState);
+  if (!matrixReference) captureMatrixReference();
+  actionNote('A sudden load change at the selected bus. The simulation starts when you click.');
   window.addEventListener('openai:set_globals',e=>{if(!playing&&!restored&&!journal.length){hydrate(e.detail?.globals?.widgetState);render();}});
   new ResizeObserver(()=>render()).observe(root);
   render();
