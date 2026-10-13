@@ -1,20 +1,4 @@
 <footer class="research-footer">
-  <details class="research-methods" id="about-demo">
-    <summary><span>About this demo</span><span class="research-methods-caption">O PredSLS · Shared online adaptation</span><span class="research-expand" aria-hidden="true"></span></summary>
-    <div class="research-methods-body">
-      <section>
-        <h3>A linear voltage surrogate</h3>
-        <p>Choose a pulse strength and click a bus to inject an unexpected load disturbance. The button and D shortcut apply the same pulse to the selected bus. The default playback is one control step per second. Press E to change forecast reliability and Space to pause or resume. The state is voltage deviation from nominal. Each bus has an equivalent control input. Tree distances define a dense linear coupling model.</p>
-        <div class="research-equation" aria-label="State at the next step equals A times the state plus the control input plus the disturbance">x<sub>t+1</sub> = Ax<sub>t</sub> + u<sub>t</sub> + w<sub>t</sub></div>
-        <p>Values use per unit coordinates and abstract control intervals. This illustration does not calculate AC power flow, actuator saturation, or hard voltage limits.</p>
-      </section>
-      <section>
-        <h3>Shared prediction adaptation</h3>
-        <p>A shared matrix calibrates forecasts using the latest 60 revealed samples. This reduced ridge loss illustrates online learning and differs from the full manuscript algorithm and its theoretical guarantees.</p>
-        <div class="research-equation" aria-label="Adaptive control equals state feedback minus the calibrated preview correction">u<sub>t</sub> = Kx<sub>t</sub> − HG<sub>t</sub>ŵ<sub>t</sub></div>
-        <p>The matrix shows three recommended remote sources per receiver. Rows are receivers and columns are sources. Teal cells mark added links and amber outlines mark removed links since the reference step. Add a disturbance or choose Set reference to begin a new comparison. Arrow width encodes prediction score. Node halos indicate voltage deviation and a ring marks the injected pulse. Visual transitions interpolate the drawing only. The discrete control samples remain unchanged. The physical feeder and deployed communication stay fixed. The instantaneous plot shows the quadratic stage cost xₜᵀQxₜ + uₜᵀRuₜ. The cumulative plot sums these same values. A click advances two real control steps so the pulse is realized and its first affected state cost is visible immediately. Subsequent samples run at the selected speed. The plots do not report formal regret. Frozen fitting measures convergence to a fixed numerical solution. Online data and source rankings can continue to change.</p>
-      </section>
-    </div>
-  </details>
-  <div class="research-colophon"><span>O PredSLS <span aria-hidden="true">·</span> Numerical experiment</span><span>Identical disturbances for all three controllers</span></div>
+  <details class="research-methods" id="about-demo"><summary>About the model <span aria-hidden="true">+</span></summary><div class="research-methods-body"><p>A synthetic 24 bus voltage regulation experiment. Clicking a bus adds an unexpected load pulse that decays over 12 control steps. The controller aims to restore nominal voltage at 1 pu. Equipment icons give the feeder context and share the same linear bus dynamics.</p><p>All three controllers face identical disturbances. Shared ridge calibration learns from the latest 60 revealed samples. The matrix shows three recommended remote prediction sources per receiver. The feeder and deployed communication remain fixed.</p><p>Cost is 35‖x‖² + 0.08‖u‖². Each attack advances two actual samples so its first affected state cost is visible, then playback continues. Each bus recovers for 12 samples before another attack. The 0.95 to 1.05 pu band is a demo target, not an enforced bound. This reduced model does not simulate AC power flow, actuator limits, or the full manuscript algorithm.</p></div></details>
+  <span class="research-colophon">O PredSLS · Numerical illustration</span>
 </footer>

@@ -132,6 +132,34 @@ test('pulse effects enter state before cost and learning without an artificial j
   assert.notDeepEqual(charged.recommendations,cleanCharged.recommendations);
 });
 
+test('the strongest UI pulse stays near nominal voltage in the seeded application scenario',()=>{
+  // A regression for the displayed scenario, not a bound for every disturbance.
+  // Inspect the actual state so rendering or display clipping cannot satisfy it.
+  const strength=0.03;
+  const checkVoltage=(snapshot,label)=>{
+    snapshot.states.online.forEach((deviation,index)=>{
+      const voltage=1+deviation;
+      assert.ok(voltage>=0.95&&voltage<=1.05,
+        `${label}, sample ${snapshot.t}, bus ${index+1}: ${voltage} pu`);
+    });
+  };
+  for(let bus=1;bus<=constants.N;bus++) {
+    const sim=new Simulation();
+    for(let t=0;t<60;t++) sim.step();
+    sim.queuePulse(bus,strength);
+    for(let t=0;t<25;t++) checkVoltage(sim.step(),`single pulse at bus ${bus}`);
+  }
+
+  // The interface waits twelve model samples before allowing the same target
+  // again. Verify repeated disturbances at that recovery interval as well.
+  const spaced=new Simulation();
+  for(let t=0;t<60;t++) spaced.step();
+  for(let t=0;t<72;t++) {
+    if(t<60&&t%12===0) spaced.queuePulse(7,strength);
+    checkVoltage(spaced.step(),'repeated pulse at bus 7');
+  }
+});
+
 test('forecast faults change future observations without rewriting prior pairs',()=>{
   const a=new Simulation(), b=new Simulation();
   for(let i=0;i<35;i++) { a.step(); b.step(); }

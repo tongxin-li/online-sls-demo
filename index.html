@@ -5,205 +5,119 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="An interactive experiment in online predictive control. Inject disturbances and compare control cost, learned prediction sources, and adaptation on a synthetic power network.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
-<title>Online predictive control · O PredSLS</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600&family=Source+Serif+4:wght@400;500;600&display=swap">
-<style>html { color-scheme: light; background: #fff; scroll-behavior: smooth; }
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Voltage lab · Online predictive control</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600&display=swap">
+<style>html { color-scheme: light; background: #fbfcfa; }
 body.research-site {
-  --background: #fff;
-  --foreground: #28272c;
-  --primary: #840028;
-  --primary-foreground: #fff;
-  --muted: #f7f6f6;
-  --muted-foreground: #716e74;
-  --border: #e6e3e5;
-  --popover: #fff;
-  --popover-foreground: #28272c;
-  --viz-series-1: #840028;
-  --viz-series-2: #527b98;
-  --viz-series-3: #939198;
-  --matrix-added: #25796e;
-  --matrix-removed: #c18a43;
-  margin: 0;
-  min-width: 280px;
-  background: var(--background);
-  color: var(--foreground);
-  font: 16px/1.55 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  -webkit-font-smoothing: antialiased;
+  --background:#fff; --foreground:#24352e; --primary:#245c48; --primary-foreground:#fff;
+  --muted:#f4f6f2; --muted-foreground:#7c847e; --border:#e6eae4; --popover:#fff;
+  --viz-series-1:#245c48; --viz-series-2:#94a4b6; --viz-series-3:#bbb4aa;
+  --matrix-added:#328a9c; --matrix-removed:#d39955; --attack:#c87938;
+  margin:0; min-width:320px; color:var(--foreground); background:#fbfcfa;
+  font:14px/1.45 'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  -webkit-font-smoothing:antialiased;
 }
-*, *::before, *::after { box-sizing: border-box; }
-.research-site a { color: var(--primary); text-decoration: none; }
-.research-site a:hover { text-decoration: underline; text-underline-offset: 3px; }
-.research-site button, .research-site input, .research-site select { font-family: inherit; }
-.research-site button, .research-site select, .research-site summary, .research-site .cursor-interaction { cursor: pointer; touch-action: manipulation; }
-.research-site :focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
-.research-header, #power-response-demo, .research-footer { width: calc(100% - 80px); max-width: 1080px; margin: 0 auto; }
-.research-header { padding: 32px 0 22px; }
-.research-title-row { display: flex; justify-content: space-between; align-items: baseline; gap: 24px; }
-h1 { font-family: 'Source Serif 4', Georgia, serif; font-size: 34px; line-height: 1.3; font-weight: 400; letter-spacing: -.8px; margin: 0; color: #171619; }
-.research-header nav { display: flex; gap: 24px; flex-shrink: 0; font-size: 13px; }
-.research-header p { font-size: 15px; color: var(--muted-foreground); margin: 5px 0 0; }
-#power-response-demo { position: relative; }
-#power-response-demo [hidden] { display: none !important; }
-.tabular-nums { font-variant-numeric: tabular-nums; }
-.pr-experiment { padding: 16px 0 14px; border-top: 1px solid var(--border); }
-.pr-instruction { font-size: 16px; font-weight: 400; margin-bottom: 12px; }
-.pr-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 16px; min-height: 36px; padding: 7px 12px; border: 1px solid var(--border); border-radius: 3px; background: #fff; color: var(--foreground); font-size: 13px; font-weight: 400; line-height: 1.4; white-space: nowrap; transition: background-color .15s, border-color .15s; }
-.btn:hover:not(:disabled) { border-color: #aaa3a8; background: #faf9fa; }
-.btn:disabled { opacity: .4; cursor: default; }
-.btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); min-height: 42px; padding: 10px 17px; font-size: 14px; }
-.btn-primary:hover:not(:disabled) { background: #670020; border-color: #670020; }
-#pr-pulse::after, #pr-fault::after { font-size: 12px; font-weight: 400; border: 1px solid currentColor; border-radius: 3px; padding: 0 5px; opacity: .65; }
-#pr-pulse::after { content: 'D'; }
-#pr-fault::after { content: 'E'; }
-#pr-fault { min-height: 42px; font-size: 13px; background: transparent; border-color: transparent; color: var(--muted-foreground); }
-.btn-play { border-color: #9e979d; min-width: 130px; }
-.btn-quiet { background: transparent; border-color: transparent; color: var(--muted-foreground); padding: 5px 8px; }
-.btn-quiet:hover:not(:disabled) { background: #f7f6f6; border-color: transparent; color: var(--foreground); }
-.pr-field { display: flex; align-items: center; gap: 10px; }
-.pr-field label { font-size: 13px; color: var(--muted-foreground); }
-.pr-field select { min-height: 36px; color: var(--foreground); background: #fff; padding: 6px 8px; border: 1px solid var(--border); border-radius: 3px; font-size: 12px; }
-#pr-bus { min-width: 52px; min-height: 42px; font-size: 14px; }
-#pr-strength { min-height: 42px; font-size: 14px; }
-.pr-action-note { margin: 7px 0 0; color: var(--muted-foreground); font-size: 12px; min-height: 20px; }
-.pr-playback { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 11px 0; }
-.pr-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
-.pr-speed-field { margin-left: 10px; }
-.pr-speed-field select { border-color: transparent; padding-right: 0; }
-.pr-status { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; font-size: 12px; color: var(--muted-foreground); }
-#pr-clock { color: var(--foreground); font-weight: 500; }
-.pr-event { font-size: 12px; color: var(--muted-foreground); margin: 6px 0 15px; min-height: 18px; }
-.pr-panels { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 48px; }
-.pr-panel { min-width: 0; }
-.pr-subhead { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px; min-height: 36px; }
-.pr-panel h2, .pr-response-heading h2 { margin: 0; font-family: 'Source Serif 4', Georgia, serif; font-size: 23px; font-weight: 400; letter-spacing: -.3px; line-height: 1.4; color: #19181c; }
-.pr-caption { margin: 4px 0; font-size: 12px; line-height: 1.6; color: var(--muted-foreground); }
-.form-check { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted-foreground); cursor: pointer; }
-.form-check input { width: 13px; height: 13px; margin: 0; accent-color: var(--primary); }
-.pr-chart { width: 100%; display: block; overflow: visible; }
-.pr-chart text { fill: var(--foreground); font-family: inherit; font-size: 12px; font-weight: 400; }
-.pr-chart .bus-number { font-size: 10px; }
-.pr-chart .fault-mark { fill: var(--muted-foreground); }
-.pr-chart .domain, .pr-chart .tick line, .pr-chart .grid line { stroke: var(--border); }
-.pr-chart .grid line { stroke-opacity: .65; }
-.pr-chart .grid .domain { display: none; }
-.pr-detail { font-size: 13px; min-height: 20px; margin: 8px 0; }
-#pr-bus-detail { margin-top: 0; padding-top: 10px; border-top: 1px solid var(--border); }
-.pr-network-key, .pr-matrix-key { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 16px; font-size: 11px; color: var(--muted-foreground); }
-.pr-network-key > span, .pr-matrix-key > span { display: inline-flex; align-items: center; gap: 5px; }
-.pr-line-key { display: inline-block; width: 15px; border-top: 1px solid #a7a2a6; }
-.pr-arrow-key { color: var(--primary); font-style: normal; font-size: 18px; line-height: 10px; }
-.pr-cell-key { display: inline-block; width: 9px; height: 9px; }
-.pr-cell-key.connected { background: var(--primary); }
-.pr-cell-key.added { background: var(--matrix-added); }
-.pr-cell-key.removed { background: #fff; border: 1.5px solid var(--matrix-removed); }
-.pr-cell-key.self { background: #bdb8bd; }
-.pr-matrix-key { padding-top: 10px; border-top: 1px solid var(--border); }
-.pr-matrix-summary { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 8px 0 0; font-size: 12px; }
-#pr-matrix-reference { color: var(--muted-foreground); }
-#pr-matrix-changes { margin-left: auto; }
-.pr-scope-note { margin: 18px 0 0; color: var(--muted-foreground); font-size: 12px; }
-.pr-response { border-top: 1px solid var(--border); margin-top: 20px; padding-top: 20px; }
-.pr-results { margin-top: 8px; }
-.pr-response-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 24px; }
-#pr-impact-note { margin: 0; font-size: 13px; color: var(--muted-foreground); }
-.pr-panel h3 { font-size: 15px; font-weight: 500; margin: 0; }
-.pr-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 15px; min-height: 28px; margin: 4px 0; }
-.pr-legend button { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; background: transparent; color: var(--foreground); font-size: 12px; min-height: 24px; }
-.pr-legend button[aria-pressed='false'] { opacity: .4; }
-.pr-swatch { display: inline-block; width: 17px; height: 0; border-top: 2px solid var(--viz-series-1); }
-#pr-fit-detail { display: flex; align-items: center; min-height: 28px; }
-#pr-cost-detail, #pr-stage-detail { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; padding-top: 10px; border-top: 1px solid var(--border); }
-.pr-cost-value { display: flex; flex-direction: column; gap: 2px; }
-.pr-cost-name { font-size: 12px; color: var(--muted-foreground); }
-.pr-cost-value strong { font-size: 21px; font-weight: 400; letter-spacing: -.5px; }
-#pr-mode-note { padding-top: 10px; border-top: 1px solid var(--border); margin-top: 8px; }
-.pr-tooltip { position: absolute; display: none; pointer-events: none; z-index: 10; padding: 10px 12px; border: 1px solid var(--border); border-radius: 3px; background: #fff; box-shadow: 0 3px 12px #00000008; font-size: 12px; }
-.pr-tooltip div { display: flex; justify-content: space-between; gap: 18px; }
-#pr-error { color: var(--primary); padding: 18px 0; }
-.research-footer { margin-top: 0; border-top: 1px solid var(--border); }
-.research-methods summary { display: flex; align-items: center; gap: 15px; padding: 16px 0; color: var(--primary); font-size: 12px; list-style: none; }
-.research-methods summary::-webkit-details-marker { display: none; }
-.research-methods-caption { font-size: 12px; color: var(--muted-foreground); }
-.research-expand { margin-left: auto; font-size: 18px; }
-.research-expand::before { content: '+'; }
-details[open] .research-expand::before { content: '−'; }
-.research-methods-body { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; padding: 12px 0 20px; }
-.research-methods-body h3 { font-size: 15px; font-weight: 500; margin: 0 0 9px; }
-.research-methods-body p { font-size: 12px; color: var(--muted-foreground); margin: 0 0 10px; }
-.research-equation { font-family: Georgia, serif; font-size: 22px; font-style: italic; margin: 18px 0; }
-.research-equation sub { font-size: 12px; }
-.research-colophon { display: flex; justify-content: space-between; gap: 14px; padding: 12px 0 28px; font-size: 10px; color: var(--muted-foreground); }
-@media(max-width:900px) {
-  .pr-panels, .research-methods-body { gap: 28px; }
-  #pr-learning { display: none; }
-}
-@media(max-width:720px) {
-  .research-header, #power-response-demo, .research-footer { width: calc(100% - 36px); }
-  .research-header { padding: 25px 0 22px; }
-  .research-title-row { flex-wrap: wrap; gap: 8px; }
-  h1 { font-size: 29px; }
-  .research-header nav { font-size: 12px; gap: 20px; }
-  .research-header p { font-size: 13px; }
-  .pr-instruction { font-size: 13px; }
-  .pr-actions { gap: 10px; }
-  .pr-actions .pr-field { width: auto; }
-  .pr-actions .pr-strength-field { width: 100%; }
-  #pr-bus { min-height: 38px; }
-  .btn-primary { padding: 12px 15px; }
-  .pr-playback { gap: 8px; }
-  .pr-toolbar { gap: 2px; }
-  .btn-play { min-width: 114px; }
-  .pr-speed-field { margin-left: 5px; gap: 1px; }
-  .pr-status { width: 100%; padding-top: 2px; }
-  #pr-learning { display: inline; }
-  .pr-event { margin-bottom: 20px; }
-  .pr-panels { grid-template-columns: minmax(0,1fr); gap: 26px; }
-  .pr-matrix-panel, .pr-cost-panel { border-top: 1px solid var(--border); padding-top: 20px; }
-  .pr-panel h2, .pr-response-heading h2 { font-size: 22px; }
-  .pr-matrix-summary { font-size: 10px; }
-  .pr-results { margin-top: 8px; }
-  .research-methods summary { flex-wrap: wrap; gap: 5px 12px; }
-  .research-methods-body { grid-template-columns: 1fr; gap: 20px; }
-  .research-colophon { flex-wrap: wrap; gap: 5px; }
-}
-@media(pointer:coarse) {
-  .btn, .pr-field select, #pr-bus { min-height: 44px; }
-  .pr-field select { font-size: 16px; }
-  .form-check, .pr-legend button { min-height: 44px; }
-}
-@media(prefers-reduced-motion:reduce) { html { scroll-behavior: auto; } .research-site * { transition: none !important; } }
-.pr-chart .matrix-columns text { font-size: 9px; fill: var(--muted-foreground); }
-.pr-chart .matrix-rows text { font-size: 10px; fill: var(--muted-foreground); }
-.pr-chart .matrix-rows [aria-pressed='true'] text { fill: #fff; }
-.pr-chart .matrix-axis { font-size: 11px; fill: var(--muted-foreground); }
-
-@media(max-width:720px) { #pr-fault { gap: 10px; padding: 8px 10px; font-size: 12px; } }
-
-.pr-adaptation { margin-top: 26px; border-top: 1px solid var(--border); }
-.pr-adaptation > summary { display: flex; justify-content: space-between; padding: 16px 0; list-style: none; font-size: 13px; color: var(--primary); }
-.pr-adaptation > summary::-webkit-details-marker { display: none; }
-.pr-adaptation[open] > summary span { transform: rotate(45deg); }
-.pr-adaptation .pr-fit { padding: 4px 0 22px; }
-#pr-network [role='button'] { cursor: crosshair; outline: none; }
-#pr-network [role='button']:hover .bus-dot, #pr-network [role='button']:focus .bus-dot { stroke: var(--primary); stroke-width: 2px; }
-#pr-network [role='button']:focus-visible .voltage-halo { stroke: var(--primary); stroke-width: 1px; }
-@media(max-width:720px) {
-  .pr-actions { gap: 8px 10px; }
-  #pr-fault { padding-left: 0; min-height: 36px; }
-  .pr-response-heading { display: block; }
-  #pr-impact-note { margin-top: 6px; }
-}
-
-.pr-network-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; min-height: 30px; }
-.pr-live-stage { white-space: nowrap; color: var(--muted-foreground); font-size: 12px; }
-.pr-live-stage strong { color: var(--primary); font-size: 18px; font-weight: 400; margin-left: 6px; }
-.pr-pulse-summary { color: var(--primary); font-size: 13px; margin: 0 0 5px; }
-.pr-pulse-summary:empty { display: none; }
-@media(max-width:400px) { .pr-network-meta { flex-wrap: wrap; gap: 0 8px; } }
-
-#pr-stage-detail { display: block; min-height: 55px; color: var(--primary); font-size: 16px; }
+*,*::before,*::after { box-sizing:border-box; }
+a { color:inherit; text-decoration:none; }
+a:hover { color:var(--primary); }
+button,input,select { font:inherit; }
+button,select,summary { cursor:pointer; touch-action:manipulation; }
+button,select,svg { -webkit-user-select:none; user-select:none; }
+button { appearance:none; }
+:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
+.research-header,#power-response-demo,.research-footer { width:calc(100% - 64px); max-width:1280px; margin:0 auto; }
+.research-header { padding:23px 0 18px; }
+.research-title-row { display:flex; justify-content:space-between; align-items:center; gap:20px; }
+h1 { font-size:27px; font-weight:550; letter-spacing:-1.1px; line-height:1.2; margin:0; }
+.research-tag { margin-left:18px; font-size:12px; color:var(--muted-foreground); font-weight:400; letter-spacing:0; vertical-align:middle; }
+.research-header nav { display:flex; gap:20px; color:var(--muted-foreground); font-size:12px; }
+#power-response-demo { position:relative; }
+#power-response-demo [hidden] { display:none!important; }
+.tabular-nums { font-variant-numeric:tabular-nums; }
+.pr-controlbar { display:flex; justify-content:space-between; gap:16px; align-items:center; padding:12px 0; border-top:1px solid var(--border); }
+.pr-toolbar,.pr-actions,.pr-settings { display:flex; align-items:center; gap:10px; }
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:34px; padding:6px 12px; border:1px solid var(--border); border-radius:6px; background:white; color:var(--foreground); white-space:nowrap; font-size:12px; transition:background .16s,border-color .16s,transform .16s; }
+.btn:hover:not(:disabled) { background:var(--muted); border-color:#c5cec5; }
+.btn:active:not(:disabled) { transform:translateY(1px); }
+.btn:disabled { opacity:.5; cursor:default; }
+.btn-play { background:var(--primary); border-color:var(--primary); color:white; font-weight:500; min-width:81px; }
+.btn-play::before { content:''; display:inline-block; width:0; height:0; border-top:4px solid transparent; border-bottom:4px solid transparent; border-left:6px solid currentColor; }
+.btn-play[aria-pressed='true']::before { width:6px; height:8px; border:0; border-left:2px solid currentColor; border-right:2px solid currentColor; }
+.btn-play:hover:not(:disabled) { background:#194534; border-color:#194534; }
+.btn-quiet { background:transparent; border-color:transparent; color:var(--muted-foreground); padding:6px; }
+.btn-attack { background:#fff1e3; border-color:#f1d9bf; color:#a85c26; padding:6px 13px; min-width:137px; }
+.btn-attack svg { fill:currentColor; transition:transform .18s; }
+.btn-attack:hover:not(:disabled) { background:#ffe8cf; border-color:#d99d63; }
+.btn-attack:hover:not(:disabled) svg { transform:rotate(-12deg) scale(1.12); }
+select { background:#fff; border:1px solid var(--border); border-radius:5px; padding:6px 9px; color:var(--foreground); min-height:34px; font-size:12px; }
+#pr-speed { border-color:transparent; background:transparent; padding-left:2px; padding-right:2px; }
+.pr-actions label,#pr-clock { color:var(--muted-foreground); font-size:12px; }
+#pr-clock { margin-left:5px; }
+.pr-mission { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:3px 0 14px; font-size:12px; color:#646f66; }
+.pr-mission strong { font-weight:500; color:var(--foreground); }
+.pr-target { color:#969c96; }
+.pr-status-dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--primary); margin-right:7px; vertical-align:middle; }
+#pr-voltage-status[data-state='recovering'] { background:var(--attack); }
+.pr-dashboard { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); column-gap:32px; background:#fff; border:1px solid var(--border); border-radius:8px; padding:0 20px; }
+.pr-panel { min-width:0; padding:12px 0 8px; }
+.pr-subhead { display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:27px; }
+.pr-subhead h2 { font-size:14px; font-weight:500; letter-spacing:-.15px; margin:0; }
+.pr-caption { font-size:11px; color:var(--muted-foreground); margin:0; }
+#pr-action-note { text-align:right; }
+.pr-panel-foot { display:flex; justify-content:space-between; align-items:center; gap:10px; min-height:24px; font-size:10px; color:var(--muted-foreground); }
+.pr-live-stage { flex-shrink:0; }
+.pr-live-stage strong { color:var(--primary); font-weight:500; }
+.pr-chart { width:100%; display:block; overflow:visible; }
+.pr-chart text { fill:var(--muted-foreground); font:10px 'DM Sans',sans-serif; }
+.pr-chart .bus-number { font-size:9px; font-weight:500; }
+.pr-chart .fault-mark { display:none; }
+.pr-chart .domain,.pr-chart .tick line,.pr-chart .grid line { stroke:var(--border); }
+.pr-chart .grid line { stroke-opacity:.65; }
+.pr-chart .grid .domain { display:none; }
+.pr-chart .matrix-columns text,.pr-chart .matrix-rows text { font-size:8px; }
+.pr-chart .matrix-axis { font-size:9px; }
+.pr-matrix-key,.pr-legend { display:flex; align-items:center; flex-wrap:wrap; gap:12px; color:var(--muted-foreground); font-size:10px; }
+.pr-matrix-key>span { display:inline-flex; align-items:center; gap:4px; }
+.pr-cell-key { width:6px; height:6px; display:inline-block; }
+.pr-cell-key.connected { background:var(--primary); }
+.pr-cell-key.added { background:var(--matrix-added); }
+.pr-cell-key.removed { border:1px solid var(--matrix-removed); }
+.pr-stage-panel,.pr-cost-panel { border-top:1px solid var(--border); padding-top:10px; padding-bottom:5px; }
+#pr-pulse-summary { font-size:10px; color:var(--attack); text-align:right; }
+.pr-bottomline { display:flex; align-items:center; justify-content:space-between; gap:20px; min-height:38px; }
+.pr-legend button { display:flex; align-items:center; gap:5px; padding:3px 0; background:transparent; border:0; font-size:11px; color:var(--muted-foreground); }
+.pr-legend button[aria-pressed='false'] { opacity:.35; }
+.pr-swatch { width:15px; border-top:2px solid var(--viz-series-1); }
+.pr-swatch.static { border-color:var(--viz-series-2); border-top-style:dashed; }
+.pr-swatch.causal { border-color:var(--viz-series-3); border-top-style:dotted; }
+#pr-event { font-size:10px; color:var(--muted-foreground); text-align:right; }
+.pr-adaptation { border-top:1px solid var(--border); }
+summary { display:flex; align-items:center; gap:8px; padding:10px 0; font-size:11px; color:var(--muted-foreground); list-style:none; }
+summary::-webkit-details-marker { display:none; }
+summary span { color:#a4aba4; }
+.pr-settings { flex-wrap:wrap; padding:8px 0; }
+.pr-settings label { display:inline-flex; align-items:center; gap:6px; font-size:12px; }
+.pr-settings input { accent-color:var(--primary); }
+.pr-adaptation .pr-chart { max-width:600px; }
+.pr-tooltip { position:absolute; display:none; pointer-events:none; z-index:10; padding:8px 10px; background:#fff; border:1px solid var(--border); border-radius:5px; box-shadow:0 3px 15px #1830240a; font-size:11px; }
+.pr-tooltip div { display:flex; justify-content:space-between; gap:14px; }
+#pr-error { padding:18px 0; color:#9b332b; }
+#pr-network .bus-node { cursor:pointer; outline:none; }
+#pr-network .bus-node:hover .bus-dot,#pr-network .bus-node:focus-visible .bus-dot { stroke:var(--attack); stroke-width:2; }
+#pr-network .bus-node:focus-visible .target-ring { opacity:1; }
+#pr-network .bus-node[aria-disabled='true'] { cursor:progress; }
+#pr-network .bus-icon,#pr-network .bus-number,#pr-network .bus-target { pointer-events:none; }
+.research-footer { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; border-top:1px solid var(--border); }
+.research-methods { flex:1; }
+.research-methods-body { max-width:950px; padding:0 0 12px; color:var(--muted-foreground); font-size:12px; line-height:1.6; }
+.research-methods-body p { margin:6px 0 12px; }
+.research-colophon { color:#9ca29c; font-size:10px; padding:10px 0; white-space:nowrap; }
+@media(min-width:1450px) and (min-height:900px) { .research-header { padding-top:36px; } .pr-dashboard { padding:5px 24px; } .pr-panel { padding-top:16px; padding-bottom:12px; } }
+@media(max-width:900px) { .research-header,#power-response-demo,.research-footer { width:calc(100% - 32px); } .pr-dashboard { gap:0 20px; padding:0 14px; } .research-tag { font-size:11px; margin-left:10px; } .pr-panel-foot { font-size:9px; } .pr-matrix-key { gap:6px; font-size:9px; } }
+@media(max-width:650px) { .research-header { padding:18px 0 14px; } h1 { font-size:25px; } .research-tag { display:none; } .pr-controlbar { flex-wrap:wrap; gap:10px; } .pr-toolbar { width:100%; } .pr-actions { width:100%; } .pr-actions label { margin-right:0; } .btn-attack { margin-left:auto; } #pr-clock { margin-left:auto; } .pr-mission { font-size:10px; gap:6px; padding-top:2px; flex-wrap:wrap; } .pr-target { display:none; } .pr-dashboard { grid-template-columns:minmax(0,1fr); } .pr-matrix-panel { border-top:1px solid var(--border); } .pr-bottomline { flex-wrap:wrap; gap:1px; padding:8px 0; } #pr-event { text-align:left; } .pr-panel-foot { font-size:10px; } .research-colophon { font-size:9px; } }
+@media(pointer:coarse) { .btn,select { min-height:40px; } .pr-legend button { min-height:30px; } }
+@media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important; transition:none!important; } }
 </style>
 </head>
 <body class="research-site">
@@ -222,114 +136,64 @@ details[open] .research-expand::before { content: '−'; }
 })();
 </script>
 <header class="research-header">
-  <div class="research-title-row">
-    <h1>Online predictive control</h1>
-    <nav aria-label="Page navigation">
-      <a href="#about-demo">About</a>
-      <a href="https://github.com/tongxin-li/online-sls-demo" target="_blank" rel="noopener noreferrer">Code ↗</a>
-    </nav>
-  </div>
-  <p>Shared online adaptation on a 24 bus power network.</p>
+  <div class="research-title-row"><h1>Voltage lab<span class="research-tag">Online predictive control</span></h1><nav aria-label="Page navigation"><a href="#about-demo">Model</a><a href="https://github.com/tongxin-li/online-sls-demo" target="_blank" rel="noopener noreferrer">Code ↗</a></nav></div>
 </header>
 
 <main id="power-response-demo">
-  <section class="pr-experiment" aria-label="Experiment controls">
-    <div class="pr-instruction">Click a bus to apply a pulse disturbance.</div>
-    <div class="pr-actions">
-      <div class="pr-field pr-strength-field"><label for="pr-strength">Pulse strength</label><select id="pr-strength" aria-label="Pulse strength"><option value="0.02">0.02 pu · Mild</option><option value="0.06" selected>0.06 pu · Medium</option><option value="0.10">0.10 pu · Strong</option></select></div>
-      <div class="pr-field"><label for="pr-bus">Bus</label><select id="pr-bus" aria-label="Selected bus"></select></div>
-      <button type="button" class="btn btn-primary" id="pr-pulse" aria-keyshortcuts="D">Add disturbance</button>
-      <button type="button" class="btn btn-secondary" id="pr-fault" aria-keyshortcuts="E">Repair forecast</button>
-    </div>
-    <p class="pr-action-note" id="pr-action-note" aria-live="polite">Set the strength, then click a bus in the network or use Add disturbance.</p>
-  </section>
-  <div class="pr-playback" aria-label="Playback controls">
+  <div class="pr-controlbar" aria-label="Simulation controls">
     <div class="pr-toolbar">
-      <button type="button" class="btn btn-play" id="pr-run">Run simulation</button>
-      <button type="button" class="btn btn-quiet" id="pr-step">One step</button>
-      <button type="button" class="btn btn-quiet" id="pr-restart">Reset</button>
-      <div class="pr-field pr-speed-field"><label for="pr-speed">Speed</label><select id="pr-speed"><option value="0.5">0.5 steps/s</option><option value="1" selected>1 step/s</option><option value="2">2 steps/s</option><option value="4">4 steps/s</option></select></div>
+      <button type="button" class="btn btn-play" id="pr-run">Run</button>
+      <button type="button" class="btn btn-quiet" id="pr-restart" title="Start a fresh experiment">Reset</button>
+      <select id="pr-speed" aria-label="Playback speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
+      <span id="pr-clock" class="tabular-nums">Step 60 / 480</span>
     </div>
-    <div class="pr-status tabular-nums"><span id="pr-clock">Step 60 / 480</span><span id="pr-learning">Learning from revealed samples</span></div>
+    <div class="pr-actions">
+      <label for="pr-strength">Pulse</label>
+      <select id="pr-strength" aria-label="Pulse strength"><option value="0.01">Small · 0.01 pu</option><option value="0.02" selected>Medium · 0.02 pu</option><option value="0.03">Large · 0.03 pu</option></select>
+      <button type="button" class="btn btn-attack" id="pr-pulse" aria-keyshortcuts="D"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14 2 5 14h6l-1 8 9-13h-6z"/></svg><span id="pr-pulse-label">Attack bus 6</span></button>
+    </div>
   </div>
-  <div id="pr-event" class="pr-event" role="status" aria-live="polite">Ready · Space to run or pause</div>
-  <div class="pr-topology pr-panels">
+  <div class="pr-mission"><span><span class="pr-status-dot" id="pr-voltage-status" aria-hidden="true"></span>Keep voltage near <strong>1.00 pu</strong><span class="pr-target"> · Target 0.95 to 1.05</span></span><span id="pr-voltage-range" class="tabular-nums"></span></div>
+  <div class="pr-dashboard">
     <section class="pr-panel pr-network-panel" aria-labelledby="pr-network-title">
-      <div class="pr-subhead"><h2 id="pr-network-title">Power network</h2><label class="form-check"><input type="checkbox" id="pr-all-links"><span>Show all links</span></label></div>
-      <div class="pr-network-meta"><p class="pr-caption" id="pr-topology-label">Prediction sources for bus 6</p><span class="pr-live-stage">Cost now <strong id="pr-live-cost" class="tabular-nums">0.0000</strong></span></div>
-      <svg class="pr-chart" id="pr-network" role="group" aria-label="Interactive power network. Click a bus to inject a pulse disturbance"></svg>
-      <p class="pr-detail tabular-nums" id="pr-bus-detail"></p>
-      <p id="pr-pulse-summary" class="pr-pulse-summary tabular-nums" aria-live="polite"></p>
-      <div class="pr-network-key"><span><i class="pr-line-key"></i>Electrical line</span><span><i class="pr-arrow-key">→</i>Prediction link</span><span>× Forecast error</span></div>
-      <p class="pr-caption" id="pr-links-detail">Click any bus to add a pulse. Select a matrix row to inspect its links.</p>
+      <div class="pr-subhead"><h2 id="pr-network-title">Power network</h2><span id="pr-action-note" class="pr-caption" aria-live="polite">Click a bus to attack</span></div>
+      <svg class="pr-chart" id="pr-network" role="group" aria-label="Interactive power network. Click a bus to inject a load pulse"></svg>
+      <div class="pr-panel-foot"><span id="pr-bus-detail" class="tabular-nums"></span><span class="pr-live-stage">Cost <strong id="pr-live-cost" class="tabular-nums">0.0000</strong></span></div>
     </section>
     <section class="pr-panel pr-matrix-panel" aria-labelledby="pr-matrix-title">
-      <div class="pr-subhead"><h2 id="pr-matrix-title">Communication matrix</h2><button class="btn btn-quiet" type="button" id="pr-reference">Set reference</button></div>
-      <p class="pr-caption">Recommended links · Rows receive from columns</p>
-      <svg class="pr-chart" id="pr-matrix" role="group" aria-label="Communication matrix of recommended prediction links"></svg>
-      <div class="pr-matrix-key" aria-label="Matrix color legend"><span><i class="pr-cell-key connected"></i>Connected</span><span><i class="pr-cell-key added"></i>Added</span><span><i class="pr-cell-key removed"></i>Removed</span><span><i class="pr-cell-key self"></i>Self</span></div>
-      <div class="pr-matrix-summary tabular-nums"><span id="pr-matrix-reference">Changes since step 60</span><span id="pr-matrix-changes">0 added · 0 removed</span></div>
-      <p class="pr-caption" id="pr-matrix-detail">Select a row to inspect a receiver.</p>
+      <div class="pr-subhead"><h2 id="pr-matrix-title">Learned communication</h2><div class="pr-matrix-key"><span><i class="pr-cell-key connected"></i>Linked</span><span><i class="pr-cell-key added"></i>Added</span><span><i class="pr-cell-key removed"></i>Removed</span></div></div>
+      <svg class="pr-chart" id="pr-matrix" role="group" aria-label="Communication matrix. Rows receive from columns"></svg>
+      <div class="pr-panel-foot"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div>
+    </section>
+    <section class="pr-panel pr-stage-panel" aria-labelledby="pr-stage-title">
+      <div class="pr-subhead"><h2 id="pr-stage-title">Instantaneous cost</h2><span id="pr-pulse-summary" class="pr-caption tabular-nums" aria-live="polite">Pulse and recovery</span></div>
+      <svg class="pr-chart" id="pr-stage" role="img" aria-label="Instantaneous control cost showing the pulse and recovery"></svg>
+    </section>
+    <section class="pr-panel pr-cost-panel" aria-labelledby="pr-cost-title">
+      <div class="pr-subhead"><h2 id="pr-cost-title">Cumulative cost</h2><span class="pr-caption">Lower is better</span></div>
+      <svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative control cost under identical disturbances"></svg>
     </section>
   </div>
-  <p class="pr-scope-note">The graph and matrix show learned link recommendations. The electrical network and deployed communication remain fixed.</p>
-  <section class="pr-response" aria-labelledby="pr-response-title">
-    <div class="pr-response-heading"><h2 id="pr-response-title">System response</h2><p id="pr-impact-note" role="status" aria-live="polite">Click a bus to see the cost of a pulse and the controller’s recovery.</p></div>
-    <div class="pr-legend" aria-label="Visible cost series">
-      <button type="button" data-series="online" aria-pressed="true"><span class="pr-swatch"></span>Adaptive</button>
-      <button type="button" data-series="static" aria-pressed="true"><span class="pr-swatch" style="border-color:var(--viz-series-2);border-top-style:dashed"></span>Static prediction</button>
-      <button type="button" data-series="causal" aria-pressed="true"><span class="pr-swatch" style="border-color:var(--viz-series-3);border-top-style:dotted"></span>Causal</button>
-    </div>
-    <div class="pr-results pr-panels">
-      <section class="pr-panel pr-stage-panel" aria-labelledby="pr-stage-title">
-        <div class="pr-subhead"><h3 id="pr-stage-title">Instantaneous cost</h3><span class="pr-caption">Recent 60 steps</span></div>
-        <svg class="pr-chart" id="pr-stage" role="img" aria-label="Instantaneous quadratic cost showing disturbance spikes and recovery"></svg>
-        <div class="pr-detail tabular-nums" id="pr-stage-detail"></div>
-        <p class="pr-caption">The cost at each step reveals the pulse and recovery.</p>
-      </section>
-      <section class="pr-panel pr-cost-panel" aria-labelledby="pr-cost-title">
-        <div class="pr-subhead"><h3 id="pr-cost-title">Cumulative cost</h3><span class="pr-caption">Full experiment</span></div>
-        <svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative quadratic cost of three controllers on the same disturbances"></svg>
-        <div class="pr-detail tabular-nums" id="pr-cost-detail"></div>
-        <p class="pr-caption">The total cost increases as each step is completed.</p>
-      </section>
-    </div>
-  </section>
+  <div class="pr-bottomline">
+    <div class="pr-legend" aria-label="Visible cost series"><button type="button" data-series="online" aria-pressed="true"><span class="pr-swatch"></span>Adaptive</button><button type="button" data-series="static" aria-pressed="true"><span class="pr-swatch static"></span>Fixed prediction</button><button type="button" data-series="causal" aria-pressed="true"><span class="pr-swatch causal"></span>Feedback only</button></div>
+    <span id="pr-event" role="status" aria-live="polite">Ready · Space to run</span>
+  </div>
   <details class="pr-adaptation" id="pr-adaptation">
-    <summary>Inspect learning and convergence <span aria-hidden="true">＋</span></summary>
-    <section class="pr-panel pr-fit" aria-labelledby="pr-fit-title">
-      <div class="pr-subhead"><h2 id="pr-fit-title">Online adaptation</h2><button type="button" class="btn btn-secondary" id="pr-freeze">Freeze data and fit</button></div>
-      <p class="pr-caption tabular-nums" id="pr-fit-detail">Rolling window of 60 revealed samples</p>
-      <svg class="pr-chart" id="pr-convergence" role="img" aria-label="Relative change of the shared prediction response over time"></svg>
-      <p class="pr-caption" id="pr-mode-note">Freeze data to inspect convergence to a fixed ridge solution</p>
-    </section>
+    <summary>Experiment settings <span aria-hidden="true">+</span></summary>
+    <div class="pr-settings"><label>Bus <select id="pr-bus" aria-label="Selected bus"></select></label><button type="button" class="btn" id="pr-step">One step</button><button type="button" class="btn" id="pr-fault">Repair forecast</button><button type="button" class="btn" id="pr-reference">Set reference</button><label class="form-check"><input type="checkbox" id="pr-all-links">All prediction links</label><button type="button" class="btn" id="pr-freeze">Freeze data and fit</button></div>
+    <p class="pr-caption" id="pr-fit-detail"></p><svg class="pr-chart" id="pr-convergence" role="img" aria-label="Shared prediction response convergence"></svg><p class="pr-caption" id="pr-mode-note"></p>
   </details>
+  <div hidden><span id="pr-fit-title"></span><span id="pr-learning"></span><span id="pr-topology-label"></span><span id="pr-links-detail"></span><span id="pr-matrix-reference"></span><span id="pr-impact-note"></span><span id="pr-stage-detail"></span><div id="pr-cost-detail"></div></div>
   <div class="pr-tooltip tabular-nums" role="tooltip" id="pr-tooltip"></div>
   <div role="alert" id="pr-error" hidden></div>
 </main>
 
 <footer class="research-footer">
-  <details class="research-methods" id="about-demo">
-    <summary><span>About this demo</span><span class="research-methods-caption">O PredSLS · Shared online adaptation</span><span class="research-expand" aria-hidden="true"></span></summary>
-    <div class="research-methods-body">
-      <section>
-        <h3>A linear voltage surrogate</h3>
-        <p>Choose a pulse strength and click a bus to inject an unexpected load disturbance. The button and D shortcut apply the same pulse to the selected bus. The default playback is one control step per second. Press E to change forecast reliability and Space to pause or resume. The state is voltage deviation from nominal. Each bus has an equivalent control input. Tree distances define a dense linear coupling model.</p>
-        <div class="research-equation" aria-label="State at the next step equals A times the state plus the control input plus the disturbance">x<sub>t+1</sub> = Ax<sub>t</sub> + u<sub>t</sub> + w<sub>t</sub></div>
-        <p>Values use per unit coordinates and abstract control intervals. This illustration does not calculate AC power flow, actuator saturation, or hard voltage limits.</p>
-      </section>
-      <section>
-        <h3>Shared prediction adaptation</h3>
-        <p>A shared matrix calibrates forecasts using the latest 60 revealed samples. This reduced ridge loss illustrates online learning and differs from the full manuscript algorithm and its theoretical guarantees.</p>
-        <div class="research-equation" aria-label="Adaptive control equals state feedback minus the calibrated preview correction">u<sub>t</sub> = Kx<sub>t</sub> − HG<sub>t</sub>ŵ<sub>t</sub></div>
-        <p>The matrix shows three recommended remote sources per receiver. Rows are receivers and columns are sources. Teal cells mark added links and amber outlines mark removed links since the reference step. Add a disturbance or choose Set reference to begin a new comparison. Arrow width encodes prediction score. Node halos indicate voltage deviation and a ring marks the injected pulse. Visual transitions interpolate the drawing only. The discrete control samples remain unchanged. The physical feeder and deployed communication stay fixed. The instantaneous plot shows the quadratic stage cost xₜᵀQxₜ + uₜᵀRuₜ. The cumulative plot sums these same values. A click advances two real control steps so the pulse is realized and its first affected state cost is visible immediately. Subsequent samples run at the selected speed. The plots do not report formal regret. Frozen fitting measures convergence to a fixed numerical solution. Online data and source rankings can continue to change.</p>
-      </section>
-    </div>
-  </details>
-  <div class="research-colophon"><span>O PredSLS <span aria-hidden="true">·</span> Numerical experiment</span><span>Identical disturbances for all three controllers</span></div>
+  <details class="research-methods" id="about-demo"><summary>About the model <span aria-hidden="true">+</span></summary><div class="research-methods-body"><p>A synthetic 24 bus voltage regulation experiment. Clicking a bus adds an unexpected load pulse that decays over 12 control steps. The controller aims to restore nominal voltage at 1 pu. Equipment icons give the feeder context and share the same linear bus dynamics.</p><p>All three controllers face identical disturbances. Shared ridge calibration learns from the latest 60 revealed samples. The matrix shows three recommended remote prediction sources per receiver. The feeder and deployed communication remain fixed.</p><p>Cost is 35‖x‖² + 0.08‖u‖². Each attack advances two actual samples so its first affected state cost is visible, then playback continues. Each bus recovers for 12 samples before another attack. The 0.95 to 1.05 pu band is a demo target, not an enforced bound. This reduced model does not simulate AC power flow, actuator limits, or the full manuscript algorithm.</p></div></details>
+  <span class="research-colophon">O PredSLS · Numerical illustration</span>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="assets/d3.v7.min.js"></script>
 <script>/* Illustrative shared response calibration for the interactive voltage demo.
  * This is not the full FIR projected response algorithm or its regret theorem.
  * Every controller receives the same immutable disturbance and forecast pair.
@@ -677,8 +541,8 @@ details[open] .research-expand::before { content: '−'; }
   for (let i=0;i<60;i++) simulation.step();
   const series = [
     { key:'online', label:'Adaptive', color:'var(--viz-series-1)', dash:null },
-    { key:'static', label:'Static prediction', color:'var(--viz-series-2)', dash:'7 4' },
-    { key:'causal', label:'Causal', color:'var(--viz-series-3)', dash:'2 4' }
+    { key:'static', label:'Fixed prediction', color:'var(--viz-series-2)', dash:'7 4' },
+    { key:'causal', label:'Feedback only', color:'var(--viz-series-3)', dash:'2 4' }
   ];
   const visible = new Set(series.map(s => s.key));
   let selectedBus = 6;
@@ -699,9 +563,17 @@ details[open] .research-expand::before { content: '−'; }
   }
   function color(value) {
     const variable = /^var\((--[^,)]+)/.exec(value);
-    return variable ? getComputedStyle(root).getPropertyValue(variable[1]).trim() || '#840028' : value;
+    return variable ? getComputedStyle(root).getPropertyValue(variable[1]).trim() || '#245c48' : value;
   }
-  const matrixColors = { connected:'#840028', added:'var(--matrix-added, #25796e)', removed:'var(--matrix-removed, #c18a43)', local:'#bdb8bd', inactive:'#f0f1f3' };
+  const matrixColors = { connected:'var(--primary)', added:'var(--matrix-added, #328a9c)', removed:'var(--matrix-removed, #d39955)', local:'#b8c2bc', inactive:'#eff2ef' };
+  const busRole = bus => bus === 1 ? 'Substation' : [5,7,14,21].includes(bus) ? 'Solar' : [8,12,18,24].includes(bus) ? 'Battery' : 'Homes';
+  const busIcons = {
+    Substation:'M-6 6H6M-4 6V-6H4V6M-6-3H6M-6 0H6M-4-6L4 6M4-6L-4 6',
+    Solar:'M-6-3H6L7 4H-7ZM0-3V4M-6 0H6M0 4V7M-4 7H4M-4-6L-5-8M0-6V-9M4-6L5-8',
+    Battery:'M-5-5H5V6H-5ZM-2-7H2M-2-1H2M0-3V1M-2 3H2',
+    Homes:'M-7 0L0-6L7 0M-5-1V6H5V-1M-1 6V2H2V6'
+  };
+  function pulseMagnitude(value) { return Number(value).toFixed(3); }
   const positions = [
     [.03,.48],[.12,.28],[.27,.28],[.43,.16],[.43,.01],[.60,.12],
     [.77,.03],[.61,.31],[.27,.48],[.44,.38],[.44,.57],[.61,.49],
@@ -735,18 +607,18 @@ details[open] .research-expand::before { content: '−'; }
     if (!window.openai?.setWidgetState) return;
     const state = {
       modelContent: { scenario:'Synthetic 24 bus voltage regulation', variant:'Shared response calibration with fixed physical and deployed links', step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
-      privateContent: { version:2, pulseStrength:$('strength').value, t:journal.length <= 200 ? snapshot.t : 0, journal:journal.length <= 200 ? journal : [], selectedBus, speed:$('speed').value, allLinks:$('all-links').checked, fitSteps:journal.length <= 200 ? fitSteps : 0, fitting:journal.length <= 200 && isFit() }
+      privateContent: { version:3, pulseStrength:$('strength').value, t:journal.length <= 200 ? snapshot.t : 0, journal:journal.length <= 200 ? journal : [], selectedBus, speed:$('speed').value, allLinks:$('all-links').checked, fitSteps:journal.length <= 200 ? fitSteps : 0, fitting:journal.length <= 200 && isFit() }
     };
     window.openai.setWidgetState(state).catch(() => {});
   }
   function hydrate(saved) {
     const data = saved?.privateContent;
-    if (restored || !data || ![1,2].includes(data.version)) return;
+    if (restored || !data || data.version !== 3) return;
     restored = true;
     selectedBus = Math.max(1, Math.min(24, Number(data.selectedBus) || 6));
     $('bus').value = String(selectedBus);
-    $('speed').value = data.version === 2 && ['0.5','1','2','4'].includes(data.speed) ? data.speed : '1';
-    if (data.version === 2 && ['0.02','0.06','0.10'].includes(data.pulseStrength)) $('strength').value = data.pulseStrength;
+    $('speed').value = ['0.5','1','2','4'].includes(data.speed) ? data.speed : '1';
+    if (['0.01','0.02','0.03'].includes(data.pulseStrength)) $('strength').value = data.pulseStrength;
     $('all-links').checked = !!data.allLinks;
     const items = Array.isArray(data.journal) ? data.journal.slice(0,200) : [];
     const t = Math.max(0, Math.min(480, Math.floor(Number(data.t) || 0)));
@@ -761,7 +633,7 @@ details[open] .research-expand::before { content: '−'; }
         }
         if (!Number.isInteger(item.bus) || item.bus < 1 || item.bus > 24) continue;
         if (item.type === 'pulse') {
-          const strength = Number.isFinite(item.strength) && item.strength >= 0.005 && item.strength <= 0.15 ? item.strength : data.version === 1 ? 0.025 : 0.06;
+          const strength = Number.isFinite(item.strength) && item.strength >= 0.005 && item.strength <= 0.03 ? item.strength : 0.02;
           simulation.queuePulse(item.bus, strength);
           item.strength = strength;
         }
@@ -779,7 +651,7 @@ details[open] .research-expand::before { content: '−'; }
     }
     snapshot = simulation.snapshot();
     captureMatrixReference();
-    announce('Saved experiment restored · Paused');
+    announce('Experiment restored · Press Run');
   }
   function stop() {
     playing = false;
@@ -797,29 +669,40 @@ details[open] .research-expand::before { content: '−'; }
     if (isFit()) { simulation.fitStep(); fitSteps++; }
     else simulation.step();
     snapshot = simulation.snapshot();
-    if (snapshot.mode === 'completed') { stop(); announce('Episode complete · Freeze the data to inspect convergence'); }
-    if (snapshot.mode === 'converged') { stop(); announce('Frozen fit converged · Relative error below 0.001%'); }
+    if (snapshot.mode === 'completed') { stop(); announce('Complete · Run to begin again'); }
+    if (snapshot.mode === 'converged') { stop(); announce('Fit converged · Run to resume'); }
     render();
     if (snapshot.t % 30 === 0 || !playing) save();
   }
-  function toggleRun() {
-    if (playing) { stop(); announce(isFit() ? 'Fit paused' : 'Simulation paused'); save(); }
-    else if (snapshot.mode !== 'completed' && snapshot.mode !== 'converged') {
-      playing = true;
-      announce(isFit() ? 'Fitting the frozen sample window' : 'Simulation running');
-      schedule();
-    }
-    renderControls();
-  }
-  $('run').addEventListener('click', toggleRun);
-  $('step').addEventListener('click', () => { stop(); tick(); save(); });
-  $('restart').addEventListener('click', () => {
+  function resetExperiment() {
     stop(); simulation.reset();
     for (let i = 0; i < 60; i++) simulation.step();
     snapshot = simulation.snapshot(); journal = []; fitSteps = 0; pin = null; lastPulse = null;
     captureMatrixReference();
-    actionNote('Click a bus to apply the selected pulse strength.');
-    announce('Reset to step 60 · Ready'); render(); save();
+    actionNote('Click a bus to add a load pulse.');
+  }
+  function toggleRun() {
+    if (playing) { stop(); announce('Paused'); save(); }
+    else {
+      if (snapshot.mode === 'completed') resetExperiment();
+      if (isFit()) {
+        simulation.resume();
+        journal.push({t:snapshot.t,type:'fit',count:fitSteps});
+        fitSteps=0; snapshot=simulation.snapshot();
+      }
+      if (snapshot.mode === 'completed') resetExperiment();
+      playing = true;
+      announce('Regulating voltage');
+      // A visible first sample confirms the click immediately.
+      tick();
+      if (playing) schedule();
+    }
+    render();
+  }
+  $('run').addEventListener('click', toggleRun);
+  $('step').addEventListener('click', () => { stop(); tick(); save(); });
+  $('restart').addEventListener('click', () => {
+    resetExperiment(); announce('Ready'); render(); save();
   });
   $('speed').addEventListener('change', () => { if (playing) { clearTimeout(timer); schedule(); } save(); });
   $('strength').addEventListener('change', () => { drawNetwork(); save(); });
@@ -830,8 +713,13 @@ details[open] .research-expand::before { content: '−'; }
     captureMatrixReference(); drawNetwork(); drawMatrix();
     announce('Connectivity reference saved at step ' + snapshot.t);
   });
+  function pulseCooldown(bus) {
+    const recent=journal.filter(item=>item.type==='pulse' && item.bus===bus).at(-1);
+    return recent ? Math.max(0,12-(snapshot.t-recent.t)) : 0;
+  }
+  function canAttack(bus) { return !isFit() && snapshot.mode !== 'completed' && pulseCooldown(bus) === 0; }
   function pulse(bus = selectedBus) {
-    if ($('pulse').disabled) return;
+    if (!canAttack(bus)) return;
     stop();
     selectedBus = bus;
     $('bus').value = String(bus);
@@ -848,9 +736,9 @@ details[open] .research-expand::before { content: '−'; }
     snapshot = simulation.snapshot();
     lastPulse = {bus:selectedBus, strength, t:pulseStep, before, after:snapshot.stage.online, charged:steps === 2};
     continueAfterAction();
-    const message = strength.toFixed(2) + ' pu pulse at bus ' + selectedBus;
-    announce(message + (playing ? ' · Simulation running' : ' · Episode complete'));
-    actionNote(message + ' applied · Watch the voltage and cost recover');
+    const message = pulseMagnitude(strength) + ' pu pulse at bus ' + selectedBus;
+    announce(message + (playing ? ' · Recovering' : ' · Complete'));
+    actionNote('Bus ' + selectedBus + ' disturbed · Voltage recovering');
     render(); pulseRipple(selectedBus); save();
   }
   function fault() {
@@ -862,7 +750,7 @@ details[open] .research-expand::before { content: '−'; }
     snapshot = simulation.snapshot();
     continueAfterAction();
     const message = 'Forecast at bus ' + selectedBus + (snapshot.faults.includes(selectedBus) ? ' corrupted' : ' repaired') + ' at step ' + snapshot.t;
-    announce(message + (playing ? ' · Simulation running' : ' · Episode complete'));
+    announce(message + (playing ? ' · Recovering' : ' · Complete'));
     actionNote(message + ' · Colored entries show changes in recommended sources');
     render(); save();
   }
@@ -900,15 +788,18 @@ details[open] .research-expand::before { content: '−'; }
   });
   function renderControls() {
     const frozen = isFit();
-    $('clock').textContent = 'Step ' + snapshot.t + ' / ' + snapshot.horizon;
+    $('clock').textContent = 't = ' + snapshot.t;
     $('learning').textContent = frozen ? 'Plant held · ' + snapshot.mode : snapshot.t < 30 ? 'Learning starts after 30 samples' : 'Learning from revealed samples';
-    $('run').textContent = playing ? (frozen ? 'Pause fit' : 'Pause simulation') : (frozen ? 'Continue fit' : 'Run simulation');
-    $('run').disabled = ['converged','completed'].includes(snapshot.mode);
+    $('run').textContent = playing ? 'Pause' : 'Run';
+    $('run').disabled = false;
+    $('run').setAttribute('aria-label',playing ? 'Pause simulation' : snapshot.mode === 'completed' ? 'Run a new simulation' : 'Run simulation');
+    $('run').setAttribute('aria-pressed',String(playing));
+    if ($('pulse-label')) $('pulse-label').textContent=pulseCooldown(selectedBus) ? 'Recovering '+pulseCooldown(selectedBus) : 'Attack bus '+selectedBus;
     $('step').textContent = frozen ? 'One fit step' : 'One step';
     $('step').disabled = ['converged','completed'].includes(snapshot.mode);
     $('freeze').textContent = frozen ? 'Return to simulation' : 'Freeze data and fit';
     $('freeze').disabled = snapshot.t < 30;
-    $('pulse').disabled = frozen || snapshot.mode === 'completed';
+    $('pulse').disabled = !canAttack(selectedBus);
     $('strength').disabled = frozen || snapshot.mode === 'completed';
     $('fault').disabled = frozen || snapshot.mode === 'completed';
     $('fault').textContent = (snapshot.faults.includes(selectedBus) ? 'Repair' : 'Corrupt') + ' forecast';
@@ -928,7 +819,7 @@ details[open] .research-expand::before { content: '−'; }
   function drawNetwork() {
     const el = $('network');
     const width = Math.max(240, el.getBoundingClientRect().width);
-    const height = 340;
+    const height = 250;
     const svg = d3.select(el).attr('viewBox', '0 0 ' + width + ' ' + height).attr('height', height)
       .attr('role','group').attr('aria-label','Power network. Activate a bus to inject the selected load pulse.');
     const point = bus => [25 + positions[bus - 1][0] * (width - 54), 26 + positions[bus - 1][1] * (height - 54)];
@@ -974,54 +865,92 @@ details[open] .research-expand::before { content: '−'; }
       .attr('stroke-width',e => e.change === 'removed' ? 1.1 : strength(e.weight))
       .attr('opacity',e => e.to === selectedBus ? (e.change === 'removed' ? .5 : .88) : e.change === 'removed' ? .1 : .14);
     const nodes = svg.select('.nodes').selectAll('g.bus-node').data(d3.range(1,25),bus => bus).join(enter => {
-      const g=enter.append('g').attr('class','bus-node cursor-interaction').attr('role','button').attr('tabindex',0);
-      g.append('circle').attr('class','voltage-halo').attr('r',12).attr('fill-opacity',0);
-      g.append('circle').attr('class','bus-dot');
-      g.append('text').attr('class','bus-number');
-      g.append('text').attr('class','fault-mark');
+      const g=enter.append('g').attr('class','bus-node').attr('role','button').attr('tabindex',0)
+        .style('cursor','pointer').style('user-select','none');
+      g.append('circle').attr('class','bus-hit').attr('r',20).attr('fill','transparent');
+      g.append('circle').attr('class','voltage-halo').attr('r',12).attr('fill-opacity',0).attr('pointer-events','none');
+      g.append('circle').attr('class','bus-dot').attr('pointer-events','none');
+      g.append('path').attr('class','bus-icon').attr('fill','none').attr('stroke-width',1.2)
+        .attr('stroke-linecap','round').attr('stroke-linejoin','round').attr('pointer-events','none');
+      g.append('text').attr('class','bus-number').attr('pointer-events','none');
+      g.append('text').attr('class','fault-mark').attr('pointer-events','none');
+      const target=g.append('g').attr('class','bus-target').attr('opacity',0).attr('pointer-events','none');
+      target.append('circle').attr('class','target-ring').attr('r',17).attr('fill','none')
+        .attr('stroke','var(--attack, #c87938)').attr('stroke-width',1.4).attr('stroke-dasharray','4 3');
+      target.append('path').attr('class','target-bolt').attr('d','M11-22L6-13H12L9-5L19-16H13L16-22Z')
+        .attr('fill','var(--attack, #c87938)').attr('stroke','var(--background)').attr('stroke-width',1.2);
       g.append('title');
       return g;
     }).attr('transform',bus => 'translate('+point(bus).join(',')+')')
-      .attr('data-bus',bus => bus).attr('aria-label',bus => 'Inject pulse at bus '+bus)
-      .attr('aria-disabled',String($('pulse').disabled))
-      .on('click',(_event,bus) => pulse(bus))
+      .attr('data-bus',bus => bus).attr('data-role',bus => busRole(bus))
+      .attr('aria-label',bus => 'Inject pulse at bus '+bus)
+      .attr('aria-description',bus => busRole(bus)+', '+(1+snapshot.states.online[bus-1]).toFixed(3)+' pu'+(pulseCooldown(bus) ? ', recovering '+pulseCooldown(bus)+' steps' : ''))
+      .attr('aria-disabled',bus => String(!canAttack(bus)))
+      .style('cursor',bus=>canAttack(bus) ? 'pointer' : 'default')
+      .on('click',(event,bus) => { event.preventDefault(); event.stopPropagation(); pulse(bus); })
+      .on('pointerenter',function(_event,bus) {
+        if (canAttack(bus)) d3.select(this).select('.bus-target').attr('opacity',1);
+        showBusDetail(bus,true);
+      })
+      .on('pointerleave',function() { d3.select(this).select('.bus-target').attr('opacity',0); showBusDetail(selectedBus); })
+      .on('focus',function(_event,bus) {
+        if (canAttack(bus)) d3.select(this).select('.bus-target').attr('opacity',1);
+        showBusDetail(bus,true);
+      })
+      .on('blur',function() { d3.select(this).select('.bus-target').attr('opacity',0); showBusDetail(selectedBus); })
       .on('keydown',(event,bus) => {
         if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); pulse(bus); }
       });
-    const deviation = bus => Math.min(1,Math.abs(snapshot.states.online[bus-1])/.06);
-    animate(nodes.select('.voltage-halo')).attr('r',bus => 13+18*deviation(bus))
-      .attr('fill',color('var(--viz-series-1)')).attr('fill-opacity',bus => .04+.2*deviation(bus));
-    animate(nodes.select('.bus-dot')).attr('r',11)
-      .attr('fill',bus => bus === selectedBus ? color('var(--primary)') : d3.interpolateRgb(color('var(--background)'), '#be7d90')(deviation(bus)*.65))
-      .attr('stroke',bus => bus === selectedBus ? color('var(--primary)') : '#c8c3c4').attr('stroke-width',1);
-    nodes.select('.bus-number').attr('text-anchor','middle').attr('dy','.35em').style('fill',bus => bus === selectedBus ? 'var(--primary-foreground)' : 'var(--foreground)').text(bus => bus);
+    const deviation = bus => Math.min(1,Math.abs(snapshot.states.online[bus-1])/.03);
+    const tint = bus => Math.abs(snapshot.states.online[bus-1]) > .02 ? '#d99c54' : '#7ea68b';
+    animate(nodes.select('.voltage-halo')).attr('r',bus => 13+12*deviation(bus))
+      .attr('fill',bus => tint(bus)).attr('fill-opacity',bus => .025+.22*deviation(bus));
+    animate(nodes.select('.bus-dot')).attr('r',12)
+      .attr('fill',bus => bus === selectedBus ? color('var(--primary)') : d3.interpolateRgb(color('var(--background)'), tint(bus))(deviation(bus)*.65))
+      .attr('stroke',bus => bus === selectedBus ? color('var(--primary)') : '#bdcbc1').attr('stroke-width',1);
+    nodes.select('.bus-icon').attr('d',bus=>busIcons[busRole(bus)])
+      .attr('stroke',bus=>bus===selectedBus ? 'var(--primary-foreground)' : 'var(--primary)');
+    nodes.select('.bus-number').attr('text-anchor','middle').attr('x',0).attr('y',23).attr('dy',null)
+      .style('fill','var(--muted-foreground)').style('font-size','9px').text(bus => bus);
     nodes.select('.fault-mark').attr('x',13).attr('y',-9).text(bus => snapshot.faults.includes(bus) ? '×' : '');
-    nodes.select('title').text(bus => 'Click to inject '+Number($('strength').value).toFixed(2)+' pu at bus '+bus+'. Voltage '+(1+snapshot.states.online[bus-1]).toFixed(4)+' pu'+(snapshot.faults.includes(bus)?' with faulty forecast':''));
-    const voltage = 1 + snapshot.states.online[selectedBus - 1];
-    $('bus-detail').textContent = 'Bus '+selectedBus+' · '+voltage.toFixed(4)+' pu · '+(snapshot.faults.includes(selectedBus)?'Faulty forecast':'Reliable forecast');
+    nodes.select('title').text(bus => busRole(bus)+' · Bus '+bus+' · '+(1+snapshot.states.online[bus-1]).toFixed(3)+' pu. '+(pulseCooldown(bus) ? 'Recovering '+pulseCooldown(bus)+' steps.' : 'Click for a '+pulseMagnitude($('strength').value)+' pu load pulse.'));
+    nodes.filter(bus=>!canAttack(bus)).select('.bus-target').attr('opacity',0);
+    showBusDetail(selectedBus);
+    const voltages=snapshot.states.online.map(value=>1+value);
+    const low=Math.min(...voltages), high=Math.max(...voltages);
+    const inRange=low>=.95 && high<=1.05;
+    if (lastPulse && snapshot.t-lastPulse.t >= 12) actionNote(inRange ? 'Voltage restored · Click a bus' : 'Controller restoring voltage');
+    if ($('voltage-range')) $('voltage-range').textContent=low.toFixed(3)+' to '+high.toFixed(3)+' pu';
+    if ($('voltage-status')) {
+      $('voltage-status').title=inRange ? 'Within target' : 'Restoring voltage';
+      $('voltage-status').dataset.state=inRange ? 'stable' : 'recovering';
+    }
     const sources = recommendations.filter(e => e.to === selectedBus).map(e => e.from).join(', ');
-    $('topology-label').textContent = $('all-links').checked ? '72 recommended remote links · Selected receiver highlighted' : 'Sources '+sources+' → bus '+selectedBus;
-    $('links-detail').textContent = 'Node shading shows voltage deviation · Arrows show recommended sources';
+    $('topology-label').textContent = $('all-links').checked ? 'All learned links' : 'Sources '+sources+' → bus '+selectedBus;
+    $('links-detail').textContent = 'Icons are bus roles · Color shows voltage';
   }
+  function showBusDetail(bus,hovered=false) {
+    const voltage=1+snapshot.states.online[bus-1];
+    $('bus-detail').textContent=busRole(bus)+' · Bus '+bus+' · '+voltage.toFixed(3)+' pu'+(pulseCooldown(bus) ? ' · Recovering '+pulseCooldown(bus)+' steps' : hovered && canAttack(bus) ? ' · Click to attack' : '');
+  }
+
   function drawMatrix() {
     const el = $('matrix');
     if (!el) return;
     if (!matrixReference) captureMatrixReference();
-    const width = Math.max(300, el.getBoundingClientRect().width);
-    const height = 340;
-    const side = Math.min(288, width - 66);
+    const width = Math.max(240, el.getBoundingClientRect().width);
+    const height = 250;
+    const side = Math.min(208, width - 66);
     const cellSize = side / 24;
     const left = (width - side + 26) / 2;
-    const top = 36;
+    const top = 30;
     const recommendations = snapshot.recommendations || [];
     const current = new Set(recommendations.map(recommendationKey));
     const added = [...current].filter(key => !matrixReference.edges.has(key));
     const removed = [...matrixReference.edges].filter(key => !current.has(key));
     const sources = recommendations.filter(edge => edge.to === selectedBus).map(edge => edge.from).sort((a,b) => a-b);
-    const selectedAdded = added.filter(key => Number(key.split(',')[0]) === selectedBus).length;
-    const selectedRemoved = removed.filter(key => Number(key.split(',')[0]) === selectedBus).length;
     const changes = added.length + ' added · ' + removed.length + ' removed';
-    const detail = 'Bus ' + selectedBus + ' receives from ' + sources.join(', ') + ' · ' + selectedAdded + ' added · ' + selectedRemoved + ' removed';
+    const detail = 'Bus ' + selectedBus + ' ← ' + sources.join(', ');
     if ($('matrix-reference')) $('matrix-reference').textContent = 'Changes since step ' + matrixReference.t;
     if ($('matrix-detail')) $('matrix-detail').textContent = detail;
     if ($('matrix-changes')) $('matrix-changes').textContent = changes;
@@ -1038,7 +967,7 @@ details[open] .research-expand::before { content: '−'; }
       svg.append('rect').attr('class','matrix-selected-row').attr('fill','none').attr('pointer-events','none');
       svg.append('g').attr('class','matrix-rows');
     }
-    svg.select('desc').text('Each entry represents a recommended source for a receiver. Burgundy entries are retained connections, teal entries are added connections, amber outlines are removed connections, and gray diagonal entries are local information. '+changes+' since step '+matrixReference.t+'. '+detail+'. Use the receiver buttons to select a bus.');
+    svg.select('desc').text('Each entry represents a recommended source for a receiver. Green entries are retained connections, blue entries are added connections, amber outlines are removed connections, and gray diagonal entries are local information. '+changes+' since step '+matrixReference.t+'. '+detail+'. Use the receiver buttons to select a bus.');
     svg.select('.matrix-source-title').attr('x',left+side/2).attr('y',12).attr('text-anchor','middle').attr('fill','var(--muted-foreground)').attr('font-size',11).text('Source bus');
     svg.select('.matrix-receiver-title').attr('transform','translate('+(left-35)+','+(top+side/2)+') rotate(-90)').attr('text-anchor','middle').attr('fill','var(--muted-foreground)').attr('font-size',11).text('Receiver bus');
     svg.select('.matrix-columns').selectAll('text').data(d3.range(1,25)).join('text')
@@ -1090,7 +1019,7 @@ details[open] .research-expand::before { content: '−'; }
   }
   function chartBase(el, observations, keys, yTitle, xTitle, height) {
     const width = Math.max(240,el.getBoundingClientRect().width);
-    const margin = {left:64,right:16,top:20,bottom:43};
+    const margin = {left:52,right:12,top:20,bottom:32};
     const frame={x:margin.left,y:margin.top,w:width-margin.left-margin.right,h:height-margin.top-margin.bottom};
     const svg=d3.select(el).attr('viewBox','0 0 '+width+' '+height).attr('height',height);
     const clip='pr-clip-'+el.id;
@@ -1201,7 +1130,7 @@ details[open] .research-expand::before { content: '−'; }
   function drawCost() {
     const observations=[{x:0,online:0,static:0,causal:0},...snapshot.history.map(d=>({x:d.t,online:d.online,static:d.static,causal:d.causal}))];
     const items=series.filter(s=>visible.has(s.key));
-    const chart=chartBase($('cost'),observations,series.map(s=>s.key),'Cumulative cost','Control step',240);
+    const chart=chartBase($('cost'),observations,series.map(s=>s.key),'Cost','Step',170);
     drawInterventions(chart);
     drawSeries(chart,observations,items);
     hover(chart,observations,items,'Step');
@@ -1219,17 +1148,17 @@ details[open] .research-expand::before { content: '−'; }
     let observations=snapshot.history.slice(-60).map(item=>({x:item.t,...item.stage}));
     if (!observations.length) observations=[{x:0,online:0,static:0,causal:0}];
     const items=series.filter(item=>visible.has(item.key));
-    const chart=chartBase($('stage'),observations,series.map(item=>item.key),'Cost per step','Control step',240);
+    const chart=chartBase($('stage'),observations,series.map(item=>item.key),'Cost','Step',170);
     drawInterventions(chart);
     drawSeries(chart,observations,items,true);
     hover(chart,observations,items,'Step');
-    $('stage-detail').textContent='Adaptive '+d3.format('.4f')(snapshot.stage.online)+' · Recent 60 samples';
+    $('stage-detail').textContent='Now '+d3.format('.4f')(snapshot.stage.online);
     if ($('live-cost')) $('live-cost').textContent=d3.format('.4f')(snapshot.stage.online);
     const pulseSummary = lastPulse
-      ? lastPulse.strength.toFixed(2)+' pu at bus '+lastPulse.bus+' · '+(lastPulse.charged ? 'Cost '+d3.format('.4f')(lastPulse.before)+' → '+d3.format('.4f')(lastPulse.after) : 'Pulse realized at the final sample · Its state cost falls beyond this episode')
-      : 'Click a bus and watch its voltage, cost and recommended connections respond.';
+      ? 'Bus '+lastPulse.bus+' · '+(lastPulse.charged ? 'Cost '+d3.format('.4f')(lastPulse.before)+' → '+d3.format('.4f')(lastPulse.after) : 'Pulse applied at the final sample')
+      : 'Click a bus to disturb the voltage.';
     if ($('impact-note')) $('impact-note').textContent=pulseSummary;
-    if ($('pulse-summary')) $('pulse-summary').textContent=lastPulse ? pulseSummary : 'Click a bus to apply a pulse';
+    if ($('pulse-summary')) $('pulse-summary').textContent=lastPulse ? pulseSummary : 'Hover a bus to attack';
   }
   function drawConvergence() {
     if ($('adaptation') && !$('adaptation').open) return;
@@ -1252,10 +1181,10 @@ details[open] .research-expand::before { content: '−'; }
     $('tooltip').style.display='none'; pin=null;
     renderControls(); drawNetwork(); drawMatrix(); drawCost(); drawStage(); drawConvergence();
   }
-  announce('Ready at step 60 · Add a disturbance to begin');
+  announce('Ready');
   hydrate(window.openai?.widgetState);
   if (!matrixReference) captureMatrixReference();
-  actionNote('Click a bus to apply the selected pulse strength.');
+  actionNote('Click a bus to add a load pulse.');
   window.addEventListener('openai:set_globals',e=>{if(!playing&&!restored&&!journal.length){hydrate(e.detail?.globals?.widgetState);render();}});
   new ResizeObserver(()=>render()).observe(root);
   render();
