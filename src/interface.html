@@ -44,7 +44,6 @@
     <div class="text-small">24 bus synthetic feeder · Illustrative shared response variant</div>
   </div>
   <aside class="pr-controls" aria-label="Experiment controls">
-  <h2 class="pr-control-title">Experiment controls</h2>
   <div class="pr-toolbar">
     <button type="button" class="btn btn-primary" id="pr-run">Run simulation</button>
     <button type="button" class="btn" id="pr-step">One step</button>
@@ -57,8 +56,6 @@
     <button type="button" class="btn" id="pr-fault" aria-keyshortcuts="E">Repair forecast</button>
     <button type="button" class="btn" id="pr-freeze">Freeze data and fit</button>
   </div>
-  <p class="pr-control-note">Select a receiver in the drawing or by bus number. Press <kbd>Space</kbd> to run or pause.</p>
-  <p class="pr-control-note">Freezing the data holds the plant while the response converges to a fixed ridge solution.</p>
   </aside>
   <div class="pr-status tabular-nums">
     <span id="pr-clock">Step 0 / 480</span>
@@ -71,10 +68,7 @@
       <div class="text-small" id="pr-topology-label">Recommended sources for bus 6</div>
       <svg class="pr-chart" id="pr-network" role="img" aria-label="Fixed radial feeder and recommended directed prediction links"></svg>
       <div class="pr-detail tabular-nums" id="pr-bus-detail"></div>
-      <div class="pr-network-caption text-small">
-        <p>Thin lines trace the fixed feeder. Arrows show recommended prediction sources, with width encoding their score.</p>
-        <p>A halo marks voltage deviation. The × identifies a faulty forecast. Deployed communication stays fixed.</p>
-      </div>
+      <div class="pr-network-caption text-small"><p>Lines show the feeder · Arrows show prediction sources · × faulty forecast</p></div>
       <div class="pr-note text-small" id="pr-links-detail">3 remote sources per receiver · Deployed links remain fixed</div>
     </section>
     <section class="pr-panel pr-cost-panel" aria-labelledby="pr-cost-title">

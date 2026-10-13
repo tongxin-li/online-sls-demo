@@ -16,7 +16,7 @@ The dynamics use per unit voltage coordinates and abstract control intervals. Th
 
 ## Run and rebuild
 
-The checked in `index.html` is deployable directly to GitHub Pages. The page runs in the browser and loads D3 from jsDelivr. Experiment state is saved in local browser storage. Start again resets the deterministic experiment.
+The checked in `index.html` is deployable directly to GitHub Pages. The page runs in the browser and loads D3 from jsDelivr and Inter from Google Fonts. Experiment state is saved in local browser storage. Start again resets the deterministic experiment.
 
 To rebuild the page with Python 3
 
@@ -44,4 +44,4 @@ Then open [the local demo](http://localhost:8000/).
 
 `src/interface.html` and `src/interface.js` define the controls and interactive figures. `src/site-shell.css`, `src/site-header.html`, and `src/site-footer.html` define the academic presentation and model notes.
 
-`src/page-template.html` contains the exported browser presentation runtime and build placeholders. `build.py` combines these sources into the standalone page. No private manuscript files or experimental datasets are included.
+`src/page-template.html` defines the standalone document and build placeholders. `build.py` combines these sources into the standalone page. No private manuscript files or experimental datasets are included.

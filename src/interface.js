@@ -192,7 +192,7 @@
     const el = $('network');
     const width = Math.max(240, el.getBoundingClientRect().width);
     const instrument = document.body.classList.contains('research-site');
-    const height = instrument ? (window.innerWidth > 720 ? 450 : 320) : 292;
+    const height = instrument ? 310 : 292;
     const svg = d3.select(el).attr('viewBox', '0 0 ' + width + ' ' + height).attr('height', height);
     const point = bus => [22 + positions[bus - 1][0] * (width - 48), 26 + positions[bus - 1][1] * (height - 54)];
     if (svg.select('defs').empty()) {
@@ -303,7 +303,7 @@
   function drawCost() {
     const observations=[{x:0,online:0,static:0,causal:0},...snapshot.history.map(d=>({x:d.t,online:d.online,static:d.static,causal:d.causal}))];
     const items=series.filter(s=>visible.has(s.key));
-    const chart=chartBase($('cost'),observations,series.map(s=>s.key),'Cost (weighted pu²)','Control step',document.body.classList.contains('research-site') ? 232 : 292);
+    const chart=chartBase($('cost'),observations,series.map(s=>s.key),'Cost (weighted pu²)','Control step',document.body.classList.contains('research-site') ? 310 : 292);
     items.forEach(s=>chart.marks.append('path').datum(observations).attr('fill','none').attr('stroke',s.color).attr('stroke-width',2).attr('stroke-dasharray',s.dash).attr('d',d3.line().x(d=>chart.x(d.x)).y(d=>chart.y(d[s.key]))));
     hover(chart,observations,items,'Step');
     tidyTicks(chart.svg);
@@ -323,7 +323,7 @@
     else observations=[{x:0,value:0},...snapshot.history.map(d=>({x:d.t,value:100*d.drift}))];
     if(!observations.length) observations=[{x:0,value:100*(snapshot.fitError || 0)}];
     $('convergence').setAttribute('aria-label',frozen?'Relative Frobenius error to the exact solution on frozen samples':'Relative Frobenius change in the shared response on each control step');
-    const chart=chartBase($('convergence'),observations,['value'],frozen?'Solution error (%)':'Response change (%)',frozen?'Gradient iteration':'Control step',document.body.classList.contains('research-site') ? 185 : 204);
+    const chart=chartBase($('convergence'),observations,['value'],frozen?'Solution error (%)':'Response change (%)',frozen?'Gradient iteration':'Control step',document.body.classList.contains('research-site') ? 175 : 204);
     chart.marks.append('path').datum(observations).attr('fill','none').attr('stroke','var(--viz-series-1)').attr('stroke-width',2).attr('d',d3.line().x(d=>chart.x(d.x)).y(d=>chart.y(d.value)));
     hover(chart,observations,[{key:'value',label:frozen?'Solution error (%)':'Response change (%)',color:'var(--viz-series-1)'}],frozen?'Iteration':'Step');
     tidyTicks(chart.svg);
