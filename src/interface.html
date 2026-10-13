@@ -2,9 +2,10 @@
   <div class="pr-controlbar" aria-label="Simulation controls">
     <div class="pr-toolbar">
       <button type="button" class="btn btn-play" id="pr-run">Run</button>
+      <button type="button" class="btn btn-quiet" id="pr-step" title="Advance one control sample">Step</button>
       <button type="button" class="btn btn-quiet" id="pr-restart" title="Start a fresh experiment">Reset</button>
       <select id="pr-speed" aria-label="Playback speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
-      <span id="pr-clock" class="tabular-nums">Step 60 / 480</span>
+      <span id="pr-clock" class="tabular-nums">t = 0</span>
     </div>
     <div class="pr-actions">
       <label for="pr-strength">Pulse</label>
@@ -20,17 +21,32 @@
       <div class="pr-panel-foot"><span id="pr-bus-detail" class="tabular-nums"></span><span class="pr-live-stage">Cost <strong id="pr-live-cost" class="tabular-nums">0.0000</strong></span></div>
     </section>
     <section class="pr-panel pr-matrix-panel" aria-labelledby="pr-matrix-title">
-      <div class="pr-subhead"><h2 id="pr-matrix-title">Learned communication</h2><div class="pr-matrix-key"><span><i class="pr-cell-key connected"></i>Linked</span><span><i class="pr-cell-key added"></i>Added</span><span><i class="pr-cell-key removed"></i>Removed</span></div></div>
+      <div class="pr-subhead"><h2 id="pr-matrix-title">Recommended communication</h2><div class="pr-matrix-key"><span><i class="pr-cell-key connected"></i>Linked</span><span><i class="pr-cell-key added"></i>Added</span><span><i class="pr-cell-key removed"></i>Removed</span></div></div>
       <svg class="pr-chart" id="pr-matrix" role="group" aria-label="Communication matrix. Rows receive from columns"></svg>
       <div class="pr-panel-foot"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div>
     </section>
     <section class="pr-panel pr-stage-panel" aria-labelledby="pr-stage-title">
-      <div class="pr-subhead"><h2 id="pr-stage-title">Instantaneous cost</h2><span id="pr-pulse-summary" class="pr-caption tabular-nums" aria-live="polite">Pulse and recovery</span></div>
-      <svg class="pr-chart" id="pr-stage" role="img" aria-label="Instantaneous control cost showing the pulse and recovery"></svg>
+      <div class="pr-subhead"><h2 id="pr-stage-title">Voltage and cost</h2><strong id="pr-state-value" class="pr-state-value tabular-nums">1.000 pu</strong></div>
+      <div class="pr-plot-label"><span id="pr-voltage-detail">Bus 6 voltage</span><span class="pr-target-key">Target 0.95 to 1.05 pu</span></div>
+      <svg class="pr-chart" id="pr-voltage" role="img" aria-label="Selected bus voltage with the target range"></svg>
+      <div class="pr-plot-label"><span>Instantaneous cost</span><span id="pr-pulse-summary" class="tabular-nums" aria-live="polite"></span></div>
+      <svg class="pr-chart" id="pr-stage" role="img" aria-label="Instantaneous quadratic cost under the same disturbances"></svg>
+      <div id="pr-stage-detail" class="pr-panel-foot tabular-nums"></div>
     </section>
-    <section class="pr-panel pr-cost-panel" aria-labelledby="pr-cost-title">
-      <div class="pr-subhead"><h2 id="pr-cost-title">Cumulative cost</h2><span class="pr-caption">Lower is better</span></div>
-      <svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative control cost under identical disturbances"></svg>
+    <section class="pr-panel pr-learning-panel" aria-labelledby="pr-learning-title">
+      <div class="pr-subhead"><h2 id="pr-learning-title">Inside the controller</h2><select id="pr-view" aria-label="Controller view"><option value="learning">Learning</option><option value="cost">Total cost</option></select></div>
+      <div id="pr-learning-content">
+        <div class="pr-algorithm-flow" id="pr-learning-flow" aria-label="Shared matrix learning cycle">
+          <div><span class="pr-flow-index">01</span><strong>Forecast</strong><span id="pr-flow-predict">5 steps</span></div>
+          <div><span class="pr-flow-index">02</span><strong>Control</strong><span id="pr-flow-control">Feedback + preview</span></div>
+          <div><span class="pr-flow-index">03</span><strong>Observe</strong><span id="pr-flow-observe">Recover disturbance</span></div>
+          <div><span class="pr-flow-index">04</span><strong>Learn</strong><span id="pr-flow-update">Fit prediction gain</span></div>
+        </div>
+        <div class="pr-learning-caption"><span id="pr-learning-kind">Gain change per step</span><button type="button" class="btn btn-fit" id="pr-freeze">Freeze data and fit</button></div>
+        <svg class="pr-chart" id="pr-convergence" role="img" aria-label="Learning diagnostic over time"></svg>
+        <p id="pr-mode-note" class="pr-caption"></p>
+      </div>
+      <div id="pr-cost-content" hidden><svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative quadratic cost of three controllers"></svg><div id="pr-cost-detail" class="pr-cost-totals tabular-nums"></div><p class="pr-caption">Identical disturbances · Lower is better</p></div>
     </section>
   </div>
   <div class="pr-bottomline">
@@ -39,10 +55,10 @@
   </div>
   <details class="pr-adaptation" id="pr-adaptation">
     <summary>Experiment settings <span aria-hidden="true">+</span></summary>
-    <div class="pr-settings"><label>Bus <select id="pr-bus" aria-label="Selected bus"></select></label><button type="button" class="btn" id="pr-step">One step</button><button type="button" class="btn" id="pr-fault">Repair forecast</button><button type="button" class="btn" id="pr-reference">Set reference</button><label class="form-check"><input type="checkbox" id="pr-all-links">All prediction links</label><button type="button" class="btn" id="pr-freeze">Freeze data and fit</button></div>
-    <p class="pr-caption" id="pr-fit-detail"></p><svg class="pr-chart" id="pr-convergence" role="img" aria-label="Shared prediction response convergence"></svg><p class="pr-caption" id="pr-mode-note"></p>
+    <div class="pr-settings"><label>Bus <select id="pr-bus" aria-label="Selected bus"></select></label><button type="button" class="btn" id="pr-fault">Repair forecast</button><button type="button" class="btn" id="pr-reference">Set reference</button><label class="form-check"><input type="checkbox" id="pr-all-links">All prediction links</label></div>
+    <p class="pr-caption" id="pr-fit-detail"></p>
   </details>
-  <div hidden><span id="pr-fit-title"></span><span id="pr-learning"></span><span id="pr-topology-label"></span><span id="pr-links-detail"></span><span id="pr-matrix-reference"></span><span id="pr-impact-note"></span><span id="pr-stage-detail"></span><div id="pr-cost-detail"></div></div>
+  <div hidden><span id="pr-fit-title"></span><span id="pr-learning"></span><span id="pr-topology-label"></span><span id="pr-links-detail"></span><span id="pr-matrix-reference"></span><span id="pr-impact-note"></span></div>
   <div class="pr-tooltip tabular-nums" role="tooltip" id="pr-tooltip"></div>
   <div role="alert" id="pr-error" hidden></div>
 </div>

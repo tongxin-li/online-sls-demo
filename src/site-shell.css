@@ -108,3 +108,34 @@ summary span { color:#a4aba4; }
 @media(max-width:650px) { .research-header { padding:18px 0 14px; } h1 { font-size:25px; } .research-tag { display:none; } .pr-controlbar { flex-wrap:wrap; gap:10px; } .pr-toolbar { width:100%; } .pr-actions { width:100%; } .pr-actions label { margin-right:0; } .btn-attack { margin-left:auto; } #pr-clock { margin-left:auto; } .pr-mission { font-size:10px; gap:6px; padding-top:2px; flex-wrap:wrap; } .pr-target { display:none; } .pr-dashboard { grid-template-columns:minmax(0,1fr); } .pr-matrix-panel { border-top:1px solid var(--border); } .pr-bottomline { flex-wrap:wrap; gap:1px; padding:8px 0; } #pr-event { text-align:left; } .pr-panel-foot { font-size:10px; } .research-colophon { font-size:9px; } }
 @media(pointer:coarse) { .btn,select { min-height:40px; } .pr-legend button { min-height:30px; } }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important; transition:none!important; } }
+
+/* Coupled state, cost and learning views. */
+.pr-panel { padding-top:10px; }
+.pr-stage-panel,.pr-learning-panel { border-top:1px solid var(--border); padding-top:10px; padding-bottom:8px; }
+.pr-state-value { font-size:13px; font-weight:500; color:var(--primary); }
+.pr-plot-label { display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:10px; color:var(--muted-foreground); padding:3px 0 0; min-height:20px; }
+.pr-target-key { color:#8d9e90; font-size:9px; }
+.pr-algorithm-flow { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; padding:13px 0 15px; }
+.pr-algorithm-flow > div { display:flex; flex-direction:column; position:relative; gap:2px; min-width:0; }
+.pr-algorithm-flow > div:not(:last-child)::after { content:'→'; position:absolute; top:19px; right:0; color:#b0bdb3; font-size:13px; }
+.pr-flow-index { font-size:9px; color:#a7b3aa; letter-spacing:.5px; }
+.pr-algorithm-flow strong { font-size:12px; font-weight:500; }
+.pr-algorithm-flow span:last-child { font-size:9px; color:var(--muted-foreground); white-space:nowrap; }
+.pr-learning-caption { display:flex; justify-content:space-between; align-items:center; gap:12px; min-height:32px; font-size:10px; color:var(--muted-foreground); border-top:1px solid var(--border); padding-top:6px; }
+.btn-fit { min-height:26px; font-size:10px; padding:4px 8px; background:#f5f8f3; }
+#pr-view { min-height:24px; padding:1px 4px; font-size:11px; border:0; background:transparent; color:var(--muted-foreground); }
+#pr-mode-note { font-size:10px; margin-top:1px; }
+#pr-stage-detail { min-height:16px; font-size:9px; }
+.pr-cost-totals { display:flex; gap:24px; padding:8px 0; }
+.pr-cost-value { display:flex; flex-direction:column; gap:3px; }
+.pr-cost-name { font-size:10px; color:var(--muted-foreground); }
+.pr-cost-value strong { font-weight:500; font-size:17px; }
+.pr-algorithm-flow[data-updated='true'] > div:last-child strong { color:var(--primary); }
+.pr-adaptation { margin-top:0; }
+.research-methods-body { max-width:1100px; display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+.research-methods-body h3 { font-size:13px; color:var(--foreground); font-weight:500; margin:12px 0 6px; }
+.research-methods-body p { margin:5px 0 9px; }
+.pr-equation { font-family:Georgia,serif; font-size:16px; color:var(--foreground); line-height:1.7; }
+.pr-scope { font-size:10px; color:#8c968e; }
+#pr-stage .intervention-label { fill:var(--attack); }
+@media(max-width:650px) { .pr-algorithm-flow { gap:6px; } .pr-algorithm-flow span:last-child { font-size:8px; } .pr-controlbar .pr-toolbar { gap:8px; } #pr-clock { margin-left:auto; } .research-methods-body { grid-template-columns:1fr; gap:8px; } }

@@ -1,5 +1,7 @@
-/* Illustrative shared response calibration for the interactive voltage demo.
- * This is not the full FIR projected response algorithm or its regret theorem.
+/* Shared predictive response calibration for the interactive voltage demo.
+ * Uses the manuscript communication plant and a five sample LQR preview.
+ * This restricted shared multiplier is not the full delayed FIR projected
+ * response algorithm and does not inherit that algorithm's regret theorem.
  * Every controller receives the same immutable disturbance and forecast pair.
  * Costs use x_t' Q x_t + u_t' R u_t, with no terminal cost.
  */
@@ -12,16 +14,29 @@
 
   const N = 24;
   const AMPLITUDE = 0.006;
-  const RIDGE = 0.03;
+  const RAW_RIDGE = 1.27e-5;
+  // Mean squared forecast loss is normalized by AMPLITUDE squared. The raw
+  // ridge value follows the voltage experiment, but this explicit mean loss
+  // differs from the manuscript's full response weighted objective.
+  const RIDGE = RAW_RIDGE / (AMPLITUDE * AMPLITUDE);
+  const PREVIEW = 5;
   const WINDOW = 60;
   const WARMUP = 30;
   const TOLERANCE = 1e-5;
-  const PULSE_DEFAULT = 0.025;
+  const PULSE_DEFAULT = 0.02;
   const PULSE_MIN = 0.005;
   const PULSE_MAX = 0.15;
   const EDGES = [[1,2],[2,3],[3,4],[4,5],[4,6],[6,7],[4,8],
     [3,9],[9,10],[9,11],[11,12],[1,15],[15,13],[13,14],[13,16],
     [16,17],[16,18],[18,19],[19,20],[20,21],[18,22],[22,23],[23,24]];
+
+  const BUS_PROFILES = Array.from({length:N},(_,i)=> {
+    const bus=i+1;
+    if (bus===1) return {bus,role:'Substation',eventName:'Feeder disturbance',decay:4,steps:16};
+    if ([5,7,14,21].includes(bus)) return {bus,role:'Solar',eventName:'Cloud cover',decay:6,steps:24};
+    if ([8,12,18,24].includes(bus)) return {bus,role:'Battery',eventName:'Inverter outage',decay:2,steps:8};
+    return {bus,role:'Homes',eventName:'Demand surge',decay:3,steps:12};
+  });
 
   function zeros(n = N, m = n) { return Array.from({length:n}, () => Array(m).fill(0)); }
   function eye(n = N) { const a = zeros(n); for (let i=0;i<n;i++) a[i][i]=1; return a; }
@@ -98,7 +113,17 @@
     }
     const H=solveSPD(combine(R,P),P);
     const K=multiply(H,A).map(row=>row.map(v=>-v));
-    return deepFreeze({A,B:eye(),Q,R,P,H,K,distances,dareResidual:residual,
+    // For fixed feedback A_c=A+K and perfect future disturbances, the LQR
+    // preview term is -sum_j (R+P)^-1 (A_c')^j P w[t+j]. We retain five
+    // immutable predictions and put the shared multiplier G on their right.
+    const previewGains=[], closedLoopTranspose=transpose(combine(A,K));
+    let response=P;
+    for (let j=0;j<PREVIEW;j++) {
+      previewGains.push(solveSPD(combine(R,P),response).map(row=>row.map(v=>-v)));
+      response=multiply(closedLoopTranspose,response);
+    }
+    return deepFreeze({A,B:eye(),Q,R,P,H,K,previewGains,distances,
+      variant:'Manuscript dense communication voltage surrogate',dareResidual:residual,
       dareIterations:iterations+1,closedLoopNormInf:normInf(combine(A,K))});
   }
   const model=buildModel();
@@ -131,6 +156,7 @@
     // The largest absolute row sum bounds the covariance spectral norm.
     return {S,T,stepSize:0.95/normInf(S),samples};
   }
+  function exactGain(stats) { return transpose(solveSPD(stats.S,transpose(stats.T))); }
   function gradientSteps(g,stats,count) {
     let result=g;
     for (let k=0;k<count;k++) {
@@ -186,6 +212,10 @@
       this.faults=new Set(this.options.faultBuses.map(bus=>this.checkBus(bus)));
       this.latent=Array.from({length:N+1},()=>this.random.normal());
       this.pulses=[]; this.samples=[]; this.history=[]; this.eventLog=[];
+      this.forecasts=[]; this.sealPreview();
+      this.lastPreview=[]; this.costStates=Object.fromEntries(Object.entries(this.states).map(([k,v])=>[k,v.slice()]));
+      this.learning={updates:0,windowStart:null,windowEnd:null,windowSize:0,
+        beforeLoss:null,afterLoss:null,gradientNorm:null,rawRms:null,calibratedRms:null};
       this.lastSample=null; this.lastInputs=null; this.fit=null; this.fitHistory=[];
       this.fitError=null; this.fitObjective=null; this.fitIteration=0;
       this.directGain=multiply(model.H,this.G).map(row=>row.map(v=>-v));
@@ -202,11 +232,34 @@
       this.checkBus(bus);
       if (!Number.isFinite(strength)||strength<PULSE_MIN||strength>PULSE_MAX)
         throw new RangeError('Pulse strength must be from 0.005 through 0.15 per unit');
+      if (this.mode==='completed') this.extend();
       if (this.mode!=='running') return false;
-      this.pulses.push({bus,strength,age:0});
+      const profile=BUS_PROFILES[bus-1];
+      this.pulses.push({bus,strength,age:0,t:this.t,...profile});
       this.eventLog.push(deepFreeze({t:this.t,type:'pulse',bus,strength,
-        message:'Net load spike of '+strength+' per unit at bus '+bus}));
+        role:profile.role,eventName:profile.eventName,decay:profile.decay,steps:profile.steps,
+        message:profile.eventName+' of '+strength+' per unit at bus '+bus}));
       return true;
+    }
+    extend(steps=480) {
+      if (!Number.isInteger(steps)||steps<1) throw new RangeError('Extension must be a positive number of steps');
+      this.options.horizon+=steps;
+      if (this.mode==='completed') this.mode='running';
+      this.sealPreview();
+      return this.snapshot();
+    }
+    sealPreview() {
+      const end=Math.min(this.options.horizon,this.t+PREVIEW);
+      while (this.forecasts.length<end) {
+        const rho=0.72, innovation=Math.sqrt(1-rho*rho);
+        this.latent=this.latent.map(v=>rho*v+innovation*this.random.normal());
+        const base=Array.from({length:N},(_,i)=>AMPLITUDE*(0.35*this.latent[0]+0.65*this.latent[i+1]));
+        const forecast=base.map((v,i)=>{
+          const faulty=this.faults.has(i+1);
+          return (faulty?0.15:1)*v+AMPLITUDE*(faulty?1.6:0.05)*this.random.normal();
+        });
+        this.forecasts.push(deepFreeze({t:this.forecasts.length,base,forecast}));
+      }
     }
     toggleFault(bus) {
       this.checkBus(bus);
@@ -230,27 +283,42 @@
       // History stops at t minus one. No current target is available to this update.
       this.lastTrainingTime=this.samples.length?this.samples[this.samples.length-1].t:null;
       this.lastTrainingSampleCount=this.samples.length;
-      if (this.samples.length>=WARMUP) this.updateGain(gradientSteps(this.G,statistics(this.samples),4));
-      else { this.drift=0; this.changedEdges=0; this.sinceStable++; }
+      if (this.samples.length>=WARMUP) {
+        const stats=statistics(this.samples);
+        const beforeLoss=objective(this.G,this.samples);
+        this.updateGain(exactGain(stats));
+        this.learning={...this.learning,updates:this.learning.updates+1,
+          windowStart:this.samples[0].t,windowEnd:this.samples.at(-1).t,
+          windowSize:this.samples.length,beforeLoss,afterLoss:objective(this.G,this.samples),
+          gradientNorm:frobenius(combine(multiply(this.G,stats.S),stats.T,1,-1))};
+      } else { this.drift=0; this.changedEdges=0; this.sinceStable++; }
 
-      const rho=0.72, innovation=Math.sqrt(1-rho*rho);
-      this.latent=this.latent.map(v=>rho*v+innovation*this.random.normal());
-      const base=Array.from({length:N},(_,i)=>AMPLITUDE*(0.35*this.latent[0]+0.65*this.latent[i+1]));
-      const forecast=base.map((v,i)=>{
-        const faulty=this.faults.has(i+1);
-        return (faulty?0.15:1)*v+AMPLITUDE*(faulty?1.6:0.05)*this.random.normal();
-      });
+      // Forecasts become immutable when they first enter the visible five
+      // sample preview. New pulses never rewrite any of these predictions.
+      this.sealPreview();
+      const {base,forecast}=this.forecasts[this.t];
+      this.lastPreview=this.forecasts.slice(this.t,Math.min(this.t+PREVIEW,this.options.horizon));
       // Unexpected demand is realized only after the forecast has been sealed.
       const disturbance=base.slice(), pulse=Array(N).fill(0);
       for (const event of this.pulses) {
-        const value=-event.strength*Math.exp(-event.age/3);
+        const value=-event.strength*Math.exp(-event.age/event.decay);
         disturbance[event.bus-1]+=value; pulse[event.bus-1]+=value; event.age++;
       }
-      this.pulses=this.pulses.filter(event=>event.age<12);
+      this.pulses=this.pulses.filter(event=>event.age<event.steps);
       const sample=deepFreeze({t:this.t,forecast,disturbance,base,pulse,
         z:forecast.map(v=>v/AMPLITUDE),y:disturbance.map(v=>v/AMPLITUDE)});
-      const preview={online:matvec(this.directGain,forecast),
-        static:matvec(model.H,forecast).map(v=>-v),causal:Array(N).fill(0)};
+      const preview={online:Array(N).fill(0),static:Array(N).fill(0),causal:Array(N).fill(0)};
+      this.lastPreview.forEach((prediction,index)=>{
+        const staticInput=matvec(model.previewGains[index],prediction.forecast);
+        const adaptiveInput=matvec(model.previewGains[index],matvec(this.G,prediction.forecast));
+        for(let i=0;i<N;i++) {
+          preview.online[i]+=adaptiveInput[i]; preview.static[i]+=staticInput[i];
+        }
+      });
+      const calibrated=matvec(this.G,forecast);
+      this.learning.rawRms=Math.sqrt(squared(forecast.map((v,i)=>v-disturbance[i]))/N);
+      this.learning.calibratedRms=Math.sqrt(squared(calibrated.map((v,i)=>v-disturbance[i]))/N);
+      this.costStates=Object.fromEntries(Object.entries(this.states).map(([k,v])=>[k,v.slice()]));
       const inputs={}, rms={};
       for (const key of ['online','static','causal']) {
         const x=this.states[key], feedback=matvec(model.K,x);
@@ -265,7 +333,13 @@
       this.lastInputs=deepFreeze(inputs); this.lastSample=sample;
       this.samples.push(sample); if (this.samples.length>WINDOW) this.samples.shift();
       this.t++;
-      this.history.push(deepFreeze({t:this.t,...this.cumulative,stage:{...this.stage},rms,
+      this.history.push(deepFreeze({t:this.t,costTime:sample.t,stateTime:this.t,
+        ...this.cumulative,stage:{...this.stage},rms,pulse:sample.pulse,
+        costStates:this.costStates,
+        states:Object.fromEntries(Object.entries(this.states).map(([k,v])=>[k,v.slice()])),
+        rawForecastRms:this.learning.rawRms,calibratedForecastRms:this.learning.calibratedRms,
+        fitBefore:this.learning.beforeLoss,fitAfter:this.learning.afterLoss,
+        fitResidual:this.learning.gradientNorm,
         drift:this.drift,changedEdges:this.changedEdges,
         calibrationLoss:objective(this.G,this.samples)}));
       if (this.t>=this.options.horizon) this.mode='completed';
@@ -275,7 +349,7 @@
       if (this.samples.length<WARMUP) return false;
       if (this.mode==='frozen'||this.mode==='fitting'||this.mode==='converged') return this.snapshot();
       const stats=statistics(this.samples.slice());
-      const optimum=transpose(solveSPD(stats.S,transpose(stats.T)));
+      const optimum=exactGain(stats);
       this.fit={...stats,optimum,scale:Math.max(frobenius(optimum),1e-12)};
       this.fitIteration=0; this.fitHistory=[]; this.mode='frozen';
       this.sinceStable=0; this.changedEdges=0;
@@ -306,7 +380,12 @@
       return this.snapshot();
     }
     snapshot() {
-      return {t:this.t,horizon:this.options.horizon,mode:this.mode,seed:this.options.seed,
+      return {t:this.t,costTime:this.lastSample?this.lastSample.t:null,stateTime:this.t,
+        horizon:this.options.horizon,mode:this.mode,seed:this.options.seed,
+        costStates:Object.fromEntries(Object.entries(this.costStates).map(([k,v])=>[k,v.slice()])),
+        learning:{...this.learning},lastPreview:this.lastPreview.slice(),
+        pendingPulses:this.pulses.filter(event=>event.age===0).map(event=>({...event})),
+        activePulses:this.pulses.filter(event=>event.age>0).map(event=>({...event})),
         states:Object.fromEntries(Object.entries(this.states).map(([k,v])=>[k,v.slice()])),
         cumulative:{...this.cumulative},stage:{...this.stage},costs:{...this.cumulative},
         history:this.history.slice(),G:copy(this.G),directGain:copy(this.directGain),
@@ -323,7 +402,8 @@
   }
 
   return {Simulation,model,constants:deepFreeze({N,edges:EDGES,amplitude:AMPLITUDE,
-    ridge:RIDGE,window:WINDOW,warmup:WARMUP,tolerance:TOLERANCE,horizon:480,
+    ridge:RIDGE,rawRidge:RAW_RIDGE,preview:PREVIEW,window:WINDOW,warmup:WARMUP,
+    busProfiles:BUS_PROFILES,tolerance:TOLERANCE,horizon:480,
     pulseDefault:PULSE_DEFAULT,pulseMin:PULSE_MIN,pulseMax:PULSE_MAX}),
-    math:{zeros,eye,transpose,multiply,matvec,combine,frobenius,normInf,solveSPD,objective,statistics,recommendations}};
+    math:{zeros,eye,transpose,multiply,matvec,combine,frobenius,normInf,solveSPD,objective,statistics,exactGain,recommendations}};
 });

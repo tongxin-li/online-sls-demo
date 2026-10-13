@@ -1,0 +1,59 @@
+/* Equipment marks stay decorative. The enclosing bus owns interaction. */
+.pe-host { -webkit-user-select:none; user-select:none; touch-action:manipulation; }
+.pe-hit { fill:transparent; pointer-events:all; }
+.pe-root { --pe-ink:#38604f; --pe-paper:#fff; --pe-voltage-color:#4c816b; --pe-voltage-opacity:.04; --pe-window-opacity:1; pointer-events:none; }
+.pe-root path,.pe-root rect,.pe-root circle { vector-effect:non-scaling-stroke; }
+.pe-voltage-wash { fill:var(--pe-voltage-color); opacity:var(--pe-voltage-opacity); transition:r .4s,opacity .4s,fill .4s; }
+.pe-disc { fill:var(--pe-paper); stroke:#dce6de; stroke-width:1; }
+.pe-voltage-ring { fill:none; stroke:var(--pe-voltage-color); stroke-opacity:.45; transition:stroke .4s,stroke-width .4s; }
+.pe-selected .pe-disc { fill:#f1f7f2; stroke:#54836c; }
+.pe-selected .pe-voltage-ring { stroke-opacity:.8; }
+.pe-glyph { stroke:var(--pe-ink); stroke-width:1.05; stroke-linejoin:round; stroke-linecap:round; fill:none; }
+.pe-house { fill:#f5f8f2; }
+.pe-house-back { fill:#eaf0e7; stroke:#819782; }
+.pe-roof { stroke-width:1.55; }
+.pe-roof-back { stroke:#819782; stroke-width:1.2; }
+.pe-door { fill:#cedecf; stroke-width:.65; }
+.pe-window { fill:#edbb65; stroke:#b99d61; stroke-width:.5; opacity:var(--pe-window-opacity); transition:opacity .4s; }
+.pe-root[data-equipment='Homes'].pe-pulse-active .pe-window { fill:#dd9650; animation:pe-window-flicker .75s ease-in-out 3; }
+.pe-chimney { fill:#f5f8f2; stroke-width:.9; }
+.pe-sun-disc { fill:#f0c465; stroke:#d5a449; stroke-width:.65; }
+.pe-sun-rays { stroke:#d5a449; stroke-width:.8; }
+.pe-sun { transition:opacity .45s; }
+.pe-cloud { fill:#d6e1e3; stroke:#91a6ae; stroke-width:.7; opacity:0; transform:translateX(-3px); transition:opacity .45s,transform .6s; }
+.pe-root[data-equipment='Solar'].pe-pulse-active .pe-cloud { opacity:1; transform:translateX(0); }
+.pe-root[data-equipment='Solar'].pe-pulse-active .pe-sun { opacity:.25; }
+.pe-panel-frame { fill:#729baa; stroke:#557a89; stroke-width:1.1; }
+.pe-panel-grid { stroke:#dae8e9; stroke-width:.65; }
+.pe-panel-stand { stroke:#688576; stroke-width:1.1; }
+.pe-battery-body { fill:#f3f7f2; }
+.pe-battery-terminal { fill:#789980; stroke:none; }
+.pe-effort-segment { fill:#4c8972; stroke:none; opacity:.15; transition:opacity .4s; }
+.pe-control-arrow { stroke:#4c8972; stroke-width:.9; transition:opacity .4s; }
+.pe-disconnect { stroke:#c58948; stroke-width:1.9; stroke-linecap:round; opacity:0; transition:opacity .25s; }
+.pe-root[data-equipment='Battery'].pe-pulse-active .pe-disconnect { opacity:1; }
+.pe-transformer { fill:#e1ebe3; }
+.pe-coil { stroke:#80a189; stroke-width:1.25; }
+.pe-insulator,.pe-station-wire { stroke:#5d7c6c; stroke-width:1; }
+.pe-station-base { fill:#edf2e9; stroke:#738d76; }
+.pe-target { opacity:0; transition:opacity .14s; }
+.pe-target-brackets { stroke:#b67b44; stroke-width:1.1; fill:none; stroke-linecap:round; }
+.pe-target-bolt { fill:#d3984d; stroke:#fff; stroke-width:1; }
+.pe-host:hover .pe-target,.pe-host:focus-visible .pe-target { opacity:1; }
+.pe-host:hover .pe-disc,.pe-host:focus-visible .pe-disc { stroke:#c18a51; stroke-width:1.6; }
+.pe-host[aria-disabled='true'] .pe-target { opacity:0; }
+.pe-pulse-active .pe-voltage-ring { stroke:#c48949; stroke-opacity:.9; }
+.pe-queued circle { fill:#fff2db; stroke:#c99851; stroke-width:.9; }
+.pe-queued text { fill:#98622b!important; font:600 6.8px sans-serif!important; }
+.pe-burst { pointer-events:none; }
+.pe-burst-ring { fill:none; stroke:#c98f4b; stroke-width:1.5; transform-box:fill-box; transform-origin:center; animation:pe-ring .9s ease-out both; }
+.pe-burst-rays { fill:none; stroke:#e1b471; stroke-width:1.6; stroke-linecap:round; animation:pe-rays .6s ease-out both; }
+.pe-burst-bolt { fill:#d59848; stroke:#fffdf6; stroke-width:1.4; stroke-linejoin:round; animation:pe-bolt .6s ease-out both; }
+@keyframes pe-ring { from { transform:scale(1); opacity:.8; } to { transform:scale(2.25); opacity:0; } }
+@keyframes pe-rays { 0% { opacity:0; } 15% { opacity:.95; } 100% { opacity:0; } }
+@keyframes pe-bolt { 0% { opacity:0; transform:translateY(-5px); } 15%,45% { opacity:1; transform:translateY(0); } 100% { opacity:0; transform:translateY(2px); } }
+@keyframes pe-window-flicker { 0%,100% { opacity:var(--pe-window-opacity); } 30% { opacity:.25; } 65% { opacity:.9; } }
+@media(prefers-reduced-motion:reduce) {
+  .pe-root * { animation:none!important; transition:none!important; }
+  .pe-burst { display:none; }
+}

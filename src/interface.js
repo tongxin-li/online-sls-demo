@@ -11,8 +11,6 @@
   }
   const d3 = window.d3;
   const simulation = new PowerDemo.Simulation();
-  // Begin with a short deterministic history so every plot is immediately useful.
-  for (let i=0;i<60;i++) simulation.step();
   const series = [
     { key:'online', label:'Adaptive', color:'var(--viz-series-1)', dash:null },
     { key:'static', label:'Fixed prediction', color:'var(--viz-series-2)', dash:'7 4' },
@@ -40,13 +38,7 @@
     return variable ? getComputedStyle(root).getPropertyValue(variable[1]).trim() || '#245c48' : value;
   }
   const matrixColors = { connected:'var(--primary)', added:'var(--matrix-added, #328a9c)', removed:'var(--matrix-removed, #d39955)', local:'#b8c2bc', inactive:'#eff2ef' };
-  const busRole = bus => bus === 1 ? 'Substation' : [5,7,14,21].includes(bus) ? 'Solar' : [8,12,18,24].includes(bus) ? 'Battery' : 'Homes';
-  const busIcons = {
-    Substation:'M-6 6H6M-4 6V-6H4V6M-6-3H6M-6 0H6M-4-6L4 6M4-6L-4 6',
-    Solar:'M-6-3H6L7 4H-7ZM0-3V4M-6 0H6M0 4V7M-4 7H4M-4-6L-5-8M0-6V-9M4-6L5-8',
-    Battery:'M-5-5H5V6H-5ZM-2-7H2M-2-1H2M0-3V1M-2 3H2',
-    Homes:'M-7 0L0-6L7 0M-5-1V6H5V-1M-1 6V2H2V6'
-  };
+  const busRole = bus => PowerDemo.constants.busProfiles?.[bus-1]?.role || (bus === 1 ? 'Substation' : [5,7,14,21].includes(bus) ? 'Solar' : [8,12,18,24].includes(bus) ? 'Battery' : 'Homes');
   function pulseMagnitude(value) { return Number(value).toFixed(3); }
   const positions = [
     [.03,.48],[.12,.28],[.27,.28],[.43,.16],[.43,.01],[.60,.12],
@@ -73,36 +65,43 @@
     $('bus').value = String(bus);
     render(); save();
   }
-  function continueAfterAction() {
-    if (!playing && snapshot.mode === 'running') { playing = true; schedule(); }
+  function resumePlant() {
+    if (isFit()) {
+      simulation.resume();
+      journal.push({t:snapshot.t,type:'fit',count:fitSteps});
+      fitSteps=0;
+    }
+    if (simulation.mode === 'completed') simulation.extend();
+    snapshot=simulation.snapshot();
   }
   function save() {
     restored = true;
     if (!window.openai?.setWidgetState) return;
     const state = {
       modelContent: { scenario:'Synthetic 24 bus voltage regulation', variant:'Shared response calibration with fixed physical and deployed links', step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
-      privateContent: { version:3, pulseStrength:$('strength').value, t:journal.length <= 200 ? snapshot.t : 0, journal:journal.length <= 200 ? journal : [], selectedBus, speed:$('speed').value, allLinks:$('all-links').checked, fitSteps:journal.length <= 200 ? fitSteps : 0, fitting:journal.length <= 200 && isFit() }
+      privateContent: { version:4, pulseStrength:$('strength').value, t:journal.length <= 2000 ? snapshot.t : 0, journal:journal.length <= 2000 ? journal : [], selectedBus, speed:$('speed').value, allLinks:$('all-links').checked, fitSteps:journal.length <= 2000 ? fitSteps : 0, fitting:journal.length <= 2000 && isFit() }
     };
     window.openai.setWidgetState(state).catch(() => {});
   }
   function hydrate(saved) {
     const data = saved?.privateContent;
-    if (restored || !data || data.version !== 3) return;
+    if (restored || !data || data.version !== 4) return;
     restored = true;
     selectedBus = Math.max(1, Math.min(24, Number(data.selectedBus) || 6));
     $('bus').value = String(selectedBus);
     $('speed').value = ['0.5','1','2','4'].includes(data.speed) ? data.speed : '1';
     if (['0.01','0.02','0.03'].includes(data.pulseStrength)) $('strength').value = data.pulseStrength;
     $('all-links').checked = !!data.allLinks;
-    const items = Array.isArray(data.journal) ? data.journal.slice(0,200) : [];
-    const t = Math.max(0, Math.min(480, Math.floor(Number(data.t) || 0)));
+    const items = Array.isArray(data.journal) ? data.journal.slice(0,2000) : [];
+    const t = Math.max(0, Math.min(100000, Math.floor(Number(data.t) || 0)));
     simulation.reset();
     journal = [];
     for (let step = 0; step <= t; step++) {
+      if (simulation.mode === 'completed') simulation.extend();
       for (const item of items.filter(v => v.t === step)) {
         if (item.type === 'fit' && step >= 30) {
           simulation.freeze();
-          for (let k=0; k<Math.min(3000,Math.max(0,Math.floor(item.count || 0))); k++) simulation.fitStep();
+          for (let k=0; k<Math.min(3000,Math.max(0,Math.floor(item.count || 0))); k++) simulation.fitStep(1);
           simulation.resume(); journal.push(item); continue;
         }
         if (!Number.isInteger(item.bus) || item.bus < 1 || item.bus > 24) continue;
@@ -121,10 +120,12 @@
     if (data.fitting && t >= 30) {
       simulation.freeze();
       const count = Math.min(3000, Math.max(0, Number(data.fitSteps) || 0));
-      for (let i = 0; i < count; i++) { simulation.fitStep(); fitSteps++; }
+      for (let i = 0; i < count; i++) { simulation.fitStep(1); fitSteps++; }
     }
     snapshot = simulation.snapshot();
     captureMatrixReference();
+    const restoredPulse=journal.filter(item=>item.type==='pulse').at(-1);
+    if(restoredPulse) lastPulse={...restoredPulse,before:snapshot.history.find(item=>(item.costTime ?? item.t-1)===restoredPulse.t-1)?.stage.online || 0};
     announce('Experiment restored · Press Run');
   }
   function stop() {
@@ -140,17 +141,20 @@
     }, 1000 / Number($('speed').value));
   }
   function tick() {
-    if (isFit()) { simulation.fitStep(); fitSteps++; }
+    if (isFit()) { simulation.fitStep(1); fitSteps++; }
     else simulation.step();
     snapshot = simulation.snapshot();
-    if (snapshot.mode === 'completed') { stop(); announce('Complete · Run to begin again'); }
-    if (snapshot.mode === 'converged') { stop(); announce('Fit converged · Run to resume'); }
+    if (!isFit() && lastPulse && snapshot.t>lastPulse.t) {
+      const active=pulseStatus(lastPulse.bus).active;
+      announce((active?'Pulse applied':'Pulse ended')+' · Bus '+lastPulse.bus+' · t = '+snapshot.t);
+    }
+    if (snapshot.mode === 'completed') { stop(); announce('Run or Step to continue'); }
+    if (snapshot.mode === 'converged') { stop(); announce('Fit converged · Return to simulation'); }
     render();
     if (snapshot.t % 30 === 0 || !playing) save();
   }
   function resetExperiment() {
     stop(); simulation.reset();
-    for (let i = 0; i < 60; i++) simulation.step();
     snapshot = simulation.snapshot(); journal = []; fitSteps = 0; pin = null; lastPulse = null;
     captureMatrixReference();
     actionNote('Click a bus to add a load pulse.');
@@ -158,43 +162,42 @@
   function toggleRun() {
     if (playing) { stop(); announce('Paused'); save(); }
     else {
-      if (snapshot.mode === 'completed') resetExperiment();
-      if (isFit()) {
-        simulation.resume();
-        journal.push({t:snapshot.t,type:'fit',count:fitSteps});
-        fitSteps=0; snapshot=simulation.snapshot();
-      }
-      if (snapshot.mode === 'completed') resetExperiment();
+      if (snapshot.mode === 'completed') { simulation.extend(); snapshot=simulation.snapshot(); }
+      if (snapshot.mode === 'converged') resumePlant();
       playing = true;
-      announce('Regulating voltage');
-      // A visible first sample confirms the click immediately.
+      announce(isFit() ? 'Fitting the frozen observations' : 'Regulating voltage');
       tick();
       if (playing) schedule();
     }
     render();
   }
   $('run').addEventListener('click', toggleRun);
-  $('step').addEventListener('click', () => { stop(); tick(); save(); });
+  $('step').addEventListener('click', () => { stop(); if(snapshot.mode==='completed'){simulation.extend();snapshot=simulation.snapshot();} tick(); save(); });
   $('restart').addEventListener('click', () => {
     resetExperiment(); announce('Ready'); render(); save();
   });
   $('speed').addEventListener('change', () => { if (playing) { clearTimeout(timer); schedule(); } save(); });
   $('strength').addEventListener('change', () => { drawNetwork(); save(); });
-  if ($('adaptation')) $('adaptation').addEventListener('toggle', () => { if ($('adaptation').open) drawConvergence(); });
+  if ($('view')) $('view').addEventListener('change', () => { renderLearningView(); drawConvergence(); drawCost(); });
   $('bus').addEventListener('change', () => selectBus(Number($('bus').value)));
   $('all-links').addEventListener('change', () => { drawNetwork(); save(); });
   if ($('reference')) $('reference').addEventListener('click', () => {
     captureMatrixReference(); drawNetwork(); drawMatrix();
     announce('Connectivity reference saved at step ' + snapshot.t);
   });
-  function pulseCooldown(bus) {
-    const recent=journal.filter(item=>item.type==='pulse' && item.bus===bus).at(-1);
-    return recent ? Math.max(0,12-(snapshot.t-recent.t)) : 0;
+  function pulseStatus(bus) {
+    const events=(snapshot.activePulses || []).filter(item=>item.bus===bus);
+    const queued=(snapshot.pendingPulses || []).filter(item=>item.bus===bus).length;
+    const applied=journal.filter(item=>item.type==='pulse' && item.bus===bus && item.t<snapshot.t);
+    const latest=applied.at(-1);
+    return {queued,active:events.some(item=>item.age>0),
+      id:latest ? latest.t+'_'+applied.length : null};
   }
-  function canAttack(bus) { return !isFit() && snapshot.mode !== 'completed' && pulseCooldown(bus) === 0; }
+  function canAttack() { return true; }
   function pulse(bus = selectedBus) {
-    if (!canAttack(bus)) return;
-    stop();
+    // A click schedules an unexpected disturbance for the next control sample.
+    // It never advances plant time or removes an earlier attack.
+    resumePlant();
     selectedBus = bus;
     $('bus').value = String(bus);
     captureMatrixReference();
@@ -202,30 +205,22 @@
     const before = snapshot.stage.online;
     const pulseStep = snapshot.t;
     simulation.queuePulse(selectedBus, strength);
-    journal.push({ t:pulseStep, type:'pulse', bus:selectedBus, strength });
-    // The unexpected disturbance enters x at the first step. Its state cost is
-    // charged at the next step, when calibration can also use the revealed sample.
-    const steps = Math.min(2, snapshot.horizon - snapshot.t);
-    for (let i = 0; i < steps; i++) simulation.step();
-    snapshot = simulation.snapshot();
-    lastPulse = {bus:selectedBus, strength, t:pulseStep, before, after:snapshot.stage.online, charged:steps === 2};
-    continueAfterAction();
-    const message = pulseMagnitude(strength) + ' pu pulse at bus ' + selectedBus;
-    announce(message + (playing ? ' · Recovering' : ' · Complete'));
-    actionNote('Bus ' + selectedBus + ' disturbed · Voltage recovering');
-    render(); pulseRipple(selectedBus); save();
+    journal.push({t:pulseStep,type:'pulse',bus:selectedBus,strength});
+    snapshot=simulation.snapshot();
+    lastPulse={bus:selectedBus,strength,t:pulseStep,before};
+    const count=pulseStatus(bus).queued;
+    const message=count+' '+(count===1?'pulse':'pulses')+' queued at bus '+bus;
+    announce(message+' · t = '+pulseStep);
+    actionNote(playing ? 'Queued for the next sample' : 'Queued at t '+pulseStep+' · Run or Step');
+    render(); save();
   }
   function fault() {
-    if ($('fault').disabled) return;
-    stop();
+    resumePlant();
     captureMatrixReference();
-    simulation.toggleFault(selectedBus); journal.push({ t:snapshot.t, type:'fault', bus:selectedBus });
-    simulation.step();
-    snapshot = simulation.snapshot();
-    continueAfterAction();
-    const message = 'Forecast at bus ' + selectedBus + (snapshot.faults.includes(selectedBus) ? ' corrupted' : ' repaired') + ' at step ' + snapshot.t;
-    announce(message + (playing ? ' · Recovering' : ' · Complete'));
-    actionNote(message + ' · Colored entries show changes in recommended sources');
+    simulation.toggleFault(selectedBus); journal.push({t:snapshot.t,type:'fault',bus:selectedBus});
+    snapshot=simulation.snapshot();
+    const message='Bus '+selectedBus+' forecast '+(snapshot.faults.includes(selectedBus)?'corrupted':'repaired');
+    announce(message); actionNote(message);
     render(); save();
   }
   $('pulse').addEventListener('click', () => pulse());
@@ -233,14 +228,13 @@
   $('freeze').addEventListener('click', () => {
     stop();
     if (isFit()) {
-      simulation.resume(); snapshot = simulation.snapshot();
-      // A refit changes future actions. Preserve this in the replay journal.
-      journal.push({ t:snapshot.t, type:'fit', count:fitSteps });
-      fitSteps = 0;
+      resumePlant();
       announce(snapshot.mode === 'completed' ? 'Episode complete' : 'Live data resumed · Press Run to continue');
     } else {
-      simulation.freeze(); snapshot = simulation.snapshot(); fitSteps = 0;
-      playing = true; schedule(); announce('Data frozen · Plant time and cumulative cost are held');
+      if (!simulation.freeze()) return;
+      snapshot = simulation.snapshot(); fitSteps = 0;
+      if ($('view')) $('view').value='learning';
+      playing = true; schedule(); announce('Data frozen · Voltage and cost are held');
     }
     render(); save();
   });
@@ -257,43 +251,48 @@
       if (visible.has(key) && visible.size > 1) visible.delete(key);
       else visible.add(key);
       button.setAttribute('aria-pressed', visible.has(key) ? 'true' : 'false');
-      drawCost(); drawStage();
+      drawCost(); drawStage(); drawVoltage();
     });
   });
-  function renderControls() {
-    const frozen = isFit();
-    $('clock').textContent = 't = ' + snapshot.t;
-    $('learning').textContent = frozen ? 'Plant held · ' + snapshot.mode : snapshot.t < 30 ? 'Learning starts after 30 samples' : 'Learning from revealed samples';
-    $('run').textContent = playing ? 'Pause' : 'Run';
-    $('run').disabled = false;
-    $('run').setAttribute('aria-label',playing ? 'Pause simulation' : snapshot.mode === 'completed' ? 'Run a new simulation' : 'Run simulation');
-    $('run').setAttribute('aria-pressed',String(playing));
-    if ($('pulse-label')) $('pulse-label').textContent=pulseCooldown(selectedBus) ? 'Recovering '+pulseCooldown(selectedBus) : 'Attack bus '+selectedBus;
-    $('step').textContent = frozen ? 'One fit step' : 'One step';
-    $('step').disabled = ['converged','completed'].includes(snapshot.mode);
-    $('freeze').textContent = frozen ? 'Return to simulation' : 'Freeze data and fit';
-    $('freeze').disabled = snapshot.t < 30;
-    $('pulse').disabled = !canAttack(selectedBus);
-    $('strength').disabled = frozen || snapshot.mode === 'completed';
-    $('fault').disabled = frozen || snapshot.mode === 'completed';
-    $('fault').textContent = (snapshot.faults.includes(selectedBus) ? 'Repair' : 'Corrupt') + ' forecast';
-    $('fit-title').textContent = frozen ? 'Convergence on frozen data' : 'Online adaptation';
-    $('fit-detail').textContent = frozen ? 'Relative solution error ' + d3.format('.2~g')(100*(snapshot.fitError || 0)) + '%' : 'Rolling window of 60 revealed samples';
-    $('mode-note').textContent = frozen ? 'A fixed ridge objective · Numerical convergence of this reduced model' : 'Freeze data to inspect convergence to a fixed ridge solution';
+  function renderLearningView() {
+    const showCost=$('view')?.value==='cost';
+    if ($('cost-content')) $('cost-content').hidden=!showCost;
+    if ($('learning-content')) $('learning-content').hidden=showCost;
+    if ($('cost')) { $('cost').hidden=!showCost; $('cost').style.display=showCost?'':'none'; }
+    if ($('convergence')) { $('convergence').hidden=showCost; $('convergence').style.display=showCost?'none':''; }
+    if ($('learning-flow')) $('learning-flow').hidden=showCost;
+    if ($('learning-kind')) $('learning-kind').textContent=showCost ? 'Accumulated quadratic cost' : isFit() ? 'Frozen data · Solution error' : 'Live data · Gain update size';
   }
-  function pulseRipple(bus) {
-    const node = d3.select($('network')).select('.nodes').selectAll('g.bus-node').filter(value => value === bus);
-    if (reducedMotion || node.empty()) return;
-    node.selectAll('.pulse-ripple').remove();
-    node.append('circle').attr('class','pulse-ripple').attr('r',13).attr('fill','none')
-      .attr('stroke',color('var(--viz-series-1)')).attr('stroke-width',2).attr('opacity',.9)
-      .attr('pointer-events','none').transition('pulse').duration(1200).ease(d3.easeCubicOut)
-      .attr('r',36).attr('stroke-width',.5).attr('opacity',0).remove();
+  function renderControls() {
+    const frozen=isFit();
+    $('clock').textContent='t = '+snapshot.t;
+    $('learning').textContent=frozen?'Plant held · '+snapshot.mode:snapshot.t<30?'Learning begins at t 30':'Learning from revealed samples';
+    $('run').textContent=playing?'Pause':frozen && snapshot.mode!=='converged'?'Fit':'Run';
+    $('run').disabled=false;
+    $('run').setAttribute('aria-label',playing?'Pause simulation':frozen?'Run frozen fit':'Run simulation');
+    $('run').setAttribute('aria-pressed',String(playing));
+    if ($('pulse-label')) $('pulse-label').textContent='Attack bus '+selectedBus;
+    $('step').textContent=frozen?'One fit step':'Step';
+    $('step').disabled=snapshot.mode==='converged';
+    $('freeze').textContent=frozen?'Return to simulation':'Freeze and converge';
+    $('freeze').disabled=!snapshot.canFreeze;
+    $('pulse').disabled=false; $('strength').disabled=false; $('fault').disabled=false;
+    $('fault').textContent=(snapshot.faults.includes(selectedBus)?'Repair':'Corrupt')+' forecast';
+    $('fit-title').textContent=frozen?'Convergence on frozen data':'Online adaptation';
+    $('fit-detail').textContent=frozen?'Error '+d3.format('.2~g')(100*(snapshot.fitError || 0))+'%':snapshot.t<30?'Learning begins at t 30':'Rolling data changes the target';
+    $('mode-note').textContent=frozen?'Exact ridge solution on a fixed observation window':'Freeze the observations to see convergence';
+    const i=selectedBus-1, sample=snapshot.lastSample;
+    const write=(id,value)=>{if($(id))$(id).textContent=value;};
+    write('flow-predict',sample ? 'ŵ '+d3.format('+.3f')(sample.forecast[i]) : 'Awaiting sample');
+    write('flow-control',snapshot.lastInputs ? 'u '+d3.format('+.3f')(snapshot.lastInputs.online[i]) : 'Fixed feedback K');
+    write('flow-observe',sample ? 'w '+d3.format('+.3f')(sample.disturbance[i]) : 'Revealed after action');
+    write('flow-update',frozen ? snapshot.fitIteration+' iterations' : snapshot.t<30 ? snapshot.t+'/30 samples' : 'ΔG '+d3.format('.2~g')(100*snapshot.drift)+'%');
+    renderLearningView();
   }
   function drawNetwork() {
     const el = $('network');
     const width = Math.max(240, el.getBoundingClientRect().width);
-    const height = 250;
+    const height = 220;
     const svg = d3.select(el).attr('viewBox', '0 0 ' + width + ' ' + height).attr('height', height)
       .attr('role','group').attr('aria-label','Power network. Activate a bus to inject the selected load pulse.');
     const point = bus => [25 + positions[bus - 1][0] * (width - 54), 26 + positions[bus - 1][1] * (height - 54)];
@@ -341,59 +340,47 @@
     const nodes = svg.select('.nodes').selectAll('g.bus-node').data(d3.range(1,25),bus => bus).join(enter => {
       const g=enter.append('g').attr('class','bus-node').attr('role','button').attr('tabindex',0)
         .style('cursor','pointer').style('user-select','none');
-      g.append('circle').attr('class','bus-hit').attr('r',20).attr('fill','transparent');
-      g.append('circle').attr('class','voltage-halo').attr('r',12).attr('fill-opacity',0).attr('pointer-events','none');
-      g.append('circle').attr('class','bus-dot').attr('pointer-events','none');
-      g.append('path').attr('class','bus-icon').attr('fill','none').attr('stroke-width',1.2)
-        .attr('stroke-linecap','round').attr('stroke-linejoin','round').attr('pointer-events','none');
       g.append('text').attr('class','bus-number').attr('pointer-events','none');
       g.append('text').attr('class','fault-mark').attr('pointer-events','none');
-      const target=g.append('g').attr('class','bus-target').attr('opacity',0).attr('pointer-events','none');
-      target.append('circle').attr('class','target-ring').attr('r',17).attr('fill','none')
-        .attr('stroke','var(--attack, #c87938)').attr('stroke-width',1.4).attr('stroke-dasharray','4 3');
-      target.append('path').attr('class','target-bolt').attr('d','M11-22L6-13H12L9-5L19-16H13L16-22Z')
-        .attr('fill','var(--attack, #c87938)').attr('stroke','var(--background)').attr('stroke-width',1.2);
+      if (window.PowerEquipment) g.each(function(bus){PowerEquipment.render(d3.select(this),busRole(bus));});
       g.append('title');
       return g;
     }).attr('transform',bus => 'translate('+point(bus).join(',')+')')
       .attr('data-bus',bus => bus).attr('data-role',bus => busRole(bus))
       .attr('aria-label',bus => 'Inject pulse at bus '+bus)
-      .attr('aria-description',bus => busRole(bus)+', '+(1+snapshot.states.online[bus-1]).toFixed(3)+' pu'+(pulseCooldown(bus) ? ', recovering '+pulseCooldown(bus)+' steps' : ''))
+      .attr('aria-description',bus => busRole(bus)+', '+(1+snapshot.states.online[bus-1]).toFixed(3)+' pu'+(pulseStatus(bus).queued ? ', pulse queued' : ''))
       .attr('aria-disabled',bus => String(!canAttack(bus)))
       .style('cursor',bus=>canAttack(bus) ? 'pointer' : 'default')
       .on('click',(event,bus) => { event.preventDefault(); event.stopPropagation(); pulse(bus); })
       .on('pointerenter',function(_event,bus) {
-        if (canAttack(bus)) d3.select(this).select('.bus-target').attr('opacity',1);
         showBusDetail(bus,true);
       })
-      .on('pointerleave',function() { d3.select(this).select('.bus-target').attr('opacity',0); showBusDetail(selectedBus); })
+      .on('pointerleave',function() { showBusDetail(selectedBus); })
       .on('focus',function(_event,bus) {
-        if (canAttack(bus)) d3.select(this).select('.bus-target').attr('opacity',1);
         showBusDetail(bus,true);
       })
-      .on('blur',function() { d3.select(this).select('.bus-target').attr('opacity',0); showBusDetail(selectedBus); })
+      .on('blur',function() { showBusDetail(selectedBus); })
       .on('keydown',(event,bus) => {
         if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); pulse(bus); }
       });
-    const deviation = bus => Math.min(1,Math.abs(snapshot.states.online[bus-1])/.03);
-    const tint = bus => Math.abs(snapshot.states.online[bus-1]) > .02 ? '#d99c54' : '#7ea68b';
-    animate(nodes.select('.voltage-halo')).attr('r',bus => 13+12*deviation(bus))
-      .attr('fill',bus => tint(bus)).attr('fill-opacity',bus => .025+.22*deviation(bus));
-    animate(nodes.select('.bus-dot')).attr('r',12)
-      .attr('fill',bus => bus === selectedBus ? color('var(--primary)') : d3.interpolateRgb(color('var(--background)'), tint(bus))(deviation(bus)*.65))
-      .attr('stroke',bus => bus === selectedBus ? color('var(--primary)') : '#bdcbc1').attr('stroke-width',1);
-    nodes.select('.bus-icon').attr('d',bus=>busIcons[busRole(bus)])
-      .attr('stroke',bus=>bus===selectedBus ? 'var(--primary-foreground)' : 'var(--primary)');
-    nodes.select('.bus-number').attr('text-anchor','middle').attr('x',0).attr('y',23).attr('dy',null)
-      .style('fill','var(--muted-foreground)').style('font-size','9px').text(bus => bus);
-    nodes.select('.fault-mark').attr('x',13).attr('y',-9).text(bus => snapshot.faults.includes(bus) ? '×' : '');
-    nodes.select('title').text(bus => busRole(bus)+' · Bus '+bus+' · '+(1+snapshot.states.online[bus-1]).toFixed(3)+' pu. '+(pulseCooldown(bus) ? 'Recovering '+pulseCooldown(bus)+' steps.' : 'Click for a '+pulseMagnitude($('strength').value)+' pu load pulse.'));
-    nodes.filter(bus=>!canAttack(bus)).select('.bus-target').attr('opacity',0);
+    nodes.each(function(bus){
+      if (!window.PowerEquipment) return;
+      const status=pulseStatus(bus);
+      PowerEquipment.update(d3.select(this),{
+        voltage:1+snapshot.states.online[bus-1],input:snapshot.lastInputs?.online[bus-1] || 0,
+        inputScale:.02,selected:bus===selectedBus,activePulse:status.active,queuedPulses:status.queued,
+        pulseId:status.id,phase:snapshot.t
+      });
+    });
+    nodes.select('.bus-number').attr('text-anchor','middle').attr('x',0).attr('y',27)
+      .style('fill','var(--muted-foreground)').style('font-size','9px').text(bus=>bus);
+    nodes.select('.fault-mark').attr('x',17).attr('y',-12).text(bus=>snapshot.faults.includes(bus)?'×':'');
+    nodes.select('title').text(bus=>busRole(bus)+' · Bus '+bus+' · '+(1+snapshot.states.online[bus-1]).toFixed(3)+' pu. Click to queue a '+pulseMagnitude($('strength').value)+' pu pulse. Repeated clicks stack.');
     showBusDetail(selectedBus);
     const voltages=snapshot.states.online.map(value=>1+value);
     const low=Math.min(...voltages), high=Math.max(...voltages);
     const inRange=low>=.95 && high<=1.05;
-    if (lastPulse && snapshot.t-lastPulse.t >= 12) actionNote(inRange ? 'Voltage restored · Click a bus' : 'Controller restoring voltage');
+    if (lastPulse && snapshot.t>lastPulse.t) actionNote(pulseStatus(lastPulse.bus).active ? 'Pulse active · Repeat any time' : inRange ? 'Voltage restored · Click to attack' : 'Controller restoring voltage');
     if ($('voltage-range')) $('voltage-range').textContent=low.toFixed(3)+' to '+high.toFixed(3)+' pu';
     if ($('voltage-status')) {
       $('voltage-status').title=inRange ? 'Within target' : 'Restoring voltage';
@@ -401,11 +388,11 @@
     }
     const sources = recommendations.filter(e => e.to === selectedBus).map(e => e.from).join(', ');
     $('topology-label').textContent = $('all-links').checked ? 'All learned links' : 'Sources '+sources+' → bus '+selectedBus;
-    $('links-detail').textContent = 'Icons are bus roles · Color shows voltage';
+    $('links-detail').textContent = 'Recommendations · Electrical feeder remains fixed';
   }
   function showBusDetail(bus,hovered=false) {
-    const voltage=1+snapshot.states.online[bus-1];
-    $('bus-detail').textContent=busRole(bus)+' · Bus '+bus+' · '+voltage.toFixed(3)+' pu'+(pulseCooldown(bus) ? ' · Recovering '+pulseCooldown(bus)+' steps' : hovered && canAttack(bus) ? ' · Click to attack' : '');
+    const voltage=1+snapshot.states.online[bus-1], status=pulseStatus(bus);
+    $('bus-detail').textContent=busRole(bus)+' · Bus '+bus+' · '+voltage.toFixed(3)+' pu'+(status.queued?' · '+status.queued+' queued':hovered?' · Click to attack':'');
   }
 
   function drawMatrix() {
@@ -413,8 +400,8 @@
     if (!el) return;
     if (!matrixReference) captureMatrixReference();
     const width = Math.max(240, el.getBoundingClientRect().width);
-    const height = 250;
-    const side = Math.min(208, width - 66);
+    const height = 220;
+    const side = Math.min(178, width - 66);
     const cellSize = side / 24;
     const left = (width - side + 26) / 2;
     const top = 30;
@@ -446,7 +433,7 @@
     svg.select('.matrix-receiver-title').attr('transform','translate('+(left-35)+','+(top+side/2)+') rotate(-90)').attr('text-anchor','middle').attr('fill','var(--muted-foreground)').attr('font-size',11).text('Receiver bus');
     svg.select('.matrix-columns').selectAll('text').data(d3.range(1,25)).join('text')
       .attr('x',bus=>left+(bus-.5)*cellSize).attr('y',top-7).attr('text-anchor','middle')
-      .attr('fill','var(--muted-foreground)').attr('font-size',9).text(bus=>bus);
+      .attr('fill','var(--muted-foreground)').attr('font-size',8).text(bus=>bus);
     const cells = d3.range(1,25).flatMap(receiver => d3.range(1,25).map(source => {
       const key = receiver+','+source;
       const local = receiver === source;
@@ -488,12 +475,12 @@
         }
       });
     rows.select('rect').attr('y',-cellSize/2).attr('height',cellSize).attr('fill',bus=>bus===selectedBus?'var(--primary)':'transparent');
-    rows.select('text').attr('font-size',10).attr('font-weight',bus=>bus===selectedBus?600:400)
+    rows.select('text').attr('font-size',9).attr('font-weight',bus=>bus===selectedBus?600:400)
       .attr('fill',bus=>bus===selectedBus?'var(--primary-foreground)':'var(--muted-foreground)').text(bus=>bus);
   }
-  function chartBase(el, observations, keys, yTitle, xTitle, height) {
+  function chartBase(el, observations, keys, yTitle, xTitle, height, options={}) {
     const width = Math.max(240,el.getBoundingClientRect().width);
-    const margin = {left:52,right:12,top:20,bottom:32};
+    const margin = {left:52,right:12,top:16,bottom:26};
     const frame={x:margin.left,y:margin.top,w:width-margin.left-margin.right,h:height-margin.top-margin.bottom};
     const svg=d3.select(el).attr('viewBox','0 0 '+width+' '+height).attr('height',height);
     const clip='pr-clip-'+el.id;
@@ -515,13 +502,13 @@
     const yl=Math.min(0,ymin || 0);
     const yh=Math.max(yl + 1e-6,ymax || 0);
     const pad=(yh-yl)*.1;
-    const x=d3.scaleLinear().domain([xmin || 0,(xmax === xmin ? (xmin || 0)+1 : xmax) || 1]).range([frame.x+2,frame.x+frame.w-2]);
-    const y=d3.scaleLinear().domain([yl,yh+pad]).range([frame.y+frame.h-2,frame.y+2]);
+    const x=d3.scaleLinear().domain(options.xDomain || [xmin || 0,(xmax === xmin ? (xmin || 0)+1 : xmax) || 1]).range([frame.x+2,frame.x+frame.w-2]);
+    const y=d3.scaleLinear().domain(options.yDomain || [yl,yh+pad]).range([frame.y+frame.h-2,frame.y+2]);
     svg.select('[data-chart-frame]').attr('x',frame.x).attr('y',frame.y).attr('width',frame.w).attr('height',frame.h);
-    animate(svg.select('.grid').attr('transform','translate('+frame.x+',0)')).call(d3.axisLeft(y).ticks(4).tickSize(-frame.w).tickFormat(''));
+    animate(svg.select('.grid').attr('transform','translate('+frame.x+',0)')).call(d3.axisLeft(y).ticks(height<150?3:4).tickSize(-frame.w).tickFormat(''));
     const xticks = x.ticks(width < 400 ? 3 : 5).filter(Number.isInteger);
     animate(svg.select('.x-axis').attr('transform','translate(0,'+(frame.y+frame.h)+')')).call(d3.axisBottom(x).tickValues(xticks).tickSize(4).tickFormat(d3.format('d')));
-    animate(svg.select('.y-axis').attr('transform','translate('+frame.x+',0)')).call(d3.axisLeft(y).ticks(4).tickSize(4).tickFormat(d3.format('.3~g')));
+    animate(svg.select('.y-axis').attr('transform','translate('+frame.x+',0)')).call(d3.axisLeft(y).ticks(height<150?3:4).tickSize(4).tickFormat(d3.format(options.yFormat || '.3~g')));
     svg.select('[data-axis=x]').attr('x',frame.x+frame.w/2).attr('y',height-5).text(xTitle);
     svg.select('[data-axis=y]').attr('transform','translate(14,'+(frame.y+frame.h/2)+') rotate(-90)').text(yTitle);
     svg.select('clipPath rect').attr('x',frame.x).attr('y',frame.y).attr('width',frame.w).attr('height',frame.h);
@@ -538,10 +525,10 @@
       .attr('stroke-linejoin','round').attr('stroke-linecap','round');
     animate(lines).attr('d',item => d3.line().defined(d => Number.isFinite(d[item.key])).x(d=>chart.x(d.x)).y(d=>chart.y(d[item.key]))(observations));
     const latest = observations[observations.length-1];
-    const dots = chart.marks.selectAll('circle.latest-value').data(showCurrent ? items : [],item => item.key).join('circle')
+    const dots = chart.marks.selectAll('circle.latest-value').data(showCurrent && latest ? items : [],item => item.key).join('circle')
       .attr('class','latest-value').attr('r',item => item.key === 'online' ? 3.5 : 2.5)
       .attr('fill',item => item.color).attr('stroke','var(--background)').attr('stroke-width',1);
-    animate(dots).attr('cx',chart.x(latest.x)).attr('cy',item => chart.y(latest[item.key]));
+    if(latest) animate(dots).attr('cx',chart.x(latest.x)).attr('cy',item => chart.y(latest[item.key]));
   }
   function hover(chart,observations,items,xLabel) {
     const {svg,x,y,frame}=chart;
@@ -573,7 +560,7 @@
   }
   function drawInterventions(chart) {
     const domain = chart.x.domain();
-    const events = journal.filter(item => ['pulse','fault'].includes(item.type) && item.t < snapshot.t && item.t+1 >= domain[0] && item.t+1 <= domain[1]).slice(-8);
+    const events = journal.filter(item => ['pulse','fault'].includes(item.type) && item.t < snapshot.t && item.t+1 >= domain[0] && item.t+1 <= domain[1]);
     const groups = [];
     for (const item of events.slice().sort((a,b)=>a.t-b.t)) {
       const x = chart.x(item.t+1);
@@ -599,12 +586,13 @@
       .attr('text-anchor','middle').attr('font-size',10).attr('fill','var(--muted-foreground)');
     animate(labels).attr('x',group=>group.x);
     labels.select('tspan').text(group=>[...new Set(group.items.map(item=>item.type==='pulse'?'D':'E'))].sort().join('/'));
-    labels.select('title').text(group=>group.items.map(item=>item.type==='pulse' ? Number(item.strength || .025).toFixed(3)+' pu pulse at bus '+item.bus+' enters after the control at step '+(item.t+1)+'. Its state cost is charged at step '+(item.t+2)+'.' : 'Forecast change at bus '+item.bus+' · Step '+(item.t+1)).join(' '));
+    labels.select('title').text(group=>group.items.map(item=>item.type==='pulse' ? Number(item.strength || .025).toFixed(3)+' pu pulse at bus '+item.bus+' enters state x at t '+(item.t+1)+'. Its state cost is charged at t '+(item.t+1)+', on the following step.' : 'Forecast change at bus '+item.bus+' · Step '+(item.t+1)).join(' '));
   }
   function drawCost() {
     const observations=[{x:0,online:0,static:0,causal:0},...snapshot.history.map(d=>({x:d.t,online:d.online,static:d.static,causal:d.causal}))];
     const items=series.filter(s=>visible.has(s.key));
-    const chart=chartBase($('cost'),observations,series.map(s=>s.key),'Cost','Step',170);
+    if ($('cost').hidden) return;
+    const chart=chartBase($('cost'),observations,items.map(s=>s.key),'Cost','Time t',140);
     drawInterventions(chart);
     drawSeries(chart,observations,items);
     hover(chart,observations,items,'Step');
@@ -617,48 +605,97 @@
       group.append(label,value); $('cost-detail').append(group);
     }
   }
+  function responseWindow() { return [Math.max(0,snapshot.t-30),Math.max(1,snapshot.t)]; }
   function drawStage() {
     if (!$('stage')) return;
-    let observations=snapshot.history.slice(-60).map(item=>({x:item.t,...item.stage}));
-    if (!observations.length) observations=[{x:0,online:0,static:0,causal:0}];
+    const domain=responseWindow();
+    let observations=snapshot.history.filter(item=>(item.costTime ?? item.t-1)>=domain[0]).map(item=>({x:item.costTime ?? item.t-1,...item.stage}));
+    if(!observations.length) observations=[{x:0,online:0,static:0,causal:0}];
     const items=series.filter(item=>visible.has(item.key));
-    const chart=chartBase($('stage'),observations,series.map(item=>item.key),'Cost','Step',170);
-    drawInterventions(chart);
-    drawSeries(chart,observations,items,true);
-    hover(chart,observations,items,'Step');
-    $('stage-detail').textContent='Now '+d3.format('.4f')(snapshot.stage.online);
+    const chart=chartBase($('stage'),observations,items.map(item=>item.key),'Cost','Time t',110,{xDomain:domain});
+    drawInterventions(chart); drawSeries(chart,observations,items,true); hover(chart,observations,items,'Cost at t');
+    $('stage-detail').textContent='Cost at t '+Math.max(0,snapshot.t-1)+' · '+d3.format('.4f')(snapshot.stage.online);
     if ($('live-cost')) $('live-cost').textContent=d3.format('.4f')(snapshot.stage.online);
-    const pulseSummary = lastPulse
-      ? 'Bus '+lastPulse.bus+' · '+(lastPulse.charged ? 'Cost '+d3.format('.4f')(lastPulse.before)+' → '+d3.format('.4f')(lastPulse.after) : 'Pulse applied at the final sample')
-      : 'Click a bus to disturb the voltage.';
-    if ($('impact-note')) $('impact-note').textContent=pulseSummary;
-    if ($('pulse-summary')) $('pulse-summary').textContent=lastPulse ? pulseSummary : 'Hover a bus to attack';
+    let summary='Select a bus · Voltage and cost share time t';
+    if(lastPulse) {
+      const charge=snapshot.history.find(item=>(item.costTime ?? item.t-1)===lastPulse.t+1);
+      lastPulse.charged=!!charge;
+      if(charge) lastPulse.after=charge.stage.online;
+      summary=snapshot.t===lastPulse.t ? 'Queued at t '+lastPulse.t+' · Run or Step' : charge ? 'Cost '+d3.format('.3~g')(lastPulse.before)+' → '+d3.format('.3~g')(charge.stage.online) : 'Voltage changed · Cost appears on next step';
+    }
+    if ($('impact-note')) $('impact-note').textContent=summary;
+    if ($('pulse-summary')) $('pulse-summary').textContent=summary;
+  }
+  function drawVoltage() {
+    const el=$('voltage'); if(!el)return;
+    const domain=responseWindow(), index=selectedBus-1;
+    let observations=snapshot.history.filter(item=>(item.stateTime ?? item.t)>=domain[0]).map(item=>({
+      x:item.stateTime ?? item.t,
+      ...Object.fromEntries(series.map(s=>[s.key,1+(item.states?.[s.key]?.[index] || 0)]))
+    }));
+    if(domain[0]===0) observations.unshift({x:0,online:1,static:1,causal:1});
+    if(!observations.length) observations=[{x:snapshot.t,...Object.fromEntries(series.map(s=>[s.key,1+snapshot.states[s.key][index]]))}];
+    const items=series.filter(item=>visible.has(item.key));
+    const values=observations.flatMap(item=>items.map(s=>item[s.key]));
+    const low=Math.min(.95,...values),high=Math.max(1.05,...values);
+    const margin=(high-low)*.05;
+    const chart=chartBase(el,observations,items.map(s=>s.key),'Voltage pu','Time t',110,{xDomain:domain,yDomain:[low-margin,high+margin],yFormat:'.2f'});
+    chart.marks.selectAll('rect.goal-band').data([null]).join('rect').attr('class','goal-band')
+      .attr('x',chart.frame.x).attr('width',chart.frame.w).attr('y',chart.y(1.05)).attr('height',chart.y(.95)-chart.y(1.05))
+      .attr('fill','var(--primary)').attr('opacity',.055).lower();
+    chart.marks.selectAll('line.voltage-target').data([.95,1,1.05]).join('line').attr('class','voltage-target')
+      .attr('x1',chart.frame.x).attr('x2',chart.frame.x+chart.frame.w).attr('y1',d=>chart.y(d)).attr('y2',d=>chart.y(d))
+      .attr('stroke','var(--primary)').attr('stroke-opacity',d=>d===1?.35:.18).attr('stroke-dasharray','3 4');
+    drawInterventions(chart); drawSeries(chart,observations,items,true); hover(chart,observations,items,'State at t');
+    if($('voltage-detail'))$('voltage-detail').textContent='Bus '+selectedBus;
+    if($('state-value'))$('state-value').textContent=(1+snapshot.states.online[index]).toFixed(3)+' pu';
   }
   function drawConvergence() {
-    if ($('adaptation') && !$('adaptation').open) return;
+    if (!$('convergence') || $('convergence').hidden) return;
     const frozen=isFit();
+    const el=$('convergence'), svg=d3.select(el);
+    if(!frozen && !snapshot.learning?.updates) {
+      const width=Math.max(240,el.getBoundingClientRect().width), height=140;
+      svg.attr('viewBox','0 0 '+width+' '+height).attr('height',height)
+        .attr('aria-label','Collecting observations. '+snapshot.t+' of 30 samples received.');
+      svg.selectAll('*').remove();
+      const wait=svg.append('g').attr('class','learning-wait');
+      wait.append('text').attr('x',width/2).attr('y',48).attr('text-anchor','middle')
+        .attr('fill','var(--foreground)').attr('font-size',13).text(snapshot.t<30?'Collecting observations':'Ready to learn');
+      wait.append('text').attr('x',width/2).attr('y',70).attr('text-anchor','middle')
+        .attr('fill','var(--muted-foreground)').attr('font-size',11).text(Math.min(30,snapshot.t)+' / 30 samples');
+      wait.append('line').attr('x1',width/2-64).attr('x2',width/2+64).attr('y1',88).attr('y2',88)
+        .attr('stroke','var(--border)').attr('stroke-width',3).attr('stroke-linecap','round');
+      wait.append('line').attr('x1',width/2-64).attr('x2',width/2-64+128*Math.min(1,snapshot.t/30)).attr('y1',88).attr('y2',88)
+        .attr('stroke','var(--primary)').attr('stroke-width',3).attr('stroke-linecap','round');
+      return;
+    }
+    if(!svg.select('.learning-wait').empty()) svg.selectAll('*').remove();
     let observations;
     if(frozen) observations=snapshot.fitHistory.map(d=>({x:d.iteration,value:100*d.error}));
-    else observations=[{x:0,value:0},...snapshot.history.map(d=>({x:d.t,value:100*d.drift}))];
+    else observations=[{x:0,value:0},...snapshot.history.map(d=>({x:d.costTime ?? d.t-1,value:100*d.drift}))];
     if(!observations.length) observations=[{x:0,value:100*(snapshot.fitError || 0)}];
     $('convergence').setAttribute('aria-label',frozen?'Relative Frobenius error to the exact solution on frozen samples':'Relative Frobenius change in the shared response on each control step');
-    const chart=chartBase($('convergence'),observations,['value'],frozen?'Solution error (%)':'Response change (%)',frozen?'Gradient iteration':'Control step',240);
+    const chart=chartBase($('convergence'),observations,['value'],frozen?'Solution error (%)':'Gain change (%)',frozen?'Gradient iteration':'Time t',140);
     if (!frozen) drawInterventions(chart);
     else {
       chart.marks.select('.intervention-markers').selectAll('line').remove();
       chart.svg.select('.intervention-labels').selectAll('text').remove();
     }
     drawSeries(chart,observations,[{key:'value',color:'var(--viz-series-1)'}]);
-    hover(chart,observations,[{key:'value',label:frozen?'Solution error (%)':'Response change (%)',color:'var(--viz-series-1)'}],frozen?'Iteration':'Step');
+    hover(chart,observations,[{key:'value',label:frozen?'Solution error (%)':'Gain change (%)',color:'var(--viz-series-1)'}],frozen?'Iteration':'Step');
   }
   function render() {
     $('tooltip').style.display='none'; pin=null;
-    renderControls(); drawNetwork(); drawMatrix(); drawCost(); drawStage(); drawConvergence();
+    renderControls(); drawNetwork(); drawMatrix(); drawCost(); drawStage(); drawVoltage(); drawConvergence();
   }
+  document.querySelectorAll('a[href="#about-demo"]').forEach(link=>link.addEventListener('click',()=>{
+    const about=document.getElementById('about-demo'); if(about && about.tagName==='DETAILS') about.open=true;
+  }));
   announce('Ready');
   hydrate(window.openai?.widgetState);
   if (!matrixReference) captureMatrixReference();
-  actionNote('Click a bus to add a load pulse.');
+  actionNote(snapshot.pendingPulses?.length ? 'Pulse queued · Run or Step' : 'Click a bus to queue a disturbance');
   window.addEventListener('openai:set_globals',e=>{if(!playing&&!restored&&!journal.length){hydrate(e.detail?.globals?.widgetState);render();}});
   new ResizeObserver(()=>render()).observe(root);
   render();
