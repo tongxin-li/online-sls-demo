@@ -2,7 +2,7 @@
 
 [Open the hosted experiment](https://tongxin.me/online-sls-demo/)
 
-Explore voltage, control cost, prediction gains and online learning on a synthetic 24 bus feeder. The browser experiment uses the shared matrix adaptation idea from the manuscript experiments. It is not a reproduction of the full delayed FIR projected update in Algorithm 1.
+Explore abstract state recovery, control cost, prediction gains and online learning on a synthetic 24 node network. The equipment artwork is illustrative. The displayed state is not a physical voltage computed from power flow. The browser experiment uses the shared matrix adaptation idea from the manuscript experiments. It is not a reproduction of the full delayed FIR projected update in Algorithm 1.
 
 ## Dynamics
 
@@ -10,7 +10,7 @@ The plant uses the manuscript communication scenario
 
 ```
 x[t+1] = A x[t] + u[t] + w[t]
-v[t] = 1 + x[t]
+y[t] = 1 + x[t]
 A = 0.4 I + 0.58 D^(-1/2) W D^(-1/2)
 W[i,j] = exp(-distance(i,j)/2) for i != j
 W[i,i] = 0
@@ -18,9 +18,9 @@ D = diag(W 1)
 B = I, Q = 35 I, R = 0.08 I
 ```
 
-Distances come from the 24 bus tree. Every bus has an equivalent control input. The fixed feedback gain comes from the discrete Riccati equation. Five forecast samples enter the LQR preview correction. Forecasts are immutable once they enter that preview. All compared controllers receive identical disturbances and forecasts.
+Distances come from the 24 node tree, not electrical line impedances. Every node has an unconstrained direct control input. There is no power balance, fixed slack bus, active or reactive power injection model, or inverter capability constraint. The fixed feedback gain comes from the discrete Riccati equation. Five forecast samples enter the LQR preview correction. Forecasts are immutable once they enter that preview. All compared controllers receive identical disturbances and forecasts.
 
-The cost at time t is `35 ||x[t]||² + 0.08 ||u[t]||²`. A pulse applied during step t first changes voltage at t+1. Its state cost is charged at t+1. Both charts use those physical indices. The cumulative plot sums actual stage costs without a terminal cost. No state or cost is clipped or artificially amplified.
+The cost at time t is `35 ||x[t]||² + 0.08 ||u[t]||²`. A pulse applied during step t first changes the state at t+1. Its state cost is charged at t+1. Both charts use those discrete sample indices. This delay belongs to the abstract recurrence and does not establish physical voltage recovery timing. The cumulative plot sums actual stage costs without a terminal cost. No state or cost is clipped or artificially amplified.
 
 ## Shared learning
 
@@ -38,11 +38,11 @@ The implementation normalizes forecast and disturbance vectors by 0.006 and scal
 
 The visible cycle shows a forecast, the applied control, the recovered disturbance and the gain update. Live gain change need not decrease monotonically because the sample window changes. Freeze and converge holds the plant, observations and cost fixed, then takes one gradient iteration per display tick toward the exact fixed ridge minimizer. This is a numerical diagnostic, not a demonstration of the paper's full convergence theorem.
 
-The graph and matrix rank three remote sources per receiver using prediction gain magnitude. They are recommendations. They do not change the electrical feeder or the deployed dense controller. The paper's offline discovery and resynthesis experiment is not reproduced here.
+The graph and matrix rank three remote sources per receiver using prediction gain magnitude. They are recommendations. They do not change the illustrated tree or the deployed dense controller. The paper's offline discovery and resynthesis experiment is not reproduced here.
 
 ## Interaction
 
-Run advances one control sample per second by default. Step advances a single sample. Clicking a bus queues an unexpected net power loss at the current time. Paused attacks wait for Run or Step. Several attacks at the same bus and time add exactly. There is no cooldown and a completed horizon can extend without discarding history.
+Run advances one control sample per second by default. Step advances a single sample. Clicking a bus queues an abstract additive state disturbance at the current time. Paused attacks wait for Run or Step. Several attacks at the same bus and time add exactly. There is no cooldown and a completed horizon can extend without discarding history.
 
 Equipment roles change the injected disturbance profile
 
@@ -55,7 +55,7 @@ Equipment roles change the injected disturbance profile
 
 Each event contributes `-strength * exp(-age / decay)` at its bus. Role icons do not imply separate inverter or battery state equations. Battery bars show current control effort, not state of charge. Queued events have count badges. Realized events trigger lightning, clouds or equipment effects based on the actual event state.
 
-The default pulse is 0.02 pu with 0.01 and 0.03 alternatives. Single pulses in the seeded validation stay close to the displayed 0.95 to 1.05 pu target. Repeated disturbances may leave that range. The model has no AC power flow, actuator saturation or hard voltage constraint.
+The default pulse is 0.02 normalized units with 0.01 and 0.03 alternatives. Single pulses in the seeded validation stay close to the displayed 0.95 to 1.05 illustrative state band. Repeated disturbances may leave that range. The model has no AC power flow, actuator saturation or hard voltage constraint.
 
 The experiment starts at zero so initial learning is visible. Version 4 browser state preserves repeated interventions at the same time. Older versions start fresh because their preview and learning definitions differ.
 

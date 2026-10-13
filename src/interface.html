@@ -9,15 +9,15 @@
     </div>
     <div class="pr-actions">
       <label for="pr-strength">Pulse</label>
-      <select id="pr-strength" aria-label="Pulse strength"><option value="0.01">Small · 0.01 pu</option><option value="0.02" selected>Medium · 0.02 pu</option><option value="0.03">Large · 0.03 pu</option></select>
+      <select id="pr-strength" aria-label="Pulse strength"><option value="0.01">Small · 0.01</option><option value="0.02" selected>Medium · 0.02</option><option value="0.03">Large · 0.03</option></select>
       <button type="button" class="btn btn-attack" id="pr-pulse" aria-keyshortcuts="D"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14 2 5 14h6l-1 8 9-13h-6z"/></svg><span id="pr-pulse-label">Attack bus 6</span></button>
     </div>
   </div>
-  <div class="pr-mission"><span><span class="pr-status-dot" id="pr-voltage-status" aria-hidden="true"></span>Keep voltage near <strong>1.00 pu</strong><span class="pr-target"> · Target 0.95 to 1.05</span></span><span id="pr-voltage-range" class="tabular-nums"></span></div>
+  <div class="pr-mission"><span><span class="pr-status-dot" id="pr-voltage-status" aria-hidden="true"></span>State reference <strong>1.00</strong><span class="pr-target"> · Target 0.95 to 1.05</span></span><span id="pr-voltage-range" class="tabular-nums"></span></div>
   <div class="pr-dashboard">
     <section class="pr-panel pr-network-panel" aria-labelledby="pr-network-title">
-      <div class="pr-subhead"><h2 id="pr-network-title">Power network</h2><span id="pr-action-note" class="pr-caption" aria-live="polite">Click a bus to attack</span></div>
-      <svg class="pr-chart" id="pr-network" role="group" aria-label="Interactive power network. Click a bus to inject a load pulse"></svg>
+      <div class="pr-subhead"><h2 id="pr-network-title">Illustrative network</h2><span id="pr-action-note" class="pr-caption" aria-live="polite">Click a bus to attack</span></div>
+      <svg class="pr-chart" id="pr-network" role="group" aria-label="Illustrative network. Click a bus to inject an abstract state disturbance"></svg>
       <div class="pr-panel-foot"><span id="pr-bus-detail" class="tabular-nums"></span><span class="pr-live-stage">Cost <strong id="pr-live-cost" class="tabular-nums">0.0000</strong></span></div>
     </section>
     <section class="pr-panel pr-matrix-panel" aria-labelledby="pr-matrix-title">
@@ -26,9 +26,9 @@
       <div class="pr-panel-foot"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div>
     </section>
     <section class="pr-panel pr-stage-panel" aria-labelledby="pr-stage-title">
-      <div class="pr-subhead"><h2 id="pr-stage-title">Voltage and cost</h2><strong id="pr-state-value" class="pr-state-value tabular-nums">1.000 pu</strong></div>
-      <div class="pr-plot-label"><span id="pr-voltage-detail">Bus 6 voltage</span><span class="pr-target-key">Target 0.95 to 1.05 pu</span></div>
-      <svg class="pr-chart" id="pr-voltage" role="img" aria-label="Selected bus voltage with the target range"></svg>
+      <div class="pr-subhead"><h2 id="pr-stage-title">State and cost</h2><strong id="pr-state-value" class="pr-state-value tabular-nums">1.000</strong></div>
+      <div class="pr-plot-label"><span id="pr-voltage-detail">Bus 6 state</span><span class="pr-target-key">Target 0.95 to 1.05</span></div>
+      <svg class="pr-chart" id="pr-voltage" role="img" aria-label="Selected normalized state with an illustrative target range"></svg>
       <div class="pr-plot-label"><span>Instantaneous cost</span><span id="pr-pulse-summary" class="tabular-nums" aria-live="polite"></span></div>
       <svg class="pr-chart" id="pr-stage" role="img" aria-label="Instantaneous quadratic cost under the same disturbances"></svg>
       <div id="pr-stage-detail" class="pr-panel-foot tabular-nums"></div>

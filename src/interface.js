@@ -78,7 +78,7 @@
     restored = true;
     if (!window.openai?.setWidgetState) return;
     const state = {
-      modelContent: { scenario:'Synthetic 24 bus voltage regulation', variant:'Shared response calibration with fixed physical and deployed links', step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
+      modelContent: { scenario:'Synthetic 24 node network control', variant:'Shared response calibration with fixed graph and deployed links', step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
       privateContent: { version:4, pulseStrength:$('strength').value, t:journal.length <= 2000 ? snapshot.t : 0, journal:journal.length <= 2000 ? journal : [], selectedBus, speed:$('speed').value, allLinks:$('all-links').checked, fitSteps:journal.length <= 2000 ? fitSteps : 0, fitting:journal.length <= 2000 && isFit() }
     };
     window.openai.setWidgetState(state).catch(() => {});
@@ -157,7 +157,7 @@
     stop(); simulation.reset();
     snapshot = simulation.snapshot(); journal = []; fitSteps = 0; pin = null; lastPulse = null;
     captureMatrixReference();
-    actionNote('Click a bus to add a load pulse.');
+    actionNote('Click a bus to add a state pulse.');
   }
   function toggleRun() {
     if (playing) { stop(); announce('Paused'); save(); }
@@ -165,7 +165,7 @@
       if (snapshot.mode === 'completed') { simulation.extend(); snapshot=simulation.snapshot(); }
       if (snapshot.mode === 'converged') resumePlant();
       playing = true;
-      announce(isFit() ? 'Fitting the frozen observations' : 'Regulating voltage');
+      announce(isFit() ? 'Fitting the frozen observations' : 'Regulating the synthetic state');
       tick();
       if (playing) schedule();
     }
@@ -234,7 +234,7 @@
       if (!simulation.freeze()) return;
       snapshot = simulation.snapshot(); fitSteps = 0;
       if ($('view')) $('view').value='learning';
-      playing = true; schedule(); announce('Data frozen · Voltage and cost are held');
+      playing = true; schedule(); announce('Data frozen · State and cost are held');
     }
     render(); save();
   });
@@ -294,10 +294,10 @@
     const width = Math.max(240, el.getBoundingClientRect().width);
     const height = 220;
     const svg = d3.select(el).attr('viewBox', '0 0 ' + width + ' ' + height).attr('height', height)
-      .attr('role','group').attr('aria-label','Power network. Activate a bus to inject the selected load pulse.');
+      .attr('role','group').attr('aria-label','Illustrative network. Activate a bus to inject an abstract state disturbance.');
     const point = bus => [25 + positions[bus - 1][0] * (width - 54), 26 + positions[bus - 1][1] * (height - 54)];
     if (svg.select('defs').empty()) {
-      svg.append('title').text('Fixed electrical feeder with learned prediction source recommendations');
+      svg.append('title').text('Illustrative tree with learned prediction source recommendations');
       const defs = svg.append('defs');
       for (const [name,fill] of [['retained',color('var(--viz-series-1)')],['added',color(matrixColors.added)],['removed',color(matrixColors.removed)]]) {
         defs.append('marker').attr('id','pr-arrow-'+name).attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerUnits','userSpaceOnUse').attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto').append('path').attr('d','M 0 0 L 10 5 L 0 10 Z').attr('fill',fill);
@@ -348,7 +348,7 @@
     }).attr('transform',bus => 'translate('+point(bus).join(',')+')')
       .attr('data-bus',bus => bus).attr('data-role',bus => busRole(bus))
       .attr('aria-label',bus => 'Inject pulse at bus '+bus)
-      .attr('aria-description',bus => busRole(bus)+', '+(1+snapshot.states.online[bus-1]).toFixed(3)+' pu'+(pulseStatus(bus).queued ? ', pulse queued' : ''))
+      .attr('aria-description',bus => busRole(bus)+', '+(1+snapshot.states.online[bus-1]).toFixed(3)+(pulseStatus(bus).queued ? ', pulse queued' : ''))
       .attr('aria-disabled',bus => String(!canAttack(bus)))
       .style('cursor',bus=>canAttack(bus) ? 'pointer' : 'default')
       .on('click',(event,bus) => { event.preventDefault(); event.stopPropagation(); pulse(bus); })
@@ -375,15 +375,15 @@
     nodes.select('.bus-number').attr('text-anchor','middle').attr('x',0).attr('y',27)
       .style('fill','var(--muted-foreground)').style('font-size','9px').text(bus=>bus);
     nodes.select('.fault-mark').attr('x',17).attr('y',-12).text(bus=>snapshot.faults.includes(bus)?'×':'');
-    nodes.select('title').text(bus=>busRole(bus)+' · Bus '+bus+' · '+(1+snapshot.states.online[bus-1]).toFixed(3)+' pu. Click to queue a '+pulseMagnitude($('strength').value)+' pu pulse. Repeated clicks stack.');
+    nodes.select('title').text(bus=>busRole(bus)+' · Bus '+bus+' · '+(1+snapshot.states.online[bus-1]).toFixed(3)+'. Click to queue a '+pulseMagnitude($('strength').value)+' pulse. Repeated clicks stack.');
     showBusDetail(selectedBus);
     const voltages=snapshot.states.online.map(value=>1+value);
     const low=Math.min(...voltages), high=Math.max(...voltages);
     const inRange=low>=.95 && high<=1.05;
-    if (lastPulse && snapshot.t>lastPulse.t) actionNote(pulseStatus(lastPulse.bus).active ? 'Pulse active · Repeat any time' : inRange ? 'Voltage restored · Click to attack' : 'Controller restoring voltage');
-    if ($('voltage-range')) $('voltage-range').textContent=low.toFixed(3)+' to '+high.toFixed(3)+' pu';
+    if (lastPulse && snapshot.t>lastPulse.t) actionNote(pulseStatus(lastPulse.bus).active ? 'Pulse active · Repeat any time' : inRange ? 'State restored · Click to attack' : 'Controller restoring state');
+    if ($('voltage-range')) $('voltage-range').textContent=low.toFixed(3)+' to '+high.toFixed(3);
     if ($('voltage-status')) {
-      $('voltage-status').title=inRange ? 'Within target' : 'Restoring voltage';
+      $('voltage-status').title=inRange ? 'Within target' : 'Restoring state';
       $('voltage-status').dataset.state=inRange ? 'stable' : 'recovering';
     }
     const sources = recommendations.filter(e => e.to === selectedBus).map(e => e.from).join(', ');
@@ -392,7 +392,7 @@
   }
   function showBusDetail(bus,hovered=false) {
     const voltage=1+snapshot.states.online[bus-1], status=pulseStatus(bus);
-    $('bus-detail').textContent=busRole(bus)+' · Bus '+bus+' · '+voltage.toFixed(3)+' pu'+(status.queued?' · '+status.queued+' queued':hovered?' · Click to attack':'');
+    $('bus-detail').textContent=busRole(bus)+' · Bus '+bus+' · '+voltage.toFixed(3)+(status.queued?' · '+status.queued+' queued':hovered?' · Click to attack':'');
   }
 
   function drawMatrix() {
@@ -586,7 +586,7 @@
       .attr('text-anchor','middle').attr('font-size',10).attr('fill','var(--muted-foreground)');
     animate(labels).attr('x',group=>group.x);
     labels.select('tspan').text(group=>[...new Set(group.items.map(item=>item.type==='pulse'?'D':'E'))].sort().join('/'));
-    labels.select('title').text(group=>group.items.map(item=>item.type==='pulse' ? Number(item.strength || .025).toFixed(3)+' pu pulse at bus '+item.bus+' enters state x at t '+(item.t+1)+'. Its state cost is charged at t '+(item.t+1)+', on the following step.' : 'Forecast change at bus '+item.bus+' · Step '+(item.t+1)).join(' '));
+    labels.select('title').text(group=>group.items.map(item=>item.type==='pulse' ? Number(item.strength || .025).toFixed(3)+' pulse at bus '+item.bus+' enters state x at t '+(item.t+1)+'. Its state cost is charged at t '+(item.t+1)+', on the following step.' : 'Forecast change at bus '+item.bus+' · Step '+(item.t+1)).join(' '));
   }
   function drawCost() {
     const observations=[{x:0,online:0,static:0,causal:0},...snapshot.history.map(d=>({x:d.t,online:d.online,static:d.static,causal:d.causal}))];
@@ -616,12 +616,12 @@
     drawInterventions(chart); drawSeries(chart,observations,items,true); hover(chart,observations,items,'Cost at t');
     $('stage-detail').textContent='Cost at t '+Math.max(0,snapshot.t-1)+' · '+d3.format('.4f')(snapshot.stage.online);
     if ($('live-cost')) $('live-cost').textContent=d3.format('.4f')(snapshot.stage.online);
-    let summary='Select a bus · Voltage and cost share time t';
+    let summary='Select a bus · State and cost share time t';
     if(lastPulse) {
       const charge=snapshot.history.find(item=>(item.costTime ?? item.t-1)===lastPulse.t+1);
       lastPulse.charged=!!charge;
       if(charge) lastPulse.after=charge.stage.online;
-      summary=snapshot.t===lastPulse.t ? 'Queued at t '+lastPulse.t+' · Run or Step' : charge ? 'Cost '+d3.format('.3~g')(lastPulse.before)+' → '+d3.format('.3~g')(charge.stage.online) : 'Voltage changed · Cost appears on next step';
+      summary=snapshot.t===lastPulse.t ? 'Queued at t '+lastPulse.t+' · Run or Step' : charge ? 'Cost '+d3.format('.3~g')(lastPulse.before)+' → '+d3.format('.3~g')(charge.stage.online) : 'State changed · Cost appears on next step';
     }
     if ($('impact-note')) $('impact-note').textContent=summary;
     if ($('pulse-summary')) $('pulse-summary').textContent=summary;
@@ -639,7 +639,7 @@
     const values=observations.flatMap(item=>items.map(s=>item[s.key]));
     const low=Math.min(.95,...values),high=Math.max(1.05,...values);
     const margin=(high-low)*.05;
-    const chart=chartBase(el,observations,items.map(s=>s.key),'Voltage pu','Time t',110,{xDomain:domain,yDomain:[low-margin,high+margin],yFormat:'.2f'});
+    const chart=chartBase(el,observations,items.map(s=>s.key),'Normalized state','Time t',110,{xDomain:domain,yDomain:[low-margin,high+margin],yFormat:'.2f'});
     chart.marks.selectAll('rect.goal-band').data([null]).join('rect').attr('class','goal-band')
       .attr('x',chart.frame.x).attr('width',chart.frame.w).attr('y',chart.y(1.05)).attr('height',chart.y(.95)-chart.y(1.05))
       .attr('fill','var(--primary)').attr('opacity',.055).lower();
@@ -648,7 +648,7 @@
       .attr('stroke','var(--primary)').attr('stroke-opacity',d=>d===1?.35:.18).attr('stroke-dasharray','3 4');
     drawInterventions(chart); drawSeries(chart,observations,items,true); hover(chart,observations,items,'State at t');
     if($('voltage-detail'))$('voltage-detail').textContent='Bus '+selectedBus;
-    if($('state-value'))$('state-value').textContent=(1+snapshot.states.online[index]).toFixed(3)+' pu';
+    if($('state-value'))$('state-value').textContent=(1+snapshot.states.online[index]).toFixed(3);
   }
   function drawConvergence() {
     if (!$('convergence') || $('convergence').hidden) return;

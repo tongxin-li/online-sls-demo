@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<meta name="description" content="Keep a power network steady under disturbance. Explore voltage recovery, control cost, and adaptive prediction in an interactive synthetic grid.">
+<meta name="description" content="An illustrative network control benchmark. Explore abstract state recovery, control cost, and adaptive prediction. This demo does not model physical feeder voltage.">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Keeping the Grid Steady</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600&display=swap">
@@ -227,7 +227,7 @@ summary span { color:#a4aba4; }
 })();
 </script>
 <header class="research-header">
-  <div class="research-title-row"><h1>Keeping the Grid Steady<span class="research-tag">Adaptive control under disturbance</span></h1><nav aria-label="Page navigation"><a href="#about-demo">Method</a><a href="https://github.com/tongxin-li/online-sls-demo" target="_blank" rel="noopener noreferrer">Code ↗</a></nav></div>
+  <div class="research-title-row"><h1>Keeping the Grid Steady<span class="research-tag">Synthetic network benchmark</span></h1><nav aria-label="Page navigation"><a href="#about-demo">Method</a><a href="https://github.com/tongxin-li/online-sls-demo" target="_blank" rel="noopener noreferrer">Code ↗</a></nav></div>
 </header>
 
 <main id="power-response-demo">
@@ -241,15 +241,15 @@ summary span { color:#a4aba4; }
     </div>
     <div class="pr-actions">
       <label for="pr-strength">Pulse</label>
-      <select id="pr-strength" aria-label="Pulse strength"><option value="0.01">Small · 0.01 pu</option><option value="0.02" selected>Medium · 0.02 pu</option><option value="0.03">Large · 0.03 pu</option></select>
+      <select id="pr-strength" aria-label="Pulse strength"><option value="0.01">Small · 0.01</option><option value="0.02" selected>Medium · 0.02</option><option value="0.03">Large · 0.03</option></select>
       <button type="button" class="btn btn-attack" id="pr-pulse" aria-keyshortcuts="D"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14 2 5 14h6l-1 8 9-13h-6z"/></svg><span id="pr-pulse-label">Attack bus 6</span></button>
     </div>
   </div>
-  <div class="pr-mission"><span><span class="pr-status-dot" id="pr-voltage-status" aria-hidden="true"></span>Keep voltage near <strong>1.00 pu</strong><span class="pr-target"> · Target 0.95 to 1.05</span></span><span id="pr-voltage-range" class="tabular-nums"></span></div>
+  <div class="pr-mission"><span><span class="pr-status-dot" id="pr-voltage-status" aria-hidden="true"></span>State reference <strong>1.00</strong><span class="pr-target"> · Target 0.95 to 1.05</span></span><span id="pr-voltage-range" class="tabular-nums"></span></div>
   <div class="pr-dashboard">
     <section class="pr-panel pr-network-panel" aria-labelledby="pr-network-title">
-      <div class="pr-subhead"><h2 id="pr-network-title">Power network</h2><span id="pr-action-note" class="pr-caption" aria-live="polite">Click a bus to attack</span></div>
-      <svg class="pr-chart" id="pr-network" role="group" aria-label="Interactive power network. Click a bus to inject a load pulse"></svg>
+      <div class="pr-subhead"><h2 id="pr-network-title">Illustrative network</h2><span id="pr-action-note" class="pr-caption" aria-live="polite">Click a bus to attack</span></div>
+      <svg class="pr-chart" id="pr-network" role="group" aria-label="Illustrative network. Click a bus to inject an abstract state disturbance"></svg>
       <div class="pr-panel-foot"><span id="pr-bus-detail" class="tabular-nums"></span><span class="pr-live-stage">Cost <strong id="pr-live-cost" class="tabular-nums">0.0000</strong></span></div>
     </section>
     <section class="pr-panel pr-matrix-panel" aria-labelledby="pr-matrix-title">
@@ -258,9 +258,9 @@ summary span { color:#a4aba4; }
       <div class="pr-panel-foot"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div>
     </section>
     <section class="pr-panel pr-stage-panel" aria-labelledby="pr-stage-title">
-      <div class="pr-subhead"><h2 id="pr-stage-title">Voltage and cost</h2><strong id="pr-state-value" class="pr-state-value tabular-nums">1.000 pu</strong></div>
-      <div class="pr-plot-label"><span id="pr-voltage-detail">Bus 6 voltage</span><span class="pr-target-key">Target 0.95 to 1.05 pu</span></div>
-      <svg class="pr-chart" id="pr-voltage" role="img" aria-label="Selected bus voltage with the target range"></svg>
+      <div class="pr-subhead"><h2 id="pr-stage-title">State and cost</h2><strong id="pr-state-value" class="pr-state-value tabular-nums">1.000</strong></div>
+      <div class="pr-plot-label"><span id="pr-voltage-detail">Bus 6 state</span><span class="pr-target-key">Target 0.95 to 1.05</span></div>
+      <svg class="pr-chart" id="pr-voltage" role="img" aria-label="Selected normalized state with an illustrative target range"></svg>
       <div class="pr-plot-label"><span>Instantaneous cost</span><span id="pr-pulse-summary" class="tabular-nums" aria-live="polite"></span></div>
       <svg class="pr-chart" id="pr-stage" role="img" aria-label="Instantaneous quadratic cost under the same disturbances"></svg>
       <div id="pr-stage-detail" class="pr-panel-foot tabular-nums"></div>
@@ -297,8 +297,8 @@ summary span { color:#a4aba4; }
 
 <footer class="research-footer">
   <details class="research-methods" id="about-demo"><summary>Dynamics and relation to the paper <span aria-hidden="true">+</span></summary><div class="research-methods-body">
-    <section><h3>Voltage dynamics</h3><div class="pr-equation">xₜ₊₁ = Axₜ + uₜ + wₜ &nbsp; · &nbsp; vₜ = 1 + xₜ</div><p>A = 0.4I + 0.58D<sup>−½</sup>WD<sup>−½</sup>, where Wᵢⱼ = exp(−dᵢⱼ / 2) for different buses, Wᵢᵢ = 0, and D contains row sums of W. This is the paper’s coupled communication scenario. All buses have the same actuation model B = I.</p><p>The stage cost is cₜ = 35‖xₜ‖² + 0.08‖uₜ‖². An unexpected pulse enters xₜ₊₁, so its state cost appears at the following sample. The plots preserve that timing.</p><p>Home load surges, solar cloud cover, battery output losses and feeder disturbances have different decay durations. Repeated clicks add disturbances, including several at the same paused step. Voltage values are never clipped. The target band is illustrative, not a hard constraint.</p></section>
-    <section><h3>What is being learned</h3><p>This is a shared matrix experimental variant. A fixed LQR feedback gain regulates voltage. A learned matrix G adjusts five previewed disturbance samples, using the latest 60 revealed samples and starting at step 30. The displayed links rank prediction gains. They are recommendations only. The physical feeder stays fixed and the dense controller continues to use all sources.</p><div class="pr-equation">Forecast → control → observe wₜ → fit G → next control</div><p>Live data keeps changing, so gain changes need not decay monotonically. Freeze data holds the plant and fits the same ridge objective repeatedly, showing error relative to its exact minimizer.</p><h3>Algorithm 1 in the paper</h3><div class="pr-equation">Φ̂(t+1) = Π<sub>F<sub>d</sub></sub>[Φ̂(t) − η∇h̃<sub>t−d</sub>(Φ̂(t−d))]</div><p>The full algorithm updates completed FIR response windows with a delayed gradient and projection. Its theorem concerns a fixed completed prefix. This browser experiment uses a restricted shared gain and a declared ridge fit, rather than reproducing that full update or its convergence guarantee.</p></section>
+    <section><h3>Synthetic benchmark dynamics</h3><div class="pr-equation">xₜ₊₁ = Axₜ + uₜ + wₜ &nbsp; · &nbsp; yₜ = 1 + xₜ</div><p>A = 0.4I + 0.58D<sup>−½</sup>WD<sup>−½</sup>, where Wᵢⱼ = exp(−dᵢⱼ / 2) for different buses, Wᵢᵢ = 0, and D contains row sums of W. This reproduces the paper’s synthetic communication benchmark. A is based on graph distance, not electrical impedance. Every node has an unconstrained direct input B = I. There is no power flow equation, power balance, fixed slack bus or inverter capability model. The displayed value y is an abstract normalized state, not a computed physical voltage.</p><p>The stage cost is cₜ = 35‖xₜ‖² + 0.08‖uₜ‖². An unexpected pulse enters xₜ₊₁, so its state cost appears at the following sample. The plots preserve that timing.</p><p>Equipment artwork gives different decay profiles to abstract additive disturbances. A click does not represent a specified load change in kW or an inverter response in kvar. Repeated clicks add disturbances, including several at the same paused step. States are never clipped. The target band is illustrative.</p></section>
+    <section><h3>What is being learned</h3><p>This is a shared matrix experimental variant. A fixed LQR feedback gain regulates the abstract state. A learned matrix G adjusts five previewed disturbance samples, using the latest 60 revealed samples and starting at step 30. The displayed links rank prediction gains. They are recommendations only. The illustrated tree stays fixed and the dense controller continues to use all sources.</p><div class="pr-equation">Forecast → control → observe wₜ → fit G → next control</div><p>Live data keeps changing, so gain changes need not decay monotonically. Freeze data holds the plant and fits the same ridge objective repeatedly, showing error relative to its exact minimizer.</p><h3>Algorithm 1 in the paper</h3><div class="pr-equation">Φ̂(t+1) = Π<sub>F<sub>d</sub></sub>[Φ̂(t) − η∇h̃<sub>t−d</sub>(Φ̂(t−d))]</div><p>The full algorithm updates completed FIR response windows with a delayed gradient and projection. Its theorem concerns a fixed completed prefix. This browser experiment uses a restricted shared gain and a declared ridge fit, rather than reproducing that full update or its convergence guarantee.</p></section>
   </div></details><span class="research-colophon">O PredSLS · Shared matrix experiment</span>
 </footer>
 
@@ -933,7 +933,7 @@ summary span { color:#a4aba4; }
     restored = true;
     if (!window.openai?.setWidgetState) return;
     const state = {
-      modelContent: { scenario:'Synthetic 24 bus voltage regulation', variant:'Shared response calibration with fixed physical and deployed links', step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
+      modelContent: { scenario:'Synthetic 24 node network control', variant:'Shared response calibration with fixed graph and deployed links', step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
       privateContent: { version:4, pulseStrength:$('strength').value, t:journal.length <= 2000 ? snapshot.t : 0, journal:journal.length <= 2000 ? journal : [], selectedBus, speed:$('speed').value, allLinks:$('all-links').checked, fitSteps:journal.length <= 2000 ? fitSteps : 0, fitting:journal.length <= 2000 && isFit() }
     };
     window.openai.setWidgetState(state).catch(() => {});
@@ -1012,7 +1012,7 @@ summary span { color:#a4aba4; }
     stop(); simulation.reset();
     snapshot = simulation.snapshot(); journal = []; fitSteps = 0; pin = null; lastPulse = null;
     captureMatrixReference();
-    actionNote('Click a bus to add a load pulse.');
+    actionNote('Click a bus to add a state pulse.');
   }
   function toggleRun() {
     if (playing) { stop(); announce('Paused'); save(); }
@@ -1020,7 +1020,7 @@ summary span { color:#a4aba4; }
       if (snapshot.mode === 'completed') { simulation.extend(); snapshot=simulation.snapshot(); }
       if (snapshot.mode === 'converged') resumePlant();
       playing = true;
-      announce(isFit() ? 'Fitting the frozen observations' : 'Regulating voltage');
+      announce(isFit() ? 'Fitting the frozen observations' : 'Regulating the synthetic state');
       tick();
       if (playing) schedule();
     }
@@ -1089,7 +1089,7 @@ summary span { color:#a4aba4; }
       if (!simulation.freeze()) return;
       snapshot = simulation.snapshot(); fitSteps = 0;
       if ($('view')) $('view').value='learning';
-      playing = true; schedule(); announce('Data frozen · Voltage and cost are held');
+      playing = true; schedule(); announce('Data frozen · State and cost are held');
     }
     render(); save();
   });
@@ -1149,10 +1149,10 @@ summary span { color:#a4aba4; }
     const width = Math.max(240, el.getBoundingClientRect().width);
     const height = 220;
     const svg = d3.select(el).attr('viewBox', '0 0 ' + width + ' ' + height).attr('height', height)
-      .attr('role','group').attr('aria-label','Power network. Activate a bus to inject the selected load pulse.');
+      .attr('role','group').attr('aria-label','Illustrative network. Activate a bus to inject an abstract state disturbance.');
     const point = bus => [25 + positions[bus - 1][0] * (width - 54), 26 + positions[bus - 1][1] * (height - 54)];
     if (svg.select('defs').empty()) {
-      svg.append('title').text('Fixed electrical feeder with learned prediction source recommendations');
+      svg.append('title').text('Illustrative tree with learned prediction source recommendations');
       const defs = svg.append('defs');
       for (const [name,fill] of [['retained',color('var(--viz-series-1)')],['added',color(matrixColors.added)],['removed',color(matrixColors.removed)]]) {
         defs.append('marker').attr('id','pr-arrow-'+name).attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerUnits','userSpaceOnUse').attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto').append('path').attr('d','M 0 0 L 10 5 L 0 10 Z').attr('fill',fill);
@@ -1203,7 +1203,7 @@ summary span { color:#a4aba4; }
     }).attr('transform',bus => 'translate('+point(bus).join(',')+')')
       .attr('data-bus',bus => bus).attr('data-role',bus => busRole(bus))
       .attr('aria-label',bus => 'Inject pulse at bus '+bus)
-      .attr('aria-description',bus => busRole(bus)+', '+(1+snapshot.states.online[bus-1]).toFixed(3)+' pu'+(pulseStatus(bus).queued ? ', pulse queued' : ''))
+      .attr('aria-description',bus => busRole(bus)+', '+(1+snapshot.states.online[bus-1]).toFixed(3)+(pulseStatus(bus).queued ? ', pulse queued' : ''))
       .attr('aria-disabled',bus => String(!canAttack(bus)))
       .style('cursor',bus=>canAttack(bus) ? 'pointer' : 'default')
       .on('click',(event,bus) => { event.preventDefault(); event.stopPropagation(); pulse(bus); })
@@ -1230,15 +1230,15 @@ summary span { color:#a4aba4; }
     nodes.select('.bus-number').attr('text-anchor','middle').attr('x',0).attr('y',27)
       .style('fill','var(--muted-foreground)').style('font-size','9px').text(bus=>bus);
     nodes.select('.fault-mark').attr('x',17).attr('y',-12).text(bus=>snapshot.faults.includes(bus)?'×':'');
-    nodes.select('title').text(bus=>busRole(bus)+' · Bus '+bus+' · '+(1+snapshot.states.online[bus-1]).toFixed(3)+' pu. Click to queue a '+pulseMagnitude($('strength').value)+' pu pulse. Repeated clicks stack.');
+    nodes.select('title').text(bus=>busRole(bus)+' · Bus '+bus+' · '+(1+snapshot.states.online[bus-1]).toFixed(3)+'. Click to queue a '+pulseMagnitude($('strength').value)+' pulse. Repeated clicks stack.');
     showBusDetail(selectedBus);
     const voltages=snapshot.states.online.map(value=>1+value);
     const low=Math.min(...voltages), high=Math.max(...voltages);
     const inRange=low>=.95 && high<=1.05;
-    if (lastPulse && snapshot.t>lastPulse.t) actionNote(pulseStatus(lastPulse.bus).active ? 'Pulse active · Repeat any time' : inRange ? 'Voltage restored · Click to attack' : 'Controller restoring voltage');
-    if ($('voltage-range')) $('voltage-range').textContent=low.toFixed(3)+' to '+high.toFixed(3)+' pu';
+    if (lastPulse && snapshot.t>lastPulse.t) actionNote(pulseStatus(lastPulse.bus).active ? 'Pulse active · Repeat any time' : inRange ? 'State restored · Click to attack' : 'Controller restoring state');
+    if ($('voltage-range')) $('voltage-range').textContent=low.toFixed(3)+' to '+high.toFixed(3);
     if ($('voltage-status')) {
-      $('voltage-status').title=inRange ? 'Within target' : 'Restoring voltage';
+      $('voltage-status').title=inRange ? 'Within target' : 'Restoring state';
       $('voltage-status').dataset.state=inRange ? 'stable' : 'recovering';
     }
     const sources = recommendations.filter(e => e.to === selectedBus).map(e => e.from).join(', ');
@@ -1247,7 +1247,7 @@ summary span { color:#a4aba4; }
   }
   function showBusDetail(bus,hovered=false) {
     const voltage=1+snapshot.states.online[bus-1], status=pulseStatus(bus);
-    $('bus-detail').textContent=busRole(bus)+' · Bus '+bus+' · '+voltage.toFixed(3)+' pu'+(status.queued?' · '+status.queued+' queued':hovered?' · Click to attack':'');
+    $('bus-detail').textContent=busRole(bus)+' · Bus '+bus+' · '+voltage.toFixed(3)+(status.queued?' · '+status.queued+' queued':hovered?' · Click to attack':'');
   }
 
   function drawMatrix() {
@@ -1441,7 +1441,7 @@ summary span { color:#a4aba4; }
       .attr('text-anchor','middle').attr('font-size',10).attr('fill','var(--muted-foreground)');
     animate(labels).attr('x',group=>group.x);
     labels.select('tspan').text(group=>[...new Set(group.items.map(item=>item.type==='pulse'?'D':'E'))].sort().join('/'));
-    labels.select('title').text(group=>group.items.map(item=>item.type==='pulse' ? Number(item.strength || .025).toFixed(3)+' pu pulse at bus '+item.bus+' enters state x at t '+(item.t+1)+'. Its state cost is charged at t '+(item.t+1)+', on the following step.' : 'Forecast change at bus '+item.bus+' · Step '+(item.t+1)).join(' '));
+    labels.select('title').text(group=>group.items.map(item=>item.type==='pulse' ? Number(item.strength || .025).toFixed(3)+' pulse at bus '+item.bus+' enters state x at t '+(item.t+1)+'. Its state cost is charged at t '+(item.t+1)+', on the following step.' : 'Forecast change at bus '+item.bus+' · Step '+(item.t+1)).join(' '));
   }
   function drawCost() {
     const observations=[{x:0,online:0,static:0,causal:0},...snapshot.history.map(d=>({x:d.t,online:d.online,static:d.static,causal:d.causal}))];
@@ -1471,12 +1471,12 @@ summary span { color:#a4aba4; }
     drawInterventions(chart); drawSeries(chart,observations,items,true); hover(chart,observations,items,'Cost at t');
     $('stage-detail').textContent='Cost at t '+Math.max(0,snapshot.t-1)+' · '+d3.format('.4f')(snapshot.stage.online);
     if ($('live-cost')) $('live-cost').textContent=d3.format('.4f')(snapshot.stage.online);
-    let summary='Select a bus · Voltage and cost share time t';
+    let summary='Select a bus · State and cost share time t';
     if(lastPulse) {
       const charge=snapshot.history.find(item=>(item.costTime ?? item.t-1)===lastPulse.t+1);
       lastPulse.charged=!!charge;
       if(charge) lastPulse.after=charge.stage.online;
-      summary=snapshot.t===lastPulse.t ? 'Queued at t '+lastPulse.t+' · Run or Step' : charge ? 'Cost '+d3.format('.3~g')(lastPulse.before)+' → '+d3.format('.3~g')(charge.stage.online) : 'Voltage changed · Cost appears on next step';
+      summary=snapshot.t===lastPulse.t ? 'Queued at t '+lastPulse.t+' · Run or Step' : charge ? 'Cost '+d3.format('.3~g')(lastPulse.before)+' → '+d3.format('.3~g')(charge.stage.online) : 'State changed · Cost appears on next step';
     }
     if ($('impact-note')) $('impact-note').textContent=summary;
     if ($('pulse-summary')) $('pulse-summary').textContent=summary;
@@ -1494,7 +1494,7 @@ summary span { color:#a4aba4; }
     const values=observations.flatMap(item=>items.map(s=>item[s.key]));
     const low=Math.min(.95,...values),high=Math.max(1.05,...values);
     const margin=(high-low)*.05;
-    const chart=chartBase(el,observations,items.map(s=>s.key),'Voltage pu','Time t',110,{xDomain:domain,yDomain:[low-margin,high+margin],yFormat:'.2f'});
+    const chart=chartBase(el,observations,items.map(s=>s.key),'Normalized state','Time t',110,{xDomain:domain,yDomain:[low-margin,high+margin],yFormat:'.2f'});
     chart.marks.selectAll('rect.goal-band').data([null]).join('rect').attr('class','goal-band')
       .attr('x',chart.frame.x).attr('width',chart.frame.w).attr('y',chart.y(1.05)).attr('height',chart.y(.95)-chart.y(1.05))
       .attr('fill','var(--primary)').attr('opacity',.055).lower();
@@ -1503,7 +1503,7 @@ summary span { color:#a4aba4; }
       .attr('stroke','var(--primary)').attr('stroke-opacity',d=>d===1?.35:.18).attr('stroke-dasharray','3 4');
     drawInterventions(chart); drawSeries(chart,observations,items,true); hover(chart,observations,items,'State at t');
     if($('voltage-detail'))$('voltage-detail').textContent='Bus '+selectedBus;
-    if($('state-value'))$('state-value').textContent=(1+snapshot.states.online[index]).toFixed(3)+' pu';
+    if($('state-value'))$('state-value').textContent=(1+snapshot.states.online[index]).toFixed(3);
   }
   function drawConvergence() {
     if (!$('convergence') || $('convergence').hidden) return;
