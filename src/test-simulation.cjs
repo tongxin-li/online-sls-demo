@@ -70,6 +70,68 @@ test('a load spike is unforecasted and decays over exactly twelve steps',()=>{
   }
 });
 
+test('pulse strength is bounded, recorded, and superposes without changing the forecast',()=>{
+  const clean=new Simulation(), pulsed=new Simulation();
+  const original=pulsed.snapshot();
+  for(const invalid of [NaN,Infinity,-Infinity,0,-0.025,0.004,0.151,'0.06',null])
+    assert.throws(()=>pulsed.queuePulse(5,invalid),RangeError);
+  assert.deepEqual(pulsed.snapshot(),original);
+  assert.deepEqual(pulsed.pulses,[]);
+  for(const strength of [constants.pulseMin,0.06,constants.pulseMax])
+    assert.equal(pulsed.queuePulse(5,strength),true);
+  assert.deepEqual(pulsed.pulses.map(event=>event.strength),[0.005,0.06,0.15]);
+  assert.deepEqual(pulsed.snapshot().eventLog.map(event=>event.strength),[0.005,0.06,0.15]);
+  assert.ok(pulsed.snapshot().eventLog.every(Object.isFrozen));
+  for(let i=0;i<14;i++) {
+    const previous=pulsed.snapshot();
+    const a=clean.step(), b=pulsed.step();
+    const expected=i<12?-(0.005+0.06+0.15)*Math.exp(-i/3):0;
+    assert.deepEqual(a.lastSample.forecast,b.lastSample.forecast);
+    assert.ok(Math.abs(b.lastSample.pulse[4]-expected)<1e-15);
+    assert.ok(Math.abs(b.lastSample.disturbance[4]-a.lastSample.disturbance[4]-expected)<1e-15);
+    for(const key of ['online','static','causal']) {
+      const ax=matvec(model.A,previous.states[key]);
+      const recovered=b.states[key].map((v,j)=>v-ax[j]-b.lastInputs[key][j]);
+      assert.ok(vectorDistance(recovered,b.lastSample.disturbance)<1e-15);
+    }
+  }
+});
+
+test('pulse effects enter state before cost and learning without an artificial jump',()=>{
+  const clean=new Simulation(), pulsed=new Simulation();
+  for(let i=0;i<60;i++) { clean.step(); pulsed.step(); }
+  const before=pulsed.snapshot();
+  pulsed.queuePulse(7,0.06);
+  const queued=pulsed.snapshot();
+  for(const field of ['t','states','stage','cumulative','G','directGain','recommendations','history'])
+    assert.deepEqual(queued[field],before[field]);
+
+  const cleanRealized=clean.step(), realized=pulsed.step();
+  assert.deepEqual(realized.G,cleanRealized.G);
+  assert.deepEqual(realized.recommendations,cleanRealized.recommendations);
+  assert.deepEqual(realized.stage,cleanRealized.stage);
+  assert.deepEqual(realized.cumulative,cleanRealized.cumulative);
+  assert.equal(realized.lastTrainingTime,59);
+  for(const key of ['online','static','causal']) {
+    const expected=cleanRealized.states[key].map((v,i)=>v-(i===6?0.06:0));
+    assert.ok(vectorDistance(realized.states[key],expected)<1e-15);
+  }
+
+  const cleanCharged=clean.step(), charged=pulsed.step();
+  assert.equal(charged.lastTrainingTime,60);
+  assert.notDeepEqual(charged.G,cleanCharged.G);
+  for(const key of ['online','static','causal']) {
+    const expected=35*realized.states[key].reduce((s,x)=>s+x*x,0)
+      +0.08*charged.lastInputs[key].reduce((s,u)=>s+u*u,0);
+    assert.equal(charged.stage[key],expected);
+    assert.ok(charged.stage[key]>cleanCharged.stage[key]+0.1);
+    assert.equal(charged.cumulative[key],realized.cumulative[key]+expected);
+  }
+  assert.deepEqual(charged.recommendations,math.recommendations(charged.directGain));
+  assert.deepEqual(charged.directGain,multiply(model.H,charged.G).map(row=>row.map(v=>-v)));
+  assert.notDeepEqual(charged.recommendations,cleanCharged.recommendations);
+});
+
 test('forecast faults change future observations without rewriting prior pairs',()=>{
   const a=new Simulation(), b=new Simulation();
   for(let i=0;i<35;i++) { a.step(); b.step(); }
@@ -160,6 +222,9 @@ test('seed and interventions replay exactly and snapshot edits cannot change pla
   const run=()=>{
     for(let t=0;t<100;t++) {
       if(t===40) sim.queuePulse(7);
+      if(t===43) sim.queuePulse(7,0.06);
+      if(t===45) sim.queuePulse(12,0.10);
+      if(t===75) sim.queuePulse(23,constants.pulseMin);
       if(t===60) sim.toggleFault(6);
       sim.step();
     }

@@ -7,7 +7,7 @@
 <meta name="description" content="An interactive experiment in online predictive control. Inject disturbances and compare control cost, learned prediction sources, and adaptation on a synthetic power network.">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Online predictive control · O PredSLS</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600&family=Source+Serif+4:wght@400;500;600&display=swap">
 <style>html { color-scheme: light; background: #fff; scroll-behavior: smooth; }
 body.research-site {
   --background: #fff;
@@ -28,7 +28,7 @@ body.research-site {
   min-width: 280px;
   background: var(--background);
   color: var(--foreground);
-  font: 15px/1.6 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font: 16px/1.55 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 *, *::before, *::after { box-sizing: border-box; }
@@ -38,45 +38,46 @@ body.research-site {
 .research-site button, .research-site select, .research-site summary, .research-site .cursor-interaction { cursor: pointer; touch-action: manipulation; }
 .research-site :focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
 .research-header, #power-response-demo, .research-footer { width: calc(100% - 80px); max-width: 1080px; margin: 0 auto; }
-.research-header { padding: 40px 0 28px; }
+.research-header { padding: 32px 0 22px; }
 .research-title-row { display: flex; justify-content: space-between; align-items: baseline; gap: 24px; }
-h1 { font-size: 30px; line-height: 1.3; font-weight: 550; letter-spacing: -.9px; margin: 0; color: #171619; }
+h1 { font-family: 'Source Serif 4', Georgia, serif; font-size: 34px; line-height: 1.3; font-weight: 400; letter-spacing: -.8px; margin: 0; color: #171619; }
 .research-header nav { display: flex; gap: 24px; flex-shrink: 0; font-size: 13px; }
-.research-header p { color: var(--muted-foreground); margin: 8px 0 0; }
+.research-header p { font-size: 15px; color: var(--muted-foreground); margin: 5px 0 0; }
 #power-response-demo { position: relative; }
 #power-response-demo [hidden] { display: none !important; }
 .tabular-nums { font-variant-numeric: tabular-nums; }
-.pr-experiment { padding: 22px 0 20px; border-top: 1px solid var(--border); }
-.pr-instruction { font-size: 15px; font-weight: 500; margin-bottom: 14px; }
+.pr-experiment { padding: 16px 0 14px; border-top: 1px solid var(--border); }
+.pr-instruction { font-size: 16px; font-weight: 400; margin-bottom: 12px; }
 .pr-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 16px; min-height: 36px; padding: 7px 12px; border: 1px solid var(--border); border-radius: 4px; background: #fff; color: var(--foreground); font-size: 12px; font-weight: 500; line-height: 1.4; white-space: nowrap; transition: background-color .15s, border-color .15s; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 16px; min-height: 36px; padding: 7px 12px; border: 1px solid var(--border); border-radius: 3px; background: #fff; color: var(--foreground); font-size: 13px; font-weight: 400; line-height: 1.4; white-space: nowrap; transition: background-color .15s, border-color .15s; }
 .btn:hover:not(:disabled) { border-color: #aaa3a8; background: #faf9fa; }
 .btn:disabled { opacity: .4; cursor: default; }
-.btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); min-height: 46px; padding: 12px 20px; font-size: 14px; }
+.btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); min-height: 42px; padding: 10px 17px; font-size: 14px; }
 .btn-primary:hover:not(:disabled) { background: #670020; border-color: #670020; }
 #pr-pulse::after, #pr-fault::after { font-size: 12px; font-weight: 400; border: 1px solid currentColor; border-radius: 3px; padding: 0 5px; opacity: .65; }
 #pr-pulse::after { content: 'D'; }
 #pr-fault::after { content: 'E'; }
-#pr-fault { min-height: 46px; font-size: 13px; }
+#pr-fault { min-height: 42px; font-size: 13px; background: transparent; border-color: transparent; color: var(--muted-foreground); }
 .btn-play { border-color: #9e979d; min-width: 130px; }
 .btn-quiet { background: transparent; border-color: transparent; color: var(--muted-foreground); padding: 5px 8px; }
 .btn-quiet:hover:not(:disabled) { background: #f7f6f6; border-color: transparent; color: var(--foreground); }
 .pr-field { display: flex; align-items: center; gap: 10px; }
-.pr-field label { font-size: 12px; color: var(--muted-foreground); }
-.pr-field select { min-height: 36px; color: var(--foreground); background: #fff; padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; }
-#pr-bus { min-width: 62px; min-height: 46px; font-size: 14px; }
-.pr-action-note { margin: 10px 0 0; color: var(--muted-foreground); font-size: 12px; min-height: 20px; }
+.pr-field label { font-size: 13px; color: var(--muted-foreground); }
+.pr-field select { min-height: 36px; color: var(--foreground); background: #fff; padding: 6px 8px; border: 1px solid var(--border); border-radius: 3px; font-size: 12px; }
+#pr-bus { min-width: 52px; min-height: 42px; font-size: 14px; }
+#pr-strength { min-height: 42px; font-size: 14px; }
+.pr-action-note { margin: 7px 0 0; color: var(--muted-foreground); font-size: 12px; min-height: 20px; }
 .pr-playback { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 11px 0; }
 .pr-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
 .pr-speed-field { margin-left: 10px; }
 .pr-speed-field select { border-color: transparent; padding-right: 0; }
 .pr-status { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; font-size: 12px; color: var(--muted-foreground); }
 #pr-clock { color: var(--foreground); font-weight: 500; }
-.pr-event { font-size: 12px; color: var(--muted-foreground); margin: 8px 0 25px; min-height: 18px; }
+.pr-event { font-size: 12px; color: var(--muted-foreground); margin: 6px 0 15px; min-height: 18px; }
 .pr-panels { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 48px; }
 .pr-panel { min-width: 0; }
 .pr-subhead { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px; min-height: 36px; }
-.pr-panel h2 { margin: 0; font-size: 18px; font-weight: 550; letter-spacing: -.4px; line-height: 1.4; color: #19181c; }
+.pr-panel h2, .pr-response-heading h2 { margin: 0; font-family: 'Source Serif 4', Georgia, serif; font-size: 23px; font-weight: 400; letter-spacing: -.3px; line-height: 1.4; color: #19181c; }
 .pr-caption { margin: 4px 0; font-size: 12px; line-height: 1.6; color: var(--muted-foreground); }
 .form-check { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted-foreground); cursor: pointer; }
 .form-check input { width: 13px; height: 13px; margin: 0; accent-color: var(--primary); }
@@ -87,9 +88,9 @@ h1 { font-size: 30px; line-height: 1.3; font-weight: 550; letter-spacing: -.9px;
 .pr-chart .domain, .pr-chart .tick line, .pr-chart .grid line { stroke: var(--border); }
 .pr-chart .grid line { stroke-opacity: .65; }
 .pr-chart .grid .domain { display: none; }
-.pr-detail { font-size: 12px; min-height: 20px; margin: 8px 0; }
+.pr-detail { font-size: 13px; min-height: 20px; margin: 8px 0; }
 #pr-bus-detail { margin-top: 0; padding-top: 10px; border-top: 1px solid var(--border); }
-.pr-network-key, .pr-matrix-key { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 16px; font-size: 10px; color: var(--muted-foreground); }
+.pr-network-key, .pr-matrix-key { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 16px; font-size: 11px; color: var(--muted-foreground); }
 .pr-network-key > span, .pr-matrix-key > span { display: inline-flex; align-items: center; gap: 5px; }
 .pr-line-key { display: inline-block; width: 15px; border-top: 1px solid #a7a2a6; }
 .pr-arrow-key { color: var(--primary); font-style: normal; font-size: 18px; line-height: 10px; }
@@ -103,21 +104,25 @@ h1 { font-size: 30px; line-height: 1.3; font-weight: 550; letter-spacing: -.9px;
 #pr-matrix-reference { color: var(--muted-foreground); }
 #pr-matrix-changes { margin-left: auto; }
 .pr-scope-note { margin: 18px 0 0; color: var(--muted-foreground); font-size: 12px; }
-.pr-results { border-top: 1px solid var(--border); margin-top: 22px; padding-top: 22px; }
+.pr-response { border-top: 1px solid var(--border); margin-top: 20px; padding-top: 20px; }
+.pr-results { margin-top: 8px; }
+.pr-response-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 24px; }
+#pr-impact-note { margin: 0; font-size: 13px; color: var(--muted-foreground); }
+.pr-panel h3 { font-size: 15px; font-weight: 500; margin: 0; }
 .pr-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 15px; min-height: 28px; margin: 4px 0; }
-.pr-legend button { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; background: transparent; color: var(--foreground); font-size: 10px; min-height: 24px; }
+.pr-legend button { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; background: transparent; color: var(--foreground); font-size: 12px; min-height: 24px; }
 .pr-legend button[aria-pressed='false'] { opacity: .4; }
 .pr-swatch { display: inline-block; width: 17px; height: 0; border-top: 2px solid var(--viz-series-1); }
 #pr-fit-detail { display: flex; align-items: center; min-height: 28px; }
-#pr-cost-detail { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; padding-top: 10px; border-top: 1px solid var(--border); }
+#pr-cost-detail, #pr-stage-detail { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; padding-top: 10px; border-top: 1px solid var(--border); }
 .pr-cost-value { display: flex; flex-direction: column; gap: 2px; }
-.pr-cost-name { font-size: 10px; color: var(--muted-foreground); }
-.pr-cost-value strong { font-size: 20px; font-weight: 500; letter-spacing: -.5px; }
+.pr-cost-name { font-size: 12px; color: var(--muted-foreground); }
+.pr-cost-value strong { font-size: 21px; font-weight: 400; letter-spacing: -.5px; }
 #pr-mode-note { padding-top: 10px; border-top: 1px solid var(--border); margin-top: 8px; }
-.pr-tooltip { position: absolute; display: none; pointer-events: none; z-index: 10; padding: 10px 12px; border: 1px solid var(--border); border-radius: 4px; background: #fff; box-shadow: 0 3px 12px #00000008; font-size: 12px; }
+.pr-tooltip { position: absolute; display: none; pointer-events: none; z-index: 10; padding: 10px 12px; border: 1px solid var(--border); border-radius: 3px; background: #fff; box-shadow: 0 3px 12px #00000008; font-size: 12px; }
 .pr-tooltip div { display: flex; justify-content: space-between; gap: 18px; }
 #pr-error { color: var(--primary); padding: 18px 0; }
-.research-footer { margin-top: 30px; border-top: 1px solid var(--border); }
+.research-footer { margin-top: 0; border-top: 1px solid var(--border); }
 .research-methods summary { display: flex; align-items: center; gap: 15px; padding: 16px 0; color: var(--primary); font-size: 12px; list-style: none; }
 .research-methods summary::-webkit-details-marker { display: none; }
 .research-methods-caption { font-size: 12px; color: var(--muted-foreground); }
@@ -138,12 +143,13 @@ details[open] .research-expand::before { content: '−'; }
   .research-header, #power-response-demo, .research-footer { width: calc(100% - 36px); }
   .research-header { padding: 25px 0 22px; }
   .research-title-row { flex-wrap: wrap; gap: 8px; }
-  h1 { font-size: 26px; }
+  h1 { font-size: 29px; }
   .research-header nav { font-size: 12px; gap: 20px; }
   .research-header p { font-size: 13px; }
   .pr-instruction { font-size: 13px; }
   .pr-actions { gap: 10px; }
-  .pr-actions .pr-field { width: 100%; }
+  .pr-actions .pr-field { width: auto; }
+  .pr-actions .pr-strength-field { width: 100%; }
   #pr-bus { min-height: 38px; }
   .btn-primary { padding: 12px 15px; }
   .pr-playback { gap: 8px; }
@@ -154,10 +160,10 @@ details[open] .research-expand::before { content: '−'; }
   #pr-learning { display: inline; }
   .pr-event { margin-bottom: 20px; }
   .pr-panels { grid-template-columns: minmax(0,1fr); gap: 26px; }
-  .pr-matrix-panel, .pr-fit { border-top: 1px solid var(--border); padding-top: 20px; }
-  .pr-panel h2 { font-size: 17px; }
+  .pr-matrix-panel, .pr-cost-panel { border-top: 1px solid var(--border); padding-top: 20px; }
+  .pr-panel h2, .pr-response-heading h2 { font-size: 22px; }
   .pr-matrix-summary { font-size: 10px; }
-  .pr-results { margin-top: 20px; }
+  .pr-results { margin-top: 8px; }
   .research-methods summary { flex-wrap: wrap; gap: 5px 12px; }
   .research-methods-body { grid-template-columns: 1fr; gap: 20px; }
   .research-colophon { flex-wrap: wrap; gap: 5px; }
@@ -174,6 +180,30 @@ details[open] .research-expand::before { content: '−'; }
 .pr-chart .matrix-axis { font-size: 11px; fill: var(--muted-foreground); }
 
 @media(max-width:720px) { #pr-fault { gap: 10px; padding: 8px 10px; font-size: 12px; } }
+
+.pr-adaptation { margin-top: 26px; border-top: 1px solid var(--border); }
+.pr-adaptation > summary { display: flex; justify-content: space-between; padding: 16px 0; list-style: none; font-size: 13px; color: var(--primary); }
+.pr-adaptation > summary::-webkit-details-marker { display: none; }
+.pr-adaptation[open] > summary span { transform: rotate(45deg); }
+.pr-adaptation .pr-fit { padding: 4px 0 22px; }
+#pr-network [role='button'] { cursor: crosshair; outline: none; }
+#pr-network [role='button']:hover .bus-dot, #pr-network [role='button']:focus .bus-dot { stroke: var(--primary); stroke-width: 2px; }
+#pr-network [role='button']:focus-visible .voltage-halo { stroke: var(--primary); stroke-width: 1px; }
+@media(max-width:720px) {
+  .pr-actions { gap: 8px 10px; }
+  #pr-fault { padding-left: 0; min-height: 36px; }
+  .pr-response-heading { display: block; }
+  #pr-impact-note { margin-top: 6px; }
+}
+
+.pr-network-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; min-height: 30px; }
+.pr-live-stage { white-space: nowrap; color: var(--muted-foreground); font-size: 12px; }
+.pr-live-stage strong { color: var(--primary); font-size: 18px; font-weight: 400; margin-left: 6px; }
+.pr-pulse-summary { color: var(--primary); font-size: 13px; margin: 0 0 5px; }
+.pr-pulse-summary:empty { display: none; }
+@media(max-width:400px) { .pr-network-meta { flex-wrap: wrap; gap: 0 8px; } }
+
+#pr-stage-detail { display: block; min-height: 55px; color: var(--primary); font-size: 16px; }
 </style>
 </head>
 <body class="research-site">
@@ -199,25 +229,26 @@ details[open] .research-expand::before { content: '−'; }
       <a href="https://github.com/tongxin-li/online-sls-demo" target="_blank" rel="noopener noreferrer">Code ↗</a>
     </nav>
   </div>
-  <p>A 24 bus experiment in shared online adaptation.</p>
+  <p>Shared online adaptation on a 24 bus power network.</p>
 </header>
 
 <main id="power-response-demo">
   <section class="pr-experiment" aria-label="Experiment controls">
-    <div class="pr-instruction">Choose a bus. Add a disturbance. Watch the response.</div>
+    <div class="pr-instruction">Click a bus to apply a pulse disturbance.</div>
     <div class="pr-actions">
-      <div class="pr-field"><label for="pr-bus">Target bus</label><select id="pr-bus" aria-label="Selected bus"></select></div>
+      <div class="pr-field pr-strength-field"><label for="pr-strength">Pulse strength</label><select id="pr-strength" aria-label="Pulse strength"><option value="0.02">0.02 pu · Mild</option><option value="0.06" selected>0.06 pu · Medium</option><option value="0.10">0.10 pu · Strong</option></select></div>
+      <div class="pr-field"><label for="pr-bus">Bus</label><select id="pr-bus" aria-label="Selected bus"></select></div>
       <button type="button" class="btn btn-primary" id="pr-pulse" aria-keyshortcuts="D">Add disturbance</button>
       <button type="button" class="btn btn-secondary" id="pr-fault" aria-keyshortcuts="E">Repair forecast</button>
     </div>
-    <p class="pr-action-note" id="pr-action-note" aria-live="polite">A sudden load change at the selected bus. The simulation starts when you click.</p>
+    <p class="pr-action-note" id="pr-action-note" aria-live="polite">Set the strength, then click a bus in the network or use Add disturbance.</p>
   </section>
   <div class="pr-playback" aria-label="Playback controls">
     <div class="pr-toolbar">
       <button type="button" class="btn btn-play" id="pr-run">Run simulation</button>
       <button type="button" class="btn btn-quiet" id="pr-step">One step</button>
       <button type="button" class="btn btn-quiet" id="pr-restart">Reset</button>
-      <div class="pr-field pr-speed-field"><label for="pr-speed">Speed</label><select id="pr-speed"><option value="4">4 steps/s</option><option value="12" selected>12 steps/s</option><option value="30">30 steps/s</option></select></div>
+      <div class="pr-field pr-speed-field"><label for="pr-speed">Speed</label><select id="pr-speed"><option value="0.5">0.5 steps/s</option><option value="1" selected>1 step/s</option><option value="2">2 steps/s</option><option value="4">4 steps/s</option></select></div>
     </div>
     <div class="pr-status tabular-nums"><span id="pr-clock">Step 60 / 480</span><span id="pr-learning">Learning from revealed samples</span></div>
   </div>
@@ -225,11 +256,12 @@ details[open] .research-expand::before { content: '−'; }
   <div class="pr-topology pr-panels">
     <section class="pr-panel pr-network-panel" aria-labelledby="pr-network-title">
       <div class="pr-subhead"><h2 id="pr-network-title">Power network</h2><label class="form-check"><input type="checkbox" id="pr-all-links"><span>Show all links</span></label></div>
-      <p class="pr-caption" id="pr-topology-label">Prediction sources for bus 6</p>
-      <svg class="pr-chart" id="pr-network" role="img" aria-label="Fixed radial feeder and recommended directed prediction links"></svg>
+      <div class="pr-network-meta"><p class="pr-caption" id="pr-topology-label">Prediction sources for bus 6</p><span class="pr-live-stage">Cost now <strong id="pr-live-cost" class="tabular-nums">0.0000</strong></span></div>
+      <svg class="pr-chart" id="pr-network" role="group" aria-label="Interactive power network. Click a bus to inject a pulse disturbance"></svg>
       <p class="pr-detail tabular-nums" id="pr-bus-detail"></p>
+      <p id="pr-pulse-summary" class="pr-pulse-summary tabular-nums" aria-live="polite"></p>
       <div class="pr-network-key"><span><i class="pr-line-key"></i>Electrical line</span><span><i class="pr-arrow-key">→</i>Prediction link</span><span>× Forecast error</span></div>
-      <p class="pr-caption" id="pr-links-detail">Select a bus to inspect its incoming links.</p>
+      <p class="pr-caption" id="pr-links-detail">Click any bus to add a pulse. Select a matrix row to inspect its links.</p>
     </section>
     <section class="pr-panel pr-matrix-panel" aria-labelledby="pr-matrix-title">
       <div class="pr-subhead"><h2 id="pr-matrix-title">Communication matrix</h2><button class="btn btn-quiet" type="button" id="pr-reference">Set reference</button></div>
@@ -241,25 +273,37 @@ details[open] .research-expand::before { content: '−'; }
     </section>
   </div>
   <p class="pr-scope-note">The graph and matrix show learned link recommendations. The electrical network and deployed communication remain fixed.</p>
-  <div class="pr-results pr-panels">
-    <section class="pr-panel pr-cost-panel" aria-labelledby="pr-cost-title">
-      <div class="pr-subhead"><h2 id="pr-cost-title">Cumulative cost</h2></div>
-      <div class="pr-legend" aria-label="Visible cost series">
-        <button type="button" data-series="online" aria-pressed="true"><span class="pr-swatch"></span>Adaptive</button>
-        <button type="button" data-series="static" aria-pressed="true"><span class="pr-swatch" style="border-color:var(--viz-series-2);border-top-style:dashed"></span>Static prediction</button>
-        <button type="button" data-series="causal" aria-pressed="true"><span class="pr-swatch" style="border-color:var(--viz-series-3);border-top-style:dotted"></span>Causal</button>
-      </div>
-      <svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative quadratic cost of three controllers on the same disturbances"></svg>
-      <div class="pr-detail tabular-nums" id="pr-cost-detail"></div>
-      <p class="pr-caption">Voltage error and control effort under identical disturbances</p>
-    </section>
+  <section class="pr-response" aria-labelledby="pr-response-title">
+    <div class="pr-response-heading"><h2 id="pr-response-title">System response</h2><p id="pr-impact-note" role="status" aria-live="polite">Click a bus to see the cost of a pulse and the controller’s recovery.</p></div>
+    <div class="pr-legend" aria-label="Visible cost series">
+      <button type="button" data-series="online" aria-pressed="true"><span class="pr-swatch"></span>Adaptive</button>
+      <button type="button" data-series="static" aria-pressed="true"><span class="pr-swatch" style="border-color:var(--viz-series-2);border-top-style:dashed"></span>Static prediction</button>
+      <button type="button" data-series="causal" aria-pressed="true"><span class="pr-swatch" style="border-color:var(--viz-series-3);border-top-style:dotted"></span>Causal</button>
+    </div>
+    <div class="pr-results pr-panels">
+      <section class="pr-panel pr-stage-panel" aria-labelledby="pr-stage-title">
+        <div class="pr-subhead"><h3 id="pr-stage-title">Instantaneous cost</h3><span class="pr-caption">Recent 60 steps</span></div>
+        <svg class="pr-chart" id="pr-stage" role="img" aria-label="Instantaneous quadratic cost showing disturbance spikes and recovery"></svg>
+        <div class="pr-detail tabular-nums" id="pr-stage-detail"></div>
+        <p class="pr-caption">The cost at each step reveals the pulse and recovery.</p>
+      </section>
+      <section class="pr-panel pr-cost-panel" aria-labelledby="pr-cost-title">
+        <div class="pr-subhead"><h3 id="pr-cost-title">Cumulative cost</h3><span class="pr-caption">Full experiment</span></div>
+        <svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative quadratic cost of three controllers on the same disturbances"></svg>
+        <div class="pr-detail tabular-nums" id="pr-cost-detail"></div>
+        <p class="pr-caption">The total cost increases as each step is completed.</p>
+      </section>
+    </div>
+  </section>
+  <details class="pr-adaptation" id="pr-adaptation">
+    <summary>Inspect learning and convergence <span aria-hidden="true">＋</span></summary>
     <section class="pr-panel pr-fit" aria-labelledby="pr-fit-title">
       <div class="pr-subhead"><h2 id="pr-fit-title">Online adaptation</h2><button type="button" class="btn btn-secondary" id="pr-freeze">Freeze data and fit</button></div>
       <p class="pr-caption tabular-nums" id="pr-fit-detail">Rolling window of 60 revealed samples</p>
       <svg class="pr-chart" id="pr-convergence" role="img" aria-label="Relative change of the shared prediction response over time"></svg>
       <p class="pr-caption" id="pr-mode-note">Freeze data to inspect convergence to a fixed ridge solution</p>
     </section>
-  </div>
+  </details>
   <div class="pr-tooltip tabular-nums" role="tooltip" id="pr-tooltip"></div>
   <div role="alert" id="pr-error" hidden></div>
 </main>
@@ -270,7 +314,7 @@ details[open] .research-expand::before { content: '−'; }
     <div class="research-methods-body">
       <section>
         <h3>A linear voltage surrogate</h3>
-        <p>Choose a bus and click Add disturbance, or press D, to inject an unexpected load pulse. The experiment starts immediately. Press E to change forecast reliability and Space to pause or resume. The state is voltage deviation from nominal. Each bus has an equivalent control input. Tree distances define a dense linear coupling model.</p>
+        <p>Choose a pulse strength and click a bus to inject an unexpected load disturbance. The button and D shortcut apply the same pulse to the selected bus. The default playback is one control step per second. Press E to change forecast reliability and Space to pause or resume. The state is voltage deviation from nominal. Each bus has an equivalent control input. Tree distances define a dense linear coupling model.</p>
         <div class="research-equation" aria-label="State at the next step equals A times the state plus the control input plus the disturbance">x<sub>t+1</sub> = Ax<sub>t</sub> + u<sub>t</sub> + w<sub>t</sub></div>
         <p>Values use per unit coordinates and abstract control intervals. This illustration does not calculate AC power flow, actuator saturation, or hard voltage limits.</p>
       </section>
@@ -278,7 +322,7 @@ details[open] .research-expand::before { content: '−'; }
         <h3>Shared prediction adaptation</h3>
         <p>A shared matrix calibrates forecasts using the latest 60 revealed samples. This reduced ridge loss illustrates online learning and differs from the full manuscript algorithm and its theoretical guarantees.</p>
         <div class="research-equation" aria-label="Adaptive control equals state feedback minus the calibrated preview correction">u<sub>t</sub> = Kx<sub>t</sub> − HG<sub>t</sub>ŵ<sub>t</sub></div>
-        <p>The matrix shows three recommended remote sources per receiver. Rows are receivers and columns are sources. Teal cells mark added links and amber outlines mark removed links since the reference step. Add a disturbance or choose Set reference to begin a new comparison. Arrow width encodes prediction score. Node halos indicate voltage deviation. The physical feeder and deployed communication stay fixed. The plots accumulate quadratic stage cost. They do not report formal regret. Frozen fitting measures convergence to a fixed numerical solution. Online data and source rankings can continue to change.</p>
+        <p>The matrix shows three recommended remote sources per receiver. Rows are receivers and columns are sources. Teal cells mark added links and amber outlines mark removed links since the reference step. Add a disturbance or choose Set reference to begin a new comparison. Arrow width encodes prediction score. Node halos indicate voltage deviation and a ring marks the injected pulse. Visual transitions interpolate the drawing only. The discrete control samples remain unchanged. The physical feeder and deployed communication stay fixed. The instantaneous plot shows the quadratic stage cost xₜᵀQxₜ + uₜᵀRuₜ. The cumulative plot sums these same values. A click advances two real control steps so the pulse is realized and its first affected state cost is visible immediately. Subsequent samples run at the selected speed. The plots do not report formal regret. Frozen fitting measures convergence to a fixed numerical solution. Online data and source rankings can continue to change.</p>
       </section>
     </div>
   </details>
@@ -304,6 +348,9 @@ details[open] .research-expand::before { content: '−'; }
   const WINDOW = 60;
   const WARMUP = 30;
   const TOLERANCE = 1e-5;
+  const PULSE_DEFAULT = 0.025;
+  const PULSE_MIN = 0.005;
+  const PULSE_MAX = 0.15;
   const EDGES = [[1,2],[2,3],[3,4],[4,5],[4,6],[6,7],[4,8],
     [3,9],[9,10],[9,11],[11,12],[1,15],[15,13],[13,14],[13,16],
     [16,17],[16,18],[18,19],[19,20],[20,21],[18,22],[22,23],[23,24]];
@@ -483,11 +530,14 @@ details[open] .research-expand::before { content: '−'; }
       if (!Number.isInteger(bus)||bus<1||bus>N) throw new Error('Bus must be an integer from 1 through 24');
       return bus;
     }
-    queuePulse(bus) {
+    queuePulse(bus,strength=PULSE_DEFAULT) {
       this.checkBus(bus);
+      if (!Number.isFinite(strength)||strength<PULSE_MIN||strength>PULSE_MAX)
+        throw new RangeError('Pulse strength must be from 0.005 through 0.15 per unit');
       if (this.mode!=='running') return false;
-      this.pulses.push({bus,age:0});
-      this.eventLog.push(deepFreeze({t:this.t,type:'pulse',bus,message:'Net load spike at bus '+bus}));
+      this.pulses.push({bus,strength,age:0});
+      this.eventLog.push(deepFreeze({t:this.t,type:'pulse',bus,strength,
+        message:'Net load spike of '+strength+' per unit at bus '+bus}));
       return true;
     }
     toggleFault(bus) {
@@ -525,7 +575,7 @@ details[open] .research-expand::before { content: '−'; }
       // Unexpected demand is realized only after the forecast has been sealed.
       const disturbance=base.slice(), pulse=Array(N).fill(0);
       for (const event of this.pulses) {
-        const value=-0.025*Math.exp(-event.age/3);
+        const value=-event.strength*Math.exp(-event.age/3);
         disturbance[event.bus-1]+=value; pulse[event.bus-1]+=value; event.age++;
       }
       this.pulses=this.pulses.filter(event=>event.age<12);
@@ -605,7 +655,8 @@ details[open] .research-expand::before { content: '−'; }
   }
 
   return {Simulation,model,constants:deepFreeze({N,edges:EDGES,amplitude:AMPLITUDE,
-    ridge:RIDGE,window:WINDOW,warmup:WARMUP,tolerance:TOLERANCE,horizon:480}),
+    ridge:RIDGE,window:WINDOW,warmup:WARMUP,tolerance:TOLERANCE,horizon:480,
+    pulseDefault:PULSE_DEFAULT,pulseMin:PULSE_MIN,pulseMax:PULSE_MAX}),
     math:{zeros,eye,transpose,multiply,matvec,combine,frobenius,normInf,solveSPD,objective,statistics,recommendations}};
 });
 </script>
@@ -639,6 +690,17 @@ details[open] .research-expand::before { content: '−'; }
   let restored = false;
   let pin = null;
   let matrixReference = null;
+  let lastPulse = null;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const duration = () => reducedMotion ? 0 : Math.min(440, 700 / Number($('speed').value || 1));
+  function animate(selection, name = 'update') {
+    selection.interrupt(name);
+    return reducedMotion ? selection : selection.transition(name).duration(duration()).ease(d3.easeCubicOut);
+  }
+  function color(value) {
+    const variable = /^var\((--[^,)]+)/.exec(value);
+    return variable ? getComputedStyle(root).getPropertyValue(variable[1]).trim() || '#840028' : value;
+  }
   const matrixColors = { connected:'#840028', added:'var(--matrix-added, #25796e)', removed:'var(--matrix-removed, #c18a43)', local:'#bdb8bd', inactive:'#f0f1f3' };
   const positions = [
     [.03,.48],[.12,.28],[.27,.28],[.43,.16],[.43,.01],[.60,.12],
@@ -658,7 +720,7 @@ details[open] .research-expand::before { content: '−'; }
   function actionNote(message) { if ($('action-note')) $('action-note').textContent = message; }
   function recommendationKey(edge) { return edge.to + ',' + edge.from; }
   function captureMatrixReference() {
-    matrixReference = { t:snapshot.t, fitIteration:snapshot.fitIteration, edges:new Set((snapshot.recommendations || []).map(recommendationKey)) };
+    matrixReference = { t:snapshot.t, fitIteration:snapshot.fitIteration, edges:new Set((snapshot.recommendations || []).map(recommendationKey)), recommendations:(snapshot.recommendations || []).map(edge => ({...edge})) };
   }
   function selectBus(bus) {
     selectedBus = bus;
@@ -666,24 +728,25 @@ details[open] .research-expand::before { content: '−'; }
     render(); save();
   }
   function continueAfterAction() {
-    if (!playing) { playing = true; schedule(); }
+    if (!playing && snapshot.mode === 'running') { playing = true; schedule(); }
   }
   function save() {
     restored = true;
     if (!window.openai?.setWidgetState) return;
     const state = {
       modelContent: { scenario:'Synthetic 24 bus voltage regulation', variant:'Shared response calibration with fixed physical and deployed links', step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
-      privateContent: { version:1, t:journal.length <= 200 ? snapshot.t : 0, journal:journal.length <= 200 ? journal : [], selectedBus, speed:$('speed').value, allLinks:$('all-links').checked, fitSteps:journal.length <= 200 ? fitSteps : 0, fitting:journal.length <= 200 && isFit() }
+      privateContent: { version:2, pulseStrength:$('strength').value, t:journal.length <= 200 ? snapshot.t : 0, journal:journal.length <= 200 ? journal : [], selectedBus, speed:$('speed').value, allLinks:$('all-links').checked, fitSteps:journal.length <= 200 ? fitSteps : 0, fitting:journal.length <= 200 && isFit() }
     };
     window.openai.setWidgetState(state).catch(() => {});
   }
   function hydrate(saved) {
     const data = saved?.privateContent;
-    if (restored || !data || data.version !== 1) return;
+    if (restored || !data || ![1,2].includes(data.version)) return;
     restored = true;
     selectedBus = Math.max(1, Math.min(24, Number(data.selectedBus) || 6));
     $('bus').value = String(selectedBus);
-    if (['4','12','30'].includes(data.speed)) $('speed').value = data.speed;
+    $('speed').value = data.version === 2 && ['0.5','1','2','4'].includes(data.speed) ? data.speed : '1';
+    if (data.version === 2 && ['0.02','0.06','0.10'].includes(data.pulseStrength)) $('strength').value = data.pulseStrength;
     $('all-links').checked = !!data.allLinks;
     const items = Array.isArray(data.journal) ? data.journal.slice(0,200) : [];
     const t = Math.max(0, Math.min(480, Math.floor(Number(data.t) || 0)));
@@ -697,7 +760,11 @@ details[open] .research-expand::before { content: '−'; }
           simulation.resume(); journal.push(item); continue;
         }
         if (!Number.isInteger(item.bus) || item.bus < 1 || item.bus > 24) continue;
-        if (item.type === 'pulse') simulation.queuePulse(item.bus);
+        if (item.type === 'pulse') {
+          const strength = Number.isFinite(item.strength) && item.strength >= 0.005 && item.strength <= 0.15 ? item.strength : data.version === 1 ? 0.025 : 0.06;
+          simulation.queuePulse(item.bus, strength);
+          item.strength = strength;
+        }
         else if (item.type === 'fault') simulation.toggleFault(item.bus);
         else continue;
         journal.push(item);
@@ -747,41 +814,59 @@ details[open] .research-expand::before { content: '−'; }
   $('run').addEventListener('click', toggleRun);
   $('step').addEventListener('click', () => { stop(); tick(); save(); });
   $('restart').addEventListener('click', () => {
-    stop(); simulation.reset(); snapshot = simulation.snapshot(); journal = []; fitSteps = 0; pin = null;
+    stop(); simulation.reset();
+    for (let i = 0; i < 60; i++) simulation.step();
+    snapshot = simulation.snapshot(); journal = []; fitSteps = 0; pin = null; lastPulse = null;
     captureMatrixReference();
-    actionNote('A sudden load change at the selected bus. The simulation starts when you click.');
-    announce('Same seed restored · Ready'); render(); save();
+    actionNote('Click a bus to apply the selected pulse strength.');
+    announce('Reset to step 60 · Ready'); render(); save();
   });
-  $('speed').addEventListener('change', save);
+  $('speed').addEventListener('change', () => { if (playing) { clearTimeout(timer); schedule(); } save(); });
+  $('strength').addEventListener('change', () => { drawNetwork(); save(); });
+  if ($('adaptation')) $('adaptation').addEventListener('toggle', () => { if ($('adaptation').open) drawConvergence(); });
   $('bus').addEventListener('change', () => selectBus(Number($('bus').value)));
   $('all-links').addEventListener('change', () => { drawNetwork(); save(); });
   if ($('reference')) $('reference').addEventListener('click', () => {
-    captureMatrixReference(); drawMatrix();
+    captureMatrixReference(); drawNetwork(); drawMatrix();
     announce('Connectivity reference saved at step ' + snapshot.t);
   });
-  function pulse() {
+  function pulse(bus = selectedBus) {
     if ($('pulse').disabled) return;
+    stop();
+    selectedBus = bus;
+    $('bus').value = String(bus);
     captureMatrixReference();
-    simulation.queuePulse(selectedBus); journal.push({ t:snapshot.t, type:'pulse', bus:selectedBus });
+    const strength = Number($('strength').value);
+    const before = snapshot.stage.online;
+    const pulseStep = snapshot.t;
+    simulation.queuePulse(selectedBus, strength);
+    journal.push({ t:pulseStep, type:'pulse', bus:selectedBus, strength });
+    // The unexpected disturbance enters x at the first step. Its state cost is
+    // charged at the next step, when calibration can also use the revealed sample.
+    const steps = Math.min(2, snapshot.horizon - snapshot.t);
+    for (let i = 0; i < steps; i++) simulation.step();
     snapshot = simulation.snapshot();
+    lastPulse = {bus:selectedBus, strength, t:pulseStep, before, after:snapshot.stage.online, charged:steps === 2};
     continueAfterAction();
-    const message = 'Disturbance added at bus ' + selectedBus + ' for step ' + (snapshot.t + 1);
-    announce(message + ' · Simulation running');
-    actionNote(message + ' · Watch the network and cumulative cost respond');
-    render(); save();
+    const message = strength.toFixed(2) + ' pu pulse at bus ' + selectedBus;
+    announce(message + (playing ? ' · Simulation running' : ' · Episode complete'));
+    actionNote(message + ' applied · Watch the voltage and cost recover');
+    render(); pulseRipple(selectedBus); save();
   }
   function fault() {
     if ($('fault').disabled) return;
+    stop();
     captureMatrixReference();
     simulation.toggleFault(selectedBus); journal.push({ t:snapshot.t, type:'fault', bus:selectedBus });
+    simulation.step();
     snapshot = simulation.snapshot();
     continueAfterAction();
     const message = 'Forecast at bus ' + selectedBus + (snapshot.faults.includes(selectedBus) ? ' corrupted' : ' repaired') + ' at step ' + snapshot.t;
-    announce(message + ' · Simulation running');
-    actionNote(message + ' · Watch the colored matrix entries change as learning continues');
+    announce(message + (playing ? ' · Simulation running' : ' · Episode complete'));
+    actionNote(message + ' · Colored entries show changes in recommended sources');
     render(); save();
   }
-  $('pulse').addEventListener('click', pulse);
+  $('pulse').addEventListener('click', () => pulse());
   $('fault').addEventListener('click', fault);
   $('freeze').addEventListener('click', () => {
     stop();
@@ -802,7 +887,7 @@ details[open] .research-expand::before { content: '−'; }
     const key = e.key.toLowerCase();
     if (key === 'd') { e.preventDefault(); pulse(); }
     else if (key === 'e') { e.preventDefault(); fault(); }
-    else if (key === ' ' && e.target.tagName !== 'BUTTON') { e.preventDefault(); toggleRun(); }
+    else if (key === ' ' && !e.target.closest('button, [role=button]')) { e.preventDefault(); toggleRun(); }
   });
   root.querySelectorAll('[data-series]').forEach(button => {
     button.addEventListener('click', () => {
@@ -810,7 +895,7 @@ details[open] .research-expand::before { content: '−'; }
       if (visible.has(key) && visible.size > 1) visible.delete(key);
       else visible.add(key);
       button.setAttribute('aria-pressed', visible.has(key) ? 'true' : 'false');
-      drawCost();
+      drawCost(); drawStage();
     });
   });
   function renderControls() {
@@ -824,36 +909,52 @@ details[open] .research-expand::before { content: '−'; }
     $('freeze').textContent = frozen ? 'Return to simulation' : 'Freeze data and fit';
     $('freeze').disabled = snapshot.t < 30;
     $('pulse').disabled = frozen || snapshot.mode === 'completed';
+    $('strength').disabled = frozen || snapshot.mode === 'completed';
     $('fault').disabled = frozen || snapshot.mode === 'completed';
     $('fault').textContent = (snapshot.faults.includes(selectedBus) ? 'Repair' : 'Corrupt') + ' forecast';
     $('fit-title').textContent = frozen ? 'Convergence on frozen data' : 'Online adaptation';
     $('fit-detail').textContent = frozen ? 'Relative solution error ' + d3.format('.2~g')(100*(snapshot.fitError || 0)) + '%' : 'Rolling window of 60 revealed samples';
     $('mode-note').textContent = frozen ? 'A fixed ridge objective · Numerical convergence of this reduced model' : 'Freeze data to inspect convergence to a fixed ridge solution';
   }
+  function pulseRipple(bus) {
+    const node = d3.select($('network')).select('.nodes').selectAll('g.bus-node').filter(value => value === bus);
+    if (reducedMotion || node.empty()) return;
+    node.selectAll('.pulse-ripple').remove();
+    node.append('circle').attr('class','pulse-ripple').attr('r',13).attr('fill','none')
+      .attr('stroke',color('var(--viz-series-1)')).attr('stroke-width',2).attr('opacity',.9)
+      .attr('pointer-events','none').transition('pulse').duration(1200).ease(d3.easeCubicOut)
+      .attr('r',36).attr('stroke-width',.5).attr('opacity',0).remove();
+  }
   function drawNetwork() {
     const el = $('network');
     const width = Math.max(240, el.getBoundingClientRect().width);
-    const instrument = document.body.classList.contains('research-site');
-    const height = instrument ? 340 : 292;
-    const svg = d3.select(el).attr('viewBox', '0 0 ' + width + ' ' + height).attr('height', height);
-    const point = bus => [22 + positions[bus - 1][0] * (width - 48), 26 + positions[bus - 1][1] * (height - 54)];
+    const height = 340;
+    const svg = d3.select(el).attr('viewBox', '0 0 ' + width + ' ' + height).attr('height', height)
+      .attr('role','group').attr('aria-label','Power network. Activate a bus to inject the selected load pulse.');
+    const point = bus => [25 + positions[bus - 1][0] * (width - 54), 26 + positions[bus - 1][1] * (height - 54)];
     if (svg.select('defs').empty()) {
       svg.append('title').text('Fixed electrical feeder with learned prediction source recommendations');
       const defs = svg.append('defs');
-      defs.append('marker').attr('id','pr-arrow').attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerUnits','userSpaceOnUse').attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto').append('path').attr('d','M 0 0 L 10 5 L 0 10 Z').attr('fill','var(--viz-series-1)');
+      for (const [name,fill] of [['retained',color('var(--viz-series-1)')],['added',color(matrixColors.added)],['removed',color(matrixColors.removed)]]) {
+        defs.append('marker').attr('id','pr-arrow-'+name).attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerUnits','userSpaceOnUse').attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto').append('path').attr('d','M 0 0 L 10 5 L 0 10 Z').attr('fill',fill);
+      }
       svg.append('g').attr('class','physical');
       svg.append('g').attr('class','recommended');
       svg.append('g').attr('class','nodes');
     }
     svg.select('.physical').selectAll('line').data(PowerDemo.constants.edges).join('line')
       .attr('x1',e => point(e[0])[0]).attr('y1',e => point(e[0])[1]).attr('x2',e => point(e[1])[0]).attr('y2',e => point(e[1])[1])
-      .attr('stroke','var(--foreground)').attr('stroke-opacity',.2).attr('stroke-width',1.4);
+      .attr('stroke','var(--foreground)').attr('stroke-opacity',.15).attr('stroke-width',1.3);
     const recommendations = snapshot.recommendations || [];
-    const edges = $('all-links').checked ? recommendations : recommendations.filter(e => e.to === selectedBus);
-    const extent = d3.extent(recommendations,e => e.weight);
-    const strength = d3.scaleSqrt().domain([0,Math.max(extent[1] || 0,1e-12)]).range([1,3.5]);
+    const current = new Set(recommendations.map(recommendationKey));
+    const reference = matrixReference?.edges || current;
+    const retained = recommendations.map(edge => ({...edge, change:reference.has(recommendationKey(edge)) ? 'retained' : 'added'}));
+    const removed = (matrixReference?.recommendations || []).filter(edge => !current.has(recommendationKey(edge))).map(edge => ({...edge,change:'removed'}));
+    const allEdges = [...removed,...retained];
+    const edges = $('all-links').checked ? allEdges : allEdges.filter(e => e.to === selectedBus);
+    const strength = d3.scaleSqrt().domain([0,Math.max(d3.max(recommendations,e => e.weight) || 0,1e-12)]).range([1,3]);
     function arc(e) {
-      const a = point(e.from), b = point(e.to), dx=b[0]-a[0], dy=b[1]-a[1], dist=Math.hypot(dx,dy)||1;
+      const a = point(e.from), b = point(e.to), dx=b[0]-a[0], dy=b[1]-a[1];
       const offset = e.from < e.to ? 1 : -1;
       const c=[(a[0]+b[0])/2 - dy*.18*offset, (a[1]+b[1])/2 + dx*.18*offset];
       const da = Math.hypot(c[0]-a[0],c[1]-a[1]) || 1, db=Math.hypot(b[0]-c[0],b[1]-c[1]) || 1;
@@ -861,25 +962,46 @@ details[open] .research-expand::before { content: '−'; }
       const end=[b[0]-14*(b[0]-c[0])/db,b[1]-14*(b[1]-c[1])/db];
       return 'M'+start.join(',')+' Q'+c.join(',')+' '+end.join(',');
     }
-    svg.select('.recommended').selectAll('path').data(edges,e => e.from+'_'+e.to).join('path')
-      .attr('d',arc).attr('fill','none').attr('stroke','var(--viz-series-1)').attr('stroke-width',e => strength(e.weight))
-      .attr('opacity',e => e.to === selectedBus ? .9 : .16).attr('marker-end','url(#pr-arrow)');
-    const nodes = svg.select('.nodes').selectAll('g').data(d3.range(1,25)).join(enter => {
-      const g=enter.append('g').attr('class','cursor-interaction');
-      g.append('circle').attr('class','voltage-halo'); g.append('circle').attr('class','bus-dot'); g.append('text').attr('class','bus-number'); g.append('text').attr('class','fault-mark'); g.append('title');
+    const links = svg.select('.recommended').selectAll('path').data(edges,e => e.from+'_'+e.to).join(
+      enter => enter.append('path').attr('d',arc).attr('opacity',0),
+      update => update,
+      exit => { if (reducedMotion) exit.remove(); else exit.interrupt('update').transition('update').duration(240).attr('opacity',0).remove(); }
+    ).attr('fill','none').attr('data-from',e => e.from).attr('data-to',e => e.to).attr('data-change',e => e.change)
+      .attr('stroke-dasharray',e => e.change === 'removed' ? '3 4' : null)
+      .attr('marker-end',e => 'url(#pr-arrow-'+e.change+')');
+    animate(links).attr('d',arc)
+      .attr('stroke',e => color(e.change === 'retained' ? 'var(--viz-series-1)' : matrixColors[e.change]))
+      .attr('stroke-width',e => e.change === 'removed' ? 1.1 : strength(e.weight))
+      .attr('opacity',e => e.to === selectedBus ? (e.change === 'removed' ? .5 : .88) : e.change === 'removed' ? .1 : .14);
+    const nodes = svg.select('.nodes').selectAll('g.bus-node').data(d3.range(1,25),bus => bus).join(enter => {
+      const g=enter.append('g').attr('class','bus-node cursor-interaction').attr('role','button').attr('tabindex',0);
+      g.append('circle').attr('class','voltage-halo').attr('r',12).attr('fill-opacity',0);
+      g.append('circle').attr('class','bus-dot');
+      g.append('text').attr('class','bus-number');
+      g.append('text').attr('class','fault-mark');
+      g.append('title');
       return g;
-    }).attr('transform',bus => 'translate('+point(bus).join(',')+')');
-    nodes.on('click',(_e,bus) => selectBus(bus));
-    nodes.select('.voltage-halo').attr('r',bus => 12+Math.min(10,Math.abs(snapshot.states.online[bus-1])*400)).attr('fill','var(--viz-series-1)').attr('fill-opacity',.12);
-    nodes.select('.bus-dot').attr('r',11).attr('fill',bus => bus === selectedBus ? 'var(--primary)' : 'var(--background)').attr('stroke','var(--border)').attr('stroke-width',1);
+    }).attr('transform',bus => 'translate('+point(bus).join(',')+')')
+      .attr('data-bus',bus => bus).attr('aria-label',bus => 'Inject pulse at bus '+bus)
+      .attr('aria-disabled',String($('pulse').disabled))
+      .on('click',(_event,bus) => pulse(bus))
+      .on('keydown',(event,bus) => {
+        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); pulse(bus); }
+      });
+    const deviation = bus => Math.min(1,Math.abs(snapshot.states.online[bus-1])/.06);
+    animate(nodes.select('.voltage-halo')).attr('r',bus => 13+18*deviation(bus))
+      .attr('fill',color('var(--viz-series-1)')).attr('fill-opacity',bus => .04+.2*deviation(bus));
+    animate(nodes.select('.bus-dot')).attr('r',11)
+      .attr('fill',bus => bus === selectedBus ? color('var(--primary)') : d3.interpolateRgb(color('var(--background)'), '#be7d90')(deviation(bus)*.65))
+      .attr('stroke',bus => bus === selectedBus ? color('var(--primary)') : '#c8c3c4').attr('stroke-width',1);
     nodes.select('.bus-number').attr('text-anchor','middle').attr('dy','.35em').style('fill',bus => bus === selectedBus ? 'var(--primary-foreground)' : 'var(--foreground)').text(bus => bus);
     nodes.select('.fault-mark').attr('x',13).attr('y',-9).text(bus => snapshot.faults.includes(bus) ? '×' : '');
-    nodes.select('title').text(bus => 'Bus '+bus+' voltage '+(1+snapshot.states.online[bus-1]).toFixed(4)+' pu'+(snapshot.faults.includes(bus)?' with faulty forecast':''));
+    nodes.select('title').text(bus => 'Click to inject '+Number($('strength').value).toFixed(2)+' pu at bus '+bus+'. Voltage '+(1+snapshot.states.online[bus-1]).toFixed(4)+' pu'+(snapshot.faults.includes(bus)?' with faulty forecast':''));
     const voltage = 1 + snapshot.states.online[selectedBus - 1];
     $('bus-detail').textContent = 'Bus '+selectedBus+' · '+voltage.toFixed(4)+' pu · '+(snapshot.faults.includes(selectedBus)?'Faulty forecast':'Reliable forecast');
     const sources = recommendations.filter(e => e.to === selectedBus).map(e => e.from).join(', ');
     $('topology-label').textContent = $('all-links').checked ? '72 recommended remote links · Selected receiver highlighted' : 'Sources '+sources+' → bus '+selectedBus;
-    $('links-detail').textContent = 'Gray lines show the electrical feeder · Arrows show recommended sources';
+    $('links-detail').textContent = 'Node shading shows voltage deviation · Arrows show recommended sources';
   }
   function drawMatrix() {
     const el = $('matrix');
@@ -936,12 +1058,12 @@ details[open] .research-expand::before { content: '−'; }
       .attr('width',Math.max(1,cellSize-1.6)).attr('height',Math.max(1,cellSize-1.6))
       .attr('data-receiver',d=>d.receiver).attr('data-source',d=>d.source)
       .attr('data-connected',d=>String(d.connected)).attr('data-change',d=>d.change)
-      .attr('fill',d=>d.change==='retained' ? matrixColors.connected : matrixColors[d.change] || matrixColors.inactive)
-      .attr('stroke',d=>d.change==='removed' ? matrixColors.removed : 'none')
-      .attr('stroke-width',d=>d.change==='removed' ? 1.4 : 0)
       .on('click',(_event,d)=>selectBus(d.receiver));
-    // Removed recommendations remain outlined until the comparison reference changes.
-    marks.filter(d=>d.change==='removed').attr('fill','var(--background)');
+    // Persistent keyed cells let recommendations fade without rebuilding the matrix.
+    animate(marks)
+      .attr('fill',d=>color(d.change==='removed' ? 'var(--background)' : d.change==='retained' ? matrixColors.connected : matrixColors[d.change] || matrixColors.inactive))
+      .attr('stroke',d=>d.change==='removed' ? color(matrixColors.removed) : 'transparent')
+      .attr('stroke-width',d=>d.change==='removed' ? 1.4 : 0);
     marks.select('title').text(d=>d.source===d.receiver ? 'Bus '+d.receiver+' local information' : 'Source '+d.source+' to receiver '+d.receiver+' · '+(d.change==='inactive'?'Not recommended':d.change==='retained'?'Connected':d.change==='added'?'Added since reference':'Removed since reference'));
     svg.select('.matrix-selected-row').attr('x',left-.8).attr('y',top+(selectedBus-1)*cellSize-.5)
       .attr('width',side+1.6).attr('height',cellSize+1).attr('rx',1).attr('stroke','var(--foreground)').attr('stroke-width',1);
@@ -968,61 +1090,87 @@ details[open] .research-expand::before { content: '−'; }
   }
   function chartBase(el, observations, keys, yTitle, xTitle, height) {
     const width = Math.max(240,el.getBoundingClientRect().width);
-    const margin = {left:68,right:18,top:16,bottom:48};
+    const margin = {left:64,right:16,top:20,bottom:43};
     const frame={x:margin.left,y:margin.top,w:width-margin.left-margin.right,h:height-margin.top-margin.bottom};
     const svg=d3.select(el).attr('viewBox','0 0 '+width+' '+height).attr('height',height);
-    svg.selectAll('*').remove();
-    svg.append('title').text(el.getAttribute('aria-label'));
+    const clip='pr-clip-'+el.id;
+    if (svg.select('.chart-marks').empty()) {
+      svg.append('title');
+      svg.append('rect').attr('data-chart-frame','').attr('fill','none').attr('stroke','var(--border)');
+      svg.append('g').attr('class','grid');
+      svg.append('g').attr('class','x-axis');
+      svg.append('g').attr('class','y-axis');
+      svg.append('text').attr('class','axis-title').attr('data-axis','x').attr('text-anchor','middle');
+      svg.append('text').attr('class','axis-title').attr('data-axis','y').attr('text-anchor','middle');
+      svg.append('defs').append('clipPath').attr('id',clip).append('rect');
+      svg.append('g').attr('class','chart-marks').attr('clip-path','url(#'+clip+')');
+      svg.append('g').attr('class','intervention-labels');
+    }
+    svg.select('title').text(el.getAttribute('aria-label'));
     const [xmin,xmax]=d3.extent(observations,d=>d.x);
     const [ymin,ymax]=d3.extent(observations.flatMap(d=>keys.map(k=>d[k])).filter(Number.isFinite));
-    let yl=Math.min(0,ymin || 0), yh=ymax || 0;
-    if (yl === yh) yh=yl+1;
-    const pad=(yh-yl)*.06;
+    const yl=Math.min(0,ymin || 0);
+    const yh=Math.max(yl + 1e-6,ymax || 0);
+    const pad=(yh-yl)*.1;
     const x=d3.scaleLinear().domain([xmin || 0,(xmax === xmin ? (xmin || 0)+1 : xmax) || 1]).range([frame.x+2,frame.x+frame.w-2]);
     const y=d3.scaleLinear().domain([yl,yh+pad]).range([frame.y+frame.h-2,frame.y+2]);
-    svg.append('rect').attr('data-chart-frame','').attr('x',frame.x).attr('y',frame.y).attr('width',frame.w).attr('height',frame.h).attr('fill','none').attr('stroke','var(--border)');
-    svg.append('g').attr('class','grid').attr('transform','translate('+frame.x+',0)').call(d3.axisLeft(y).ticks(4).tickSize(-frame.w).tickFormat('')).selectAll('text').remove();
+    svg.select('[data-chart-frame]').attr('x',frame.x).attr('y',frame.y).attr('width',frame.w).attr('height',frame.h);
+    animate(svg.select('.grid').attr('transform','translate('+frame.x+',0)')).call(d3.axisLeft(y).ticks(4).tickSize(-frame.w).tickFormat(''));
     const xticks = x.ticks(width < 400 ? 3 : 5).filter(Number.isInteger);
-    svg.append('g').attr('class','x-axis').attr('transform','translate(0,'+(frame.y+frame.h)+')').call(d3.axisBottom(x).tickValues(xticks).tickSize(4).tickFormat(d3.format('d')));
-    svg.append('g').attr('class','y-axis').attr('transform','translate('+frame.x+',0)').call(d3.axisLeft(y).ticks(4).tickSize(4).tickFormat(d3.format('.3~g')));
-    svg.append('text').attr('class','axis-title').attr('data-axis','x').attr('x',frame.x+frame.w/2).attr('y',height-5).attr('text-anchor','middle').text(xTitle);
-    svg.append('text').attr('class','axis-title').attr('data-axis','y').attr('transform','translate(14,'+(frame.y+frame.h/2)+') rotate(-90)').attr('text-anchor','middle').text(yTitle);
-    const clip='pr-clip-'+el.id;
-    svg.append('defs').append('clipPath').attr('id',clip).append('rect').attr('x',frame.x).attr('y',frame.y).attr('width',frame.w).attr('height',frame.h);
-    const marks=svg.append('g').attr('clip-path','url(#'+clip+')');
+    animate(svg.select('.x-axis').attr('transform','translate(0,'+(frame.y+frame.h)+')')).call(d3.axisBottom(x).tickValues(xticks).tickSize(4).tickFormat(d3.format('d')));
+    animate(svg.select('.y-axis').attr('transform','translate('+frame.x+',0)')).call(d3.axisLeft(y).ticks(4).tickSize(4).tickFormat(d3.format('.3~g')));
+    svg.select('[data-axis=x]').attr('x',frame.x+frame.w/2).attr('y',height-5).text(xTitle);
+    svg.select('[data-axis=y]').attr('transform','translate(14,'+(frame.y+frame.h/2)+') rotate(-90)').text(yTitle);
+    svg.select('clipPath rect').attr('x',frame.x).attr('y',frame.y).attr('width',frame.w).attr('height',frame.h);
+    const marks=svg.select('.chart-marks');
     return {svg,marks,x,y,frame,width,height};
+  }
+  function drawSeries(chart, observations, items, showCurrent = false) {
+    const lines = chart.marks.selectAll('path.data-series').data(items,item => item.key).join(
+      enter => enter.append('path').attr('class','data-series').attr('fill','none'),
+      update => update,
+      exit => exit.remove()
+    ).attr('data-series-key',item => item.key).attr('stroke',item => item.color)
+      .attr('stroke-width',item => item.key === 'online' ? 2.3 : 1.65).attr('stroke-dasharray',item => item.dash || null)
+      .attr('stroke-linejoin','round').attr('stroke-linecap','round');
+    animate(lines).attr('d',item => d3.line().defined(d => Number.isFinite(d[item.key])).x(d=>chart.x(d.x)).y(d=>chart.y(d[item.key]))(observations));
+    const latest = observations[observations.length-1];
+    const dots = chart.marks.selectAll('circle.latest-value').data(showCurrent ? items : [],item => item.key).join('circle')
+      .attr('class','latest-value').attr('r',item => item.key === 'online' ? 3.5 : 2.5)
+      .attr('fill',item => item.color).attr('stroke','var(--background)').attr('stroke-width',1);
+    animate(dots).attr('cx',chart.x(latest.x)).attr('cy',item => chart.y(latest[item.key]));
   }
   function hover(chart,observations,items,xLabel) {
     const {svg,x,y,frame}=chart;
     const tip=$('tooltip');
-    const guide=svg.append('line').attr('data-chart-hover-guide','').attr('y1',frame.y).attr('y2',frame.y+frame.h).attr('stroke','var(--foreground)').attr('stroke-opacity',.3).attr('display','none');
-    const dots=svg.append('g');
-    const overlay=svg.append('rect').attr('data-chart-hit','').attr('data-chart-hover-overlay','cross-series').attr('x',frame.x).attr('y',frame.y).attr('width',frame.w).attr('height',frame.h).attr('fill','transparent');
+    const guide=svg.selectAll('[data-chart-hover-guide]').data([null]).join('line').attr('data-chart-hover-guide','').attr('y1',frame.y).attr('y2',frame.y+frame.h).attr('stroke','var(--foreground)').attr('stroke-opacity',.3).attr('display','none');
+    const dots=svg.selectAll('g.hover-dots').data([null]).join('g').attr('class','hover-dots');
+    dots.selectAll('circle').remove();
+    const overlay=svg.selectAll('[data-chart-hit]').data([null]).join('rect').attr('data-chart-hit','').attr('data-chart-hover-overlay','cross-series').attr('x',frame.x).attr('y',frame.y).attr('width',frame.w).attr('height',frame.h).attr('fill','transparent').raise();
     function show(event) {
       const pointer=d3.pointer(event,svg.node());
-      const px=Math.max(x.range()[0],Math.min(x.range()[1],pointer[0]));
-      const xv=x.invert(px);
+      const xv=x.invert(Math.max(x.range()[0],Math.min(x.range()[1],pointer[0])));
       const near=d3.bisector(d=>d.x).center(observations,xv);
-      let lo=near, hi=near;
-      if (observations[near].x > xv) lo=Math.max(0,near-1);
-      else hi=Math.min(observations.length-1,near+1);
-      const a=observations[lo],b=observations[hi],fraction=a.x===b.x?0:(xv-a.x)/(b.x-a.x);
-      const values=items.map(s=>({...s,value:a[s.key]+fraction*(b[s.key]-a[s.key])}));
+      const observation=observations[near];
+      const px=x(observation.x);
+      // Tooltips report actual sampled costs rather than interpolated readings.
+      const values=items.map(item=>({...item,value:observation[item.key]}));
       guide.attr('x1',px).attr('x2',px).attr('display',null);
-      dots.selectAll('circle').data(values).join('circle').attr('data-chart-hover-marker','').attr('r',3).attr('cx',px).attr('cy',d=>y(d.value)).attr('fill',d=>d.color);
+      dots.selectAll('circle').data(values,item=>item.key).join('circle').attr('data-chart-hover-marker','').attr('r',3).attr('cx',px).attr('cy',d=>y(d.value)).attr('fill',d=>d.color);
       tip.replaceChildren();
-      const title=document.createElement('span'); title.textContent=xLabel+' '+d3.format('.1f')(xv); tip.append(title);
-      values.forEach(s=>{const row=document.createElement('div'),label=document.createElement('span'),value=document.createElement('span');label.textContent=s.label;value.textContent=d3.format('.4~g')(s.value);row.append(label,value);tip.append(row);});
+      const title=document.createElement('span'); title.textContent=xLabel+' '+observation.x; tip.append(title);
+      values.forEach(item=>{const row=document.createElement('div'),label=document.createElement('span'),value=document.createElement('span');label.textContent=item.label;value.textContent=d3.format('.4~g')(item.value);row.append(label,value);tip.append(row);});
       tip.style.display='block';
       const bounds=root.getBoundingClientRect();
       const sx=event.clientX-bounds.left, sy=event.clientY-bounds.top;
       tip.style.left=Math.max(0,Math.min(root.clientWidth-tip.offsetWidth,sx+12))+'px';
       tip.style.top=Math.max(0,sy-tip.offsetHeight-12)+'px';
     }
-    overlay.on('pointermove',event=>{if(!pin)show(event);}).on('pointerleave',()=>{if(!pin){tip.style.display='none';guide.attr('display','none');dots.selectAll('*').remove();}}).on('click',event=>{pin=pin?null:svg.node().id;show(event);});
+    overlay.on('pointermove',event=>{if(!pin)show(event);}).on('pointerleave',()=>{if(!pin){tip.style.display='none';guide.attr('display','none');dots.selectAll('circle').remove();}}).on('click',event=>{pin=pin?null:svg.node().id;show(event);});
   }
   function drawInterventions(chart) {
-    const events = journal.filter(item => ['pulse','fault'].includes(item.type) && item.t < snapshot.t).slice(-8);
+    const domain = chart.x.domain();
+    const events = journal.filter(item => ['pulse','fault'].includes(item.type) && item.t < snapshot.t && item.t+1 >= domain[0] && item.t+1 <= domain[1]).slice(-8);
     const groups = [];
     for (const item of events.slice().sort((a,b)=>a.t-b.t)) {
       const x = chart.x(item.t+1);
@@ -1032,35 +1180,31 @@ details[open] .research-expand::before { content: '−'; }
         previous.right = x;
       } else groups.push({left:x,right:x,items:[item]});
     }
-    const markers = chart.marks.append('g').attr('class','intervention-markers');
-    for (const group of groups) {
-      const {items} = group;
-      const x = (group.left+group.right)/2;
-      markers.append('line').attr('x1',x).attr('x2',x).attr('y1',chart.frame.y).attr('y2',chart.frame.y+chart.frame.h)
-        .attr('stroke','var(--muted-foreground)').attr('stroke-opacity',.35).attr('stroke-width',1).attr('stroke-dasharray','3 4');
-      const label = [...new Set(items.map(item=>item.type==='pulse'?'D':'E'))].sort().join('/');
-      chart.svg.append('text').attr('class','intervention-label').attr('x',x).attr('y',chart.frame.y-5)
-        .attr('data-event-count',items.length).attr('data-disturbance-count',items.filter(item=>item.type==='pulse').length)
-        .attr('data-forecast-change-count',items.filter(item=>item.type==='fault').length)
-        .attr('data-event-steps',items.map(item=>item.t+1).join(','))
-        .attr('text-anchor','middle').attr('font-size',10).attr('fill','var(--muted-foreground)').text(label)
-        .append('title').text(items.map(item=>(item.type==='pulse'?'Disturbance':'Forecast change')+' at bus '+item.bus+' · Step '+(item.t+1)).join(' · '));
-    }
-  }
-  function tidyTicks(svg) {
-    const nodes=svg.selectAll('.x-axis .tick text').nodes();
-    for(let i=1;i<nodes.length;i++){const a=nodes[i-1].getBoundingClientRect(),b=nodes[i].getBoundingClientRect();if(a.right+4>b.left) nodes[i].style.display='none';}
-    const yLabels=svg.selectAll('.y-axis .tick text').nodes();
-    for(let i=1;i<yLabels.length;i++){const a=yLabels[i-1].getBoundingClientRect(),b=yLabels[i].getBoundingClientRect();if(b.bottom+4>a.top) yLabels[i].style.display='none';}
+    groups.forEach(group => { group.key=group.items.map(item=>item.t+item.type+item.bus).join('_'); group.x=(group.left+group.right)/2; });
+    const markers = chart.marks.selectAll('g.intervention-markers').data([null]).join('g').attr('class','intervention-markers');
+    const lines = markers.selectAll('line').data(groups,group => group.key).join('line')
+      .attr('y1',chart.frame.y).attr('y2',chart.frame.y+chart.frame.h)
+      .attr('stroke','var(--muted-foreground)').attr('stroke-opacity',.28).attr('stroke-width',1).attr('stroke-dasharray','3 4');
+    animate(lines).attr('x1',group=>group.x).attr('x2',group=>group.x);
+    const labels = chart.svg.select('.intervention-labels').selectAll('text').data(groups,group=>group.key).join(enter=>{
+      const label=enter.append('text').attr('class','intervention-label');
+      label.append('title'); label.append('tspan'); return label;
+    }).attr('y',chart.frame.y-6)
+      .attr('data-event-count',group=>group.items.length).attr('data-disturbance-count',group=>group.items.filter(item=>item.type==='pulse').length)
+      .attr('data-forecast-change-count',group=>group.items.filter(item=>item.type==='fault').length)
+      .attr('data-event-steps',group=>group.items.map(item=>item.t+1).join(','))
+      .attr('text-anchor','middle').attr('font-size',10).attr('fill','var(--muted-foreground)');
+    animate(labels).attr('x',group=>group.x);
+    labels.select('tspan').text(group=>[...new Set(group.items.map(item=>item.type==='pulse'?'D':'E'))].sort().join('/'));
+    labels.select('title').text(group=>group.items.map(item=>item.type==='pulse' ? Number(item.strength || .025).toFixed(3)+' pu pulse at bus '+item.bus+' enters after the control at step '+(item.t+1)+'. Its state cost is charged at step '+(item.t+2)+'.' : 'Forecast change at bus '+item.bus+' · Step '+(item.t+1)).join(' '));
   }
   function drawCost() {
     const observations=[{x:0,online:0,static:0,causal:0},...snapshot.history.map(d=>({x:d.t,online:d.online,static:d.static,causal:d.causal}))];
     const items=series.filter(s=>visible.has(s.key));
-    const chart=chartBase($('cost'),observations,series.map(s=>s.key),'Cost (weighted pu²)','Control step',document.body.classList.contains('research-site') ? 260 : 292);
+    const chart=chartBase($('cost'),observations,series.map(s=>s.key),'Cumulative cost','Control step',240);
     drawInterventions(chart);
-    items.forEach(s=>chart.marks.append('path').datum(observations).attr('fill','none').attr('stroke',s.color).attr('stroke-width',2).attr('stroke-dasharray',s.dash).attr('d',d3.line().x(d=>chart.x(d.x)).y(d=>chart.y(d[s.key]))));
+    drawSeries(chart,observations,items);
     hover(chart,observations,items,'Step');
-    tidyTicks(chart.svg);
     const c=snapshot.cumulative;
     $('cost-detail').replaceChildren();
     for (const item of series) {
@@ -1070,32 +1214,53 @@ details[open] .research-expand::before { content: '−'; }
       group.append(label,value); $('cost-detail').append(group);
     }
   }
+  function drawStage() {
+    if (!$('stage')) return;
+    let observations=snapshot.history.slice(-60).map(item=>({x:item.t,...item.stage}));
+    if (!observations.length) observations=[{x:0,online:0,static:0,causal:0}];
+    const items=series.filter(item=>visible.has(item.key));
+    const chart=chartBase($('stage'),observations,series.map(item=>item.key),'Cost per step','Control step',240);
+    drawInterventions(chart);
+    drawSeries(chart,observations,items,true);
+    hover(chart,observations,items,'Step');
+    $('stage-detail').textContent='Adaptive '+d3.format('.4f')(snapshot.stage.online)+' · Recent 60 samples';
+    if ($('live-cost')) $('live-cost').textContent=d3.format('.4f')(snapshot.stage.online);
+    const pulseSummary = lastPulse
+      ? lastPulse.strength.toFixed(2)+' pu at bus '+lastPulse.bus+' · '+(lastPulse.charged ? 'Cost '+d3.format('.4f')(lastPulse.before)+' → '+d3.format('.4f')(lastPulse.after) : 'Pulse realized at the final sample · Its state cost falls beyond this episode')
+      : 'Click a bus and watch its voltage, cost and recommended connections respond.';
+    if ($('impact-note')) $('impact-note').textContent=pulseSummary;
+    if ($('pulse-summary')) $('pulse-summary').textContent=lastPulse ? pulseSummary : 'Click a bus to apply a pulse';
+  }
   function drawConvergence() {
+    if ($('adaptation') && !$('adaptation').open) return;
     const frozen=isFit();
     let observations;
     if(frozen) observations=snapshot.fitHistory.map(d=>({x:d.iteration,value:100*d.error}));
     else observations=[{x:0,value:0},...snapshot.history.map(d=>({x:d.t,value:100*d.drift}))];
     if(!observations.length) observations=[{x:0,value:100*(snapshot.fitError || 0)}];
     $('convergence').setAttribute('aria-label',frozen?'Relative Frobenius error to the exact solution on frozen samples':'Relative Frobenius change in the shared response on each control step');
-    const chart=chartBase($('convergence'),observations,['value'],frozen?'Solution error (%)':'Response change (%)',frozen?'Gradient iteration':'Control step',document.body.classList.contains('research-site') ? 260 : 204);
+    const chart=chartBase($('convergence'),observations,['value'],frozen?'Solution error (%)':'Response change (%)',frozen?'Gradient iteration':'Control step',240);
     if (!frozen) drawInterventions(chart);
-    chart.marks.append('path').datum(observations).attr('fill','none').attr('stroke','var(--viz-series-1)').attr('stroke-width',2).attr('d',d3.line().x(d=>chart.x(d.x)).y(d=>chart.y(d.value)));
+    else {
+      chart.marks.select('.intervention-markers').selectAll('line').remove();
+      chart.svg.select('.intervention-labels').selectAll('text').remove();
+    }
+    drawSeries(chart,observations,[{key:'value',color:'var(--viz-series-1)'}]);
     hover(chart,observations,[{key:'value',label:frozen?'Solution error (%)':'Response change (%)',color:'var(--viz-series-1)'}],frozen?'Iteration':'Step');
-    tidyTicks(chart.svg);
   }
   function render() {
     $('tooltip').style.display='none'; pin=null;
-    renderControls(); drawNetwork(); drawMatrix(); drawCost(); drawConvergence();
+    renderControls(); drawNetwork(); drawMatrix(); drawCost(); drawStage(); drawConvergence();
   }
   announce('Ready at step 60 · Add a disturbance to begin');
   hydrate(window.openai?.widgetState);
   if (!matrixReference) captureMatrixReference();
-  actionNote('A sudden load change at the selected bus. The simulation starts when you click.');
+  actionNote('Click a bus to apply the selected pulse strength.');
   window.addEventListener('openai:set_globals',e=>{if(!playing&&!restored&&!journal.length){hydrate(e.detail?.globals?.widgetState);render();}});
   new ResizeObserver(()=>render()).observe(root);
   render();
   // A read only inspection hook supports deterministic browser verification.
-  root.powerDemo = { getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,playing,fitSteps,journal:[...journal]}) };
+  root.powerDemo = { getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,playing,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null}) };
 })();
 </script>
 </body>

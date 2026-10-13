@@ -16,6 +16,9 @@
   const WINDOW = 60;
   const WARMUP = 30;
   const TOLERANCE = 1e-5;
+  const PULSE_DEFAULT = 0.025;
+  const PULSE_MIN = 0.005;
+  const PULSE_MAX = 0.15;
   const EDGES = [[1,2],[2,3],[3,4],[4,5],[4,6],[6,7],[4,8],
     [3,9],[9,10],[9,11],[11,12],[1,15],[15,13],[13,14],[13,16],
     [16,17],[16,18],[18,19],[19,20],[20,21],[18,22],[22,23],[23,24]];
@@ -195,11 +198,14 @@
       if (!Number.isInteger(bus)||bus<1||bus>N) throw new Error('Bus must be an integer from 1 through 24');
       return bus;
     }
-    queuePulse(bus) {
+    queuePulse(bus,strength=PULSE_DEFAULT) {
       this.checkBus(bus);
+      if (!Number.isFinite(strength)||strength<PULSE_MIN||strength>PULSE_MAX)
+        throw new RangeError('Pulse strength must be from 0.005 through 0.15 per unit');
       if (this.mode!=='running') return false;
-      this.pulses.push({bus,age:0});
-      this.eventLog.push(deepFreeze({t:this.t,type:'pulse',bus,message:'Net load spike at bus '+bus}));
+      this.pulses.push({bus,strength,age:0});
+      this.eventLog.push(deepFreeze({t:this.t,type:'pulse',bus,strength,
+        message:'Net load spike of '+strength+' per unit at bus '+bus}));
       return true;
     }
     toggleFault(bus) {
@@ -237,7 +243,7 @@
       // Unexpected demand is realized only after the forecast has been sealed.
       const disturbance=base.slice(), pulse=Array(N).fill(0);
       for (const event of this.pulses) {
-        const value=-0.025*Math.exp(-event.age/3);
+        const value=-event.strength*Math.exp(-event.age/3);
         disturbance[event.bus-1]+=value; pulse[event.bus-1]+=value; event.age++;
       }
       this.pulses=this.pulses.filter(event=>event.age<12);
@@ -317,6 +323,7 @@
   }
 
   return {Simulation,model,constants:deepFreeze({N,edges:EDGES,amplitude:AMPLITUDE,
-    ridge:RIDGE,window:WINDOW,warmup:WARMUP,tolerance:TOLERANCE,horizon:480}),
+    ridge:RIDGE,window:WINDOW,warmup:WARMUP,tolerance:TOLERANCE,horizon:480,
+    pulseDefault:PULSE_DEFAULT,pulseMin:PULSE_MIN,pulseMax:PULSE_MAX}),
     math:{zeros,eye,transpose,multiply,matvec,combine,frobenius,normInf,solveSPD,objective,statistics,recommendations}};
 });
