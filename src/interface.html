@@ -43,36 +43,42 @@
     <h2>Adaptive voltage regulation</h2>
     <div class="text-small">24 bus synthetic feeder · Illustrative shared response variant</div>
   </div>
+  <aside class="pr-controls" aria-label="Experiment controls">
+  <h2 class="pr-control-title">Experiment controls</h2>
   <div class="pr-toolbar">
     <button type="button" class="btn btn-primary" id="pr-run">Run simulation</button>
     <button type="button" class="btn" id="pr-step">One step</button>
-    <button type="button" class="btn btn-ghost" id="pr-restart">Start again</button>
+    <button type="button" class="btn btn-ghost" id="pr-restart">Reset</button>
     <div class="pr-field"><label class="form-label" for="pr-speed">Speed</label><select class="form-select" id="pr-speed"><option value="4">4 steps/s</option><option value="12" selected>12 steps/s</option><option value="30">30 steps/s</option></select></div>
   </div>
   <div class="pr-toolbar">
     <div class="pr-field"><label class="form-label" for="pr-bus">Bus</label><select class="form-select" id="pr-bus" aria-label="Selected bus"></select></div>
-    <button type="button" class="btn" id="pr-pulse" aria-keyshortcuts="D">Load pulse · D</button>
-    <button type="button" class="btn" id="pr-fault" aria-keyshortcuts="E">Repair forecast · E</button>
+    <button type="button" class="btn" id="pr-pulse" aria-keyshortcuts="D">Load pulse</button>
+    <button type="button" class="btn" id="pr-fault" aria-keyshortcuts="E">Repair forecast</button>
     <button type="button" class="btn" id="pr-freeze">Freeze data and fit</button>
   </div>
+  <p class="pr-control-note">Select a receiver in the drawing or by bus number. Press <kbd>Space</kbd> to run or pause.</p>
+  <p class="pr-control-note">Freezing the data holds the plant while the response converges to a fixed ridge solution.</p>
+  </aside>
   <div class="pr-status tabular-nums">
     <span id="pr-clock">Step 0 / 480</span>
     <span id="pr-learning">Learning starts after 30 samples</span>
     <span id="pr-event" role="status" aria-live="polite">Ready · Space to run or pause</span>
   </div>
   <div class="pr-panels">
-    <section class="pr-panel" aria-labelledby="pr-network-title">
-      <div class="pr-subhead"><h3 id="pr-network-title">Prediction topology</h3><label class="form-check"><input class="form-check-input" type="checkbox" id="pr-all-links"><span class="form-check-label text-small">All receivers</span></label></div>
+    <section class="pr-panel pr-network-panel" aria-labelledby="pr-network-title">
+      <div class="pr-subhead"><h3 id="pr-network-title">24 bus feeder</h3><label class="form-check"><input class="form-check-input" type="checkbox" id="pr-all-links"><span class="form-check-label text-small">All receivers</span></label></div>
       <div class="text-small" id="pr-topology-label">Recommended sources for bus 6</div>
       <svg class="pr-chart" id="pr-network" role="img" aria-label="Fixed radial feeder and recommended directed prediction links"></svg>
       <div class="pr-detail tabular-nums" id="pr-bus-detail"></div>
-      <div class="text-small">Gray lines are physical · Arrows are recommendations · × faulty forecast</div>
-      <div class="text-small">Halos indicate the magnitude of voltage deviation</div>
-      <div class="text-small">Dense communication remains active for control</div>
+      <div class="pr-network-caption text-small">
+        <p>Thin lines trace the fixed feeder. Arrows show recommended prediction sources, with width encoding their score.</p>
+        <p>A halo marks voltage deviation. The × identifies a faulty forecast. Deployed communication stays fixed.</p>
+      </div>
       <div class="pr-note text-small" id="pr-links-detail">3 remote sources per receiver · Deployed links remain fixed</div>
     </section>
-    <section class="pr-panel" aria-labelledby="pr-cost-title">
-      <h3 id="pr-cost-title">Cumulative control cost</h3>
+    <section class="pr-panel pr-cost-panel" aria-labelledby="pr-cost-title">
+      <h3 id="pr-cost-title">Cumulative cost</h3>
       <div class="pr-legend" aria-label="Visible cost series">
         <button type="button" class="cursor-interaction" data-series="online" aria-pressed="true"><span class="pr-swatch"></span>Adaptive</button>
         <button type="button" class="cursor-interaction" data-series="static" aria-pressed="true"><span class="pr-swatch" style="border-color:var(--viz-series-2);border-top-style:dashed"></span>Static prediction</button>
