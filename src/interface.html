@@ -4,13 +4,13 @@
       <button type="button" class="btn btn-play" id="pr-run">Run</button>
       <button type="button" class="btn btn-quiet" id="pr-step" title="Advance one second of feeder operation">Step</button>
       <button type="button" class="btn btn-quiet" id="pr-restart" title="Restart the current trial">Reset</button>
-      <select id="pr-speed" aria-label="Playback speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
+      <select id="pr-speed" aria-label="Playback speed" title="8× plays eight simulation samples per second"><option value="2">2×</option><option value="4">4×</option><option value="8" selected>8×</option><option value="16">16×</option></select>
       <span id="pr-clock" class="tabular-nums">t = 0 s</span>
     </div>
     <div class="pr-actions">
       <label for="pr-strength">Pulse</label>
-      <select id="pr-strength" aria-label="Pulse strength"><option value="50">50 kW</option><option value="100" selected>100 kW</option><option value="150">150 kW</option></select>
-      <button type="button" class="btn btn-attack" id="pr-pulse" aria-keyshortcuts="D" title="Click for a pulse or hold for one pulse each sample"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14 2 5 14h6l-1 8 9-13h-6z"/></svg><span id="pr-pulse-label">Attack bus 7</span></button><span class="pr-attack-hint">Click or hold</span>
+      <select id="pr-strength" aria-label="Pulse strength" title="Requested power per pulse. Applied power respects equipment limits"><option value="50">50 kW</option><option value="100" selected>100 kW</option><option value="150">150 kW</option></select>
+      <button type="button" class="btn btn-attack" id="pr-pulse" aria-keyshortcuts="D" title="Click for a pulse or hold for one pulse each sample"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14 2 5 14h6l-1 8 9-13h-6z"/></svg><span id="pr-pulse-label">Attack bus 7</span></button><span class="pr-attack-hint">Hold button or bus</span>
     </div>
   </div>
   <div class="pr-comparison-controls">
@@ -21,14 +21,14 @@
   <div class="pr-mission"><span><span class="pr-status-dot" id="pr-voltage-status" aria-hidden="true"></span>Restore the <strong>nominal voltage profile</strong><span class="pr-target"> · Illustrative band 0.95 to 1.05 pu</span></span><span id="pr-voltage-range" class="tabular-nums"></span></div>
   <div class="pr-dashboard">
     <section class="pr-panel pr-network-panel" aria-labelledby="pr-network-title">
-      <div class="pr-subhead"><h2 id="pr-network-title">Power network</h2><span id="pr-action-note" class="pr-caption" aria-live="polite">Click a bus to attack</span></div>
-      <svg class="pr-chart" id="pr-network" role="group" aria-label="24 bus radial power feeder. Click a load, solar, or battery bus to queue a power disturbance"></svg>
+      <div class="pr-subhead"><h2 id="pr-network-title">Power network</h2><span id="pr-action-note" class="pr-caption" aria-live="polite">Hold a bus for continuous attacks</span></div>
+      <svg class="pr-chart" id="pr-network" role="group" aria-label="24 bus radial power feeder. Press and hold a load, solar, or battery bus for continuous power disturbances"></svg>
       <div class="pr-panel-foot"><span id="pr-bus-detail" class="tabular-nums"></span><span class="pr-live-stage">Cost <strong id="pr-live-cost" class="tabular-nums">0.0000</strong></span></div>
     </section>
     <section class="pr-panel pr-matrix-panel" aria-labelledby="pr-matrix-title">
-      <div class="pr-subhead"><h2 id="pr-matrix-title">Learning prediction links</h2><select id="pr-matrix-view" aria-label="Prediction matrix view"><option value="links">Selected links</option><option value="change" selected>Learning change</option></select></div>
+      <div class="pr-subhead"><h2 id="pr-matrix-title">Learning prediction links</h2><select id="pr-matrix-view" aria-label="Prediction matrix view"><option value="links" selected>Connectivity</option><option value="change">Learning weights</option></select></div>
       <div class="pr-matrix-key" id="pr-matrix-key"></div><svg class="pr-chart" id="pr-matrix" role="group" aria-label="Candidate prediction links. Rows receive forecasts from columns"></svg>
-      <div class="pr-panel-foot"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div><p id="pr-topology-note" class="pr-caption"></p>
+      <div class="pr-panel-foot"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div><div class="pr-topology-history"><label for="pr-topology-history" id="pr-history-count">0 link updates</label><input id="pr-topology-history" type="range" min="0" max="0" step="1" value="0" aria-label="Topology history" disabled><button type="button" id="pr-history-live" aria-pressed="true">Latest</button></div><p id="pr-topology-note" class="pr-caption" aria-live="polite"></p>
     </section>
     <section class="pr-panel pr-stage-panel" aria-labelledby="pr-stage-title">
       <div class="pr-subhead"><h2 id="pr-stage-title">Voltage and cost</h2><strong id="pr-state-value" class="pr-state-value tabular-nums">1.000 pu</strong></div>
@@ -61,7 +61,7 @@
   <p id="pr-phase-note" class="pr-overlap-note">Discovery learns completed responses. Prediction curves coincide.</p>
   <details class="pr-adaptation" id="pr-adaptation">
     <summary>Experiment settings <span aria-hidden="true">+</span></summary>
-    <div class="pr-settings"><label>Bus <select id="pr-bus" aria-label="Selected bus"></select></label><button type="button" class="btn" id="pr-fault">Repair forecast</button><button type="button" class="btn" id="pr-reference">Set reference</button><label class="form-check"><input type="checkbox" id="pr-all-links">All prediction links</label></div>
+    <div class="pr-settings"><label>Bus <select id="pr-bus" aria-label="Selected bus"></select></label><button type="button" class="btn" id="pr-fault">Repair forecast</button><label class="form-check"><input type="checkbox" id="pr-all-links" checked>All prediction links</label></div>
     <p class="pr-caption" id="pr-fit-detail"></p>
   </details>
   <div hidden><span id="pr-fit-title"></span><span id="pr-learning"></span><span id="pr-topology-label"></span><span id="pr-links-detail"></span><span id="pr-matrix-reference"></span><span id="pr-impact-note"></span></div>

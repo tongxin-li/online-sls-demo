@@ -23,6 +23,7 @@ def build(source_url):
         "__DEMO_RESPONSES_JS__": (source / "response-controller.js").read_text(encoding="utf-8").replace("</script", "<\\/script"),
         "__DEMO_SIMULATION_JS__": (source / "simulation.js").read_text(encoding="utf-8").replace("</script", "<\\/script"),
         "__DEMO_EQUIPMENT_JS__": (source / "equipment.js").read_text(encoding="utf-8").replace("</script", "<\\/script"),
+        "__DEMO_TOPOLOGY_JS__": (source / "topology-timeline.js").read_text(encoding="utf-8").replace("</script", "<\\/script"),
         "__DEMO_INTERFACE_JS__": (source / "interface.js").read_text(encoding="utf-8").replace("</script", "<\\/script"),
     }
     for marker, content in replacements.items():

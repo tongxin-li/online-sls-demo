@@ -8,12 +8,15 @@ const vm=require('node:vm');
 const test=require('node:test');
 const PowerDemo=require('./simulation.js');
 const d3=require('../assets/d3.v7.min.js');
+const TopologyTimeline=require('./topology-timeline.js');
 const html=fs.readFileSync(path.join(__dirname,'interface.html'),'utf8');
 const original=fs.readFileSync(path.join(__dirname,'interface.js'),'utf8');
 const anchor="  announce('Ready');";
 assert.equal(original.split(anchor).length,2,'Interface initialization anchor must be unique');
 const source=original.replace(anchor,
-  '  drawNetwork=drawMatrix=drawCost=drawStage=drawVoltage=drawConvergence=()=>{};\n'+anchor);
+  '  drawNetwork=drawCost=drawStage=drawVoltage=drawConvergence=()=>{};\n'+
+  '  drawMatrix=drawTopologyHistory;\n'+
+  '  root.bindTestBus=(element,bus)=>bindAttackTarget(element,()=>bus);\n'+anchor);
 const plain=value=>JSON.parse(JSON.stringify(value));
 
 class Clock {
@@ -56,21 +59,42 @@ function target(tagName='DIV') {
 }
 
 function harness(saved) {
-  const clock=new Clock(),nodes=new Map(),savedStates=[];
-  for(const match of html.matchAll(/<(\w+)[^>]*\bid="(pr-[^"]+)"/g)){
-    const node=target(match[1].toUpperCase());node.id=match[2];nodes.set(node.id,node);
+  const clock=new Clock(),nodes=new Map(),savedStates=[],captures=new Map();
+  function element(tagName='DIV') {
+    const node=target(tagName);
+    node.setPointerCapture=id=>{node.capturedPointer=id;captures.set(id,node);};
+    node.releasePointerCapture=id=>{if(captures.get(id)===node){captures.delete(id);node.dispatch('lostpointercapture',{pointerId:id});}};
+    node.hasPointerCapture=id=>captures.get(id)===node;
+    return node;
   }
-  for(const [id,value] of Object.entries({speed:'1',strength:'100',view:'cost','matrix-view':'change',preset:'mixed'}))nodes.get('pr-'+id).value=value;
+  for(const match of html.matchAll(/<(\w+)[^>]*\bid="(pr-[^"]+)"/g)){
+    const node=element(match[1].toUpperCase());node.id=match[2];nodes.set(node.id,node);
+  }
+  // Read actual selected defaults so the harness cannot hide an HTML speed bug.
+  for(const select of html.matchAll(/<select\b[^>]*\bid="(pr-[^"]+)"[^>]*>([\s\S]*?)<\/select>/g)){
+    const options=[...select[2].matchAll(/<option\b([^>]*)>/g)];
+    const selected=options.find(option=>/\bselected\b/.test(option[1]))||options[0];
+    if(selected)nodes.get(select[1]).value=selected[1].match(/\bvalue="([^"]*)"/)[1];
+  }
   const root=target();root.querySelector=selector=>nodes.get(selector.slice(1));root.querySelectorAll=()=>[];
   const document=Object.assign(target(),{getElementById:()=>root,createElement:tag=>target(tag.toUpperCase()),createTextNode:text=>({textContent:text})});
-  const window=Object.assign(target(),{d3,PowerDemo,matchMedia:()=>({matches:true}),
+  const window=Object.assign(target(),{d3,PowerDemo,TopologyTimeline,matchMedia:()=>({matches:true}),
     openai:{widgetState:saved,setWidgetState:state=>{savedStates.push(plain(state));return Promise.resolve();}}});
-  vm.runInNewContext(source,{window,document,PowerDemo,d3,console,
+  vm.runInNewContext(source,{window,document,PowerDemo,d3,TopologyTimeline,console,
     performance:{now:()=>clock.now},setTimeout:clock.setTimeout,clearTimeout:clock.clearTimeout,
     ResizeObserver:class{observe(){}},getComputedStyle:()=>({getPropertyValue:()=>''})},
     {filename:'interface.js'});
   const node=id=>nodes.get('pr-'+id);
-  return {clock,document,window,node,snapshot:()=>root.powerDemo.getSnapshot(),state:()=>plain(root.powerDemo.getState()),
+  return {clock,document,window,node,
+    samples:count=>clock.advance(count*1000/Number(node('speed').value)),
+    bus:bus=>{const svg=element('g');svg.dataset.bus=String(bus);root.bindTestBus(svg,bus);return svg;},
+    pointer(type,underPointer,detail={}){
+      const id=detail.pointerId??1,recipient=captures.get(id)||underPointer;
+      const result=recipient.dispatch(type,{pointerId:id,pointerType:'mouse',...detail});
+      if(type==='pointerup'||type==='pointercancel')recipient.releasePointerCapture(id);
+      return result;
+    },
+    snapshot:()=>root.powerDemo.getSnapshot(),state:()=>plain(root.powerDemo.getState()),
     saved:()=>savedStates.at(-1),
     event:(id,type,detail)=>node(id).dispatch(type,detail),
     click:(id,detail=0)=>node(id).dispatch('click',{detail}),
@@ -81,58 +105,59 @@ function harness(saved) {
 }
 const pulses=h=>h.snapshot().eventLog.filter(event=>event.type==='pulse');
 
- test('pointer activation queues once and a paused attack starts playback without advancing time',async()=>{
+test('pointer activation queues once and a paused attack starts playback without advancing time',async()=>{
   const h=harness();h.event('pulse','pointerdown');h.event('pulse','pointerup');h.click('pulse',1);
   assert.equal(pulses(h).length,1);assert.equal(h.snapshot().pendingPulses.length,1);
   assert.equal(h.snapshot().t,0);assert.equal(h.state().playing,true);
-  await h.clock.advance(1000);assert.equal(h.snapshot().t,1);assert.equal(pulses(h).length,1);
+  await h.samples(1);assert.equal(h.snapshot().t,1);assert.equal(pulses(h).length,1);
   assert.equal(h.snapshot().activePulses.length,1);
 });
 
 test('holding Attack adds one pulse per physical sample and release preserves playback',async()=>{
-  const h=harness();h.event('pulse','pointerdown');await h.clock.advance(3000);
+  const h=harness();h.event('pulse','pointerdown');await h.samples(3);
   assert.equal(h.snapshot().t,3);assert.deepEqual(pulses(h).map(event=>event.t),[0,1,2]);
   assert.equal(h.node('pulse').dataset.holding,'true');
-  h.event('pulse','pointerup');h.click('pulse',1);await h.clock.advance(2000);
+  h.event('pulse','pointerup');h.click('pulse',1);await h.samples(2);
   assert.equal(h.snapshot().t,5);assert.equal(pulses(h).length,3);assert.equal(h.state().playing,true);
   assert.equal(h.node('pulse').dataset.holding,'false');assert.ok(h.snapshot().activePulses.length>0);
 });
 
 test('D hold ignores keyboard repeats and keyup stops only new attacks',async()=>{
   const h=harness();h.key('keydown','d');h.key('keydown','d',{repeat:true});
-  await h.clock.advance(4000);assert.deepEqual(pulses(h).map(event=>event.t),[0,1,2,3]);
-  h.key('keyup','D');await h.clock.advance(2000);
+  await h.samples(4);assert.deepEqual(pulses(h).map(event=>event.t),[0,1,2,3]);
+  h.key('keyup','D');await h.samples(2);
   assert.equal(pulses(h).length,4);assert.equal(h.snapshot().t,6);assert.equal(h.state().playing,true);
 });
 
 test('quick clicks preserve every pending and active pulse and do not reset time',async()=>{
   const h=harness();for(let i=0;i<5;i++)h.quickClick();
   assert.equal(pulses(h).length,5);assert.equal(h.snapshot().pendingPulses.length,5);assert.equal(h.snapshot().t,0);
-  await h.clock.advance(1000);assert.equal(h.snapshot().activePulses.length,5);
+  await h.samples(1);assert.equal(h.snapshot().activePulses.length,5);
   h.quickClick();h.quickClick();assert.equal(h.snapshot().activePulses.length,5);assert.equal(h.snapshot().pendingPulses.length,2);
-  await h.clock.advance(1000);assert.equal(h.snapshot().t,2);assert.equal(h.snapshot().activePulses.length,7);
+  await h.samples(1);assert.equal(h.snapshot().t,2);assert.equal(h.snapshot().activePulses.length,7);
   assert.deepEqual(pulses(h).map(event=>event.t),[0,0,0,0,0,1,1]);
 });
 
 test('pointer cancellation and window blur release attacks without pausing playback',async()=>{
   for(const kind of ['pointercancel','lostpointercapture','blur']){
-    const h=harness();h.event('pulse','pointerdown');await h.clock.advance(1000);
+    const h=harness();h.event('pulse','pointerdown');await h.samples(1);
     if(kind==='blur')h.window.dispatch(kind);else h.event('pulse',kind);
-    await h.clock.advance(2000);assert.equal(pulses(h).length,1,kind);assert.equal(h.snapshot().t,3,kind);assert.equal(h.state().playing,true,kind);
+    await h.samples(2);assert.equal(pulses(h).length,1,kind);assert.equal(h.snapshot().t,3,kind);assert.equal(h.state().playing,true,kind);
   }
 });
 
 test('hidden document pauses playback and clears the hold',async()=>{
-  const h=harness();h.key('keydown','d');await h.clock.advance(1000);
-  h.document.hidden=true;h.document.dispatch('visibilitychange');await h.clock.advance(4000);
+  const h=harness();h.key('keydown','d');await h.samples(1);
+  h.document.hidden=true;h.document.dispatch('visibilitychange');await h.samples(4);
   assert.equal(h.snapshot().t,1);assert.equal(h.state().playing,false);assert.equal(h.node('pulse').dataset.holding,'false');
 });
 
 test('late timers do not burst through missed physical samples',async()=>{
   const h=harness();h.quickClick();h.clock.now=10000;await h.clock.runNext();
-  assert.equal(h.snapshot().t,1);assert.ok(h.clock.next()[1].at>=10150);
-  await h.clock.advance(149);assert.equal(h.snapshot().t,1);
-  await h.clock.advance(1);assert.equal(h.snapshot().t,2);
+  assert.equal(h.snapshot().t,1);const recoveryDelay=1000/Number(h.node('speed').value)*.15;
+  assert.ok(h.clock.next()[1].at>=10000+recoveryDelay);
+  await h.clock.advance(recoveryDelay-.01);assert.equal(h.snapshot().t,1);
+  await h.clock.advance(.01);assert.equal(h.snapshot().t,2);
 });
 
 test('attacks interleave safely with comparison batches and continue after the batch',async()=>{
@@ -144,17 +169,17 @@ test('attacks interleave safely with comparison batches and continue after the b
   h.event('pulse','pointerdown');await h.clock.until(()=>!h.node('compare').disabled);await comparison;
   assert.equal(h.snapshot().t,180);assert.equal(pulses(h).length,168);assert.equal(h.state().playing,true);
   assert.equal(new Set(pulses(h).map(event=>event.t)).size,168);
-  await h.clock.advance(1000);assert.equal(h.snapshot().t,181);assert.equal(pulses(h).length,169);
-  h.event('pulse','pointerup');await h.clock.advance(1000);assert.equal(h.snapshot().t,182);assert.equal(pulses(h).length,169);
+  await h.samples(1);assert.equal(h.snapshot().t,181);assert.equal(pulses(h).length,169);
+  h.event('pulse','pointerup');await h.samples(1);assert.equal(h.snapshot().t,182);assert.equal(pulses(h).length,169);
 });
 
 test('matrix reference survives pulses, forecast changes and exact saved replay',async()=>{
   const h=harness();h.quickClick();const initialReference=h.saved().privateContent.matrixReference;
-  await h.clock.advance(35000);h.click('reference');h.click('run');
-  const reference=h.saved().privateContent.matrixReference;assert.equal(reference.t,35);
-  assert.equal(initialReference.t,0);h.quickClick();h.click('fault');
+  await h.samples(35);h.click('run');
+  const reference=h.saved().privateContent.matrixReference;assert.equal(reference.t,0);
+  assert.deepEqual(reference,initialReference);h.quickClick();h.click('fault');
   assert.deepEqual(h.saved().privateContent.matrixReference,reference);
-  await h.clock.advance(3000);h.click('run');
+  await h.samples(3);h.click('run');
   const restored=harness(h.saved());
   assert.deepEqual(restored.snapshot().cumulative,h.snapshot().cumulative);
   assert.deepEqual(restored.snapshot().states,h.snapshot().states);
@@ -167,16 +192,200 @@ test('deployment replay is exact and Learn again starts a fresh discovery trial'
   const h=harness();const comparison=h.click('compare');await h.clock.until(()=>!h.node('compare').disabled);await comparison;
   assert.equal(h.snapshot().canDeploy,true);h.click('deploy');assert.equal(h.snapshot().phase,'deployment');assert.equal(h.snapshot().t,0);
   assert.equal(h.node('deploy').textContent,'Learn again');assert.equal(h.node('deploy').disabled,false);
-  h.key('keydown','d');await h.clock.advance(3000);h.key('keyup','d');h.click('run');
+  h.key('keydown','d');await h.samples(3);h.key('keyup','d');h.click('run');
   const restored=harness(h.saved());assert.equal(restored.snapshot().phase,'deployment');
   assert.deepEqual(restored.snapshot().deployedSupport,h.snapshot().deployedSupport);
   assert.deepEqual(restored.snapshot().cumulative,h.snapshot().cumulative);
   h.click('deploy');assert.equal(h.snapshot().phase,'discovery');assert.equal(h.snapshot().t,0);
   assert.equal(h.snapshot().deployedSupport,null);assert.equal(h.snapshot().eventLog.length,0);assert.equal(h.state().playing,false);
-  assert.equal(h.node('matrix-view').value,'change');assert.equal(h.snapshot().preset,'mixed');
+  assert.equal(h.node('matrix-view').value,'links');assert.equal(h.snapshot().preset,'mixed');
 });
 
 test('fixed slack rejects pointer and keyboard attacks',()=>{
   const h=harness();h.change('bus',1);h.event('pulse','pointerdown');h.click('pulse',0);h.key('keydown','d');
   assert.equal(pulses(h).length,0);assert.equal(h.state().playing,false);assert.equal(h.node('pulse').disabled,true);
+});
+
+test('default playback advances eight physical samples per wall second',async()=>{
+  const h=harness();assert.equal(h.node('speed').value,'8');
+  h.quickClick();await h.clock.advance(1000);
+  assert.equal(h.snapshot().t,8);assert.equal(pulses(h).length,1);
+});
+
+test('SVG bus press captures the pointer and holds that bus at the default speed',async()=>{
+  const h=harness(),bus=h.bus(14);
+  h.pointer('pointerdown',bus,{pointerId:41});
+  assert.equal(bus.capturedPointer,41);assert.equal(bus.hasPointerCapture(41),true);
+  assert.equal(bus.dataset.holding,'true');assert.equal(h.state().selectedBus,14);
+  assert.equal(pulses(h).length,1);assert.equal(h.snapshot().t,0);
+  await h.clock.advance(1000);
+  assert.equal(h.snapshot().t,8);assert.deepEqual(pulses(h).map(event=>event.t),[0,1,2,3,4,5,6,7]);
+  assert.ok(pulses(h).every(event=>event.bus===14));
+  h.pointer('pointerup',bus,{pointerId:41});bus.dispatch('click',{detail:1});
+  assert.equal(pulses(h).length,8);assert.equal(bus.dataset.holding,'false');
+  await h.samples(2);assert.equal(h.snapshot().t,10);assert.equal(pulses(h).length,8);assert.equal(h.state().playing,true);
+});
+
+test('releasing outside a captured SVG bus ends the hold without stopping playback',async()=>{
+  const h=harness(),bus=h.bus(8),outside=target();
+  h.pointer('pointerdown',bus,{pointerId:17});await h.samples(3);
+  h.pointer('pointermove',outside,{pointerId:17});
+  h.pointer('pointerup',outside,{pointerId:17});
+  assert.equal(bus.hasPointerCapture(17),false);assert.equal(bus.dataset.holding,'false');
+  await h.samples(3);assert.equal(h.snapshot().t,6);assert.equal(pulses(h).length,3);assert.equal(h.state().playing,true);
+});
+
+test('touch cancellation on a captured SVG bus preserves previously applied attacks',async()=>{
+  const h=harness(),bus=h.bus(12);
+  h.pointer('pointerdown',bus,{pointerId:32,pointerType:'touch'});await h.samples(2);
+  const attacks=h.snapshot().activePulses.length;
+  h.pointer('pointercancel',target(),{pointerId:32,pointerType:'touch'});
+  assert.equal(bus.dataset.holding,'false');assert.equal(bus.hasPointerCapture(32),false);
+  assert.equal(h.snapshot().activePulses.length,attacks);
+  await h.samples(2);assert.equal(pulses(h).length,2);assert.equal(h.snapshot().t,4);assert.equal(h.state().playing,true);
+});
+
+test('repeated SVG clicks add one pulse per gesture with no compatibility click duplication',()=>{
+  const h=harness(),bus=h.bus(21);
+  for(let i=0;i<4;i++){
+    h.pointer('pointerdown',bus);h.pointer('pointerup',bus);bus.dispatch('click',{detail:i+1});
+  }
+  bus.dispatch('dblclick',{detail:2});
+  assert.equal(pulses(h).length,4);assert.equal(h.snapshot().pendingPulses.length,4);
+  assert.ok(pulses(h).every(event=>event.bus===21));assert.equal(h.snapshot().t,0);
+});
+
+test('Enter and Space hold an SVG bus and ignore repeated keyboard events',async()=>{
+  for(const key of ['Enter',' ']){
+    const h=harness(),bus=h.bus(18);
+    bus.dispatch('keydown',{key});bus.dispatch('keydown',{key,repeat:true});await h.samples(4);
+    assert.equal(pulses(h).length,4,key);assert.ok(pulses(h).every(event=>event.bus===18));
+    bus.dispatch('keyup',{key});await h.samples(2);
+    assert.equal(pulses(h).length,4,key);assert.equal(h.snapshot().t,6,key);assert.equal(bus.dataset.holding,'false');
+  }
+});
+
+test('all playback modes preserve one held bus pulse per physical sample',async()=>{
+  for(const rate of [2,4,8,16]){
+    const h=harness(),bus=h.bus(5);h.change('speed',rate);h.pointer('pointerdown',bus);
+    await h.clock.advance(1000);assert.equal(h.snapshot().t,rate);assert.equal(pulses(h).length,rate);
+    assert.equal(new Set(pulses(h).map(event=>event.t)).size,rate);
+    h.pointer('pointerup',bus);await h.clock.advance(1000);
+    assert.equal(h.snapshot().t,2*rate);assert.equal(pulses(h).length,rate);assert.equal(h.state().playing,true);
+  }
+});
+
+test('changing speed during a hold replaces the timer without losing or doubling attacks',async()=>{
+  const h=harness(),bus=h.bus(7);h.pointer('pointerdown',bus);await h.samples(1);
+  h.change('speed',16);assert.equal(h.clock.tasks.size,1);await h.clock.advance(1000);
+  assert.equal(h.snapshot().t,17);assert.deepEqual(pulses(h).map(event=>event.t),Array.from({length:17},(_,i)=>i));
+});
+
+test('version seven replay migrates speed and connectivity view without changing physical history',async()=>{
+  const h=harness();h.quickClick();await h.samples(3);h.click('run');
+  const legacy=plain(h.saved());legacy.privateContent.version=7;legacy.privateContent.speed='1';legacy.privateContent.matrixView='change';
+  const restored=harness(legacy);
+  assert.equal(restored.node('speed').value,'8');assert.equal(restored.node('matrix-view').value,'links');
+  assert.equal(restored.snapshot().t,3);assert.deepEqual(restored.snapshot().cumulative,h.snapshot().cumulative);
+  assert.deepEqual(restored.snapshot().states,h.snapshot().states);assert.deepEqual(restored.snapshot().eventLog,h.snapshot().eventLog);
+  assert.equal(restored.state().playing,false);restored.quickClick();assert.equal(restored.saved().privateContent.version,8);
+});
+
+test('version eight replay retains selected fast speed and matrix view',async()=>{
+  const h=harness();h.change('speed',16);h.change('matrix-view','change');h.quickClick();await h.samples(3);h.click('run');
+  assert.equal(h.saved().privateContent.version,8);
+  const restored=harness(h.saved());assert.equal(restored.node('speed').value,'16');assert.equal(restored.node('matrix-view').value,'change');
+  assert.deepEqual(restored.snapshot().cumulative,h.snapshot().cumulative);assert.deepEqual(restored.snapshot().eventLog,h.snapshot().eventLog);
+});
+
+// A regression fixture for real support reversals, not a production default.
+// Seed seven changes at samples 6, 55, 94 and 105 and returns to its initial set.
+function topologyHarness(){
+  return harness({privateContent:{version:8,phase:'discovery',preset:'mixed',
+    initialOptions:{seed:7,preset:'mixed'},t:0,events:[],selectedBus:7,
+    speed:'8',pulseStrength:'100',view:'cost',matrixView:'links'}});
+}
+async function compare(h){
+  const completion=h.click('compare');await h.clock.until(()=>!h.node('compare').disabled);await completion;
+}
+
+test('Advance 180 retains every actual topology change including returns to the initial support',async()=>{
+  const fast=topologyHarness();await compare(fast);
+  const timeline=fast.state().topology;
+  assert.equal(fast.snapshot().t,180);assert.equal(timeline.lastT,180);
+  assert.deepEqual(timeline.events.map(event=>event.t),[6,55,94,105]);
+  assert.deepEqual(timeline.events[1].after,timeline.initial);
+  assert.deepEqual(timeline.events[3].after,timeline.initial);
+  assert.deepEqual(timeline.current,timeline.initial);
+  assert.equal(fast.node('topology-history').max,'4');assert.equal(fast.node('topology-history').disabled,false);
+  assert.equal(fast.node('history-count').textContent,'4 link updates');
+  const single=topologyHarness();for(let i=0;i<180;i++)single.click('step');
+  assert.deepEqual(single.state().topology,timeline);
+  assert.deepEqual(single.snapshot().cumulative,fast.snapshot().cumulative);
+});
+
+test('version eight replay reconstructs topology events from every physical sample',async()=>{
+  const h=topologyHarness();await compare(h);
+  const bus=h.bus(14);h.pointer('pointerdown',bus);await h.samples(7);h.pointer('pointerup',bus);h.click('run');
+  const restored=harness(h.saved());
+  assert.equal(restored.saved(),undefined,'Restoration must not rewrite the saved trial');
+  assert.deepEqual(restored.state().topology,h.state().topology);
+  assert.deepEqual(restored.snapshot().eventLog,h.snapshot().eventLog);
+  assert.deepEqual(restored.snapshot().cumulative,h.snapshot().cumulative);
+  assert.equal(restored.state().historyIndex,null);
+});
+
+test('deployment and its reset preserve the completed discovery history while Learn again clears it',async()=>{
+  const h=topologyHarness();await compare(h);const discovery=h.state().topology;
+  h.click('deploy');const frozen=h.state().topology;
+  assert.deepEqual(frozen,{...discovery,phase:'deployment'});assert.equal(h.snapshot().t,0);
+  await compare(h);assert.equal(h.snapshot().t,180);assert.deepEqual(h.state().topology,frozen);
+  const restored=harness(h.saved());assert.deepEqual(restored.state().topology,frozen);
+  assert.equal(restored.snapshot().phase,'deployment');
+  h.node('topology-history').value='1';h.event('topology-history','input');
+  h.click('restart');assert.equal(h.snapshot().t,0);assert.equal(h.snapshot().phase,'deployment');
+  assert.deepEqual(h.state().topology,frozen);assert.equal(h.state().historyIndex,null);
+  h.click('deploy');assert.equal(h.snapshot().phase,'discovery');assert.equal(h.snapshot().t,0);
+  assert.equal(h.state().topology.events.length,0);assert.equal(h.state().topology.lastT,0);
+  assert.equal(h.state().topology.phase,'discovery');assert.equal(h.state().historyIndex,null);
+});
+
+test('Discovery reset discards old topology observations and starts from the new initial support',async()=>{
+  const h=topologyHarness();await compare(h);assert.equal(h.state().topology.events.length,4);
+  h.node('topology-history').value='2';h.event('topology-history','input');h.click('restart');
+  const timeline=h.state().topology;
+  assert.equal(h.snapshot().t,0);assert.equal(timeline.events.length,0);assert.equal(timeline.initialT,0);assert.equal(timeline.lastT,0);
+  assert.deepEqual(timeline.initial,timeline.current);assert.equal(h.state().historyIndex,null);
+  assert.equal(h.node('topology-history').disabled,true);assert.equal(h.node('history-count').textContent,'0 link updates');
+});
+
+test('history slider and Show latest change only the view, never the current engine state',async()=>{
+  const h=topologyHarness();await compare(h);
+  const before=h.snapshot(),timeline=h.state().topology;
+  for(const index of [0,1,2,4]){
+    h.node('topology-history').value=String(index);h.event('topology-history','input');
+    assert.equal(h.state().historyIndex,index);assert.equal(h.node('history-live').textContent,'Show latest');
+    assert.deepEqual(h.snapshot(),before);assert.deepEqual(h.state().topology,timeline);assert.equal(h.state().playing,false);
+  }
+  h.click('history-live');assert.equal(h.state().historyIndex,null);assert.equal(h.node('history-live').textContent,'Latest');
+  assert.deepEqual(h.snapshot(),before);assert.deepEqual(h.state().topology,timeline);
+  h.node('topology-history').value='1';h.event('topology-history','input');h.click('step');
+  assert.equal(h.snapshot().t,181);assert.equal(h.state().historyIndex,1,'Reviewing history must not block live progression');
+});
+
+test('keyboard hold ends when its toolbar or bus loses focus, while unrelated blur leaves it active',async()=>{
+  for(const kind of ['toolbar','bus'])for(const key of ['Enter',' ']){
+    const h=harness(),owner=kind==='toolbar'?h.node('pulse'):h.bus(8);
+    const other=kind==='toolbar'?h.bus(12):h.node('pulse');
+    owner.dispatch('keydown',{key});await h.samples(2);
+    other.dispatch('blur',{relatedTarget:owner});await h.samples(1);
+    assert.equal(pulses(h).length,3,kind+' should ignore another target losing focus');
+    assert.equal(owner.dataset.holding,'true');
+    owner.dispatch('keydown',{key:'Tab'});owner.dispatch('blur',{relatedTarget:other});
+    h.key('keyup',key,{target:other});await h.samples(2);
+    assert.equal(owner.dataset.holding,'false',kind+' should release when focus moves');
+    assert.equal(h.node('pulse').dataset.holding,'false');
+    assert.equal(pulses(h).length,3,kind+' should not add attacks after blur');
+    assert.equal(h.snapshot().t,5);assert.equal(h.state().playing,true);
+  }
 });

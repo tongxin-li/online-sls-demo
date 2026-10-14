@@ -11,8 +11,9 @@
  *   inputScale: 100,   // Inverter reactive capability in kvar for the effort display.
  *   selected: false,
  *   activePulse: false,
- *   activePulses: 0,   // Optional number of overlapping applied pulses at this bus.
+ *   attackPowerKw: 0,  // Actual applied attack power after physical equipment caps.
  *   queuedPulses: 0,   // Requests waiting for the next physical model sample.
+ *   attackHeld: false, // True only while the user is holding an attack on this bus.
  *   pulseId: null,     // Change for EVERY applied pulse, even in the same step.
  *   phase: 0           // Optional simulation step. Recorded, not invented motion.
  * })
@@ -87,10 +88,11 @@
     equipment.append('g').attr('class', 'pe-event-layer');
     // This badge remains visible for the full physical disturbance. It is not
     // tied to an animation frame or hidden when a short impact burst ends.
-    const attack = equipment.append('g').attr('class', 'pe-attack-badge').attr('transform', 'translate(13 -14)').attr('display', 'none');
-    attack.append('rect').attr('x', -9).attr('y', -9).attr('width', 18).attr('height', 18).attr('rx', 9);
-    path(attack, 'pe-attack-bolt', 'M1.4-6.3L-4.4 1H-.9L-2 6.1L4.8-1.8H1L3.1-6.3Z');
-    attack.append('text').attr('x', 13).attr('y', .4).attr('text-anchor', 'middle').attr('dominant-baseline', 'middle');
+    const attack = equipment.append('g').attr('class', 'pe-attack-badge').attr('transform', 'translate(13 -16)').attr('display', 'none');
+    attack.append('rect').attr('x', -10).attr('y', -10).attr('width', 20).attr('height', 20).attr('rx', 10);
+    path(attack, 'pe-attack-bolt', 'M1.5-7L-5 1.1H-1L-2.2 6.8L5.3-2H1.1L3.4-7Z');
+    attack.append('text').attr('x', 10).attr('y', .4).attr('text-anchor', 'start').attr('dominant-baseline', 'middle');
+    attack.append('title');
     return equipment;
   }
 
@@ -111,17 +113,20 @@
     const input = finite(data.input, 0);
     const inputScale = Math.max(Math.abs(finite(data.inputScale, 100)), 1e-9);
     const effort = clamp(Math.abs(input) / inputScale);
-    const queuedPulses = Math.max(0, Math.floor(finite(data.queuedPulses, 0)));
-    const activePulses = Math.max(0, Math.floor(finite(data.activePulses, data.activePulse ? 1 : 0)));
-    const attacked = Boolean(data.activePulse) || queuedPulses > 0 || activePulses > 0;
-    const pulseCount = queuedPulses + activePulses;
+    const attackable = equipment.attr('data-equipment') !== 'Substation';
+    const activePulse = attackable && Boolean(data.activePulse);
+    const queuedPulses = attackable ? Math.max(0, Math.floor(finite(data.queuedPulses, 0))) : 0;
+    const attackHeld = attackable && Boolean(data.attackHeld);
+    const attacked = activePulse || queuedPulses > 0 || attackHeld;
+    const hasAttackPower = data.attackPowerKw !== null && data.attackPowerKw !== undefined && Number.isFinite(Number(data.attackPowerKw));
+    const attackPowerKw = hasAttackPower ? Math.abs(Number(data.attackPowerKw)) : 0;
     const reference = finite(data.referenceVoltage, 1);
     const stress = clamp(Math.abs(voltage - reference) / .025);
     const voltageColor = voltage < .95 || voltage > 1.05 || stress > .6 ? '#be793e' : stress > .25 ? '#859454' : '#4c816b';
     equipment.attr('data-voltage', voltage).attr('data-control', input)
-      .attr('data-phase', finite(data.phase, 0)).attr('data-pulse-active', String(Boolean(data.activePulse)))
-      .classed('pe-selected', Boolean(data.selected)).classed('pe-pulse-active', Boolean(data.activePulse))
-      .classed('pe-attacked', attacked).classed('pe-pulse-queued', queuedPulses > 0)
+      .attr('data-phase', finite(data.phase, 0)).attr('data-pulse-active', String(activePulse))
+      .classed('pe-selected', Boolean(data.selected)).classed('pe-pulse-active', activePulse)
+      .classed('pe-attacked', attacked).classed('pe-pulse-queued', queuedPulses > 0).classed('pe-attack-held', attackHeld)
       .style('--pe-voltage-color', voltageColor).style('--pe-voltage-opacity', .04 + stress * .2)
       .style('--pe-window-opacity', .35 + .65 * clamp((voltage - .9) / .1));
     equipment.select('.pe-voltage-wash').attr('r', 15 + stress * 5);
@@ -131,18 +136,22 @@
       this.style.opacity = String(.15 + .85 * clamp(effort * 3 - index));
     });
     equipment.select('.pe-control-arrow').attr('transform', input < 0 ? 'rotate(180 0 -4.4)' : null).attr('opacity', effort > .01 ? .85 : .2);
+    // A badge reports the physical power, never an event count or requested sum.
+    // Pending requests have no applied magnitude until the next model sample.
+    const label = activePulse && hasAttackPower ? `${Math.round(attackPowerKw)} kW` : queuedPulses > 0 ? 'Pending' : attackHeld ? 'Held' : '';
     const badge = equipment.select('.pe-attack-badge').attr('display', attacked ? null : 'none')
-      .attr('data-pulse-count', pulseCount).attr('data-queued-count', queuedPulses);
-    const showCount = pulseCount > 1;
-    badge.select('rect').attr('width', showCount ? 32 : 18);
-    badge.select('text').attr('display', showCount ? null : 'none').text(pulseCount > 99 ? '99+' : String(pulseCount));
+      .attr('data-applied-power-kw', activePulse && hasAttackPower ? attackPowerKw : null)
+      .attr('data-attack-held', String(attackHeld));
+    badge.select('rect').attr('width', label ? 27 + label.length * 5.7 : 20);
+    badge.select('text').attr('display', label ? null : 'none').text(label);
+    badge.select('title').text(activePulse && hasAttackPower ? `${Math.round(attackPowerKw)} kW applied disturbance${attackHeld ? '. Continuing while held' : ''}` : queuedPulses > 0 ? 'Disturbance pending the next sample' : attackHeld ? 'Continuous attack while held' : 'Active disturbance');
     // The one pulse token belongs to the host DOM node, not a mutable model object.
     const node = equipment.node();
-    if (data.pulseId !== undefined && data.pulseId !== null && node.__pePulseId !== data.pulseId) {
+    if (attackable && data.pulseId !== undefined && data.pulseId !== null && node.__pePulseId !== data.pulseId) {
       node.__pePulseId = data.pulseId;
       flash(equipment);
     }
-    if (data.pulseId === null) {
+    if (!attackable || data.pulseId === null) {
       node.__pePulseId = null;
       equipment.select('.pe-event-layer').selectAll('*').remove();
     }

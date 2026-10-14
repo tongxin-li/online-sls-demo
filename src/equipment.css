@@ -5,6 +5,7 @@
 .pe-root path,.pe-root rect,.pe-root circle { vector-effect:non-scaling-stroke; }
 .pe-attack-halo { fill:#ff9f0a; fill-opacity:0; stroke:#ef7b0b; stroke-opacity:0; stroke-width:1; transition:fill-opacity .18s,stroke-opacity .18s; }
 .pe-attacked .pe-attack-halo { fill-opacity:.14; stroke-opacity:.24; }
+.pe-attack-held .pe-attack-halo { fill-opacity:.22; stroke-opacity:.8; stroke-width:2; stroke-dasharray:3 3; }
 .pe-voltage-wash { fill:var(--pe-voltage-color); opacity:var(--pe-voltage-opacity); transition:r .4s,opacity .4s,fill .4s; }
 .pe-disc { fill:var(--pe-paper); stroke:#dce6de; stroke-width:1; }
 .pe-voltage-ring { fill:none; stroke:var(--pe-voltage-color); stroke-opacity:.45; transition:stroke .4s,stroke-width .4s; }
@@ -50,8 +51,9 @@
 .pe-attack-badge { filter:drop-shadow(0 1px 2px #8b440426); }
 .pe-attack-badge rect { fill:#ec7609; stroke:#fff; stroke-width:1.5; }
 .pe-attack-bolt { fill:#fff; stroke:none; }
-.pe-attack-badge text { fill:#fff!important; font:700 9px var(--font-ui,-apple-system,BlinkMacSystemFont,sans-serif)!important; letter-spacing:-.3px; }
+.pe-attack-badge text { fill:#fff!important; font:650 10px var(--font-ui,-apple-system,BlinkMacSystemFont,sans-serif)!important; letter-spacing:0; }
 .pe-pulse-queued .pe-attack-badge rect { fill:#f38a0b; }
+.pe-attack-held .pe-attack-badge rect { fill:#d95e00; stroke-width:2; }
 .pe-burst { pointer-events:none; }
 .pe-burst-ring { fill:#ff9f0a; fill-opacity:.1; stroke:#ed7d0d; stroke-width:2; transform-box:fill-box; transform-origin:center; animation:pe-ring 1.1s ease-out both; }
 .pe-burst-rays { fill:none; stroke:#f7981c; stroke-width:2; stroke-linecap:round; animation:pe-rays .75s ease-out both; }

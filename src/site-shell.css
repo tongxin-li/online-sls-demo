@@ -172,3 +172,14 @@ summary span { color:#a1a1a6; }
 @media(max-width:650px) { .pr-attack-hint { font-size:9px; } .btn-attack { min-width:132px; } #pr-matrix-key { gap:8px; font-size:9px; } .pr-chart .matrix-columns text { font-size:8px; } }
 
 @media(max-width:380px) { .pr-attack-hint { display:none; } .pr-actions { gap:6px; } }
+
+#pr-network .bus-node { touch-action:none; -webkit-touch-callout:none; }
+#pr-network .bus-node[data-holding='true'] { cursor:grabbing; }
+
+.pr-topology-history { display:flex; align-items:center; gap:10px; margin:4px 0; min-height:28px; }
+.pr-topology-history label { font-size:10px; color:var(--muted-foreground); min-width:75px; }
+.pr-topology-history input { flex:1; min-width:50px; margin:0; height:20px; accent-color:var(--primary); cursor:ew-resize; }
+.pr-topology-history button { border:0; background:var(--muted); color:var(--primary); border-radius:6px; padding:5px 8px; font-size:10px; white-space:nowrap; }
+.pr-topology-history button[aria-pressed='true'] { background:#edf5fe; }
+.pr-topology-history input:disabled,.pr-topology-history button:disabled { opacity:.4; cursor:default; }
+#pr-topology-note { min-height:28px; line-height:1.4; color:#60606a; }

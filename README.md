@@ -6,9 +6,11 @@ The environment document describes the feeder, power disturbances, units and eva
 
 ## Interaction
 
-Click a bus or Attack to add a pulse and start playback. Repeated clicks add pulses without restarting the clock. Hold Attack or the D key for one pulse per simulation sample. Releasing stops the repeated attacks and leaves playback running. Pause stops both. Orange lightning badges show individual or grouped attack counts, while shaded plot intervals locate the disturbances.
+Click a bus or Attack to add a pulse and start playback. Hold a bus, Attack or the D key to add one request per physical sample until release. Repeated clicks also add requests without restarting the clock. Releasing stops new requests and leaves playback running. Pause stops both. Playback defaults to eight samples per second, with options of two, four, eight and sixteen. Each physical sample still represents one second.
 
-The prediction matrix shows eight inverter receivers and 23 source buses. Learning change displays the signed change in realizing gain energy relative to the offline energy of the same completed rows. Its color scale is shown explicitly and selected sources remain outlined. Coefficient change is the relative Frobenius norm of the actual learned gain correction. Selected links shows only the connectivity. Learning weights may change without changing the strongest sources. During deployment both the selected support and retained discovery diagnostic stay fixed. Learn again starts new discovery.
+Orange lightning badges show the actual applied disturbance in kW after equipment limits. Pending means that a request is queued for the next physical sample. The badges do not count attacks or sum requested power. Chart badges say Attack or Attacks, while shaded intervals locate the disturbances.
+
+The prediction matrix shows eight inverter receivers and 23 source buses. Connectivity is the default view. Its history slider retains actual support changes over time, with added links in green and removed links in amber. Returning to the starting topology does not erase earlier changes. Learning weights displays the signed change in realizing gain energy relative to the offline energy of the same completed rows. Its color scale is shown explicitly and selected sources remain outlined. Coefficient change is the relative Frobenius norm of the actual learned gain correction. Learning weights can change without changing the strongest sources. During deployment both the selected support and retained discovery diagnostic stay fixed. Learn again starts new discovery.
 
 ## Execution contract
 
@@ -43,6 +45,7 @@ The checked in `index.html`, `environment.html` and bundled assets deploy direct
 python3 build.py
 node src/test-simulation.cjs
 node src/test-interactions.cjs
+node src/test-topology-timeline.cjs
 node src/benchmark.cjs --json
 python3 -m http.server 8000
 ```

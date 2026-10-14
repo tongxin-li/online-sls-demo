@@ -182,6 +182,17 @@ summary span { color:#a1a1a6; }
 
 @media(max-width:380px) { .pr-attack-hint { display:none; } .pr-actions { gap:6px; } }
 
+#pr-network .bus-node { touch-action:none; -webkit-touch-callout:none; }
+#pr-network .bus-node[data-holding='true'] { cursor:grabbing; }
+
+.pr-topology-history { display:flex; align-items:center; gap:10px; margin:4px 0; min-height:28px; }
+.pr-topology-history label { font-size:10px; color:var(--muted-foreground); min-width:75px; }
+.pr-topology-history input { flex:1; min-width:50px; margin:0; height:20px; accent-color:var(--primary); cursor:ew-resize; }
+.pr-topology-history button { border:0; background:var(--muted); color:var(--primary); border-radius:6px; padding:5px 8px; font-size:10px; white-space:nowrap; }
+.pr-topology-history button[aria-pressed='true'] { background:#edf5fe; }
+.pr-topology-history input:disabled,.pr-topology-history button:disabled { opacity:.4; cursor:default; }
+#pr-topology-note { min-height:28px; line-height:1.4; color:#60606a; }
+
 /* Equipment marks stay decorative. The enclosing bus owns interaction. */
 .pe-host { -webkit-user-select:none; user-select:none; touch-action:manipulation; }
 .pe-hit { fill:transparent; pointer-events:all; }
@@ -189,6 +200,7 @@ summary span { color:#a1a1a6; }
 .pe-root path,.pe-root rect,.pe-root circle { vector-effect:non-scaling-stroke; }
 .pe-attack-halo { fill:#ff9f0a; fill-opacity:0; stroke:#ef7b0b; stroke-opacity:0; stroke-width:1; transition:fill-opacity .18s,stroke-opacity .18s; }
 .pe-attacked .pe-attack-halo { fill-opacity:.14; stroke-opacity:.24; }
+.pe-attack-held .pe-attack-halo { fill-opacity:.22; stroke-opacity:.8; stroke-width:2; stroke-dasharray:3 3; }
 .pe-voltage-wash { fill:var(--pe-voltage-color); opacity:var(--pe-voltage-opacity); transition:r .4s,opacity .4s,fill .4s; }
 .pe-disc { fill:var(--pe-paper); stroke:#dce6de; stroke-width:1; }
 .pe-voltage-ring { fill:none; stroke:var(--pe-voltage-color); stroke-opacity:.45; transition:stroke .4s,stroke-width .4s; }
@@ -234,8 +246,9 @@ summary span { color:#a1a1a6; }
 .pe-attack-badge { filter:drop-shadow(0 1px 2px #8b440426); }
 .pe-attack-badge rect { fill:#ec7609; stroke:#fff; stroke-width:1.5; }
 .pe-attack-bolt { fill:#fff; stroke:none; }
-.pe-attack-badge text { fill:#fff!important; font:700 9px var(--font-ui,-apple-system,BlinkMacSystemFont,sans-serif)!important; letter-spacing:-.3px; }
+.pe-attack-badge text { fill:#fff!important; font:650 10px var(--font-ui,-apple-system,BlinkMacSystemFont,sans-serif)!important; letter-spacing:0; }
 .pe-pulse-queued .pe-attack-badge rect { fill:#f38a0b; }
+.pe-attack-held .pe-attack-badge rect { fill:#d95e00; stroke-width:2; }
 .pe-burst { pointer-events:none; }
 .pe-burst-ring { fill:#ff9f0a; fill-opacity:.1; stroke:#ed7d0d; stroke-width:2; transform-box:fill-box; transform-origin:center; animation:pe-ring 1.1s ease-out both; }
 .pe-burst-rays { fill:none; stroke:#f7981c; stroke-width:2; stroke-linecap:round; animation:pe-rays .75s ease-out both; }
@@ -277,13 +290,13 @@ summary span { color:#a1a1a6; }
       <button type="button" class="btn btn-play" id="pr-run">Run</button>
       <button type="button" class="btn btn-quiet" id="pr-step" title="Advance one second of feeder operation">Step</button>
       <button type="button" class="btn btn-quiet" id="pr-restart" title="Restart the current trial">Reset</button>
-      <select id="pr-speed" aria-label="Playback speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
+      <select id="pr-speed" aria-label="Playback speed" title="8× plays eight simulation samples per second"><option value="2">2×</option><option value="4">4×</option><option value="8" selected>8×</option><option value="16">16×</option></select>
       <span id="pr-clock" class="tabular-nums">t = 0 s</span>
     </div>
     <div class="pr-actions">
       <label for="pr-strength">Pulse</label>
-      <select id="pr-strength" aria-label="Pulse strength"><option value="50">50 kW</option><option value="100" selected>100 kW</option><option value="150">150 kW</option></select>
-      <button type="button" class="btn btn-attack" id="pr-pulse" aria-keyshortcuts="D" title="Click for a pulse or hold for one pulse each sample"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14 2 5 14h6l-1 8 9-13h-6z"/></svg><span id="pr-pulse-label">Attack bus 7</span></button><span class="pr-attack-hint">Click or hold</span>
+      <select id="pr-strength" aria-label="Pulse strength" title="Requested power per pulse. Applied power respects equipment limits"><option value="50">50 kW</option><option value="100" selected>100 kW</option><option value="150">150 kW</option></select>
+      <button type="button" class="btn btn-attack" id="pr-pulse" aria-keyshortcuts="D" title="Click for a pulse or hold for one pulse each sample"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14 2 5 14h6l-1 8 9-13h-6z"/></svg><span id="pr-pulse-label">Attack bus 7</span></button><span class="pr-attack-hint">Hold button or bus</span>
     </div>
   </div>
   <div class="pr-comparison-controls">
@@ -294,14 +307,14 @@ summary span { color:#a1a1a6; }
   <div class="pr-mission"><span><span class="pr-status-dot" id="pr-voltage-status" aria-hidden="true"></span>Restore the <strong>nominal voltage profile</strong><span class="pr-target"> · Illustrative band 0.95 to 1.05 pu</span></span><span id="pr-voltage-range" class="tabular-nums"></span></div>
   <div class="pr-dashboard">
     <section class="pr-panel pr-network-panel" aria-labelledby="pr-network-title">
-      <div class="pr-subhead"><h2 id="pr-network-title">Power network</h2><span id="pr-action-note" class="pr-caption" aria-live="polite">Click a bus to attack</span></div>
-      <svg class="pr-chart" id="pr-network" role="group" aria-label="24 bus radial power feeder. Click a load, solar, or battery bus to queue a power disturbance"></svg>
+      <div class="pr-subhead"><h2 id="pr-network-title">Power network</h2><span id="pr-action-note" class="pr-caption" aria-live="polite">Hold a bus for continuous attacks</span></div>
+      <svg class="pr-chart" id="pr-network" role="group" aria-label="24 bus radial power feeder. Press and hold a load, solar, or battery bus for continuous power disturbances"></svg>
       <div class="pr-panel-foot"><span id="pr-bus-detail" class="tabular-nums"></span><span class="pr-live-stage">Cost <strong id="pr-live-cost" class="tabular-nums">0.0000</strong></span></div>
     </section>
     <section class="pr-panel pr-matrix-panel" aria-labelledby="pr-matrix-title">
-      <div class="pr-subhead"><h2 id="pr-matrix-title">Learning prediction links</h2><select id="pr-matrix-view" aria-label="Prediction matrix view"><option value="links">Selected links</option><option value="change" selected>Learning change</option></select></div>
+      <div class="pr-subhead"><h2 id="pr-matrix-title">Learning prediction links</h2><select id="pr-matrix-view" aria-label="Prediction matrix view"><option value="links" selected>Connectivity</option><option value="change">Learning weights</option></select></div>
       <div class="pr-matrix-key" id="pr-matrix-key"></div><svg class="pr-chart" id="pr-matrix" role="group" aria-label="Candidate prediction links. Rows receive forecasts from columns"></svg>
-      <div class="pr-panel-foot"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div><p id="pr-topology-note" class="pr-caption"></p>
+      <div class="pr-panel-foot"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div><div class="pr-topology-history"><label for="pr-topology-history" id="pr-history-count">0 link updates</label><input id="pr-topology-history" type="range" min="0" max="0" step="1" value="0" aria-label="Topology history" disabled><button type="button" id="pr-history-live" aria-pressed="true">Latest</button></div><p id="pr-topology-note" class="pr-caption" aria-live="polite"></p>
     </section>
     <section class="pr-panel pr-stage-panel" aria-labelledby="pr-stage-title">
       <div class="pr-subhead"><h2 id="pr-stage-title">Voltage and cost</h2><strong id="pr-state-value" class="pr-state-value tabular-nums">1.000 pu</strong></div>
@@ -334,7 +347,7 @@ summary span { color:#a1a1a6; }
   <p id="pr-phase-note" class="pr-overlap-note">Discovery learns completed responses. Prediction curves coincide.</p>
   <details class="pr-adaptation" id="pr-adaptation">
     <summary>Experiment settings <span aria-hidden="true">+</span></summary>
-    <div class="pr-settings"><label>Bus <select id="pr-bus" aria-label="Selected bus"></select></label><button type="button" class="btn" id="pr-fault">Repair forecast</button><button type="button" class="btn" id="pr-reference">Set reference</button><label class="form-check"><input type="checkbox" id="pr-all-links">All prediction links</label></div>
+    <div class="pr-settings"><label>Bus <select id="pr-bus" aria-label="Selected bus"></select></label><button type="button" class="btn" id="pr-fault">Repair forecast</button><label class="form-check"><input type="checkbox" id="pr-all-links" checked>All prediction links</label></div>
     <p class="pr-caption" id="pr-fit-detail"></p>
   </details>
   <div hidden><span id="pr-fit-title"></span><span id="pr-learning"></span><span id="pr-topology-label"></span><span id="pr-links-detail"></span><span id="pr-matrix-reference"></span><span id="pr-impact-note"></span></div>
@@ -1061,8 +1074,9 @@ summary span { color:#a1a1a6; }
  *   inputScale: 100,   // Inverter reactive capability in kvar for the effort display.
  *   selected: false,
  *   activePulse: false,
- *   activePulses: 0,   // Optional number of overlapping applied pulses at this bus.
+ *   attackPowerKw: 0,  // Actual applied attack power after physical equipment caps.
  *   queuedPulses: 0,   // Requests waiting for the next physical model sample.
+ *   attackHeld: false, // True only while the user is holding an attack on this bus.
  *   pulseId: null,     // Change for EVERY applied pulse, even in the same step.
  *   phase: 0           // Optional simulation step. Recorded, not invented motion.
  * })
@@ -1137,10 +1151,11 @@ summary span { color:#a1a1a6; }
     equipment.append('g').attr('class', 'pe-event-layer');
     // This badge remains visible for the full physical disturbance. It is not
     // tied to an animation frame or hidden when a short impact burst ends.
-    const attack = equipment.append('g').attr('class', 'pe-attack-badge').attr('transform', 'translate(13 -14)').attr('display', 'none');
-    attack.append('rect').attr('x', -9).attr('y', -9).attr('width', 18).attr('height', 18).attr('rx', 9);
-    path(attack, 'pe-attack-bolt', 'M1.4-6.3L-4.4 1H-.9L-2 6.1L4.8-1.8H1L3.1-6.3Z');
-    attack.append('text').attr('x', 13).attr('y', .4).attr('text-anchor', 'middle').attr('dominant-baseline', 'middle');
+    const attack = equipment.append('g').attr('class', 'pe-attack-badge').attr('transform', 'translate(13 -16)').attr('display', 'none');
+    attack.append('rect').attr('x', -10).attr('y', -10).attr('width', 20).attr('height', 20).attr('rx', 10);
+    path(attack, 'pe-attack-bolt', 'M1.5-7L-5 1.1H-1L-2.2 6.8L5.3-2H1.1L3.4-7Z');
+    attack.append('text').attr('x', 10).attr('y', .4).attr('text-anchor', 'start').attr('dominant-baseline', 'middle');
+    attack.append('title');
     return equipment;
   }
 
@@ -1161,17 +1176,20 @@ summary span { color:#a1a1a6; }
     const input = finite(data.input, 0);
     const inputScale = Math.max(Math.abs(finite(data.inputScale, 100)), 1e-9);
     const effort = clamp(Math.abs(input) / inputScale);
-    const queuedPulses = Math.max(0, Math.floor(finite(data.queuedPulses, 0)));
-    const activePulses = Math.max(0, Math.floor(finite(data.activePulses, data.activePulse ? 1 : 0)));
-    const attacked = Boolean(data.activePulse) || queuedPulses > 0 || activePulses > 0;
-    const pulseCount = queuedPulses + activePulses;
+    const attackable = equipment.attr('data-equipment') !== 'Substation';
+    const activePulse = attackable && Boolean(data.activePulse);
+    const queuedPulses = attackable ? Math.max(0, Math.floor(finite(data.queuedPulses, 0))) : 0;
+    const attackHeld = attackable && Boolean(data.attackHeld);
+    const attacked = activePulse || queuedPulses > 0 || attackHeld;
+    const hasAttackPower = data.attackPowerKw !== null && data.attackPowerKw !== undefined && Number.isFinite(Number(data.attackPowerKw));
+    const attackPowerKw = hasAttackPower ? Math.abs(Number(data.attackPowerKw)) : 0;
     const reference = finite(data.referenceVoltage, 1);
     const stress = clamp(Math.abs(voltage - reference) / .025);
     const voltageColor = voltage < .95 || voltage > 1.05 || stress > .6 ? '#be793e' : stress > .25 ? '#859454' : '#4c816b';
     equipment.attr('data-voltage', voltage).attr('data-control', input)
-      .attr('data-phase', finite(data.phase, 0)).attr('data-pulse-active', String(Boolean(data.activePulse)))
-      .classed('pe-selected', Boolean(data.selected)).classed('pe-pulse-active', Boolean(data.activePulse))
-      .classed('pe-attacked', attacked).classed('pe-pulse-queued', queuedPulses > 0)
+      .attr('data-phase', finite(data.phase, 0)).attr('data-pulse-active', String(activePulse))
+      .classed('pe-selected', Boolean(data.selected)).classed('pe-pulse-active', activePulse)
+      .classed('pe-attacked', attacked).classed('pe-pulse-queued', queuedPulses > 0).classed('pe-attack-held', attackHeld)
       .style('--pe-voltage-color', voltageColor).style('--pe-voltage-opacity', .04 + stress * .2)
       .style('--pe-window-opacity', .35 + .65 * clamp((voltage - .9) / .1));
     equipment.select('.pe-voltage-wash').attr('r', 15 + stress * 5);
@@ -1181,18 +1199,22 @@ summary span { color:#a1a1a6; }
       this.style.opacity = String(.15 + .85 * clamp(effort * 3 - index));
     });
     equipment.select('.pe-control-arrow').attr('transform', input < 0 ? 'rotate(180 0 -4.4)' : null).attr('opacity', effort > .01 ? .85 : .2);
+    // A badge reports the physical power, never an event count or requested sum.
+    // Pending requests have no applied magnitude until the next model sample.
+    const label = activePulse && hasAttackPower ? `${Math.round(attackPowerKw)} kW` : queuedPulses > 0 ? 'Pending' : attackHeld ? 'Held' : '';
     const badge = equipment.select('.pe-attack-badge').attr('display', attacked ? null : 'none')
-      .attr('data-pulse-count', pulseCount).attr('data-queued-count', queuedPulses);
-    const showCount = pulseCount > 1;
-    badge.select('rect').attr('width', showCount ? 32 : 18);
-    badge.select('text').attr('display', showCount ? null : 'none').text(pulseCount > 99 ? '99+' : String(pulseCount));
+      .attr('data-applied-power-kw', activePulse && hasAttackPower ? attackPowerKw : null)
+      .attr('data-attack-held', String(attackHeld));
+    badge.select('rect').attr('width', label ? 27 + label.length * 5.7 : 20);
+    badge.select('text').attr('display', label ? null : 'none').text(label);
+    badge.select('title').text(activePulse && hasAttackPower ? `${Math.round(attackPowerKw)} kW applied disturbance${attackHeld ? '. Continuing while held' : ''}` : queuedPulses > 0 ? 'Disturbance pending the next sample' : attackHeld ? 'Continuous attack while held' : 'Active disturbance');
     // The one pulse token belongs to the host DOM node, not a mutable model object.
     const node = equipment.node();
-    if (data.pulseId !== undefined && data.pulseId !== null && node.__pePulseId !== data.pulseId) {
+    if (attackable && data.pulseId !== undefined && data.pulseId !== null && node.__pePulseId !== data.pulseId) {
       node.__pePulseId = data.pulseId;
       flash(equipment);
     }
-    if (data.pulseId === null) {
+    if (!attackable || data.pulseId === null) {
       node.__pePulseId = null;
       equipment.select('.pe-event-layer').selectAll('*').remove();
     }
@@ -1201,6 +1223,129 @@ summary span { color:#a1a1a6; }
 
   root.PowerEquipment = { render, update, flash };
 })(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>/* Persistent observations of actual directed prediction support.
+ * This module does not select links or change a controller.
+ */
+(function(root,factory){
+  const TopologyTimeline=factory();
+  if(typeof module==='object'&&module.exports)module.exports=TopologyTimeline;
+  else root.TopologyTimeline=TopologyTimeline;
+})(typeof globalThis!=='undefined'?globalThis:this,function(){
+  'use strict';
+  const key=edge=>edge.from+','+edge.to;
+  const copy=edges=>edges.map(({from,to})=>({from,to}));
+  const same=(a,b)=>a.length===b.length&&a.every((edge,i)=>key(edge)===key(b[i]));
+  function support(edges){
+    if(!Array.isArray(edges))throw new TypeError('Prediction support must be an array');
+    const unique=new Map();
+    for(const edge of edges){
+      if(!edge||!Number.isInteger(edge.from)||!Number.isInteger(edge.to)||edge.from<1||edge.to<1)
+        throw new TypeError('Prediction link endpoints must be positive integer bus numbers');
+      if(edge.from!==edge.to)unique.set(key(edge),Object.freeze({from:edge.from,to:edge.to}));
+    }
+    return Object.freeze([...unique.values()].sort((a,b)=>a.to-b.to||a.from-b.from));
+  }
+  function time(value){
+    if(!Number.isInteger(value)||value<0)throw new TypeError('Sample time must be a nonnegative integer');
+    return value;
+  }
+  function phase(value){
+    if(value!=='discovery'&&value!=='deployment')throw new TypeError('Unknown experiment phase');
+    return value;
+  }
+  function difference(before,after){
+    const a=new Set(before.map(key)),b=new Set(after.map(key));
+    return{
+      added:Object.freeze(after.filter(edge=>!a.has(key(edge)))),
+      removed:Object.freeze(before.filter(edge=>!b.has(key(edge))))
+    };
+  }
+  function event(index,t,before,after){
+    return Object.freeze({index,t,...difference(before,after),before,after});
+  }
+  class TopologyTimeline{
+    constructor(snapshot){this.reset(snapshot);}
+    reset(snapshot){
+      this._events=[];this._added=0;this._removed=0;this._initialized=false;
+      this._phase='discovery';this._initialT=null;this._lastT=null;
+      this._initial=support([]);this._current=this._initial;
+      if(snapshot){
+        const next=support(snapshot.recommendations),t=time(snapshot.t),nextPhase=phase(snapshot.phase);
+        this._initial=next;this._current=next;this._initialT=t;this._lastT=t;
+        this._phase=nextPhase;this._initialized=true;
+      }
+      return this;
+    }
+    observe(snapshot){
+      if(!snapshot)throw new TypeError('An experiment snapshot is required');
+      const nextPhase=phase(snapshot.phase);
+      if(!this._initialized){this.reset(snapshot);return null;}
+      // Deployment displays this completed discovery record as a frozen reference.
+      // Its fresh trial clock and resynthesized weights must not create link events.
+      if(nextPhase==='deployment'){this._phase=nextPhase;return null;}
+      if(this._phase==='deployment'){this.reset(snapshot);return null;}
+      const t=time(snapshot.t);
+      if(t<this._lastT)return null;
+      const next=support(snapshot.recommendations);
+      this._lastT=t;
+      if(same(next,this._current))return null;
+      const change=event(this._events.length+1,t,this._current,next);
+      this._events.push(change);this._current=next;
+      this._added+=change.added.length;this._removed+=change.removed.length;
+      return change;
+    }
+    get phase(){return this._phase;}
+    get frozen(){return this._phase==='deployment';}
+    get initialT(){return this._initialT;}
+    get lastT(){return this._lastT;}
+    get initial(){return this._initial;}
+    get current(){return this._current;}
+    get events(){return Object.freeze(this._events.slice());}
+    get latest(){return this._events.at(-1)||null;}
+    get cumulative(){return Object.freeze({added:this._added,removed:this._removed,
+      changes:this._added+this._removed,transitions:this._events.length});}
+    at(index){
+      if(!Number.isInteger(index)||index<0||index>this._events.length)throw new RangeError('Unknown topology history position');
+      return index===0?this._initial:this._events[index-1].after;
+    }
+    export(){
+      return{version:1,initialized:this._initialized,phase:this._phase,
+        initialT:this._initialT,lastT:this._lastT,initial:copy(this._initial),current:copy(this._current),
+        events:this._events.map(change=>({index:change.index,t:change.t,
+          added:copy(change.added),removed:copy(change.removed),before:copy(change.before),after:copy(change.after)}))};
+    }
+    restore(data){
+      if(!data||data.version!==1)throw new TypeError('Unsupported topology history version');
+      const nextPhase=phase(data.phase);
+      if(typeof data.initialized!=='boolean'||!Array.isArray(data.events))throw new TypeError('Invalid topology history');
+      const initial=support(data.initial),storedCurrent=support(data.current);
+      if(!data.initialized){
+        if(data.initialT!==null||data.lastT!==null||initial.length||storedCurrent.length||data.events.length)
+          throw new TypeError('Uninitialized topology history contains observations');
+        this.reset();this._phase=nextPhase;return this;
+      }
+      const initialT=time(data.initialT),lastT=time(data.lastT),events=[];
+      let current=initial,previousT=initialT,added=0,removed=0;
+      for(const stored of data.events){
+        const t=time(stored.t),before=support(stored.before),after=support(stored.after);
+        if(stored.index!==events.length+1||t<previousT||!same(before,current)||same(before,after))
+          throw new TypeError('Topology history is not a continuous sequence');
+        const change=event(stored.index,t,before,after);
+        if(!same(support(stored.added),change.added)||!same(support(stored.removed),change.removed))
+          throw new TypeError('Topology event changes do not match its supports');
+        events.push(change);current=after;previousT=t;
+        added+=change.added.length;removed+=change.removed.length;
+      }
+      if(lastT<previousT||!same(storedCurrent,current))throw new TypeError('Topology history endpoint does not match its events');
+      // Validate completely before replacing a valid live record.
+      this._initialized=true;this._phase=nextPhase;this._initialT=initialT;this._lastT=lastT;
+      this._initial=initial;this._current=current;this._events=events;this._added=added;this._removed=removed;
+      return this;
+    }
+  }
+  return TopologyTimeline;
+});
 </script>
 <script>(function () {
   'use strict';
@@ -1229,6 +1374,8 @@ summary span { color:#a1a1a6; }
   let nextTickAt = 0;
   let heldAttack = null;
   let snapshot = simulation.snapshot();
+  const topology = new TopologyTimeline(snapshot);
+  let historyIndex = null;
   let journal = [];
   let fitSteps = 0;
   let restored = false;
@@ -1236,7 +1383,7 @@ summary span { color:#a1a1a6; }
   let matrixReference = null;
   let lastPulse = null;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const duration = () => reducedMotion ? 0 : Math.min(900, 820 / Number($('speed').value || 1));
+  const duration = () => reducedMotion ? 0 : Math.min(900, 820 / Number($('speed').value || 8));
   function animate(selection, name = 'update') {
     selection.interrupt(name);
     return reducedMotion ? selection : selection.transition(name).duration(duration()).ease(d3.easeCubicOut);
@@ -1281,7 +1428,7 @@ summary span { color:#a1a1a6; }
   function appliedPulseLabel(bus) {
     const power=appliedPulse(bus);
     if(!power) return 'Pulse active';
-    return disturbanceName(bus)+' '+d3.format('.3~g')(power.applied)+(power.capped?' of '+d3.format('.3~g')(power.requested):'')+' kW applied';
+    return disturbanceName(bus)+' '+Math.round(power.applied)+' kW applied'+(power.capped?' · Equipment limit':'');
   }
   function disturbanceName(bus) { return busRole(bus)==='Solar' ? 'PV loss' : busRole(bus)==='Battery' ? 'Charging surge' : 'Load surge'; }
   const positions = [
@@ -1304,6 +1451,36 @@ summary span { color:#a1a1a6; }
   function captureMatrixReference() {
     matrixReference = { t:snapshot.t, fitIteration:snapshot.fitIteration, edges:new Set((snapshot.recommendations || []).map(recommendationKey)), recommendations:(snapshot.recommendations || []).map(edge => ({...edge})) };
   }
+  function advanceSample() {
+    const next=simulation.step();
+    topology.observe(next);
+    return next;
+  }
+  function topologyFrame() {
+    const event=historyIndex===null ? topology.latest : historyIndex ? topology.events[historyIndex-1] : null;
+    const links=historyIndex===null ? snapshot.recommendations : topology.at(historyIndex);
+    return {event,links,reference:new Set((event?.before || links).map(recommendationKey))};
+  }
+  function drawTopologyHistory() {
+    const total=topology.cumulative.transitions,changing=$('matrix-view').value==='change';
+    const index=historyIndex===null ? total : historyIndex;
+    const control=$('topology-history');
+    control.max=String(total);control.value=String(index);control.disabled=changing || total===0;
+    control.setAttribute('aria-valuetext',index ? 'Update '+index+' at second '+topology.events[index-1].t : 'Initial topology');
+    $('history-count').textContent=total+' link update'+(total===1?'':'s');
+    $('history-live').setAttribute('aria-pressed',String(historyIndex===null));
+    $('history-live').textContent=historyIndex===null ? 'Latest' : 'Show latest';
+    $('history-live').disabled=changing;
+    const {event}=topologyFrame();
+    const label=edges=>edges.map(e=>e.from+' → '+e.to).join(', ');
+    $('topology-note').textContent=changing ? 'Weight changes do not always change connectivity.'
+      : event ? (historyIndex===null?(snapshot.phase==='deployment'?'Last discovery':'Latest'):'Viewing')+' update at '+event.t+' s · Added '+label(event.added)+' · Removed '+label(event.removed)
+      : historyIndex===0 ? 'Initial prediction links · Move the slider to review each update.'
+      : snapshot.phase==='deployment' ? 'No link changes during discovery. Deployed links stay fixed.'
+      : snapshot.t<6 ? 'Learning starts after five samples. Each link update is kept here.'
+      : 'No links have changed yet. Learning weights may still change.';
+    $('topology-note').title=snapshot.phase==='deployment' ? 'Discovery history. The deployed controller stays fixed.' : 'History displays observed connectivity only. Reviewing an update does not change the controller.';
+  }
   function selectBus(bus) {
     selectedBus = bus;
     $('bus').value = String(bus);
@@ -1324,7 +1501,7 @@ summary span { color:#a1a1a6; }
     const events=snapshot.eventLog || [];
     const state = {
       modelContent: { scenario:'24 bus LinDistFlow voltage regulation', variant:'Completed response learning and separate sparse deployment', phase:snapshot.phase, step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
-      privateContent: { version:7, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, view:$('view').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, speed:$('speed').value, allLinks:$('all-links').checked }
+      privateContent: { version:8, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, view:$('view').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, speed:$('speed').value, allLinks:$('all-links').checked }
     };
     window.openai.setWidgetState(state).catch(() => {});
   }
@@ -1349,26 +1526,31 @@ summary span { color:#a1a1a6; }
       }
       if(step<target) {
         if(simulation.mode==='completed') simulation.extend();
-        simulation.step();
+        advanceSample();
       }
     }
   }
   function hydrate(saved) {
     const data=saved?.privateContent;
-    if(restored||!data||data.version!==7) return;
+    if(restored||!data||![7,8].includes(data.version)) return;
     restored=true;
     selectedBus=Math.max(1,Math.min(24,Math.floor(Number(data.selectedBus)||7)));
     $('bus').value=String(selectedBus);
-    $('speed').value=['0.5','1','2','4'].includes(data.speed)?data.speed:'1';
+    $('speed').value=data.version===8 && ['2','4','8','16'].includes(data.speed)?data.speed:'8';
     if(['50','100','150'].includes(data.pulseStrength)) $('strength').value=data.pulseStrength;
     $('all-links').checked=!!data.allLinks;
-    $('matrix-view').value=data.matrixView==='links'?'links':'change';
+    $('matrix-view').value=data.version===8 && data.matrixView==='change'?'change':'links';
     const preset=['reliable','uniform','mixed'].includes(data.preset)?data.preset:'mixed';
     if(data.phase==='deployment' && data.discoveryRecord) {
       simulation=new PowerDemo.Simulation(data.discoveryRecord.options || {preset});
+      topology.reset(simulation.snapshot());
       replayRecord(data.discoveryRecord);
       simulation.deployTopology();
-    } else simulation=new PowerDemo.Simulation(data.initialOptions || {preset});
+      topology.observe(simulation.snapshot());
+    } else {
+      simulation=new PowerDemo.Simulation(data.initialOptions || {preset});
+      topology.reset(simulation.snapshot());
+    }
     const initialLinks=simulation.snapshot().recommendations.map(e=>({...e}));
     replayRecord({t:data.t,events:data.events});
     snapshot=simulation.snapshot();
@@ -1384,6 +1566,7 @@ summary span { color:#a1a1a6; }
   }
 
   function releaseAttack() {
+    if(heldAttack?.owner) heldAttack.owner.dataset.holding='false';
     heldAttack = null;
     $('pulse').dataset.holding='false';
   }
@@ -1411,7 +1594,7 @@ summary span { color:#a1a1a6; }
     else {
       if(simulation.mode==='completed') simulation.extend();
       if(heldAttack && heldAttack.lastQueuedAt<simulation.t) pulse(heldAttack.bus,{repeated:true});
-      simulation.step();
+      advanceSample();
     }
     snapshot = simulation.snapshot();
     if (!isFit() && lastPulse && snapshot.t>lastPulse.t) {
@@ -1426,8 +1609,11 @@ summary span { color:#a1a1a6; }
   function resetExperiment() {
     stop(); simulation.reset();
     snapshot = simulation.snapshot(); journal = []; fitSteps = 0; pin = null; lastPulse = null;
+    if(snapshot.phase==='discovery') topology.reset(snapshot);
+    else topology.observe(snapshot);
+    historyIndex=null;
     captureMatrixReference();
-    actionNote('Click a bus to disturb its power.');
+    actionNote('Hold a bus for continuous attacks');
   }
   function toggleRun() {
     if (comparing) return;
@@ -1447,15 +1633,16 @@ summary span { color:#a1a1a6; }
     if(comparing) return;
     if(snapshot.phase==='deployment') {
       simulation=new PowerDemo.Simulation({preset:$('preset').value});resetExperiment();
-      $('matrix-view').value='change';announce('New discovery · Press Run or attack a bus');render();save();return;
+      $('matrix-view').value='links';announce('New discovery · Press Run or attack a bus');render();save();return;
     }
     if(!snapshot.canDeploy) return;
     stop();
     simulation.deployTopology(); snapshot=simulation.snapshot();
+    topology.observe(snapshot);historyIndex=null;
     journal=[]; fitSteps=0; pin=null; lastPulse=null;
     captureMatrixReference(); $('view').value='cost';
     announce('Prediction links deployed · Fresh trial at t 0');
-    actionNote('Fixed learned links · Click a bus to attack');
+    actionNote('Fixed learned links · Hold a bus to attack');
     render(); save();
   });
   $('preset').addEventListener('change', () => {
@@ -1475,7 +1662,7 @@ summary span { color:#a1a1a6; }
         for (let k=0;k<12;k++) {
           if (simulation.mode==='completed') simulation.extend();
           if(heldAttack && heldAttack.lastQueuedAt<simulation.t) pulse(heldAttack.bus,{repeated:true});
-          simulation.step();
+          advanceSample();
         }
         snapshot=simulation.snapshot();
         announce('Comparing '+(snapshot.t-start)+' / 180 steps');
@@ -1494,7 +1681,9 @@ summary span { color:#a1a1a6; }
   });
   $('speed').addEventListener('change', () => { if (playing) { clearTimeout(timer); nextTickAt=0; schedule(); } save(); });
   $('strength').addEventListener('change', () => { drawNetwork(); save(); });
-  if ($('matrix-view')) $('matrix-view').addEventListener('change',()=>{drawMatrix();save();});
+  if ($('matrix-view')) $('matrix-view').addEventListener('change',()=>{historyIndex=null;drawNetwork();drawMatrix();save();});
+  $('topology-history').addEventListener('input',()=>{historyIndex=Number($('topology-history').value);drawNetwork();drawMatrix();});
+  $('history-live').addEventListener('click',()=>{historyIndex=null;drawNetwork();drawMatrix();});
   if ($('view')) $('view').addEventListener('change', () => { renderLearningView(); drawConvergence(); drawCost(); save(); });
   $('bus').addEventListener('change', () => selectBus(Number($('bus').value)));
   $('all-links').addEventListener('change', () => { drawNetwork(); save(); });
@@ -1532,7 +1721,7 @@ summary span { color:#a1a1a6; }
     if(!playing && !comparing) {
       playing=true; nextTickAt=0; schedule();
     }
-    actionNote('Queued for the next sample · Keep clicking or hold Attack');
+    actionNote(heldAttack?'Holding bus '+selectedBus+' · Release to stop adding pulses':'Pulse queued · Hold a bus for continuous attacks');
     // Queuing an event must not restart every chart transition.
     if(!repeated) { renderControls(); drawNetwork(); save(); }
   }
@@ -1545,21 +1734,43 @@ summary span { color:#a1a1a6; }
     announce(message); actionNote(message);
     render(); save();
   }
-  function beginAttack(bus=selectedBus) {
+  function beginAttack(bus=selectedBus,owner=null) {
     if(!canAttack(bus)) return;
-    heldAttack={bus,lastQueuedAt:-1}; $('pulse').dataset.holding='true';
+    releaseAttack();
+    heldAttack={bus,lastQueuedAt:-1,owner}; $('pulse').dataset.holding='true';
+    if(owner) owner.dataset.holding='true';
     pulse(bus);
   }
-  $('pulse').addEventListener('pointerdown',event=>{
-    if(event.button!==0 || !canAttack()) return;
-    $('pulse').setPointerCapture(event.pointerId);
-    beginAttack();
-  });
-  $('pulse').addEventListener('pointerup',releaseAttack);
-  $('pulse').addEventListener('pointercancel',releaseAttack);
-  $('pulse').addEventListener('lostpointercapture',releaseAttack);
-  // Pointer activation already queued on pointerdown. Keyboard activation has detail zero.
-  $('pulse').addEventListener('click',event=>{if(event.detail===0) pulse();});
+  function bindAttackTarget(element,getBus) {
+    element.addEventListener('pointerdown',event=>{
+      if(event.button!==0 || !canAttack(getBus())) return;
+      event.preventDefault();event.stopPropagation();
+      element.setPointerCapture(event.pointerId);
+      beginAttack(getBus(),element);
+    });
+    for(const type of ['pointerup','pointercancel','lostpointercapture']) element.addEventListener(type,event=>{
+      event.stopPropagation();
+      if(heldAttack?.owner===element) {releaseAttack();renderControls();drawNetwork();save();}
+    });
+    element.addEventListener('click',event=>{
+      event.preventDefault();event.stopPropagation();
+      // Pointerdown already handled the activation. Detail zero covers assistive clicks.
+      if(event.detail===0 && !heldAttack) pulse(getBus());
+    });
+    element.addEventListener('blur',()=>{
+      if(heldAttack?.owner===element) {releaseAttack();renderControls();drawNetwork();save();}
+    });
+    element.addEventListener('keydown',event=>{
+      if(event.key==='Enter'||event.key===' ') {
+        event.preventDefault();event.stopPropagation();
+        if(!event.repeat) beginAttack(getBus(),element);
+      }
+    });
+    element.addEventListener('keyup',event=>{
+      if(event.key==='Enter'||event.key===' ') {event.preventDefault();event.stopPropagation();releaseAttack();renderControls();drawNetwork();save();}
+    });
+  }
+  bindAttackTarget($('pulse'),()=>selectedBus);
   document.addEventListener('keyup',event=>{if(event.key.toLowerCase()==='d') releaseAttack();});
   window.addEventListener('blur',releaseAttack);
   document.addEventListener('visibilitychange',()=>{
@@ -1646,7 +1857,7 @@ summary span { color:#a1a1a6; }
     const width = Math.max(240, el.getBoundingClientRect().width);
     const height = 220;
     const svg = d3.select(el).attr('viewBox', '0 0 ' + width + ' ' + height).attr('height', height)
-      .attr('role','group').attr('aria-label','Radial power feeder. Activate a bus to disturb load, solar output, or battery charging.');
+      .attr('role','group').attr('aria-label','Radial power feeder. Hold a bus for continuous load, solar or charging disturbances.');
     const point = bus => [25 + positions[bus - 1][0] * (width - 54), 26 + positions[bus - 1][1] * (height - 54)];
     if (svg.select('defs').empty()) {
       svg.append('title').text('Radial electrical feeder and prediction source links');
@@ -1661,13 +1872,13 @@ summary span { color:#a1a1a6; }
     svg.select('.physical').selectAll('line').data(PowerDemo.constants.edges).join('line')
       .attr('x1',e => point(e[0])[0]).attr('y1',e => point(e[0])[1]).attr('x2',e => point(e[1])[0]).attr('y2',e => point(e[1])[1])
       .attr('stroke','var(--foreground)').attr('stroke-opacity',.15).attr('stroke-width',1.3);
-    const recommendations = snapshot.recommendations || [];
+    const frame=topologyFrame(),recommendations=frame.links || [];
     const current = new Set(recommendations.map(recommendationKey));
-    const reference = matrixReference?.edges || current;
+    const reference = frame.reference;
     const retained = recommendations.map(edge => ({...edge, change:reference.has(recommendationKey(edge)) ? 'retained' : 'added'}));
-    const removed = (matrixReference?.recommendations || []).filter(edge => !current.has(recommendationKey(edge))).map(edge => ({...edge,change:'removed'}));
+    const removed = (frame.event?.before || []).filter(edge => !current.has(recommendationKey(edge))).map(edge => ({...edge,change:'removed'}));
     const allEdges = [...removed,...retained];
-    const edges = $('all-links').checked ? allEdges : allEdges.filter(e => e.to === selectedBus);
+    const edges = $('all-links').checked ? allEdges : allEdges.filter(e => e.to === selectedBus || e.change !== 'retained');
     const strength = d3.scaleSqrt().domain([0,Math.max(d3.max(recommendations,e => e.weight) || 0,1e-12)]).range([1,3]);
     function arc(e) {
       const a = point(e.from), b = point(e.to), dx=b[0]-a[0], dy=b[1]-a[1];
@@ -1687,8 +1898,8 @@ summary span { color:#a1a1a6; }
       .attr('marker-end',e => 'url(#pr-arrow-'+e.change+')');
     animate(links).attr('d',arc)
       .attr('stroke',e => color(e.change === 'retained' ? 'var(--viz-series-1)' : matrixColors[e.change]))
-      .attr('stroke-width',e => e.change === 'removed' ? 1.1 : strength(e.weight))
-      .attr('opacity',e => e.to === selectedBus ? (e.change === 'removed' ? .5 : .88) : e.change === 'removed' ? .1 : .14);
+      .attr('stroke-width',e => e.change !== 'retained' ? 2.5 : Number.isFinite(e.weight)?strength(e.weight):1.5)
+      .attr('opacity',e => e.change !== 'retained' ? .95 : e.to === selectedBus ? .7 : .12);
     const nodes = svg.select('.nodes').selectAll('g.bus-node').data(d3.range(1,25),bus => bus).join(enter => {
       const g=enter.append('g').attr('class','bus-node').attr('role','button').attr('tabindex',0)
         .style('cursor','pointer').style('user-select','none');
@@ -1696,14 +1907,14 @@ summary span { color:#a1a1a6; }
       g.append('text').attr('class','fault-mark').attr('pointer-events','none');
       if (window.PowerEquipment) g.each(function(bus){PowerEquipment.render(d3.select(this),busRole(bus));});
       g.append('title');
+      g.each(function(bus){bindAttackTarget(this,()=>bus);});
       return g;
     }).attr('transform',bus => 'translate('+point(bus).join(',')+')')
       .attr('data-bus',bus => bus).attr('data-role',bus => busRole(bus))
-      .attr('aria-label',bus => bus===1 ? 'Fixed substation at bus 1' : 'Inject pulse at bus '+bus)
-      .attr('aria-description',bus => busRole(bus)+', '+busVoltage(bus).toFixed(4)+' pu'+(pulseStatus(bus).queued ? ', pulse queued' : ''))
+      .attr('aria-label',bus => bus===1 ? 'Fixed substation at bus 1' : 'Hold to attack bus '+bus)
+      .attr('aria-description',bus => busRole(bus)+', '+busVoltage(bus).toFixed(4)+' pu'+(appliedPulse(bus)?', '+appliedPulseLabel(bus):pulseStatus(bus).queued?', pulse pending':''))
       .attr('aria-disabled',bus => String(!canAttack(bus)))
       .style('cursor',bus=>canAttack(bus) ? 'pointer' : 'default')
-      .on('click',(event,bus) => { event.preventDefault(); event.stopPropagation(); pulse(bus); })
       .on('pointerenter',function(_event,bus) {
         showBusDetail(bus,true);
       })
@@ -1711,29 +1922,30 @@ summary span { color:#a1a1a6; }
       .on('focus',function(_event,bus) {
         showBusDetail(bus,true);
       })
-      .on('blur',function() { showBusDetail(selectedBus); })
-      .on('keydown',(event,bus) => {
-        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); pulse(bus); }
-      });
+      .on('blur',function() { showBusDetail(selectedBus); });
     nodes.each(function(bus){
       if (!window.PowerEquipment) return;
       const status=pulseStatus(bus);
       PowerEquipment.update(d3.select(this),{
         voltage:busVoltage(bus),referenceVoltage:referenceVoltage(bus),input:reactivePower(bus),
         inputScale:PowerDemo.constants.busProfiles?.[bus-1]?.inverterKvar || 100,selected:bus===selectedBus,activePulse:status.active,activePulses:status.activeCount,queuedPulses:status.queued,
-        pulseId:status.id,phase:snapshot.t
+        pulseId:status.id,phase:snapshot.t,attackPowerKw:appliedPulse(bus)?.applied,attackHeld:heldAttack?.bus===bus
       });
+      const badge=d3.select(this).select('.pe-attack-badge');
+      const badgeWidth=Number(badge.select('rect').attr('width')) || 60;
+      badge.attr('transform','translate('+(point(bus)[0]>width-95 ? -badgeWidth-10 : 13)+' -16)');
     });
     nodes.select('.bus-number').attr('text-anchor','middle').attr('x',0).attr('y',27)
       .style('fill','var(--muted-foreground)').style('font-size','9px').text(bus=>bus);
     nodes.select('.fault-mark').attr('x',17).attr('y',-12).text(bus=>snapshot.faults.includes(bus)?'×':'');
-    nodes.select('title').text(bus=>busRole(bus)+' · Bus '+bus+' · '+busVoltage(bus).toFixed(4)+' pu · '+powerDescription(bus)+(hasInverter(bus)?' · Q '+reactivePower(bus).toFixed(0)+' kvar':'')+'. '+(bus===1?'Fixed voltage substation.':disturbanceName(bus)+' '+pulseMagnitude($('strength').value)+' requested. Repeated clicks stack within equipment limits.'));
+    nodes.select('title').text(bus=>busRole(bus)+' · Bus '+bus+' · '+busVoltage(bus).toFixed(4)+' pu · '+powerDescription(bus)+(hasInverter(bus)?' · Q '+reactivePower(bus).toFixed(0)+' kvar':'')+'. '+(bus===1?'Fixed voltage substation.':disturbanceName(bus)+' '+pulseMagnitude($('strength').value)+' requested. Hold for continuous attacks. Release to stop adding pulses.'));
     showBusDetail(selectedBus);
     const voltages=d3.range(1,25).map(bus=>busVoltage(bus));
     const low=Math.min(...voltages), high=Math.max(...voltages);
     const inRange=low>=.95 && high<=1.05;
     const nearNominal=voltages.every((voltage,index)=>Math.abs(voltage-referenceVoltage(index+1))<.001);
-    if (lastPulse && snapshot.t>lastPulse.t) actionNote(pulseStatus(lastPulse.bus).active ? appliedPulseLabel(lastPulse.bus) : nearNominal ? 'Near nominal profile · Click to attack' : 'Restoring the nominal profile');
+    if(heldAttack) actionNote('Holding bus '+heldAttack.bus+' · Release to stop adding pulses');
+    else if (lastPulse && snapshot.t>lastPulse.t) actionNote(pulseStatus(lastPulse.bus).active ? appliedPulseLabel(lastPulse.bus) : nearNominal ? 'Near nominal · Hold a bus to attack' : 'Restoring the nominal profile');
     if ($('voltage-range')) $('voltage-range').textContent=low.toFixed(3)+' to '+high.toFixed(3)+' pu';
     if ($('voltage-status')) {
       $('voltage-status').title=inRange ? 'Within illustrative band' : 'Restoring voltage';
@@ -1747,7 +1959,7 @@ summary span { color:#a1a1a6; }
     const status=pulseStatus(bus);
     $('bus-detail').textContent='Bus '+bus+' · '+busVoltage(bus).toFixed(4)+' pu · '+powerDescription(bus)
       +(hasInverter(bus)?' · Q '+reactivePower(bus).toFixed(0)+' kvar':'')
-      +(status.queued?' · '+status.queued+' queued':hovered && canAttack(bus)?' · Click to attack':'');
+      +(status.queued?' · '+status.queued+' queued':hovered && canAttack(bus)?' · Hold to keep attacking':'');
   }
 
   function drawMatrix() {
@@ -1758,19 +1970,17 @@ summary span { color:#a1a1a6; }
     const changing=$('matrix-view').value==='change', deployed=snapshot.phase==='deployment';
     const width=Math.max(240,el.getBoundingClientRect().width),height=188;
     const left=40,top=35,cellWidth=(width-left-8)/sources.length,cellHeight=17;
-    const recommendations=snapshot.recommendations || [],current=new Set(recommendations.map(recommendationKey));
-    const added=[...current].filter(key=>!matrixReference.edges.has(key)),removed=[...matrixReference.edges].filter(key=>!current.has(key));
+    const frame=topologyFrame(),recommendations=frame.links || [],current=new Set(recommendations.map(recommendationKey));
+    $('matrix-title').textContent=historyIndex===null ? (deployed?'Deployed prediction links':'Learning prediction links') : 'Prediction links at '+(frame.event?.t ?? topology.initialT)+' s';
+    const added=[...current].filter(key=>!frame.reference.has(key)),removed=[...frame.reference].filter(key=>!current.has(key));
     const gainPercent=100*(diagnostics?.relativeGainChange || 0);
     const replaced=diagnostics?.changedLinkCount || 0;
     const matrixReceiver=hasInverter(selectedBus)?selectedBus:null;
     const selectedSources=recommendations.filter(e=>e.to===selectedBus).map(e=>e.from).sort((a,b)=>a-b);
     $('matrix-detail').textContent=changing ? 'Coefficient change '+d3.format('.3~g')(gainPercent)+'%' : matrixReceiver ? 'Inverter '+selectedBus+' ← '+selectedSources.join(', ') : 'Eight inverter receivers';
-    $('matrix-changes').textContent=added.length+' added · '+removed.length+' removed';
-    $('matrix-changes').title='Compared with the displayed reference at t '+matrixReference.t+' s';
-    $('topology-note').textContent=deployed ? (changing?'Discovery result retained. Deployed links stay fixed.':'Links stay fixed in this trial. Learn again starts new discovery.')
-      : !diagnostics?.completedRows ? 'Updates begin after five samples. Then weights and links can change.'
-      : changing ? 'Color shows learned weight change. Outlined cells are selected.'
-      : 'Weights can change while the selected sources stay the same.';
+    $('matrix-changes').textContent=(deployed?(historyIndex===null?'Fixed deployment · ':'Discovery history · '):'')+added.length+' added · '+removed.length+' removed';
+    $('matrix-changes').title='Changes in the displayed topology update';
+    drawTopologyHistory();
     const delta=diagnostics?.receiverNormalizedChange || receivers.map(()=>sources.map(()=>0));
     const maximum=Math.max(.0001,...delta.flat().map(v=>Math.abs(v)));
     const shade=d3.scaleLinear().domain([-maximum,0,maximum]).range(['#c56c1b','#f5f5f7','#0071e3']).clamp(true);
@@ -1782,7 +1992,8 @@ summary span { color:#a1a1a6; }
     }
     const svg=d3.select(el).attr('viewBox','0 0 '+width+' '+height).attr('height',height)
       .attr('role','group').attr('aria-label',changing?'Learning changes in predictive response weights':'Selected prediction sources for eight inverter receivers')
-      .attr('data-gain-change',gainPercent).attr('data-source-changes',added.length).attr('data-offline-source-changes',replaced);
+      .attr('data-gain-change',gainPercent).attr('data-source-changes',added.length).attr('data-offline-source-changes',replaced)
+      .attr('data-history-index',historyIndex===null?'latest':historyIndex).attr('data-topology-updates',topology.cumulative.transitions);
     if(svg.select('.matrix-cells').empty()) {
       svg.append('title');svg.append('text').attr('class','matrix-source-title matrix-axis');
       svg.append('text').attr('class','matrix-receiver-title matrix-axis');
@@ -1796,7 +2007,7 @@ summary span { color:#a1a1a6; }
     svg.select('.matrix-columns').selectAll('text').data(sources).join('text').attr('x',(_,i)=>left+(i+.5)*cellWidth).attr('y',top-8).attr('text-anchor','middle').text(bus=>bus);
     const cells=receivers.flatMap((receiver,i)=>sources.map((source,j)=>{
       const id=receiver+','+source,local=receiver===source,connected=local||current.has(id);
-      const change=local?'local':current.has(id)?(matrixReference.edges.has(id)?'retained':'added'):matrixReference.edges.has(id)?'removed':'inactive';
+      const change=local?'local':current.has(id)?(frame.reference.has(id)?'retained':'added'):frame.reference.has(id)?'removed':'inactive';
       return {receiver,source,i,j,local,connected,change,delta:delta[i]?.[j] || 0};
     }));
     const marks=svg.select('.matrix-cells').selectAll('rect').data(cells,d=>d.receiver+','+d.source).join(enter=>{const r=enter.append('rect').attr('class','matrix-cell');r.append('title');return r;})
@@ -1934,14 +2145,15 @@ summary span { color:#a1a1a6; }
     const groups=[];
     for(const item of events) {
       const x=chart.x(item.t+1), previous=groups.at(-1);
-      if(previous && x-previous.right<42) {previous.items.push(item);previous.right=x;}
+      if(previous && x-previous.right<78) {previous.items.push(item);previous.right=x;}
       else groups.push({left:x,right:x,items:[item]});
     }
     groups.forEach(group=>{
       const first=group.items[0]; group.key=first.t+'_'+first.type+'_'+first.bus;
       group.attacks=group.items.filter(item=>item.type==='pulse').length;
       group.count=group.attacks || group.items.length;
-      group.width=group.count>1 ? 25+String(group.count).length*7 : 22;
+      group.label=group.attacks?(group.count>1?'Attacks':'Attack'):'Forecast';
+      group.width=24+group.label.length*6;
       group.x=Math.max(chart.frame.x+group.width/2,Math.min(chart.frame.x+chart.frame.w-group.width/2,(group.left+group.right)/2));
     });
     const markers=chart.marks.selectAll('g.intervention-markers').data([null]).join('g').attr('class','intervention-markers');
@@ -1964,13 +2176,13 @@ summary span { color:#a1a1a6; }
       .attr('fill',g=>g.attacks?'var(--attack)':'#687580');
     labels.select('path').attr('transform',g=>'translate('+(-g.width/2+4)+',-8) scale(.7)')
       .attr('d',g=>g.attacks?'M14 1 3 13h7l-1 10L21 9h-8z':'M10 2h4v12h-4z M10 17h4v4h-4z').attr('fill','#fff');
-    labels.select('text').attr('x',10).attr('y',.5).attr('text-anchor','middle').attr('dominant-baseline','middle')
-      .style('font-size','11px').style('font-weight','650').style('fill','#fff').text(g=>g.count>1?g.count:'');
+    labels.select('text').attr('x',8).attr('y',.5).attr('text-anchor','middle').attr('dominant-baseline','middle')
+      .style('font-size','11px').style('font-weight','650').style('fill','#fff').text(g=>g.label);
     labels.select('title').text(g=>{
       const details=g.items.slice(-8).map(item=>item.type==='pulse'
         ? pulseMagnitude(item.strength || 100)+' at bus '+item.bus+' · Voltage and cost at t '+(item.t+1)+' s'
         : 'Forecast changed at bus '+item.bus+' · t '+(item.t+1)+' s');
-      return g.attacks+' attacks'+(g.items.length>8?' · Latest 8 events shown':'')+'\n'+details.join('\n');
+      return g.attacks+' individual pulses in this shaded interval'+(g.items.length>8?' · Latest 8 events shown':'')+'\n'+details.join('\n');
     });
   }
   function drawCost() {
@@ -2004,7 +2216,7 @@ summary span { color:#a1a1a6; }
     return Math.abs(percent)<.05 ? 'Nearly equal' : d3.format('.1f')(Math.abs(percent))+'% '+(percent<0?'lower':'higher');
   }
 
-  function responseWindow() { return [Math.max(0,snapshot.t-30),Math.max(1,snapshot.t)]; }
+  function responseWindow() { return [Math.max(0,snapshot.t-80),Math.max(1,snapshot.t)]; }
   function drawStage() {
     if (!$('stage')) return;
     const domain=responseWindow();
@@ -2098,12 +2310,12 @@ summary span { color:#a1a1a6; }
   announce('Ready');
   hydrate(window.openai?.widgetState);
   if (!matrixReference) captureMatrixReference();
-  actionNote(snapshot.pendingPulses?.length ? 'Pulse queued · Run or Step' : 'Click a bus to queue a disturbance');
+  actionNote(snapshot.pendingPulses?.length ? 'Pulse queued · Run or Step' : 'Hold a bus for continuous attacks');
   window.addEventListener('openai:set_globals',e=>{if(!playing&&!restored&&!journal.length){hydrate(e.detail?.globals?.widgetState);render();}});
   new ResizeObserver(()=>render()).observe(root);
   render();
   // A read only inspection hook supports deterministic browser verification.
-  root.powerDemo = { getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,playing,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null}) };
+  root.powerDemo = { getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,playing,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null,topology:topology.export(),historyIndex}) };
 })();
 </script>
 </body>
