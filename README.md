@@ -4,6 +4,12 @@
 
 The environment document describes the feeder, power disturbances, units and evaluation quantities. The website keeps the experiment itself central.
 
+## Interaction
+
+Click a bus or Attack to add a pulse and start playback. Repeated clicks add pulses without restarting the clock. Hold Attack or the D key for one pulse per simulation sample. Releasing stops the repeated attacks and leaves playback running. Pause stops both. Orange lightning badges show individual or grouped attack counts, while shaded plot intervals locate the disturbances.
+
+The prediction matrix shows eight inverter receivers and 23 source buses. Learning change displays the signed change in realizing gain energy relative to the offline energy of the same completed rows. Its color scale is shown explicitly and selected sources remain outlined. Coefficient change is the relative Frobenius norm of the actual learned gain correction. Selected links shows only the connectivity. Learning weights may change without changing the strongest sources. During deployment both the selected support and retained discovery diagnostic stay fixed. Learn again starts new discovery.
+
 ## Execution contract
 
 Discovery follows the delayed update printed in Algorithm 1 of `manuscript.tex`. Predictions of the canonical disturbance are issued once and retained. After applying the bounded command, the observed next state reveals the actual disturbance. At round t, only completed rows through t − d are updated, with the gradient evaluated at the stored iterate from t − d. The projection preserves the printed temporal support set.
@@ -36,6 +42,7 @@ The checked in `index.html`, `environment.html` and bundled assets deploy direct
 ```sh
 python3 build.py
 node src/test-simulation.cjs
+node src/test-interactions.cjs
 node src/benchmark.cjs --json
 python3 -m http.server 8000
 ```

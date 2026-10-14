@@ -276,6 +276,7 @@
         stepSize:null,fitError:null,rawRms:null,calibratedRms:null,windowStart:null,windowEnd:null,windowSize:0};
       this.fit=null;this.fitHistory=[];this.fitError=null;this.fitObjective=null;this.fitIteration=0;
       this.drift=0;this.changedEdges=0;this.sinceStable=0;this.lastTrainingTime=null;this.lastTrainingSampleCount=0;
+      this.directGain=null;this.recommendations=[];
       this.refreshScores();this.sealPreview();return this.snapshot();
     }
     addSegment(start,length){
@@ -379,14 +380,18 @@
       this.lastTrainingTime=this.learning.windowEnd;this.lastTrainingSampleCount=this.rows.length;
     }
     refreshScores(){
-      let scores=zeros(M,N-1);
+      let scores=zeros(M,N-1),baselineScores=zeros(M,N-1),gainChangeSquared=0;
       if(this.phase==='deployment'){
         const segment=this.segments.find(s=>this.t>=s.start&&this.t<s.end)||this.segments.at(-1);
         scores=Response.scores(segment.designs.online).map(row=>row.map(v=>v/segment.length));
       }else if(this.rows.length){
-        for(const row of this.rows)for(let i=0;i<M;i++)for(let j=0;j<N-1;j++)
+        for(const row of this.rows)for(let i=0;i<M;i++)for(let j=0;j<N-1;j++){
           scores[i][j]+=row.score0[i][j]+row.beta*row.score1[i][j]+row.beta*row.beta*row.score2[i][j];
+          baselineScores[i][j]+=row.score0[i][j];
+          gainChangeSquared+=row.beta*row.beta*row.score2[i][j];
+        }
         scores=scores.map(row=>row.map(v=>Math.max(0,v)/this.rows.length));
+        baselineScores=baselineScores.map(row=>row.map(v=>v/this.rows.length));
       }else scores=this.segments[0].offlineScores.map(row=>row.map(v=>v/this.segments[0].length));
       const selection=Response.supportFromScores(scores,INVERTER_BUSES,REMOTE_BUDGET),gain=scoreGain(scores);
       const next=this.phase==='deployment'?this.deployedSupport.links.map(e=>({...e,weight:scores[INVERTER_BUSES.indexOf(e.to)][e.from-2]})):selection.links;
@@ -395,6 +400,29 @@
         this.changedEdges=edgeChanges(this.recommendations,next);this.sinceStable=this.changedEdges===0?this.sinceStable+1:0;
       }
       this.directGain=gain;this.recommendations=next.map(e=>({...e}));this.predictionScores=scores;
+      if(this.phase==='deployment'){
+        this.predictionDiagnostics=deepFreeze({...this.deployedSupport.discoveryDiagnostics,frozen:true});
+      }else{
+        // Compare learned and offline gains on exactly the same completed rows.
+        // Dividing by each receiver's total energy also covers initially zero
+        // channels without inventing a relative percentage or a denominator floor.
+        const count=this.rows.length,learnedScores=count?scores:zeros(M,N-1);
+        const receiverEnergy=baselineScores.map(row=>row.reduce((sum,v)=>sum+v,0));
+        const baselineEnergy=receiverEnergy.reduce((sum,v)=>sum+v,0);
+        const energyChange=learnedScores.map((row,i)=>row.map((v,j)=>v-baselineScores[i][j]));
+        const relativeEnergyChange=energyChange.map((row,i)=>row.map((v,j)=>baselineScores[i][j]>0?v/baselineScores[i][j]:null));
+        const receiverNormalizedChange=energyChange.map((row,i)=>row.map(v=>receiverEnergy[i]>0?v/receiverEnergy[i]:0));
+        const offlineLinks=count?Response.supportFromScores(baselineScores,INVERTER_BUSES,REMOTE_BUDGET).links:[];
+        const offlineKeys=new Set(offlineLinks.map(e=>e.to+','+e.from)),learnedKeys=new Set(count?selection.links.map(e=>e.to+','+e.from):[]);
+        const addedLinkCount=[...learnedKeys].filter(key=>!offlineKeys.has(key)).length;
+        const removedLinkCount=[...offlineKeys].filter(key=>!learnedKeys.has(key)).length;
+        this.predictionDiagnostics=deepFreeze({available:count>0,frozen:false,completedRows:count,
+          receiverBuses:INVERTER_BUSES.slice(),sourceBuses:Array.from({length:N-1},(_,i)=>i+2),
+          baselineScores,learnedScores,energyChange,relativeEnergyChange,receiverNormalizedChange,
+          relativeGainChange:baselineEnergy>0?Math.sqrt(gainChangeSquared/(count*baselineEnergy)):null,
+          overallRelativeEnergyChange:baselineEnergy>0?energyChange.flat().reduce((sum,v)=>sum+v,0)/baselineEnergy:null,
+          offlineLinks,addedLinkCount,removedLinkCount,changedLinkCount:addedLinkCount+removedLinkCount});
+      }
     }
     step(){
       if(this.mode!=='running')return this.snapshot();
@@ -477,7 +505,8 @@
       const offline=zeros(M,N-1);for(const segment of this.segments)addScores(offline,segment.offlineScores);
       const fixed=Response.supportFromScores(offline,INVERTER_BUSES,REMOTE_BUDGET);
       this.deployedSupport=deepFreeze({learned:learned.support,fixed:fixed.support,links:learned.links,fixedLinks:fixed.links,
-        scores:this.predictionScores.map(row=>row.slice()),completedRows:this.rows.length,discoveryTime:this.t});
+        scores:this.predictionScores.map(row=>row.slice()),completedRows:this.rows.length,discoveryTime:this.t,
+        discoveryDiagnostics:this.predictionDiagnostics});
       this.phase='deployment';this.initialOptions={...this.discoveryRecord.options,
         seed:(this.discoveryRecord.options.seed^0x9E3779B9)>>>0};return this.reset();
     }
@@ -500,7 +529,7 @@
         ...Object.fromEntries(Object.entries(this.power).map(([key,value])=>[key,value.slice()])),powerDeviation:this.powerDeviation.slice(),
         edgeData:model.edgeData.map((edge,i)=>({...edge,pKw:flows.online[i].pKw,qKvar:Object.fromEntries(CONTROLLERS.map(key=>[key,flows[key][i].qKvar]))})),
         lastPulseApplications:this.lastPulseApplications.map(p=>({...p})),costStates:Object.fromEntries(CONTROLLERS.map(key=>[key,this.costStates[key].slice()])),
-        learning:{...this.learning},lastPreview:this.lastPreview.slice(),
+        learning:{...this.learning},predictionDiagnostics:this.predictionDiagnostics,lastPreview:this.lastPreview.slice(),
         pendingPulses:this.pulses.filter(e=>e.age===0).map(e=>({...e})),activePulses:this.pulses.filter(e=>e.age>0).map(e=>({...e})),
         states:Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].slice()])),
         regulationStates:Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].map((v,i)=>v-model.baseDrop[i])])),

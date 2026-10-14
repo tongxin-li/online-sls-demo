@@ -11,6 +11,7 @@
  *   inputScale: 100,   // Inverter reactive capability in kvar for the effort display.
  *   selected: false,
  *   activePulse: false,
+ *   activePulses: 0,   // Optional number of overlapping applied pulses at this bus.
  *   queuedPulses: 0,   // Requests waiting for the next physical model sample.
  *   pulseId: null,     // Change for EVERY applied pulse, even in the same step.
  *   phase: 0           // Optional simulation step. Recorded, not invented motion.
@@ -40,6 +41,7 @@
     host.selectAll('.pe-hit').remove();
     host.insert('circle', ':first-child').attr('class', 'pe-hit').attr('r', 21);
     equipment = host.append('g').attr('class', 'pe-root').attr('data-equipment', role).attr('aria-hidden', 'true');
+    equipment.append('circle').attr('class', 'pe-attack-halo').attr('r', 22);
     equipment.append('circle').attr('class', 'pe-voltage-wash').attr('r', 16);
     equipment.append('circle').attr('class', 'pe-disc').attr('r', 13.5);
     equipment.append('circle').attr('class', 'pe-voltage-ring').attr('r', 14.5);
@@ -82,10 +84,13 @@
     const target = equipment.append('g').attr('class', 'pe-target');
     path(target, 'pe-target-brackets', 'M-18-8V-13Q-18-18-13-18H-8M8-18H13Q18-18 18-13V-8M18 8V13Q18 18 13 18H8M-8 18H-13Q-18 18-18 13V8');
     path(target, 'pe-target-bolt', 'M12-22L7-14H12L9-7L19-17H14L17-22Z');
-    const queued = equipment.append('g').attr('class', 'pe-queued').attr('transform', 'translate(12 -11)').attr('display', 'none');
-    queued.append('circle').attr('r', 4.8);
-    queued.append('text').attr('text-anchor', 'middle').attr('dy', '0.35em');
     equipment.append('g').attr('class', 'pe-event-layer');
+    // This badge remains visible for the full physical disturbance. It is not
+    // tied to an animation frame or hidden when a short impact burst ends.
+    const attack = equipment.append('g').attr('class', 'pe-attack-badge').attr('transform', 'translate(13 -14)').attr('display', 'none');
+    attack.append('rect').attr('x', -9).attr('y', -9).attr('width', 18).attr('height', 18).attr('rx', 9);
+    path(attack, 'pe-attack-bolt', 'M1.4-6.3L-4.4 1H-.9L-2 6.1L4.8-1.8H1L3.1-6.3Z');
+    attack.append('text').attr('x', 13).attr('y', .4).attr('text-anchor', 'middle').attr('dominant-baseline', 'middle');
     return equipment;
   }
 
@@ -94,9 +99,9 @@
     layer.selectAll('*').remove();
     // New SVG nodes restart the burst even on repeated clicks in one step.
     const burst = layer.append('g').attr('class', 'pe-burst');
-    burst.append('circle').attr('class', 'pe-burst-ring').attr('r', 13.5);
-    path(burst, 'pe-burst-rays', 'M0-19V-25M13.4-13.4L17.7-17.7M19 0H25M13.4 13.4L17.7 17.7M0 19V25M-13.4 13.4L-17.7 17.7M-19 0H-25M-13.4-13.4L-17.7-17.7');
-    path(burst, 'pe-burst-bolt', 'M4-19L-5-5H2L-2 6L10-10H3L8-19Z');
+    burst.append('circle').attr('class', 'pe-burst-ring').attr('r', 16);
+    path(burst, 'pe-burst-rays', 'M0-21V-28M14.8-14.8L19.8-19.8M21 0H28M14.8 14.8L19.8 19.8M0 21V28M-14.8 14.8L-19.8 19.8M-21 0H-28M-14.8-14.8L-19.8-19.8');
+    path(burst, 'pe-burst-bolt', 'M3-15L-7-1H-.7L-3.2 11L10-6H3L7-15Z');
   }
 
   function update(host, data = {}) {
@@ -107,12 +112,16 @@
     const inputScale = Math.max(Math.abs(finite(data.inputScale, 100)), 1e-9);
     const effort = clamp(Math.abs(input) / inputScale);
     const queuedPulses = Math.max(0, Math.floor(finite(data.queuedPulses, 0)));
+    const activePulses = Math.max(0, Math.floor(finite(data.activePulses, data.activePulse ? 1 : 0)));
+    const attacked = Boolean(data.activePulse) || queuedPulses > 0 || activePulses > 0;
+    const pulseCount = queuedPulses + activePulses;
     const reference = finite(data.referenceVoltage, 1);
     const stress = clamp(Math.abs(voltage - reference) / .025);
     const voltageColor = voltage < .95 || voltage > 1.05 || stress > .6 ? '#be793e' : stress > .25 ? '#859454' : '#4c816b';
     equipment.attr('data-voltage', voltage).attr('data-control', input)
       .attr('data-phase', finite(data.phase, 0)).attr('data-pulse-active', String(Boolean(data.activePulse)))
       .classed('pe-selected', Boolean(data.selected)).classed('pe-pulse-active', Boolean(data.activePulse))
+      .classed('pe-attacked', attacked).classed('pe-pulse-queued', queuedPulses > 0)
       .style('--pe-voltage-color', voltageColor).style('--pe-voltage-opacity', .04 + stress * .2)
       .style('--pe-window-opacity', .35 + .65 * clamp((voltage - .9) / .1));
     equipment.select('.pe-voltage-wash').attr('r', 15 + stress * 5);
@@ -122,8 +131,11 @@
       this.style.opacity = String(.15 + .85 * clamp(effort * 3 - index));
     });
     equipment.select('.pe-control-arrow').attr('transform', input < 0 ? 'rotate(180 0 -4.4)' : null).attr('opacity', effort > .01 ? .85 : .2);
-    equipment.select('.pe-queued').attr('display', queuedPulses ? null : 'none');
-    equipment.select('.pe-queued text').text(queuedPulses > 9 ? '+' : String(queuedPulses));
+    const badge = equipment.select('.pe-attack-badge').attr('display', attacked ? null : 'none')
+      .attr('data-pulse-count', pulseCount).attr('data-queued-count', queuedPulses);
+    const showCount = pulseCount > 1;
+    badge.select('rect').attr('width', showCount ? 32 : 18);
+    badge.select('text').attr('display', showCount ? null : 'none').text(pulseCount > 99 ? '99+' : String(pulseCount));
     // The one pulse token belongs to the host DOM node, not a mutable model object.
     const node = equipment.node();
     if (data.pulseId !== undefined && data.pulseId !== null && node.__pePulseId !== data.pulseId) {

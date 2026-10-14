@@ -243,6 +243,43 @@ test('only inverter receivers and physical nonslack source channels are ranked w
   for(let bus=1;bus<=24;bus++)if(!constants.inverterBuses.includes(bus))assert.deepEqual(s.directGain[bus-1],Array(24).fill(0));
 });
 
+test('learning visibility compares reconstructed realizing gains on the same completed rows and remains frozen after deployment',()=>{
+  const sim=new Simulation({horizon:70});
+  assert.equal(sim.snapshot().predictionDiagnostics.available,false);
+  assert.equal(sim.snapshot().predictionDiagnostics.relativeGainChange,null);
+  for(let t=0;t<45;t++){if(t===20||t===21)sim.queuePulse(7,100);sim.step();}
+  const diagnostic=sim.snapshot().predictionDiagnostics,baseline=zeros(8,23),learned=zeros(8,23);
+  let changeSquared=0,baselineSquared=0;
+  for(const row of sim.rows)for(let b=0;b<row.blocks.length;b++){
+    const block=row.blocks[b];
+    const X=block.X.map((line,i)=>line.map((v,j)=>v+row.beta*row.ex[i]*row.h[b][j]));
+    const U=block.U.map((line,i)=>line.map((v,j)=>v+row.beta*row.eu[i]*row.h[b][j]));
+    const actual=combine(U,multiply(model.K,X),1,-1),offline=combine(block.U,multiply(model.K,block.X),1,-1);
+    for(let i=0;i<8;i++)for(let j=0;j<23;j++){
+      baseline[i][j]+=offline[i][j]**2/sim.rows.length;
+      learned[i][j]+=actual[i][j]**2/sim.rows.length;
+      changeSquared+=(actual[i][j]-offline[i][j])**2;baselineSquared+=offline[i][j]**2;
+    }
+  }
+  assert.deepEqual(diagnostic.receiverBuses,constants.inverterBuses);
+  assert.deepEqual(diagnostic.sourceBuses,Array.from({length:23},(_,i)=>i+2));
+  assert.equal(diagnostic.completedRows,sim.rows.length);assert.ok(diagnostic.relativeGainChange>0);
+  assert.ok(distance(diagnostic.baselineScores,baseline)/frobenius(baseline)<1e-12);
+  assert.ok(distance(diagnostic.learnedScores,learned)/frobenius(learned)<1e-12);
+  assert.ok(Math.abs(diagnostic.relativeGainChange-Math.sqrt(changeSquared/baselineSquared))<1e-12);
+  for(let i=0;i<8;i++)for(let j=0;j<23;j++){
+    const delta=learned[i][j]-baseline[i][j],total=baseline[i].reduce((sum,v)=>sum+v,0);
+    assert.ok(Math.abs(diagnostic.receiverNormalizedChange[i][j]-delta/total)<1e-12);
+    if(baseline[i][j]===0)assert.equal(diagnostic.relativeEnergyChange[i][j],null);
+  }
+  assert.ok(diagnostic.relativeEnergyChange.flat().some(v=>v===null));
+  assert.ok(Object.isFrozen(diagnostic.receiverNormalizedChange[0]));
+  sim.freeze();sim.fitStep(12);assert.deepEqual(sim.snapshot().predictionDiagnostics,diagnostic);sim.resume();
+  const fresh=sim.deployTopology();assert.deepEqual(fresh.predictionDiagnostics,{...diagnostic,frozen:true});
+  const deployed=fresh.predictionDiagnostics;sim.queuePulse(23,100);run(sim,10);
+  assert.deepEqual(sim.snapshot().predictionDiagnostics,deployed);
+});
+
 test('independent nonlinear AC reference validates representative physical cases and loss balance',()=>{
   const cases=[new Simulation().snapshot()];for(const bus of [3,7,12,23,24]){const sim=new Simulation();run(sim,40);sim.queuePulse(bus,150);for(let t=0;t<5;t++)cases.push(sim.step());}
   let maxError=0;

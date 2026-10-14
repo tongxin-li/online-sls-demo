@@ -155,3 +155,20 @@ summary span { color:#a1a1a6; }
 .pr-phase-badge[data-phase='deployment'] { color:#0071e3; background:#edf5fe; }
 .btn-deploy { min-height:30px; padding:4px 10px; color:var(--primary); background:#edf5fe; }
 @media(max-width:650px) { .pr-phase-actions { margin-left:0; width:100%; justify-content:space-between; } }
+
+.pr-attack-hint { font-size:10px; color:var(--muted-foreground); }
+.btn-attack { background:#fff0de; color:#a34a00; min-width:150px; min-height:38px; }
+.btn-attack svg { width:21px; height:21px; }
+.btn-attack[data-holding='true'] { background:#bd570a; color:#fff; box-shadow:0 0 0 4px #bd570a18; }
+#pr-matrix-view { min-height:27px; padding:3px 7px; font-size:11px; }
+#pr-matrix-key { min-height:24px; justify-content:flex-end; font-size:10px; gap:12px; }
+#pr-matrix-key .change-scale { display:none; }
+.pr-cell-key.decreased { background:#c56c1b; }
+.pr-cell-key.increased { background:#0071e3; }
+.pr-cell-key.outline { border:1px solid #404047; width:9px; height:9px; }
+#pr-topology-note { min-height:15px; font-size:10px; }
+.pr-chart .matrix-columns text,.pr-chart .matrix-rows text { font-size:10px; }
+.intervention-badge { pointer-events:auto; }
+@media(max-width:650px) { .pr-attack-hint { font-size:9px; } .btn-attack { min-width:132px; } #pr-matrix-key { gap:8px; font-size:9px; } .pr-chart .matrix-columns text { font-size:8px; } }
+
+@media(max-width:380px) { .pr-attack-hint { display:none; } .pr-actions { gap:6px; } }
