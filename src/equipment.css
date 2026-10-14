@@ -1,16 +1,16 @@
 /* Equipment marks stay decorative. The enclosing bus owns interaction. */
 .pe-host { -webkit-user-select:none; user-select:none; touch-action:manipulation; }
 .pe-hit { fill:transparent; pointer-events:all; }
-.pe-root { --pe-ink:#38604f; --pe-paper:#fff; --pe-voltage-color:#4c816b; --pe-voltage-opacity:.04; --pe-window-opacity:1; pointer-events:none; }
+.pe-root { --pe-ink:#51606c; --pe-paper:#fff; --pe-voltage-color:#4c816b; --pe-voltage-opacity:.04; --pe-window-opacity:1; pointer-events:none; }
 .pe-root path,.pe-root rect,.pe-root circle { vector-effect:non-scaling-stroke; }
 .pe-voltage-wash { fill:var(--pe-voltage-color); opacity:var(--pe-voltage-opacity); transition:r .4s,opacity .4s,fill .4s; }
 .pe-disc { fill:var(--pe-paper); stroke:#dce6de; stroke-width:1; }
 .pe-voltage-ring { fill:none; stroke:var(--pe-voltage-color); stroke-opacity:.45; transition:stroke .4s,stroke-width .4s; }
-.pe-selected .pe-disc { fill:#f1f7f2; stroke:#54836c; }
+.pe-selected .pe-disc { fill:#edf5ff; stroke:#4389cc; }
 .pe-selected .pe-voltage-ring { stroke-opacity:.8; }
 .pe-glyph { stroke:var(--pe-ink); stroke-width:1.05; stroke-linejoin:round; stroke-linecap:round; fill:none; }
-.pe-house { fill:#f5f8f2; }
-.pe-house-back { fill:#eaf0e7; stroke:#819782; }
+.pe-house { fill:#f7f8fa; }
+.pe-house-back { fill:#eef1f5; stroke:#8c97a4; }
 .pe-roof { stroke-width:1.55; }
 .pe-roof-back { stroke:#819782; stroke-width:1.2; }
 .pe-door { fill:#cedecf; stroke-width:.65; }

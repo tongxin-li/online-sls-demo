@@ -1,16 +1,16 @@
-/* Synthetic radial feeder with linear DistFlow voltage magnitudes and bounded
- * inverter reactive power commands. The actuator has a physical first order lag.
- * Shared matrix/scalar forecast calibration illustrates the paper's experiment;
- * this is not the full delayed projected FIR algorithm or its regret theorem.
- */
+/* Synthetic radial LinDistFlow feeder with bounded inverter commands.
+ * Discovery executes a fixed feasible predictive controller while literal
+ * Algorithm 1 updates completed response rows with the delayed gradient.
+ * Deployment resynthesizes a feasible controller under frozen prediction links.
+ * Support-space learning does not preserve achievability or change future rows. */
 (function (root, factory) {
   const api=factory();
   if(typeof module==='object'&&module.exports)module.exports=api;
   else root.PowerDemo=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
-  const N=24, M=8, AMPLITUDE=.006, RAW_RIDGE=1.27e-5;
-  const RIDGE=RAW_RIDGE/(AMPLITUDE*AMPLITUDE),PREVIEW=5,WINDOW=60,WARMUP=30,TOLERANCE=1e-5;
+  const N=24, M=8, AMPLITUDE=.006, RAW_RIDGE=1e-6;
+  const RIDGE=RAW_RIDGE,REMOTE_BUDGET=3,PREVIEW=5,WINDOW=60,WARMUP=30,TOLERANCE=1e-5;
   const BASE_KV=12.47,BASE_MVA=1,POWER_BASE_KW=1000,SAMPLE_SECONDS=1,TAU_SECONDS=2;
   const LAG=Math.exp(-SAMPLE_SECONDS/TAU_SECONDS),Q_LIMIT=.07,S_RATING=.12;
   const PULSE_DEFAULT=100,PULSE_MIN=10,PULSE_MAX=150;
@@ -106,44 +106,6 @@
     }};
   }
 
-  function statistics(samples) {
-    const S=zeros(), T=zeros();
-    for (const sample of samples) for (let i=0;i<N;i++) for (let j=0;j<N;j++) {
-      S[i][j] += sample.z[i]*sample.z[j]/samples.length;
-      T[i][j] += sample.y[i]*sample.z[j]/samples.length;
-    }
-    for (let i=0;i<N;i++) { S[i][i]+=RIDGE; T[i][i]+=RIDGE; }
-    // The largest absolute row sum bounds the covariance spectral norm.
-    return {S,T,stepSize:0.95/normInf(S),samples};
-  }
-  function exactGain(stats) { return transpose(solveSPD(stats.S,transpose(stats.T))); }
-  function exactScalarGain(stats) {
-    // Restrict the SAME objective to G=diag(1,alpha I_23). Its ridge penalty
-    // is lambda*23*(alpha-1)^2/2, because the slack is not a physical channel.
-    // The slack coordinate is display padding, fixed at G[0][0]=1 in both
-    // matrix and scalar models. Only the 23 physical forecast channels share alpha.
-    const trace=a=>a.reduce((sum,row,i)=>sum+(i===0?0:row[i]),0);
-    return trace(stats.T)/trace(stats.S);
-  }
-  function gradientSteps(g,stats,count) {
-    let result=g;
-    for (let k=0;k<count;k++) {
-      const gradient=combine(multiply(result,stats.S),stats.T,1,-1);
-      result=combine(result,gradient,1,-stats.stepSize);
-    }
-    return result;
-  }
-  function objective(g,samples) {
-    if (!samples.length) return 0;
-    let loss=0;
-    for (const pair of samples) {
-      const predicted=matvec(g,pair.z);
-      for (let i=0;i<N;i++) loss += (predicted[i]-pair.y[i])**2/(2*samples.length);
-    }
-    for (let i=0;i<N;i++) for (let j=0;j<N;j++) loss += RIDGE/2*(g[i][j]-(i===j?1:0))**2;
-    return loss;
-  }
-
   function buildModel(){
     const children=Array.from({length:N},()=>[]),parent=Array(N).fill(-1),parentEdge=Array(N).fill(-1);
     const edgeData=EDGES.map(([from,to],index)=>{
@@ -181,26 +143,16 @@
     }
     const S=combine(R,multiply(bt,multiply(P,B)));
     const K=solveSPD(S,multiply(bt,multiply(P,A))).map(row=>row.map(v=>-v));
-    const closedLoop=combine(A,multiply(B,K)),act=transpose(closedLoop);
-    const previewGains=[];let response=P;
-    for(let j=0;j<PREVIEW;j++){
-      previewGains.push(solveSPD(S,multiply(bt,response)).map(row=>row.map(v=>-v)));
-      response=multiply(act,response);
-    }
-    // Raw power forecasts are sealed. Their derived voltage disturbance
-    // predictions use the currently observed power and the same issued future
-    // power forecasts. Collect coefficients of each predicted power vector.
-    const powerPreviewGains=previewGains.map((gain,j)=>multiply(
-      j+1<PREVIEW?combine(gain,previewGains[j+1],1,-LAG):gain,F));
+    const closedLoop=combine(A,multiply(B,K));
     const distances=zeros();
     for(let i=0;i<N;i++)for(let j=0;j<N;j++)for(let e=0;e<N-1;e++)distances[i][j]+=Math.abs(paths[i][e]-paths[j][e]);
     return deepFreeze({A,B,Q,R,P,K,S,X,F,resistance,reactance,powerToVoltage,paths,
       baseP,baseQ,baseDrop,referenceVoltage,initialVoltage:referenceVoltage,
-      previewGains,powerPreviewGains,edgeData,order,parent,parentEdge,children,distances,
+      edgeData,order,parent,parentEdge,children,distances,
       inverterBuses:INVERTER_BUSES,lag:LAG,qLimit:Q_LIMIT,inverterRating:S_RATING,
       baseKv:BASE_KV,baseMva:BASE_MVA,sampleSeconds:SAMPLE_SECONDS,tauSeconds:TAU_SECONDS,
       variant:'Synthetic radial LinDistFlow feeder with inverter lag',
-      costReference:'Nominal feasible voltage profile',dareResidual:residual,
+      costReference:'Nominal feasible voltage profile',forecastForcingScales:powerToVoltage.map(row=>AMPLITUDE*Math.sqrt(squared(row)*(1+LAG*LAG))),dareResidual:residual,
       dareIterations:iterations+1,closedLoopNormInf:normInf(closedLoop)});
   }
   const model=buildModel();
@@ -281,217 +233,294 @@
       slackKw:ir[0]*1000,slackKvar:-ii[0]*1000,lossesKw,lossesKvar};
   }
 
+  const Response=typeof module==='object'&&module.exports?require('./response-controller.js'):globalThis.ResponseController;
+  if(!Response)throw new Error('Load response-controller.js before simulation.js');
+  const synthesizer=new Response.Synthesizer(model,PREVIEW),designCache=new Map();
+  function getDesign(horizon,support=null){
+    const key=JSON.stringify([horizon,support]);
+    if(!designCache.has(key))designCache.set(key,deepFreeze(synthesizer.synthesize(horizon,support)));
+    return designCache.get(key);
+  }
+  function scoreGain(scores){
+    const gain=zeros();INVERTER_BUSES.forEach((bus,i)=>scores[i].forEach((v,j)=>gain[bus-1][j+1]=Math.sqrt(Math.max(0,v))));return gain;
+  }
+  function addScores(a,b){for(let i=0;i<M;i++)for(let j=0;j<N-1;j++)a[i][j]+=b[i][j];}
   class Simulation{
     constructor(options={}){
       const id=options.preset===undefined?'mixed':options.preset;
       const preset=FORECAST_PRESETS.find(p=>p.id===id);
       if(!preset)throw new RangeError('Forecast preset must be reliable, uniform, or mixed');
       this.preset=preset;
-      this.options={seed:options.seed===undefined?20261013:options.seed,
+      this.initialOptions={seed:options.seed===undefined?20261013:options.seed,
         horizon:options.horizon===undefined?480:options.horizon,preset:id,
         faultBuses:options.faultBuses===undefined?preset.faultBuses.slice():options.faultBuses.slice()};
-      if(!Number.isInteger(this.options.horizon)||this.options.horizon<1)throw new Error('Invalid horizon');
-      this.reset();
+      if(!Number.isInteger(this.initialOptions.horizon)||this.initialOptions.horizon<1)throw new Error('Invalid horizon');
+      this.phase='discovery';this.discoveryRecord=null;this.deployedSupport=null;this.reset();
     }
     reset(){
-      this.random=seededRandom(this.options.seed);this.t=0;this.mode='running';this.G=eye();this.scalarGain=1;
+      this.options={...this.initialOptions,faultBuses:this.initialOptions.faultBuses.slice()};
+      this.random=seededRandom(this.options.seed);this.t=0;this.mode='running';
       this.powerDeviation=Array(N).fill(0);this.power=physicalPower(this.powerDeviation);
       this.q=Object.fromEntries(CONTROLLERS.map(key=>[key,Array(M).fill(0)]));
       this.command=Object.fromEntries(CONTROLLERS.map(key=>[key,Array(M).fill(0)]));
       this.saturation=Object.fromEntries(CONTROLLERS.map(key=>[key,Array(N).fill(false)]));
       this.states=Object.fromEntries(CONTROLLERS.map(key=>[key,model.baseDrop.slice()]));
       this.costStates=Object.fromEntries(CONTROLLERS.map(key=>[key,model.baseDrop.slice()]));
-      this.cumulative=Object.fromEntries(CONTROLLERS.map(key=>[key,0]));
-      this.stage=Object.fromEntries(CONTROLLERS.map(key=>[key,0]));
+      this.cumulative=Object.fromEntries(CONTROLLERS.map(key=>[key,0]));this.stage={...this.cumulative};
       this.faults=new Set(this.options.faultBuses.map(bus=>this.checkBus(bus)).filter(bus=>bus!==1));
       this.latent=Array.from({length:N+1},()=>this.random.normal());
       this.pulses=[];this.samples=[];this.history=[];this.eventLog=[];this.forecasts=[];this.lastPreview=[];
-      this.lastPulseApplications=[];this.sealPreview();
-      this.learning={updates:0,windowStart:null,windowEnd:null,windowSize:0,
-        beforeLoss:null,afterLoss:null,gradientNorm:null,rawRms:null,calibratedRms:null};
-      this.lastSample=null;this.lastInputs=null;this.fit=null;this.fitHistory=[];
-      this.fitError=null;this.fitObjective=null;this.fitIteration=0;
-      this.directGain=paddedGain(model.powerPreviewGains[0]);this.recommendations=recommendations(this.directGain);
+      this.lastPulseApplications=[];this.lastSample=null;this.lastInputs=null;
+      this.rows=[];this.rowIds=new Set();this.segments=[];this.addSegment(0,this.options.horizon);
+      this.learning={completedRows:0,delay:PREVIEW,updates:0,updateCount:0,prefixError:null,prefixLoss:null,
+        stepSize:null,fitError:null,rawRms:null,calibratedRms:null,windowStart:null,windowEnd:null,windowSize:0};
+      this.fit=null;this.fitHistory=[];this.fitError=null;this.fitObjective=null;this.fitIteration=0;
       this.drift=0;this.changedEdges=0;this.sinceStable=0;this.lastTrainingTime=null;this.lastTrainingSampleCount=0;
-      return this.snapshot();
+      this.refreshScores();this.sealPreview();return this.snapshot();
+    }
+    addSegment(start,length){
+      const dense=getDesign(length),offlineScores=Response.scores(dense);
+      const fixed=Response.supportFromScores(offlineScores,INVERTER_BUSES,REMOTE_BUDGET);
+      const designs={online:dense,scalar:dense,static:dense};
+      if(this.phase==='deployment'){
+        designs.online=getDesign(length,this.deployedSupport.learned);
+        designs.scalar=getDesign(length,this.deployedSupport.fixed);
+      }
+      this.segments.push({start,end:start+length,length,dense,designs,offlineScores,fixed});
     }
     checkBus(bus){if(!Number.isInteger(bus)||bus<1||bus>N)throw new Error('Bus must be an integer from 1 through 24');return bus;}
     queuePulse(bus,strength=PULSE_DEFAULT){
       this.checkBus(bus);
       if(!Number.isFinite(strength)||strength<PULSE_MIN||strength>PULSE_MAX)throw new RangeError('Pulse strength must be from 10 through 150 kW');
-      if(bus===1)return false;
-      if(this.mode==='completed')this.extend();
-      if(this.mode!=='running')return false;
-      const profile=BUS_PROFILES[bus-1];
-      this.pulses.push({bus,strength,age:0,t:this.t,...profile,requestedKw:strength,appliedKw:null});
+      if(bus===1)return false;if(this.mode==='completed')this.extend();if(this.mode!=='running')return false;
+      const profile=BUS_PROFILES[bus-1];this.pulses.push({bus,strength,age:0,t:this.t,...profile,requestedKw:strength,appliedKw:null});
       this.eventLog.push(deepFreeze({t:this.t,type:'pulse',bus,strength,units:'kW',role:profile.role,
-        eventName:profile.eventName,decay:profile.decay,steps:profile.steps,
-        message:profile.eventName+' requested '+strength+' kW at bus '+bus}));return true;
+        eventName:profile.eventName,decay:profile.decay,steps:profile.steps,message:profile.eventName+' at bus '+bus}));return true;
     }
     extend(steps=480){
       if(!Number.isInteger(steps)||steps<1)throw new RangeError('Extension must be a positive number of steps');
-      this.options.horizon+=steps;if(this.mode==='completed')this.mode='running';this.sealPreview();return this.snapshot();
+      this.addSegment(this.options.horizon,steps);this.options.horizon+=steps;
+      this.eventLog.push(deepFreeze({t:this.t,type:'extend',steps,message:'New finite planning segment'}));
+      if(this.mode==='completed')this.mode='running';this.sealPreview();return this.snapshot();
     }
     sealPreview(){
-      const end=Math.min(this.options.horizon,this.t+PREVIEW);
-      while(this.forecasts.length<end){
-        const rho=.72,innovation=Math.sqrt(1-rho*rho);
+      // A forecast is issued exactly once, at max(0,s-d+1). Forecasts beyond
+      // the current finite segment are still sealed to support later extension.
+      while(this.forecasts.length<this.t+PREVIEW){
+        const s=this.forecasts.length,rho=.72,innovation=Math.sqrt(1-rho*rho);
         this.latent=this.latent.map(v=>rho*v+innovation*this.random.normal());
-        const base=Array.from({length:N},(_,i)=>i===0?0:AMPLITUDE*(.35*this.latent[0]+.65*this.latent[i+1]));
-        const forecast=base.map((v,i)=>{
+        const base=Array.from({length:N},(_,i)=>i===0?0:boundedPowerDeviation(i+1,AMPLITUDE*(.35*this.latent[0]+.65*this.latent[i+1])));
+        const previous=s?this.forecasts[s-1].base:Array(N).fill(0);
+        const baseW=matvec(model.powerToVoltage,base.map((v,i)=>v-LAG*previous[i]));
+        const forecast=baseW.map((v,i)=>{
           const faulty=this.faults.has(i+1),noise=this.random.normal();
+          const scale=model.forecastForcingScales[i];
           return i===0?0:(faulty?this.preset.faultyGain:this.preset.gain)*v
-            +AMPLITUDE*(faulty?this.preset.faultyNoise:this.preset.noise)*noise;
+            +scale*(faulty?this.preset.faultyNoise:this.preset.noise)*noise;
         });
-        this.forecasts.push(deepFreeze({t:this.forecasts.length,base,forecast,units:'pu active power on 1 MVA'}));
+        this.forecasts.push(deepFreeze({t:s,issuedAt:Math.max(0,s-PREVIEW+1),base,forecast,units:'pu voltage forcing'}));
       }
     }
     toggleFault(bus){
       this.checkBus(bus);if(bus===1||this.mode!=='running')return false;
       if(this.faults.has(bus))this.faults.delete(bus);else this.faults.add(bus);
       this.eventLog.push(deepFreeze({t:this.t,type:'forecast',bus,faulty:this.faults.has(bus),
-        message:'Future power forecasts at bus '+bus+(this.faults.has(bus)?' corrupted':' repaired')}));return this.faults.has(bus);
+        message:'Future voltage-forcing forecasts '+(this.faults.has(bus)?'corrupted':'repaired')}));return this.faults.has(bus);
     }
-    updateGain(g){
-      const gain=paddedGain(multiply(model.powerPreviewGains[0],g)),next=recommendations(gain);
-      this.drift=frobenius(combine(gain,this.directGain,1,-1))/Math.max(frobenius(this.directGain),1e-12);
-      this.changedEdges=edgeChanges(this.recommendations,next);this.sinceStable=this.changedEdges===0?this.sinceStable+1:0;
-      this.G=g;this.directGain=gain;this.recommendations=next;
+    addCompletedRow(segment,localRow){
+      const id=segment.start+','+localRow;if(this.rowIds.has(id))return;
+      const blocks=segment.dense.rows[localRow],h=[],ex=Array(N-1).fill(0),eu=Array(M).fill(0);
+      for(const block of blocks){
+        const index=segment.start+block.k-1,forecast=this.forecasts[index].forecast.slice(1);
+        const actual=this.samples[index].disturbance.slice(1),error=actual.map((v,i)=>v-forecast[i]);
+        h.push(forecast);const dx=matvec(block.X,error),du=matvec(block.U,error);
+        for(let i=0;i<N-1;i++)ex[i]+=dx[i];for(let i=0;i<M;i++)eu[i]+=du[i];
+      }
+      const kex=matvec(model.K,ex),el=eu.map((v,i)=>v-kex[i]),energy=h.reduce((s,v)=>s+squared(v),0);
+      const score0=zeros(M,N-1),score1=zeros(M,N-1),score2=zeros(M,N-1);
+      blocks.forEach((block,k)=>{for(let i=0;i<M;i++)for(let j=0;j<N-1;j++){
+        const direction=el[i]*h[k][j],base=block.L[i][j];
+        score0[i][j]+=base*base;score1[i][j]+=2*base*direction;score2[i][j]+=direction*direction;
+      }});
+      this.rows.push({id,t:segment.start+localRow,segmentStart:segment.start,localRow,blocks,h,ex,eu,el,
+        energy,curvature:RAW_RIDGE+energy,residualEnergy:squared(ex)+squared(eu),beta:0,
+        delayed:Array(PREVIEW+1).fill(0),score0,score1,score2});this.rowIds.add(id);
+    }
+    advanceRows(rows){
+      const maximum=Math.max(...rows.map(row=>row.energy));
+      const eta=.05/((PREVIEW+1)*(RAW_RIDGE+maximum));
+      for(const row of rows){
+        row.beta+=eta*(1-row.curvature*row.delayed[0]);
+        row.delayed.shift();row.delayed.push(row.beta);
+      }
+      return eta;
+    }
+    updateResponses(){
+      if(!this.rows.length)return;
+      this.learning.stepSize=this.advanceRows(this.rows);
+      this.learning.updates++;this.learning.updateCount=this.learning.updates;
+      this.measureResponses();this.refreshScores();
+    }
+    rowMetrics(rows){
+      let error=0,scale=0,loss=0;
+      for(const row of rows){
+        const optimum=1/row.curvature,weight=row.residualEnergy*row.energy;
+        error+=weight*(row.beta-optimum)**2;scale+=weight*optimum*optimum;
+        loss+=.5*row.residualEnergy*((row.beta*row.energy-1)**2+RAW_RIDGE*row.beta*row.beta*row.energy);
+      }
+      return{error:rows.length?Math.sqrt(error/Math.max(scale,1e-30)):null,loss:rows.length?loss:null};
+    }
+    measureResponses(){
+      const metrics=this.rowMetrics(this.rows);
+      this.learning.completedRows=this.rows.length;this.learning.windowSize=this.rows.length;
+      this.learning.windowStart=this.rows.length?this.rows[0].t:null;
+      this.learning.windowEnd=this.rows.length?this.rows.at(-1).t:null;
+      this.learning.prefixError=metrics.error;this.learning.prefixLoss=metrics.loss;
+      this.lastTrainingTime=this.learning.windowEnd;this.lastTrainingSampleCount=this.rows.length;
+    }
+    refreshScores(){
+      let scores=zeros(M,N-1);
+      if(this.phase==='deployment'){
+        const segment=this.segments.find(s=>this.t>=s.start&&this.t<s.end)||this.segments.at(-1);
+        scores=Response.scores(segment.designs.online).map(row=>row.map(v=>v/segment.length));
+      }else if(this.rows.length){
+        for(const row of this.rows)for(let i=0;i<M;i++)for(let j=0;j<N-1;j++)
+          scores[i][j]+=row.score0[i][j]+row.beta*row.score1[i][j]+row.beta*row.beta*row.score2[i][j];
+        scores=scores.map(row=>row.map(v=>Math.max(0,v)/this.rows.length));
+      }else scores=this.segments[0].offlineScores.map(row=>row.map(v=>v/this.segments[0].length));
+      const selection=Response.supportFromScores(scores,INVERTER_BUSES,REMOTE_BUDGET),gain=scoreGain(scores);
+      const next=this.phase==='deployment'?this.deployedSupport.links.map(e=>({...e,weight:scores[INVERTER_BUSES.indexOf(e.to)][e.from-2]})):selection.links;
+      if(this.directGain){
+        this.drift=frobenius(combine(gain,this.directGain,1,-1))/Math.max(frobenius(this.directGain),1e-12);
+        this.changedEdges=edgeChanges(this.recommendations,next);this.sinceStable=this.changedEdges===0?this.sinceStable+1:0;
+      }
+      this.directGain=gain;this.recommendations=next.map(e=>({...e}));this.predictionScores=scores;
     }
     step(){
       if(this.mode!=='running')return this.snapshot();
       if(this.t>=this.options.horizon){this.mode='completed';return this.snapshot();}
-      this.lastTrainingTime=this.samples.length?this.samples.at(-1).t:null;this.lastTrainingSampleCount=this.samples.length;
-      if(this.samples.length>=WARMUP){
-        const stats=statistics(this.samples),beforeLoss=objective(this.G,this.samples);
-        this.updateGain(exactGain(stats));this.scalarGain=exactScalarGain(stats);
-        this.learning={...this.learning,updates:this.learning.updates+1,windowStart:this.samples[0].t,
-          windowEnd:this.samples.at(-1).t,windowSize:this.samples.length,beforeLoss,
-          afterLoss:objective(this.G,this.samples),gradientNorm:frobenius(combine(multiply(this.G,stats.S),stats.T,1,-1))};
-      }else{this.drift=0;this.changedEdges=0;this.sinceStable++;}
-      this.sealPreview();this.lastPreview=this.forecasts.slice(this.t,Math.min(this.t+PREVIEW,this.options.horizon));
-      const issued=this.forecasts[this.t],forecast=issued.forecast;
-      const background=issued.base.map((v,i)=>boundedPowerDeviation(i+1,v));
-      const requested=Array(N).fill(0);
+      const time=this.t,segment=this.segments.find(s=>time>=s.start&&time<s.end),local=time-segment.start;
+      this.sealPreview();this.lastPreview=segment.dense.rows[local].map(block=>this.forecasts[segment.start+block.k-1]);
+      const issued=this.forecasts[time],background=issued.base,requested=Array(N).fill(0);
       for(const event of this.pulses){event.requestedKw=event.strength*Math.exp(-event.age/event.decay);requested[event.bus-1]+=event.requestedKw;}
-      const disturbance=background.map((v,i)=>boundedPowerDeviation(i+1,v+requested[i]/1000));
-      const pulse=disturbance.map((v,i)=>(v-background[i])*1000);
-      this.lastPulseApplications=[];
+      const nextPower=background.map((v,i)=>boundedPowerDeviation(i+1,v+requested[i]/1000));
+      const pulse=nextPower.map((v,i)=>(v-background[i])*1000);this.lastPulseApplications=[];
       for(let i=1;i<N;i++)if(requested[i]>0)this.lastPulseApplications.push({bus:i+1,requestedKw:requested[i],
         appliedKw:pulse[i],capped:pulse[i]<requested[i]-1e-9,eventName:BUS_PROFILES[i].eventName});
       for(const event of this.pulses){event.appliedKw=requested[event.bus-1]?event.requestedKw*pulse[event.bus-1]/requested[event.bus-1]:0;event.age++;}
       this.pulses=this.pulses.filter(event=>event.age<event.steps);
-      const currentEffect=matvec(model.F,this.powerDeviation),nextEffect=matvec(model.F,disturbance);
-      const voltageDisturbance=[0,...nextEffect.map((v,i)=>v-LAG*currentEffect[i])];
-      const sample=deepFreeze({t:this.t,forecast,disturbance,base:background,pulse,
-        voltageDisturbance,observedPower:this.powerDeviation.slice(),
-        anchorForecast:this.t>0?this.forecasts[this.t-1].forecast:Array(N).fill(0),
-        pulseApplications:this.lastPulseApplications.map(p=>({...p})),
-        units:'pu active power on 1 MVA',pulseUnits:'kW',z:forecast.map(v=>v/AMPLITUDE),y:disturbance.map(v=>v/AMPLITUDE)});
-      // Condition every method on the currently observed physical power.
-      // The sealed forecast for that observation supplies an innovation anchor.
-      // Future level predictions are d_current+G*(h_future-h_current).
-      // Causal G=0 therefore holds current power rather than assuming it vanishes.
-      const anchorForecast=this.t>0?this.forecasts[this.t-1].forecast:Array(N).fill(0);
-      const common=Array(M).fill(0);
-      for(let j=0;j<this.lastPreview.length;j++){
-        const held=matvec(model.previewGains[j],currentEffect.map(v=>(1-LAG)*v));
-        for(let i=0;i<M;i++)common[i]+=held[i];
-      }
-      const preview=Object.fromEntries(CONTROLLERS.map(key=>[key,Array(M).fill(0)]));
-      this.lastPreview.forEach((prediction,index)=>{
-        const powerGain=this.lastPreview.length<PREVIEW&&index===this.lastPreview.length-1
-          ?multiply(model.previewGains[index],model.F):model.powerPreviewGains[index];
-        const increment=prediction.forecast.map((v,i)=>v-anchorForecast[i]);
-        const staticInput=matvec(powerGain,increment);
-        const adaptiveInput=matvec(powerGain,matvec(this.G,increment));
-        for(let i=0;i<M;i++){preview.online[i]+=adaptiveInput[i];preview.static[i]+=staticInput[i];preview.scalar[i]+=this.scalarGain*staticInput[i];}
-      });
-      const calibrated=matvec(this.G,forecast);
-      this.learning.rawRms=Math.sqrt(squared(forecast.map((v,i)=>v-disturbance[i]))/(N-1));
-      this.learning.calibratedRms=Math.sqrt(squared(calibrated.map((v,i)=>v-disturbance[i]))/(N-1));
       this.costStates=Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].slice()]));
-      const inputs={},rms={},regulationRms={};
+      const inputs={},rms={},regulationRms={},recovered={};
       for(const key of CONTROLLERS){
         const x=this.states[key].slice(1).map((v,i)=>v-model.baseDrop[i+1]);
-        const feedback=matvec(model.K,x);
-        const raw=feedback.map((v,i)=>v+common[i]+preview[key][i]);
+        const raw=matvec(model.K,x);
+        if(key!=='causal')for(const block of segment.designs[key].rows[local]){
+          const contribution=matvec(block.L,this.forecasts[segment.start+block.k-1].forecast.slice(1));
+          for(let i=0;i<M;i++)raw[i]+=contribution[i];
+        }
         const bounded=raw.map(v=>Math.max(-Q_LIMIT,Math.min(Q_LIMIT,v)));
         this.command[key]=bounded;this.saturation[key]=padInput(raw.map((v,i)=>Math.abs(v-bounded[i])>1e-12));
         this.stage[key]=35*squared(x)+.08*squared(bounded);this.cumulative[key]+=this.stage[key];
         this.q[key]=this.q[key].map((v,i)=>LAG*v+(1-LAG)*bounded[i]);
-        this.states[key]=voltageFrom(disturbance,this.q[key]);inputs[key]=padInput(bounded);
-        rms[key]=Math.sqrt(squared(this.states[key].slice(1))/(N-1));
-        regulationRms[key]=Math.sqrt(squared(this.states[key].slice(1).map((v,i)=>v-model.baseDrop[i+1]))/(N-1));
+        this.states[key]=voltageFrom(nextPower,this.q[key]);inputs[key]=padInput(bounded);
+        const bu=matvec(model.B,bounded),xn=this.states[key].slice(1).map((v,i)=>v-model.baseDrop[i+1]);
+        recovered[key]=[0,...xn.map((v,i)=>v-LAG*x[i]-bu[i])];
+        rms[key]=Math.sqrt(squared(this.states[key].slice(1))/(N-1));regulationRms[key]=Math.sqrt(squared(xn)/(N-1));
       }
-      this.powerDeviation=disturbance.slice();this.power=physicalPower(disturbance);
-      this.lastInputs=deepFreeze(inputs);this.lastSample=sample;this.samples.push(sample);if(this.samples.length>WINDOW)this.samples.shift();
+      const sample=deepFreeze({t:time,forecast:issued.forecast,disturbance:recovered.online,
+        voltageDisturbance:recovered.online,disturbances:recovered,base:background,powerDeviation:nextPower,
+        pulse,pulseApplications:this.lastPulseApplications.map(p=>({...p})),units:'pu voltage forcing',pulseUnits:'kW'});
+      this.powerDeviation=nextPower.slice();this.power=physicalPower(nextPower);this.lastInputs=deepFreeze(inputs);this.lastSample=sample;this.samples.push(sample);
+      this.learning.rawRms=Math.sqrt(squared(sample.forecast.map((v,i)=>v-sample.disturbance[i]))/(N-1));
+      if(this.phase==='discovery'&&time>=PREVIEW){
+        const completedTime=time-PREVIEW,completedSegment=this.segments.find(s=>completedTime>=s.start&&completedTime<s.end);
+        this.addCompletedRow(completedSegment,completedTime-completedSegment.start);
+      }
+      if(this.phase==='discovery'&&this.rows.length)this.updateResponses();
+      else{this.drift=0;this.changedEdges=0;this.sinceStable++;}
       this.t++;
-      this.history.push(deepFreeze({t:this.t,costTime:sample.t,stateTime:this.t,...this.cumulative,
-        stage:{...this.stage},rms,regulationRms,pulse:sample.pulse,costStates:this.costStates,
-        states:Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].slice()])),
+      this.history.push(deepFreeze({t:this.t,costTime:time,stateTime:this.t,...this.cumulative,stage:{...this.stage},rms,regulationRms,
+        pulse:sample.pulse,costStates:this.costStates,states:Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].slice()])),
         regulationStates:Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].map((v,i)=>v-model.baseDrop[i])])),
-        rawForecastRms:this.learning.rawRms,calibratedForecastRms:this.learning.calibratedRms,
-        fitBefore:this.learning.beforeLoss,fitAfter:this.learning.afterLoss,fitResidual:this.learning.gradientNorm,
-        drift:this.drift,changedEdges:this.changedEdges,calibrationLoss:objective(this.G,this.samples)}));
+        rawForecastRms:this.learning.rawRms,prefixError:this.learning.prefixError,prefixLoss:this.learning.prefixLoss,
+        completedRows:this.rows.length,drift:this.drift,changedEdges:this.changedEdges}));
       if(this.t>=this.options.horizon)this.mode='completed';return this.snapshot();
     }
     freeze(){
-      if(this.samples.length<WARMUP)return false;
+      if(this.phase!=='discovery'||this.rows.length<WARMUP)return false;
       if(['frozen','fitting','converged'].includes(this.mode))return this.snapshot();
-      const stats=statistics(this.samples.slice()),optimum=exactGain(stats);
-      this.fit={...stats,optimum,scale:Math.max(frobenius(optimum),1e-12)};
-      this.fitIteration=0;this.fitHistory=[];this.mode='frozen';this.sinceStable=0;this.changedEdges=0;this.measureFit();
-      this.eventLog.push(deepFreeze({t:this.t,type:'freeze',message:'Power observation window frozen for optimizer convergence'}));return this.snapshot();
+      this.fit={rows:this.rows.map(row=>({...row,delayed:row.delayed.slice()})),rowCount:this.rows.length};
+      this.fitIteration=0;this.fitHistory=[];this.mode='frozen';
+      this.measureFit();this.eventLog.push(deepFreeze({t:this.t,type:'freeze',message:'Independent copy of completed response prefix frozen'}));return this.snapshot();
     }
     measureFit(){
-      this.fitError=frobenius(combine(this.G,this.fit.optimum,1,-1))/this.fit.scale;this.fitObjective=objective(this.G,this.fit.samples);
+      const metrics=this.rowMetrics(this.fit.rows);this.fitError=metrics.error;this.fitObjective=metrics.loss;
       this.fitHistory.push(deepFreeze({iteration:this.fitIteration,error:this.fitError,objective:this.fitObjective,changedEdges:this.changedEdges}));
     }
     fitStep(count=12){
       if(!this.fit||['running','completed','converged'].includes(this.mode))return this.snapshot();
       if(!Number.isInteger(count)||count<1)throw new Error('Iteration count must be positive');
-      this.mode='fitting';this.updateGain(gradientSteps(this.G,this.fit,count));this.fitIteration+=count;this.measureFit();
+      this.mode='fitting';for(let i=0;i<count;i++)this.advanceRows(this.fit.rows);this.fitIteration+=count;this.measureFit();
+      this.eventLog.push(deepFreeze({t:this.t,type:'fit',count,message:'Delayed response optimization on fixed data'}));
       if(this.fitError<TOLERANCE)this.mode='converged';return this.snapshot();
     }
     resume(){
       this.mode=this.t>=this.options.horizon?'completed':'running';this.fit=null;this.fitError=null;this.fitObjective=null;
-      this.fitIteration=0;this.fitHistory=[];this.drift=0;this.changedEdges=0;this.sinceStable=0;return this.snapshot();
+      this.fitIteration=0;this.fitHistory=[];this.drift=0;this.changedEdges=0;this.sinceStable=0;
+      this.eventLog.push(deepFreeze({t:this.t,type:'resume',message:'Physical trial resumed'}));return this.snapshot();
+    }
+    deployTopology(){
+      if(this.phase!=='discovery'||this.rows.length<WARMUP)return false;
+      this.discoveryRecord=deepFreeze({options:{...this.initialOptions,faultBuses:this.initialOptions.faultBuses.slice()},
+        t:this.t,events:this.eventLog.slice()});
+      const learned=Response.supportFromScores(this.predictionScores,INVERTER_BUSES,REMOTE_BUDGET);
+      const offline=zeros(M,N-1);for(const segment of this.segments)addScores(offline,segment.offlineScores);
+      const fixed=Response.supportFromScores(offline,INVERTER_BUSES,REMOTE_BUDGET);
+      this.deployedSupport=deepFreeze({learned:learned.support,fixed:fixed.support,links:learned.links,fixedLinks:fixed.links,
+        scores:this.predictionScores.map(row=>row.slice()),completedRows:this.rows.length,discoveryTime:this.t});
+      this.phase='deployment';this.initialOptions={...this.discoveryRecord.options,
+        seed:(this.discoveryRecord.options.seed^0x9E3779B9)>>>0};return this.reset();
     }
     snapshot(){
       const voltages=Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].map(v=>1+v)]));
       const inverterQ=Object.fromEntries(CONTROLLERS.map(key=>[key,padInput(this.q[key]).map(v=>v*1000)]));
       const commandQ=Object.fromEntries(CONTROLLERS.map(key=>[key,padInput(this.command[key]).map(v=>v*1000)]));
       const flows=Object.fromEntries(CONTROLLERS.map(key=>[key,branchFlows(this.power.loadP,this.power.loadQ,this.q[key])]));
+      const terminalCost=Object.fromEntries(CONTROLLERS.map(key=>{
+        const x=this.states[key].slice(1).map((v,i)=>v-model.baseDrop[i+1]),px=matvec(model.P,x);return[key,x.reduce((sum,v,i)=>sum+v*px[i],0)];}));
       return{t:this.t,costTime:this.lastSample?this.lastSample.t:null,stateTime:this.t,horizon:this.options.horizon,
-        mode:this.mode,seed:this.options.seed,preset:this.options.preset,presetLabel:this.preset.label,scalarGain:this.scalarGain,
+        initialOptions:{...this.initialOptions,faultBuses:this.initialOptions.faultBuses.slice()},
+        phase:this.phase,canDeploy:this.phase==='discovery'&&this.rows.length>=WARMUP,
+        discoveryRecord:this.discoveryRecord,deployedSupport:this.deployedSupport,
+        segments:this.segments.map(s=>({start:s.start,end:s.end,length:s.length})),
+        mode:this.mode,seed:this.options.seed,preset:this.options.preset,presetLabel:this.preset.label,
         initialVoltage:model.initialVoltage.slice(),referenceVoltage:model.referenceVoltage.slice(),initialStates:model.baseDrop.slice(),
         voltage:voltages.online.slice(),voltages,inverterQ,commandQ,
         saturation:Object.fromEntries(CONTROLLERS.map(key=>[key,this.saturation[key].map(Boolean)])),
-        ...Object.fromEntries(Object.entries(this.power).map(([key,value])=>[key,value.slice()])),
-        powerDeviation:this.powerDeviation.slice(),
-        edgeData:model.edgeData.map((edge,i)=>({...edge,pKw:flows.online[i].pKw,
-          qKvar:Object.fromEntries(CONTROLLERS.map(key=>[key,flows[key][i].qKvar]))})),
-        lastPulseApplications:this.lastPulseApplications.map(p=>({...p})),
-        costStates:Object.fromEntries(CONTROLLERS.map(key=>[key,this.costStates[key].slice()])),
+        ...Object.fromEntries(Object.entries(this.power).map(([key,value])=>[key,value.slice()])),powerDeviation:this.powerDeviation.slice(),
+        edgeData:model.edgeData.map((edge,i)=>({...edge,pKw:flows.online[i].pKw,qKvar:Object.fromEntries(CONTROLLERS.map(key=>[key,flows[key][i].qKvar]))})),
+        lastPulseApplications:this.lastPulseApplications.map(p=>({...p})),costStates:Object.fromEntries(CONTROLLERS.map(key=>[key,this.costStates[key].slice()])),
         learning:{...this.learning},lastPreview:this.lastPreview.slice(),
         pendingPulses:this.pulses.filter(e=>e.age===0).map(e=>({...e})),activePulses:this.pulses.filter(e=>e.age>0).map(e=>({...e})),
         states:Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].slice()])),
         regulationStates:Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].map((v,i)=>v-model.baseDrop[i])])),
-        cumulative:{...this.cumulative},stage:{...this.stage},costs:{...this.cumulative},history:this.history.slice(),G:copy(this.G),directGain:copy(this.directGain),
-        recommendations:this.recommendations.map(e=>({...e})),
+        cumulative:{...this.cumulative},stage:{...this.stage},costs:{...this.cumulative},terminalCost,
+        totalCost:Object.fromEntries(CONTROLLERS.map(key=>[key,this.cumulative[key]+terminalCost[key]])),
+        history:this.history.slice(),directGain:copy(this.directGain),recommendations:this.recommendations.map(e=>({...e})),
         localChannels:INVERTER_BUSES.map(bus=>({from:bus,to:bus,weight:this.directGain[bus-1][bus-1]**2})),
         faults:[...this.faults].sort((a,b)=>a-b),eventLog:this.eventLog.slice(),lastSample:this.lastSample,lastInputs:this.lastInputs,
         drift:this.drift,changedEdges:this.changedEdges,sinceStable:this.sinceStable,sampleCount:this.samples.length,
         lastTrainingTime:this.lastTrainingTime,lastTrainingSampleCount:this.lastTrainingSampleCount,
-        fitError:this.fitError,fitObjective:this.fitObjective,fitIteration:this.fitIteration,fitHistory:this.fitHistory.slice(),canFreeze:this.samples.length>=WARMUP};
+        fitError:this.fitError,fitObjective:this.fitObjective,fitIteration:this.fitIteration,fitHistory:this.fitHistory.slice(),
+        fitDiagnostic:this.fit?{independent:true,rowCount:this.fit.rowCount,deployed:false}:null,
+        canFreeze:this.phase==='discovery'&&this.rows.length>=WARMUP};
     }
   }
   return{Simulation,model,constants:deepFreeze({N,M,edges:EDGES,edgeData:model.edgeData,inverterBuses:INVERTER_BUSES,
-    amplitude:AMPLITUDE,ridge:RIDGE,rawRidge:RAW_RIDGE,preview:PREVIEW,window:WINDOW,warmup:WARMUP,
+    amplitude:AMPLITUDE,ridge:RIDGE,rawRidge:RAW_RIDGE,remoteBudget:REMOTE_BUDGET,preview:PREVIEW,window:WINDOW,warmup:WARMUP,
     busProfiles:BUS_PROFILES,controllers:CONTROLLERS,forecastPresets:FORECAST_PRESETS,tolerance:TOLERANCE,horizon:480,
     pulseDefault:PULSE_DEFAULT,pulseMin:PULSE_MIN,pulseMax:PULSE_MAX,pulseUnits:'kW',powerBaseKw:POWER_BASE_KW,
     baseKv:BASE_KV,baseMva:BASE_MVA,sampleSeconds:SAMPLE_SECONDS,tauSeconds:TAU_SECONDS,inverterKvar:70}),
-    math:{zeros,eye,transpose,multiply,matvec,combine,frobenius,normInf,solveSPD,objective,statistics,exactGain,exactScalarGain,
+    math:{zeros,eye,transpose,multiply,matvec,combine,frobenius,normInf,solveSPD,getDesign,Response,
       recommendations,physicalPower,voltageFrom,branchFlows,radialAC,padInput}};
 });

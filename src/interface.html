@@ -3,7 +3,7 @@
     <div class="pr-toolbar">
       <button type="button" class="btn btn-play" id="pr-run">Run</button>
       <button type="button" class="btn btn-quiet" id="pr-step" title="Advance one second of feeder operation">Step</button>
-      <button type="button" class="btn btn-quiet" id="pr-restart" title="Start a fresh experiment">Reset</button>
+      <button type="button" class="btn btn-quiet" id="pr-restart" title="Restart the current trial">Reset</button>
       <select id="pr-speed" aria-label="Playback speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
       <span id="pr-clock" class="tabular-nums">t = 0 s</span>
     </div>
@@ -14,9 +14,9 @@
     </div>
   </div>
   <div class="pr-comparison-controls">
-    <label for="pr-preset">Forecasts <select id="pr-preset" aria-label="Forecast preset"><option value="reliable">Reliable forecasts</option><option value="uniform">Uniform noise</option><option value="mixed" selected>Mixed reliability</option></select></label>
+    <label for="pr-preset">Forecasts <select id="pr-preset" aria-label="Forecast preset" title="Changing forecasts starts a new discovery trial"><option value="reliable">Reliable forecasts</option><option value="uniform">Uniform noise</option><option value="mixed" selected>Mixed reliability</option></select></label>
     <button type="button" class="btn btn-compare" id="pr-compare" title="Advance 180 seconds of feeder operation and keep all accumulated costs">Run 180 steps</button>
-    <span class="pr-caption">Changing forecasts resets the experiment</span>
+    <div class="pr-phase-actions"><span id="pr-phase" class="pr-phase-badge">Discovery</span><button type="button" id="pr-deploy" class="btn btn-deploy" disabled title="Use the learned prediction links in a fresh trial">Deploy learned links</button></div>
   </div>
   <div class="pr-mission"><span><span class="pr-status-dot" id="pr-voltage-status" aria-hidden="true"></span>Restore the <strong>nominal voltage profile</strong><span class="pr-target"> · Illustrative band 0.95 to 1.05 pu</span></span><span id="pr-voltage-range" class="tabular-nums"></span></div>
   <div class="pr-dashboard">
@@ -26,8 +26,8 @@
       <div class="pr-panel-foot"><span id="pr-bus-detail" class="tabular-nums"></span><span class="pr-live-stage">Cost <strong id="pr-live-cost" class="tabular-nums">0.0000</strong></span></div>
     </section>
     <section class="pr-panel pr-matrix-panel" aria-labelledby="pr-matrix-title">
-      <div class="pr-subhead"><h2 id="pr-matrix-title">Recommended communication</h2><div class="pr-matrix-key"><span><i class="pr-cell-key connected"></i>Linked</span><span><i class="pr-cell-key added"></i>Added</span><span><i class="pr-cell-key removed"></i>Removed</span></div></div>
-      <svg class="pr-chart" id="pr-matrix" role="group" aria-label="Communication matrix. Rows receive from columns"></svg>
+      <div class="pr-subhead"><h2 id="pr-matrix-title">Prediction links</h2><div class="pr-matrix-key"><span><i class="pr-cell-key connected"></i>Linked</span><span><i class="pr-cell-key added"></i>Added</span><span><i class="pr-cell-key removed"></i>Removed</span></div></div>
+      <svg class="pr-chart" id="pr-matrix" role="group" aria-label="Candidate prediction links. Rows receive forecasts from columns"></svg>
       <div class="pr-panel-foot"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div>
     </section>
     <section class="pr-panel pr-stage-panel" aria-labelledby="pr-stage-title">
@@ -41,24 +41,24 @@
     <section class="pr-panel pr-learning-panel" aria-labelledby="pr-learning-title">
       <div class="pr-subhead"><h2 id="pr-learning-title">Cost comparison</h2><select id="pr-view" aria-label="Controller view"><option value="cost" selected>Cost comparison</option><option value="learning">Learning</option></select></div>
       <div id="pr-learning-content" hidden>
-        <div class="pr-algorithm-flow" id="pr-learning-flow" aria-label="Shared matrix learning cycle">
-          <div><span class="pr-flow-index">01</span><strong>Forecast</strong><span id="pr-flow-predict">Load forecast</span></div>
+        <div class="pr-algorithm-flow" id="pr-learning-flow" aria-label="Completed response learning cycle">
+          <div><span class="pr-flow-index">01</span><strong>Forecast</strong><span id="pr-flow-predict">Voltage forcing</span></div>
           <div><span class="pr-flow-index">02</span><strong>Control</strong><span id="pr-flow-control">Reactive support</span></div>
-          <div><span class="pr-flow-index">03</span><strong>Observe</strong><span id="pr-flow-observe">Realized load</span></div>
-          <div><span class="pr-flow-index">04</span><strong>Learn</strong><span id="pr-flow-update">Fit prediction gain</span></div>
+          <div><span class="pr-flow-index">03</span><strong>Observe</strong><span id="pr-flow-observe">Completed response</span></div>
+          <div><span class="pr-flow-index">04</span><strong>Learn</strong><span id="pr-flow-update">Projected update</span></div>
         </div>
-        <div class="pr-learning-caption"><span id="pr-learning-kind">Gain change per step</span><button type="button" class="btn btn-fit" id="pr-freeze">Freeze data and fit</button></div>
+        <div class="pr-learning-caption"><span id="pr-learning-kind">Completed responses · Relative error (%)</span><button type="button" class="btn btn-fit" id="pr-freeze">Inspect fixed data</button></div>
         <svg class="pr-chart" id="pr-convergence" role="img" aria-label="Learning diagnostic over time"></svg>
         <p id="pr-mode-note" class="pr-caption"></p>
       </div>
-      <div id="pr-cost-content"><svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative normalized voltage and reactive effort cost of four controllers"></svg><table class="pr-cost-table tabular-nums" aria-label="Cumulative controller costs"><thead><tr><th scope="col">Method</th><th scope="col">Total cost</th><th scope="col">vs feedback</th></tr></thead><tbody id="pr-cost-detail"></tbody></table><p id="pr-comparison-summary" class="pr-comparison-summary" aria-live="polite">Run to compare adaptive and scalar costs</p><p class="pr-caption pr-comparison-note">Normalized objective · All samples and pulses included</p></div>
+      <div id="pr-cost-content"><svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative normalized voltage and reactive effort cost of four controllers"></svg><table class="pr-cost-table tabular-nums" aria-label="Cumulative controller costs"><thead><tr><th scope="col">Method</th><th scope="col">Cumulative cost</th><th scope="col">vs feedback</th></tr></thead><tbody id="pr-cost-detail"></tbody></table><p id="pr-comparison-summary" class="pr-comparison-summary" aria-live="polite">Discovery uses the same dense prediction controller</p><p class="pr-caption pr-comparison-note">Current trial · All samples and pulses included</p></div>
     </section>
   </div>
   <div class="pr-bottomline">
-    <div class="pr-legend" aria-label="Adaptive method and three baselines"><button type="button" data-series="online" aria-pressed="true"><span class="pr-swatch online"></span>Adaptive</button><button type="button" data-series="scalar" aria-pressed="true"><span class="pr-swatch scalar"></span>Scalar adaptation</button><button type="button" data-series="static" aria-pressed="true"><span class="pr-swatch static"></span>Fixed prediction</button><button type="button" data-series="causal" aria-pressed="true"><span class="pr-swatch causal"></span>Feedback only</button></div>
+    <div class="pr-legend" aria-label="Learned sparse controller and three baselines"><button type="button" data-series="online" aria-pressed="true"><span class="pr-swatch online"></span>Learned sparse</button><button type="button" data-series="scalar" aria-pressed="true"><span class="pr-swatch scalar"></span>Fixed sparse</button><button type="button" data-series="static" aria-pressed="true"><span class="pr-swatch static"></span>Dense prediction</button><button type="button" data-series="causal" aria-pressed="true"><span class="pr-swatch causal"></span>Feedback only</button></div>
     <span id="pr-event" role="status" aria-live="polite">Ready · Space to run</span>
   </div>
-  <p class="pr-overlap-note">1 adaptive method + 3 baselines · Prediction curves overlap before learning at 30 s</p>
+  <p id="pr-phase-note" class="pr-overlap-note">Discovery learns completed responses. Prediction curves coincide.</p>
   <details class="pr-adaptation" id="pr-adaptation">
     <summary>Experiment settings <span aria-hidden="true">+</span></summary>
     <div class="pr-settings"><label>Bus <select id="pr-bus" aria-label="Selected bus"></select></label><button type="button" class="btn" id="pr-fault">Repair forecast</button><button type="button" class="btn" id="pr-reference">Set reference</button><label class="form-check"><input type="checkbox" id="pr-all-links">All prediction links</label></div>

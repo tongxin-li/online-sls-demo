@@ -12,9 +12,9 @@
   const d3 = window.d3;
   let simulation = new PowerDemo.Simulation({preset:'mixed'});
   const series = [
-    { key:'online', label:'Adaptive', color:'var(--viz-series-1)', dash:null, shape:d3.symbolCircle },
-    { key:'scalar', label:'Scalar adaptation', color:'var(--viz-series-4)', dash:'8 3', shape:d3.symbolSquare },
-    { key:'static', label:'Fixed prediction', color:'var(--viz-series-2)', dash:'5 3 1 3', shape:d3.symbolDiamond },
+    { key:'online', label:'Learned sparse', color:'var(--viz-series-1)', dash:null, shape:d3.symbolCircle },
+    { key:'scalar', label:'Fixed sparse', color:'var(--viz-series-4)', dash:'8 3', shape:d3.symbolSquare },
+    { key:'static', label:'Dense prediction', color:'var(--viz-series-2)', dash:'5 3 1 3', shape:d3.symbolDiamond },
     { key:'causal', label:'Feedback only', color:'var(--viz-series-3)', dash:'1 4', shape:d3.symbolTriangle }
   ];
   const visible = new Set(series.map(s => s.key));
@@ -35,11 +35,18 @@
     selection.interrupt(name);
     return reducedMotion ? selection : selection.transition(name).duration(duration()).ease(d3.easeCubicOut);
   }
+  function updateAxis(selection,axis) {
+    // Axis transitions also live on ticks and text. Cancel descendants before
+    // joining ticks so rapid renders cannot leave old labels in flight.
+    selection.interrupt().interrupt('update');
+    selection.selectAll('*').interrupt().interrupt('update');
+    selection.call(axis);
+  }
   function color(value) {
     const variable = /^var\((--[^,)]+)/.exec(value);
-    return variable ? getComputedStyle(root).getPropertyValue(variable[1]).trim() || '#245c48' : value;
+    return variable ? getComputedStyle(root).getPropertyValue(variable[1]).trim() || '#0071e3' : value;
   }
-  const matrixColors = { connected:'var(--primary)', added:'var(--matrix-added, #328a9c)', removed:'var(--matrix-removed, #d39955)', local:'#b8c2bc', inactive:'#eff2ef' };
+  const matrixColors = { connected:'var(--primary)', added:'var(--matrix-added, #168b79)', removed:'var(--matrix-removed, #cf8a2b)', local:'#c1c1c7', inactive:'#f0f0f3' };
   const busRole = bus => PowerDemo.constants.busProfiles?.[bus-1]?.role || (bus === 1 ? 'Substation' : [5,7,14,21].includes(bus) ? 'Solar' : [8,12,18,24].includes(bus) ? 'Battery' : 'Homes');
   function pulseMagnitude(value) { return Math.round(Number(value))+' kW'; }
   function costFormat(value) { return value===0 ? '0' : d3.format('.4~g')(value); }
@@ -108,61 +115,65 @@
   function save() {
     restored = true;
     if (!window.openai?.setWidgetState) return;
+    const events=snapshot.eventLog || [];
     const state = {
-      modelContent: { scenario:'24 bus LinDistFlow voltage regulation', variant:'Shared forecast calibration with reactive inverter control', step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
-      privateContent: { version:6, preset:snapshot.preset, view:$('view').value, pulseStrength:$('strength').value, t:journal.length <= 2000 ? snapshot.t : 0, journal:journal.length <= 2000 ? journal : [], selectedBus, speed:$('speed').value, allLinks:$('all-links').checked, fitSteps:journal.length <= 2000 ? fitSteps : 0, fitting:journal.length <= 2000 && isFit() }
+      modelContent: { scenario:'24 bus LinDistFlow voltage regulation', variant:'Completed response learning and separate sparse deployment', phase:snapshot.phase, step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
+      privateContent: { version:7, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, view:$('view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, speed:$('speed').value, allLinks:$('all-links').checked }
     };
     window.openai.setWidgetState(state).catch(() => {});
   }
-  function hydrate(saved) {
-    const data = saved?.privateContent;
-    if (restored || !data || data.version !== 6) return;
-    restored = true;
-    selectedBus = Math.max(1, Math.min(24, Number(data.selectedBus) || 7));
-    $('bus').value = String(selectedBus);
-    $('speed').value = ['0.5','1','2','4'].includes(data.speed) ? data.speed : '1';
-    if (['50','100','150'].includes(data.pulseStrength)) $('strength').value = data.pulseStrength;
-    $('all-links').checked = !!data.allLinks;
-    const items = Array.isArray(data.journal) ? data.journal.slice(0,2000) : [];
-    const t = Math.max(0, Math.min(100000, Math.floor(Number(data.t) || 0)));
-    const preset=['reliable','uniform','mixed'].includes(data.preset) ? data.preset : 'mixed';
-    simulation=new PowerDemo.Simulation({preset});
-    $('preset').value=preset;
-    $('view').value=data.view==='learning' ? 'learning' : 'cost';
-    journal = [];
-    for (let step = 0; step <= t; step++) {
-      if (simulation.mode === 'completed') simulation.extend();
-      for (const item of items.filter(v => v.t === step)) {
-        if (item.type === 'fit' && step >= 30) {
-          simulation.freeze();
-          for (let k=0; k<Math.min(3000,Math.max(0,Math.floor(item.count || 0))); k++) simulation.fitStep(1);
-          simulation.resume(); journal.push(item); continue;
-        }
-        if (!Number.isInteger(item.bus) || item.bus < 1 || item.bus > 24) continue;
-        if (item.type === 'pulse') {
-          if (item.bus===1) continue;
-          const strength = [50,100,150].includes(item.strength) ? item.strength : 100;
-          simulation.queuePulse(item.bus, strength);
-          item.strength = strength;
-        }
-        else if (item.type === 'fault' && item.bus!==1) simulation.toggleFault(item.bus);
-        else continue;
-        journal.push(item);
+  function replayRecord(record) {
+    const events=Array.isArray(record?.events)?record.events:[];
+    const target=Number.isSafeInteger(record?.t) && record.t>=0 ? record.t : 0;
+    const eventsAt=new Map();
+    for(const item of events) {
+      if(!Number.isSafeInteger(item.t) || item.t<0 || item.t>target) continue;
+      if(!eventsAt.has(item.t)) eventsAt.set(item.t,[]);
+      eventsAt.get(item.t).push(item);
+    }
+    for(let step=0;step<=target;step++) {
+      for(const item of eventsAt.get(step) || []) {
+        if(item.type==='extend') { simulation.extend(item.steps); continue; }
+        if(item.type==='freeze') { simulation.freeze(); continue; }
+        if(item.type==='fit') { simulation.fitStep(Math.max(1,Math.floor(item.count || item.steps || 1))); continue; }
+        if(item.type==='resume') { simulation.resume(); continue; }
+        if(!Number.isInteger(item.bus)||item.bus<2||item.bus>24) continue;
+        if(item.type==='pulse') simulation.queuePulse(item.bus,[50,100,150].includes(item.strength)?item.strength:100);
+        else if(item.type==='forecast'||item.type==='fault') simulation.toggleFault(item.bus);
       }
-      if (step < t) simulation.step();
+      if(step<target) {
+        if(simulation.mode==='completed') simulation.extend();
+        simulation.step();
+      }
     }
-    fitSteps = 0;
-    if (data.fitting && t >= 30) {
-      simulation.freeze();
-      const count = Math.min(3000, Math.max(0, Number(data.fitSteps) || 0));
-      for (let i = 0; i < count; i++) { simulation.fitStep(1); fitSteps++; }
-    }
-    snapshot = simulation.snapshot();
+  }
+  function hydrate(saved) {
+    const data=saved?.privateContent;
+    if(restored||!data||data.version!==7) return;
+    restored=true;
+    selectedBus=Math.max(1,Math.min(24,Math.floor(Number(data.selectedBus)||7)));
+    $('bus').value=String(selectedBus);
+    $('speed').value=['0.5','1','2','4'].includes(data.speed)?data.speed:'1';
+    if(['50','100','150'].includes(data.pulseStrength)) $('strength').value=data.pulseStrength;
+    $('all-links').checked=!!data.allLinks;
+    const preset=['reliable','uniform','mixed'].includes(data.preset)?data.preset:'mixed';
+    if(data.phase==='deployment' && data.discoveryRecord) {
+      simulation=new PowerDemo.Simulation(data.discoveryRecord.options || {preset});
+      replayRecord(data.discoveryRecord);
+      simulation.deployTopology();
+    } else simulation=new PowerDemo.Simulation(data.initialOptions || {preset});
+    replayRecord({t:data.t,events:data.events});
+    snapshot=simulation.snapshot();
+    $('preset').value=snapshot.preset;
+    $('view').value=data.view==='learning'?'learning':'cost';
+    journal=(snapshot.eventLog || []).filter(item=>item.type==='pulse'||item.type==='forecast'||item.type==='fault').map(item=>({...item,type:item.type==='forecast'?'fault':item.type}));
+    fitSteps=snapshot.fitIteration || 0;
     captureMatrixReference();
     const restoredPulse=journal.filter(item=>item.type==='pulse').at(-1);
     if(restoredPulse) lastPulse={...restoredPulse,before:snapshot.history.find(item=>(item.costTime ?? item.t-1)===restoredPulse.t-1)?.stage.online || 0};
-    announce('Experiment restored · Press Run');
+    announce('Trial restored · Press Run');
   }
+
   function stop() {
     playing = false;
     if (timer) clearTimeout(timer);
@@ -176,7 +187,7 @@
     }, 1000 / Number($('speed').value));
   }
   function tick() {
-    if (isFit()) { simulation.fitStep(1); fitSteps++; }
+    if (isFit()) { simulation.fitStep(100); fitSteps+=100; }
     else simulation.step();
     snapshot = simulation.snapshot();
     if (!isFit() && lastPulse && snapshot.t>lastPulse.t) {
@@ -201,13 +212,23 @@
       if (snapshot.mode === 'completed') { simulation.extend(); snapshot=simulation.snapshot(); }
       if (snapshot.mode === 'converged') resumePlant();
       playing = true;
-      announce(isFit() ? 'Fitting the frozen observations' : 'Regulating feeder voltage');
+      announce(isFit() ? 'Fitting the frozen responses' : 'Regulating feeder voltage');
       tick();
       if (playing) schedule();
     }
     render();
   }
   $('run').addEventListener('click', toggleRun);
+  $('deploy').addEventListener('click', () => {
+    if(comparing || !snapshot.canDeploy || snapshot.phase==='deployment') return;
+    stop();
+    simulation.deployTopology(); snapshot=simulation.snapshot();
+    journal=[]; fitSteps=0; pin=null; lastPulse=null;
+    captureMatrixReference(); $('view').value='cost';
+    announce('Prediction links deployed · Fresh trial at t 0');
+    actionNote('Fixed learned links · Click a bus to attack');
+    render(); save();
+  });
   $('preset').addEventListener('change', () => {
     stop(); simulation=new PowerDemo.Simulation({preset:$('preset').value});
     resetExperiment(); $('view').value='cost';
@@ -326,13 +347,19 @@
     if ($('cost')) { $('cost').hidden=!showCost; $('cost').style.display=showCost?'':'none'; }
     if ($('convergence')) { $('convergence').hidden=showCost; $('convergence').style.display=showCost?'none':''; }
     if ($('learning-flow')) $('learning-flow').hidden=showCost;
-    if ($('learning-title')) $('learning-title').textContent=showCost ? 'Cost comparison' : 'Inside the controller';
-    if ($('learning-kind')) $('learning-kind').textContent=showCost ? 'Accumulated quadratic cost' : isFit() ? 'Frozen data · Solution error' : 'Live data · Gain update size';
+    if ($('learning-title')) $('learning-title').textContent=showCost ? 'Cost comparison' : isFit() ? 'Fixed data diagnostic' : snapshot.phase==='deployment' ? 'Deployed controller' : 'Completed response learning';
+    if ($('learning-kind')) $('learning-kind').textContent=showCost ? 'Accumulated quadratic cost' : isFit() ? 'Relative error (%)' : snapshot.phase==='deployment' ? 'Fixed prediction support' : 'Completed responses · Relative error (%)';
   }
   function renderControls() {
     const frozen=isFit();
+    const deployed=snapshot.phase==='deployment';
+    const completedRows=snapshot.learning?.completedRows || 0;
+    if($('phase')) { $('phase').textContent=deployed?'Deployment':snapshot.canDeploy?'Ready to deploy':'Discovery '+Math.min(30,completedRows)+'/30'; $('phase').dataset.phase=deployed?'deployment':'discovery'; }
+    if($('deploy')) { $('deploy').disabled=comparing || deployed || !snapshot.canDeploy; $('deploy').textContent=deployed?'Links deployed':'Deploy learned links'; $('deploy').title=deployed?'Prediction support is fixed in this trial':snapshot.canDeploy?'Start a fresh trial using the learned prediction links':(snapshot.learning?.completedRows || 0)+' of 30 completed responses'; }
+    if($('phase-note')) $('phase-note').textContent=deployed?'Fresh trial with fixed prediction links. Feedback communication is unchanged.':'Discovery learns completed responses. Prediction curves coincide.';
+    if($('matrix-title')) $('matrix-title').textContent=deployed?'Deployed prediction links':'Prediction links';
     $('clock').textContent='t = '+snapshot.t+' s';
-    $('learning').textContent=frozen?'Plant held · '+snapshot.mode:snapshot.t<30?'Learning begins at t 30':'Learning from revealed samples';
+    $('learning').textContent=frozen?'Plant held · '+snapshot.mode:deployed?'Prediction links fixed':completedRows+' completed responses';
     $('run').textContent=playing?'Pause':frozen && snapshot.mode!=='converged'?'Fit':'Run';
     $('run').disabled=comparing;
     $('compare').disabled=comparing;
@@ -342,21 +369,21 @@
     $('run').setAttribute('aria-label',playing?'Pause simulation':frozen?'Run frozen fit':'Run simulation');
     $('run').setAttribute('aria-pressed',String(playing));
     if ($('pulse-label')) $('pulse-label').textContent=selectedBus===1?'Fixed substation':'Attack bus '+selectedBus;
-    $('step').textContent=frozen?'One fit step':'Step';
+    $('step').textContent=frozen?'100 fit steps':'Step';
     $('step').disabled=comparing || snapshot.mode==='converged';
-    $('freeze').textContent=frozen?'Return to simulation':'Freeze and converge';
-    $('freeze').disabled=comparing || !snapshot.canFreeze;
+    $('freeze').textContent=frozen?'Return to simulation':'Inspect fixed data';
+    $('freeze').disabled=comparing || deployed || !snapshot.canFreeze;
     $('pulse').disabled=!canAttack(selectedBus); $('strength').disabled=comparing; $('fault').disabled=!canAttack(selectedBus);
     $('fault').textContent=(snapshot.faults.includes(selectedBus)?'Repair':'Corrupt')+' forecast';
-    $('fit-title').textContent=frozen?'Convergence on frozen data':'Online adaptation';
-    $('fit-detail').textContent=frozen?'Error '+d3.format('.2~g')(100*(snapshot.fitError || 0))+'%':snapshot.t<30?'Learning begins at t 30':'Rolling data changes the target';
-    $('mode-note').textContent=frozen?'Exact ridge solution on a fixed observation window':'Freeze the observations to see convergence';
+    $('fit-title').textContent=frozen?'Fixed data diagnostic':deployed?'Deployed prediction support':'Completed response learning';
+    $('fit-detail').textContent=frozen?'Relative error '+d3.format('.2~g')(100*(snapshot.fitError || 0))+'%':deployed?'Prediction links stay fixed in this trial':completedRows+' completed responses · '+(snapshot.learning?.delay || 0)+' second completion delay';
+    $('mode-note').textContent=frozen?'Trial and controller paused. Learned links stay unchanged.':deployed?'Change the forecast preset to begin a new discovery trial':'The target changes as responses complete. Freeze to inspect convergence.';
     const i=selectedBus-1, sample=snapshot.lastSample;
     const write=(id,value)=>{if($(id))$(id).textContent=value;};
-    write('flow-predict',selectedBus===1 ? 'Fixed slack' : sample ? 'ΔP̂ '+d3.format('+.0f')(1000*sample.forecast[i])+' kW' : 'Awaiting forecast');
+    write('flow-predict',selectedBus===1 ? 'Fixed slack' : sample ? 'ŵ '+d3.format('+.2~g')(sample.forecast[i])+' pu' : 'Awaiting forecast');
     write('flow-control',hasInverter(selectedBus) ? 'Q* '+d3.format('+.0f')(reactiveCommand(selectedBus))+' kvar' : 'No inverter');
-    write('flow-observe',selectedBus===1 ? busVoltage(1).toFixed(3)+' pu' : sample ? 'ΔP '+d3.format('+.0f')(1000*sample.disturbance[i])+' kW' : 'Awaiting load');
-    write('flow-update',frozen ? snapshot.fitIteration+' iterations' : snapshot.t<30 ? snapshot.t+'/30 samples' : 'ΔG '+d3.format('.2~g')(100*snapshot.drift)+'%');
+    write('flow-observe',selectedBus===1 ? busVoltage(1).toFixed(3)+' pu' : sample ? 'w '+d3.format('+.2~g')(sample.disturbance[i])+' pu' : 'Awaiting response');
+    write('flow-update',frozen ? snapshot.fitIteration+' iterations' : deployed ? 'Support fixed' : completedRows+' completed rows');
     renderLearningView();
   }
   function drawNetwork() {
@@ -367,7 +394,7 @@
       .attr('role','group').attr('aria-label','Radial power feeder. Activate a bus to disturb load, solar output, or battery charging.');
     const point = bus => [25 + positions[bus - 1][0] * (width - 54), 26 + positions[bus - 1][1] * (height - 54)];
     if (svg.select('defs').empty()) {
-      svg.append('title').text('Radial electrical feeder and learned communication recommendations');
+      svg.append('title').text('Radial electrical feeder and prediction source links');
       const defs = svg.append('defs');
       for (const [name,fill] of [['retained',color('var(--viz-series-1)')],['added',color(matrixColors.added)],['removed',color(matrixColors.removed)]]) {
         defs.append('marker').attr('id','pr-arrow-'+name).attr('viewBox','0 0 10 10').attr('refX',9).attr('refY',5).attr('markerUnits','userSpaceOnUse').attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto').append('path').attr('d','M 0 0 L 10 5 L 0 10 Z').attr('fill',fill);
@@ -459,7 +486,7 @@
     }
     const sources = recommendations.filter(e => e.to === selectedBus).map(e => e.from).join(', ');
     $('topology-label').textContent = $('all-links').checked ? 'All learned links' : hasInverter(selectedBus) ? 'Sources '+sources+' → inverter '+selectedBus : 'No inverter at bus '+selectedBus;
-    $('links-detail').textContent = 'Recommendations · Electrical feeder remains fixed';
+    $('links-detail').textContent = 'Prediction links · Electrical feeder and feedback remain fixed';
   }
   function showBusDetail(bus,hovered=false) {
     const status=pulseStatus(bus);
@@ -489,7 +516,7 @@
     if ($('matrix-detail')) $('matrix-detail').textContent = detail;
     if ($('matrix-changes')) $('matrix-changes').textContent = changes;
     const svg = d3.select(el).attr('viewBox','0 0 '+width+' '+height).attr('height',height)
-      .attr('role','group').attr('aria-label','Recommended communication connectivity matrix')
+      .attr('role','group').attr('aria-label',snapshot.phase==='deployment'?'Deployed prediction source matrix':'Candidate prediction source matrix')
       .attr('aria-describedby','pr-matrix-description');
     if (svg.select('.matrix-cells').empty()) {
       svg.append('title').text('Recommended connectivity from source columns to receiver rows');
@@ -501,7 +528,8 @@
       svg.append('rect').attr('class','matrix-selected-row').attr('fill','none').attr('pointer-events','none');
       svg.append('g').attr('class','matrix-rows');
     }
-    svg.select('desc').text('Each entry represents a recommended source for a receiver. Green entries are retained connections, blue entries are added connections, amber outlines are removed connections, and gray diagonal entries are local information. '+changes+' since step '+matrixReference.t+'. '+detail+'. Use the receiver buttons to select a bus.');
+    svg.select('title').text(snapshot.phase==='deployment'?'Deployed prediction links from source columns to inverter rows':'Candidate prediction links from source columns to inverter rows');
+    svg.select('desc').text('Entries represent prediction sources for inverter controllers. Blue entries are retained links, green entries are added links, amber outlines are removed links, and gray diagonal entries are local information. '+changes+' since step '+matrixReference.t+'. '+detail+'. Use the receiver buttons to select a bus.');
     svg.select('.matrix-source-title').attr('x',left+side/2).attr('y',12).attr('text-anchor','middle').attr('fill','var(--muted-foreground)').attr('font-size',11).text('Source bus');
     svg.select('.matrix-receiver-title').attr('transform','translate('+(left-35)+','+(top+side/2)+') rotate(-90)').attr('text-anchor','middle').attr('fill','var(--muted-foreground)').attr('font-size',11).text('Receiver bus');
     svg.select('.matrix-columns').selectAll('text').data(d3.range(1,25)).join('text')
@@ -528,7 +556,7 @@
       .attr('fill',d=>color(d.change==='removed' ? 'var(--background)' : d.change==='retained' ? matrixColors.connected : matrixColors[d.change] || matrixColors.inactive))
       .attr('stroke',d=>d.change==='removed' ? color(matrixColors.removed) : 'transparent')
       .attr('stroke-width',d=>d.change==='removed' ? 1.4 : 0);
-    marks.select('title').text(d=>d.change==='local' ? 'Inverter '+d.receiver+' local information' : 'Source '+d.source+' to receiver '+d.receiver+' · '+(d.change==='inactive'?'Not recommended':d.change==='retained'?'Connected':d.change==='added'?'Added since reference':'Removed since reference'));
+    marks.select('title').text(d=>d.change==='local' ? 'Inverter '+d.receiver+' local information' : 'Source '+d.source+' to receiver '+d.receiver+' · '+(d.change==='inactive'?(snapshot.phase==='deployment'?'Excluded prediction source':'Not selected'):d.change==='retained'?'Connected':d.change==='added'?'Added since reference':'Removed since reference'));
     svg.select('.matrix-selected-row').attr('x',left-.8).attr('y',top+(selectedBus-1)*cellSize-.5)
       .attr('width',side+1.6).attr('height',cellSize+1).attr('rx',1).attr('stroke','var(--foreground)').attr('stroke-width',1);
     const rows=svg.select('.matrix-rows').selectAll('g').data(d3.range(1,25)).join(enter=>{
@@ -579,18 +607,21 @@
     const x=d3.scaleLinear().domain(options.xDomain || [xmin || 0,(xmax === xmin ? (xmin || 0)+1 : xmax) || 1]).range([frame.x+2,frame.x+frame.w-2]);
     const y=d3.scaleLinear().domain(options.yDomain || [yl,yh+pad]).range([frame.y+frame.h-2,frame.y+2]);
     svg.select('[data-chart-frame]').attr('x',frame.x).attr('y',frame.y).attr('width',frame.w).attr('height',frame.h);
-    animate(svg.select('.grid').attr('transform','translate('+frame.x+',0)')).call(d3.axisLeft(y).ticks(height<150?3:4).tickSize(-frame.w).tickFormat(''));
+    updateAxis(svg.select('.grid').attr('transform','translate('+frame.x+',0)'),d3.axisLeft(y).ticks(height<150?3:4).tickSize(-frame.w).tickFormat(''));
     const xticks = x.ticks(width < 400 ? 3 : 5).filter(Number.isInteger);
-    animate(svg.select('.x-axis').attr('transform','translate(0,'+(frame.y+frame.h)+')')).call(d3.axisBottom(x).tickValues(xticks).tickSize(4).tickFormat(d3.format('d')));
-    animate(svg.select('.y-axis').attr('transform','translate('+frame.x+',0)')).call(d3.axisLeft(y).ticks(height<150?3:4).tickSize(4).tickFormat(d3.format(options.yFormat || '.3~g')));
+    updateAxis(svg.select('.x-axis').attr('transform','translate(0,'+(frame.y+frame.h)+')'),d3.axisBottom(x).tickValues(xticks).tickSize(4).tickFormat(d3.format('d')));
+    updateAxis(svg.select('.y-axis').attr('transform','translate('+frame.x+',0)'),d3.axisLeft(y).ticks(height<150?3:4).tickSize(4).tickFormat(d3.format(options.yFormat || '.3~g')));
     svg.select('[data-axis=x]').attr('x',frame.x+frame.w/2).attr('y',height-5).text(xTitle);
-    svg.select('[data-axis=y]').attr('transform','translate(14,'+(frame.y+frame.h/2)+') rotate(-90)').text(yTitle);
+    // Plot captions already name these quantities. Keep units accessible without
+    // crowding the numeric ticks with a duplicate vertical label.
+    svg.select('[data-axis=y]').text('').attr('aria-hidden','true');
+    svg.select('.y-axis').attr('aria-label',yTitle);
     svg.select('clipPath rect').attr('x',frame.x).attr('y',frame.y).attr('width',frame.w).attr('height',frame.h);
     const marks=svg.select('.chart-marks');
     return {svg,marks,x,y,frame,width,height};
   }
   function drawSeries(chart, observations, items, showCurrent = false) {
-    // Put the adaptive curve last while preserving exact overlaps and sample values.
+    // Put the learned controller last while preserving exact overlaps and sample values.
     const paintOrder=items.filter(item=>item.key!=='online').concat(items.filter(item=>item.key==='online'));
     const lines = chart.marks.selectAll('path.data-series').data(paintOrder,item => item.key).join(
       enter => enter.append('path').attr('class','data-series').attr('fill','none'),
@@ -614,12 +645,12 @@
       .attr('d',point=>d3.symbol().type(point.item.shape || d3.symbolCircle).size(23)())
       .attr('fill','var(--background)').attr('stroke',point=>point.item.color).attr('stroke-width',1.3)
       .attr('pointer-events','none').raise();
-    animate(points).attr('transform',point=>'translate('+chart.x(point.sample.x)+','+chart.y(point.sample[point.item.key])+')');
+    points.interrupt().interrupt('update').attr('transform',point=>'translate('+chart.x(point.sample.x)+','+chart.y(point.sample[point.item.key])+')');
     const latest = observations[observations.length-1];
     const dots = chart.marks.selectAll('circle.latest-value').data(showCurrent && latest ? paintOrder : [],item => item.key).join('circle')
       .attr('class','latest-value').attr('r',item => item.key === 'online' ? 2.7 : 2)
       .attr('fill',item => item.color).attr('stroke','var(--background)').attr('stroke-width',.8).order();
-    if(latest) animate(dots).attr('cx',chart.x(latest.x)).attr('cy',item => chart.y(latest[item.key]));
+    if(latest) dots.interrupt().interrupt('update').attr('cx',chart.x(latest.x)).attr('cy',item => chart.y(latest[item.key]));
   }
 
   function hover(chart,observations,items,xLabel) {
@@ -667,7 +698,7 @@
     const lines = markers.selectAll('line').data(groups,group => group.key).join('line')
       .attr('y1',chart.frame.y).attr('y2',chart.frame.y+chart.frame.h)
       .attr('stroke','var(--muted-foreground)').attr('stroke-opacity',.28).attr('stroke-width',1).attr('stroke-dasharray','3 4');
-    animate(lines).attr('x1',group=>group.x).attr('x2',group=>group.x);
+    lines.interrupt().interrupt('update').attr('x1',group=>group.x).attr('x2',group=>group.x);
     const labels = chart.svg.select('.intervention-labels').selectAll('text').data(groups,group=>group.key).join(enter=>{
       const label=enter.append('text').attr('class','intervention-label');
       label.append('title'); label.append('tspan'); return label;
@@ -676,7 +707,7 @@
       .attr('data-forecast-change-count',group=>group.items.filter(item=>item.type==='fault').length)
       .attr('data-event-steps',group=>group.items.map(item=>item.t+1).join(','))
       .attr('text-anchor','middle').attr('font-size',10).attr('fill','var(--muted-foreground)');
-    animate(labels).attr('x',group=>group.x);
+    labels.interrupt().interrupt('update').attr('x',group=>group.x);
     labels.select('tspan').text(group=>[...new Set(group.items.map(item=>item.type==='pulse'?'D':'E'))].sort().join('/'));
     labels.select('title').text(group=>group.items.map(item=>item.type==='pulse' ? pulseMagnitude(item.strength || 100)+' pulse at bus '+item.bus+' changes feeder voltage at t '+(item.t+1)+' s. Its voltage cost is charged at t '+(item.t+1)+' s, on the following sample.' : 'Forecast change at bus '+item.bus+' · Step '+(item.t+1)).join(' '));
   }
@@ -684,7 +715,7 @@
     const observations=[{x:0,...Object.fromEntries(series.map(item=>[item.key,0]))},...snapshot.history.map(d=>({x:d.t,...Object.fromEntries(series.map(item=>[item.key,d[item.key]]))}))];
     const items=series.filter(s=>visible.has(s.key));
     if ($('cost').hidden) return;
-    const chart=chartBase($('cost'),observations,items.map(s=>s.key),'Total cost','Time t',140);
+    const chart=chartBase($('cost'),observations,items.map(s=>s.key),'Cumulative cost','Time t',140);
     drawInterventions(chart);
     drawSeries(chart,observations,items);
     hover(chart,observations,items,'Time (s)');
@@ -699,15 +730,16 @@
       difference.textContent=item.key==='causal' ? 'Reference' : comparativeCost(c[item.key],c.causal);
       row.dataset.method=item.key; row.append(label,value,difference); $('cost-detail').append(row);
     }
-    const scalarComparison=comparativeCost(c.online,c.scalar);
-    $('comparison-summary').textContent=c.scalar>1e-12
-      ? scalarComparison==='Equal' ? 'Adaptive and scalar costs are equal' : 'Adaptive cost is '+scalarComparison+' than scalar'
-      : 'Run to compare adaptive and scalar costs';
+    const sparseComparison=comparativeCost(c.online,c.scalar);
+    $('comparison-summary').textContent=snapshot.phase!=='deployment' ? 'Discovery uses the same dense prediction controller' : c.scalar>1e-12
+      ? sparseComparison==='Equal' ? 'Learned and fixed sparse costs are equal' : sparseComparison==='Nearly equal' ? 'Learned and fixed sparse costs are nearly equal' : 'Learned cost is '+sparseComparison+' than fixed sparse'
+      : 'Run to compare the deployed controllers';
   }
   function comparativeCost(value,reference) {
     if (!(reference>1e-12)) return 'Pending';
+    if(Math.abs(value-reference)<=1e-12) return 'Equal';
     const percent=100*(value-reference)/reference;
-    return Math.abs(percent)<.05 ? 'Equal' : d3.format('.1f')(Math.abs(percent))+'% '+(percent<0?'lower':'higher');
+    return Math.abs(percent)<.05 ? 'Nearly equal' : d3.format('.1f')(Math.abs(percent))+'% '+(percent<0?'lower':'higher');
   }
 
   function responseWindow() { return [Math.max(0,snapshot.t-30),Math.max(1,snapshot.t)]; }
@@ -759,46 +791,48 @@
   }
   function drawConvergence() {
     if (!$('convergence') || $('convergence').hidden) return;
-    const frozen=isFit();
+    const frozen=isFit(), deployed=snapshot.phase==='deployment';
     const el=$('convergence'), svg=d3.select(el);
-    if(!frozen && !snapshot.learning?.updates) {
+    const completedRows=snapshot.learning?.completedRows || 0;
+    if(!frozen && (deployed || !snapshot.learning?.updateCount)) {
       const width=Math.max(240,el.getBoundingClientRect().width), height=140;
+      const heading=deployed?'Prediction links are deployed':'Waiting for completed responses';
+      const detail=deployed?'Support stays fixed throughout this trial':completedRows+' of 30 responses required to deploy';
       svg.attr('viewBox','0 0 '+width+' '+height).attr('height',height)
-        .attr('aria-label','Collecting observations. '+snapshot.t+' of 30 samples received.');
+        .attr('aria-label',heading+'. '+detail+'.');
       svg.selectAll('*').remove();
       const wait=svg.append('g').attr('class','learning-wait');
       wait.append('text').attr('x',width/2).attr('y',48).attr('text-anchor','middle')
-        .attr('fill','var(--foreground)').attr('font-size',13).text(snapshot.t<30?'Collecting observations':'Ready to learn');
+        .attr('fill','var(--foreground)').attr('font-size',13).text(heading);
       wait.append('text').attr('x',width/2).attr('y',70).attr('text-anchor','middle')
-        .attr('fill','var(--muted-foreground)').attr('font-size',11).text(Math.min(30,snapshot.t)+' / 30 samples');
-      wait.append('line').attr('x1',width/2-64).attr('x2',width/2+64).attr('y1',88).attr('y2',88)
-        .attr('stroke','var(--border)').attr('stroke-width',3).attr('stroke-linecap','round');
-      wait.append('line').attr('x1',width/2-64).attr('x2',width/2-64+128*Math.min(1,snapshot.t/30)).attr('y1',88).attr('y2',88)
-        .attr('stroke','var(--primary)').attr('stroke-width',3).attr('stroke-linecap','round');
+        .attr('fill','var(--muted-foreground)').attr('font-size',11).text(detail);
+      if(!deployed) {
+        wait.append('line').attr('x1',width/2-64).attr('x2',width/2+64).attr('y1',88).attr('y2',88)
+          .attr('stroke','var(--border)').attr('stroke-width',3).attr('stroke-linecap','round');
+        wait.append('line').attr('x1',width/2-64).attr('x2',width/2-64+128*Math.min(1,completedRows/30)).attr('y1',88).attr('y2',88)
+          .attr('stroke','var(--primary)').attr('stroke-width',3).attr('stroke-linecap','round');
+      }
       return;
     }
     if(!svg.select('.learning-wait').empty()) svg.selectAll('*').remove();
-    let observations;
-    if(frozen) observations=snapshot.fitHistory.map(d=>({x:d.iteration,value:100*d.error}));
-    else observations=[{x:0,value:0},...snapshot.history.map(d=>({x:d.costTime ?? d.t-1,value:100*d.drift}))];
-    if(!observations.length) observations=[{x:0,value:100*(snapshot.fitError || 0)}];
-    $('convergence').setAttribute('aria-label',frozen?'Relative Frobenius error to the exact solution on frozen samples':'Relative Frobenius change in the shared response on each control step');
-    const chart=chartBase($('convergence'),observations,['value'],frozen?'Solution error (%)':'Gain change (%)',frozen?'Gradient iteration':'Time (s)',140);
+    const observations=frozen
+      ? snapshot.fitHistory.filter(d=>Number.isFinite(d.error)).map(d=>({x:d.iteration,value:100*d.error}))
+      : snapshot.history.filter(d=>Number.isFinite(d.prefixError)).map(d=>({x:d.t,value:100*d.prefixError}));
+    if(!observations.length) return;
+    $('convergence').setAttribute('aria-label',frozen?'Fixed data diagnostic. Relative error to the exact completed response optimizer on frozen data':'Relative error to the changing completed response optimizer');
+    const chart=chartBase($('convergence'),observations,['value'],'Relative error (%)',frozen?'Gradient iteration':'Time (s)',140);
     if (!frozen) drawInterventions(chart);
     else {
       chart.marks.select('.intervention-markers').selectAll('line').remove();
       chart.svg.select('.intervention-labels').selectAll('text').remove();
     }
     drawSeries(chart,observations,[{key:'value',color:'var(--viz-series-1)'}]);
-    hover(chart,observations,[{key:'value',label:frozen?'Solution error (%)':'Gain change (%)',color:'var(--viz-series-1)'}],frozen?'Iteration':'Time (s)');
+    hover(chart,observations,[{key:'value',label:'Relative error (%)',color:'var(--viz-series-1)'}],frozen?'Iteration':'Time (s)');
   }
   function render() {
     $('tooltip').style.display='none'; pin=null;
     renderControls(); drawNetwork(); drawMatrix(); drawCost(); drawStage(); drawVoltage(); drawConvergence();
   }
-  document.querySelectorAll('a[href="#about-demo"]').forEach(link=>link.addEventListener('click',()=>{
-    const about=document.getElementById('about-demo'); if(about && about.tagName==='DETAILS') about.open=true;
-  }));
   announce('Ready');
   hydrate(window.openai?.widgetState);
   if (!matrixReference) captureMatrixReference();

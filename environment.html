@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Experimental environment for the interactive LinDistFlow feeder demo.">
+<title>Experimental environment · Keeping the Grid Steady</title>
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#1d1d1f;background:#fff;font-synthesis:none}*{box-sizing:border-box}body{margin:0;padding:40px 24px 60px}main{max-width:760px;margin:auto}nav{display:flex;justify-content:space-between;align-items:center;font-size:14px;border-bottom:1px solid #e5e5e7;padding-bottom:22px;margin-bottom:42px}a{color:#0066cc;text-decoration:none}a:hover{text-decoration:underline}nav span{color:#86868b}h1{font-size:36px;letter-spacing:-1.2px;line-height:1.1;font-weight:650;margin:0 0 16px}p{font-size:16px;line-height:1.6;margin:12px 0;color:#424245}h2{font-size:19px;letter-spacing:-.35px;margin:30px 0 10px}table{width:100%;border-collapse:collapse;font-size:14px;line-height:1.45}th,td{text-align:left;vertical-align:top;border-bottom:1px solid #e8e8ed;padding:9px 12px 9px 0}th{font-weight:600;width:35%}.equation{font-size:16px;line-height:1.65;background:#f5f5f7;border-radius:12px;padding:14px 18px;margin:16px 0;font-variant-numeric:tabular-nums}footer{margin-top:34px;padding-top:18px;border-top:1px solid #e5e5e7;color:#86868b;font-size:13px;line-height:1.5}@media(max-width:520px){body{padding:24px 20px}h1{font-size:30px}nav{margin-bottom:30px}th{width:40%}.equation{font-size:14px;overflow-x:auto}}@media print{body{padding:0}nav{margin-bottom:20px}h1{font-size:28px}h2{margin-top:20px}p{font-size:11pt}table,footer{font-size:10pt}.equation{font-size:11pt}a{color:inherit}main{max-width:none}}
+</style>
+</head>
+<body><main>
+<nav><a href="./">← Return to the experiment</a><span>Experimental environment</span></nav>
+<h1>A distribution feeder under changing power</h1>
+<p>The experiment regulates a constructed, balanced radial feeder with 24 buses. A fixed substation supplies homes, solar generation and batteries. The target is the nominal voltage profile before power disturbances.</p>
+<h2>Physical setting</h2>
+<table aria-label="Feeder parameters">
+<tr><th>Power flow</th><td>Voltage magnitude LinDistFlow with bus 1 fixed at 1 pu</td></tr>
+<tr><th>Electrical bases</th><td>12.47 kV line to line and 1 MVA</td></tr>
+<tr><th>Lines</th><td>23 branches with resistance 0.45 to 0.90 Ω and reactance 0.30 to 0.46 Ω</td></tr>
+<tr><th>Nominal power</th><td>70 kW per ordinary bus and 50 kW per battery bus, at power factor 0.95. Solar buses additionally generate 80 kW.</td></tr>
+<tr><th>Inverters</th><td>Buses 5, 7, 8, 12, 14, 18, 21 and 24. Each has a 120 kVA rating and a reactive command limit of ±70 kvar.</td></tr>
+<tr><th>Prediction messages</th><td>A sparse controller receives its local prediction and at most three remote sources per inverter.</td></tr>
+<tr><th>Time</th><td>One second per sample with a two second inverter response time</td></tr>
+</table>
+<div class="equation">vₜ = 1 − Rᵥpₜ − Xᵥqₜ<sup>load</sup> + XᵥEqₜ<sup>inv</sup><br>qₜ₊₁<sup>inv</sup> = aqₜ<sup>inv</sup> + (1 − a)uₜ &nbsp; &nbsp; a = exp(−1/2)</div>
+<p>Rᵥ and Xᵥ sum branch impedances along shared substation paths. E places inverter injections at their buses. The reference v̄ uses nominal power and zero inverter reactive injection, ranging from 0.98738 to 1 pu.</p>
+<h2>Disturbances and observations</h2>
+<p>Background net power follows a correlated process with a 6 kW scale. The forecast presets provide reliable, uniformly corrupted or mixed quality predictions of the resulting voltage forcing. Each prediction is fixed when issued, and clicked events are absent from it. Compared controllers receive identical power disturbances and issued forecasts.</p>
+<p>Clicking a home adds demand at power factor 0.95. Clicking solar reduces generation. Clicking a battery increases charging. Requests of 50, 100 or 150 kW decay over several seconds. Repeated requests add before equipment limits apply. Solar loss cannot exceed available generation, and battery charging is capped at 90 kW. The substation remains fixed.</p>
+<h2>Displayed quantities</h2>
+<div class="equation">cₜ = 35‖vₜ − v̄‖² + 0.08‖uₜ‖²</div>
+<p>Voltage is displayed in pu and inverter injection in kvar. Cost uses the bounded reactive command u on the 1 MVA base. The live cumulative curve sums executed stage costs. A completed benchmark additionally includes the terminal voltage error penalty. A disturbance changes voltage at the next sample, and its voltage error is charged at that sample.</p>
+<p>The 0.95 to 1.05 pu band is a reference operating band, not an enforced constraint. Voltage and cost are never clipped. Playback speed changes viewing pace without changing physical time.</p>
+<footer>LinDistFlow neglects line losses and assumes small voltage deviations. This experiment omits unbalanced phases, thermal line limits, protection, frequency dynamics and battery energy limits. It is a constructed environment rather than a measured utility case.</footer>
+</main></body></html>
