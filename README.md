@@ -12,7 +12,11 @@ Orange lightning badges show the actual applied disturbance in kW after equipmen
 
 The prediction matrix shows eight inverter receivers and 23 source buses. Connectivity is the default view. Its history slider and recent event cards retain actual support changes over time, with added links in green and removed links in amber. Changed cells and links briefly flash when an update arrives. Returning to the starting topology does not erase earlier events. Connectivity can remain stable while coefficients change, and the display identifies these quantities separately. Learning weights displays the signed change in realizing gain energy relative to the offline energy of the same completed rows. Its color scale is shown explicitly and selected sources remain outlined. Coefficient change is the relative Frobenius norm of the actual learned gain correction. Learning weights can change without changing the strongest sources. During deployment both the selected support and retained discovery diagnostic stay fixed. Learn again starts new discovery.
 
-The learning run shows only Dense prediction and Feedback only, which are the two policies actually executed in that phase. Compare controllers starts a fresh trial with the learned sparse, fixed sparse, dense and feedback policies. Curves use colors and line styles without geometric sample markers. If the learned and fixed supports are identical, the page states that their curves coincide. Gap to fixed sparse subtracts its actual cumulative cost at each sample. The table always shows cumulative totals. No visual separation or performance advantage is invented.
+Run collects 180 physical samples for learning, then automatically starts an independent four controller comparison. The right panel shows learning progress during preparation. The comparison clock and costs start at zero, while discovery topology history remains available. Ongoing attacks and unapplied requests continue across the transition. Decaying disturbances from the old plant do not transfer.
+
+Saved trials restore paused in their original phase. Automatic transition resumes with live sampling. Step stays paused. Advance 180 executes exactly 180 samples across the phases and preserves ongoing attacks. Disable automatic comparison in Experiment settings to inspect a longer learning run or choose deployment manually.
+
+Curves use colors and line styles. Equal learned and fixed supports are identified explicitly. Gap to fixed sparse subtracts actual cumulative costs, while the table retains totals.
 
 ## Execution contract
 

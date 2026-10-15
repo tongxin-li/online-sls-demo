@@ -316,8 +316,8 @@ summary span { color:#a1a1a6; }
   </div>
   <div class="pr-comparison-controls">
     <label for="pr-preset">Forecasts <select id="pr-preset" aria-label="Forecast preset" title="Changing forecasts starts a new discovery trial"><option value="reliable">Reliable forecasts</option><option value="uniform">Uniform noise</option><option value="mixed" selected>Mixed reliability</option></select></label>
-    <button type="button" class="btn btn-compare" id="pr-compare" title="Advance 180 seconds of feeder operation and keep all accumulated costs">Advance 180</button>
-    <div class="pr-phase-actions"><span id="pr-phase" class="pr-phase-badge">Discovery</span><button type="button" id="pr-deploy" class="btn btn-deploy" disabled title="Start four controllers on the same fresh disturbance sequence">Compare controllers</button></div>
+    <button type="button" class="btn btn-compare" id="pr-compare" title="Advance 180 samples across learning and comparison">Advance 180</button>
+    <div class="pr-phase-actions"><span id="pr-phase" class="pr-phase-badge">Learning 0 / 180 s</span><button type="button" id="pr-deploy" class="btn btn-deploy" disabled title="Start four controllers on the same fresh disturbance sequence">Compare controllers</button></div>
   </div>
   <div class="pr-mission"><span><span class="pr-status-dot" id="pr-voltage-status" aria-hidden="true"></span>Restore the <strong>nominal voltage profile</strong><span class="pr-target"> · Illustrative band 0.95 to 1.05 pu</span></span><span id="pr-voltage-range" class="tabular-nums"></span></div>
   <div class="pr-dashboard">
@@ -362,7 +362,7 @@ summary span { color:#a1a1a6; }
   <p id="pr-phase-note" class="pr-overlap-note">Colors and line styles identify controllers · Hover for exact values</p>
   <details class="pr-adaptation" id="pr-adaptation">
     <summary>Experiment settings <span aria-hidden="true">+</span></summary>
-    <div class="pr-settings"><label>Bus <select id="pr-bus" aria-label="Selected bus"></select></label><button type="button" class="btn" id="pr-fault">Repair forecast</button><label class="form-check"><input type="checkbox" id="pr-all-links" checked>All prediction links</label></div>
+    <div class="pr-settings"><label class="form-check"><input type="checkbox" id="pr-auto-compare" checked>Start comparison automatically</label><label>Bus <select id="pr-bus" aria-label="Selected bus"></select></label><button type="button" class="btn" id="pr-fault">Repair forecast</button><label class="form-check"><input type="checkbox" id="pr-all-links" checked>All prediction links</label></div>
     <p class="pr-caption" id="pr-fit-detail"></p>
   </details>
   <div hidden><span id="pr-fit-title"></span><span id="pr-learning"></span><span id="pr-topology-label"></span><span id="pr-links-detail"></span><span id="pr-matrix-reference"></span><span id="pr-impact-note"></span></div>
@@ -1395,6 +1395,8 @@ summary span { color:#a1a1a6; }
     { key:'causal', label:'Feedback only', color:'var(--viz-series-3)', dash:'1 4' }
   ];
   const visible = new Set(series.map(s => s.key));
+  const DISCOVERY_SAMPLES=180;
+  const automaticComparison=()=>$('auto-compare').checked;
   // Discovery executes one dense predictive policy plus the feedback baseline.
   // Sparse labels become meaningful only after their constrained designs exist.
   function activeSeries() { return snapshot.phase==='deployment' ? series : series.filter(s=>s.key==='static'||s.key==='causal'); }
@@ -1570,7 +1572,7 @@ summary span { color:#a1a1a6; }
     const events=snapshot.eventLog || [];
     const state = {
       modelContent: { scenario:'24 bus LinDistFlow voltage regulation', variant:'Completed response learning and separate sparse deployment', phase:snapshot.phase, step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
-      privateContent: { version:9, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, view:$('view').value, costMetric:$('cost-metric').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, speed:$('speed').value, allLinks:$('all-links').checked }
+      privateContent: { version:9, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, automaticComparison:automaticComparison(), view:$('view').value, costMetric:$('cost-metric').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, speed:$('speed').value, allLinks:$('all-links').checked }
     };
     window.openai.setWidgetState(state).catch(() => {});
   }
@@ -1603,6 +1605,7 @@ summary span { color:#a1a1a6; }
     const data=saved?.privateContent;
     if(restored||!data||![7,8,9].includes(data.version)) return;
     restored=true;
+    $('auto-compare').checked=data.automaticComparison!==false;
     selectedBus=Math.max(1,Math.min(24,Math.floor(Number(data.selectedBus)||7)));
     $('bus').value=String(selectedBus);
     $('speed').value=data.version===9 && ['2','4','8','16','32'].includes(data.speed)?data.speed:'16';
@@ -1641,8 +1644,8 @@ summary span { color:#a1a1a6; }
     heldAttack = null;
     $('pulse').dataset.holding='false';
   }
-  function stop() {
-    releaseAttack();
+  function stop(preserveAttack=false) {
+    if(!preserveAttack) releaseAttack();
     nextTickAt = 0;
     playing = false;
     if (timer) clearTimeout(timer);
@@ -1660,13 +1663,46 @@ summary span { color:#a1a1a6; }
       if(playing) schedule();
     },Math.max(0,nextTickAt-performance.now()));
   }
+  function enterComparison(preserveAttack=false) {
+    // Transfer requests not yet applied, not decaying disturbances from the old plant.
+    const requests=preserveAttack ? simulation.snapshot().pendingPulses.map(p=>({bus:p.bus,strength:p.strength})) : [];
+    if(!simulation.deployTopology()) return false;
+    snapshot=simulation.snapshot();
+    topology.observe(snapshot);historyIndex=null;visualTopologyEvent=null;
+    journal=[];fitSteps=0;pin=null;lastPulse=null;
+    if(preserveAttack && heldAttack) {
+      if(!requests.some(p=>p.bus===heldAttack.bus)) requests.push({bus:heldAttack.bus,strength:Number($('strength').value)});
+      heldAttack.lastQueuedAt=0;
+    } else releaseAttack();
+    for(const request of requests) {
+      simulation.queuePulse(request.bus,request.strength);
+      journal.push({t:0,type:'pulse',...request});
+      lastPulse={...request,t:0,before:0};
+    }
+    snapshot=simulation.snapshot();
+    captureMatrixReference();$('view').value='cost';$('cost-metric').value='total';
+    visible.clear();series.forEach(item=>visible.add(item.key));
+    announce('Learning complete · Fresh comparison trial · Costs start at zero');
+    return true;
+  }
+  function startAutomaticComparison() {
+    if(!automaticComparison() || simulation.phase!=='discovery' || isFit()
+      || simulation.t<DISCOVERY_SAMPLES || !simulation.snapshot().canDeploy) return false;
+    return enterComparison(true);
+  }
+  function advanceLiveSample() {
+    // Replayed records never call this function. Their historical phase is retained.
+    let transitioned=startAutomaticComparison();
+    if(simulation.mode==='completed') simulation.extend();
+    if(heldAttack && heldAttack.lastQueuedAt<simulation.t) pulse(heldAttack.bus,{repeated:true});
+    advanceSample();snapshot=simulation.snapshot();
+    transitioned=startAutomaticComparison() || transitioned;
+    if(transitioned) save();
+    return transitioned;
+  }
   function tick() {
     if (isFit()) { simulation.fitStep(100); fitSteps+=100; }
-    else {
-      if(simulation.mode==='completed') simulation.extend();
-      if(heldAttack && heldAttack.lastQueuedAt<simulation.t) pulse(heldAttack.bus,{repeated:true});
-      advanceSample();
-    }
+    else advanceLiveSample();
     snapshot = simulation.snapshot();
     if (!isFit() && lastPulse && snapshot.t>lastPulse.t) {
       const active=pulseStatus(lastPulse.bus).active;
@@ -1708,13 +1744,8 @@ summary span { color:#a1a1a6; }
     }
     if(!snapshot.canDeploy) return;
     stop();
-    simulation.deployTopology(); snapshot=simulation.snapshot();
-    topology.observe(snapshot);historyIndex=null;
-    journal=[]; fitSteps=0; pin=null; lastPulse=null;
-    captureMatrixReference(); $('view').value='cost'; $('cost-metric').value='total';
-    visible.clear();series.forEach(item=>visible.add(item.key));
+    enterComparison();
     playing=true;nextTickAt=0;schedule();
-    announce('Four controllers running · Fresh comparison trial at t 0');
     actionNote(attackInstruction());
     render(); save();
   });
@@ -1725,23 +1756,19 @@ summary span { color:#a1a1a6; }
   });
   $('compare').addEventListener('click', async () => {
     if (comparing) return;
-    stop(); resumePlant(); comparing=true; $('view').value='cost';
-    const start=snapshot.t;
+    stop(true); resumePlant(); comparing=true; $('view').value='cost';
+    const startingPhase=snapshot.phase;
     try {
       for (let done=0; done<180; done+=12) {
         // Yield between batches so progress and controls remain responsive.
         renderControls();
         await new Promise(resolve=>setTimeout(resolve,0));
-        for (let k=0;k<12;k++) {
-          if (simulation.mode==='completed') simulation.extend();
-          if(heldAttack && heldAttack.lastQueuedAt<simulation.t) pulse(heldAttack.bus,{repeated:true});
-          advanceSample();
-        }
+        for (let k=0;k<12;k++) advanceLiveSample();
         snapshot=simulation.snapshot();
-        announce('Comparing '+(snapshot.t-start)+' / 180 steps');
+        announce('Advancing '+(done+12)+' / 180 samples');
         if ((done+12)%36===0) render();
       }
-      announce('180 seconds added · t = '+snapshot.t+' s');
+      announce(startingPhase!==snapshot.phase?'Learning complete · Fresh comparison trial · t = '+snapshot.t+' s':'180 samples added · t = '+snapshot.t+' s');
     } finally {
       comparing=false;
       if(heldAttack && !playing) {playing=true;nextTickAt=0;schedule();}
@@ -1753,6 +1780,7 @@ summary span { color:#a1a1a6; }
     resetExperiment(); announce('Ready'); render(); save();
   });
   $('speed').addEventListener('change', () => { if (playing) { clearTimeout(timer); nextTickAt=0; schedule(); } save(); });
+  $('auto-compare').addEventListener('change',()=>{render();save();});
   $('cost-metric').addEventListener('change',()=>{drawCost();save();});
   $('strength').addEventListener('change', () => { drawNetwork(); save(); });
   $('attack-mode').addEventListener('change',()=>{releaseAttack();renderControls();drawNetwork();save();});
@@ -1903,21 +1931,24 @@ summary span { color:#a1a1a6; }
     });
   });
   function renderLearningView() {
-    const showCost=$('view')?.value==='cost';
+    const preparing=snapshot.phase==='discovery' && automaticComparison();
+    const showCost=!preparing && $('view')?.value==='cost';
+    $('view').hidden=preparing;
     if ($('cost-content')) $('cost-content').hidden=!showCost;
     if ($('learning-content')) $('learning-content').hidden=showCost;
     if ($('cost')) { $('cost').hidden=!showCost; $('cost').style.display=showCost?'':'none'; }
     if ($('convergence')) { $('convergence').hidden=showCost; $('convergence').style.display=showCost?'none':''; }
     if ($('learning-flow')) $('learning-flow').hidden=showCost;
-    if ($('learning-title')) $('learning-title').textContent=showCost ? (snapshot.phase==='deployment'?'Controller comparison':'Learning run') : isFit() ? 'Fixed data diagnostic' : snapshot.phase==='deployment' ? 'Deployed controller' : 'Completed response learning';
+    if ($('learning-title')) $('learning-title').textContent=preparing ? 'Learning progress' : showCost ? (snapshot.phase==='deployment'?'Controller comparison':'Learning run') : isFit() ? 'Fixed data diagnostic' : snapshot.phase==='deployment' ? 'Deployed controller' : 'Completed response learning';
     if ($('learning-kind')) $('learning-kind').textContent=showCost ? 'Accumulated quadratic cost' : isFit() ? 'Relative error (%)' : snapshot.phase==='deployment' ? 'Fixed prediction support' : 'Completed responses · Relative error (%)';
   }
   function renderControls() {
     const frozen=isFit();
     const deployed=snapshot.phase==='deployment';
     const completedRows=snapshot.learning?.completedRows || 0;
-    if($('phase')) { $('phase').textContent=deployed?'Comparing four controllers':snapshot.canDeploy?'Ready to compare':'Learning '+Math.min(30,completedRows)+'/30'; $('phase').dataset.phase=deployed?'deployment':'discovery'; }
-    if($('deploy')) { $('deploy').disabled=comparing || (!deployed && !snapshot.canDeploy); $('deploy').textContent=deployed?'Learn again':'Compare controllers'; $('deploy').title=deployed?'Start a new discovery trial with these forecast settings':snapshot.canDeploy?'Start four controllers on the same fresh disturbance sequence':(snapshot.learning?.completedRows || 0)+' of 30 completed responses'; }
+    const preparing=!deployed && automaticComparison();
+    if($('phase')) { $('phase').textContent=deployed?'Comparison trial':preparing?'Learning '+Math.min(DISCOVERY_SAMPLES,snapshot.t)+' / '+DISCOVERY_SAMPLES+' s':snapshot.canDeploy?'Ready to compare':'Learning '+Math.min(30,completedRows)+'/30'; $('phase').dataset.phase=deployed?'deployment':'discovery'; }
+    if($('deploy')) { $('deploy').hidden=preparing; $('deploy').disabled=comparing || (!deployed && !snapshot.canDeploy); $('deploy').textContent=deployed?'Learn again':'Compare controllers'; $('deploy').title=deployed?'Start a new discovery trial with these forecast settings':snapshot.canDeploy?'Start four controllers on the same fresh disturbance sequence':(snapshot.learning?.completedRows || 0)+' of 30 completed responses'; }
     if($('phase-note')) $('phase-note').textContent='Colors and line styles identify controllers · Hover for exact values';
     $('cost-metric').hidden=!deployed;
     if(!deployed) $('cost-metric').value='total';
@@ -1928,7 +1959,7 @@ summary span { color:#a1a1a6; }
       button.setAttribute('aria-pressed',String(visible.has(item.key)));
     });
     if($('matrix-title')) $('matrix-title').textContent=deployed?'Deployed prediction links':'Learning prediction links';
-    $('clock').textContent='t = '+snapshot.t+' s';
+    $('clock').textContent=(deployed?'Comparison t = ':'Learning t = ')+snapshot.t+' s';
     $('learning').textContent=frozen?'Plant held · '+snapshot.mode:deployed?'Prediction links fixed':completedRows+' completed responses';
     $('run').textContent=playing?'Pause':frozen && snapshot.mode!=='converged'?'Fit':'Run';
     $('run').disabled=comparing;
@@ -1946,11 +1977,12 @@ summary span { color:#a1a1a6; }
     $('step').disabled=comparing || snapshot.mode==='converged';
     $('freeze').textContent=frozen?'Return to simulation':'Inspect fixed data';
     $('freeze').disabled=comparing || deployed || !snapshot.canFreeze;
+    $('freeze').hidden=preparing && !frozen;
     $('pulse').disabled=!heldAttack && !canAttack(selectedBus); $('strength').disabled=false; $('fault').disabled=!canAttack(selectedBus);
     $('fault').textContent=(snapshot.faults.includes(selectedBus)?'Repair':'Corrupt')+' forecast';
     $('fit-title').textContent=frozen?'Fixed data diagnostic':deployed?'Deployed prediction support':'Completed response learning';
     $('fit-detail').textContent=frozen?'Relative error '+d3.format('.2~g')(100*(snapshot.fitError || 0))+'%':deployed?'Prediction links stay fixed in this trial':completedRows+' completed responses · '+(snapshot.learning?.delay || 0)+' second completion delay';
-    $('mode-note').textContent=frozen?'Trial and controller paused. Learned links stay unchanged.':deployed?'Change the forecast preset to begin a new discovery trial':'The target changes as responses complete. Freeze to inspect convergence.';
+    $('mode-note').textContent=frozen?'Trial and controller paused. Learned links stay unchanged.':deployed?'Change the forecast preset to begin a new discovery trial':preparing?(snapshot.t>=DISCOVERY_SAMPLES?'Comparison starts when playback resumes. Its costs start at zero.':'Comparison starts automatically after '+DISCOVERY_SAMPLES+' s of learning. Its costs start at zero.'):'The target changes as responses complete. Freeze to inspect convergence.';
     const i=selectedBus-1, sample=snapshot.lastSample;
     const write=(id,value)=>{if($(id))$(id).textContent=value;};
     write('flow-predict',selectedBus===1 ? 'Fixed slack' : sample ? 'ŵ '+d3.format('+.2~g')(sample.forecast[i])+' pu' : 'Awaiting forecast');
@@ -2310,7 +2342,7 @@ summary span { color:#a1a1a6; }
       : c.scalar>1e-12 ? sparseComparison==='Equal' ? 'Different links · Equal cost so far' : sparseComparison==='Nearly equal' ? 'Different links · Nearly equal cost so far' : 'Learned cost is '+sparseComparison+' than fixed sparse'
       : 'Four controllers · Identical disturbances';
     $('cost-note').textContent=gap?'Gap = cumulative cost − fixed sparse cost · Below zero is better · Table shows total costs'
-      : snapshot.phase==='deployment'?'Fresh comparison trial · Identical disturbances · Lower cost is better':'Two active controllers · Learning continues as the trial runs';
+      : snapshot.phase==='deployment'?'Fresh comparison trial · Learning costs excluded · Identical disturbances':'Two active controllers · Learning continues as the trial runs';
   }
   function comparativeCost(value,reference) {
     if (!(reference>1e-12)) return 'Pending';
@@ -2374,7 +2406,7 @@ summary span { color:#a1a1a6; }
     if(!frozen && (deployed || !snapshot.learning?.updateCount)) {
       const width=Math.max(240,el.getBoundingClientRect().width), height=140;
       const heading=deployed?'Prediction links are deployed':'Waiting for completed responses';
-      const detail=deployed?'Support stays fixed throughout this trial':completedRows+' of 30 responses required to deploy';
+      const detail=deployed?'Support stays fixed throughout this trial':automaticComparison()?'Comparison will start automatically':'Run to collect completed responses';
       svg.attr('viewBox','0 0 '+width+' '+height).attr('height',height)
         .attr('aria-label',heading+'. '+detail+'.');
       svg.selectAll('*').remove();
