@@ -14,7 +14,7 @@ The prediction matrix shows eight inverter receivers and 23 source buses. Connec
 
 Run collects 180 physical samples for learning, then automatically starts an independent four controller comparison. The right panel shows learning progress during preparation. The comparison clock and costs start at zero, while discovery topology history remains available. Ongoing attacks and unapplied requests continue across the transition. Decaying disturbances from the old plant do not transfer.
 
-Saved trials restore paused in their original phase. Automatic transition resumes with live sampling. Step stays paused. Advance 180 executes exactly 180 samples across the phases and preserves ongoing attacks. Disable automatic comparison in Experiment settings to inspect a longer learning run or choose deployment manually.
+Saved trials restore paused in their original phase. Automatic transition resumes with live sampling. Step stays paused. Advance 180 executes exactly 180 samples across the phases and preserves ongoing attacks. Disable automatic comparison in Experiment settings to inspect a longer learning run or choose deployment manually. Forecast selection and Advance 180 are also in Experiment settings, keeping the main controls focused on playback and disturbances.
 
 Curves use colors and line styles. Equal learned and fixed supports are identified explicitly. Gap to fixed sparse subtracts actual cumulative costs, while the table retains totals.
 
