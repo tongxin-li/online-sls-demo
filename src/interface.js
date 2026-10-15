@@ -12,12 +12,20 @@
   const d3 = window.d3;
   let simulation = new PowerDemo.Simulation({preset:'mixed'});
   const series = [
-    { key:'online', label:'Learned sparse', color:'var(--viz-series-1)', dash:null, shape:d3.symbolCircle },
-    { key:'scalar', label:'Fixed sparse', color:'var(--viz-series-4)', dash:'8 3', shape:d3.symbolSquare },
-    { key:'static', label:'Dense prediction', color:'var(--viz-series-2)', dash:'5 3 1 3', shape:d3.symbolDiamond },
-    { key:'causal', label:'Feedback only', color:'var(--viz-series-3)', dash:'1 4', shape:d3.symbolTriangle }
+    { key:'online', label:'Learned sparse', color:'var(--viz-series-1)', dash:null },
+    { key:'scalar', label:'Fixed sparse', color:'var(--viz-series-4)', dash:'8 3' },
+    { key:'static', label:'Dense prediction', color:'var(--viz-series-2)', dash:'5 3 1 3' },
+    { key:'causal', label:'Feedback only', color:'var(--viz-series-3)', dash:'1 4' }
   ];
   const visible = new Set(series.map(s => s.key));
+  // Discovery executes one dense predictive policy plus the feedback baseline.
+  // Sparse labels become meaningful only after their constrained designs exist.
+  function activeSeries() { return snapshot.phase==='deployment' ? series : series.filter(s=>s.key==='static'||s.key==='causal'); }
+  function plottedSeries() { return activeSeries().filter(s=>visible.has(s.key)); }
+  function sameSparseSupport() {
+    const support=snapshot.deployedSupport;
+    return !!support && JSON.stringify(support.learned)===JSON.stringify(support.fixed);
+  }
   let selectedBus = 7;
   let playing = false;
   let comparing = false;
@@ -185,7 +193,7 @@
     const events=snapshot.eventLog || [];
     const state = {
       modelContent: { scenario:'24 bus LinDistFlow voltage regulation', variant:'Completed response learning and separate sparse deployment', phase:snapshot.phase, step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
-      privateContent: { version:9, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, view:$('view').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, speed:$('speed').value, allLinks:$('all-links').checked }
+      privateContent: { version:9, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, view:$('view').value, costMetric:$('cost-metric').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, speed:$('speed').value, allLinks:$('all-links').checked }
     };
     window.openai.setWidgetState(state).catch(() => {});
   }
@@ -241,6 +249,7 @@
     snapshot=simulation.snapshot();
     $('preset').value=snapshot.preset;
     $('view').value=data.view==='learning'?'learning':'cost';
+    $('cost-metric').value=data.costMetric==='gap' && snapshot.phase==='deployment'?'gap':'total';
     journal=(snapshot.eventLog || []).filter(item=>item.type==='pulse'||item.type==='forecast'||item.type==='fault').map(item=>({...item,type:item.type==='forecast'?'fault':item.type}));
     fitSteps=snapshot.fitIteration || 0;
     if(data.matrixReference?.recommendations) matrixReference={...data.matrixReference,edges:new Set(data.matrixReference.recommendations.map(recommendationKey))};
@@ -297,7 +306,7 @@
     if(snapshot.phase==='discovery') topology.reset(snapshot);
     else topology.observe(snapshot);
     historyIndex=null;visualTopologyEvent=null;
-    captureMatrixReference();
+    captureMatrixReference(); $('cost-metric').value='total';
     actionNote(attackInstruction());
   }
   function toggleRun() {
@@ -325,9 +334,11 @@
     simulation.deployTopology(); snapshot=simulation.snapshot();
     topology.observe(snapshot);historyIndex=null;
     journal=[]; fitSteps=0; pin=null; lastPulse=null;
-    captureMatrixReference(); $('view').value='cost';
-    announce('Prediction links deployed · Fresh trial at t 0');
-    actionNote('Fixed learned links · Hold a bus to attack');
+    captureMatrixReference(); $('view').value='cost'; $('cost-metric').value='total';
+    visible.clear();series.forEach(item=>visible.add(item.key));
+    playing=true;nextTickAt=0;schedule();
+    announce('Four controllers running · Fresh comparison trial at t 0');
+    actionNote(attackInstruction());
     render(); save();
   });
   $('preset').addEventListener('change', () => {
@@ -365,6 +376,7 @@
     resetExperiment(); announce('Ready'); render(); save();
   });
   $('speed').addEventListener('change', () => { if (playing) { clearTimeout(timer); nextTickAt=0; schedule(); } save(); });
+  $('cost-metric').addEventListener('change',()=>{drawCost();save();});
   $('strength').addEventListener('change', () => { drawNetwork(); save(); });
   $('attack-mode').addEventListener('change',()=>{releaseAttack();renderControls();drawNetwork();save();});
   if ($('matrix-view')) $('matrix-view').addEventListener('change',()=>{historyIndex=null;drawNetwork();drawMatrix();save();});
@@ -507,7 +519,7 @@
   root.querySelectorAll('[data-series]').forEach(button => {
     button.addEventListener('click', () => {
       const key = button.dataset.series;
-      if (visible.has(key) && visible.size > 1) visible.delete(key);
+      if (visible.has(key) && plottedSeries().length > 1) visible.delete(key);
       else visible.add(key);
       button.setAttribute('aria-pressed', visible.has(key) ? 'true' : 'false');
       drawCost(); drawStage(); drawVoltage();
@@ -520,16 +532,24 @@
     if ($('cost')) { $('cost').hidden=!showCost; $('cost').style.display=showCost?'':'none'; }
     if ($('convergence')) { $('convergence').hidden=showCost; $('convergence').style.display=showCost?'none':''; }
     if ($('learning-flow')) $('learning-flow').hidden=showCost;
-    if ($('learning-title')) $('learning-title').textContent=showCost ? 'Cost comparison' : isFit() ? 'Fixed data diagnostic' : snapshot.phase==='deployment' ? 'Deployed controller' : 'Completed response learning';
+    if ($('learning-title')) $('learning-title').textContent=showCost ? (snapshot.phase==='deployment'?'Controller comparison':'Learning run') : isFit() ? 'Fixed data diagnostic' : snapshot.phase==='deployment' ? 'Deployed controller' : 'Completed response learning';
     if ($('learning-kind')) $('learning-kind').textContent=showCost ? 'Accumulated quadratic cost' : isFit() ? 'Relative error (%)' : snapshot.phase==='deployment' ? 'Fixed prediction support' : 'Completed responses · Relative error (%)';
   }
   function renderControls() {
     const frozen=isFit();
     const deployed=snapshot.phase==='deployment';
     const completedRows=snapshot.learning?.completedRows || 0;
-    if($('phase')) { $('phase').textContent=deployed?'Deployment':snapshot.canDeploy?'Ready to deploy':'Discovery '+Math.min(30,completedRows)+'/30'; $('phase').dataset.phase=deployed?'deployment':'discovery'; }
-    if($('deploy')) { $('deploy').disabled=comparing || (!deployed && !snapshot.canDeploy); $('deploy').textContent=deployed?'Learn again':'Deploy learned links'; $('deploy').title=deployed?'Start a new discovery trial with these forecast settings':snapshot.canDeploy?'Start a fresh trial using the learned prediction links':(snapshot.learning?.completedRows || 0)+' of 30 completed responses'; }
-    if($('phase-note')) $('phase-note').textContent=deployed?'Fresh trial with fixed prediction links. Feedback communication is unchanged.':'Discovery learns completed responses. Prediction curves coincide.';
+    if($('phase')) { $('phase').textContent=deployed?'Comparing four controllers':snapshot.canDeploy?'Ready to compare':'Learning '+Math.min(30,completedRows)+'/30'; $('phase').dataset.phase=deployed?'deployment':'discovery'; }
+    if($('deploy')) { $('deploy').disabled=comparing || (!deployed && !snapshot.canDeploy); $('deploy').textContent=deployed?'Learn again':'Compare controllers'; $('deploy').title=deployed?'Start a new discovery trial with these forecast settings':snapshot.canDeploy?'Start four controllers on the same fresh disturbance sequence':(snapshot.learning?.completedRows || 0)+' of 30 completed responses'; }
+    if($('phase-note')) $('phase-note').textContent='Colors and line styles identify controllers · Hover for exact values';
+    $('cost-metric').hidden=!deployed;
+    if(!deployed) $('cost-metric').value='total';
+    if(!plottedSeries().length) activeSeries().forEach(item=>visible.add(item.key));
+    root.querySelectorAll('[data-series]').forEach(button=>{
+      const item=series.find(item=>item.key===button.dataset.series);
+      button.hidden=!activeSeries().includes(item);
+      button.setAttribute('aria-pressed',String(visible.has(item.key)));
+    });
     if($('matrix-title')) $('matrix-title').textContent=deployed?'Deployed prediction links':'Learning prediction links';
     $('clock').textContent='t = '+snapshot.t+' s';
     $('learning').textContent=frozen?'Plant held · '+snapshot.mode:deployed?'Prediction links fixed':completedRows+' completed responses';
@@ -800,21 +820,7 @@
       .attr('stroke-width',item => item.key === 'online' ? 2.2 : 1.8).attr('stroke-dasharray',item => item.dash || null)
       .attr('stroke-linejoin','round').attr('stroke-linecap','round');
     animate(lines).attr('d',item => d3.line().defined(d => Number.isFinite(d[item.key])).x(d=>chart.x(d.x)).y(d=>chart.y(d[item.key]))(observations));
-    // Different symbols occupy different actual samples, exposing coincident curves
-    // without shifting their coordinates or inventing numerical separation.
-    const stride=Math.max(8,Math.ceil(observations.length/4));
-    const symbols=items.flatMap(item=> {
-      const index=series.findIndex(s=>s.key===item.key);
-      if(index<0 || observations.length<2) return [];
-      const offset=index*2;
-      return observations.filter((sample,i)=>i%stride===offset && Number.isFinite(sample[item.key])).map(sample=>({item,sample,key:item.key+'_'+sample.x}));
-    });
-    const points=chart.marks.selectAll('path.sample-symbol').data(symbols,point=>point.key).join('path')
-      .attr('class','sample-symbol').attr('data-series-key',point=>point.item.key)
-      .attr('d',point=>d3.symbol().type(point.item.shape || d3.symbolCircle).size(23)())
-      .attr('fill','var(--background)').attr('stroke',point=>point.item.color).attr('stroke-width',1.3)
-      .attr('pointer-events','none').raise();
-    points.interrupt().interrupt('update').attr('transform',point=>'translate('+chart.x(point.sample.x)+','+chart.y(point.sample[point.item.key])+')');
+    chart.marks.selectAll('path.sample-symbol').remove();
     const latest = observations[observations.length-1];
     const dots = chart.marks.selectAll('circle.latest-value').data(showCurrent && latest ? paintOrder : [],item => item.key).join('circle')
       .attr('class','latest-value').attr('r',item => item.key === 'online' ? 2.7 : 2)
@@ -897,28 +903,37 @@
     });
   }
   function drawCost() {
-    const observations=[{x:0,...Object.fromEntries(series.map(item=>[item.key,0]))},...snapshot.history.map(d=>({x:d.t,...Object.fromEntries(series.map(item=>[item.key,d[item.key]]))}))];
-    const items=series.filter(s=>visible.has(s.key));
+    const active=activeSeries(),items=plottedSeries();
+    const gap=snapshot.phase==='deployment' && $('cost-metric').value==='gap';
+    const observations=[{x:0,...Object.fromEntries(series.map(item=>[item.key,0]))},...snapshot.history.map(d=>({x:d.t,...Object.fromEntries(series.map(item=>[item.key,d[item.key]-(gap?d.scalar:0)]))}))];
     if ($('cost').hidden) return;
-    const chart=chartBase($('cost'),observations,items.map(s=>s.key),'Cumulative cost','Time t',140);
+    $('cost').setAttribute('aria-label',gap?'Cumulative cost difference from fixed sparse. Zero is the fixed sparse baseline. Lower is better.':'Cumulative cost of '+active.length+' active controllers');
+    const chart=chartBase($('cost'),observations,items.map(s=>s.key),gap?'Cost difference from fixed sparse':'Cumulative cost','Time (s)',140);
+    chart.marks.selectAll('line.cost-reference').data(gap?[0]:[]).join('line').attr('class','cost-reference')
+      .attr('x1',chart.frame.x).attr('x2',chart.frame.x+chart.frame.w).attr('y1',chart.y(0)).attr('y2',chart.y(0))
+      .attr('stroke','var(--muted-foreground)').attr('stroke-opacity',.35);
     drawInterventions(chart);
     drawSeries(chart,observations,items);
-    hover(chart,observations,items,'Time (s)');
+    hover(chart,observations,items,gap?'Cost difference at t':'Time (s)');
     const c=snapshot.cumulative;
     $('cost-detail').replaceChildren();
-    for (const item of series) {
+    for (const item of active) {
       const row=document.createElement('tr'), label=document.createElement('th'), value=document.createElement('td'), difference=document.createElement('td');
       const swatch=document.createElement('span'); swatch.className='pr-swatch '+item.key;
       label.scope='row'; label.append(swatch,document.createTextNode(item.label));
-      value.textContent=costFormat(c[item.key]);
+      value.textContent=costFormat(c[item.key]);value.title=d3.format('.10~g')(c[item.key]);
       value.dataset.cost=String(c[item.key]);
       difference.textContent=item.key==='causal' ? 'Reference' : comparativeCost(c[item.key],c.causal);
       row.dataset.method=item.key; row.append(label,value,difference); $('cost-detail').append(row);
     }
     const sparseComparison=comparativeCost(c.online,c.scalar);
-    $('comparison-summary').textContent=snapshot.phase!=='deployment' ? 'Discovery uses the same dense prediction controller' : c.scalar>1e-12
-      ? sparseComparison==='Equal' ? 'Learned and fixed sparse costs are equal' : sparseComparison==='Nearly equal' ? 'Learned and fixed sparse costs are nearly equal' : 'Learned cost is '+sparseComparison+' than fixed sparse'
-      : 'Run to compare the deployed controllers';
+    $('comparison-summary').textContent=snapshot.phase!=='deployment'
+      ? 'Learning uses dense prediction. Sparse controllers are tested after you select Compare controllers.'
+      : sameSparseSupport() ? 'Learned and fixed sparse selected identical links, so their curves coincide.'
+      : c.scalar>1e-12 ? sparseComparison==='Equal' ? 'Different links · Equal cost so far' : sparseComparison==='Nearly equal' ? 'Different links · Nearly equal cost so far' : 'Learned cost is '+sparseComparison+' than fixed sparse'
+      : 'Four controllers · Identical disturbances';
+    $('cost-note').textContent=gap?'Gap = cumulative cost − fixed sparse cost · Below zero is better · Table shows total costs'
+      : snapshot.phase==='deployment'?'Fresh comparison trial · Identical disturbances · Lower cost is better':'Two active controllers · Learning continues as the trial runs';
   }
   function comparativeCost(value,reference) {
     if (!(reference>1e-12)) return 'Pending';
@@ -933,7 +948,7 @@
     const domain=responseWindow();
     let observations=snapshot.history.filter(item=>(item.costTime ?? item.t-1)>=domain[0]).map(item=>({x:item.costTime ?? item.t-1,...item.stage}));
     if(!observations.length) observations=[{x:0,...Object.fromEntries(series.map(item=>[item.key,0]))}];
-    const items=series.filter(item=>visible.has(item.key));
+    const items=plottedSeries();
     const chart=chartBase($('stage'),observations,items.map(item=>item.key),'Cost','Time (s)',110,{xDomain:domain});
     drawInterventions(chart); drawSeries(chart,observations,items,true); hover(chart,observations,items,'Cost at t');
     $('stage-detail').textContent='Cost at t '+Math.max(0,snapshot.t-1)+' · '+costFormat(snapshot.stage.online);
@@ -957,7 +972,7 @@
     }));
     if(domain[0]===0) observations.unshift({x:0,...Object.fromEntries(series.map(item=>[item.key, snapshot.initialVoltage?.[index] ?? 1+(snapshot.initialStates?.[item.key]?.[index] ?? snapshot.history[0]?.costStates?.[item.key]?.[index] ?? snapshot.states[item.key][index])]))});
     if(!observations.length) observations=[{x:snapshot.t,...Object.fromEntries(series.map(s=>[s.key,1+snapshot.states[s.key][index]]))}];
-    const items=series.filter(item=>visible.has(item.key));
+    const items=plottedSeries();
     const values=observations.flatMap(item=>items.map(s=>item[s.key]));
     const reference=referenceVoltage(selectedBus);
     const low=Math.min(reference,...values),high=Math.max(reference,...values);

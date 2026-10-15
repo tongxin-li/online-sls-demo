@@ -22,7 +22,8 @@ const withoutCards=original.slice(0,original.indexOf(cardStart))+original.slice(
 const source=withoutCards.replace(anchor,
   '  drawNetwork=drawCost=drawStage=drawVoltage=drawConvergence=highlightTopology=()=>{};\n'+
   '  drawMatrix=drawTopologyHistory;\n'+
-  '  root.bindTestBus=(element,bus)=>bindAttackTarget(element,()=>bus);\n'+anchor);
+  '  root.bindTestBus=(element,bus)=>bindAttackTarget(element,()=>bus);\n'+
+  '  root.testComparison=()=>({active:activeSeries().map(item=>item.key),plotted:plottedSeries().map(item=>item.key),sameSparseSupport:sameSparseSupport()});\n'+anchor);
 const plain=value=>JSON.parse(JSON.stringify(value));
 
 class Clock {
@@ -82,7 +83,12 @@ function harness(saved) {
     const selected=options.find(option=>/\bselected\b/.test(option[1]))||options[0];
     if(selected)nodes.get(select[1]).value=selected[1].match(/\bvalue="([^"]*)"/)[1];
   }
-  const root=target();root.querySelector=selector=>nodes.get(selector.slice(1));root.querySelectorAll=()=>[];
+  const seriesButtons=new Map();
+  for(const match of html.matchAll(/<button\b[^>]*\bdata-series="([^"]+)"[^>]*>/g)){
+    const button=element('BUTTON');button.dataset.series=match[1];seriesButtons.set(match[1],button);
+  }
+  const root=target();root.querySelector=selector=>nodes.get(selector.slice(1));
+  root.querySelectorAll=selector=>selector==='[data-series]'?[...seriesButtons.values()]:[];
   const document=Object.assign(target(),{getElementById:()=>root,createElement:tag=>target(tag.toUpperCase()),createTextNode:text=>({textContent:text})});
   const window=Object.assign(target(),{d3,PowerDemo,TopologyTimeline,matchMedia:()=>({matches:true}),
     openai:{widgetState:saved,setWidgetState:state=>{savedStates.push(plain(state));return Promise.resolve();}}});
@@ -92,6 +98,7 @@ function harness(saved) {
     {filename:'interface.js'});
   const node=id=>nodes.get('pr-'+id);
   return {clock,document,window,node,
+    comparison:()=>plain(root.testComparison()),seriesButton:key=>seriesButtons.get(key),
     samples:count=>clock.advance(count*1000/Number(node('speed').value)),
     bus:bus=>{const svg=element('g');svg.dataset.bus=String(bus);root.bindTestBus(svg,bus);return svg;},
     pointer(type,underPointer,detail={}){
@@ -525,4 +532,84 @@ test('version eight restores trial history while adopting faster playback and Co
   assert.equal(restored.node('speed').value,'16');assert.equal(restored.node('attack-mode').value,'continuous');assert.equal(restored.node('matrix-view').value,'change');
   assert.deepEqual(restored.snapshot().cumulative,h.snapshot().cumulative);assert.deepEqual(restored.snapshot().eventLog,h.snapshot().eventLog);
   assert.equal(restored.state().playing,false);assert.equal(restored.node('pulse')['aria-pressed'],'false');
+});
+
+
+test('discovery exposes only the two executing controllers and cannot hide the last active curve',async()=>{
+  const h=harness();
+  assert.deepEqual(h.comparison(),{active:['static','causal'],plotted:['static','causal'],sameSparseSupport:false});
+  assert.equal(h.seriesButton('online').hidden,true);assert.equal(h.seriesButton('scalar').hidden,true);
+  assert.equal(h.seriesButton('static').hidden,false);assert.equal(h.seriesButton('causal').hidden,false);
+  assert.equal(h.node('cost-metric').hidden,true);assert.equal(h.node('cost-metric').value,'total');
+  h.seriesButton('static').dispatch('click');assert.deepEqual(h.comparison().plotted,['causal']);
+  h.seriesButton('causal').dispatch('click');assert.deepEqual(h.comparison().plotted,['causal']);
+  assert.equal(h.seriesButton('causal')['aria-pressed'],'true');
+  h.seriesButton('static').dispatch('click');assert.deepEqual(h.comparison().plotted,['static','causal']);
+  await compare(h);
+  assert.deepEqual(h.comparison().active,['static','causal']);assert.equal(h.node('deploy').disabled,false);
+});
+
+test('Compare controllers clears discovery attacks and schedules a fresh visible four controller trial',async()=>{
+  const h=harness(),bus=h.bus(7);pointerClick(h,bus);await h.samples(40);
+  assert.equal(h.snapshot().canDeploy,true);assert.equal(pulses(h).length,40);
+  const discoveryOptions=plain(h.snapshot().initialOptions);
+  h.seriesButton('static').dispatch('click');assert.deepEqual(h.comparison().plotted,['causal']);
+  h.click('deploy');
+  assert.equal(h.snapshot().phase,'deployment');assert.equal(h.snapshot().t,0);assert.equal(h.state().playing,true);
+  assert.equal(h.clock.tasks.size,1,'Exactly one playback timer must be scheduled');
+  assert.ok(Object.values(h.snapshot().cumulative).every(value=>value===0));
+  assert.equal(h.snapshot().eventLog.length,0);assert.equal(h.snapshot().pendingPulses.length,0);
+  assert.equal(h.snapshot().activePulses.length,0);assert.equal(h.state().journal.length,0);
+  assert.equal(h.node('pulse')['aria-pressed'],'false');assert.equal(h.node('cost-metric').hidden,false);
+  assert.notEqual(h.snapshot().initialOptions.seed,discoveryOptions.seed,'Deployment uses an independent disturbance seed');
+  assert.deepEqual(h.comparison().active,['online','scalar','static','causal']);
+  assert.deepEqual(h.comparison().plotted,h.comparison().active);
+  for(const key of h.comparison().active){assert.equal(h.seriesButton(key).hidden,false);assert.equal(h.seriesButton(key)['aria-pressed'],'true');}
+  await h.samples(1);assert.equal(h.snapshot().t,1);assert.equal(pulses(h).length,0);
+  assert.ok(Object.values(h.snapshot().cumulative).some(value=>value>0));
+  await h.samples(3);assert.equal(pulses(h).length,0,'Continuous discovery attacks must not leak into the comparison');
+  for(const key of ['online','scalar','static'])h.seriesButton(key).dispatch('click');
+  assert.deepEqual(h.comparison().plotted,['causal']);
+  h.seriesButton('causal').dispatch('click');assert.deepEqual(h.comparison().plotted,['causal']);
+});
+
+test('Learn again cancels comparison playback and attacks and restores the discovery cost view',async()=>{
+  const h=harness();await compare(h);h.click('deploy');h.change('cost-metric','gap');
+  pointerClick(h,h.bus(14));await h.samples(3);assert.ok(pulses(h).length>0);
+  h.click('deploy');
+  assert.equal(h.snapshot().phase,'discovery');assert.equal(h.snapshot().t,0);assert.equal(h.state().playing,false);
+  assert.equal(h.clock.tasks.size,0);assert.equal(h.node('pulse')['aria-pressed'],'false');
+  assert.equal(h.snapshot().eventLog.length,0);assert.equal(h.snapshot().activePulses.length,0);
+  assert.deepEqual(h.comparison().active,['static','causal']);assert.deepEqual(h.comparison().plotted,['static','causal']);
+  assert.equal(h.node('cost-metric').hidden,true);assert.equal(h.node('cost-metric').value,'total');
+  assert.equal(h.node('deploy').textContent,'Compare controllers');assert.equal(h.node('deploy').disabled,true);
+  await h.samples(3);assert.equal(h.snapshot().t,0);
+});
+
+test('comparison gap measure survives saved replay without resuming playback or changing costs',async()=>{
+  const h=harness();await compare(h);h.click('deploy');await h.samples(5);h.change('cost-metric','gap');
+  const saved=h.saved();assert.equal(saved.privateContent.version,9);assert.equal(saved.privateContent.costMetric,'gap');
+  const restored=harness(saved);
+  assert.equal(restored.snapshot().phase,'deployment');assert.equal(restored.node('cost-metric').value,'gap');
+  assert.equal(restored.node('cost-metric').hidden,false);assert.equal(restored.state().playing,false);
+  assert.equal(restored.clock.tasks.size,0);assert.deepEqual(restored.snapshot().cumulative,h.snapshot().cumulative);
+  assert.deepEqual(restored.snapshot().deployedSupport,h.snapshot().deployedSupport);
+  assert.deepEqual(restored.comparison().active,['online','scalar','static','causal']);
+  for(const value of [undefined,'invalid']){
+    const legacy=plain(saved);if(value===undefined)delete legacy.privateContent.costMetric;else legacy.privateContent.costMetric=value;
+    const old=harness(legacy);assert.equal(old.node('cost-metric').value,'total');assert.equal(old.state().playing,false);
+    assert.deepEqual(old.snapshot().cumulative,h.snapshot().cumulative);
+  }
+  const discovery=harness({privateContent:{version:9,phase:'discovery',t:0,events:[],costMetric:'gap'}});
+  assert.equal(discovery.node('cost-metric').value,'total');assert.equal(discovery.node('cost-metric').hidden,true);
+});
+
+test('identical sparse support is reported from the real deployed designs',async()=>{
+  const h=harness();await compare(h);h.click('deploy');
+  const support=h.snapshot().deployedSupport;
+  assert.deepEqual(support.learned,support.fixed,'Default fixture intentionally has identical selected sources');
+  assert.equal(h.comparison().sameSparseSupport,true);
+  await h.samples(12);assert.equal(h.snapshot().cumulative.online,h.snapshot().cumulative.scalar);
+  assert.notEqual(h.snapshot().cumulative.static,h.snapshot().cumulative.causal,'The two other executed controllers still have distinct costs');
+  h.click('deploy');assert.equal(h.comparison().sameSparseSupport,false);
 });

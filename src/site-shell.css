@@ -89,13 +89,9 @@ select { background:var(--muted); border:1px solid transparent; border-radius:8p
 .pr-legend button { display:flex; align-items:center; gap:5px; padding:3px 0; background:transparent; border:0; font-size:11px; color:#616167; }
 .pr-legend button[aria-pressed='false'] { opacity:.35; }
 .pr-swatch { position:relative; display:inline-block; width:21px; border-top:2px solid var(--viz-series-1); margin-right:2px; color:var(--viz-series-1); }
-.pr-swatch::after { content:''; position:absolute; width:5px; height:5px; top:-3px; left:8px; background:currentColor; border-radius:50%; }
 .pr-swatch.scalar { border-color:var(--viz-series-4); border-top-style:dashed; color:var(--viz-series-4); }
-.pr-swatch.scalar::after { border-radius:0; }
 .pr-swatch.static { border-color:var(--viz-series-2); border-top-style:dashed; color:var(--viz-series-2); }
-.pr-swatch.static::after { border-radius:0; transform:rotate(45deg); }
 .pr-swatch.causal { border-color:var(--viz-series-3); border-top-style:dotted; color:var(--viz-series-3); }
-.pr-swatch.causal::after { width:0; height:0; top:-4px; background:transparent; border:3px solid transparent; border-bottom:5px solid currentColor; border-top:0; border-radius:0; }
 #pr-event { font-size:10px; color:var(--muted-foreground); text-align:right; }
 .pr-overlap-note { font-size:9px; color:#8b8b90; margin:0 0 8px; }
 .pr-adaptation { border-top:1px solid var(--border); margin-top:0; }
@@ -130,7 +126,6 @@ summary span { color:#a1a1a6; }
 .pr-cost-table tbody tr:first-child th,.pr-cost-table tbody tr:first-child td { font-weight:500; }
 .pr-cost-table tbody td:last-child { color:var(--muted-foreground); }
 .pr-cost-table .pr-swatch { width:17px; vertical-align:middle; margin-right:8px; }
-.pr-cost-table .pr-swatch::after { left:6px; }
 .pr-comparison-summary { font-size:11px; color:var(--foreground); margin:6px 0 2px; min-height:16px; }
 .pr-comparison-note { font-size:9px; color:var(--muted-foreground); }
 .research-footer { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; border-top:1px solid var(--border); }
@@ -196,3 +191,8 @@ summary span { color:#a1a1a6; }
 #pr-attack-mode { background:#fff6eb; color:#a34a00; }
 #pr-topology-note { min-height:14px; font-size:9px; }
 @media(max-width:1000px) { .pr-attack-hint { display:none; } }
+
+.pr-cost-tools { display:flex; justify-content:flex-end; }
+#pr-cost-metric { min-height:25px; padding:2px 6px; font-size:10px; }
+.pr-comparison-summary { margin:5px 0 3px; color:#53535a; line-height:1.4; }
+#pr-deploy:not(:disabled) { background:#0071e3; color:#fff; }

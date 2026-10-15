@@ -16,7 +16,7 @@
   <div class="pr-comparison-controls">
     <label for="pr-preset">Forecasts <select id="pr-preset" aria-label="Forecast preset" title="Changing forecasts starts a new discovery trial"><option value="reliable">Reliable forecasts</option><option value="uniform">Uniform noise</option><option value="mixed" selected>Mixed reliability</option></select></label>
     <button type="button" class="btn btn-compare" id="pr-compare" title="Advance 180 seconds of feeder operation and keep all accumulated costs">Advance 180</button>
-    <div class="pr-phase-actions"><span id="pr-phase" class="pr-phase-badge">Discovery</span><button type="button" id="pr-deploy" class="btn btn-deploy" disabled title="Use the learned prediction links in a fresh trial">Deploy learned links</button></div>
+    <div class="pr-phase-actions"><span id="pr-phase" class="pr-phase-badge">Discovery</span><button type="button" id="pr-deploy" class="btn btn-deploy" disabled title="Start four controllers on the same fresh disturbance sequence">Compare controllers</button></div>
   </div>
   <div class="pr-mission"><span><span class="pr-status-dot" id="pr-voltage-status" aria-hidden="true"></span>Restore the <strong>nominal voltage profile</strong><span class="pr-target"> · Illustrative band 0.95 to 1.05 pu</span></span><span id="pr-voltage-range" class="tabular-nums"></span></div>
   <div class="pr-dashboard">
@@ -39,7 +39,7 @@
       <div id="pr-stage-detail" class="pr-panel-foot tabular-nums"></div>
     </section>
     <section class="pr-panel pr-learning-panel" aria-labelledby="pr-learning-title">
-      <div class="pr-subhead"><h2 id="pr-learning-title">Cost comparison</h2><select id="pr-view" aria-label="Controller view"><option value="cost" selected>Cost comparison</option><option value="learning">Learning</option></select></div>
+      <div class="pr-subhead"><h2 id="pr-learning-title">Cost comparison</h2><select id="pr-view" aria-label="Controller view"><option value="cost" selected>Cost</option><option value="learning">Learning</option></select></div>
       <div id="pr-learning-content" hidden>
         <div class="pr-algorithm-flow" id="pr-learning-flow" aria-label="Completed response learning cycle">
           <div><span class="pr-flow-index">01</span><strong>Forecast</strong><span id="pr-flow-predict">Voltage forcing</span></div>
@@ -51,14 +51,14 @@
         <svg class="pr-chart" id="pr-convergence" role="img" aria-label="Learning diagnostic over time"></svg>
         <p id="pr-mode-note" class="pr-caption"></p>
       </div>
-      <div id="pr-cost-content"><svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative normalized voltage and reactive effort cost of four controllers"></svg><table class="pr-cost-table tabular-nums" aria-label="Cumulative controller costs"><thead><tr><th scope="col">Method</th><th scope="col">Cumulative cost</th><th scope="col">vs feedback</th></tr></thead><tbody id="pr-cost-detail"></tbody></table><p id="pr-comparison-summary" class="pr-comparison-summary" aria-live="polite">Discovery uses the same dense prediction controller</p><p class="pr-caption pr-comparison-note">Current trial · All samples and pulses included</p></div>
+      <div id="pr-cost-content"><p id="pr-comparison-summary" class="pr-comparison-summary" aria-live="polite">Learning uses dense prediction. Sparse controllers are tested after you select Compare controllers.</p><div class="pr-cost-tools"><select id="pr-cost-metric" aria-label="Cost measure" hidden><option value="total" selected>Cumulative cost</option><option value="gap">Gap to fixed sparse</option></select></div><svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative cost of active controllers"></svg><table class="pr-cost-table tabular-nums" aria-label="Cumulative controller costs"><thead><tr><th scope="col">Method</th><th scope="col">Cumulative cost</th><th scope="col">vs feedback</th></tr></thead><tbody id="pr-cost-detail"></tbody></table><p id="pr-cost-note" class="pr-caption pr-comparison-note">Two active controllers · Learning continues as the trial runs</p></div>
     </section>
   </div>
   <div class="pr-bottomline">
-    <div class="pr-legend" aria-label="Learned sparse controller and three baselines"><button type="button" data-series="online" aria-pressed="true"><span class="pr-swatch online"></span>Learned sparse</button><button type="button" data-series="scalar" aria-pressed="true"><span class="pr-swatch scalar"></span>Fixed sparse</button><button type="button" data-series="static" aria-pressed="true"><span class="pr-swatch static"></span>Dense prediction</button><button type="button" data-series="causal" aria-pressed="true"><span class="pr-swatch causal"></span>Feedback only</button></div>
+    <div class="pr-legend" aria-label="Controller curves"><button type="button" data-series="online" aria-pressed="true"><span class="pr-swatch online"></span>Learned sparse</button><button type="button" data-series="scalar" aria-pressed="true"><span class="pr-swatch scalar"></span>Fixed sparse</button><button type="button" data-series="static" aria-pressed="true"><span class="pr-swatch static"></span>Dense prediction</button><button type="button" data-series="causal" aria-pressed="true"><span class="pr-swatch causal"></span>Feedback only</button></div>
     <span id="pr-event" role="status" aria-live="polite">Ready · Space to run</span>
   </div>
-  <p id="pr-phase-note" class="pr-overlap-note">Discovery learns completed responses. Prediction curves coincide.</p>
+  <p id="pr-phase-note" class="pr-overlap-note">Colors and line styles identify controllers · Hover for exact values</p>
   <details class="pr-adaptation" id="pr-adaptation">
     <summary>Experiment settings <span aria-hidden="true">+</span></summary>
     <div class="pr-settings"><label>Bus <select id="pr-bus" aria-label="Selected bus"></select></label><button type="button" class="btn" id="pr-fault">Repair forecast</button><label class="form-check"><input type="checkbox" id="pr-all-links" checked>All prediction links</label></div>
