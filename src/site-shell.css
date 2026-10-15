@@ -236,3 +236,12 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 .pr-attack-stop { display:none; }
 .btn-attack[data-attack-state='continuous'] .pr-attack-bolt { display:none; }
 .btn-attack[data-attack-state='continuous'] .pr-attack-stop { display:block; }
+
+/* Preserve readable source labels without widening the four panel layout. */
+.pr-chart .matrix-columns text,.pr-chart .matrix-rows text { font-size:11px; }
+.pr-chart .matrix-columns text[data-inspected='true'] { fill:var(--foreground); font-weight:650; }
+.pr-cell-key.local { background:#c1c1c7; }
+.pr-matrix-detail { flex-wrap:wrap; gap:2px 10px; align-items:flex-start; }
+#pr-matrix-detail { color:var(--foreground); line-height:1.5; }
+#pr-matrix-inspect-hint { margin:0 0 4px; }
+.matrix-cell:focus-visible { outline:none; stroke:var(--foreground); stroke-width:2; }

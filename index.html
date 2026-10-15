@@ -246,6 +246,15 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 .btn-attack[data-attack-state='continuous'] .pr-attack-bolt { display:none; }
 .btn-attack[data-attack-state='continuous'] .pr-attack-stop { display:block; }
 
+/* Preserve readable source labels without widening the four panel layout. */
+.pr-chart .matrix-columns text,.pr-chart .matrix-rows text { font-size:11px; }
+.pr-chart .matrix-columns text[data-inspected='true'] { fill:var(--foreground); font-weight:650; }
+.pr-cell-key.local { background:#c1c1c7; }
+.pr-matrix-detail { flex-wrap:wrap; gap:2px 10px; align-items:flex-start; }
+#pr-matrix-detail { color:var(--foreground); line-height:1.5; }
+#pr-matrix-inspect-hint { margin:0 0 4px; }
+.matrix-cell:focus-visible { outline:none; stroke:var(--foreground); stroke-width:2; }
+
 /* Artwork stays decorative. The enclosing bus handles hit area and badge input. */
 .pe-host { -webkit-user-select:none; user-select:none; touch-action:manipulation; }
 .pe-hit { fill:transparent; pointer-events:all; }
@@ -378,7 +387,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     <section class="pr-panel pr-matrix-panel" aria-labelledby="pr-matrix-title">
       <div class="pr-subhead"><h2 id="pr-matrix-title">Learning prediction links</h2><select id="pr-matrix-view" aria-label="Prediction matrix view"><option value="links" selected>Connectivity</option><option value="change">Learning weights</option></select></div>
       <div class="pr-matrix-key" id="pr-matrix-key"></div><svg class="pr-chart" id="pr-matrix" role="group" aria-label="Candidate prediction links. Rows receive forecasts from columns"></svg>
-      <div class="pr-panel-foot"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div><div class="pr-topology-status"><strong id="pr-topology-status">Connectivity unchanged</strong><span id="pr-topology-gain">Weights changed 0%</span></div><div id="pr-topology-events" class="pr-topology-events" aria-label="Recent topology changes" hidden></div><div class="pr-topology-history"><label for="pr-topology-history" id="pr-history-count">0 link updates</label><input id="pr-topology-history" type="range" min="0" max="0" step="1" value="0" aria-label="Topology history" disabled><button type="button" id="pr-history-live" aria-pressed="true">Latest</button></div><p id="pr-topology-note" class="pr-caption" aria-live="polite"></p>
+      <p id="pr-matrix-inspect-hint" class="pr-caption">Tap a cell to inspect a connection</p>
+      <div class="pr-panel-foot pr-matrix-detail"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div><div class="pr-topology-status"><strong id="pr-topology-status">Connectivity unchanged</strong><span id="pr-topology-gain">Weights changed 0%</span></div><div id="pr-topology-events" class="pr-topology-events" aria-label="Recent topology changes" hidden></div><div class="pr-topology-history"><label for="pr-topology-history" id="pr-history-count">0 link updates</label><input id="pr-topology-history" type="range" min="0" max="0" step="1" value="0" aria-label="Topology history" disabled><button type="button" id="pr-history-live" aria-pressed="true">Latest</button></div><p id="pr-topology-note" class="pr-caption" aria-live="polite"></p>
     </section>
     <section class="pr-panel pr-stage-panel" aria-labelledby="pr-stage-title">
       <div class="pr-subhead"><h2 id="pr-stage-title">Voltage and cost</h2><strong id="pr-state-value" class="pr-state-value tabular-nums">1.000 pu</strong></div>
@@ -1478,6 +1488,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   let restored = false;
   let pin = null;
   let matrixReference = null;
+  let inspectedSource = null;
   let lastPulse = null;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const duration = () => reducedMotion ? 0 : 1000 / Number($('speed').value || 16);
@@ -1776,7 +1787,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     snapshot = simulation.snapshot(); journal = []; fitSteps = 0; pin = null; lastPulse = null;
     if(snapshot.phase==='discovery') topology.reset(snapshot);
     else topology.observe(snapshot);
-    historyIndex=null;visualTopologyEvent=null;
+    historyIndex=null;visualTopologyEvent=null;inspectedSource=null;
     captureMatrixReference(); $('cost-metric').value='total';
     actionNote(attackInstruction());
   }
@@ -2186,8 +2197,9 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     const diagnostics=snapshot.predictionDiagnostics;
     const receivers=PowerDemo.constants.inverterBuses, sources=d3.range(2,25);
     const changing=$('matrix-view').value==='change', deployed=snapshot.phase==='deployment';
-    const width=Math.max(240,el.getBoundingClientRect().width),height=188;
-    const left=40,top=35,cellWidth=(width-left-8)/sources.length,cellHeight=17;
+    const width=Math.max(240,el.getBoundingClientRect().width);
+    const left=40,cellWidth=(width-left-8)/sources.length,cellHeight=17;
+    const staggered=cellWidth<18,top=staggered?48:35,height=top+153;
     const frame=topologyFrame(),recommendations=frame.links || [],current=new Set(recommendations.map(recommendationKey));
     $('matrix-title').textContent=historyIndex===null ? (deployed?'Deployed prediction links':'Learning prediction links') : 'Prediction links at '+(frame.event?.t ?? topology.initialT)+' s';
     const added=[...current].filter(key=>!frame.reference.has(key)),removed=[...frame.reference].filter(key=>!current.has(key));
@@ -2205,7 +2217,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     const changeLabel=d3.format('.2~g')(100*maximum)+'%';
     const key=$('matrix-key');key.replaceChildren();
     for(const [className,label] of changing ? [['decreased','−'+changeLabel],['change-scale','Change in row energy'],['increased','+'+changeLabel],['outline','Selected']]
-      : [['connected','Selected'],['added','Added'],['removed','Removed']]) {
+      : [['connected','Selected'],['added','Added'],['removed','Removed'],['local','Local']]) {
       const span=document.createElement('span'),icon=document.createElement('i');icon.className='pr-cell-key '+className;span.append(icon,document.createTextNode(label));key.append(span);
     }
     const svg=d3.select(el).attr('viewBox','0 0 '+width+' '+height).attr('height',height)
@@ -2217,27 +2229,55 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       svg.append('text').attr('class','matrix-receiver-title matrix-axis');
       svg.append('g').attr('class','matrix-columns');svg.append('g').attr('class','matrix-cells');
       svg.append('rect').attr('class','matrix-selected-row').attr('fill','none').attr('pointer-events','none');
+      svg.append('rect').attr('class','matrix-inspected-cell').attr('fill','none').attr('pointer-events','none');
       svg.append('g').attr('class','matrix-rows');
     }
     svg.select('title').text(changing?'Signed change in learned gain energy divided by each receiver’s offline energy. Outline shows selected sources.':'Rows are inverter receivers. Columns are prediction sources.');
     svg.select('.matrix-source-title').attr('x',left+(width-left)/2).attr('y',10).attr('text-anchor','middle').text('Source bus');
     svg.select('.matrix-receiver-title').attr('transform','translate(9,'+(top+cellHeight*4)+') rotate(-90)').attr('text-anchor','middle').text('Inverter');
-    svg.select('.matrix-columns').selectAll('text').data(sources).join('text').attr('x',(_,i)=>left+(i+.5)*cellWidth).attr('y',top-8).attr('text-anchor','middle').text(bus=>bus);
+    const labelY=(_,i)=>top-8-(staggered&&i%2===0?14:0);
+    svg.select('.matrix-columns').selectAll('line').data(staggered?sources:[]).join('line')
+      .attr('x1',(_,i)=>left+(i+.5)*cellWidth).attr('x2',(_,i)=>left+(i+.5)*cellWidth)
+      .attr('y1',(bus,i)=>labelY(bus,i)+3).attr('y2',top-3).attr('stroke','#d9d9df');
+    svg.select('.matrix-columns').selectAll('text').data(sources).join('text').attr('x',(_,i)=>left+(i+.5)*cellWidth).attr('y',labelY).attr('text-anchor','middle')
+      .attr('data-inspected',bus=>String(bus===inspectedSource)).text(bus=>bus);
     const cells=receivers.flatMap((receiver,i)=>sources.map((source,j)=>{
       const id=receiver+','+source,local=receiver===source,connected=local||current.has(id);
       const change=local?'local':current.has(id)?(frame.reference.has(id)?'retained':'added'):frame.reference.has(id)?'removed':'inactive';
       return {receiver,source,i,j,local,connected,change,delta:delta[i]?.[j] || 0};
     }));
+    const inspected=cells.find(d=>d.receiver===matrixReceiver&&d.source===inspectedSource);
+    const connectionStatus=d=>d.local?'Local source':d.change==='added'?'Added link':d.change==='removed'?'Removed link':d.connected?'Selected link':'No link';
+    const cellLabel=d=>'Bus '+d.source+' → inverter '+d.receiver+' · '+connectionStatus(d)
+      +(changing?' · Energy change '+d3.format('+.3~g')(100*d.delta)+'% of offline receiver energy':'');
+    if(inspected) $('matrix-detail').textContent=cellLabel(inspected);
+    $('matrix-detail').title=inspected?'Inspect with arrow keys. This only changes the view.':'Tap a cell to inspect a source and receiver. This only changes the view.';
+    $('matrix-inspect-hint').style.visibility=inspected?'hidden':'visible';
+    const inspect=(receiver,source,focus=false)=>{
+      inspectedSource=source;selectBus(receiver);
+      if(focus) svg.select('.matrix-cells').selectAll('rect').filter(d=>d.receiver===receiver&&d.source===source).node()?.focus();
+    };
     const marks=svg.select('.matrix-cells').selectAll('rect').data(cells,d=>d.receiver+','+d.source).join(enter=>{const r=enter.append('rect').attr('class','matrix-cell');r.append('title');return r;})
       .attr('x',d=>left+d.j*cellWidth+1).attr('y',d=>top+d.i*cellHeight+1).attr('width',Math.max(2,cellWidth-2)).attr('height',cellHeight-2).attr('rx',2)
       .attr('data-receiver',d=>d.receiver).attr('data-source',d=>d.source).attr('data-connected',d=>String(d.connected)).attr('data-change',d=>d.change).attr('data-weight-change',d=>d.delta)
-      .style('cursor','pointer').on('click',(_event,d)=>selectBus(d.receiver));
+      .attr('role','button').attr('aria-label',d=>'Inspect '+cellLabel(d))
+      .attr('tabindex',d=>d.receiver===(matrixReceiver||receivers[0])&&d.source===(inspectedSource||sources[0])?0:-1)
+      .style('cursor','pointer').on('click',(_event,d)=>inspect(d.receiver,d.source))
+      .on('keydown',(event,d)=>{
+        if(event.key==='Enter'||event.key===' ') {event.preventDefault();inspect(d.receiver,d.source);}
+        else if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(event.key)) {
+          event.preventDefault();event.stopPropagation();
+          const row=Math.max(0,Math.min(receivers.length-1,d.i+(event.key==='ArrowUp'?-1:event.key==='ArrowDown'?1:0)));
+          const column=event.key==='Home'?0:event.key==='End'?sources.length-1:Math.max(0,Math.min(sources.length-1,d.j+(event.key==='ArrowLeft'?-1:event.key==='ArrowRight'?1:0)));
+          inspect(receivers[row],sources[column],true);
+        }
+      });
     animate(marks).attr('fill',d=>changing?shade(d.delta):color(d.change==='removed'?'var(--background)':d.change==='retained'?matrixColors.connected:matrixColors[d.change] || matrixColors.inactive))
       .attr('stroke',d=>changing?(d.change==='added'?color(matrixColors.added):d.change==='removed'?color(matrixColors.removed):d.connected?'#404047':'transparent'):d.change==='removed'?color(matrixColors.removed):d.change==='added'?color(matrixColors.added):'transparent')
       .attr('stroke-width',d=>changing&&d.connected?1.2:d.change==='removed'?1.4:0).attr('stroke-dasharray',d=>changing&&d.change==='removed'?'2 2':null);
-    marks.select('title').text(d=>'Bus '+d.source+' → inverter '+d.receiver+' · '+(d.connected?'Selected':'Not selected')
-      +(changing?' · Energy change '+d3.format('+.3~g')(100*d.delta)+'% of offline receiver energy':'')
-      +(d.local?' · Local source':''));
+    marks.select('title').text(cellLabel);
+    svg.select('.matrix-inspected-cell').attr('x',left+(inspected?.j||0)*cellWidth-.5).attr('y',top+(inspected?.i||0)*cellHeight-.5)
+      .attr('width',cellWidth+1).attr('height',cellHeight+1).attr('rx',3).attr('stroke','#1d1d1f').attr('stroke-width',2).attr('display',inspected?null:'none');
     svg.select('.matrix-selected-row').attr('x',left-2).attr('y',top+receivers.indexOf(matrixReceiver)*cellHeight-1)
       .attr('width',width-left-5).attr('height',cellHeight+2).attr('rx',3).attr('stroke','#1d1d1f').attr('stroke-width',1).attr('display',matrixReceiver?null:'none');
     const rows=svg.select('.matrix-rows').selectAll('g').data(receivers).join(enter=>{
