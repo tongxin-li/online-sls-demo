@@ -13,8 +13,14 @@ const html=fs.readFileSync(path.join(__dirname,'interface.html'),'utf8');
 const original=fs.readFileSync(path.join(__dirname,'interface.js'),'utf8');
 const anchor="  announce('Ready');";
 assert.equal(original.split(anchor).length,2,'Interface initialization anchor must be unique');
-const source=original.replace(anchor,
-  '  drawNetwork=drawCost=drawStage=drawVoltage=drawConvergence=()=>{};\n'+
+// Event cards and transient flashes are rendered and checked in the browser.
+// Keep the actual history state and controls in this lightweight DOM harness.
+const cardStart="    const cards=d3.select($('topology-events'))";
+const cardEnd="    $('topology-events').hidden=total===0;";
+assert.equal(original.split(cardStart).length,2,'Topology cards anchor must be unique');
+const withoutCards=original.slice(0,original.indexOf(cardStart))+original.slice(original.indexOf(cardEnd));
+const source=withoutCards.replace(anchor,
+  '  drawNetwork=drawCost=drawStage=drawVoltage=drawConvergence=highlightTopology=()=>{};\n'+
   '  drawMatrix=drawTopologyHistory;\n'+
   '  root.bindTestBus=(element,bus)=>bindAttackTarget(element,()=>bus);\n'+anchor);
 const plain=value=>JSON.parse(JSON.stringify(value));
@@ -106,7 +112,7 @@ function harness(saved) {
 const pulses=h=>h.snapshot().eventLog.filter(event=>event.type==='pulse');
 
 test('pointer activation queues once and a paused attack starts playback without advancing time',async()=>{
-  const h=harness();h.event('pulse','pointerdown');h.event('pulse','pointerup');h.click('pulse',1);
+  const h=harness();h.change('attack-mode','pulse');h.event('pulse','pointerdown');h.event('pulse','pointerup');h.click('pulse',1);
   assert.equal(pulses(h).length,1);assert.equal(h.snapshot().pendingPulses.length,1);
   assert.equal(h.snapshot().t,0);assert.equal(h.state().playing,true);
   await h.samples(1);assert.equal(h.snapshot().t,1);assert.equal(pulses(h).length,1);
@@ -114,7 +120,7 @@ test('pointer activation queues once and a paused attack starts playback without
 });
 
 test('holding Attack adds one pulse per physical sample and release preserves playback',async()=>{
-  const h=harness();h.event('pulse','pointerdown');await h.samples(3);
+  const h=harness();h.change('attack-mode','pulse');h.event('pulse','pointerdown');await h.samples(3);
   assert.equal(h.snapshot().t,3);assert.deepEqual(pulses(h).map(event=>event.t),[0,1,2]);
   assert.equal(h.node('pulse').dataset.holding,'true');
   h.event('pulse','pointerup');h.click('pulse',1);await h.samples(2);
@@ -123,14 +129,14 @@ test('holding Attack adds one pulse per physical sample and release preserves pl
 });
 
 test('D hold ignores keyboard repeats and keyup stops only new attacks',async()=>{
-  const h=harness();h.key('keydown','d');h.key('keydown','d',{repeat:true});
+  const h=harness();h.change('attack-mode','pulse');h.key('keydown','d');h.key('keydown','d',{repeat:true});
   await h.samples(4);assert.deepEqual(pulses(h).map(event=>event.t),[0,1,2,3]);
   h.key('keyup','D');await h.samples(2);
   assert.equal(pulses(h).length,4);assert.equal(h.snapshot().t,6);assert.equal(h.state().playing,true);
 });
 
 test('quick clicks preserve every pending and active pulse and do not reset time',async()=>{
-  const h=harness();for(let i=0;i<5;i++)h.quickClick();
+  const h=harness();h.change('attack-mode','pulse');for(let i=0;i<5;i++)h.quickClick();
   assert.equal(pulses(h).length,5);assert.equal(h.snapshot().pendingPulses.length,5);assert.equal(h.snapshot().t,0);
   await h.samples(1);assert.equal(h.snapshot().activePulses.length,5);
   h.quickClick();h.quickClick();assert.equal(h.snapshot().activePulses.length,5);assert.equal(h.snapshot().pendingPulses.length,2);
@@ -140,20 +146,20 @@ test('quick clicks preserve every pending and active pulse and do not reset time
 
 test('pointer cancellation and window blur release attacks without pausing playback',async()=>{
   for(const kind of ['pointercancel','lostpointercapture','blur']){
-    const h=harness();h.event('pulse','pointerdown');await h.samples(1);
+    const h=harness();h.change('attack-mode','pulse');h.event('pulse','pointerdown');await h.samples(1);
     if(kind==='blur')h.window.dispatch(kind);else h.event('pulse',kind);
     await h.samples(2);assert.equal(pulses(h).length,1,kind);assert.equal(h.snapshot().t,3,kind);assert.equal(h.state().playing,true,kind);
   }
 });
 
 test('hidden document pauses playback and clears the hold',async()=>{
-  const h=harness();h.key('keydown','d');await h.samples(1);
+  const h=harness();h.change('attack-mode','pulse');h.key('keydown','d');await h.samples(1);
   h.document.hidden=true;h.document.dispatch('visibilitychange');await h.samples(4);
   assert.equal(h.snapshot().t,1);assert.equal(h.state().playing,false);assert.equal(h.node('pulse').dataset.holding,'false');
 });
 
 test('late timers do not burst through missed physical samples',async()=>{
-  const h=harness();h.quickClick();h.clock.now=10000;await h.clock.runNext();
+  const h=harness();h.change('attack-mode','pulse');h.quickClick();h.clock.now=10000;await h.clock.runNext();
   assert.equal(h.snapshot().t,1);const recoveryDelay=1000/Number(h.node('speed').value)*.15;
   assert.ok(h.clock.next()[1].at>=10000+recoveryDelay);
   await h.clock.advance(recoveryDelay-.01);assert.equal(h.snapshot().t,1);
@@ -161,7 +167,7 @@ test('late timers do not burst through missed physical samples',async()=>{
 });
 
 test('attacks interleave safely with comparison batches and continue after the batch',async()=>{
-  const h=harness();const comparison=h.click('compare');assert.equal(h.node('run').disabled,true);
+  const h=harness();h.change('attack-mode','pulse');const comparison=h.click('compare');assert.equal(h.node('run').disabled,true);
   h.event('pulse','pointerdown');await h.clock.runNext();
   assert.equal(h.snapshot().t,12);assert.equal(pulses(h).length,12);
   h.event('pulse','pointerup');h.click('pulse',1);await h.clock.runNext();
@@ -174,7 +180,7 @@ test('attacks interleave safely with comparison batches and continue after the b
 });
 
 test('matrix reference survives pulses, forecast changes and exact saved replay',async()=>{
-  const h=harness();h.quickClick();const initialReference=h.saved().privateContent.matrixReference;
+  const h=harness();h.change('attack-mode','pulse');h.quickClick();const initialReference=h.saved().privateContent.matrixReference;
   await h.samples(35);h.click('run');
   const reference=h.saved().privateContent.matrixReference;assert.equal(reference.t,0);
   assert.deepEqual(reference,initialReference);h.quickClick();h.click('fault');
@@ -189,7 +195,7 @@ test('matrix reference survives pulses, forecast changes and exact saved replay'
 });
 
 test('deployment replay is exact and Learn again starts a fresh discovery trial',async()=>{
-  const h=harness();const comparison=h.click('compare');await h.clock.until(()=>!h.node('compare').disabled);await comparison;
+  const h=harness();h.change('attack-mode','pulse');const comparison=h.click('compare');await h.clock.until(()=>!h.node('compare').disabled);await comparison;
   assert.equal(h.snapshot().canDeploy,true);h.click('deploy');assert.equal(h.snapshot().phase,'deployment');assert.equal(h.snapshot().t,0);
   assert.equal(h.node('deploy').textContent,'Learn again');assert.equal(h.node('deploy').disabled,false);
   h.key('keydown','d');await h.samples(3);h.key('keyup','d');h.click('run');
@@ -202,32 +208,32 @@ test('deployment replay is exact and Learn again starts a fresh discovery trial'
 });
 
 test('fixed slack rejects pointer and keyboard attacks',()=>{
-  const h=harness();h.change('bus',1);h.event('pulse','pointerdown');h.click('pulse',0);h.key('keydown','d');
+  const h=harness();h.change('attack-mode','pulse');h.change('bus',1);h.event('pulse','pointerdown');h.click('pulse',0);h.key('keydown','d');
   assert.equal(pulses(h).length,0);assert.equal(h.state().playing,false);assert.equal(h.node('pulse').disabled,true);
 });
 
-test('default playback advances eight physical samples per wall second',async()=>{
-  const h=harness();assert.equal(h.node('speed').value,'8');
+test('default playback advances sixteen physical samples per wall second',async()=>{
+  const h=harness();h.change('attack-mode','pulse');assert.equal(h.node('speed').value,'16');
   h.quickClick();await h.clock.advance(1000);
-  assert.equal(h.snapshot().t,8);assert.equal(pulses(h).length,1);
+  assert.equal(h.snapshot().t,16);assert.equal(pulses(h).length,1);
 });
 
 test('SVG bus press captures the pointer and holds that bus at the default speed',async()=>{
-  const h=harness(),bus=h.bus(14);
+  const h=harness();h.change('attack-mode','pulse');const bus=h.bus(14);
   h.pointer('pointerdown',bus,{pointerId:41});
   assert.equal(bus.capturedPointer,41);assert.equal(bus.hasPointerCapture(41),true);
   assert.equal(bus.dataset.holding,'true');assert.equal(h.state().selectedBus,14);
   assert.equal(pulses(h).length,1);assert.equal(h.snapshot().t,0);
   await h.clock.advance(1000);
-  assert.equal(h.snapshot().t,8);assert.deepEqual(pulses(h).map(event=>event.t),[0,1,2,3,4,5,6,7]);
+  assert.equal(h.snapshot().t,16);assert.deepEqual(pulses(h).map(event=>event.t),Array.from({length:16},(_,i)=>i));
   assert.ok(pulses(h).every(event=>event.bus===14));
   h.pointer('pointerup',bus,{pointerId:41});bus.dispatch('click',{detail:1});
-  assert.equal(pulses(h).length,8);assert.equal(bus.dataset.holding,'false');
-  await h.samples(2);assert.equal(h.snapshot().t,10);assert.equal(pulses(h).length,8);assert.equal(h.state().playing,true);
+  assert.equal(pulses(h).length,16);assert.equal(bus.dataset.holding,'false');
+  await h.samples(2);assert.equal(h.snapshot().t,18);assert.equal(pulses(h).length,16);assert.equal(h.state().playing,true);
 });
 
 test('releasing outside a captured SVG bus ends the hold without stopping playback',async()=>{
-  const h=harness(),bus=h.bus(8),outside=target();
+  const h=harness();h.change('attack-mode','pulse');const bus=h.bus(8),outside=target();
   h.pointer('pointerdown',bus,{pointerId:17});await h.samples(3);
   h.pointer('pointermove',outside,{pointerId:17});
   h.pointer('pointerup',outside,{pointerId:17});
@@ -236,7 +242,7 @@ test('releasing outside a captured SVG bus ends the hold without stopping playba
 });
 
 test('touch cancellation on a captured SVG bus preserves previously applied attacks',async()=>{
-  const h=harness(),bus=h.bus(12);
+  const h=harness();h.change('attack-mode','pulse');const bus=h.bus(12);
   h.pointer('pointerdown',bus,{pointerId:32,pointerType:'touch'});await h.samples(2);
   const attacks=h.snapshot().activePulses.length;
   h.pointer('pointercancel',target(),{pointerId:32,pointerType:'touch'});
@@ -246,7 +252,7 @@ test('touch cancellation on a captured SVG bus preserves previously applied atta
 });
 
 test('repeated SVG clicks add one pulse per gesture with no compatibility click duplication',()=>{
-  const h=harness(),bus=h.bus(21);
+  const h=harness();h.change('attack-mode','pulse');const bus=h.bus(21);
   for(let i=0;i<4;i++){
     h.pointer('pointerdown',bus);h.pointer('pointerup',bus);bus.dispatch('click',{detail:i+1});
   }
@@ -257,7 +263,7 @@ test('repeated SVG clicks add one pulse per gesture with no compatibility click 
 
 test('Enter and Space hold an SVG bus and ignore repeated keyboard events',async()=>{
   for(const key of ['Enter',' ']){
-    const h=harness(),bus=h.bus(18);
+    const h=harness();h.change('attack-mode','pulse');const bus=h.bus(18);
     bus.dispatch('keydown',{key});bus.dispatch('keydown',{key,repeat:true});await h.samples(4);
     assert.equal(pulses(h).length,4,key);assert.ok(pulses(h).every(event=>event.bus===18));
     bus.dispatch('keyup',{key});await h.samples(2);
@@ -266,8 +272,8 @@ test('Enter and Space hold an SVG bus and ignore repeated keyboard events',async
 });
 
 test('all playback modes preserve one held bus pulse per physical sample',async()=>{
-  for(const rate of [2,4,8,16]){
-    const h=harness(),bus=h.bus(5);h.change('speed',rate);h.pointer('pointerdown',bus);
+  for(const rate of [2,4,8,16,32]){
+    const h=harness();h.change('attack-mode','pulse');const bus=h.bus(5);h.change('speed',rate);h.pointer('pointerdown',bus);
     await h.clock.advance(1000);assert.equal(h.snapshot().t,rate);assert.equal(pulses(h).length,rate);
     assert.equal(new Set(pulses(h).map(event=>event.t)).size,rate);
     h.pointer('pointerup',bus);await h.clock.advance(1000);
@@ -276,25 +282,26 @@ test('all playback modes preserve one held bus pulse per physical sample',async(
 });
 
 test('changing speed during a hold replaces the timer without losing or doubling attacks',async()=>{
-  const h=harness(),bus=h.bus(7);h.pointer('pointerdown',bus);await h.samples(1);
-  h.change('speed',16);assert.equal(h.clock.tasks.size,1);await h.clock.advance(1000);
-  assert.equal(h.snapshot().t,17);assert.deepEqual(pulses(h).map(event=>event.t),Array.from({length:17},(_,i)=>i));
+  const h=harness();h.change('attack-mode','pulse');const bus=h.bus(7);h.pointer('pointerdown',bus);await h.samples(1);
+  h.change('speed',32);assert.equal(h.clock.tasks.size,1);await h.clock.advance(1000);
+  assert.equal(h.snapshot().t,33);assert.deepEqual(pulses(h).map(event=>event.t),Array.from({length:33},(_,i)=>i));
 });
 
 test('version seven replay migrates speed and connectivity view without changing physical history',async()=>{
-  const h=harness();h.quickClick();await h.samples(3);h.click('run');
+  const h=harness();h.change('attack-mode','pulse');h.quickClick();await h.samples(3);h.click('run');
   const legacy=plain(h.saved());legacy.privateContent.version=7;legacy.privateContent.speed='1';legacy.privateContent.matrixView='change';
   const restored=harness(legacy);
-  assert.equal(restored.node('speed').value,'8');assert.equal(restored.node('matrix-view').value,'links');
+  assert.equal(restored.node('speed').value,'16');assert.equal(restored.node('matrix-view').value,'links');
   assert.equal(restored.snapshot().t,3);assert.deepEqual(restored.snapshot().cumulative,h.snapshot().cumulative);
   assert.deepEqual(restored.snapshot().states,h.snapshot().states);assert.deepEqual(restored.snapshot().eventLog,h.snapshot().eventLog);
-  assert.equal(restored.state().playing,false);restored.quickClick();assert.equal(restored.saved().privateContent.version,8);
+  assert.equal(restored.state().playing,false);restored.quickClick();assert.equal(restored.saved().privateContent.version,9);
 });
 
-test('version eight replay retains selected fast speed and matrix view',async()=>{
-  const h=harness();h.change('speed',16);h.change('matrix-view','change');h.quickClick();await h.samples(3);h.click('run');
-  assert.equal(h.saved().privateContent.version,8);
+test('version nine replay retains speed, attack mode and matrix view',async()=>{
+  const h=harness();h.change('attack-mode','pulse');h.change('speed',16);h.change('matrix-view','change');h.quickClick();await h.samples(3);h.click('run');
+  assert.equal(h.saved().privateContent.version,9);
   const restored=harness(h.saved());assert.equal(restored.node('speed').value,'16');assert.equal(restored.node('matrix-view').value,'change');
+  assert.equal(restored.node('attack-mode').value,'pulse');
   assert.deepEqual(restored.snapshot().cumulative,h.snapshot().cumulative);assert.deepEqual(restored.snapshot().eventLog,h.snapshot().eventLog);
 });
 
@@ -324,7 +331,7 @@ test('Advance 180 retains every actual topology change including returns to the 
   assert.deepEqual(single.snapshot().cumulative,fast.snapshot().cumulative);
 });
 
-test('version eight replay reconstructs topology events from every physical sample',async()=>{
+test('version nine replay reconstructs topology events from every physical sample',async()=>{
   const h=topologyHarness();await compare(h);
   const bus=h.bus(14);h.pointer('pointerdown',bus);await h.samples(7);h.pointer('pointerup',bus);h.click('run');
   const restored=harness(h.saved());
@@ -375,7 +382,7 @@ test('history slider and Show latest change only the view, never the current eng
 
 test('keyboard hold ends when its toolbar or bus loses focus, while unrelated blur leaves it active',async()=>{
   for(const kind of ['toolbar','bus'])for(const key of ['Enter',' ']){
-    const h=harness(),owner=kind==='toolbar'?h.node('pulse'):h.bus(8);
+    const h=harness();h.change('attack-mode','pulse');const owner=kind==='toolbar'?h.node('pulse'):h.bus(8);
     const other=kind==='toolbar'?h.bus(12):h.node('pulse');
     owner.dispatch('keydown',{key});await h.samples(2);
     other.dispatch('blur',{relatedTarget:owner});await h.samples(1);
@@ -388,4 +395,134 @@ test('keyboard hold ends when its toolbar or bus loses focus, while unrelated bl
     assert.equal(pulses(h).length,3,kind+' should not add attacks after blur');
     assert.equal(h.snapshot().t,5);assert.equal(h.state().playing,true);
   }
+});
+
+function pointerClick(h,element,pointerId=1){
+  h.pointer('pointerdown',element,{pointerId});
+  h.pointer('pointerup',element,{pointerId});
+  element.dispatch('click',{detail:1});
+}
+
+test('Continuous is the default and a released bus click repeats one pulse per sample',async()=>{
+  const h=harness(),bus=h.bus(14);
+  assert.equal(h.node('attack-mode').value,'continuous');assert.equal(h.node('speed').value,'16');
+  pointerClick(h,bus,51);
+  assert.equal(bus.hasPointerCapture(51),false,'Native pointer release also delivers lostpointercapture');
+  assert.equal(pulses(h).length,1,'Compatibility click must not toggle or duplicate activation');
+  assert.equal(h.node('pulse-label').textContent,'Stop attack');assert.equal(h.node('pulse')['aria-pressed'],'true');
+  await h.clock.advance(1000);
+  assert.equal(h.snapshot().t,16);assert.equal(pulses(h).length,16);
+  assert.deepEqual(pulses(h).map(event=>event.t),Array.from({length:16},(_,i)=>i));
+  assert.ok(pulses(h).every(event=>event.bus===14));
+  assert.equal(h.node('attack-hint').textContent,'Continuous · Bus 14');
+});
+
+test('clicking the same bus stops a continuous attack without adding a final pulse',async()=>{
+  const h=harness(),bus=h.bus(7);pointerClick(h,bus);await h.samples(4);
+  const active=h.snapshot().activePulses.length;pointerClick(h,bus);
+  assert.equal(h.node('pulse-label').textContent,'Attack bus 7');assert.equal(h.node('pulse')['aria-pressed'],'false');
+  assert.equal(h.snapshot().activePulses.length,active);assert.equal(pulses(h).length,4);
+  await h.samples(3);assert.equal(h.snapshot().t,7);assert.equal(pulses(h).length,4);assert.equal(h.state().playing,true);
+});
+
+test('Stop attack targets the active continuous bus even after selection changes to the slack bus',async()=>{
+  const h=harness(),bus=h.bus(8);pointerClick(h,bus);await h.samples(3);
+  h.change('bus',1);assert.equal(h.node('pulse').disabled,false);assert.equal(h.node('pulse-label').textContent,'Stop attack');
+  pointerClick(h,h.node('pulse'),23);await h.samples(3);
+  assert.equal(pulses(h).length,3);assert.equal(h.snapshot().t,6);assert.equal(h.state().selectedBus,1);
+  assert.equal(h.node('pulse-label').textContent,'Fixed substation');assert.equal(h.node('pulse').disabled,true);
+});
+
+test('clicking another bus transfers continuous attacks and preserves earlier applied pulses',async()=>{
+  const h=harness(),first=h.bus(7),second=h.bus(14);
+  pointerClick(h,first);await h.samples(3);const firstCount=h.snapshot().activePulses.filter(event=>event.bus===7).length;
+  pointerClick(h,second,24);assert.equal(h.snapshot().activePulses.filter(event=>event.bus===7).length,firstCount);
+  await h.samples(3);
+  assert.deepEqual(pulses(h).map(event=>event.bus),[7,7,7,14,14,14]);
+  assert.deepEqual(pulses(h).map(event=>event.t),[0,1,2,3,4,5]);
+  assert.equal(h.state().selectedBus,14);assert.equal(h.node('pulse-label').textContent,'Stop attack');
+});
+
+test('touch cancellation stops a continuous attack while normal release keeps it active',async()=>{
+  const h=harness(),bus=h.bus(12);
+  h.pointer('pointerdown',bus,{pointerId:8,pointerType:'touch'});await h.samples(2);
+  h.pointer('pointercancel',target(),{pointerId:8,pointerType:'touch'});await h.samples(2);
+  assert.equal(pulses(h).length,2);assert.equal(h.node('pulse')['aria-pressed'],'false');assert.equal(h.state().playing,true);
+  h.pointer('pointerdown',bus,{pointerId:9,pointerType:'touch'});
+  h.pointer('pointerup',target(),{pointerId:9,pointerType:'touch'});bus.dispatch('click',{detail:1});
+  await h.samples(3);assert.equal(pulses(h).length,5);assert.equal(h.node('pulse')['aria-pressed'],'true');
+});
+
+test('losing capture before pointer release cancels continuous attacks',async()=>{
+  const h=harness(),bus=h.bus(21);h.pointer('pointerdown',bus,{pointerId:17});await h.samples(2);
+  bus.releasePointerCapture(17);await h.samples(2);
+  assert.equal(pulses(h).length,2);assert.equal(h.node('pulse')['aria-pressed'],'false');assert.equal(h.state().playing,true);
+});
+
+test('Enter and Space toggle continuous bus and toolbar attacks and ignore keyup and repeats',async()=>{
+  for(const kind of ['bus','toolbar'])for(const key of ['Enter',' ']){
+    const h=harness(),owner=kind==='bus'?h.bus(18):h.node('pulse');
+    owner.dispatch('keydown',{key});owner.dispatch('keydown',{key,repeat:true});owner.dispatch('keyup',{key});
+    await h.samples(3);assert.equal(pulses(h).length,3,kind+' '+key);assert.equal(h.node('pulse')['aria-pressed'],'true');
+    owner.dispatch('keydown',{key});owner.dispatch('keyup',{key});await h.samples(2);
+    assert.equal(pulses(h).length,3,kind+' should stop on the second activation');assert.equal(h.state().playing,true);
+  }
+});
+
+test('continuous attacks survive ordinary focus changes but stop on window blur',async()=>{
+  const h=harness(),bus=h.bus(18);pointerClick(h,bus);await h.samples(2);
+  bus.dispatch('blur',{relatedTarget:h.node('speed')});await h.samples(2);
+  assert.equal(pulses(h).length,4);assert.equal(h.node('pulse')['aria-pressed'],'true');
+  h.window.dispatch('blur');await h.samples(2);
+  assert.equal(pulses(h).length,4);assert.equal(h.node('pulse')['aria-pressed'],'false');assert.equal(h.state().playing,true);
+});
+
+test('assistive clicks toggle continuous attacks exactly once per activation',async()=>{
+  for(const kind of ['bus','toolbar']){
+    const h=harness(),owner=kind==='bus'?h.bus(5):h.node('pulse');
+    owner.dispatch('click',{detail:0});await h.samples(3);
+    assert.equal(pulses(h).length,3);owner.dispatch('click',{detail:0});await h.samples(2);
+    assert.equal(pulses(h).length,3);assert.equal(h.node('pulse')['aria-pressed'],'false');
+  }
+});
+
+test('Pause ends a continuous attack and Run resumes only the plant',async()=>{
+  const h=harness(),bus=h.bus(14);pointerClick(h,bus);await h.samples(4);h.click('run');
+  await h.samples(3);assert.equal(h.snapshot().t,4);assert.equal(h.state().playing,false);assert.equal(h.node('pulse')['aria-pressed'],'false');
+  h.click('run');await h.samples(2);assert.equal(h.snapshot().t,7);assert.equal(pulses(h).length,4);assert.equal(h.state().playing,true);
+});
+
+test('reloading an active continuous trial restores physical history but never restarts the attack',async()=>{
+  const h=harness(),bus=h.bus(14);pointerClick(h,bus);await h.samples(4);
+  h.change('speed',32);const saved=h.saved();assert.equal(saved.privateContent.version,9);assert.equal(saved.privateContent.attackMode,'continuous');
+  const restored=harness(saved);assert.equal(restored.node('attack-mode').value,'continuous');assert.equal(restored.node('speed').value,'32');
+  assert.equal(restored.state().playing,false);assert.equal(restored.node('pulse')['aria-pressed'],'false');
+  assert.deepEqual(restored.snapshot().cumulative,h.snapshot().cumulative);assert.deepEqual(restored.snapshot().eventLog,h.snapshot().eventLog);
+  await restored.samples(2);assert.equal(restored.snapshot().t,4);
+  restored.click('run');await restored.samples(2);assert.equal(restored.snapshot().t,7);assert.equal(pulses(restored).length,4);
+});
+
+test('D remains an explicit hold shortcut in either attack mode',async()=>{
+  for(const mode of ['continuous','pulse']){
+    const h=harness();h.change('attack-mode',mode);h.key('keydown','d');h.key('keydown','d',{repeat:true});
+    await h.samples(3);assert.equal(pulses(h).length,3);h.key('keyup','d');await h.samples(2);
+    assert.equal(pulses(h).length,3);assert.equal(h.snapshot().t,5);assert.equal(h.node('pulse')['aria-pressed'],'false');
+  }
+});
+
+test('changing attack mode stops repetition without deleting pending or applied disturbances',async()=>{
+  const h=harness(),bus=h.bus(7);pointerClick(h,bus);await h.samples(3);
+  h.change('attack-mode','pulse');await h.samples(2);assert.equal(pulses(h).length,3);assert.equal(h.state().playing,true);
+  h.pointer('pointerdown',bus);await h.samples(2);h.change('attack-mode','continuous');h.pointer('pointerup',bus);bus.dispatch('click',{detail:1});
+  await h.samples(2);assert.equal(pulses(h).length,5);assert.equal(h.node('pulse')['aria-pressed'],'false');
+  assert.ok(h.snapshot().activePulses.length>0);
+});
+
+test('version eight restores trial history while adopting faster playback and Continuous mode',async()=>{
+  const h=harness();h.change('attack-mode','pulse');h.change('speed',2);h.change('matrix-view','change');h.quickClick();await h.samples(4);h.click('run');
+  const old=plain(h.saved());old.privateContent.version=8;
+  const restored=harness(old);
+  assert.equal(restored.node('speed').value,'16');assert.equal(restored.node('attack-mode').value,'continuous');assert.equal(restored.node('matrix-view').value,'change');
+  assert.deepEqual(restored.snapshot().cumulative,h.snapshot().cumulative);assert.deepEqual(restored.snapshot().eventLog,h.snapshot().eventLog);
+  assert.equal(restored.state().playing,false);assert.equal(restored.node('pulse')['aria-pressed'],'false');
 });

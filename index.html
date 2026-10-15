@@ -193,6 +193,19 @@ summary span { color:#a1a1a6; }
 .pr-topology-history input:disabled,.pr-topology-history button:disabled { opacity:.4; cursor:default; }
 #pr-topology-note { min-height:28px; line-height:1.4; color:#60606a; }
 
+.pr-topology-status { display:flex; justify-content:space-between; gap:10px; font-size:10px; margin:4px 0 7px; color:var(--muted-foreground); }
+.pr-topology-status strong { font-weight:500; color:var(--foreground); }
+.pr-topology-events { display:flex; gap:6px; margin:0 0 6px; }
+.pr-topology-events button { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; text-align:left; padding:6px 9px; border:1px solid var(--border); border-radius:7px; background:#f7f9fb; color:var(--foreground); }
+.pr-topology-events button span { color:var(--muted-foreground); font-size:10px; }
+.pr-topology-events button strong { font-weight:550; font-size:12px; }
+.pr-topology-events button[aria-pressed='true'] { background:#eef7f4; border-color:#9bc7ba; }
+.pr-link-flash { animation:pr-link-arrival 1.6s ease-out; }
+@keyframes pr-link-arrival { 0%,30%,60% { filter:drop-shadow(0 0 4px #168b79); opacity:.35; } 15%,45%,100% { filter:drop-shadow(0 0 0 transparent); opacity:1; } }
+#pr-attack-mode { background:#fff6eb; color:#a34a00; }
+#pr-topology-note { min-height:14px; font-size:9px; }
+@media(max-width:1000px) { .pr-attack-hint { display:none; } }
+
 /* Equipment marks stay decorative. The enclosing bus owns interaction. */
 .pe-host { -webkit-user-select:none; user-select:none; touch-action:manipulation; }
 .pe-hit { fill:transparent; pointer-events:all; }
@@ -200,7 +213,7 @@ summary span { color:#a1a1a6; }
 .pe-root path,.pe-root rect,.pe-root circle { vector-effect:non-scaling-stroke; }
 .pe-attack-halo { fill:#ff9f0a; fill-opacity:0; stroke:#ef7b0b; stroke-opacity:0; stroke-width:1; transition:fill-opacity .18s,stroke-opacity .18s; }
 .pe-attacked .pe-attack-halo { fill-opacity:.14; stroke-opacity:.24; }
-.pe-attack-held .pe-attack-halo { fill-opacity:.22; stroke-opacity:.8; stroke-width:2; stroke-dasharray:3 3; }
+.pe-attack-held .pe-attack-halo,.pe-attack-latched .pe-attack-halo { fill-opacity:.22; stroke-opacity:.8; stroke-width:2; transform-box:fill-box; transform-origin:center; animation:pe-continuous-halo 1.6s ease-in-out infinite; }
 .pe-voltage-wash { fill:var(--pe-voltage-color); opacity:var(--pe-voltage-opacity); transition:r .4s,opacity .4s,fill .4s; }
 .pe-disc { fill:var(--pe-paper); stroke:#dce6de; stroke-width:1; }
 .pe-voltage-ring { fill:none; stroke:var(--pe-voltage-color); stroke-opacity:.45; transition:stroke .4s,stroke-width .4s; }
@@ -247,12 +260,14 @@ summary span { color:#a1a1a6; }
 .pe-attack-badge rect { fill:#ec7609; stroke:#fff; stroke-width:1.5; }
 .pe-attack-bolt { fill:#fff; stroke:none; }
 .pe-attack-badge text { fill:#fff!important; font:650 10px var(--font-ui,-apple-system,BlinkMacSystemFont,sans-serif)!important; letter-spacing:0; }
+.pe-attack-badge .pe-attack-status { font-size:7px!important; font-weight:750!important; letter-spacing:.7px; fill:#fff2dd!important; }
 .pe-pulse-queued .pe-attack-badge rect { fill:#f38a0b; }
-.pe-attack-held .pe-attack-badge rect { fill:#d95e00; stroke-width:2; }
+.pe-attack-held .pe-attack-badge rect,.pe-attack-latched .pe-attack-badge rect { fill:#d95e00; stroke-width:2; }
 .pe-burst { pointer-events:none; }
 .pe-burst-ring { fill:#ff9f0a; fill-opacity:.1; stroke:#ed7d0d; stroke-width:2; transform-box:fill-box; transform-origin:center; animation:pe-ring 1.1s ease-out both; }
 .pe-burst-rays { fill:none; stroke:#f7981c; stroke-width:2; stroke-linecap:round; animation:pe-rays .75s ease-out both; }
 .pe-burst-bolt { fill:#ee7d09; stroke:#fff; stroke-width:1.8; stroke-linejoin:round; animation:pe-bolt .75s ease-out both; }
+@keyframes pe-continuous-halo { 0%,100% { transform:scale(.95); fill-opacity:.13; stroke-opacity:.5; } 50% { transform:scale(1.16); fill-opacity:.24; stroke-opacity:.95; } }
 @keyframes pe-ring { from { transform:scale(1); opacity:.95; } to { transform:scale(2.1); opacity:0; } }
 @keyframes pe-rays { 0% { opacity:0; } 15% { opacity:.95; } 100% { opacity:0; } }
 @keyframes pe-bolt { 0% { opacity:0; transform:translateY(-5px); } 15%,45% { opacity:1; transform:translateY(0); } 100% { opacity:0; transform:translateY(2px); } }
@@ -290,13 +305,13 @@ summary span { color:#a1a1a6; }
       <button type="button" class="btn btn-play" id="pr-run">Run</button>
       <button type="button" class="btn btn-quiet" id="pr-step" title="Advance one second of feeder operation">Step</button>
       <button type="button" class="btn btn-quiet" id="pr-restart" title="Restart the current trial">Reset</button>
-      <select id="pr-speed" aria-label="Playback speed" title="8× plays eight simulation samples per second"><option value="2">2×</option><option value="4">4×</option><option value="8" selected>8×</option><option value="16">16×</option></select>
+      <select id="pr-speed" aria-label="Playback speed" title="16× plays sixteen simulation samples per second"><option value="2">2×</option><option value="4">4×</option><option value="8">8×</option><option value="16" selected>16×</option><option value="32">32×</option></select>
       <span id="pr-clock" class="tabular-nums">t = 0 s</span>
     </div>
     <div class="pr-actions">
-      <label for="pr-strength">Pulse</label>
+      <select id="pr-attack-mode" aria-label="Attack mode"><option value="continuous" selected>Continuous</option><option value="pulse">Pulse</option></select>
       <select id="pr-strength" aria-label="Pulse strength" title="Requested power per pulse. Applied power respects equipment limits"><option value="50">50 kW</option><option value="100" selected>100 kW</option><option value="150">150 kW</option></select>
-      <button type="button" class="btn btn-attack" id="pr-pulse" aria-keyshortcuts="D" title="Click for a pulse or hold for one pulse each sample"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14 2 5 14h6l-1 8 9-13h-6z"/></svg><span id="pr-pulse-label">Attack bus 7</span></button><span class="pr-attack-hint">Hold button or bus</span>
+      <button type="button" class="btn btn-attack" id="pr-pulse" aria-keyshortcuts="D" title="Click for a pulse or hold for one pulse each sample"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14 2 5 14h6l-1 8 9-13h-6z"/></svg><span id="pr-pulse-label">Attack bus 7</span></button><span id="pr-attack-hint" class="pr-attack-hint">Click to start or stop</span>
     </div>
   </div>
   <div class="pr-comparison-controls">
@@ -307,14 +322,14 @@ summary span { color:#a1a1a6; }
   <div class="pr-mission"><span><span class="pr-status-dot" id="pr-voltage-status" aria-hidden="true"></span>Restore the <strong>nominal voltage profile</strong><span class="pr-target"> · Illustrative band 0.95 to 1.05 pu</span></span><span id="pr-voltage-range" class="tabular-nums"></span></div>
   <div class="pr-dashboard">
     <section class="pr-panel pr-network-panel" aria-labelledby="pr-network-title">
-      <div class="pr-subhead"><h2 id="pr-network-title">Power network</h2><span id="pr-action-note" class="pr-caption" aria-live="polite">Hold a bus for continuous attacks</span></div>
-      <svg class="pr-chart" id="pr-network" role="group" aria-label="24 bus radial power feeder. Press and hold a load, solar, or battery bus for continuous power disturbances"></svg>
+      <div class="pr-subhead"><h2 id="pr-network-title">Power network</h2><span id="pr-action-note" class="pr-caption" aria-live="polite">Click a bus to start · Click again to stop</span></div>
+      <svg class="pr-chart" id="pr-network" role="group" aria-label="24 bus radial power feeder. Click a load, solar, or battery bus to start a continuous disturbance. Click again to stop."></svg>
       <div class="pr-panel-foot"><span id="pr-bus-detail" class="tabular-nums"></span><span class="pr-live-stage">Cost <strong id="pr-live-cost" class="tabular-nums">0.0000</strong></span></div>
     </section>
     <section class="pr-panel pr-matrix-panel" aria-labelledby="pr-matrix-title">
       <div class="pr-subhead"><h2 id="pr-matrix-title">Learning prediction links</h2><select id="pr-matrix-view" aria-label="Prediction matrix view"><option value="links" selected>Connectivity</option><option value="change">Learning weights</option></select></div>
       <div class="pr-matrix-key" id="pr-matrix-key"></div><svg class="pr-chart" id="pr-matrix" role="group" aria-label="Candidate prediction links. Rows receive forecasts from columns"></svg>
-      <div class="pr-panel-foot"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div><div class="pr-topology-history"><label for="pr-topology-history" id="pr-history-count">0 link updates</label><input id="pr-topology-history" type="range" min="0" max="0" step="1" value="0" aria-label="Topology history" disabled><button type="button" id="pr-history-live" aria-pressed="true">Latest</button></div><p id="pr-topology-note" class="pr-caption" aria-live="polite"></p>
+      <div class="pr-panel-foot"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div><div class="pr-topology-status"><strong id="pr-topology-status">Connectivity unchanged</strong><span id="pr-topology-gain">Weights changed 0%</span></div><div id="pr-topology-events" class="pr-topology-events" aria-label="Recent topology changes" hidden></div><div class="pr-topology-history"><label for="pr-topology-history" id="pr-history-count">0 link updates</label><input id="pr-topology-history" type="range" min="0" max="0" step="1" value="0" aria-label="Topology history" disabled><button type="button" id="pr-history-live" aria-pressed="true">Latest</button></div><p id="pr-topology-note" class="pr-caption" aria-live="polite"></p>
     </section>
     <section class="pr-panel pr-stage-panel" aria-labelledby="pr-stage-title">
       <div class="pr-subhead"><h2 id="pr-stage-title">Voltage and cost</h2><strong id="pr-state-value" class="pr-state-value tabular-nums">1.000 pu</strong></div>
@@ -1077,6 +1092,7 @@ summary span { color:#a1a1a6; }
  *   attackPowerKw: 0,  // Actual applied attack power after physical equipment caps.
  *   queuedPulses: 0,   // Requests waiting for the next physical model sample.
  *   attackHeld: false, // True only while the user is holding an attack on this bus.
+ *   attackLatched: false, // Continuous mode is enabled for this bus until stopped.
  *   pulseId: null,     // Change for EVERY applied pulse, even in the same step.
  *   phase: 0           // Optional simulation step. Recorded, not invented motion.
  * })
@@ -1154,7 +1170,8 @@ summary span { color:#a1a1a6; }
     const attack = equipment.append('g').attr('class', 'pe-attack-badge').attr('transform', 'translate(13 -16)').attr('display', 'none');
     attack.append('rect').attr('x', -10).attr('y', -10).attr('width', 20).attr('height', 20).attr('rx', 10);
     path(attack, 'pe-attack-bolt', 'M1.5-7L-5 1.1H-1L-2.2 6.8L5.3-2H1.1L3.4-7Z');
-    attack.append('text').attr('x', 10).attr('y', .4).attr('text-anchor', 'start').attr('dominant-baseline', 'middle');
+    attack.append('text').attr('class', 'pe-attack-power').attr('x', 10).attr('y', .4).attr('text-anchor', 'start').attr('dominant-baseline', 'middle');
+    attack.append('text').attr('class', 'pe-attack-status').attr('x', 10).attr('y', 12).attr('text-anchor', 'start').attr('display', 'none').text('CONTINUOUS');
     attack.append('title');
     return equipment;
   }
@@ -1180,7 +1197,9 @@ summary span { color:#a1a1a6; }
     const activePulse = attackable && Boolean(data.activePulse);
     const queuedPulses = attackable ? Math.max(0, Math.floor(finite(data.queuedPulses, 0))) : 0;
     const attackHeld = attackable && Boolean(data.attackHeld);
-    const attacked = activePulse || queuedPulses > 0 || attackHeld;
+    const attackLatched = attackable && Boolean(data.attackLatched);
+    const sustained = attackHeld || attackLatched;
+    const attacked = activePulse || queuedPulses > 0 || sustained;
     const hasAttackPower = data.attackPowerKw !== null && data.attackPowerKw !== undefined && Number.isFinite(Number(data.attackPowerKw));
     const attackPowerKw = hasAttackPower ? Math.abs(Number(data.attackPowerKw)) : 0;
     const reference = finite(data.referenceVoltage, 1);
@@ -1189,7 +1208,7 @@ summary span { color:#a1a1a6; }
     equipment.attr('data-voltage', voltage).attr('data-control', input)
       .attr('data-phase', finite(data.phase, 0)).attr('data-pulse-active', String(activePulse))
       .classed('pe-selected', Boolean(data.selected)).classed('pe-pulse-active', activePulse)
-      .classed('pe-attacked', attacked).classed('pe-pulse-queued', queuedPulses > 0).classed('pe-attack-held', attackHeld)
+      .classed('pe-attacked', attacked).classed('pe-pulse-queued', queuedPulses > 0).classed('pe-attack-held', attackHeld).classed('pe-attack-latched', attackLatched)
       .style('--pe-voltage-color', voltageColor).style('--pe-voltage-opacity', .04 + stress * .2)
       .style('--pe-window-opacity', .35 + .65 * clamp((voltage - .9) / .1));
     equipment.select('.pe-voltage-wash').attr('r', 15 + stress * 5);
@@ -1201,23 +1220,32 @@ summary span { color:#a1a1a6; }
     equipment.select('.pe-control-arrow').attr('transform', input < 0 ? 'rotate(180 0 -4.4)' : null).attr('opacity', effort > .01 ? .85 : .2);
     // A badge reports the physical power, never an event count or requested sum.
     // Pending requests have no applied magnitude until the next model sample.
-    const label = activePulse && hasAttackPower ? `${Math.round(attackPowerKw)} kW` : queuedPulses > 0 ? 'Pending' : attackHeld ? 'Held' : '';
+    const role = equipment.attr('data-equipment');
+    const powerKind = role === 'Solar' ? 'PV loss' : role === 'Battery' ? 'Charge' : 'Load';
+    const label = activePulse && hasAttackPower ? `${powerKind} ${role === 'Solar' ? '' : '+'}${Math.round(attackPowerKw)} kW` : queuedPulses > 0 ? 'Pending' : sustained ? 'Starting' : '';
     const badge = equipment.select('.pe-attack-badge').attr('display', attacked ? null : 'none')
       .attr('data-applied-power-kw', activePulse && hasAttackPower ? attackPowerKw : null)
-      .attr('data-attack-held', String(attackHeld));
-    badge.select('rect').attr('width', label ? 27 + label.length * 5.7 : 20);
-    badge.select('text').attr('display', label ? null : 'none').text(label);
-    badge.select('title').text(activePulse && hasAttackPower ? `${Math.round(attackPowerKw)} kW applied disturbance${attackHeld ? '. Continuing while held' : ''}` : queuedPulses > 0 ? 'Disturbance pending the next sample' : attackHeld ? 'Continuous attack while held' : 'Active disturbance');
-    // The one pulse token belongs to the host DOM node, not a mutable model object.
+      .attr('data-attack-held', String(attackHeld)).attr('data-attack-latched', String(attackLatched));
+    const status = attackLatched ? 'CONTINUOUS' : attackHeld ? 'WHILE HELD' : '';
+    const labelWidth = label ? 27 + label.length * 5.7 : 20;
+    const statusWidth = status ? 27 + status.length * 4.5 : 20;
+    badge.select('rect').attr('width', Math.max(labelWidth, statusWidth)).attr('height', status ? 32 : 20).attr('rx', status ? 8 : 10);
+    badge.select('.pe-attack-power').attr('display', label ? null : 'none').text(label);
+    badge.select('.pe-attack-status').attr('display', status ? null : 'none').text(status);
+    const continuation = attackLatched ? '. Continuing until stopped' : attackHeld ? '. Continuing while held' : '';
+    badge.select('title').text(activePulse && hasAttackPower ? `${powerKind} of ${Math.round(attackPowerKw)} kW applied after equipment limits${continuation}` : queuedPulses > 0 ? `Disturbance pending the next sample${continuation}` : sustained ? `Attack starting${continuation}` : 'Active disturbance');
+    // Keep the initial impact burst, then let the sustained halo animate freely.
+    // Individual pulse requests still restart the burst when their token changes.
     const node = equipment.node();
-    if (attackable && data.pulseId !== undefined && data.pulseId !== null && node.__pePulseId !== data.pulseId) {
-      node.__pePulseId = data.pulseId;
-      flash(equipment);
-    }
-    if (!attackable || data.pulseId === null) {
+    const hasPulseId = data.pulseId !== undefined && data.pulseId !== null;
+    const pulseChanged = hasPulseId && node.__pePulseId !== data.pulseId;
+    if (attackable && ((sustained && !node.__peAttackSustained) || (pulseChanged && !sustained))) flash(equipment);
+    if (hasPulseId) node.__pePulseId = data.pulseId;
+    if (!attackable || (data.pulseId === null && !sustained)) {
       node.__pePulseId = null;
       equipment.select('.pe-event-layer').selectAll('*').remove();
     }
+    node.__peAttackSustained = sustained;
     return equipment;
   }
 
@@ -1376,6 +1404,7 @@ summary span { color:#a1a1a6; }
   let snapshot = simulation.snapshot();
   const topology = new TopologyTimeline(snapshot);
   let historyIndex = null;
+  let visualTopologyEvent = null;
   let journal = [];
   let fitSteps = 0;
   let restored = false;
@@ -1383,10 +1412,10 @@ summary span { color:#a1a1a6; }
   let matrixReference = null;
   let lastPulse = null;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const duration = () => reducedMotion ? 0 : Math.min(900, 820 / Number($('speed').value || 8));
+  const duration = () => reducedMotion ? 0 : 1000 / Number($('speed').value || 16);
   function animate(selection, name = 'update') {
     selection.interrupt(name);
-    return reducedMotion ? selection : selection.transition(name).duration(duration()).ease(d3.easeCubicOut);
+    return reducedMotion ? selection : selection.transition(name).duration(duration()).ease(d3.easeLinear);
   }
   function updateAxis(selection,axis) {
     // Axis transitions also live on ticks and text. Cancel descendants before
@@ -1453,13 +1482,34 @@ summary span { color:#a1a1a6; }
   }
   function advanceSample() {
     const next=simulation.step();
-    topology.observe(next);
+    const event=topology.observe(next);
+    if(event && historyIndex===null) visualTopologyEvent=event;
     return next;
   }
   function topologyFrame() {
     const event=historyIndex===null ? topology.latest : historyIndex ? topology.events[historyIndex-1] : null;
     const links=historyIndex===null ? snapshot.recommendations : topology.at(historyIndex);
     return {event,links,reference:new Set((event?.before || links).map(recommendationKey))};
+  }
+  function reviewTopology(index) {
+    historyIndex=index;visualTopologyEvent=index ? topology.events[index-1] : null;
+    if(index!==null) $('matrix-view').value='links';
+    drawNetwork();drawMatrix();highlightTopology();
+  }
+  function highlightTopology() {
+    if(!visualTopologyEvent) return;
+    const event=visualTopologyEvent;visualTopologyEvent=null;
+    if(reducedMotion) return;
+    const receivers=new Set([...event.added,...event.removed].map(e=>e.to));
+    const edges=new Set([...event.added,...event.removed].map(recommendationKey));
+    const changed=d3.select(root).selectAll('.matrix-cell, .recommended path, .bus-node').filter(function(){
+      if(this.dataset.bus) return receivers.has(Number(this.dataset.bus));
+      const to=Number(this.dataset.receiver || this.dataset.to),from=Number(this.dataset.source || this.dataset.from);
+      return edges.has(to+','+from);
+    });
+    changed.classed('pr-link-flash',false);
+    changed.each(function(){void this.getBoundingClientRect();});
+    changed.classed('pr-link-flash',true);
   }
   function drawTopologyHistory() {
     const total=topology.cumulative.transitions,changing=$('matrix-view').value==='change';
@@ -1468,6 +1518,17 @@ summary span { color:#a1a1a6; }
     control.max=String(total);control.value=String(index);control.disabled=changing || total===0;
     control.setAttribute('aria-valuetext',index ? 'Update '+index+' at second '+topology.events[index-1].t : 'Initial topology');
     $('history-count').textContent=total+' link update'+(total===1?'':'s');
+    const gain=100*(snapshot.predictionDiagnostics?.relativeGainChange || 0);
+    $('topology-status').textContent=historyIndex!==null?'Viewing saved topology':snapshot.phase==='deployment'?'Deployed links fixed':topology.latest && snapshot.t-topology.latest.t<8?'Link changed at '+topology.latest.t+' s':'Connectivity unchanged';
+    $('topology-gain').textContent='Weights changed '+d3.format('.3~g')(gain)+'%';
+    const cards=d3.select($('topology-events')).selectAll('button').data(topology.events.slice(-3),e=>e.index).join(enter=>{
+      const b=enter.append('button').attr('type','button');b.append('span');b.append('strong');return b;
+    }).attr('aria-pressed',e=>String(historyIndex===e.index || historyIndex===null && e.index===total))
+      .attr('title',e=>'At '+e.t+' seconds. '+e.removed.map(x=>'Removed '+x.from+' → '+x.to).join('. ')+'. '+e.added.map(x=>'Added '+x.from+' → '+x.to).join('. '))
+      .on('click',(_event,e)=>reviewTopology(e.index));
+    cards.select('span').text(e=>e.t+' s · '+(new Set(e.added.map(x=>x.to)).size===1?'Inverter '+e.added[0].to:e.added.length+' sources'));
+    cards.select('strong').text(e=>e.added.length===1 && e.removed.length===1?'Source '+e.removed[0].from+' → '+e.added[0].from:e.added.length+' added · '+e.removed.length+' removed');
+    $('topology-events').hidden=total===0;
     $('history-live').setAttribute('aria-pressed',String(historyIndex===null));
     $('history-live').textContent=historyIndex===null ? 'Latest' : 'Show latest';
     $('history-live').disabled=changing;
@@ -1501,7 +1562,7 @@ summary span { color:#a1a1a6; }
     const events=snapshot.eventLog || [];
     const state = {
       modelContent: { scenario:'24 bus LinDistFlow voltage regulation', variant:'Completed response learning and separate sparse deployment', phase:snapshot.phase, step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
-      privateContent: { version:8, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, view:$('view').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, speed:$('speed').value, allLinks:$('all-links').checked }
+      privateContent: { version:9, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, view:$('view').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, speed:$('speed').value, allLinks:$('all-links').checked }
     };
     window.openai.setWidgetState(state).catch(() => {});
   }
@@ -1532,14 +1593,15 @@ summary span { color:#a1a1a6; }
   }
   function hydrate(saved) {
     const data=saved?.privateContent;
-    if(restored||!data||![7,8].includes(data.version)) return;
+    if(restored||!data||![7,8,9].includes(data.version)) return;
     restored=true;
     selectedBus=Math.max(1,Math.min(24,Math.floor(Number(data.selectedBus)||7)));
     $('bus').value=String(selectedBus);
-    $('speed').value=data.version===8 && ['2','4','8','16'].includes(data.speed)?data.speed:'8';
+    $('speed').value=data.version===9 && ['2','4','8','16','32'].includes(data.speed)?data.speed:'16';
+    $('attack-mode').value=data.version===9 && data.attackMode==='pulse'?'pulse':'continuous';
     if(['50','100','150'].includes(data.pulseStrength)) $('strength').value=data.pulseStrength;
     $('all-links').checked=!!data.allLinks;
-    $('matrix-view').value=data.version===8 && data.matrixView==='change'?'change':'links';
+    $('matrix-view').value=data.version>=8 && data.matrixView==='change'?'change':'links';
     const preset=['reliable','uniform','mixed'].includes(data.preset)?data.preset:'mixed';
     if(data.phase==='deployment' && data.discoveryRecord) {
       simulation=new PowerDemo.Simulation(data.discoveryRecord.options || {preset});
@@ -1611,9 +1673,9 @@ summary span { color:#a1a1a6; }
     snapshot = simulation.snapshot(); journal = []; fitSteps = 0; pin = null; lastPulse = null;
     if(snapshot.phase==='discovery') topology.reset(snapshot);
     else topology.observe(snapshot);
-    historyIndex=null;
+    historyIndex=null;visualTopologyEvent=null;
     captureMatrixReference();
-    actionNote('Hold a bus for continuous attacks');
+    actionNote(attackInstruction());
   }
   function toggleRun() {
     if (comparing) return;
@@ -1681,9 +1743,10 @@ summary span { color:#a1a1a6; }
   });
   $('speed').addEventListener('change', () => { if (playing) { clearTimeout(timer); nextTickAt=0; schedule(); } save(); });
   $('strength').addEventListener('change', () => { drawNetwork(); save(); });
+  $('attack-mode').addEventListener('change',()=>{releaseAttack();renderControls();drawNetwork();save();});
   if ($('matrix-view')) $('matrix-view').addEventListener('change',()=>{historyIndex=null;drawNetwork();drawMatrix();save();});
-  $('topology-history').addEventListener('input',()=>{historyIndex=Number($('topology-history').value);drawNetwork();drawMatrix();});
-  $('history-live').addEventListener('click',()=>{historyIndex=null;drawNetwork();drawMatrix();});
+  $('topology-history').addEventListener('input',()=>reviewTopology(Number($('topology-history').value)));
+  $('history-live').addEventListener('click',()=>reviewTopology(null));
   if ($('view')) $('view').addEventListener('change', () => { renderLearningView(); drawConvergence(); drawCost(); save(); });
   $('bus').addEventListener('change', () => selectBus(Number($('bus').value)));
   $('all-links').addEventListener('change', () => { drawNetwork(); save(); });
@@ -1721,7 +1784,7 @@ summary span { color:#a1a1a6; }
     if(!playing && !comparing) {
       playing=true; nextTickAt=0; schedule();
     }
-    actionNote(heldAttack?'Holding bus '+selectedBus+' · Release to stop adding pulses':'Pulse queued · Hold a bus for continuous attacks');
+    actionNote(heldAttack?(heldAttack.latched?'Continuous attack · Bus ':'Holding bus ')+selectedBus:'Pulse queued');
     // Queuing an event must not restart every chart transition.
     if(!repeated) { renderControls(); drawNetwork(); save(); }
   }
@@ -1734,44 +1797,65 @@ summary span { color:#a1a1a6; }
     announce(message); actionNote(message);
     render(); save();
   }
-  function beginAttack(bus=selectedBus,owner=null) {
+  function continuousMode() { return $('attack-mode').value==='continuous'; }
+  function attackInstruction() { return continuousMode()?'Click a bus to start · Click again to stop':'Click for a pulse · Hold to repeat'; }
+  function finishAttack() { releaseAttack();renderControls();drawNetwork();save(); }
+  function activateAttack(bus,owner) {
+    if(continuousMode()) {
+      if(heldAttack?.latched && heldAttack.bus===bus) finishAttack();
+      else beginAttack(bus,null,true);
+    } else beginAttack(bus,owner);
+  }
+  function beginAttack(bus=selectedBus,owner=null,latched=false) {
     if(!canAttack(bus)) return;
     releaseAttack();
-    heldAttack={bus,lastQueuedAt:-1,owner}; $('pulse').dataset.holding='true';
+    heldAttack={bus,lastQueuedAt:-1,owner,latched}; $('pulse').dataset.holding='true';
     if(owner) owner.dataset.holding='true';
     pulse(bus);
   }
   function bindAttackTarget(element,getBus) {
+    let pointerBus=null;
     element.addEventListener('pointerdown',event=>{
-      if(event.button!==0 || !canAttack(getBus())) return;
+      const bus=getBus();
+      if(event.button!==0 || !canAttack(bus)) return;
       event.preventDefault();event.stopPropagation();
-      element.setPointerCapture(event.pointerId);
-      beginAttack(getBus(),element);
+      pointerBus=bus;element.setPointerCapture(event.pointerId);
+      activateAttack(bus,element);
     });
-    for(const type of ['pointerup','pointercancel','lostpointercapture']) element.addEventListener(type,event=>{
+    element.addEventListener('pointerup',event=>{
+      event.stopPropagation();pointerBus=null;
+      if(heldAttack?.owner===element && !heldAttack.latched) finishAttack();
+    });
+    for(const type of ['pointercancel','lostpointercapture']) element.addEventListener(type,event=>{
       event.stopPropagation();
-      if(heldAttack?.owner===element) {releaseAttack();renderControls();drawNetwork();save();}
+      if(pointerBus!==null && heldAttack?.bus===pointerBus) finishAttack();
+      pointerBus=null;
     });
     element.addEventListener('click',event=>{
       event.preventDefault();event.stopPropagation();
-      // Pointerdown already handled the activation. Detail zero covers assistive clicks.
-      if(event.detail===0 && !heldAttack) pulse(getBus());
+      if(event.detail===0) {
+        if(continuousMode()) activateAttack(getBus(),element);
+        else if(!heldAttack) pulse(getBus());
+      }
     });
     element.addEventListener('blur',()=>{
-      if(heldAttack?.owner===element) {releaseAttack();renderControls();drawNetwork();save();}
+      if(heldAttack?.owner===element && !heldAttack.latched) finishAttack();
     });
     element.addEventListener('keydown',event=>{
       if(event.key==='Enter'||event.key===' ') {
         event.preventDefault();event.stopPropagation();
-        if(!event.repeat) beginAttack(getBus(),element);
+        if(!event.repeat) activateAttack(getBus(),element);
       }
     });
     element.addEventListener('keyup',event=>{
-      if(event.key==='Enter'||event.key===' ') {event.preventDefault();event.stopPropagation();releaseAttack();renderControls();drawNetwork();save();}
+      if(event.key==='Enter'||event.key===' ') {
+        event.preventDefault();event.stopPropagation();
+        if(heldAttack?.owner===element && !heldAttack.latched) finishAttack();
+      }
     });
   }
-  bindAttackTarget($('pulse'),()=>selectedBus);
-  document.addEventListener('keyup',event=>{if(event.key.toLowerCase()==='d') releaseAttack();});
+  bindAttackTarget($('pulse'),()=>heldAttack?.latched ? heldAttack.bus : selectedBus);
+  document.addEventListener('keyup',event=>{if(event.key.toLowerCase()==='d' && !heldAttack?.latched && !heldAttack?.owner) finishAttack();});
   window.addEventListener('blur',releaseAttack);
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden) { stop(); renderControls(); save(); }
@@ -1834,12 +1918,15 @@ summary span { color:#a1a1a6; }
     $('restart').disabled=comparing;
     $('run').setAttribute('aria-label',playing?'Pause simulation':frozen?'Run frozen fit':'Run simulation');
     $('run').setAttribute('aria-pressed',String(playing));
-    if ($('pulse-label')) $('pulse-label').textContent=selectedBus===1?'Fixed substation':'Attack bus '+selectedBus;
+    if ($('pulse-label')) $('pulse-label').textContent=heldAttack?.latched?'Stop attack':selectedBus===1?'Fixed substation':'Attack bus '+selectedBus;
+    $('pulse').setAttribute('aria-pressed',String(!!heldAttack));
+    $('pulse').title=heldAttack?.latched?'Stop the continuous attack at bus '+heldAttack.bus:attackInstruction();
+    $('attack-hint').textContent=heldAttack?.latched?'Continuous · Bus '+heldAttack.bus:continuousMode()?'Click to start or stop':'Click or hold';
     $('step').textContent=frozen?'100 fit steps':'Step';
     $('step').disabled=comparing || snapshot.mode==='converged';
     $('freeze').textContent=frozen?'Return to simulation':'Inspect fixed data';
     $('freeze').disabled=comparing || deployed || !snapshot.canFreeze;
-    $('pulse').disabled=!canAttack(selectedBus); $('strength').disabled=false; $('fault').disabled=!canAttack(selectedBus);
+    $('pulse').disabled=!heldAttack && !canAttack(selectedBus); $('strength').disabled=false; $('fault').disabled=!canAttack(selectedBus);
     $('fault').textContent=(snapshot.faults.includes(selectedBus)?'Repair':'Corrupt')+' forecast';
     $('fit-title').textContent=frozen?'Fixed data diagnostic':deployed?'Deployed prediction support':'Completed response learning';
     $('fit-detail').textContent=frozen?'Relative error '+d3.format('.2~g')(100*(snapshot.fitError || 0))+'%':deployed?'Prediction links stay fixed in this trial':completedRows+' completed responses · '+(snapshot.learning?.delay || 0)+' second completion delay';
@@ -1857,7 +1944,7 @@ summary span { color:#a1a1a6; }
     const width = Math.max(240, el.getBoundingClientRect().width);
     const height = 220;
     const svg = d3.select(el).attr('viewBox', '0 0 ' + width + ' ' + height).attr('height', height)
-      .attr('role','group').attr('aria-label','Radial power feeder. Hold a bus for continuous load, solar or charging disturbances.');
+      .attr('role','group').attr('aria-label','Radial power feeder. '+attackInstruction()+'. Disturbances change load, solar generation or battery charging.');
     const point = bus => [25 + positions[bus - 1][0] * (width - 54), 26 + positions[bus - 1][1] * (height - 54)];
     if (svg.select('defs').empty()) {
       svg.append('title').text('Radial electrical feeder and prediction source links');
@@ -1911,7 +1998,7 @@ summary span { color:#a1a1a6; }
       return g;
     }).attr('transform',bus => 'translate('+point(bus).join(',')+')')
       .attr('data-bus',bus => bus).attr('data-role',bus => busRole(bus))
-      .attr('aria-label',bus => bus===1 ? 'Fixed substation at bus 1' : 'Hold to attack bus '+bus)
+      .attr('aria-label',bus => bus===1 ? 'Fixed substation at bus 1' : (heldAttack?.latched && heldAttack.bus===bus?'Stop attack at bus ':continuousMode()?'Toggle continuous attack at bus ':'Hold to attack bus ')+bus)
       .attr('aria-description',bus => busRole(bus)+', '+busVoltage(bus).toFixed(4)+' pu'+(appliedPulse(bus)?', '+appliedPulseLabel(bus):pulseStatus(bus).queued?', pulse pending':''))
       .attr('aria-disabled',bus => String(!canAttack(bus)))
       .style('cursor',bus=>canAttack(bus) ? 'pointer' : 'default')
@@ -1929,7 +2016,7 @@ summary span { color:#a1a1a6; }
       PowerEquipment.update(d3.select(this),{
         voltage:busVoltage(bus),referenceVoltage:referenceVoltage(bus),input:reactivePower(bus),
         inputScale:PowerDemo.constants.busProfiles?.[bus-1]?.inverterKvar || 100,selected:bus===selectedBus,activePulse:status.active,activePulses:status.activeCount,queuedPulses:status.queued,
-        pulseId:status.id,phase:snapshot.t,attackPowerKw:appliedPulse(bus)?.applied,attackHeld:heldAttack?.bus===bus
+        pulseId:status.id,phase:snapshot.t,attackPowerKw:appliedPulse(bus)?.applied,attackHeld:heldAttack?.bus===bus,attackLatched:heldAttack?.bus===bus && heldAttack.latched
       });
       const badge=d3.select(this).select('.pe-attack-badge');
       const badgeWidth=Number(badge.select('rect').attr('width')) || 60;
@@ -1938,14 +2025,15 @@ summary span { color:#a1a1a6; }
     nodes.select('.bus-number').attr('text-anchor','middle').attr('x',0).attr('y',27)
       .style('fill','var(--muted-foreground)').style('font-size','9px').text(bus=>bus);
     nodes.select('.fault-mark').attr('x',17).attr('y',-12).text(bus=>snapshot.faults.includes(bus)?'×':'');
-    nodes.select('title').text(bus=>busRole(bus)+' · Bus '+bus+' · '+busVoltage(bus).toFixed(4)+' pu · '+powerDescription(bus)+(hasInverter(bus)?' · Q '+reactivePower(bus).toFixed(0)+' kvar':'')+'. '+(bus===1?'Fixed voltage substation.':disturbanceName(bus)+' '+pulseMagnitude($('strength').value)+' requested. Hold for continuous attacks. Release to stop adding pulses.'));
+    nodes.select('title').text(bus=>busRole(bus)+' · Bus '+bus+' · '+busVoltage(bus).toFixed(4)+' pu · '+powerDescription(bus)+(hasInverter(bus)?' · Q '+reactivePower(bus).toFixed(0)+' kvar':'')+'. '+(bus===1?'Fixed voltage substation.':disturbanceName(bus)+' '+pulseMagnitude($('strength').value)+' requested. '+attackInstruction()+'.'));
     showBusDetail(selectedBus);
     const voltages=d3.range(1,25).map(bus=>busVoltage(bus));
     const low=Math.min(...voltages), high=Math.max(...voltages);
     const inRange=low>=.95 && high<=1.05;
     const nearNominal=voltages.every((voltage,index)=>Math.abs(voltage-referenceVoltage(index+1))<.001);
-    if(heldAttack) actionNote('Holding bus '+heldAttack.bus+' · Release to stop adding pulses');
-    else if (lastPulse && snapshot.t>lastPulse.t) actionNote(pulseStatus(lastPulse.bus).active ? appliedPulseLabel(lastPulse.bus) : nearNominal ? 'Near nominal · Hold a bus to attack' : 'Restoring the nominal profile');
+    if(heldAttack) actionNote((heldAttack.latched?'Continuous · ':'Holding · ')+appliedPulseLabel(heldAttack.bus));
+    else if (lastPulse && snapshot.t>lastPulse.t) actionNote(pulseStatus(lastPulse.bus).active ? appliedPulseLabel(lastPulse.bus) : nearNominal ? attackInstruction() : 'Restoring the nominal profile');
+    else actionNote(attackInstruction());
     if ($('voltage-range')) $('voltage-range').textContent=low.toFixed(3)+' to '+high.toFixed(3)+' pu';
     if ($('voltage-status')) {
       $('voltage-status').title=inRange ? 'Within illustrative band' : 'Restoring voltage';
@@ -1959,7 +2047,7 @@ summary span { color:#a1a1a6; }
     const status=pulseStatus(bus);
     $('bus-detail').textContent='Bus '+bus+' · '+busVoltage(bus).toFixed(4)+' pu · '+powerDescription(bus)
       +(hasInverter(bus)?' · Q '+reactivePower(bus).toFixed(0)+' kvar':'')
-      +(status.queued?' · '+status.queued+' queued':hovered && canAttack(bus)?' · Hold to keep attacking':'');
+      +(status.queued?' · '+status.queued+' queued':hovered && canAttack(bus)?(continuousMode()?' · Click to toggle attack':' · Hold to keep attacking'):'');
   }
 
   function drawMatrix() {
@@ -2108,7 +2196,7 @@ summary span { color:#a1a1a6; }
     const dots = chart.marks.selectAll('circle.latest-value').data(showCurrent && latest ? paintOrder : [],item => item.key).join('circle')
       .attr('class','latest-value').attr('r',item => item.key === 'online' ? 2.7 : 2)
       .attr('fill',item => item.color).attr('stroke','var(--background)').attr('stroke-width',.8).order();
-    if(latest) dots.interrupt().interrupt('update').attr('cx',chart.x(latest.x)).attr('cy',item => chart.y(latest[item.key]));
+    if(latest) animate(dots).attr('cx',chart.x(latest.x)).attr('cy',item => chart.y(latest[item.key]));
   }
 
   function hover(chart,observations,items,xLabel) {
@@ -2305,12 +2393,12 @@ summary span { color:#a1a1a6; }
   }
   function render() {
     $('tooltip').style.display='none'; pin=null;
-    renderControls(); drawNetwork(); drawMatrix(); drawCost(); drawStage(); drawVoltage(); drawConvergence();
+    renderControls(); drawNetwork(); drawMatrix(); drawCost(); drawStage(); drawVoltage(); drawConvergence();highlightTopology();
   }
   announce('Ready');
   hydrate(window.openai?.widgetState);
   if (!matrixReference) captureMatrixReference();
-  actionNote(snapshot.pendingPulses?.length ? 'Pulse queued · Run or Step' : 'Hold a bus for continuous attacks');
+  actionNote(snapshot.pendingPulses?.length ? 'Pulse queued · Run or Step' : attackInstruction());
   window.addEventListener('openai:set_globals',e=>{if(!playing&&!restored&&!journal.length){hydrate(e.detail?.globals?.widgetState);render();}});
   new ResizeObserver(()=>render()).observe(root);
   render();

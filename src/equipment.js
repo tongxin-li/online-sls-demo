@@ -14,6 +14,7 @@
  *   attackPowerKw: 0,  // Actual applied attack power after physical equipment caps.
  *   queuedPulses: 0,   // Requests waiting for the next physical model sample.
  *   attackHeld: false, // True only while the user is holding an attack on this bus.
+ *   attackLatched: false, // Continuous mode is enabled for this bus until stopped.
  *   pulseId: null,     // Change for EVERY applied pulse, even in the same step.
  *   phase: 0           // Optional simulation step. Recorded, not invented motion.
  * })
@@ -91,7 +92,8 @@
     const attack = equipment.append('g').attr('class', 'pe-attack-badge').attr('transform', 'translate(13 -16)').attr('display', 'none');
     attack.append('rect').attr('x', -10).attr('y', -10).attr('width', 20).attr('height', 20).attr('rx', 10);
     path(attack, 'pe-attack-bolt', 'M1.5-7L-5 1.1H-1L-2.2 6.8L5.3-2H1.1L3.4-7Z');
-    attack.append('text').attr('x', 10).attr('y', .4).attr('text-anchor', 'start').attr('dominant-baseline', 'middle');
+    attack.append('text').attr('class', 'pe-attack-power').attr('x', 10).attr('y', .4).attr('text-anchor', 'start').attr('dominant-baseline', 'middle');
+    attack.append('text').attr('class', 'pe-attack-status').attr('x', 10).attr('y', 12).attr('text-anchor', 'start').attr('display', 'none').text('CONTINUOUS');
     attack.append('title');
     return equipment;
   }
@@ -117,7 +119,9 @@
     const activePulse = attackable && Boolean(data.activePulse);
     const queuedPulses = attackable ? Math.max(0, Math.floor(finite(data.queuedPulses, 0))) : 0;
     const attackHeld = attackable && Boolean(data.attackHeld);
-    const attacked = activePulse || queuedPulses > 0 || attackHeld;
+    const attackLatched = attackable && Boolean(data.attackLatched);
+    const sustained = attackHeld || attackLatched;
+    const attacked = activePulse || queuedPulses > 0 || sustained;
     const hasAttackPower = data.attackPowerKw !== null && data.attackPowerKw !== undefined && Number.isFinite(Number(data.attackPowerKw));
     const attackPowerKw = hasAttackPower ? Math.abs(Number(data.attackPowerKw)) : 0;
     const reference = finite(data.referenceVoltage, 1);
@@ -126,7 +130,7 @@
     equipment.attr('data-voltage', voltage).attr('data-control', input)
       .attr('data-phase', finite(data.phase, 0)).attr('data-pulse-active', String(activePulse))
       .classed('pe-selected', Boolean(data.selected)).classed('pe-pulse-active', activePulse)
-      .classed('pe-attacked', attacked).classed('pe-pulse-queued', queuedPulses > 0).classed('pe-attack-held', attackHeld)
+      .classed('pe-attacked', attacked).classed('pe-pulse-queued', queuedPulses > 0).classed('pe-attack-held', attackHeld).classed('pe-attack-latched', attackLatched)
       .style('--pe-voltage-color', voltageColor).style('--pe-voltage-opacity', .04 + stress * .2)
       .style('--pe-window-opacity', .35 + .65 * clamp((voltage - .9) / .1));
     equipment.select('.pe-voltage-wash').attr('r', 15 + stress * 5);
@@ -138,23 +142,32 @@
     equipment.select('.pe-control-arrow').attr('transform', input < 0 ? 'rotate(180 0 -4.4)' : null).attr('opacity', effort > .01 ? .85 : .2);
     // A badge reports the physical power, never an event count or requested sum.
     // Pending requests have no applied magnitude until the next model sample.
-    const label = activePulse && hasAttackPower ? `${Math.round(attackPowerKw)} kW` : queuedPulses > 0 ? 'Pending' : attackHeld ? 'Held' : '';
+    const role = equipment.attr('data-equipment');
+    const powerKind = role === 'Solar' ? 'PV loss' : role === 'Battery' ? 'Charge' : 'Load';
+    const label = activePulse && hasAttackPower ? `${powerKind} ${role === 'Solar' ? '' : '+'}${Math.round(attackPowerKw)} kW` : queuedPulses > 0 ? 'Pending' : sustained ? 'Starting' : '';
     const badge = equipment.select('.pe-attack-badge').attr('display', attacked ? null : 'none')
       .attr('data-applied-power-kw', activePulse && hasAttackPower ? attackPowerKw : null)
-      .attr('data-attack-held', String(attackHeld));
-    badge.select('rect').attr('width', label ? 27 + label.length * 5.7 : 20);
-    badge.select('text').attr('display', label ? null : 'none').text(label);
-    badge.select('title').text(activePulse && hasAttackPower ? `${Math.round(attackPowerKw)} kW applied disturbance${attackHeld ? '. Continuing while held' : ''}` : queuedPulses > 0 ? 'Disturbance pending the next sample' : attackHeld ? 'Continuous attack while held' : 'Active disturbance');
-    // The one pulse token belongs to the host DOM node, not a mutable model object.
+      .attr('data-attack-held', String(attackHeld)).attr('data-attack-latched', String(attackLatched));
+    const status = attackLatched ? 'CONTINUOUS' : attackHeld ? 'WHILE HELD' : '';
+    const labelWidth = label ? 27 + label.length * 5.7 : 20;
+    const statusWidth = status ? 27 + status.length * 4.5 : 20;
+    badge.select('rect').attr('width', Math.max(labelWidth, statusWidth)).attr('height', status ? 32 : 20).attr('rx', status ? 8 : 10);
+    badge.select('.pe-attack-power').attr('display', label ? null : 'none').text(label);
+    badge.select('.pe-attack-status').attr('display', status ? null : 'none').text(status);
+    const continuation = attackLatched ? '. Continuing until stopped' : attackHeld ? '. Continuing while held' : '';
+    badge.select('title').text(activePulse && hasAttackPower ? `${powerKind} of ${Math.round(attackPowerKw)} kW applied after equipment limits${continuation}` : queuedPulses > 0 ? `Disturbance pending the next sample${continuation}` : sustained ? `Attack starting${continuation}` : 'Active disturbance');
+    // Keep the initial impact burst, then let the sustained halo animate freely.
+    // Individual pulse requests still restart the burst when their token changes.
     const node = equipment.node();
-    if (attackable && data.pulseId !== undefined && data.pulseId !== null && node.__pePulseId !== data.pulseId) {
-      node.__pePulseId = data.pulseId;
-      flash(equipment);
-    }
-    if (!attackable || data.pulseId === null) {
+    const hasPulseId = data.pulseId !== undefined && data.pulseId !== null;
+    const pulseChanged = hasPulseId && node.__pePulseId !== data.pulseId;
+    if (attackable && ((sustained && !node.__peAttackSustained) || (pulseChanged && !sustained))) flash(equipment);
+    if (hasPulseId) node.__pePulseId = data.pulseId;
+    if (!attackable || (data.pulseId === null && !sustained)) {
       node.__pePulseId = null;
       equipment.select('.pe-event-layer').selectAll('*').remove();
     }
+    node.__peAttackSustained = sustained;
     return equipment;
   }
 

@@ -5,7 +5,7 @@
 .pe-root path,.pe-root rect,.pe-root circle { vector-effect:non-scaling-stroke; }
 .pe-attack-halo { fill:#ff9f0a; fill-opacity:0; stroke:#ef7b0b; stroke-opacity:0; stroke-width:1; transition:fill-opacity .18s,stroke-opacity .18s; }
 .pe-attacked .pe-attack-halo { fill-opacity:.14; stroke-opacity:.24; }
-.pe-attack-held .pe-attack-halo { fill-opacity:.22; stroke-opacity:.8; stroke-width:2; stroke-dasharray:3 3; }
+.pe-attack-held .pe-attack-halo,.pe-attack-latched .pe-attack-halo { fill-opacity:.22; stroke-opacity:.8; stroke-width:2; transform-box:fill-box; transform-origin:center; animation:pe-continuous-halo 1.6s ease-in-out infinite; }
 .pe-voltage-wash { fill:var(--pe-voltage-color); opacity:var(--pe-voltage-opacity); transition:r .4s,opacity .4s,fill .4s; }
 .pe-disc { fill:var(--pe-paper); stroke:#dce6de; stroke-width:1; }
 .pe-voltage-ring { fill:none; stroke:var(--pe-voltage-color); stroke-opacity:.45; transition:stroke .4s,stroke-width .4s; }
@@ -52,12 +52,14 @@
 .pe-attack-badge rect { fill:#ec7609; stroke:#fff; stroke-width:1.5; }
 .pe-attack-bolt { fill:#fff; stroke:none; }
 .pe-attack-badge text { fill:#fff!important; font:650 10px var(--font-ui,-apple-system,BlinkMacSystemFont,sans-serif)!important; letter-spacing:0; }
+.pe-attack-badge .pe-attack-status { font-size:7px!important; font-weight:750!important; letter-spacing:.7px; fill:#fff2dd!important; }
 .pe-pulse-queued .pe-attack-badge rect { fill:#f38a0b; }
-.pe-attack-held .pe-attack-badge rect { fill:#d95e00; stroke-width:2; }
+.pe-attack-held .pe-attack-badge rect,.pe-attack-latched .pe-attack-badge rect { fill:#d95e00; stroke-width:2; }
 .pe-burst { pointer-events:none; }
 .pe-burst-ring { fill:#ff9f0a; fill-opacity:.1; stroke:#ed7d0d; stroke-width:2; transform-box:fill-box; transform-origin:center; animation:pe-ring 1.1s ease-out both; }
 .pe-burst-rays { fill:none; stroke:#f7981c; stroke-width:2; stroke-linecap:round; animation:pe-rays .75s ease-out both; }
 .pe-burst-bolt { fill:#ee7d09; stroke:#fff; stroke-width:1.8; stroke-linejoin:round; animation:pe-bolt .75s ease-out both; }
+@keyframes pe-continuous-halo { 0%,100% { transform:scale(.95); fill-opacity:.13; stroke-opacity:.5; } 50% { transform:scale(1.16); fill-opacity:.24; stroke-opacity:.95; } }
 @keyframes pe-ring { from { transform:scale(1); opacity:.95; } to { transform:scale(2.1); opacity:0; } }
 @keyframes pe-rays { 0% { opacity:0; } 15% { opacity:.95; } 100% { opacity:0; } }
 @keyframes pe-bolt { 0% { opacity:0; transform:translateY(-5px); } 15%,45% { opacity:1; transform:translateY(0); } 100% { opacity:0; transform:translateY(2px); } }

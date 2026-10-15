@@ -183,3 +183,16 @@ summary span { color:#a1a1a6; }
 .pr-topology-history button[aria-pressed='true'] { background:#edf5fe; }
 .pr-topology-history input:disabled,.pr-topology-history button:disabled { opacity:.4; cursor:default; }
 #pr-topology-note { min-height:28px; line-height:1.4; color:#60606a; }
+
+.pr-topology-status { display:flex; justify-content:space-between; gap:10px; font-size:10px; margin:4px 0 7px; color:var(--muted-foreground); }
+.pr-topology-status strong { font-weight:500; color:var(--foreground); }
+.pr-topology-events { display:flex; gap:6px; margin:0 0 6px; }
+.pr-topology-events button { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; text-align:left; padding:6px 9px; border:1px solid var(--border); border-radius:7px; background:#f7f9fb; color:var(--foreground); }
+.pr-topology-events button span { color:var(--muted-foreground); font-size:10px; }
+.pr-topology-events button strong { font-weight:550; font-size:12px; }
+.pr-topology-events button[aria-pressed='true'] { background:#eef7f4; border-color:#9bc7ba; }
+.pr-link-flash { animation:pr-link-arrival 1.6s ease-out; }
+@keyframes pr-link-arrival { 0%,30%,60% { filter:drop-shadow(0 0 4px #168b79); opacity:.35; } 15%,45%,100% { filter:drop-shadow(0 0 0 transparent); opacity:1; } }
+#pr-attack-mode { background:#fff6eb; color:#a34a00; }
+#pr-topology-note { min-height:14px; font-size:9px; }
+@media(max-width:1000px) { .pr-attack-hint { display:none; } }
