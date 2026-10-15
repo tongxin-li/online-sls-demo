@@ -14,7 +14,7 @@ body.research-site {
   --muted:#f5f5f7; --muted-foreground:#626269; --border:#e5e5e9; --popover:#fff;
   --viz-series-1:#0071e3; --viz-series-2:#ad6400; --viz-series-3:#687580; --viz-series-4:#9451b7;
   --matrix-added:#168b79; --matrix-removed:#cf8a2b; --attack:#c56c1b;
-  margin:0; min-width:320px; color:var(--foreground); background:#fff;
+  margin:0; min-width:280px; color:var(--foreground); background:#fff;
   font:14px/1.45 var(--font-ui); -webkit-font-smoothing:antialiased;
 }
 *,*::before,*::after { box-sizing:border-box; }
@@ -254,6 +254,25 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 #pr-matrix-detail { color:var(--foreground); line-height:1.5; }
 #pr-matrix-inspect-hint { margin:0 0 4px; }
 .matrix-cell:focus-visible { outline:none; stroke:var(--foreground); stroke-width:2; }
+
+/* Secondary controls stay compact with a mouse and comfortable to tap. */
+:focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
+@media(max-width:650px),(pointer:coarse) {
+  #pr-matrix-view,#pr-view,#pr-cost-metric { min-height:44px; padding:8px 10px; font-size:12px; }
+  .btn-fit,.btn-deploy { min-height:44px; padding:8px 12px; font-size:12px; }
+  .pr-topology-history { gap:8px; }
+  .pr-topology-history input { height:44px; }
+  .pr-topology-history button { min-height:44px; padding:8px 12px; font-size:12px; }
+  .pr-topology-events button { min-height:44px; }
+  .pr-legend button { min-height:44px; padding:8px 10px; border-radius:8px; font-size:12px; background:var(--muted); }
+  .pr-settings .form-check { min-height:44px; }
+  .pr-adaptation summary { min-height:44px; }
+}
+@media(max-width:650px) {
+  .pr-legend { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; width:100%; }
+  .pr-legend button { min-width:0; justify-content:flex-start; text-align:left; }
+  .pr-bottomline { gap:10px; }
+}
 
 /* Artwork stays decorative. The enclosing bus handles hit area and badge input. */
 .pe-host { -webkit-user-select:none; user-select:none; touch-action:manipulation; }
@@ -2003,7 +2022,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     const key = e.key.toLowerCase();
     if (key === 'd') { e.preventDefault(); beginAttack(); }
     else if (key === 'e') { e.preventDefault(); fault(); }
-    else if (key === ' ' && !e.target.closest('button, [role=button]')) { e.preventDefault(); toggleRun(); }
+    else if (key === ' ' && !e.target.closest('button, [role=button], summary, a[href]')) { e.preventDefault(); toggleRun(); }
   });
   root.querySelectorAll('[data-series]').forEach(button => {
     button.addEventListener('click', () => {

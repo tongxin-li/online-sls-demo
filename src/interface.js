@@ -558,7 +558,7 @@
     const key = e.key.toLowerCase();
     if (key === 'd') { e.preventDefault(); beginAttack(); }
     else if (key === 'e') { e.preventDefault(); fault(); }
-    else if (key === ' ' && !e.target.closest('button, [role=button]')) { e.preventDefault(); toggleRun(); }
+    else if (key === ' ' && !e.target.closest('button, [role=button], summary, a[href]')) { e.preventDefault(); toggleRun(); }
   });
   root.querySelectorAll('[data-series]').forEach(button => {
     button.addEventListener('click', () => {

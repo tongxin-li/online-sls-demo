@@ -122,6 +122,33 @@ function harness(saved) {
 }
 const pulses=h=>h.snapshot().eventLog.filter(event=>event.type==='pulse');
 
+test('Space preserves native summary and link activation, including descendant targets',()=>{
+  for(const selector of ['summary','a[href]'])for(const descendant of [false,true])for(const playing of [false,true]){
+    const h=harness();if(playing)h.click('run');
+    const initialTime=h.snapshot().t;
+    const control=target(selector==='summary'?'SUMMARY':'A');
+    const origin=descendant?target('SPAN'):control;
+    origin.closest=selectors=>selectors.split(',').some(value=>value.trim()===selector)?control:null;
+    let prevented=false;
+    h.key('keydown',' ',{target:origin,preventDefault(){prevented=true;this.defaultPrevented=true;}});
+    const context=selector+(descendant?' descendant':'')+(playing?' during playback':' while paused');
+    assert.equal(prevented,false,context+' must retain its native Space behavior');
+    assert.equal(h.state().playing,playing,context+' must not toggle playback');
+    assert.equal(h.snapshot().t,initialTime,context+' must not advance the simulation');
+  }
+});
+
+test('Space on the page background starts and pauses ordinary playback',async()=>{
+  const h=harness(),background=target('DIV');
+  let prevented=0;
+  const press=()=>h.key('keydown',' ',{target:background,preventDefault(){prevented++;this.defaultPrevented=true;}});
+  press();assert.equal(h.state().playing,true);assert.equal(prevented,1);
+  const initialTime=h.snapshot().t;
+  await h.samples(2);assert.equal(h.snapshot().t,initialTime+2);
+  press();assert.equal(h.state().playing,false);assert.equal(prevented,2);
+  await h.samples(2);assert.equal(h.snapshot().t,initialTime+2,'Paused playback must stop sampling');
+});
+
 test('pointer activation queues once and a paused attack starts playback without advancing time',async()=>{
   const h=harness();h.change('attack-mode','pulse');h.event('pulse','pointerdown');h.event('pulse','pointerup');h.click('pulse',1);
   assert.equal(pulses(h).length,1);assert.equal(h.snapshot().pendingPulses.length,1);
