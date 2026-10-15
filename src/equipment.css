@@ -1,4 +1,4 @@
-/* Equipment marks stay decorative. The enclosing bus owns interaction. */
+/* Artwork stays decorative. The enclosing bus handles hit area and badge input. */
 .pe-host { -webkit-user-select:none; user-select:none; touch-action:manipulation; }
 .pe-hit { fill:transparent; pointer-events:all; }
 .pe-root { --pe-ink:#51606c; --pe-paper:#fff; --pe-voltage-color:#4c816b; --pe-voltage-opacity:.04; --pe-window-opacity:1; pointer-events:none; }
@@ -52,7 +52,7 @@
 .pe-attack-badge rect { fill:#ec7609; stroke:#fff; stroke-width:1.5; }
 .pe-attack-bolt { fill:#fff; stroke:none; }
 .pe-attack-badge text { fill:#fff!important; font:650 10px var(--font-ui,-apple-system,BlinkMacSystemFont,sans-serif)!important; letter-spacing:0; }
-.pe-attack-badge .pe-attack-status { font-size:7px!important; font-weight:750!important; letter-spacing:.7px; fill:#fff2dd!important; }
+.pe-attack-badge .pe-attack-status { font-size:8px!important; font-weight:650!important; letter-spacing:.6px; fill:#fff2dd!important; }
 .pe-pulse-queued .pe-attack-badge rect { fill:#f38a0b; }
 .pe-attack-held .pe-attack-badge rect,.pe-attack-latched .pe-attack-badge rect { fill:#d95e00; stroke-width:2; }
 .pe-burst { pointer-events:none; }
@@ -70,3 +70,13 @@
 }
 
 .pe-host[data-bus='1']:hover .pe-disc { stroke:#dce6de; stroke-width:1; }
+
+/* Residual power stays visible after request generation stops. */
+.pe-residual .pe-attack-badge rect { fill:#fff0dc; stroke:#dfb17a; stroke-width:1; }
+.pe-residual .pe-attack-badge text,.pe-residual .pe-attack-badge .pe-attack-status { fill:#895019!important; }
+.pe-residual .pe-attack-bolt { fill:#a75c17; }
+.pe-residual .pe-attack-halo { fill-opacity:.07; stroke-opacity:.25; }
+.pe-paused * { animation-play-state:paused!important; }
+.pe-paused .pe-burst { display:none; }
+
+.pe-attack-badge { pointer-events:all; cursor:pointer; }

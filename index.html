@@ -242,7 +242,11 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   .pr-actions .btn-attack { grid-column:1 / -1; }
 }
 
-/* Equipment marks stay decorative. The enclosing bus owns interaction. */
+.pr-attack-stop { display:none; }
+.btn-attack[data-attack-state='continuous'] .pr-attack-bolt { display:none; }
+.btn-attack[data-attack-state='continuous'] .pr-attack-stop { display:block; }
+
+/* Artwork stays decorative. The enclosing bus handles hit area and badge input. */
 .pe-host { -webkit-user-select:none; user-select:none; touch-action:manipulation; }
 .pe-hit { fill:transparent; pointer-events:all; }
 .pe-root { --pe-ink:#51606c; --pe-paper:#fff; --pe-voltage-color:#4c816b; --pe-voltage-opacity:.04; --pe-window-opacity:1; pointer-events:none; }
@@ -296,7 +300,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 .pe-attack-badge rect { fill:#ec7609; stroke:#fff; stroke-width:1.5; }
 .pe-attack-bolt { fill:#fff; stroke:none; }
 .pe-attack-badge text { fill:#fff!important; font:650 10px var(--font-ui,-apple-system,BlinkMacSystemFont,sans-serif)!important; letter-spacing:0; }
-.pe-attack-badge .pe-attack-status { font-size:7px!important; font-weight:750!important; letter-spacing:.7px; fill:#fff2dd!important; }
+.pe-attack-badge .pe-attack-status { font-size:8px!important; font-weight:650!important; letter-spacing:.6px; fill:#fff2dd!important; }
 .pe-pulse-queued .pe-attack-badge rect { fill:#f38a0b; }
 .pe-attack-held .pe-attack-badge rect,.pe-attack-latched .pe-attack-badge rect { fill:#d95e00; stroke-width:2; }
 .pe-burst { pointer-events:none; }
@@ -314,6 +318,16 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 }
 
 .pe-host[data-bus='1']:hover .pe-disc { stroke:#dce6de; stroke-width:1; }
+
+/* Residual power stays visible after request generation stops. */
+.pe-residual .pe-attack-badge rect { fill:#fff0dc; stroke:#dfb17a; stroke-width:1; }
+.pe-residual .pe-attack-badge text,.pe-residual .pe-attack-badge .pe-attack-status { fill:#895019!important; }
+.pe-residual .pe-attack-bolt { fill:#a75c17; }
+.pe-residual .pe-attack-halo { fill-opacity:.07; stroke-opacity:.25; }
+.pe-paused * { animation-play-state:paused!important; }
+.pe-paused .pe-burst { display:none; }
+
+.pe-attack-badge { pointer-events:all; cursor:pointer; }
 </style>
 </head>
 <body class="research-site">
@@ -347,7 +361,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     <div class="pr-actions">
       <select id="pr-attack-mode" aria-label="Attack mode"><option value="continuous" selected>Continuous</option><option value="pulse">Pulse</option></select>
       <select id="pr-strength" aria-label="Pulse strength" title="Requested power per pulse. Applied power respects equipment limits"><option value="50">50 kW</option><option value="100" selected>100 kW</option><option value="150">150 kW</option></select>
-      <button type="button" class="btn btn-attack" id="pr-pulse" aria-keyshortcuts="D" title="Click for a pulse or hold for one pulse each sample"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14 2 5 14h6l-1 8 9-13h-6z"/></svg><span id="pr-pulse-label">Attack bus 7</span></button><span id="pr-attack-hint" class="pr-attack-hint">Click to start or stop</span>
+      <button type="button" class="btn btn-attack" id="pr-pulse" aria-keyshortcuts="D" title="Click for a pulse or hold for one pulse each sample"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path class="pr-attack-bolt" d="M14 2 5 14h6l-1 8 9-13h-6z"/><rect class="pr-attack-stop" x="6" y="6" width="12" height="12" rx="2"/></svg><span id="pr-pulse-label">Attack bus 7</span></button><span id="pr-attack-hint" class="pr-attack-hint">Click to start or stop</span>
     </div>
   </div>
   <div class="pr-mission">
@@ -1133,6 +1147,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
  *   attackHeld: false, // True only while the user is holding an attack on this bus.
  *   attackLatched: false, // Continuous mode is enabled for this bus until stopped.
  *   pulseId: null,     // Change for EVERY applied pulse, even in the same step.
+ *   paused: false,    // Freeze visual motion with the physical plant.
  *   phase: 0           // Optional simulation step. Recorded, not invented motion.
  * })
  *
@@ -1238,6 +1253,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     const attackHeld = attackable && Boolean(data.attackHeld);
     const attackLatched = attackable && Boolean(data.attackLatched);
     const sustained = attackHeld || attackLatched;
+    const paused = Boolean(data.paused);
+    const residual = activePulse && !sustained && queuedPulses === 0;
     const attacked = activePulse || queuedPulses > 0 || sustained;
     const hasAttackPower = data.attackPowerKw !== null && data.attackPowerKw !== undefined && Number.isFinite(Number(data.attackPowerKw));
     const attackPowerKw = hasAttackPower ? Math.abs(Number(data.attackPowerKw)) : 0;
@@ -1247,7 +1264,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     equipment.attr('data-voltage', voltage).attr('data-control', input)
       .attr('data-phase', finite(data.phase, 0)).attr('data-pulse-active', String(activePulse))
       .classed('pe-selected', Boolean(data.selected)).classed('pe-pulse-active', activePulse)
-      .classed('pe-attacked', attacked).classed('pe-pulse-queued', queuedPulses > 0).classed('pe-attack-held', attackHeld).classed('pe-attack-latched', attackLatched)
+      .classed('pe-attacked', attacked).classed('pe-pulse-queued', queuedPulses > 0).classed('pe-attack-held', attackHeld).classed('pe-attack-latched', attackLatched).classed('pe-residual', residual).classed('pe-paused', paused)
       .style('--pe-voltage-color', voltageColor).style('--pe-voltage-opacity', .04 + stress * .2)
       .style('--pe-window-opacity', .35 + .65 * clamp((voltage - .9) / .1));
     equipment.select('.pe-voltage-wash').attr('r', 15 + stress * 5);
@@ -1265,20 +1282,22 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     const badge = equipment.select('.pe-attack-badge').attr('display', attacked ? null : 'none')
       .attr('data-applied-power-kw', activePulse && hasAttackPower ? attackPowerKw : null)
       .attr('data-attack-held', String(attackHeld)).attr('data-attack-latched', String(attackLatched));
-    const status = attackLatched ? 'CONTINUOUS' : attackHeld ? 'WHILE HELD' : '';
+    const status = sustained ? 'ATTACK ON' : queuedPulses > 0 ? 'QUEUED' : residual ? paused ? 'PAUSED' : 'FADING' : '';
+    badge.attr('data-attack-state',sustained?'adding':queuedPulses>0?'pending':residual?paused?'paused':'fading':'idle');
     const labelWidth = label ? 27 + label.length * 5.7 : 20;
-    const statusWidth = status ? 27 + status.length * 4.5 : 20;
+    const statusWidth = status ? 27 + status.length * 5.5 : 20;
     badge.select('rect').attr('width', Math.max(labelWidth, statusWidth)).attr('height', status ? 32 : 20).attr('rx', status ? 8 : 10);
     badge.select('.pe-attack-power').attr('display', label ? null : 'none').text(label);
     badge.select('.pe-attack-status').attr('display', status ? null : 'none').text(status);
-    const continuation = attackLatched ? '. Continuing until stopped' : attackHeld ? '. Continuing while held' : '';
+    const continuation = attackLatched ? '. New attacks continue until stopped' : attackHeld ? '. New attacks continue while held' : residual ? paused ? '. Simulation paused. The disturbance remains' : '. No new requests. The existing disturbance is fading' : '';
     badge.select('title').text(activePulse && hasAttackPower ? `${powerKind} of ${Math.round(attackPowerKw)} kW applied after equipment limits${continuation}` : queuedPulses > 0 ? `Disturbance pending the next sample${continuation}` : sustained ? `Attack starting${continuation}` : 'Active disturbance');
     // Keep the initial impact burst, then let the sustained halo animate freely.
     // Individual pulse requests still restart the burst when their token changes.
     const node = equipment.node();
     const hasPulseId = data.pulseId !== undefined && data.pulseId !== null;
     const pulseChanged = hasPulseId && node.__pePulseId !== data.pulseId;
-    if (attackable && ((sustained && !node.__peAttackSustained) || (pulseChanged && !sustained))) flash(equipment);
+    if (!paused && attackable && ((sustained && !node.__peAttackSustained) || (pulseChanged && !sustained))) flash(equipment);
+    if (paused) equipment.select('.pe-event-layer').selectAll('*').remove();
     if (hasPulseId) node.__pePulseId = data.pulseId;
     if (!attackable || (data.pulseId === null && !sustained)) {
       node.__pePulseId = null;
@@ -1744,8 +1763,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     else advanceLiveSample();
     snapshot = simulation.snapshot();
     if (!isFit() && lastPulse && snapshot.t>lastPulse.t) {
-      const active=pulseStatus(lastPulse.bus).active;
-      announce((active?'Pulse applied':'Pulse ended')+' · Bus '+lastPulse.bus+' · t = '+snapshot.t+' s');
+      const state=attackState(lastPulse.bus);
+      announce((state==='continuous'||state==='held'?'Adding attacks':state==='fading'?'Disturbance fading':state==='paused'?'Paused':'Disturbance ended')+' · Bus '+lastPulse.bus+' · t = '+snapshot.t+' s');
     }
     if (snapshot.mode === 'completed' && !playing) announce('Run or Step to continue');
     if (snapshot.mode === 'converged') { stop(); announce('Fit converged · Return to simulation'); }
@@ -1841,6 +1860,17 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     return {queued,active:events.some(item=>item.age>0),activeCount:events.length,
       id:latest ? latest.t+'_'+applied.length : null};
   }
+  function attackState(bus=selectedBus) {
+    if(heldAttack?.bus===bus) return heldAttack.latched?'continuous':'held';
+    const status=pulseStatus(bus);
+    if(status.queued) return 'pending';
+    if(status.active) return (playing && !isFit()) || comparing ? 'fading' : 'paused';
+    return 'idle';
+  }
+  function attackFeedback(bus=selectedBus) {
+    const state=attackState(bus);
+    return {state,hint:state==='continuous'?'Repeats until stopped':state==='held'?'Release to stop':state==='pending'?'Queued for next sample':state==='fading'?'Disturbance fading':state==='paused'?'Paused · Disturbance remains':continuousMode()?'Click to start or stop':'Click or hold'};
+  }
   function canAttack(bus=selectedBus) { return bus!==1; }
   function pulse(bus = selectedBus,{repeated=false}={}) {
     if (!canAttack(bus)) return;
@@ -1878,7 +1908,11 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   }
   function continuousMode() { return $('attack-mode').value==='continuous'; }
   function attackInstruction() { return continuousMode()?'Click a bus to start · Click again to stop':'Click for a pulse · Hold to repeat'; }
-  function finishAttack() { releaseAttack();renderControls();drawNetwork();save(); }
+  function finishAttack() {
+    const bus=heldAttack?.bus;
+    releaseAttack();renderControls();drawNetwork();save();
+    if(bus) announce('New attacks stopped · Bus '+bus+(pulseStatus(bus).active || pulseStatus(bus).queued?' · Existing disturbance remains':''));
+  }
   function activateAttack(bus,owner) {
     if(continuousMode()) {
       if(heldAttack?.latched && heldAttack.bus===bus) finishAttack();
@@ -1935,9 +1969,9 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   }
   bindAttackTarget($('pulse'),()=>heldAttack?.latched ? heldAttack.bus : selectedBus);
   document.addEventListener('keyup',event=>{if(event.key.toLowerCase()==='d' && !heldAttack?.latched && !heldAttack?.owner) finishAttack();});
-  window.addEventListener('blur',releaseAttack);
+  window.addEventListener('blur',()=>{if(heldAttack) finishAttack();});
   document.addEventListener('visibilitychange',()=>{
-    if(document.hidden) { stop(); renderControls(); save(); }
+    if(document.hidden) { stop(); renderControls(); drawNetwork(); save(); }
   });
   $('fault').addEventListener('click', fault);
   $('freeze').addEventListener('click', () => {
@@ -2011,7 +2045,9 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     if ($('pulse-label')) $('pulse-label').textContent=heldAttack?.latched?'Stop attack':selectedBus===1?'Fixed substation':'Attack bus '+selectedBus;
     $('pulse').setAttribute('aria-pressed',String(!!heldAttack));
     $('pulse').title=heldAttack?.latched?'Stop the continuous attack at bus '+heldAttack.bus:attackInstruction();
-    $('attack-hint').textContent=heldAttack?.latched?'Continuous · Bus '+heldAttack.bus:continuousMode()?'Click to start or stop':'Click or hold';
+    const feedback=attackFeedback(heldAttack?.bus ?? selectedBus);
+    $('pulse').dataset.attackState=feedback.state;
+    $('attack-hint').textContent=feedback.hint;
     $('step').textContent=frozen?'100 fit steps':'Step';
     $('step').disabled=comparing || snapshot.mode==='converged';
     $('freeze').textContent=frozen?'Return to simulation':'Inspect fixed data';
@@ -2084,7 +2120,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       g.append('text').attr('class','bus-number').attr('pointer-events','none');
       g.append('text').attr('class','fault-mark').attr('pointer-events','none');
       if (window.PowerEquipment) g.each(function(bus){PowerEquipment.render(d3.select(this),busRole(bus));});
-      g.append('title');
+      g.append('title').attr('class','bus-description');
       g.each(function(bus){bindAttackTarget(this,()=>bus);});
       return g;
     }).attr('transform',bus => 'translate('+point(bus).join(',')+')')
@@ -2107,7 +2143,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       PowerEquipment.update(d3.select(this),{
         voltage:busVoltage(bus),referenceVoltage:referenceVoltage(bus),input:reactivePower(bus),
         inputScale:PowerDemo.constants.busProfiles?.[bus-1]?.inverterKvar || 100,selected:bus===selectedBus,activePulse:status.active,activePulses:status.activeCount,queuedPulses:status.queued,
-        pulseId:status.id,phase:snapshot.t,attackPowerKw:appliedPulse(bus)?.applied,attackHeld:heldAttack?.bus===bus,attackLatched:heldAttack?.bus===bus && heldAttack.latched
+        pulseId:status.id,phase:snapshot.t,attackPowerKw:appliedPulse(bus)?.applied,attackHeld:heldAttack?.bus===bus,attackLatched:heldAttack?.bus===bus && heldAttack.latched,paused:!((playing && !isFit()) || comparing)
       });
       const badge=d3.select(this).select('.pe-attack-badge');
       const badgeWidth=Number(badge.select('rect').attr('width')) || 60;
@@ -2116,15 +2152,18 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     nodes.select('.bus-number').attr('text-anchor','middle').attr('x',0).attr('y',27)
       .style('fill','var(--muted-foreground)').style('font-size','9px').text(bus=>bus);
     nodes.select('.fault-mark').attr('x',17).attr('y',-12).text(bus=>snapshot.faults.includes(bus)?'×':'');
-    nodes.select('title').text(bus=>busRole(bus)+' · Bus '+bus+' · '+busVoltage(bus).toFixed(4)+' pu · '+powerDescription(bus)+(hasInverter(bus)?' · Q '+reactivePower(bus).toFixed(0)+' kvar':'')+'. '+(bus===1?'Fixed voltage substation.':disturbanceName(bus)+' '+pulseMagnitude($('strength').value)+' requested. '+attackInstruction()+'.'));
+    nodes.select('.bus-description').text(bus=>busRole(bus)+' · Bus '+bus+' · '+busVoltage(bus).toFixed(4)+' pu · '+powerDescription(bus)+(hasInverter(bus)?' · Q '+reactivePower(bus).toFixed(0)+' kvar':'')+'. '+(bus===1?'Fixed voltage substation.':disturbanceName(bus)+' '+pulseMagnitude($('strength').value)+' requested. '+attackInstruction()+'.'));
     showBusDetail(selectedBus);
     const voltages=d3.range(1,25).map(bus=>busVoltage(bus));
     const low=Math.min(...voltages), high=Math.max(...voltages);
     const inRange=low>=.95 && high<=1.05;
     const nearNominal=voltages.every((voltage,index)=>Math.abs(voltage-referenceVoltage(index+1))<.001);
-    if(heldAttack) actionNote((heldAttack.latched?'Continuous · ':'Holding · ')+appliedPulseLabel(heldAttack.bus));
-    else if (lastPulse && snapshot.t>lastPulse.t) actionNote(pulseStatus(lastPulse.bus).active ? appliedPulseLabel(lastPulse.bus) : nearNominal ? attackInstruction() : 'Restoring the nominal profile');
-    else actionNote(attackInstruction());
+    const feedbackBus=heldAttack?.bus ?? (attackState(selectedBus)!=='idle'?selectedBus:lastPulse?.bus ?? selectedBus);
+    const feedback=attackFeedback(feedbackBus);
+    if(feedback.state==='continuous' || feedback.state==='held') actionNote('Adding attacks · Bus '+feedbackBus);
+    else if(feedback.state==='pending') actionNote('Queued at bus '+feedbackBus+' · Next sample');
+    else if(feedback.state==='fading' || feedback.state==='paused') actionNote((feedback.state==='paused'?'Paused':'Fading')+' · '+appliedPulseLabel(feedbackBus));
+    else actionNote(nearNominal ? attackInstruction() : 'Restoring the nominal profile');
     if ($('voltage-range')) $('voltage-range').textContent=low.toFixed(3)+' to '+high.toFixed(3)+' pu';
     if ($('voltage-status')) {
       $('voltage-status').title=inRange ? 'Within illustrative band' : 'Restoring voltage';

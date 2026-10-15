@@ -232,3 +232,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   .pr-actions { grid-template-columns:1fr 1fr; }
   .pr-actions .btn-attack { grid-column:1 / -1; }
 }
+
+.pr-attack-stop { display:none; }
+.btn-attack[data-attack-state='continuous'] .pr-attack-bolt { display:none; }
+.btn-attack[data-attack-state='continuous'] .pr-attack-stop { display:block; }

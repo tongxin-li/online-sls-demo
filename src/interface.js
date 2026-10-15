@@ -328,8 +328,8 @@
     else advanceLiveSample();
     snapshot = simulation.snapshot();
     if (!isFit() && lastPulse && snapshot.t>lastPulse.t) {
-      const active=pulseStatus(lastPulse.bus).active;
-      announce((active?'Pulse applied':'Pulse ended')+' · Bus '+lastPulse.bus+' · t = '+snapshot.t+' s');
+      const state=attackState(lastPulse.bus);
+      announce((state==='continuous'||state==='held'?'Adding attacks':state==='fading'?'Disturbance fading':state==='paused'?'Paused':'Disturbance ended')+' · Bus '+lastPulse.bus+' · t = '+snapshot.t+' s');
     }
     if (snapshot.mode === 'completed' && !playing) announce('Run or Step to continue');
     if (snapshot.mode === 'converged') { stop(); announce('Fit converged · Return to simulation'); }
@@ -425,6 +425,17 @@
     return {queued,active:events.some(item=>item.age>0),activeCount:events.length,
       id:latest ? latest.t+'_'+applied.length : null};
   }
+  function attackState(bus=selectedBus) {
+    if(heldAttack?.bus===bus) return heldAttack.latched?'continuous':'held';
+    const status=pulseStatus(bus);
+    if(status.queued) return 'pending';
+    if(status.active) return (playing && !isFit()) || comparing ? 'fading' : 'paused';
+    return 'idle';
+  }
+  function attackFeedback(bus=selectedBus) {
+    const state=attackState(bus);
+    return {state,hint:state==='continuous'?'Repeats until stopped':state==='held'?'Release to stop':state==='pending'?'Queued for next sample':state==='fading'?'Disturbance fading':state==='paused'?'Paused · Disturbance remains':continuousMode()?'Click to start or stop':'Click or hold'};
+  }
   function canAttack(bus=selectedBus) { return bus!==1; }
   function pulse(bus = selectedBus,{repeated=false}={}) {
     if (!canAttack(bus)) return;
@@ -462,7 +473,11 @@
   }
   function continuousMode() { return $('attack-mode').value==='continuous'; }
   function attackInstruction() { return continuousMode()?'Click a bus to start · Click again to stop':'Click for a pulse · Hold to repeat'; }
-  function finishAttack() { releaseAttack();renderControls();drawNetwork();save(); }
+  function finishAttack() {
+    const bus=heldAttack?.bus;
+    releaseAttack();renderControls();drawNetwork();save();
+    if(bus) announce('New attacks stopped · Bus '+bus+(pulseStatus(bus).active || pulseStatus(bus).queued?' · Existing disturbance remains':''));
+  }
   function activateAttack(bus,owner) {
     if(continuousMode()) {
       if(heldAttack?.latched && heldAttack.bus===bus) finishAttack();
@@ -519,9 +534,9 @@
   }
   bindAttackTarget($('pulse'),()=>heldAttack?.latched ? heldAttack.bus : selectedBus);
   document.addEventListener('keyup',event=>{if(event.key.toLowerCase()==='d' && !heldAttack?.latched && !heldAttack?.owner) finishAttack();});
-  window.addEventListener('blur',releaseAttack);
+  window.addEventListener('blur',()=>{if(heldAttack) finishAttack();});
   document.addEventListener('visibilitychange',()=>{
-    if(document.hidden) { stop(); renderControls(); save(); }
+    if(document.hidden) { stop(); renderControls(); drawNetwork(); save(); }
   });
   $('fault').addEventListener('click', fault);
   $('freeze').addEventListener('click', () => {
@@ -595,7 +610,9 @@
     if ($('pulse-label')) $('pulse-label').textContent=heldAttack?.latched?'Stop attack':selectedBus===1?'Fixed substation':'Attack bus '+selectedBus;
     $('pulse').setAttribute('aria-pressed',String(!!heldAttack));
     $('pulse').title=heldAttack?.latched?'Stop the continuous attack at bus '+heldAttack.bus:attackInstruction();
-    $('attack-hint').textContent=heldAttack?.latched?'Continuous · Bus '+heldAttack.bus:continuousMode()?'Click to start or stop':'Click or hold';
+    const feedback=attackFeedback(heldAttack?.bus ?? selectedBus);
+    $('pulse').dataset.attackState=feedback.state;
+    $('attack-hint').textContent=feedback.hint;
     $('step').textContent=frozen?'100 fit steps':'Step';
     $('step').disabled=comparing || snapshot.mode==='converged';
     $('freeze').textContent=frozen?'Return to simulation':'Inspect fixed data';
@@ -668,7 +685,7 @@
       g.append('text').attr('class','bus-number').attr('pointer-events','none');
       g.append('text').attr('class','fault-mark').attr('pointer-events','none');
       if (window.PowerEquipment) g.each(function(bus){PowerEquipment.render(d3.select(this),busRole(bus));});
-      g.append('title');
+      g.append('title').attr('class','bus-description');
       g.each(function(bus){bindAttackTarget(this,()=>bus);});
       return g;
     }).attr('transform',bus => 'translate('+point(bus).join(',')+')')
@@ -691,7 +708,7 @@
       PowerEquipment.update(d3.select(this),{
         voltage:busVoltage(bus),referenceVoltage:referenceVoltage(bus),input:reactivePower(bus),
         inputScale:PowerDemo.constants.busProfiles?.[bus-1]?.inverterKvar || 100,selected:bus===selectedBus,activePulse:status.active,activePulses:status.activeCount,queuedPulses:status.queued,
-        pulseId:status.id,phase:snapshot.t,attackPowerKw:appliedPulse(bus)?.applied,attackHeld:heldAttack?.bus===bus,attackLatched:heldAttack?.bus===bus && heldAttack.latched
+        pulseId:status.id,phase:snapshot.t,attackPowerKw:appliedPulse(bus)?.applied,attackHeld:heldAttack?.bus===bus,attackLatched:heldAttack?.bus===bus && heldAttack.latched,paused:!((playing && !isFit()) || comparing)
       });
       const badge=d3.select(this).select('.pe-attack-badge');
       const badgeWidth=Number(badge.select('rect').attr('width')) || 60;
@@ -700,15 +717,18 @@
     nodes.select('.bus-number').attr('text-anchor','middle').attr('x',0).attr('y',27)
       .style('fill','var(--muted-foreground)').style('font-size','9px').text(bus=>bus);
     nodes.select('.fault-mark').attr('x',17).attr('y',-12).text(bus=>snapshot.faults.includes(bus)?'×':'');
-    nodes.select('title').text(bus=>busRole(bus)+' · Bus '+bus+' · '+busVoltage(bus).toFixed(4)+' pu · '+powerDescription(bus)+(hasInverter(bus)?' · Q '+reactivePower(bus).toFixed(0)+' kvar':'')+'. '+(bus===1?'Fixed voltage substation.':disturbanceName(bus)+' '+pulseMagnitude($('strength').value)+' requested. '+attackInstruction()+'.'));
+    nodes.select('.bus-description').text(bus=>busRole(bus)+' · Bus '+bus+' · '+busVoltage(bus).toFixed(4)+' pu · '+powerDescription(bus)+(hasInverter(bus)?' · Q '+reactivePower(bus).toFixed(0)+' kvar':'')+'. '+(bus===1?'Fixed voltage substation.':disturbanceName(bus)+' '+pulseMagnitude($('strength').value)+' requested. '+attackInstruction()+'.'));
     showBusDetail(selectedBus);
     const voltages=d3.range(1,25).map(bus=>busVoltage(bus));
     const low=Math.min(...voltages), high=Math.max(...voltages);
     const inRange=low>=.95 && high<=1.05;
     const nearNominal=voltages.every((voltage,index)=>Math.abs(voltage-referenceVoltage(index+1))<.001);
-    if(heldAttack) actionNote((heldAttack.latched?'Continuous · ':'Holding · ')+appliedPulseLabel(heldAttack.bus));
-    else if (lastPulse && snapshot.t>lastPulse.t) actionNote(pulseStatus(lastPulse.bus).active ? appliedPulseLabel(lastPulse.bus) : nearNominal ? attackInstruction() : 'Restoring the nominal profile');
-    else actionNote(attackInstruction());
+    const feedbackBus=heldAttack?.bus ?? (attackState(selectedBus)!=='idle'?selectedBus:lastPulse?.bus ?? selectedBus);
+    const feedback=attackFeedback(feedbackBus);
+    if(feedback.state==='continuous' || feedback.state==='held') actionNote('Adding attacks · Bus '+feedbackBus);
+    else if(feedback.state==='pending') actionNote('Queued at bus '+feedbackBus+' · Next sample');
+    else if(feedback.state==='fading' || feedback.state==='paused') actionNote((feedback.state==='paused'?'Paused':'Fading')+' · '+appliedPulseLabel(feedbackBus));
+    else actionNote(nearNominal ? attackInstruction() : 'Restoring the nominal profile');
     if ($('voltage-range')) $('voltage-range').textContent=low.toFixed(3)+' to '+high.toFixed(3)+' pu';
     if ($('voltage-status')) {
       $('voltage-status').title=inRange ? 'Within illustrative band' : 'Restoring voltage';
