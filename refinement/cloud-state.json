@@ -8,7 +8,7 @@
   "hard_deadline": "2026-10-18T01:45:00+08:00",
   "max_scheduled_runs": 24,
   "max_minutes_per_run": 40,
-  "completed_count": 4,
+  "completed_count": 5,
   "runs": [
     {
       "slot": "2026-10-17T02:00:00+08:00",
@@ -268,23 +268,49 @@
       },
       "deployment": "GitHub Pages success",
       "direct_live_inspection": "unverified, previously denied browser access not retried"
+    },
+    {
+      "slot": "2026-10-17T07:00:00+08:00",
+      "started_at": "2026-10-17T07:03:44+08:00",
+      "completed_at": "2026-10-16 23:17:13 UTC",
+      "status": "completed",
+      "changes": [
+        "Read only raw source forecast, revealed voltage forcing and signed error in explicit mpu.",
+        "Exact issue, action and reveal times; pending and history states prevent future or stale observation.",
+        "Dense discovery and frozen deployed support meaning retained separately from reliability state.",
+        "Preserved current source state separately from immutable issued forecasts and exact version 13 replay.",
+        "Documented that forcing error is not bus voltage or pure source noise. Repaired literal newline formatting in prior documentation."
+      ],
+      "source_commit": "0463507efafa6ba739c3c8153261fcffd65e1557",
+      "published_commit": "277829df6c911ec0b68135c7c0b0cd29dcefdb82",
+      "candidate_run": 38979867651,
+      "main_run": 38980264964,
+      "pages_run": 38980265198,
+      "tests": {
+        "suites": 5,
+        "total": 149,
+        "failed": 0,
+        "build": "passed",
+        "main_consistency": "passed",
+        "causality": "Last revealed pair and exact actual issue metadata, pending and saved history, paused toggle immutability, sealed preview delay, paired physical forcing, frozen support and exact saved replay",
+        "browser": "Desktop and mobile DOM match actual revealed source values and timestamps. Existing repeated source/power attacks, handoff, thirty cost switches, four curves, solar outage and responsive layout pass",
+        "benchmarks": "Not rerun. Simulation, controllers, coefficients, scenarios and scientific parameters unchanged."
+      },
+      "screenshots": {
+        "artifact_id": 12081185343,
+        "pixel_review": "unverified"
+      },
+      "deployment": "GitHub Pages success",
+      "direct_live_inspection": "unverified, previously denied browser access not retried",
+      "superseded_initialization": {
+        "id": 38979733351,
+        "conclusion": "cancelled",
+        "reason": "Superseded candidate branch initialization at lease metadata, before source push. Future candidates should create the ref at the source commit directly."
+      }
     }
   ],
-  "active_run": {
-    "slot": "2026-10-17T07:00:00+08:00",
-    "started_at": "2026-10-17T07:03:44+08:00",
-    "lease_expires_at": "2026-10-17T07:43:44+08:00",
-    "branch": "cloud/refine/20261017-0700",
-    "base_main": "f9d089f70a8d6bde3388a9661c30b0b94f53d504",
-    "focus": "Read only inspected source forecast error and issuance timing from revealed observations",
-    "status": "candidate validation",
-    "changes": [
-      "Read only raw source forecast, revealed voltage forcing and signed error in explicit mpu.",
-      "Exact issue, action and reveal times; pending and history states prevent future or stale observation.",
-      "Dense discovery and frozen deployed support meaning retained separately from reliability state."
-    ]
-  },
-  "next_focus": "Make inspected source forecast errors and issuance timing observable against revealed forcing, without leaking future observations or changing frozen deployed links. Preserve the reference and audited solar outage scenarios.",
+  "active_run": null,
+  "next_focus": "Audit the inspected source’s actual contribution to the latest receiver command using only issued forecasts and executed coefficients. Distinguish permitted support from a nonzero gain, including dense discovery and frozen comparison. Avoid fabricated links or future observations. Preserve both audited power scenarios and all baseline curves.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -325,5 +351,6 @@
     }
   },
   "cloud_runtime": "ChatGPT hosted automation with connected GitHub APIs and GitHub Actions ubuntu-latest, Node 22, Python 3.12, Playwright Chromium 141",
-  "source_of_truth": "Cloud GitHub main is canonical while Mac is off. Later local work must refresh first."
+  "source_of_truth": "Cloud GitHub main is canonical while Mac is off. Later local work must refresh first.",
+  "workflow_note": "Create future candidate refs directly at the source commit after acquiring the metadata lease, avoiding an unnecessary initialization validation run."
 }
