@@ -620,7 +620,31 @@
         canFreeze:this.phase==='discovery'&&this.rows.length>=WARMUP};
     }
   }
-  return{Simulation,model,constants:deepFreeze({N,M,edges:EDGES,edgeData:model.edgeData,inverterBuses:INVERTER_BUSES,
+  // Pure diagnostics over executed states. These never enter control or cost.
+  function voltageMetrics(snapshot) {
+    const reference=snapshot.referenceVoltage;
+    const worst=(values,absolute=false)=>{
+      let value=-Infinity,bus=1;
+      for(let i=0;i<reference.length;i++) {
+        const error=Math.abs((absolute?values[i]:1+values[i])-reference[i]);
+        if(error>value) {value=error;bus=i+1;}
+      }
+      return {value,bus};
+    };
+    return Object.fromEntries(CONTROLLERS.map(key=>{
+      const current=worst(snapshot.states[key]);
+      let peak=worst(snapshot.initialVoltage,true),peakTime=0;
+      for(const entry of snapshot.history || []) {
+        if(!entry.states?.[key]) continue;
+        const candidate=worst(entry.states[key]);
+        if(candidate.value>peak.value) {peak=candidate;peakTime=entry.stateTime ?? entry.t;}
+      }
+      if(current.value>peak.value) {peak=current;peakTime=snapshot.t;}
+      return [key,{currentMaxPu:current.value,currentBus:current.bus,peakMaxPu:peak.value,peakBus:peak.bus,peakTime,
+        limitedCount:(snapshot.saturation?.[key] || []).filter(Boolean).length}];
+    }));
+  }
+  return{Simulation,model,voltageMetrics,constants:deepFreeze({N,M,edges:EDGES,edgeData:model.edgeData,inverterBuses:INVERTER_BUSES,
     amplitude:AMPLITUDE,ridge:RIDGE,rawRidge:RAW_RIDGE,remoteBudget:REMOTE_BUDGET,preview:PREVIEW,window:WINDOW,warmup:WARMUP,
     busProfiles:BUS_PROFILES,controllers:CONTROLLERS,forecastPresets:FORECAST_PRESETS,communicationBetas:COMMUNICATION_BETAS,tolerance:TOLERANCE,horizon:480,
     pulseDefault:PULSE_DEFAULT,pulseMin:PULSE_MIN,pulseMax:PULSE_MAX,pulseUnits:'kW',powerBaseKw:POWER_BASE_KW,

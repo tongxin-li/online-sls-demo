@@ -292,3 +292,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 .pr-source-controls { display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; margin:8px 0; }
 .pr-source-controls .btn { min-height:44px; max-width:100%; white-space:normal; }
 #pr-source-status { flex:1 1 150px; line-height:1.5; }
+
+.pr-voltage-table { margin-top:8px; }
+.pr-voltage-table th,.pr-voltage-table td { padding:3px 2px; }
+#pr-voltage-metrics-note { margin:4px 0 10px; font-size:10px; line-height:1.5; }

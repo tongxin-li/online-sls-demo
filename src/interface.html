@@ -41,6 +41,8 @@
       <div class="pr-subhead"><h2 id="pr-stage-title">Voltage and cost</h2><strong id="pr-state-value" class="pr-state-value tabular-nums">1.000 pu</strong></div>
       <div class="pr-plot-label"><span id="pr-voltage-detail">Bus 7 voltage</span><span id="pr-voltage-reference" class="pr-target-key">Nominal voltage</span></div>
       <svg class="pr-chart" id="pr-voltage" role="img" aria-label="Selected bus voltage in per unit with its nominal reference profile"></svg>
+      <table class="pr-cost-table pr-voltage-table tabular-nums" aria-label="Voltage deviation from nominal profile" aria-describedby="pr-voltage-metrics-note"><thead><tr><th scope="col">Method</th><th scope="col">Now</th><th scope="col">Peak</th><th scope="col" title="Inverters with clipped reactive commands at the last action">Limited</th></tr></thead><tbody id="pr-voltage-metrics"></tbody></table>
+      <p id="pr-voltage-metrics-note" class="pr-caption">Worst bus deviation · 1 mpu = 0.001 pu · Peak resets for comparison</p>
       <div class="pr-plot-label"><span>Normalized cost per second</span><span id="pr-pulse-summary" class="tabular-nums" aria-live="polite"></span></div>
       <svg class="pr-chart" id="pr-stage" role="img" aria-label="Normalized voltage and reactive effort cost under identical power disturbances"></svg>
       <div id="pr-stage-detail" class="pr-panel-foot tabular-nums"></div>

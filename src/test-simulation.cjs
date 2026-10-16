@@ -1,7 +1,7 @@
 'use strict';
 const assert=require('node:assert/strict');
 const test=require('node:test');
-const {Simulation,model,constants,math}=require('./simulation.js');
+const {Simulation,model,constants,math,voltageMetrics}=require('./simulation.js');
 const {multiply,transpose,combine,frobenius,matvec,solveSPD}=math;
 const Response=require('./response-controller.js');
 const Calibration=require('./forecast-calibration.js');
@@ -416,4 +416,50 @@ test('discovery and deployment replay preserve extensions, diagnostic counts, re
     if(t<record.t)replay.step();
   }
   assert.deepEqual(replay.snapshot(),sim.snapshot());
+});
+
+test('voltage diagnostics use each bus nominal profile and executed state times rather than the illustrative band',()=>{
+  const reference=[1,.987,.99],baseline=reference.map(v=>v-1);
+  const states=Object.fromEntries(controllers.map(key=>[key,baseline.slice()]));
+  states.online[1]=-.02;
+  const past=Object.fromEntries(controllers.map(key=>[key,baseline.slice()]));
+  past.online[1]=-.04;
+  const snapshot={t:9,referenceVoltage:reference,initialVoltage:reference.slice(),states,
+    history:[{stateTime:4,t:4,states:past,costStates:Object.fromEntries(controllers.map(key=>[key,[0,-.5,0]]))}],
+    saturation:Object.fromEntries(controllers.map(key=>[key,key==='online'?[false,true,false]:[false,false,false]]))};
+  const before=JSON.stringify(snapshot),metrics=voltageMetrics(snapshot);
+  assert.ok(Math.abs(metrics.online.currentMaxPu-.007)<1e-14);
+  assert.ok(Math.abs(metrics.online.peakMaxPu-.027)<1e-14);
+  assert.equal(metrics.online.currentBus,2);assert.equal(metrics.online.peakBus,2);assert.equal(metrics.online.peakTime,4);
+  assert.equal(metrics.online.limitedCount,1);
+  assert.equal(metrics.causal.currentMaxPu,0,'A nominal .987 pu bus has zero regulation error');
+  assert.equal(metrics.causal.peakMaxPu,0);
+  assert.equal(JSON.stringify(snapshot),before,'Diagnostics are read only');
+  const reset={...snapshot,t:0,history:[],states:Object.fromEntries(controllers.map(key=>[key,baseline.slice()])),saturation:{}};
+  assert.equal(voltageMetrics(reset).online.peakMaxPu,0,'Fresh comparison does not inherit discovery peaks');
+});
+
+test('voltage diagnostics agree with raw states for all twenty predefined seeds in discovery and held out comparison',()=>{
+  const verify=sim=>{
+    const snapshot=sim.snapshot(),before=JSON.stringify(snapshot),metrics=voltageMetrics(snapshot);
+    for(const key of controllers) {
+      const deviation=state=>Math.max(...state.map((value,i)=>Math.abs(1+value-snapshot.referenceVoltage[i])));
+      const current=deviation(snapshot.states[key]);
+      const initial=Math.max(...snapshot.initialVoltage.map((value,i)=>Math.abs(value-snapshot.referenceVoltage[i])));
+      const peak=Math.max(initial,current,...snapshot.history.map(entry=>deviation(entry.states[key])));
+      assert.ok(Math.abs(metrics[key].currentMaxPu-current)<1e-14);
+      assert.ok(Math.abs(metrics[key].peakMaxPu-peak)<1e-14);
+      assert.equal(metrics[key].limitedCount,snapshot.saturation[key].filter(Boolean).length);
+      assert.ok(metrics[key].limitedCount<=constants.inverterBuses.length);
+      assert.ok(Number.isFinite(peak));assert.ok(peak>=current);
+    }
+    assert.equal(JSON.stringify(snapshot),before);
+  };
+  for(let seed=1;seed<=20;seed++) {
+    const sim=new Simulation({experiment:'communication',beta:1,seed,horizon:180});
+    verify(sim);run(sim,180);verify(sim);
+    assert.equal(sim.deployTopology(),true);verify(sim);
+    assert.equal(voltageMetrics(sim.snapshot()).online.peakMaxPu,0);
+    sim.queuePulse(23,150);run(sim,8);verify(sim);
+  }
 });

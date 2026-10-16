@@ -1200,6 +1200,21 @@
   }
   function drawVoltage() {
     const el=$('voltage'); if(!el)return;
+    const metrics=PowerDemo.voltageMetrics(snapshot);
+    const rows=d3.select($('voltage-metrics')).selectAll('tr').data(activeSeries(),item=>item.key).join(enter=>{
+      const row=enter.append('tr');row.append('th').attr('scope','row');
+      row.append('td').attr('class','current-deviation');row.append('td').attr('class','peak-deviation');
+      row.append('td').attr('class','limited-inverters');return row;
+    }).attr('data-controller',item=>item.key)
+      .attr('data-current-pu',item=>metrics[item.key].currentMaxPu).attr('data-peak-pu',item=>metrics[item.key].peakMaxPu)
+      .attr('data-limited',item=>metrics[item.key].limitedCount);
+    rows.select('th').text(item=>item.label);
+    rows.select('.current-deviation').text(item=>(1000*metrics[item.key].currentMaxPu).toFixed(2))
+      .attr('title',item=>'Largest absolute departure from nominal now at bus '+metrics[item.key].currentBus);
+    rows.select('.peak-deviation').text(item=>(1000*metrics[item.key].peakMaxPu).toFixed(2))
+      .attr('title',item=>'Peak at bus '+metrics[item.key].peakBus+' at t '+metrics[item.key].peakTime+' s in this phase');
+    rows.select('.limited-inverters').text(item=>metrics[item.key].limitedCount+'/'+PowerDemo.constants.inverterBuses.length)
+      .attr('title','Inverters whose reactive command was clipped at the last executed action');
     const domain=responseWindow(), index=selectedBus-1;
     let observations=snapshot.history.filter(item=>(item.stateTime ?? item.t)>=domain[0]).map(item=>({
       x:item.stateTime ?? item.t,
@@ -1220,7 +1235,7 @@
       .attr('x1',chart.frame.x).attr('x2',chart.frame.x+chart.frame.w).attr('y1',d=>chart.y(d)).attr('y2',d=>chart.y(d))
       .attr('stroke','var(--primary)').attr('stroke-opacity',d=>d===reference?.5:.18).attr('stroke-dasharray','3 4');
     drawInterventions(chart); drawSeries(chart,observations,items,true); hover(chart,observations,items,'Voltage at t');
-    if($('voltage-detail'))$('voltage-detail').textContent='Bus '+selectedBus+' voltage';
+    if($('voltage-detail'))$('voltage-detail').textContent='Bus '+selectedBus+' · Δ '+d3.format('+.2f')(1000*(busVoltage(selectedBus)-reference))+' mpu';
     if($('voltage-reference'))$('voltage-reference').textContent='Nominal '+reference.toFixed(4)+' pu';
     if($('state-value'))$('state-value').textContent=busVoltage(selectedBus).toFixed(4)+' pu';
   }

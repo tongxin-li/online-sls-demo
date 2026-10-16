@@ -50,7 +50,37 @@ async function main() {
     const pause = async () => {
       if (await page.locator('#pr-run').textContent() === 'Pause') await page.locator('#pr-run').click();
     };
+    const checkVoltageMetrics = async surface => {
+      const result=await surface.evaluate(()=>{
+        const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot();
+        const rows=Array.from(document.querySelectorAll('#pr-voltage-metrics tr')).map(row=>({
+          key:row.dataset.controller,current:Number(row.dataset.currentPu),peak:Number(row.dataset.peakPu),
+          limited:Number(row.dataset.limited),shownCurrent:row.querySelector('.current-deviation').textContent,
+          shownPeak:row.querySelector('.peak-deviation').textContent,shownLimited:row.querySelector('.limited-inverters').textContent
+        }));
+        const expected=Object.fromEntries(['online','scalar','static','causal'].map(key=>{
+          const deviation=values=>Math.max(...values.map((value,i)=>Math.abs(1+value-snapshot.referenceVoltage[i])));
+          const current=deviation(snapshot.states[key]);
+          const peak=Math.max(current,...snapshot.initialVoltage.map((value,i)=>Math.abs(value-snapshot.referenceVoltage[i])),
+            ...snapshot.history.map(entry=>deviation(entry.states[key])));
+          return [key,{current,peak,limited:snapshot.saturation[key].filter(Boolean).length}];
+        }));
+        return {rows,expected,detail:document.querySelector('#pr-voltage-detail').textContent};
+      });
+      assert.deepEqual(result.rows.map(row=>row.key),['online','scalar','static','causal'],'All four controller diagnostics remain present');
+      for(const row of result.rows) {
+        const expected=result.expected[row.key];
+        assert.ok(Math.abs(row.current-expected.current)<1e-12,'Current diagnostic matches measured nominal departure');
+        assert.ok(Math.abs(row.peak-expected.peak)<1e-12,'Peak includes actual executed states in this phase');
+        assert.equal(row.limited,expected.limited);
+        assert.equal(row.shownCurrent,(1000*expected.current).toFixed(2));
+        assert.equal(row.shownPeak,(1000*expected.peak).toFixed(2));
+        assert.equal(row.shownLimited,expected.limited+'/8');
+      }
+      assert.match(result.detail,/Δ .* mpu/);
+    };
     const checkPlots = async () => {
+      await checkVoltageMetrics(page);
       for (const chart of ['pr-cost', 'pr-stage', 'pr-voltage']) {
         const paths = await page.locator(`#${chart} path.data-series`).evaluateAll(elements => elements.map(element => element.getAttribute('d')));
         assert.equal(paths.length, 4, `${chart} retains all four controller curves`);
@@ -111,6 +141,7 @@ async function main() {
       assert.deepEqual((await sourceState()).faults,initial.faults,'Second action repairs or corrupts back to initial state');
     };
     await inspectLinks();
+    await checkVoltageMetrics(page);
 
     // Ordinary playback and repeated forecast toggles use the actual bus targets.
     await page.locator('#pr-run').click();
@@ -218,6 +249,7 @@ async function main() {
       assert.deepEqual(mobileAfter.snapshot.states,mobileBefore.snapshot.states);
       assert.deepEqual(mobileAfter.snapshot.cumulative,mobileBefore.snapshot.cumulative);
     }
+    await checkVoltageMetrics(phone);
     const sourceBounds=await phone.locator('#pr-source-fault').boundingBox();
     assert.ok(sourceBounds.width>=44&&sourceBounds.height>=44,'Explicit source action has a usable touch target');
     const dimensions = await phone.evaluate(() => ({ page: document.documentElement.scrollWidth, viewport: innerWidth }));
@@ -226,7 +258,7 @@ async function main() {
     assert.ok(attackBounds.width >= 44 && attackBounds.height >= 44, 'Primary touch target remains at least 44 pixels');
     await phone.screenshot({ path: path.join(output, 'mobile.png'), fullPage: true });
     assert.deepEqual(errors, [], 'No browser runtime errors');
-    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), touchEvents, checks: ['playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'four controller curves', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'continuous mobile power attack', 'mobile touch and layout'], errors }, null, 2));
+    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), touchEvents, checks: ['playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'continuous mobile power attack', 'mobile touch and layout'], errors }, null, 2));
     console.log('Browser smoke passed');
   } finally {
     if (browser) await browser.close();

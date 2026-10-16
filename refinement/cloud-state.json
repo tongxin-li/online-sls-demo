@@ -77,7 +77,13 @@
     "started_at": "2026-10-17T04:58:04+08:00",
     "expires_at": "2026-10-17T05:38:04+08:00",
     "branch": "cloud/refine/20261017-0500",
-    "focus": "Measured nominal-profile voltage deviation and inverter limiting diagnostics for all four controllers."
+    "focus": "Measured nominal-profile voltage deviation and inverter limiting diagnostics for all four controllers.",
+    "stage": "candidate_validation",
+    "changes": [
+      "Added read only current and phase peak worst-bus deviation from each bus nominal voltage for all four controllers in explicit mpu units.",
+      "Added current inverter-command limiting counts and peak bus/time details without changing controls, objective or scenarios.",
+      "Added exact synthetic metric tests, twenty-seed raw-state consistency across discovery and held out comparison, and desktop/mobile DOM checks."
+    ]
   },
   "next_focus": "Expose meaningful deviation from each bus nominal profile and recovery or saturation metrics before introducing a bounded stress preset. Keep reference scenario and shared-controller comparisons honest.",
   "priorities": [
