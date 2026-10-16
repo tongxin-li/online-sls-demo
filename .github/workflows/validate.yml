@@ -1,0 +1,103 @@
+name: Validate demo
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test controllers and interactions
+        run: |
+          node src/test-forecast-calibration.cjs
+          node src/test-simulation.cjs
+          node src/test-communication.cjs
+          node src/test-interactions.cjs
+          node src/test-topology-timeline.cjs
+      - name: Build the deployable page
+        run: python3 build.py
+      - name: Check the published page is current
+        if: github.event_name != 'push' || !startsWith(github.ref, 'refs/heads/cloud/refine/')
+        run: git diff --exit-code -- index.html
+      - name: Install isolated browser test tools
+        run: |
+          npm install --prefix "$RUNNER_TEMP/browser-test" --no-audit --no-fund playwright@1.56.1
+          "$RUNNER_TEMP/browser-test/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Check browser interactions and responsive layout
+        env:
+          NODE_PATH: ${{ runner.temp }}/browser-test/node_modules
+          DEMO_SMOKE_OUTPUT: ${{ runner.temp }}/browser-results
+        run: node src/test-browser-smoke.cjs
+      - name: Save browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-evidence
+          path: ${{ runner.temp }}/browser-results
+          if-no-files-found: ignore
+      - name: Save the validated build
+        uses: actions/upload-artifact@v4
+        with:
+          name: validated-page
+          path: index.html
+          if-no-files-found: error
+
+  prepare-candidate:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/cloud/refine/')
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: validated-page
+          path: ${{ runner.temp }}/validated-page
+      - name: Save only the validated page on the tested candidate
+        env:
+          CANDIDATE_BRANCH: ${{ github.ref_name }}
+          TESTED_SHA: ${{ github.sha }}
+        run: |
+          case "$CANDIDATE_BRANCH" in cloud/refine/*) ;; *) exit 1 ;; esac
+          remote_sha="$(git ls-remote origin "refs/heads/$CANDIDATE_BRANCH" | cut -f1)"
+          test "$remote_sha" = "$TESTED_SHA"
+          cp "$RUNNER_TEMP/validated-page/index.html" index.html
+          if ! git diff --quiet -- index.html; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add -- index.html
+            git commit -m 'Build validated demo page'
+            git push --force-with-lease="refs/heads/$CANDIDATE_BRANCH:$TESTED_SHA" origin "HEAD:refs/heads/$CANDIDATE_BRANCH"
+          fi
+          candidate_sha="$(git rev-parse HEAD)"
+          {
+            echo '## Validated candidate'
+            echo
+            echo "Source commit $TESTED_SHA"
+            echo "Ready commit $candidate_sha"
+            echo
+            echo 'The workflow never promotes a candidate to main.'
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -123,3 +123,13 @@ node src/benchmark.cjs --json
 node src/benchmark.cjs --attacks --json
 python3 -m http.server 8000
 ```
+
+## Cloud validation
+
+Every branch push and pull request runs the five existing numerical and interaction test suites, builds the page and checks the real browser interactions. Browser checks cover ordinary playback, repeated forecast clicks, continuous power attacks through automatic comparison, thirty live cost view switches and a narrow touch layout. The workflow saves desktop and mobile screenshots as evidence. These smoke checks do not replace visual review or scientific benchmarks.
+
+Cloud changes use a new branch beginning with `cloud/refine/`. Push source edits to that branch without editing the generated page by hand. After validation succeeds, a separate job with write access commits only the tested `index.html` to the same candidate branch. It checks that the remote branch still equals the tested source commit and uses a lease when pushing. It never updates `main`. Main and pull request runs require the checked in page to match the build.
+
+Before promotion, read both successful jobs and the final candidate commit, confirm that the source changes are intended and that the branch still descends from the expected main commit. Update `main` to that candidate with an expected head check. Verify the subsequent main validation and GitHub Pages deployment before calling the update live. A failed or cancelled candidate stays unpublished. The build commit uses the repository Actions token and does not trigger another workflow run.
+
+The cloud browser dependency is pinned to Playwright 1.56.1 and installed only in the runner temporary directory. It does not add a production dependency.

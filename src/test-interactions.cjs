@@ -24,6 +24,8 @@ const source=withoutCards.replace(anchor,
   '  drawMatrix=drawTopologyHistory;\n'+
   '  root.bindTestBus=(element,bus)=>bindAttackTarget(element,()=>bus);\n'+
   '  root.testSummary=()=>comparisonSummary();\n'+
+  '  root.testDrawSeries=drawSeries;\n'+
+  '  root.testPin=(value)=>{if(value!==undefined)pin=value;return pin;};\n'+
   '  root.testPowerContext=()=>powerRecoveryContext();\n'+
   '  root.testShownReference=()=>[...topologyFrame().reference];\n'+
   '  root.testComparison=()=>({active:activeSeries().map(item=>item.key),plotted:plottedSeries().map(item=>item.key),sameSparseSupport:sameSparseSupport()});\n'+anchor);
@@ -69,7 +71,7 @@ function target(tagName='DIV') {
   };
 }
 
-function harness(saved,experiment='prediction') {
+function harness(saved,experiment='prediction',reducedMotion=true) {
   const clock=new Clock(),nodes=new Map(),savedStates=[],captures=new Map();
   function element(tagName='DIV') {
     const node=target(tagName);
@@ -102,14 +104,14 @@ function harness(saved,experiment='prediction') {
   const root=target();root.querySelector=selector=>nodes.get(selector.slice(1));
   root.querySelectorAll=selector=>selector==='[data-series]'?[...seriesButtons.values()]:[];
   const document=Object.assign(target(),{getElementById:()=>root,createElement:tag=>target(tag.toUpperCase()),createTextNode:text=>({textContent:text})});
-  const window=Object.assign(target(),{d3,PowerDemo,TopologyTimeline,matchMedia:()=>({matches:true}),
+  const window=Object.assign(target(),{d3,PowerDemo,TopologyTimeline,matchMedia:()=>({matches:reducedMotion}),
     openai:{widgetState:saved,setWidgetState:state=>{savedStates.push(plain(state));return Promise.resolve();}}});
   vm.runInNewContext(source,{window,document,PowerDemo,d3,TopologyTimeline,console,
     performance:{now:()=>clock.now},setTimeout:clock.setTimeout,clearTimeout:clock.clearTimeout,
     ResizeObserver:class{observe(){}},getComputedStyle:()=>({getPropertyValue:()=>''})},
     {filename:'interface.js'});
   const node=id=>nodes.get('pr-'+id);
-  return {clock,document,window,node,
+  return {clock,document,window,node,drawSeries:(...args)=>root.testDrawSeries(...args),pin:value=>root.testPin(value),
     comparison:()=>plain(root.testComparison()),summary:()=>root.testSummary(),powerContext:()=>root.testPowerContext(),shownReference:()=>plain(root.testShownReference()),seriesButton:key=>seriesButtons.get(key),
     samples:count=>clock.advance(count*1000/Number(node('speed').value)),
     bus:bus=>{const svg=element('g');svg.dataset.bus=String(bus);root.bindTestBus(svg,bus);return svg;},
@@ -1069,4 +1071,42 @@ test('zero noise forecast configuration is explicit and never claims active corr
   assert.equal(h.node('pulse').dataset.attackState,'quiet');
   assert.match(h.node('attack-hint').textContent,/No noise at β 0/);
   assert.match(h.node('pulse').title,/disabled at β 0/);assert.match(h.node('event').textContent,/No noise at β 0/);
+});
+
+
+test('switching cost quantities during playback clears stale readings without changing the experiment',async()=>{
+  const h=harness(undefined,'communication');h.click('run');await h.samples(20);
+  const initial=h.snapshot(),tasks=h.clock.tasks.size;
+  for(const metric of ['gap','total','gap','total']){
+    h.node('tooltip').style.display='block';h.pin('pr-cost');h.change('cost-metric',metric);
+    assert.equal(h.pin(),null,'Pinned values from the former quantity must be dismissed');
+    assert.equal(h.node('tooltip').style.display,'none');
+    assert.equal(h.state().playing,true);assert.equal(h.clock.tasks.size,tasks);
+    assert.equal(h.snapshot().t,initial.t);assert.deepEqual(h.snapshot().cumulative,initial.cumulative);
+  }
+  await h.samples(2);assert.equal(h.snapshot().t,initial.t+2);
+});
+
+test('sample paths and latest markers use the current scale immediately when quantity and sample count change',()=>{
+  const h=harness(undefined,'prediction',false),selections=new Map();
+  function selection(selector){
+    if(selections.has(selector))return selections.get(selector);
+    const value={dataValues:[],attributes:new Map(),interruptions:[],
+      data(values){this.dataValues=values;return this;},join(){return this;},order(){return this;},remove(){return this;},
+      attr(name,value){this.attributes.set(name,this.dataValues.map(item=>typeof value==='function'?value(item):value));return this;},
+      interrupt(name){this.interruptions.push(name??'default');return this;},
+      transition(){assert.fail('Measured curves must not morph between incompatible scales');}
+    };selections.set(selector,value);return value;
+  }
+  const items=[{key:'online',color:'blue'},{key:'scalar',color:'purple'}];
+  const chart={marks:{selectAll:selection},x:value=>value*10,y:value=>100-value*20};
+  h.drawSeries(chart,[{x:0,online:0,scalar:0},{x:1,online:2,scalar:3}],items,true);
+  assert.deepEqual(plain(selection('path.data-series').attributes.get('d')),['M0,100L10,40','M0,100L10,60']);
+  // The next frame has both a different quantity and an extra measured sample.
+  const gapChart={...chart,y:value=>50-value*30};
+  h.drawSeries(gapChart,[{x:0,online:0,scalar:0},{x:1,online:-1,scalar:0},{x:2,online:-2,scalar:0}],items,true);
+  assert.deepEqual(plain(selection('path.data-series').attributes.get('d')),['M0,50L10,50L20,50','M0,50L10,80L20,110']);
+  assert.deepEqual(plain(selection('circle.latest-value').attributes.get('cy')),[50,110]);
+  assert.ok(selection('path.data-series').interruptions.includes('update'));
+  assert.ok(selection('circle.latest-value').interruptions.includes('update'));
 });
