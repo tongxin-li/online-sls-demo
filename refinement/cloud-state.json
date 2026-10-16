@@ -2,7 +2,7 @@
   "program": "Hourly grid demo refinement",
   "timezone": "Asia/Shanghai",
   "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
-  "status": "scheduled",
+  "status": "running",
   "first_run": "2026-10-17T02:00:00+08:00",
   "last_scheduled_run": "2026-10-18T01:00:00+08:00",
   "hard_deadline": "2026-10-18T01:45:00+08:00",
@@ -41,7 +41,13 @@
       "direct_live_inspection": "unverified, previously denied browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-17T04:00:00+08:00",
+    "started_at": "2026-10-17T04:00:18+08:00",
+    "expires_at": "2026-10-17T04:40:18+08:00",
+    "branch": "cloud/refine/20261017-0400",
+    "focus": "Explicit reliability toggle for inspected source, separate from inverter receiver selection."
+  },
   "next_focus": "Make inspected source reliability actions explicit and separate from inverter receiver selection, preserving persistent toggles and frozen deployed links.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
