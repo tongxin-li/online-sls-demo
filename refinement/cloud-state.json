@@ -2,13 +2,13 @@
   "program": "Hourly grid demo refinement",
   "timezone": "Asia/Shanghai",
   "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
-  "status": "running",
+  "status": "scheduled",
   "first_run": "2026-10-17T02:00:00+08:00",
   "last_scheduled_run": "2026-10-18T01:00:00+08:00",
   "hard_deadline": "2026-10-18T01:45:00+08:00",
   "max_scheduled_runs": 24,
   "max_minutes_per_run": 40,
-  "completed_count": 2,
+  "completed_count": 3,
   "runs": [
     {
       "slot": "2026-10-17T02:00:00+08:00",
@@ -70,22 +70,46 @@
       },
       "deployment": "GitHub Pages success",
       "direct_live_inspection": "unverified, previously denied browser access not retried"
+    },
+    {
+      "slot": "2026-10-17T05:00:00+08:00",
+      "started_at": "2026-10-17T04:58:04+08:00",
+      "completed_at": "2026-10-16 21:10:20 UTC",
+      "status": "completed",
+      "changes": [
+        "Added read only current and phase peak worst-bus deviation from each bus nominal voltage for all four controllers in explicit mpu units.",
+        "Added current inverter-command limiting counts and peak bus/time details without changing controls, objective or scenarios.",
+        "Added exact synthetic metric tests, twenty-seed raw-state consistency across discovery and held out comparison, and desktop/mobile DOM checks."
+      ],
+      "source_commit": "fc5812c3bc0c4842e16a86b83c11071f423fba5e",
+      "published_commit": "b7381aab9c258b1be7f2f4736f9e99a9a6d47864",
+      "candidate_run": 38966611763,
+      "main_run": 38967072952,
+      "pages_run": 38967072806,
+      "tests": {
+        "suites": 5,
+        "total": 144,
+        "failed": 0,
+        "build": "passed",
+        "main_consistency": "passed",
+        "diagnostics": "Exact synthetic formula and state-time cases; all predefined seeds 1 through 20 across 180-sample discovery and fresh held out comparison; phase reset, paired physical pulse, immutability and limiting-count checks",
+        "browser": "All four diagnostic rows agree with raw executed states and displayed units on desktop and mobile, repeated forecast actions, power attacks, automatic comparison, thirty live cost switches and responsive layout"
+      },
+      "superseded_candidate": {
+        "run": 38966440564,
+        "job": 117194227515,
+        "reason": "Diagnostic regression expected boolean true from deployTopology instead of returned snapshot. Corrected to assert snapshot phase. Superseded before publication."
+      },
+      "screenshots": {
+        "artifact_id": 12075256158,
+        "pixel_review": "unverified"
+      },
+      "deployment": "GitHub Pages success",
+      "direct_live_inspection": "unverified, previously denied browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-17T05:00:00+08:00",
-    "started_at": "2026-10-17T04:58:04+08:00",
-    "expires_at": "2026-10-17T05:38:04+08:00",
-    "branch": "cloud/refine/20261017-0500",
-    "focus": "Measured nominal-profile voltage deviation and inverter limiting diagnostics for all four controllers.",
-    "stage": "candidate_validation",
-    "changes": [
-      "Added read only current and phase peak worst-bus deviation from each bus nominal voltage for all four controllers in explicit mpu units.",
-      "Added current inverter-command limiting counts and peak bus/time details without changing controls, objective or scenarios.",
-      "Added exact synthetic metric tests, twenty-seed raw-state consistency across discovery and held out comparison, and desktop/mobile DOM checks."
-    ]
-  },
-  "next_focus": "Expose meaningful deviation from each bus nominal profile and recovery or saturation metrics before introducing a bounded stress preset. Keep reference scenario and shared-controller comparisons honest.",
+  "active_run": null,
+  "next_focus": "Design a bounded physically justified sustained-load stress preset and prespecified recovery metric, retaining the reference scenario. Evaluate all predefined seeds with identical forecasts and realized disturbances, including ties and unfavorable regimes, without retuning gains or cost.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
