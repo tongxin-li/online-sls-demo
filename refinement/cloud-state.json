@@ -2,13 +2,13 @@
   "program": "Hourly grid demo refinement",
   "timezone": "Asia/Shanghai",
   "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
-  "status": "running",
+  "status": "scheduled",
   "first_run": "2026-10-17T02:00:00+08:00",
   "last_scheduled_run": "2026-10-18T01:00:00+08:00",
   "hard_deadline": "2026-10-18T01:45:00+08:00",
   "max_scheduled_runs": 24,
   "max_minutes_per_run": 40,
-  "completed_count": 3,
+  "completed_count": 4,
   "runs": [
     {
       "slot": "2026-10-17T02:00:00+08:00",
@@ -106,22 +106,172 @@
       },
       "deployment": "GitHub Pages success",
       "direct_live_inspection": "unverified, previously denied browser access not retried"
+    },
+    {
+      "slot": "2026-10-17T06:00:00+08:00",
+      "started_at": "2026-10-17T06:04:39+08:00",
+      "completed_at": "2026-10-16 22:24:54 UTC",
+      "status": "completed",
+      "changes": [
+        "Added optional comparison-only four-site solar outage from actions 30 through 49 using existing generation bounds.",
+        "Display requested/applied outage power and physical start/restoration markers, preserve reference and saved replay.",
+        "Audit all twenty predefined seeds at zero, high and severe forecast noise, with full costs, frozen support and paired-reference recovery."
+      ],
+      "science_source_commit": "a6acbfbbbe7198f7ab2dd2a8b803865207e76bf8",
+      "generated_commit": "171673396513c0276e574173f216485a4949433a",
+      "source_commit": "b4dd78acc260bf8166f945cc1fdcfe0e004a0dbf",
+      "published_commit": "b4dd78acc260bf8166f945cc1fdcfe0e004a0dbf",
+      "candidate_run": 38974712200,
+      "science_candidate_run": 38974155438,
+      "audit_run": 38974155548,
+      "main_run": 38975190858,
+      "main_audit_run": 38975190830,
+      "pages_run": 38975189931,
+      "tests": {
+        "suites": 5,
+        "total": 146,
+        "failed": 0,
+        "build": "passed",
+        "main_consistency": "passed",
+        "browser": "Outage onset/restoration, requested/applied bounds, actual physical event markers, saved replay, existing repeated attacks and thirty chart switches, mobile UI and scientific report layout",
+        "scientific_audit": "All predefined seeds 1 through 20 at beta 0,1,2; reference and outage paired with identical issued forecasts and frozen supports; existing reference means unchanged; main report exactly reproduced"
+      },
+      "scientific_results": [
+        {
+          "beta": 0,
+          "comparisons": {
+            "scalar": {
+              "learnedSavingsPercent": 0,
+              "wins": 0,
+              "ties": 20,
+              "losses": 0
+            },
+            "static": {
+              "learnedSavingsPercent": -4.544042636541647,
+              "wins": 1,
+              "ties": 0,
+              "losses": 19
+            },
+            "causal": {
+              "learnedSavingsPercent": 3.798589882469806,
+              "wins": 20,
+              "ties": 0,
+              "losses": 0
+            }
+          },
+          "recovery": {
+            "online": {
+              "meanConfirmedSeconds": 8,
+              "failures": 0
+            },
+            "scalar": {
+              "meanConfirmedSeconds": 8,
+              "failures": 0
+            },
+            "static": {
+              "meanConfirmedSeconds": 8,
+              "failures": 0
+            },
+            "causal": {
+              "meanConfirmedSeconds": 8,
+              "failures": 0
+            }
+          }
+        },
+        {
+          "beta": 1,
+          "comparisons": {
+            "scalar": {
+              "learnedSavingsPercent": 1.491006663973655,
+              "wins": 20,
+              "ties": 0,
+              "losses": 0
+            },
+            "static": {
+              "learnedSavingsPercent": 1.521859958224563,
+              "wins": 13,
+              "ties": 0,
+              "losses": 7
+            },
+            "causal": {
+              "learnedSavingsPercent": 1.9122532719869683,
+              "wins": 19,
+              "ties": 0,
+              "losses": 1
+            }
+          },
+          "recovery": {
+            "online": {
+              "meanConfirmedSeconds": 8,
+              "failures": 0
+            },
+            "scalar": {
+              "meanConfirmedSeconds": 8,
+              "failures": 0
+            },
+            "static": {
+              "meanConfirmedSeconds": 8,
+              "failures": 0
+            },
+            "causal": {
+              "meanConfirmedSeconds": 8,
+              "failures": 0
+            }
+          }
+        },
+        {
+          "beta": 2,
+          "comparisons": {
+            "scalar": {
+              "learnedSavingsPercent": 4.417803412249024,
+              "wins": 20,
+              "ties": 0,
+              "losses": 0
+            },
+            "static": {
+              "learnedSavingsPercent": 14.582005926820687,
+              "wins": 20,
+              "ties": 0,
+              "losses": 0
+            },
+            "causal": {
+              "learnedSavingsPercent": -5.269614339126525,
+              "wins": 0,
+              "ties": 0,
+              "losses": 20
+            }
+          },
+          "recovery": {
+            "online": {
+              "meanConfirmedSeconds": 8,
+              "failures": 0
+            },
+            "scalar": {
+              "meanConfirmedSeconds": 8,
+              "failures": 0
+            },
+            "static": {
+              "meanConfirmedSeconds": 8,
+              "failures": 0
+            },
+            "causal": {
+              "meanConfirmedSeconds": 8,
+              "failures": 0
+            }
+          }
+        }
+      ],
+      "report": "benchmark-stress.json",
+      "screenshots": {
+        "artifact_id": 12078212248,
+        "pixel_review": "unverified"
+      },
+      "deployment": "GitHub Pages success",
+      "direct_live_inspection": "unverified, previously denied browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-17T06:00:00+08:00",
-    "started_at": "2026-10-17T06:04:39+08:00",
-    "expires_at": "2026-10-17T06:44:39+08:00",
-    "branch": "cloud/refine/20261017-0600",
-    "focus": "Prespecified bounded 20 second solar outage only in held out comparison with paired seed audit.",
-    "stage": "candidate_validation_and_paired_audit",
-    "changes": [
-      "Added optional comparison-only four-site solar outage from actions 30 through 49 using existing generation bounds.",
-      "Display requested/applied outage power and physical start/restoration markers, preserve reference and saved replay.",
-      "Audit all twenty predefined seeds at zero, high and severe forecast noise, with full costs, frozen support and paired-reference recovery."
-    ]
-  },
-  "next_focus": "Design a bounded physically justified sustained-load stress preset and prespecified recovery metric, retaining the reference scenario. Evaluate all predefined seeds with identical forecasts and realized disturbances, including ties and unfavorable regimes, without retuning gains or cost.",
+  "active_run": null,
+  "next_focus": "Make inspected source forecast errors and issuance timing observable against revealed forcing, without leaking future observations or changing frozen deployed links. Preserve the reference and audited solar outage scenarios.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
