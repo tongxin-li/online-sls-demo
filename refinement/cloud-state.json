@@ -2,7 +2,7 @@
   "program": "Hourly grid demo refinement",
   "timezone": "Asia/Shanghai",
   "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
-  "status": "scheduled",
+  "status": "running",
   "first_run": "2026-10-17T02:00:00+08:00",
   "last_scheduled_run": "2026-10-18T01:00:00+08:00",
   "hard_deadline": "2026-10-18T01:45:00+08:00",
@@ -108,7 +108,13 @@
       "direct_live_inspection": "unverified, previously denied browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-17T06:00:00+08:00",
+    "started_at": "2026-10-17T06:04:39+08:00",
+    "expires_at": "2026-10-17T06:44:39+08:00",
+    "branch": "cloud/refine/20261017-0600",
+    "focus": "Prespecified bounded 20 second solar outage only in held out comparison with paired seed audit."
+  },
   "next_focus": "Design a bounded physically justified sustained-load stress preset and prespecified recovery metric, retaining the reference scenario. Evaluate all predefined seeds with identical forecasts and realized disturbances, including ties and unfavorable regimes, without retuning gains or cost.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
