@@ -214,8 +214,36 @@
       : 'No links have changed yet. Learning weights may still change.';
     $('topology-note').title=snapshot.phase==='deployment' ? (communicationComparison()?'Discovery history. Deployed links and prediction weights stay fixed.':'Discovery history. Deployed links stay fixed while prediction weights continue adapting.') : 'History displays observed connectivity only. Reviewing an update does not change the controller.';
   }
+  // Read only the last revealed pair. Never read a future forcing or forecast base.
+  function inspectedForecastObservation() {
+    const inspection=predictionInspection(),sample=snapshot.lastSample;
+    if(!inspection || historyIndex!==null || !sample) return null;
+    const index=inspection.source-1;
+    const forecast=sample.forecast[index],realized=sample.disturbance[index];
+    return {source:inspection.source,receiver:inspection.receiver,action:sample.t,
+      issuedAt:Math.max(0,sample.t-PowerDemo.constants.preview+1),observedAt:sample.t+1,
+      forecast,realized,error:forecast-realized};
+  }
+  function renderForecastObservation(inspection) {
+    const panel=$('forecast-observation'),observation=inspectedForecastObservation();
+    panel.hidden=!inspection;
+    $('forecast-values').hidden=!observation;
+    panel.dataset.available=String(!!observation);
+    for(const key of ['source','receiver','action','issuedAt','observedAt','forecast','realized','error'])
+      panel.dataset[key]=observation ? String(observation[key]) : '';
+    $('forecast-timing').textContent=observation
+      ? 'Source '+observation.source+' · Action '+observation.action+' s · Issued '+observation.issuedAt+' s · Revealed '+observation.observedAt+' s'
+      : historyIndex!==null ? 'Saved links · Return to Latest for current observations'
+      : 'Run or step to reveal a source observation';
+    for(const key of ['forecast','realized','error'])
+      $('observed-'+key).textContent=observation ? (1000*observation[key]).toFixed(3) : '—';
+    $('forecast-support').textContent=!inspection ? '' : historyIndex!==null ? 'Current sample hidden while reviewing saved links'
+      : snapshot.phase==='discovery' ? 'Discovery uses dense messages · Displayed links are candidates'
+      : (inspection.connected ? 'Permitted by deployed support' : 'Excluded from deployed support')+' at inverter '+inspection.receiver+' · Links fixed';
+  }
   function renderInspectedSource() {
     const inspection=predictionInspection(),control=$('source-fault');
+    renderForecastObservation(inspection);
     $('source-controls').hidden=!inspection;
     const bus=inspection?.source;
     const noisy=!!inspection && snapshot.faults.includes(bus);

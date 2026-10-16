@@ -79,8 +79,31 @@ async function main() {
       }
       assert.match(result.detail,/Δ .* mpu/);
     };
+    const checkForecastObservation = async surface => {
+      const reading=await surface.evaluate(()=>{
+        const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),state=root.powerDemo.getState();
+        const panel=document.querySelector('#pr-forecast-observation'),values=document.querySelector('#pr-forecast-values');
+        const active=state.inspectedSource!==null&&[5,7,8,12,14,18,21,24].includes(state.selectedBus);
+        const sample=snapshot.lastSample,index=state.inspectedSource-1;
+        return {hidden:panel.hidden,valuesHidden:values.hidden,data:{...panel.dataset},active,
+          expected:active&&state.historyIndex===null&&sample?{source:state.inspectedSource,receiver:state.selectedBus,
+            action:sample.t,issuedAt:Math.max(0,sample.t-4),observedAt:sample.t+1,
+            forecast:sample.forecast[index],realized:sample.disturbance[index],error:sample.forecast[index]-sample.disturbance[index]}:null,
+          shown:Object.fromEntries(['forecast','realized','error'].map(key=>[key,document.querySelector('#pr-observed-'+key).textContent])),
+          context:document.querySelector('#pr-forecast-support').textContent,phase:snapshot.phase};
+      });
+      assert.equal(reading.hidden,!reading.active);
+      assert.equal(reading.valuesHidden,!reading.expected);
+      assert.equal(reading.data.available,String(!!reading.expected));
+      if(reading.expected){
+        for(const [key,value] of Object.entries(reading.expected))assert.equal(Number(reading.data[key]),value,'Observed '+key+' matches the actual revealed pair');
+        for(const key of ['forecast','realized','error'])assert.equal(reading.shown[key],(1000*reading.expected[key]).toFixed(3));
+        assert.match(reading.context,reading.phase==='discovery'?/Discovery uses dense messages/:/deployed support.*Links fixed/);
+      }else assert.equal(reading.data.forecast,'','Unavailable observations clear stale numeric metadata');
+    };
     const checkPlots = async () => {
       await checkVoltageMetrics(page);
+      await checkForecastObservation(page);
       for (const chart of ['pr-cost', 'pr-stage', 'pr-voltage']) {
         const paths = await page.locator(`#${chart} path.data-series`).evaluateAll(elements => elements.map(element => element.getAttribute('d')));
         assert.equal(paths.length, 4, `${chart} retains all four controller curves`);
@@ -101,6 +124,7 @@ async function main() {
           const root=document.querySelector('#power-response-demo');
           return {state:root.powerDemo.getState(),snapshot:JSON.stringify(root.powerDemo.getSnapshot())};
         });
+        await checkForecastObservation(page);
         assert.equal(reading.snapshot,before,'Inspection changes no physical, forecast or control state');
         assert.equal(reading.state.selectedBus,edge.receiver);
         assert.equal(reading.state.inspectedSource,source);
@@ -133,6 +157,7 @@ async function main() {
         assert.equal(await page.locator('#pr-source-fault').getAttribute('aria-label'),(wasNoisy?'Repair':'Corrupt')+' forecast source at bus '+edge.source);
         await page.locator('#pr-source-fault').click();
         const after=await sourceState();
+        await checkForecastObservation(page);
         assert.equal(after.faults.includes(edge.source),!wasNoisy,'Each explicit action toggles once');
         assert.deepEqual(after.faults.filter(bus=>bus!==edge.source),initial.faults.filter(bus=>bus!==edge.source),'Only inspected source changes');
         assert.deepEqual(after.state,initial.state,'Receiver, source selection and pause state remain unchanged');
@@ -195,6 +220,8 @@ async function main() {
     assert.equal(outage.powerScenario,'solar-outage');assert.equal(outage.scenario.active,true);
     assert.ok(outage.scenario.appliedKw>0&&outage.scenario.appliedKw<=360+1e-8);
     for(const bus of [5,7,14,21])assert.ok(Math.abs(outage.generationP[bus-1])<1e-8);
+    await page.locator('#pr-matrix .matrix-cell[data-receiver="5"][data-source="7"]').click();
+    await checkForecastObservation(page);
     await page.screenshot({path:path.join(output,'solar-outage.png'),fullPage:true});
     await page.locator('#pr-run').click();
     await page.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t>=51);
@@ -261,6 +288,7 @@ async function main() {
       const mobileAfter=await phone.evaluate(()=>{
         const root=document.querySelector('#power-response-demo');return {state:root.powerDemo.getState(),snapshot:root.powerDemo.getSnapshot()};
       });
+      await checkForecastObservation(phone);
       assert.equal(mobileAfter.snapshot.faults.includes(7),action==='Corrupt');
       assert.equal(mobileAfter.state.selectedBus,5);assert.equal(mobileAfter.state.inspectedSource,7);
       assert.equal(mobileAfter.state.playing,false);
@@ -281,7 +309,7 @@ async function main() {
     assert.ok(reportLayout.page<=reportLayout.viewport+1,'Scientific report stays within the mobile page');
     await phone.screenshot({path:path.join(output,'environment.png'),fullPage:true});
     assert.deepEqual(errors, [], 'No browser runtime errors');
-    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), touchEvents, checks: ['playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'continuous mobile power attack', 'mobile touch and layout'], errors }, null, 2));
+    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), touchEvents, checks: ['playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'continuous mobile power attack', 'mobile touch and layout'], errors }, null, 2));
     console.log('Browser smoke passed');
   } finally {
     if (browser) await browser.close();

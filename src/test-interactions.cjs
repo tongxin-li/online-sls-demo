@@ -26,6 +26,7 @@ const source=withoutCards.replace(anchor,
   '  root.testSummary=()=>comparisonSummary();\n'+
   '  root.testInspectPredictionLink=(receiver,source)=>inspectPredictionLink(receiver,source);\n'+
   '  root.testInspection=()=>predictionInspection();\n'+
+  '  root.testForecastObservation=()=>inspectedForecastObservation();\n'+
   '  root.testIssuedForecasts=()=>simulation.forecasts;\n'+
   '  root.testDrawSeries=drawSeries;\n'+
   '  root.testPin=(value)=>{if(value!==undefined)pin=value;return pin;};\n'+
@@ -124,7 +125,7 @@ function harness(saved,experiment='prediction',reducedMotion=true) {
       if(type==='pointerup'||type==='pointercancel')recipient.releasePointerCapture(id);
       return result;
     },
-    inspectLink:(receiver,source)=>root.testInspectPredictionLink(receiver,source),inspection:()=>plain(root.testInspection()),issuedForecasts:()=>plain(root.testIssuedForecasts()),
+    inspectLink:(receiver,source)=>root.testInspectPredictionLink(receiver,source),inspection:()=>plain(root.testInspection()),forecastObservation:()=>plain(root.testForecastObservation()),issuedForecasts:()=>plain(root.testIssuedForecasts()),
     snapshot:()=>root.powerDemo.getSnapshot(),state:()=>plain(root.powerDemo.getState()),
     saved:()=>savedStates.at(-1),
     event:(id,type,detail)=>node(id).dispatch(type,detail),
@@ -1262,4 +1263,67 @@ test('power scenario selection preserves exact replay and Learn again while keep
   h.click('deploy');assert.equal(h.snapshot().powerScenario,'solar-outage');
   h.change('power-scenario','reference');assert.equal(h.snapshot().powerScenario,'reference');
   assert.equal(h.snapshot().phase,'discovery');assert.equal(h.snapshot().t,0);assert.equal(h.state().playing,false);
+});
+
+
+test('source observation uses only the last revealed forcing pair with exact issue timing and replay',()=>{
+  const h=harness(undefined,'communication');h.inspectLink(5,7);
+  assert.equal(h.forecastObservation(),null);
+  assert.equal(h.node('forecast-values').hidden,true);
+  assert.match(h.node('forecast-timing').textContent,/Run or step/);
+  for(let i=0;i<12;i++) {
+    h.click('step');
+    const snapshot=h.snapshot(),sample=snapshot.lastSample,issued=h.issuedForecasts()[sample.t];
+    const expected={source:7,receiver:5,action:sample.t,issuedAt:issued.issuedAt,observedAt:snapshot.t,
+      forecast:sample.forecast[6],realized:sample.disturbance[6],error:sample.forecast[6]-sample.disturbance[6]};
+    assert.deepEqual(h.forecastObservation(),expected);
+    assert.ok(expected.issuedAt<=expected.action&&expected.observedAt===expected.action+1);
+    assert.equal(expected.forecast,issued.forecast[6]);
+    assert.equal(h.node('forecast-observation').dataset.observedAt,String(snapshot.t));
+    assert.equal(h.node('observed-error').textContent,(1000*expected.error).toFixed(3));
+    assert.equal(h.state().playing,false);
+  }
+  const before=plain(h.snapshot()),observation=h.forecastObservation();
+  h.inspectLink(5,14);assert.equal(h.forecastObservation().forecast,before.lastSample.forecast[13]);
+  assert.deepEqual(plain(h.snapshot()),before,'Inspection never changes the experiment');
+  h.inspectLink(5,7);
+  const restored=harness(h.saved());
+  assert.deepEqual(restored.forecastObservation(),observation,'Version 13 replay recreates the exact revealed observation');
+});
+
+test('source reliability toggles do not rewrite observed or already issued forecasts',()=>{
+  const changed=harness(undefined,'communication'),reference=harness(undefined,'communication');
+  for(const h of [changed,reference]){h.click('step');h.inspectLink(5,7);}
+  const observation=changed.forecastObservation(),issued=changed.issuedForecasts();
+  changed.click('source-fault');
+  assert.deepEqual(changed.forecastObservation(),observation,'Current reliability is not retroactive');
+  assert.deepEqual(changed.issuedForecasts(),issued);
+  let observedDifference=false;
+  for(let i=0;i<8;i++){
+    changed.click('step');reference.click('step');
+    const actual=changed.forecastObservation(),control=reference.forecastObservation();
+    if(actual.action<issued.length)assert.equal(actual.forecast,control.forecast,'Sealed preview remains unchanged');
+    else if(actual.forecast!==control.forecast)observedDifference=true;
+    assert.ok(Math.abs(actual.realized-control.realized)<1e-12,'Only source reliability changed, not physical forcing');
+  }
+  assert.equal(observedDifference,true,'Changed source error becomes observable after the sealed preview');
+});
+
+test('source observation distinguishes dense discovery from frozen deployed support and saved history',async()=>{
+  const h=harness(undefined,'communication');h.inspectLink(5,7);h.click('step');
+  assert.match(h.node('forecast-support').textContent,/Discovery uses dense messages/);
+  h.event('topology-history','input');
+  assert.equal(h.forecastObservation(),null);assert.equal(h.node('forecast-values').hidden,true);
+  assert.equal(h.node('forecast-observation').dataset.forecast,'','History must not carry stale current values');
+  assert.match(h.node('forecast-timing').textContent,/Return to Latest/);
+  h.click('history-live');assert.ok(h.forecastObservation());
+  h.check('auto-compare',false);await compare(h);h.click('deploy');h.click('run');
+  h.inspectLink(5,7);assert.equal(h.forecastObservation(),null,'Fresh comparison has no revealed samples');
+  h.click('step');const snapshot=plain(h.snapshot());
+  const edge=snapshot.recommendations.find(edge=>edge.from!==edge.to);
+  h.inspectLink(edge.to,edge.from);assert.match(h.node('forecast-support').textContent,/Permitted by deployed support/);
+  const absent=Array.from({length:23},(_,i)=>i+2).find(bus=>bus!==edge.to&&!snapshot.recommendations.some(e=>e.to===edge.to&&e.from===bus));
+  h.inspectLink(edge.to,absent);assert.match(h.node('forecast-support').textContent,/Excluded from deployed support/);
+  assert.equal(h.forecastObservation().forecast,snapshot.lastSample.forecast[absent-1],'Excluded source can be audited, not sent on a fabricated link');
+  assert.deepEqual(plain(h.snapshot()),snapshot);
 });

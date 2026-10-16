@@ -36,6 +36,16 @@
       <p id="pr-link-budget" class="pr-caption pr-link-budget"></p><p id="pr-noisy-links" class="pr-caption pr-noisy-links" hidden></p><div class="pr-matrix-key" id="pr-matrix-key"></div><svg class="pr-chart" id="pr-matrix" role="group" aria-label="Candidate prediction links. Rows receive forecasts from columns"></svg>
       <p id="pr-matrix-inspect-hint" class="pr-caption">Tap a cell to locate its source and inverter</p>
       <div id="pr-source-controls" class="pr-source-controls" hidden><button type="button" id="pr-source-fault" class="btn btn-quiet" aria-describedby="pr-source-status" disabled>Corrupt source</button><span id="pr-source-status" class="pr-caption" role="status"></span></div>
+      <div id="pr-forecast-observation" class="pr-forecast-observation" hidden>
+        <p id="pr-forecast-timing" class="pr-caption"></p>
+        <dl id="pr-forecast-values" class="pr-forecast-values" aria-label="Raw source voltage forcing in mpu" hidden>
+          <div><dt>Raw forecast</dt><dd id="pr-observed-forecast">—</dd></div>
+          <div><dt>Revealed forcing</dt><dd id="pr-observed-realized">—</dd></div>
+          <div><dt>Error <span title="Raw forecast minus revealed forcing">f − w</span></dt><dd id="pr-observed-error">—</dd></div>
+        </dl>
+        <p class="pr-caption">mpu · 1 mpu = 0.001 pu · Error includes unforecast power changes</p>
+        <p id="pr-forecast-support" class="pr-caption"></p>
+      </div>
       <div class="pr-panel-foot pr-matrix-detail"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div><div class="pr-topology-status"><strong id="pr-topology-status">Connectivity unchanged</strong><span id="pr-topology-gain">Weights changed 0%</span></div><div id="pr-topology-events" class="pr-topology-events" aria-label="Recent topology changes" hidden></div><div class="pr-topology-history"><label for="pr-topology-history" id="pr-history-count">0 link updates</label><input id="pr-topology-history" type="range" min="0" max="0" step="1" value="0" aria-label="Topology history" disabled><button type="button" id="pr-history-live" aria-pressed="true">Latest</button></div><p id="pr-topology-note" class="pr-caption" aria-live="polite"></p>
     </section>
     <section class="pr-panel pr-stage-panel" aria-labelledby="pr-stage-title">

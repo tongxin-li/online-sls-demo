@@ -276,7 +276,13 @@
     "lease_expires_at": "2026-10-17T07:43:44+08:00",
     "branch": "cloud/refine/20261017-0700",
     "base_main": "f9d089f70a8d6bde3388a9661c30b0b94f53d504",
-    "focus": "Read only inspected source forecast error and issuance timing from revealed observations"
+    "focus": "Read only inspected source forecast error and issuance timing from revealed observations",
+    "status": "candidate validation",
+    "changes": [
+      "Read only raw source forecast, revealed voltage forcing and signed error in explicit mpu.",
+      "Exact issue, action and reveal times; pending and history states prevent future or stale observation.",
+      "Dense discovery and frozen deployed support meaning retained separately from reliability state."
+    ]
   },
   "next_focus": "Make inspected source forecast errors and issuance timing observable against revealed forcing, without leaking future observations or changing frozen deployed links. Preserve the reference and audited solar outage scenarios.",
   "priorities": [
