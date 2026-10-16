@@ -2,7 +2,7 @@
   "program": "Hourly grid demo refinement",
   "timezone": "Asia/Shanghai",
   "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
-  "status": "scheduled",
+  "status": "running",
   "first_run": "2026-10-17T02:00:00+08:00",
   "last_scheduled_run": "2026-10-18T01:00:00+08:00",
   "hard_deadline": "2026-10-18T01:45:00+08:00",
@@ -72,7 +72,13 @@
       "direct_live_inspection": "unverified, previously denied browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-17T05:00:00+08:00",
+    "started_at": "2026-10-17T04:58:04+08:00",
+    "expires_at": "2026-10-17T05:38:04+08:00",
+    "branch": "cloud/refine/20261017-0500",
+    "focus": "Measured nominal-profile voltage deviation and inverter limiting diagnostics for all four controllers."
+  },
   "next_focus": "Expose meaningful deviation from each bus nominal profile and recovery or saturation metrics before introducing a bounded stress preset. Keep reference scenario and shared-controller comparisons honest.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
