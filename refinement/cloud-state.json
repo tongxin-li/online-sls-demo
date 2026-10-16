@@ -2,13 +2,13 @@
   "program": "Hourly grid demo refinement",
   "timezone": "Asia/Shanghai",
   "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
-  "status": "running",
+  "status": "scheduled",
   "first_run": "2026-10-17T02:00:00+08:00",
   "last_scheduled_run": "2026-10-18T01:00:00+08:00",
   "hard_deadline": "2026-10-18T01:45:00+08:00",
   "max_scheduled_runs": 24,
   "max_minutes_per_run": 40,
-  "completed_count": 1,
+  "completed_count": 2,
   "runs": [
     {
       "slot": "2026-10-17T02:00:00+08:00",
@@ -39,22 +39,41 @@
       },
       "deployment": "GitHub Pages success",
       "direct_live_inspection": "unverified, previously denied browser access not retried"
+    },
+    {
+      "slot": "2026-10-17T04:00:00+08:00",
+      "started_at": "2026-10-17T04:00:18+08:00",
+      "completed_at": "2026-10-16 20:09:14 UTC",
+      "status": "completed",
+      "changes": [
+        "Added explicit Corrupt or Repair action for the inspected forecast source without changing its receiving inverter or pause state.",
+        "Show persistent reliability state and disable source changes in saved topology history and zero noise.",
+        "Preserved version 13 replay with optional source inspection; added issued-forecast causality, deployment persistence and desktop/mobile action regressions."
+      ],
+      "source_commit": "141fa2f4022d5349ed2eba2b807e2cb23b51ab23",
+      "published_commit": "dcf1e39659663e05f43591fc45b6b0f72d0be61a",
+      "candidate_run": 38959513564,
+      "main_run": 38959815010,
+      "pages_run": 38959814672,
+      "tests": {
+        "suites": 5,
+        "total": 142,
+        "failed": 0,
+        "build": "passed",
+        "main_consistency": "passed",
+        "browser": "passed explicit inspected source actions on desktop and touch, preserved receiver and pause, discovery/deployment inspection invariance, repeated attacks, handoff and thirty live cost switches",
+        "causality": "Existing forecasts immutable, only newly issued inspected source forecasts differ with identical paired physical generator"
+      },
+      "screenshots": {
+        "artifact_id": 12071314434,
+        "pixel_review": "unverified"
+      },
+      "deployment": "GitHub Pages success",
+      "direct_live_inspection": "unverified, previously denied browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-17T04:00:00+08:00",
-    "started_at": "2026-10-17T04:00:18+08:00",
-    "expires_at": "2026-10-17T04:40:18+08:00",
-    "branch": "cloud/refine/20261017-0400",
-    "focus": "Explicit reliability toggle for inspected source, separate from inverter receiver selection.",
-    "stage": "candidate_validation",
-    "changes": [
-      "Added explicit Corrupt or Repair action for the inspected forecast source without changing its receiving inverter or pause state.",
-      "Show persistent reliability state and disable source changes in saved topology history and zero noise.",
-      "Preserved version 13 replay with optional source inspection; added issued-forecast causality, deployment persistence and desktop/mobile action regressions."
-    ]
-  },
-  "next_focus": "Make inspected source reliability actions explicit and separate from inverter receiver selection, preserving persistent toggles and frozen deployed links.",
+  "active_run": null,
+  "next_focus": "Expose meaningful deviation from each bus nominal profile and recovery or saturation metrics before introducing a bounded stress preset. Keep reference scenario and shared-controller comparisons honest.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
