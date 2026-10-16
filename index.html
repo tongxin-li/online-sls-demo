@@ -2169,7 +2169,11 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   });
   $('speed').addEventListener('change', () => { if (playing) { clearTimeout(timer); nextTickAt=0; schedule(); } save(); });
   $('auto-compare').addEventListener('change',()=>{render();save();});
-  $('cost-metric').addEventListener('change',()=>{drawCost();save();});
+  $('cost-metric').addEventListener('change',()=>{
+    // A pinned reading belongs to the previous quantity and scale.
+    $('tooltip').style.display='none';pin=null;
+    drawCost();save();
+  });
   $('strength').addEventListener('change', () => { drawNetwork(); save(); });
   $('attack-mode').addEventListener('change',()=>{releaseAttack();renderControls();drawNetwork();save();});
   $('intervention').addEventListener('change',()=>{
@@ -2285,7 +2289,10 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     });
     element.addEventListener('click',event=>{
       event.preventDefault();event.stopPropagation();
-      if(event.detail===0) {
+      // Some Chromium versions emit a touch click with detail 0. The touch
+      // already activated on pointerdown, so only clicks without a pointer
+      // source represent keyboard or assistive activation here.
+      if(event.detail===0 && !event.pointerType) {
         if(forecastMode()||continuousMode()) activateAttack(getBus(),element);
         else if(!heldAttack) pulse(getBus());
       }
@@ -2705,13 +2712,16 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     ).order().attr('data-series-key',item => item.key).attr('stroke',item => item.color)
       .attr('stroke-width',item => item.key === 'online' ? 2.2 : 1.8).attr('stroke-dasharray',item => item.dash || null)
       .attr('stroke-linejoin','round').attr('stroke-linecap','round');
-    animate(lines).attr('d',item => d3.line().defined(d => Number.isFinite(d[item.key])).x(d=>chart.x(d.x)).y(d=>chart.y(d[item.key]))(observations));
+    // Repaint measured samples together with the axes. SVG path interpolation
+    // blends unrelated points when the sample count or metric changes and can
+    // briefly display invented curves against the new scale.
+    lines.interrupt().interrupt('update').attr('d',item => d3.line().defined(d => Number.isFinite(d[item.key])).x(d=>chart.x(d.x)).y(d=>chart.y(d[item.key]))(observations));
     chart.marks.selectAll('path.sample-symbol').remove();
     const latest = observations[observations.length-1];
     const dots = chart.marks.selectAll('circle.latest-value').data(showCurrent && latest ? paintOrder : [],item => item.key).join('circle')
       .attr('class','latest-value').attr('r',item => item.key === 'online' ? 2.7 : 2)
       .attr('fill',item => item.color).attr('stroke','var(--background)').attr('stroke-width',.8).order();
-    if(latest) animate(dots).attr('cx',chart.x(latest.x)).attr('cy',item => chart.y(latest[item.key]));
+    if(latest) dots.interrupt().interrupt('update').attr('cx',chart.x(latest.x)).attr('cy',item => chart.y(latest[item.key]));
   }
 
   function hover(chart,observations,items,xLabel) {
@@ -2748,44 +2758,45 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     const groups=[];
     for(const item of events) {
       const x=chart.x(item.t+1), previous=groups.at(-1);
-      if(previous && x-previous.right<78) {previous.items.push(item);previous.right=x;}
+      if(previous && x-previous.right<120) {previous.items.push(item);previous.right=x;}
       else groups.push({left:x,right:x,items:[item]});
     }
     groups.forEach(group=>{
       const first=group.items[0]; group.key=first.t+'_'+first.type+'_'+first.bus;
       group.attacks=group.items.filter(item=>item.type==='pulse').length;
       group.count=group.attacks || group.items.length;
-      group.label=group.attacks?(group.count>1?'Attacks':'Attack'):'Forecast';
-      group.width=24+group.label.length*6;
+      group.label=group.attacks?(group.count>1?'Attacks':'Attack'):'Forecast changed';
+      group.width=(group.attacks?24:16)+group.label.length*6;
       group.x=Math.max(chart.frame.x+group.width/2,Math.min(chart.frame.x+chart.frame.w-group.width/2,(group.left+group.right)/2));
     });
     const markers=chart.marks.selectAll('g.intervention-markers').data([null]).join('g').attr('class','intervention-markers');
     markers.selectAll('rect').data(groups,group=>group.key).join('rect')
       .attr('x',g=>g.left-2).attr('width',g=>Math.max(4,g.right-g.left+4))
-      .attr('y',chart.frame.y).attr('height',chart.frame.h).attr('fill','var(--attack)').attr('opacity',.085);
+      .attr('y',chart.frame.y).attr('height',chart.frame.h).attr('fill',g=>g.attacks?'var(--attack)':'#687580').attr('opacity',.085);
     markers.selectAll('line').data(groups,group=>group.key).join('line')
       .interrupt().interrupt('update').attr('x1',g=>g.left).attr('x2',g=>g.left)
       .attr('y1',chart.frame.y).attr('y2',chart.frame.y+chart.frame.h)
-      .attr('stroke','var(--attack)').attr('stroke-opacity',.65).attr('stroke-width',1.3).attr('stroke-dasharray','3 3');
+      .attr('stroke',g=>g.attacks?'var(--attack)':'#687580').attr('stroke-opacity',.65).attr('stroke-width',1.3).attr('stroke-dasharray','3 3');
     const labels=chart.svg.select('.intervention-labels').selectAll('g').data(groups,g=>g.key).join(enter=>{
       const badge=enter.append('g').attr('class','intervention-badge').attr('role','img');
       badge.append('title');badge.append('rect');badge.append('path');badge.append('text');return badge;
     }).attr('data-event-count',g=>g.items.length).attr('data-disturbance-count',g=>g.attacks)
       .attr('data-event-steps',g=>g.items.map(item=>item.t+1).join(','))
-      .attr('aria-label',g=>g.attacks+' attacks and '+(g.items.length-g.attacks)+' forecast changes');
+      .attr('aria-label',g=>g.attacks?g.attacks+' power pulses and '+(g.items.length-g.attacks)+' forecast changes':'Forecast reliability changed at '+[...new Set(g.items.map(item=>'bus '+item.bus))].join(', '));
     // Position badges directly. They must never fly in from a stale chart scale.
     labels.interrupt().interrupt('update').attr('transform',g=>'translate('+g.x+','+(chart.frame.y-14)+')');
     labels.select('rect').attr('x',g=>-g.width/2).attr('y',-10).attr('width',g=>g.width).attr('height',20).attr('rx',6)
       .attr('fill',g=>g.attacks?'var(--attack)':'#687580');
     labels.select('path').attr('transform',g=>'translate('+(-g.width/2+4)+',-8) scale(.7)')
-      .attr('d',g=>g.attacks?'M14 1 3 13h7l-1 10L21 9h-8z':'M10 2h4v12h-4z M10 17h4v4h-4z').attr('fill','#fff');
-    labels.select('text').attr('x',8).attr('y',.5).attr('text-anchor','middle').attr('dominant-baseline','middle')
+      .attr('d',g=>g.attacks?'M14 1 3 13h7l-1 10L21 9h-8z':null).attr('fill','#fff');
+    labels.select('text').attr('x',g=>g.attacks?8:0).attr('y',.5).attr('text-anchor','middle').attr('dominant-baseline','middle')
       .style('font-size','11px').style('font-weight','650').style('fill','#fff').text(g=>g.label);
     labels.select('title').text(g=>{
       const details=g.items.slice(-8).map(item=>item.type==='pulse'
         ? pulseMagnitude(item.strength || 100)+' at bus '+item.bus+' · Voltage and cost at t '+(item.t+1)+' s'
-        : 'Forecast changed at bus '+item.bus+' · t '+(item.t+1)+' s');
-      return g.attacks+' individual pulses in this shaded interval'+(g.items.length>8?' · Latest 8 events shown':'')+'\n'+details.join('\n');
+        : 'Bus '+item.bus+' forecast reliability changed · New forecasts only · t '+item.t+' s');
+      const explanation=g.attacks?g.attacks+' individual power pulses in this shaded interval':'Forecast settings changed here · This marker is not a power disturbance';
+      return explanation+(g.items.length>8?' · Latest 8 events shown':'')+'\n'+details.join('\n');
     });
   }
   function drawCost() {
