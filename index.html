@@ -298,6 +298,11 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   .pr-experiment-bar select { min-height:44px; padding:8px 10px; }
 }
 
+.pr-forecast-observation {margin:8px 0;padding:8px 10px;background:var(--surface-subtle,#f5f5f7);border-radius:8px}
+.pr-forecast-observation p {margin:3px 0;overflow-wrap:anywhere}
+.pr-forecast-values {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:7px 0}
+.pr-forecast-values dt {font-size:11px;color:var(--muted,#6e6e73);line-height:1.4}
+.pr-forecast-values dd {margin:3px 0;font-size:14px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .pr-source-controls { display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; margin:8px 0; }
 .pr-source-controls .btn { min-height:44px; max-width:100%; white-space:normal; }
 #pr-source-status { flex:1 1 150px; line-height:1.5; }
@@ -468,6 +473,16 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       <p id="pr-link-budget" class="pr-caption pr-link-budget"></p><p id="pr-noisy-links" class="pr-caption pr-noisy-links" hidden></p><div class="pr-matrix-key" id="pr-matrix-key"></div><svg class="pr-chart" id="pr-matrix" role="group" aria-label="Candidate prediction links. Rows receive forecasts from columns"></svg>
       <p id="pr-matrix-inspect-hint" class="pr-caption">Tap a cell to locate its source and inverter</p>
       <div id="pr-source-controls" class="pr-source-controls" hidden><button type="button" id="pr-source-fault" class="btn btn-quiet" aria-describedby="pr-source-status" disabled>Corrupt source</button><span id="pr-source-status" class="pr-caption" role="status"></span></div>
+      <div id="pr-forecast-observation" class="pr-forecast-observation" hidden>
+        <p id="pr-forecast-timing" class="pr-caption"></p>
+        <dl id="pr-forecast-values" class="pr-forecast-values" aria-label="Raw source voltage forcing in mpu" hidden>
+          <div><dt>Raw forecast</dt><dd id="pr-observed-forecast">—</dd></div>
+          <div><dt>Revealed forcing</dt><dd id="pr-observed-realized">—</dd></div>
+          <div><dt>Error <span title="Raw forecast minus revealed forcing">f − w</span></dt><dd id="pr-observed-error">—</dd></div>
+        </dl>
+        <p class="pr-caption">mpu · 1 mpu = 0.001 pu · Error includes unforecast power changes</p>
+        <p id="pr-forecast-support" class="pr-caption"></p>
+      </div>
       <div class="pr-panel-foot pr-matrix-detail"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div><div class="pr-topology-status"><strong id="pr-topology-status">Connectivity unchanged</strong><span id="pr-topology-gain">Weights changed 0%</span></div><div id="pr-topology-events" class="pr-topology-events" aria-label="Recent topology changes" hidden></div><div class="pr-topology-history"><label for="pr-topology-history" id="pr-history-count">0 link updates</label><input id="pr-topology-history" type="range" min="0" max="0" step="1" value="0" aria-label="Topology history" disabled><button type="button" id="pr-history-live" aria-pressed="true">Latest</button></div><p id="pr-topology-note" class="pr-caption" aria-live="polite"></p>
     </section>
     <section class="pr-panel pr-stage-panel" aria-labelledby="pr-stage-title">
@@ -1978,8 +1993,36 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       : 'No links have changed yet. Learning weights may still change.';
     $('topology-note').title=snapshot.phase==='deployment' ? (communicationComparison()?'Discovery history. Deployed links and prediction weights stay fixed.':'Discovery history. Deployed links stay fixed while prediction weights continue adapting.') : 'History displays observed connectivity only. Reviewing an update does not change the controller.';
   }
+  // Read only the last revealed pair. Never read a future forcing or forecast base.
+  function inspectedForecastObservation() {
+    const inspection=predictionInspection(),sample=snapshot.lastSample;
+    if(!inspection || historyIndex!==null || !sample) return null;
+    const index=inspection.source-1;
+    const forecast=sample.forecast[index],realized=sample.disturbance[index];
+    return {source:inspection.source,receiver:inspection.receiver,action:sample.t,
+      issuedAt:Math.max(0,sample.t-PowerDemo.constants.preview+1),observedAt:sample.t+1,
+      forecast,realized,error:forecast-realized};
+  }
+  function renderForecastObservation(inspection) {
+    const panel=$('forecast-observation'),observation=inspectedForecastObservation();
+    panel.hidden=!inspection;
+    $('forecast-values').hidden=!observation;
+    panel.dataset.available=String(!!observation);
+    for(const key of ['source','receiver','action','issuedAt','observedAt','forecast','realized','error'])
+      panel.dataset[key]=observation ? String(observation[key]) : '';
+    $('forecast-timing').textContent=observation
+      ? 'Source '+observation.source+' · Action '+observation.action+' s · Issued '+observation.issuedAt+' s · Revealed '+observation.observedAt+' s'
+      : historyIndex!==null ? 'Saved links · Return to Latest for current observations'
+      : 'Run or step to reveal a source observation';
+    for(const key of ['forecast','realized','error'])
+      $('observed-'+key).textContent=observation ? (1000*observation[key]).toFixed(3) : '—';
+    $('forecast-support').textContent=!inspection ? '' : historyIndex!==null ? 'Current sample hidden while reviewing saved links'
+      : snapshot.phase==='discovery' ? 'Discovery uses dense messages · Displayed links are candidates'
+      : (inspection.connected ? 'Permitted by deployed support' : 'Excluded from deployed support')+' at inverter '+inspection.receiver+' · Links fixed';
+  }
   function renderInspectedSource() {
     const inspection=predictionInspection(),control=$('source-fault');
+    renderForecastObservation(inspection);
     $('source-controls').hidden=!inspection;
     const bus=inspection?.source;
     const noisy=!!inspection && snapshot.faults.includes(bus);
