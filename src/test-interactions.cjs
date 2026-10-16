@@ -1110,3 +1110,37 @@ test('sample paths and latest markers use the current scale immediately when qua
   assert.ok(selection('path.data-series').interruptions.includes('update'));
   assert.ok(selection('circle.latest-value').interruptions.includes('update'));
 });
+
+
+test('touch clicks with zero detail do not toggle a forecast twice after pointer activation',()=>{
+  const h=harness(undefined,'communication'),bus=h.bus(7);
+  function touchTap(id){
+    h.pointer('pointerdown',bus,{pointerId:id,pointerType:'touch'});
+    bus.dispatch('gotpointercapture',{pointerId:id,pointerType:'touch'});
+    // Pointer release delivers lostpointercapture before the synthesized click.
+    h.pointer('pointerup',bus,{pointerId:id,pointerType:'touch'});
+    bus.dispatch('click',{detail:0,pointerId:id,pointerType:'touch'});
+  }
+  touchTap(41);
+  assert.equal(h.snapshot().faults.includes(7),true);assert.equal(forecastEvents(h).length,1);
+  touchTap(42);
+  assert.equal(h.snapshot().faults.includes(7),false);assert.equal(forecastEvents(h).length,2);
+  // Assistive and keyboard clicks have no pointer source and remain supported.
+  bus.dispatch('click',{detail:0,pointerType:''});
+  assert.equal(h.snapshot().faults.includes(7),true);assert.equal(forecastEvents(h).length,3);
+  bus.dispatch('click',{detail:0});
+  assert.equal(h.snapshot().faults.includes(7),false);assert.equal(forecastEvents(h).length,4);
+});
+
+test('zero detail touch clicks preserve a latched power attack until the next tap',async()=>{
+  const h=harness(undefined,'communication');h.change('intervention','power');const bus=h.bus(23);
+  const tap=id=>{
+    h.pointer('pointerdown',bus,{pointerId:id,pointerType:'touch'});
+    h.pointer('pointerup',bus,{pointerId:id,pointerType:'touch'});
+    bus.dispatch('click',{detail:0,pointerId:id,pointerType:'touch'});
+  };
+  tap(51);assert.equal(h.node('pulse')['aria-pressed'],'true');
+  await h.samples(3);assert.equal(pulses(h).length,3);
+  tap(52);assert.equal(h.node('pulse')['aria-pressed'],'false');
+  const count=pulses(h).length;await h.samples(2);assert.equal(pulses(h).length,count);
+});

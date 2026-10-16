@@ -118,6 +118,17 @@ async function main() {
     try {
       await phone.getByRole('button', { name: 'Corrupt forecast at bus 7', exact: true }).tap();
       await phone.getByRole('button', { name: 'Repair forecast at bus 7', exact: true }).waitFor();
+      await phone.getByRole('button', { name: 'Repair forecast at bus 7', exact: true }).tap();
+      await phone.getByRole('button', { name: 'Corrupt forecast at bus 7', exact: true }).waitFor();
+      await phone.locator('#pr-intervention').selectOption('power');
+      await phone.getByRole('button', { name: 'Toggle continuous attack at bus 23', exact: true }).tap();
+      await phone.getByRole('button', { name: 'Stop attack at bus 23', exact: true }).waitFor();
+      assert.equal(await phone.locator('#pr-pulse').getAttribute('aria-pressed'), 'true');
+      const attackStart = Number((await phone.locator('#pr-clock').textContent()).match(/t = (\d+)/)[1]);
+      await phone.waitForFunction(target => Number(document.querySelector('#pr-clock').textContent.match(/t = (\d+)/)[1]) >= target, attackStart + 3);
+      await phone.getByRole('button', { name: 'Stop attack at bus 23', exact: true }).tap();
+      await phone.getByRole('button', { name: 'Toggle continuous attack at bus 23', exact: true }).waitFor();
+      assert.equal(await phone.locator('#pr-pulse').getAttribute('aria-pressed'), 'false');
     } catch (error) {
       const details = await phone.evaluate(() => ({
         bus7: document.querySelector('[data-bus="7"]')?.getAttribute('aria-label'),
@@ -129,7 +140,7 @@ async function main() {
         viewportWidth: innerWidth,
         scrollY
       }));
-      const diagnostic = { passed: false, browser: browser.version(), check: 'mobile forecast tap', details, touchEvents, errors, failure: error.message };
+      const diagnostic = { passed: false, browser: browser.version(), check: 'mobile bus interactions', details, touchEvents, errors, failure: error.message };
       console.error(JSON.stringify(diagnostic, null, 2));
       await fs.writeFile(path.join(output, 'mobile-failure.json'), JSON.stringify(diagnostic, null, 2));
       await phone.screenshot({ path: path.join(output, 'mobile-failure.png'), fullPage: true });
@@ -142,7 +153,7 @@ async function main() {
     assert.ok(attackBounds.width >= 44 && attackBounds.height >= 44, 'Primary touch target remains at least 44 pixels');
     await phone.screenshot({ path: path.join(output, 'mobile.png'), fullPage: true });
     assert.deepEqual(errors, [], 'No browser runtime errors');
-    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), touchEvents, checks: ['playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'four controller curves', 'live cost switching', 'mobile touch and layout'], errors }, null, 2));
+    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), touchEvents, checks: ['playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'four controller curves', 'live cost switching', 'repeated mobile forecast taps', 'continuous mobile power attack', 'mobile touch and layout'], errors }, null, 2));
     console.log('Browser smoke passed');
   } finally {
     if (browser) await browser.close();

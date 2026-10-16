@@ -573,7 +573,10 @@
     });
     element.addEventListener('click',event=>{
       event.preventDefault();event.stopPropagation();
-      if(event.detail===0) {
+      // Some Chromium versions emit a touch click with detail 0. The touch
+      // already activated on pointerdown, so only clicks without a pointer
+      // source represent keyboard or assistive activation here.
+      if(event.detail===0 && !event.pointerType) {
         if(forecastMode()||continuousMode()) activateAttack(getBus(),element);
         else if(!heldAttack) pulse(getBus());
       }
