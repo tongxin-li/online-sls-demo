@@ -1,8 +1,8 @@
 {
   "program": "Hourly grid demo refinement",
   "timezone": "Asia/Shanghai",
-  "automation_id": null,
-  "status": "awaiting_cloud_validation",
+  "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
+  "status": "scheduled",
   "first_run": "2026-10-17T02:00:00+08:00",
   "last_scheduled_run": "2026-10-18T01:00:00+08:00",
   "hard_deadline": "2026-10-18T01:45:00+08:00",
@@ -27,8 +27,30 @@
   ],
   "setup": {
     "chart_fix": "Atomic chart paths and axes on cost metric changes, clear stale inspection and explain forecast event marker.",
-    "local_validation": "135 tests passed and repeated live chart switching checked in browser.",
-    "cloud_validation": null,
-    "publication": null
-  }
+    "local_validation": "Parent reports 137 tests passed including Chromium 141 touch regression.",
+    "cloud_validation": {
+      "source_sha": "d8de86e2d506fc1301c98267193d05f2b7f64536",
+      "candidate_run": 38941137566,
+      "main_run": 38941501177,
+      "tests": 137,
+      "browser_smoke": "passed desktop and repeated mobile forecast and power toggles, handoff and live metric switches",
+      "result": "success"
+    },
+    "publication": {
+      "commit": "6b3164c3f045edc003cc531c1ed3a7266b9f0d9c",
+      "expected_main": "452d65e8545857fc8352ff4b37945781f382f32b",
+      "pages_run": 38941500654,
+      "pages_status": "success",
+      "direct_live_inspection": "unverified, cloud browser permission denied, do not bypass",
+      "screenshot_pixel_review": "unverified"
+    },
+    "schedule": {
+      "enabled_readback": true,
+      "canonical_id": "6ad2628236888191b683d1e7ed2e5b93",
+      "schedule": "BEGIN:VEVENT\nDTSTART;TZID=Asia/Shanghai:20261017T020000\nRRULE:FREQ=HOURLY;COUNT=24\nEND:VEVENT",
+      "service_next_run_time": null
+    }
+  },
+  "cloud_runtime": "ChatGPT hosted automation with connected GitHub APIs and GitHub Actions ubuntu-latest, Node 22, Python 3.12, Playwright Chromium 141",
+  "source_of_truth": "Cloud GitHub main is canonical while Mac is off. Later local work must refresh first."
 }
