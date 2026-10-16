@@ -458,7 +458,7 @@ test('voltage diagnostics agree with raw states for all twenty predefined seeds 
   for(let seed=1;seed<=20;seed++) {
     const sim=new Simulation({experiment:'communication',beta:1,seed,horizon:180});
     verify(sim);run(sim,180);verify(sim);
-    assert.equal(sim.deployTopology(),true);verify(sim);
+    assert.equal(sim.deployTopology().phase,'deployment');verify(sim);
     assert.equal(voltageMetrics(sim.snapshot()).online.peakMaxPu,0);
     sim.queuePulse(23,150);run(sim,8);verify(sim);
   }
