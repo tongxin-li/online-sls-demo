@@ -183,6 +183,25 @@ async function main() {
     await waitSamples(2);
     assert.ok(await sample() > switchingStart, 'Playback continues during metric switching');
     await pause();
+    await page.locator('#pr-adaptation > summary').click();
+    await page.locator('#pr-power-scenario').selectOption('solar-outage');
+    await page.locator('#pr-compare').click();
+    await page.waitForFunction(()=>document.querySelector('#pr-phase').dataset.phase==='deployment'&&!document.querySelector('#pr-compare').disabled);
+    await page.locator('#pr-adaptation > summary').click();
+    await page.locator('#pr-run').click();
+    await page.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().scenario.active);
+    await pause();
+    const outage=await page.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot());
+    assert.equal(outage.powerScenario,'solar-outage');assert.equal(outage.scenario.active,true);
+    assert.ok(outage.scenario.appliedKw>0&&outage.scenario.appliedKw<=360+1e-8);
+    for(const bus of [5,7,14,21])assert.ok(Math.abs(outage.generationP[bus-1])<1e-8);
+    await page.screenshot({path:path.join(output,'solar-outage.png'),fullPage:true});
+    await page.locator('#pr-run').click();
+    await page.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t>=51);
+    await pause();
+    assert.match(await page.locator('#pr-scenario-status').textContent(),/Solar restored/);
+    assert.ok(await page.locator('.intervention-badge[aria-label*="Solar"]').count()>0,'Markers identify actual solar changes');
+    await checkPlots();
     await page.screenshot({ path: path.join(output, 'desktop.png'), fullPage: true });
 
     // A narrow touch viewport keeps the controls usable and the page in bounds.

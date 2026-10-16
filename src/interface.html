@@ -24,6 +24,7 @@
     <span id="pr-voltage-range" class="tabular-nums"></span>
     <div class="pr-phase-actions"><span id="pr-phase" class="pr-phase-badge">Learning 0 / 180 s</span><button type="button" id="pr-deploy" class="btn btn-deploy" disabled title="Start four controllers on the same fresh disturbance sequence">Compare controllers</button></div>
   </div>
+  <p id="pr-scenario-status" class="pr-caption" role="status" hidden></p>
   <div class="pr-dashboard">
     <section class="pr-panel pr-network-panel" aria-labelledby="pr-network-title">
       <div class="pr-subhead"><h2 id="pr-network-title">Power network</h2><span id="pr-action-note" class="pr-caption" aria-live="polite">Click a bus to start · Click again to stop</span></div>
@@ -71,6 +72,7 @@
   <details class="pr-adaptation" id="pr-adaptation">
     <summary>Experiment settings <span aria-hidden="true">+</span></summary>
     <div class="pr-comparison-controls">
+      <label for="pr-power-scenario">Power scenario <select id="pr-power-scenario" aria-label="Power scenario" title="Changing the scenario starts a fresh discovery trial"><option value="reference" selected>Reference</option><option value="solar-outage">Solar outage · 20 s</option></select></label>
       <label id="pr-preset-control" for="pr-preset">Forecasts <select id="pr-preset" aria-label="Forecast preset" title="Changing forecasts starts a new discovery trial"><option value="reliable">Reliable forecasts</option><option value="uniform">Uniform noise</option><option value="mixed" selected>Mixed reliability</option></select></label>
       <button type="button" class="btn btn-compare" id="pr-compare" title="Advance 180 samples across learning and comparison">Advance 180</button>
     </div>

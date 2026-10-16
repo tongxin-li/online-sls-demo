@@ -1,0 +1,25 @@
+name: Audit solar outage
+on:
+  push:
+    paths:
+      - 'src/simulation.js'
+      - 'src/benchmark-stress.cjs'
+      - '.github/workflows/stress-audit.yml'
+permissions:
+  contents: read
+concurrency:
+  group: stress-audit-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit every predefined seed
+        run: node src/benchmark-stress.cjs

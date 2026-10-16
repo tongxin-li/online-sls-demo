@@ -287,8 +287,10 @@
       const id=options.preset===undefined?'mixed':options.preset;
       const preset=FORECAST_PRESETS.find(p=>p.id===id);
       if(!preset)throw new RangeError('Forecast preset must be reliable, uniform, or mixed');
+      const powerScenario=options.powerScenario || 'reference';
+      if(!['reference','solar-outage'].includes(powerScenario))throw new RangeError('Unknown power scenario');
       this.preset=preset;
-      this.initialOptions={experiment,beta,seed:options.seed===undefined?20261013:options.seed,
+      this.initialOptions={experiment,beta,powerScenario,seed:options.seed===undefined?20261013:options.seed,
         horizon:options.horizon===undefined?480:options.horizon,preset:id,
         faultBuses:options.faultBuses===undefined?preset.faultBuses.slice():options.faultBuses.slice()};
       if(!Number.isInteger(this.initialOptions.horizon)||this.initialOptions.horizon<1)throw new Error('Invalid horizon');
@@ -307,7 +309,7 @@
       this.faults=new Set(this.options.faultBuses.map(bus=>this.checkBus(bus)).filter(bus=>bus!==1));
       this.latent=Array.from({length:N+1},()=>this.random.normal());
       this.pulses=[];this.samples=[];this.history=[];this.eventLog=[];this.forecasts=[];this.lastPreview=[];
-      this.lastPulseApplications=[];this.lastSample=null;this.lastInputs=null;
+      this.lastPulseApplications=[];this.lastScenarioApplications=[];this.lastSample=null;this.lastInputs=null;
       this.rows=[];this.rowIds=new Set();this.segments=[];this.addSegment(0,this.options.horizon);
       this.learning={completedRows:0,delay:PREVIEW,updates:0,updateCount:0,prefixError:null,prefixLoss:null,
         stepSize:null,fitError:null,rawRms:null,calibratedRms:null,windowStart:null,windowEnd:null,windowSize:0};
@@ -494,9 +496,17 @@
       this.updateCalibration();
       this.sealPreview();this.lastPreview=segment.dense.rows[local].map(block=>this.forecasts[segment.start+block.k-1]);
       const issued=this.forecasts[time],background=issued.base,requested=Array(N).fill(0);
+      // A prespecified unannounced generation outage is realized only after
+      // deployment. It never enters sealPreview or changes discovery selection.
+      const outage=this.phase==='deployment'&&this.options.powerScenario==='solar-outage'&&time>=30&&time<50;
+      const scenarioRequest=background.map((v,i)=>outage&&SOLAR_BUSES.includes(i+1)?Math.max(0,BUS_PROFILES[i].baseGenerationKw-v*1000):0);
+      const scenarioBase=background.map((v,i)=>boundedPowerDeviation(i+1,v+scenarioRequest[i]/1000));
+      this.lastScenarioApplications=scenarioRequest.flatMap((requestedKw,i)=>requestedKw>0?[{bus:i+1,requestedKw,appliedKw:(scenarioBase[i]-background[i])*1000}]:[]);
+      if(this.phase==='deployment'&&this.options.powerScenario==='solar-outage'&&(time===30||time===50))
+        this.eventLog.push(deepFreeze({t:time,type:'scenario',action:time===30?'start':'restore',buses:SOLAR_BUSES.slice(),message:time===30?'Solar outage begins':'Solar generation restored'}));
       for(const event of this.pulses){event.requestedKw=event.strength*Math.exp(-event.age/event.decay);requested[event.bus-1]+=event.requestedKw;}
-      const nextPower=background.map((v,i)=>boundedPowerDeviation(i+1,v+requested[i]/1000));
-      const pulse=nextPower.map((v,i)=>(v-background[i])*1000);this.lastPulseApplications=[];
+      const nextPower=scenarioBase.map((v,i)=>boundedPowerDeviation(i+1,v+requested[i]/1000));
+      const pulse=nextPower.map((v,i)=>(v-scenarioBase[i])*1000);this.lastPulseApplications=[];
       for(let i=1;i<N;i++)if(requested[i]>0)this.lastPulseApplications.push({bus:i+1,requestedKw:requested[i],
         appliedKw:pulse[i],capped:pulse[i]<requested[i]-1e-9,eventName:BUS_PROFILES[i].eventName});
       for(const event of this.pulses){event.appliedKw=requested[event.bus-1]?event.requestedKw*pulse[event.bus-1]/requested[event.bus-1]:0;event.age++;}
@@ -524,7 +534,7 @@
       }
       const sample=deepFreeze({t:time,forecast:issued.forecast,disturbance:recovered.online,
         voltageDisturbance:recovered.online,disturbances:recovered,base:background,powerDeviation:nextPower,
-        pulse,pulseApplications:this.lastPulseApplications.map(p=>({...p})),units:'pu voltage forcing',pulseUnits:'kW'});
+        pulse,scenarioApplications:this.lastScenarioApplications.map(p=>({...p})),pulseApplications:this.lastPulseApplications.map(p=>({...p})),units:'pu voltage forcing',pulseUnits:'kW'});
       this.powerDeviation=nextPower.slice();this.power=physicalPower(nextPower);this.lastInputs=deepFreeze(inputs);this.lastSample=sample;this.samples.push(sample);
       this.learning.rawRms=Math.sqrt(squared(sample.forecast.map((v,i)=>v-sample.disturbance[i]))/(N-1));
       if(this.phase==='discovery'&&time>=PREVIEW){
@@ -603,7 +613,8 @@
         saturation:Object.fromEntries(CONTROLLERS.map(key=>[key,this.saturation[key].map(Boolean)])),
         ...Object.fromEntries(Object.entries(this.power).map(([key,value])=>[key,value.slice()])),powerDeviation:this.powerDeviation.slice(),
         edgeData:model.edgeData.map((edge,i)=>({...edge,pKw:flows.online[i].pKw,qKvar:Object.fromEntries(CONTROLLERS.map(key=>[key,flows[key][i].qKvar]))})),
-        lastPulseApplications:this.lastPulseApplications.map(p=>({...p})),costStates:Object.fromEntries(CONTROLLERS.map(key=>[key,this.costStates[key].slice()])),
+        powerScenario:this.options.powerScenario,scenario:{id:this.options.powerScenario,start:30,end:50,active:this.phase==='deployment'&&this.t>30&&this.t<=50,requestedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.requestedKw,0),appliedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.appliedKw,0)},
+        lastScenarioApplications:this.lastScenarioApplications.map(p=>({...p})),lastPulseApplications:this.lastPulseApplications.map(p=>({...p})),costStates:Object.fromEntries(CONTROLLERS.map(key=>[key,this.costStates[key].slice()])),
         learning:{...this.learning},calibration:{...this.calibration,matrix:copy(this.calibration.matrix)},predictionDiagnostics:this.predictionDiagnostics,lastPreview:this.lastPreview.slice(),
         pendingPulses:this.pulses.filter(e=>e.age===0).map(e=>({...e})),activePulses:this.pulses.filter(e=>e.age>0).map(e=>({...e})),
         states:Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].slice()])),

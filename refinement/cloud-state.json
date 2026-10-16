@@ -113,7 +113,13 @@
     "started_at": "2026-10-17T06:04:39+08:00",
     "expires_at": "2026-10-17T06:44:39+08:00",
     "branch": "cloud/refine/20261017-0600",
-    "focus": "Prespecified bounded 20 second solar outage only in held out comparison with paired seed audit."
+    "focus": "Prespecified bounded 20 second solar outage only in held out comparison with paired seed audit.",
+    "stage": "candidate_validation_and_paired_audit",
+    "changes": [
+      "Added optional comparison-only four-site solar outage from actions 30 through 49 using existing generation bounds.",
+      "Display requested/applied outage power and physical start/restoration markers, preserve reference and saved replay.",
+      "Audit all twenty predefined seeds at zero, high and severe forecast noise, with full costs, frozen support and paired-reference recovery."
+    ]
   },
   "next_focus": "Design a bounded physically justified sustained-load stress preset and prespecified recovery metric, retaining the reference scenario. Evaluate all predefined seeds with identical forecasts and realized disturbances, including ties and unfavorable regimes, without retuning gains or cost.",
   "priorities": [

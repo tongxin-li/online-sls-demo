@@ -1247,3 +1247,19 @@ test('source actions cannot mutate reliability in saved history or with zero for
   assert.deepEqual(plain(h.snapshot()),quiet);
   h.change('bus',2);assert.equal(h.node('source-controls').hidden,true);
 });
+
+test('power scenario selection preserves exact replay and Learn again while keeping reference available',async()=>{
+  const h=harness(undefined,'communication');
+  assert.equal(h.snapshot().powerScenario,'reference');
+  h.change('power-scenario','solar-outage');await compare(h);
+  assert.equal(h.snapshot().phase,'deployment');assert.equal(h.snapshot().powerScenario,'solar-outage');
+  for(let i=0;i<55;i++)h.click('step');
+  const restored=harness(h.saved());
+  assert.equal(restored.node('power-scenario').value,'solar-outage');
+  assert.deepEqual(restored.snapshot().states,h.snapshot().states);
+  assert.deepEqual(restored.snapshot().cumulative,h.snapshot().cumulative);
+  assert.deepEqual(restored.snapshot().eventLog,h.snapshot().eventLog);
+  h.click('deploy');assert.equal(h.snapshot().powerScenario,'solar-outage');
+  h.change('power-scenario','reference');assert.equal(h.snapshot().powerScenario,'reference');
+  assert.equal(h.snapshot().phase,'discovery');assert.equal(h.snapshot().t,0);assert.equal(h.state().playing,false);
+});

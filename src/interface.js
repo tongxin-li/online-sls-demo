@@ -13,7 +13,7 @@
   function optionsFromControls() {
     const experiment=$('experiment').value==='prediction'?'prediction':'communication';
     const beta=Number($('noise').value);
-    return {experiment,beta:[0,.25,.5,1,2].includes(beta)?beta:1,preset:experiment==='communication'?'mixed':$('preset').value,
+    return {experiment,powerScenario:$('power-scenario').value || 'reference',beta:[0,.25,.5,1,2].includes(beta)?beta:1,preset:experiment==='communication'?'mixed':$('preset').value,
       ...(experiment==='communication'?{horizon:180}:{})};
   }
   let simulation = new PowerDemo.Simulation(optionsFromControls());
@@ -39,6 +39,7 @@
   function forecastNoiseEnabled() { return snapshot.experiment!=='communication'||snapshot.beta>0; }
   function forecastNoisy(bus) { return forecastNoiseEnabled()&&snapshot.faults.includes(bus); }
   function powerRecoveryContext() {
+    if(snapshot.powerScenario==='solar-outage'&&snapshot.phase==='deployment')return 'Includes solar outage recovery · Outage is not forecast';
     return journal.some(item=>item.type==='pulse')?'Includes load recovery · Clicked power disturbances are not forecast':'';
   }
   function forecastInstruction(bus=selectedBus) {
@@ -314,6 +315,7 @@
     $('experiment').value=savedOptions?.experiment==='prediction'?'prediction':'communication';
     $('noise').value=String([0,.25,.5,1,2].includes(savedOptions?.beta)?savedOptions.beta:1);
     $('preset').value=preset;
+    $('power-scenario').value=savedOptions?.powerScenario==='solar-outage'?'solar-outage':'reference';
     if(data.phase==='deployment' && data.discoveryRecord) {
       simulation=new PowerDemo.Simulation(data.discoveryRecord.options || optionsFromControls());
       topology.reset(simulation.snapshot());
@@ -460,6 +462,7 @@
   $('preset').addEventListener('change',startSelectedExperiment);
   $('experiment').addEventListener('change',startSelectedExperiment);
   $('noise').addEventListener('change',startSelectedExperiment);
+  $('power-scenario').addEventListener('change',startSelectedExperiment);
   $('compare').addEventListener('click', async () => {
     if (comparing) return;
     stop(true); resumePlant(); comparing=true; $('view').value='cost';
@@ -682,7 +685,10 @@
     const beta=snapshot.beta || 0;
     $('noise-caption').textContent=beta===0?'No forecast noise':'Noise SD · Noisy buses '+d3.format('.3~g')(4*beta)+'× reference scale · Quiet buses '+d3.format('.3~g')(.05*beta)+'×';
     $('noise-caption').title='Forecast error standard deviation in pu uses the declared physical voltage forcing reference scale for each source. This scale is set by the feeder and disturbance generator, not estimated from the current run. β multiplies all source noise levels.';
-    $('experiment').disabled=comparing; $('noise').disabled=comparing;
+    $('experiment').disabled=comparing; $('noise').disabled=comparing; $('power-scenario').disabled=comparing;
+    const scenario=snapshot.scenario;
+    $('scenario-status').hidden=scenario?.id!=='solar-outage';
+    $('scenario-status').textContent=snapshot.phase!=='deployment'?'Solar outage reserved for comparison · Four sites · 30 to 50 s':snapshot.t<=30?'Solar outage starts at comparison 30 s':scenario.active?'Solar outage · '+scenario.requestedKw.toFixed(1)+' kW requested · '+scenario.appliedKw.toFixed(1)+' kW applied':'Solar restored · Background power continues';
     const gapOption=$('cost-metric').querySelector('option[value="gap"]');
     if(gapOption) gapOption.textContent=communicationComparison()?'Difference vs fixed sparse':'Difference vs scalar';
     const matrixChangeOption=$('matrix-view').querySelector('option[value="change"]');
@@ -1082,7 +1088,8 @@
   }
   function drawInterventions(chart) {
     const domain=chart.x.domain();
-    const events=journal.filter(item=>['pulse','fault'].includes(item.type) && item.t<snapshot.t && item.t+1>=domain[0] && item.t+1<=domain[1]);
+    const scenarioEvents=(snapshot.eventLog || []).filter(item=>item.type==='scenario').map(item=>({...item,bus:0}));
+    const events=[...journal,...scenarioEvents].sort((a,b)=>a.t-b.t).filter(item=>['pulse','fault','scenario'].includes(item.type) && item.t<snapshot.t && item.t+1>=domain[0] && item.t+1<=domain[1]);
     const groups=[];
     for(const item of events) {
       const x=chart.x(item.t+1), previous=groups.at(-1);
@@ -1093,7 +1100,8 @@
       const first=group.items[0]; group.key=first.t+'_'+first.type+'_'+first.bus;
       group.attacks=group.items.filter(item=>item.type==='pulse').length;
       group.count=group.attacks || group.items.length;
-      group.label=group.attacks?(group.count>1?'Attacks':'Attack'):'Forecast changed';
+      group.scenario=group.items.some(item=>item.type==='scenario');
+      group.label=group.scenario?'Solar event':group.attacks?(group.count>1?'Attacks':'Attack'):'Forecast changed';
       group.width=(group.attacks?24:16)+group.label.length*6;
       group.x=Math.max(chart.frame.x+group.width/2,Math.min(chart.frame.x+chart.frame.w-group.width/2,(group.left+group.right)/2));
     });
@@ -1110,7 +1118,7 @@
       badge.append('title');badge.append('rect');badge.append('path');badge.append('text');return badge;
     }).attr('data-event-count',g=>g.items.length).attr('data-disturbance-count',g=>g.attacks)
       .attr('data-event-steps',g=>g.items.map(item=>item.t+1).join(','))
-      .attr('aria-label',g=>g.attacks?g.attacks+' power pulses and '+(g.items.length-g.attacks)+' forecast changes':'Forecast reliability changed at '+[...new Set(g.items.map(item=>'bus '+item.bus))].join(', '));
+      .attr('aria-label',g=>g.scenario?g.items.filter(item=>item.type==='scenario').map(item=>item.message).join(' · '):g.attacks?g.attacks+' power pulses and '+(g.items.length-g.attacks)+' forecast changes':'Forecast reliability changed at '+[...new Set(g.items.map(item=>'bus '+item.bus))].join(', '));
     // Position badges directly. They must never fly in from a stale chart scale.
     labels.interrupt().interrupt('update').attr('transform',g=>'translate('+g.x+','+(chart.frame.y-14)+')');
     labels.select('rect').attr('x',g=>-g.width/2).attr('y',-10).attr('width',g=>g.width).attr('height',20).attr('rx',6)
@@ -1122,8 +1130,8 @@
     labels.select('title').text(g=>{
       const details=g.items.slice(-8).map(item=>item.type==='pulse'
         ? pulseMagnitude(item.strength || 100)+' at bus '+item.bus+' · Voltage and cost at t '+(item.t+1)+' s'
-        : 'Bus '+item.bus+' forecast reliability changed · New forecasts only · t '+item.t+' s');
-      const explanation=g.attacks?g.attacks+' individual power pulses in this shaded interval':'Forecast settings changed here · This marker is not a power disturbance';
+        : item.type==='scenario'?item.message+' · Applied at t '+(item.t+1)+' s': 'Bus '+item.bus+' forecast reliability changed · New forecasts only · t '+item.t+' s');
+      const explanation=g.scenario?'Scheduled physical generation change · Absent from forecasts':g.attacks?g.attacks+' individual power pulses in this shaded interval':'Forecast settings changed here · This marker is not a power disturbance';
       return explanation+(g.items.length>8?' · Latest 8 events shown':'')+'\n'+details.join('\n');
     });
   }

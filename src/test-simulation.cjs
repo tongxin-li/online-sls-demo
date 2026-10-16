@@ -463,3 +463,31 @@ test('voltage diagnostics agree with raw states for all twenty predefined seeds 
     sim.queuePulse(23,150);run(sim,8);verify(sim);
   }
 });
+
+test('solar outage is bounded, comparison only and absent from issued forecasts',()=>{
+  assert.throws(()=>new Simulation({powerScenario:'unknown'}),/scenario/);
+  const reference=new Simulation({experiment:'communication',seed:3,horizon:180});
+  const stress=new Simulation({experiment:'communication',seed:3,horizon:180,powerScenario:'solar-outage'});
+  run(reference,180);run(stress,180);
+  assert.deepEqual(reference.snapshot().states,stress.snapshot().states,'Discovery has no physical stress');
+  assert.deepEqual(reference.forecasts,stress.forecasts);
+  reference.deployTopology();stress.deployTopology();
+  const support=JSON.stringify(stress.snapshot().deployedSupport);
+  let activeSamples=0;
+  for(let action=0;action<60;action++) {
+    const a=reference.step(),b=stress.step();
+    assert.deepEqual(reference.forecasts,stress.forecasts,'No scenario information enters forecasts');
+    assert.equal(JSON.stringify(b.deployedSupport),support);
+    if(action>=30&&action<50) {
+      activeSamples++;assert.equal(b.scenario.active,true);
+      assert.equal(b.lastScenarioApplications.length,4);
+      assert.ok(b.scenario.requestedKw<=360+1e-9);assert.ok(b.scenario.appliedKw<=360+1e-9);
+      for(const bus of [5,7,14,21])assert.ok(Math.abs(b.generationP[bus-1])<1e-9,'Full generation outage');
+      assert.deepEqual(b.lastSample.forecast,a.lastSample.forecast);
+    } else assert.equal(b.scenario.active,false);
+  }
+  assert.equal(activeSamples,20);
+  assert.deepEqual(stress.snapshot().eventLog.filter(e=>e.type==='scenario').map(e=>[e.t,e.action]),[[30,'start'],[50,'restore']]);
+  assert.ok(stress.snapshot().generationP[4]>0);
+  assert.deepEqual(stress.snapshot().pendingPulses,[],'Scenario does not fabricate clicked attacks');
+});
