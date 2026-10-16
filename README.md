@@ -32,11 +32,13 @@ L_off = U_off - K X_off
 Both fits minimize the same explicitly specified ridge objective in physical voltage forcing units
 
 ```text
-0.5 sum_s ||C forecast_s - disturbance_s||^2 + 0.5 lambda ||C - I||_F^2
-lambda = 1.27e-5
+0.5 mean_s ||C forecast_s - disturbance_s||^2 + 0.5 lambda ||C - I||_F^2
+normalizedRidge = 1.27e-5 / 0.006^2
+forcingScale = sqrt(mean_j forecastForcingScale[j]^2)
+lambda = normalizedRidge * forcingScale^2 = 3.589027526e-8
 ```
 
-Scalar adaptation restricts C to cI and therefore uses 23 lambda in its scalar regularizer. Matrix adaptation fits source dependent corrections. This is the manuscript experimental shared parameter mechanism with a declared ridge implementation and a communication restriction for this feeder. The archived experimental protocol describes this unweighted forecast fit. The active appendix instead prints a response weighted scalar expression and does not provide an unambiguous full matrix update. This website is not an exact reproduction of Algorithm 1 or of the manuscript numerical results.
+Scalar adaptation restricts C to cI and therefore uses 23 lambda in its scalar regularizer. The numerical solve accumulates sums and adds m lambda for m observations, preserving this mean loss convention. Matrix adaptation fits source dependent corrections. This is the manuscript experimental shared parameter mechanism with a declared ridge implementation and a communication restriction for this feeder. This unweighted mean loss correction follows the explicit archived experimental moment equations. The physical scale transfer and sparse matrix restriction are declared adaptations for this feeder. This website is not an exact reproduction of Algorithm 1 or of the manuscript numerical results.
 
 A fixed common C multiplying both X and U preserves homogeneous response recursion and temporal support. Changing C between actions gives adaptive feedforward with common stabilizing feedback. It does not make the executed switched trajectory one fixed lifted response, and no prefix convergence theorem is claimed for this implementation.
 
@@ -85,19 +87,25 @@ Finite horizon synthesis includes the terminal Riccati penalty and the initial a
 
 Saved trials from earlier algorithm versions are not replayed as this experiment. Current trials restore deterministically from the initial seed and event journal.
 
+## Calibration scale audit
+
+The preceding release copied a sum loss ridge of 1.27e−5 from a different voltage forcing scale. The explicit archived experimental correction instead uses mean moments. This release preserves that mean convention and transfers its dimensionless ridge to the feeder using the fixed physical forcing scale above. Both corrections apply equally to matrix and scalar adaptation. Scale and sample duplication invariance are regression tested. No physical model, forecast corruption level or test seed was changed to enlarge a gap.
+
+The previous mixed reliability savings were 8.35 percent without attacks and 2.31 percent with attacks. The corrected comparison gives 10.75 and 2.95 percent. This does not reproduce the manuscript numerical results. Its heterogeneous voltage comparison reports 14.8 percent against Scalar, while its much larger communication gains compare sparse versus dense prediction under a different high noise scenario and communication budget.
+
 ## Paired deployment results
 
-The checked in [benchmark results](benchmark-results.json) use seeds 1 through 20, 180 discovery samples and 180 deployment samples per seed. Deployment uses a separate deterministic random stream. Every controller receives identical disturbances within each trial. Physical parameters, forecast presets, seed list and message budget were retained from the previous benchmark. The ridge was fixed before evaluation. These trials contain no clicked interventions.
+The checked in [benchmark results](benchmark-results.json) use seeds 1 through 20, 180 discovery samples and 180 deployment samples per seed. Deployment uses a separate deterministic random stream. Every controller receives identical disturbances within each trial. Physical parameters, forecast presets, seed list and message budget were retained from the previous benchmark. The dimensionless ridge and physics based scale rule were fixed before evaluation. The forcing scale uses only the declared feeder and forecast generator, with RMS 0.0003189611 pu. It does not depend on realized data, corruption preset, selected links, test seed or measured cost. These trials contain no clicked interventions.
 
 | Forecast setting | Matrix adaptation | Scalar adaptation | Fixed prediction | Feedback only |
 | --- | --- | --- | --- | --- |
-| Reliable forecasts | 0.01249414 | 0.01249210 | 0.01041358 | 0.01447046 |
-| Uniform corruption | 0.01309367 | 0.01323765 | 0.01115768 | 0.01447046 |
-| Mixed reliability | 0.01238564 | 0.01351434 | 0.01145050 | 0.01447046 |
+| Reliable forecasts | 0.01249545 | 0.01249457 | 0.01041358 | 0.01447046 |
+| Uniform corruption | 0.01315855 | 0.01342402 | 0.01115768 | 0.01447046 |
+| Mixed reliability | 0.01230440 | 0.01378628 | 0.01145050 | 0.01447046 |
 
-Values are mean total costs including the terminal penalty. Under mixed reliability, matrix adaptation reduces mean cost by 8.35 percent versus scalar adaptation and wins on all 20 seeds. The gain is 1.09 percent under uniform corruption. Under reliable forecasts matrix adaptation is 0.016 percent worse on average. Dense fixed prediction remains cheaper in all three settings and receives more messages. These results do not establish a universal or isolated topology advantage.
+Values are mean total costs including the terminal penalty. Under mixed reliability, matrix adaptation reduces mean cost by 10.75 percent versus scalar adaptation and wins on all 20 seeds. The gain is 1.98 percent under uniform corruption. Under reliable forecasts matrix adaptation is 0.007 percent worse on average. Dense fixed prediction remains cheaper in all three settings and receives more messages. These results do not establish a universal or isolated topology advantage.
 
-The [fixed attack stress protocol](benchmark-attacks.json) repeats the same 20 seeds and all three presets with identical discovery data. It applies two 100 kW requests at bus 23 at samples 20 and 21, then 50 kW each sample during 60 through 69 at solar bus 7, 100 through 109 at battery bus 12, and 140 through 149 at homes bus 23. This schedule was declared before evaluating attack results. In mixed reliability matrix cost is 2.31 percent below scalar adaptation, with 20 wins. Under uniform corruption the difference is 0.36 percent, and under reliable forecasts matrix cost is 0.014 percent higher. The physical attack cost dominates much of the comparison. Neither benchmark activates reactive command saturation.
+The [fixed attack stress protocol](benchmark-attacks.json) repeats the same 20 seeds and all three presets with identical discovery data. It applies two 100 kW requests at bus 23 at samples 20 and 21, then 50 kW each sample during 60 through 69 at solar bus 7, 100 through 109 at battery bus 12, and 140 through 149 at homes bus 23. This schedule was declared before evaluating attack results. In mixed reliability matrix cost is 2.95 percent below scalar adaptation, with 20 wins. Under uniform corruption the difference is 0.66 percent, and under reliable forecasts matrix cost is 0.027 percent higher. Absolute matrix savings versus scalar remain about 0.00148 without attacks and 0.00153 with attacks. Attacks add about 0.0382 to both costs, diluting the percentage. The physical attack cost dominates much of the comparison. Neither benchmark activates reactive command saturation.
 
 ```sh
 node src/benchmark.cjs --attacks --json

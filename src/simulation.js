@@ -10,6 +10,7 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
   const N=24, M=8, AMPLITUDE=.006, RAW_RIDGE=1e-6;
+  const CALIBRATION_REFERENCE_SCALE=.006,CALIBRATION_NORMALIZED_RIDGE=1.27e-5/CALIBRATION_REFERENCE_SCALE**2;
   const RIDGE=RAW_RIDGE,REMOTE_BUDGET=3,PREVIEW=5,WINDOW=60,WARMUP=30,TOLERANCE=1e-5;
   const BASE_KV=12.47,BASE_MVA=1,POWER_BASE_KW=1000,SAMPLE_SECONDS=1,TAU_SECONDS=2;
   const LAG=Math.exp(-SAMPLE_SECONDS/TAU_SECONDS),Q_LIMIT=.07,S_RATING=.12;
@@ -146,13 +147,21 @@
     const closedLoop=combine(A,multiply(B,K));
     const distances=zeros();
     for(let i=0;i<N;i++)for(let j=0;j<N;j++)for(let e=0;e<N-1;e++)distances[i][j]+=Math.abs(paths[i][e]-paths[j][e]);
+    // Preserve a dimensionless mean-loss regularizer across the change from
+    // the paper's direct voltage forcing to power converted by this feeder.
+    // This scale depends only on the physical forecast generator, never on a
+    // test seed, observed corruption, selected topology or comparison cost.
+    const forecastForcingScales=powerToVoltage.map(row=>AMPLITUDE*Math.sqrt(squared(row)*(1+LAG*LAG)));
+    const forecastScaleSquared=squared(forecastForcingScales.slice(1))/(N-1);
     return deepFreeze({A,B,Q,R,P,K,S,X,F,resistance,reactance,powerToVoltage,paths,
       baseP,baseQ,baseDrop,referenceVoltage,initialVoltage:referenceVoltage,
       edgeData,order,parent,parentEdge,children,distances,
       inverterBuses:INVERTER_BUSES,lag:LAG,qLimit:Q_LIMIT,inverterRating:S_RATING,
       baseKv:BASE_KV,baseMva:BASE_MVA,sampleSeconds:SAMPLE_SECONDS,tauSeconds:TAU_SECONDS,
       variant:'Synthetic radial LinDistFlow feeder with inverter lag',
-      costReference:'Nominal feasible voltage profile',forecastForcingScales:powerToVoltage.map(row=>AMPLITUDE*Math.sqrt(squared(row)*(1+LAG*LAG))),dareResidual:residual,
+      costReference:'Nominal feasible voltage profile',forecastForcingScales,
+      calibrationScale:Math.sqrt(forecastScaleSquared),calibrationNormalizedRidge:CALIBRATION_NORMALIZED_RIDGE,
+      calibrationRidge:CALIBRATION_NORMALIZED_RIDGE*forecastScaleSquared,dareResidual:residual,
       dareIterations:iterations+1,closedLoopNormInf:normInf(closedLoop)});
   }
   const model=buildModel();
@@ -412,7 +421,7 @@
       if(samples.length<WARMUP)return;
       this._calibrationAt=this.t;
       const previous=this.calibration.matrix;
-      const fit=Calibration.fit(samples,{support:this.phase==='deployment'?this.deployedSupport.learned:null});
+      const fit=Calibration.fit(samples,{lambda:model.calibrationRidge,support:this.phase==='deployment'?this.deployedSupport.learned:null});
       this.calibration={...fit,updates:this.calibration.updates+1,trainedThrough:this.t-1,
         carriedSamples:Math.max(0,samples.length-this.samples.length),
         parameterChange:frobenius(combine(fit.matrix,previous,1,-1))};

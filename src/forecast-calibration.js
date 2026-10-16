@@ -8,7 +8,7 @@
  * the current action. This module retains the last 60 supplied observations.
  *
  * Both estimators minimize the same objective
- *   0.5 sum_s ||C forecast_s - disturbance_s||^2
+ *   0.5 mean_s ||C forecast_s - disturbance_s||^2
  *       + 0.5 lambda ||C - I||_F^2.
  * The scalar estimator restricts C to c I. The matrix estimator can additionally
  * restrict C so applying it never introduces a forbidden raw prediction source.
@@ -75,12 +75,15 @@
     const mask=compatibleMask(support),observed=samples.slice(-WINDOW).map(sample=>({
       forecast:coordinates(sample.forecast),disturbance:coordinates(sample.disturbance)
     }));
-    if(!observed.length)return{matrix:identity(),scalar:1,windowSize:0,lambda,
+    const effectiveSumRidge=lambda*Math.max(1,observed.length);
+    if(!observed.length)return{matrix:identity(),scalar:1,windowSize:0,lambda,effectiveSumRidge,
       rawRms:null,matrixRms:null,scalarRms:null,matrixDelta:0,scalarDelta:0,
       rawObjective:0,matrixObjective:0,scalarObjective:0};
-    const covariance=identity().map(row=>row.map(value=>lambda*value));
-    const cross=identity().map(row=>row.map(value=>lambda*value));
-    let scalarNumerator=lambda*DIMENSION,scalarDenominator=lambda*DIMENSION;
+    // Multiplying the mean loss normal equations by the observation count
+    // leaves the optimizer unchanged and scales the prior by that same count.
+    const covariance=identity().map(row=>row.map(value=>effectiveSumRidge*value));
+    const cross=identity().map(row=>row.map(value=>effectiveSumRidge*value));
+    let scalarNumerator=effectiveSumRidge*DIMENSION,scalarDenominator=effectiveSumRidge*DIMENSION;
     for(const {forecast,disturbance} of observed){
       for(let a=0;a<DIMENSION;a++){
         scalarNumerator+=disturbance[a]*forecast[a];scalarDenominator+=forecast[a]*forecast[a];
@@ -105,14 +108,14 @@
     }
     const matrixDeltaSquared=matrix.reduce((sum,row,a)=>sum+squared(row.map((value,b)=>value-+(a===b))),0);
     const scalarDeltaSquared=DIMENSION*(scalar-1)**2,count=observed.length*DIMENSION;
-    return {matrix,scalar,windowSize:observed.length,lambda,
+    return {matrix,scalar,windowSize:observed.length,lambda,effectiveSumRidge,
       rawRms:count?Math.sqrt(rawSquared/count):null,
       matrixRms:count?Math.sqrt(matrixSquared/count):null,
       scalarRms:count?Math.sqrt(scalarSquared/count):null,
       matrixDelta:Math.sqrt(matrixDeltaSquared),scalarDelta:Math.sqrt(scalarDeltaSquared),
-      rawObjective:.5*rawSquared,
-      matrixObjective:.5*(matrixSquared+lambda*matrixDeltaSquared),
-      scalarObjective:.5*(scalarSquared+lambda*scalarDeltaSquared)};
+      rawObjective:.5*rawSquared/observed.length,
+      matrixObjective:.5*(matrixSquared/observed.length+lambda*matrixDeltaSquared),
+      scalarObjective:.5*(scalarSquared/observed.length+lambda*scalarDeltaSquared)};
   }
   return {fit,identity,apply,compatibleMask,constants:Object.freeze({dimension:DIMENSION,window:WINDOW,lambda:LAMBDA})};
 });

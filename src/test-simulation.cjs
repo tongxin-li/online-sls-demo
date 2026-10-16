@@ -97,7 +97,7 @@ test('discovery calibrates future commands after warmup while completed row diag
       assert.deepEqual(snap.calibration.matrix,math.eye(23));assert.equal(snap.calibration.scalar,1);
       assert.deepEqual(snap.states.online,snap.states.static);assert.deepEqual(snap.states.scalar,snap.states.static);
     }else{
-      const fit=Calibration.fit(revealed);
+      const fit=Calibration.fit(revealed,{lambda:model.calibrationRidge});
       assert.deepEqual(snap.calibration.matrix,fit.matrix);assert.equal(snap.calibration.scalar,fit.scalar);
       assert.equal(snap.calibration.trainedThrough,t-1);assert.equal(snap.calibration.windowSize,Math.min(t,60));
       assert.equal(snap.calibration.updates,t-29);
@@ -129,7 +129,7 @@ test('calibration never sees an unrevealed attack and uses only the latest sixty
   assert.deepEqual(a.calibration,b.calibration);assert.deepEqual(a.lastInputs,b.lastInputs);
   assert.notDeepEqual(a.lastSample.disturbance,b.lastSample.disturbance);
   assert.equal(b.calibration.windowSize,60);assert.equal(b.calibration.trainedThrough,64);
-  const revealed=attacked.samples.slice(-60),expected=Calibration.fit(revealed),next=attacked.step();clean.step();
+  const revealed=attacked.samples.slice(-60),expected=Calibration.fit(revealed,{lambda:model.calibrationRidge}),next=attacked.step();clean.step();
   assert.deepEqual(next.calibration.matrix,expected.matrix);assert.equal(next.calibration.scalar,expected.scalar);
   assert.notDeepEqual(next.calibration.matrix,clean.snapshot().calibration.matrix);
   const saved=attacked.snapshot();saved.calibration.matrix[0][0]+=10;
@@ -257,14 +257,14 @@ test('deployment starts an independent trial and continuously calibrates within 
   assert.notEqual(fresh.seed,discovery.seed);assert.equal(fresh.canFreeze,false);assert.deepEqual(fresh.cumulative,{online:0,scalar:0,static:0,causal:0});
   assert.deepEqual(fresh.recommendations.map(e=>[e.from,e.to]),selected);
   assert.deepEqual(fresh.deployedSupport.trainingSamples,carried);assert.equal(fresh.calibration.carriedSamples,40);
-  const fit=Calibration.fit(carried,{support:fresh.deployedSupport.learned});
+  const fit=Calibration.fit(carried,{lambda:model.calibrationRidge,support:fresh.deployedSupport.learned});
   assert.deepEqual(fresh.calibration.matrix,fit.matrix);assert.equal(fresh.calibration.scalar,fit.scalar);
   const support=JSON.stringify(fresh.deployedSupport);let differs=false;
   for(let t=0;t<70;t++){
     const previous=sim.snapshot(),revealed=[...carried,...sim.samples].slice(-60),s=sim.step();
     assert.equal(JSON.stringify(s.deployedSupport),support);assert.equal(s.calibration.trainedThrough,t-1);
     assert.equal(s.calibration.windowSize,Math.min(40+t,60));assert.equal(s.calibration.carriedSamples,Math.max(0,Math.min(40,60-t)));
-    assert.deepEqual(s.calibration.matrix,Calibration.fit(revealed,{support:s.deployedSupport.learned}).matrix);
+    assert.deepEqual(s.calibration.matrix,Calibration.fit(revealed,{lambda:model.calibrationRidge,support:s.deployedSupport.learned}).matrix);
     for(const key of ['online','scalar','static']){
       let expected=matvec(model.K,reg(previous.states[key]));
       for(const block of sim.segments[0].designs[key].rows[t]){

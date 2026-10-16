@@ -57,7 +57,9 @@ const report={seeds,discoverySamples:horizon,deploymentSamples:horizon,intervent
   referenceVoltage:model.referenceVoltage,
   learning:'Shared matrix and scalar rolling ridge on revealed pairs, warmup 30 and window 60',
   deployment:'Sparse SLS synthesis plus support compatible shared calibration, with discovery observations carried into the new trial',
-  remoteBudget:3,previewDepth:5,ridge:1.27e-5,
+  remoteBudget:3,previewDepth:5,ridge:model.calibrationRidge,
+  ridgeLoss:'Mean squared prediction residual plus Frobenius prior',
+  calibrationScale:model.calibrationScale,dimensionlessRidge:model.calibrationNormalizedRidge,
   discoveryAndDeploymentIndependent:true,topologyFixedBeforeTesting:true,
   objective:'Sum of executed stage costs plus terminal x transpose P x',
   currentWebsiteCurves:'Executed stage costs only, with no terminal jump during ongoing playback',results};

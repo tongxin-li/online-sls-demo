@@ -612,7 +612,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
  * the current action. This module retains the last 60 supplied observations.
  *
  * Both estimators minimize the same objective
- *   0.5 sum_s ||C forecast_s - disturbance_s||^2
+ *   0.5 mean_s ||C forecast_s - disturbance_s||^2
  *       + 0.5 lambda ||C - I||_F^2.
  * The scalar estimator restricts C to c I. The matrix estimator can additionally
  * restrict C so applying it never introduces a forbidden raw prediction source.
@@ -679,12 +679,15 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     const mask=compatibleMask(support),observed=samples.slice(-WINDOW).map(sample=>({
       forecast:coordinates(sample.forecast),disturbance:coordinates(sample.disturbance)
     }));
-    if(!observed.length)return{matrix:identity(),scalar:1,windowSize:0,lambda,
+    const effectiveSumRidge=lambda*Math.max(1,observed.length);
+    if(!observed.length)return{matrix:identity(),scalar:1,windowSize:0,lambda,effectiveSumRidge,
       rawRms:null,matrixRms:null,scalarRms:null,matrixDelta:0,scalarDelta:0,
       rawObjective:0,matrixObjective:0,scalarObjective:0};
-    const covariance=identity().map(row=>row.map(value=>lambda*value));
-    const cross=identity().map(row=>row.map(value=>lambda*value));
-    let scalarNumerator=lambda*DIMENSION,scalarDenominator=lambda*DIMENSION;
+    // Multiplying the mean loss normal equations by the observation count
+    // leaves the optimizer unchanged and scales the prior by that same count.
+    const covariance=identity().map(row=>row.map(value=>effectiveSumRidge*value));
+    const cross=identity().map(row=>row.map(value=>effectiveSumRidge*value));
+    let scalarNumerator=effectiveSumRidge*DIMENSION,scalarDenominator=effectiveSumRidge*DIMENSION;
     for(const {forecast,disturbance} of observed){
       for(let a=0;a<DIMENSION;a++){
         scalarNumerator+=disturbance[a]*forecast[a];scalarDenominator+=forecast[a]*forecast[a];
@@ -709,14 +712,14 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     }
     const matrixDeltaSquared=matrix.reduce((sum,row,a)=>sum+squared(row.map((value,b)=>value-+(a===b))),0);
     const scalarDeltaSquared=DIMENSION*(scalar-1)**2,count=observed.length*DIMENSION;
-    return {matrix,scalar,windowSize:observed.length,lambda,
+    return {matrix,scalar,windowSize:observed.length,lambda,effectiveSumRidge,
       rawRms:count?Math.sqrt(rawSquared/count):null,
       matrixRms:count?Math.sqrt(matrixSquared/count):null,
       scalarRms:count?Math.sqrt(scalarSquared/count):null,
       matrixDelta:Math.sqrt(matrixDeltaSquared),scalarDelta:Math.sqrt(scalarDeltaSquared),
-      rawObjective:.5*rawSquared,
-      matrixObjective:.5*(matrixSquared+lambda*matrixDeltaSquared),
-      scalarObjective:.5*(scalarSquared+lambda*scalarDeltaSquared)};
+      rawObjective:.5*rawSquared/observed.length,
+      matrixObjective:.5*(matrixSquared/observed.length+lambda*matrixDeltaSquared),
+      scalarObjective:.5*(scalarSquared/observed.length+lambda*scalarDeltaSquared)};
   }
   return {fit,identity,apply,compatibleMask,constants:Object.freeze({dimension:DIMENSION,window:WINDOW,lambda:LAMBDA})};
 });
@@ -733,6 +736,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
   const N=24, M=8, AMPLITUDE=.006, RAW_RIDGE=1e-6;
+  const CALIBRATION_REFERENCE_SCALE=.006,CALIBRATION_NORMALIZED_RIDGE=1.27e-5/CALIBRATION_REFERENCE_SCALE**2;
   const RIDGE=RAW_RIDGE,REMOTE_BUDGET=3,PREVIEW=5,WINDOW=60,WARMUP=30,TOLERANCE=1e-5;
   const BASE_KV=12.47,BASE_MVA=1,POWER_BASE_KW=1000,SAMPLE_SECONDS=1,TAU_SECONDS=2;
   const LAG=Math.exp(-SAMPLE_SECONDS/TAU_SECONDS),Q_LIMIT=.07,S_RATING=.12;
@@ -869,13 +873,21 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     const closedLoop=combine(A,multiply(B,K));
     const distances=zeros();
     for(let i=0;i<N;i++)for(let j=0;j<N;j++)for(let e=0;e<N-1;e++)distances[i][j]+=Math.abs(paths[i][e]-paths[j][e]);
+    // Preserve a dimensionless mean-loss regularizer across the change from
+    // the paper's direct voltage forcing to power converted by this feeder.
+    // This scale depends only on the physical forecast generator, never on a
+    // test seed, observed corruption, selected topology or comparison cost.
+    const forecastForcingScales=powerToVoltage.map(row=>AMPLITUDE*Math.sqrt(squared(row)*(1+LAG*LAG)));
+    const forecastScaleSquared=squared(forecastForcingScales.slice(1))/(N-1);
     return deepFreeze({A,B,Q,R,P,K,S,X,F,resistance,reactance,powerToVoltage,paths,
       baseP,baseQ,baseDrop,referenceVoltage,initialVoltage:referenceVoltage,
       edgeData,order,parent,parentEdge,children,distances,
       inverterBuses:INVERTER_BUSES,lag:LAG,qLimit:Q_LIMIT,inverterRating:S_RATING,
       baseKv:BASE_KV,baseMva:BASE_MVA,sampleSeconds:SAMPLE_SECONDS,tauSeconds:TAU_SECONDS,
       variant:'Synthetic radial LinDistFlow feeder with inverter lag',
-      costReference:'Nominal feasible voltage profile',forecastForcingScales:powerToVoltage.map(row=>AMPLITUDE*Math.sqrt(squared(row)*(1+LAG*LAG))),dareResidual:residual,
+      costReference:'Nominal feasible voltage profile',forecastForcingScales,
+      calibrationScale:Math.sqrt(forecastScaleSquared),calibrationNormalizedRidge:CALIBRATION_NORMALIZED_RIDGE,
+      calibrationRidge:CALIBRATION_NORMALIZED_RIDGE*forecastScaleSquared,dareResidual:residual,
       dareIterations:iterations+1,closedLoopNormInf:normInf(closedLoop)});
   }
   const model=buildModel();
@@ -1135,7 +1147,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       if(samples.length<WARMUP)return;
       this._calibrationAt=this.t;
       const previous=this.calibration.matrix;
-      const fit=Calibration.fit(samples,{support:this.phase==='deployment'?this.deployedSupport.learned:null});
+      const fit=Calibration.fit(samples,{lambda:model.calibrationRidge,support:this.phase==='deployment'?this.deployedSupport.learned:null});
       this.calibration={...fit,updates:this.calibration.updates+1,trainedThrough:this.t-1,
         carriedSamples:Math.max(0,samples.length-this.samples.length),
         parameterChange:frobenius(combine(fit.matrix,previous,1,-1))};
@@ -1804,7 +1816,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     const events=snapshot.eventLog || [];
     const state = {
       modelContent: { scenario:'24 bus LinDistFlow voltage regulation', variant:'Shared prediction adaptation and sparse deployment', phase:snapshot.phase, step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
-      privateContent: { version:10, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, automaticComparison:automaticComparison(), view:$('view').value, costMetric:$('cost-metric').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, speed:$('speed').value, allLinks:$('all-links').checked }
+      privateContent: { version:11, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, automaticComparison:automaticComparison(), view:$('view').value, costMetric:$('cost-metric').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, speed:$('speed').value, allLinks:$('all-links').checked }
     };
     window.openai.setWidgetState(state).catch(() => {});
   }
@@ -1835,7 +1847,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   }
   function hydrate(saved) {
     const data=saved?.privateContent;
-    if(restored||!data||data.version!==10) return;
+    if(restored||!data||data.version!==11) return;
     restored=true;
     $('auto-compare').checked=data.automaticComparison!==false;
     selectedBus=Math.max(1,Math.min(24,Math.floor(Number(data.selectedBus)||7)));
