@@ -13,9 +13,10 @@
       <span id="pr-clock" class="tabular-nums">t = 0 s</span>
     </div>
     <div class="pr-actions">
+      <select id="pr-intervention" aria-label="Bus interaction" title="Choose what clicking a bus changes"><option value="forecast" selected>Forecast</option><option value="power">Power disturbance</option></select>
       <select id="pr-attack-mode" aria-label="Attack mode"><option value="continuous" selected>Continuous</option><option value="pulse">Pulse</option></select>
       <select id="pr-strength" aria-label="Pulse strength" title="Requested power per pulse. Applied power respects equipment limits"><option value="50">50 kW</option><option value="100" selected>100 kW</option><option value="150">150 kW</option></select>
-      <button type="button" class="btn btn-attack" id="pr-pulse" aria-keyshortcuts="D" title="Click for a pulse or hold for one pulse each sample"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path class="pr-attack-bolt" d="M14 2 5 14h6l-1 8 9-13h-6z"/><rect class="pr-attack-stop" x="6" y="6" width="12" height="12" rx="2"/></svg><span id="pr-pulse-label">Attack bus 7</span></button><span id="pr-attack-hint" class="pr-attack-hint">Click to start or stop</span>
+      <button type="button" class="btn btn-attack" id="pr-pulse" aria-keyshortcuts="D" title="Click for a pulse or hold for one pulse each sample"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path class="pr-forecast-signal" d="M3 12h3l3-7 6 14 3-7h3"/><path class="pr-attack-bolt" d="M14 2 5 14h6l-1 8 9-13h-6z"/><rect class="pr-attack-stop" x="6" y="6" width="12" height="12" rx="2"/></svg><span id="pr-pulse-label">Attack bus 7</span></button><span id="pr-attack-hint" class="pr-attack-hint">Click to start or stop</span>
     </div>
   </div>
   <div class="pr-mission">
@@ -56,7 +57,7 @@
         <svg class="pr-chart" id="pr-convergence" role="img" aria-label="Learning diagnostic over time"></svg>
         <p id="pr-mode-note" class="pr-caption"></p>
       </div>
-      <div id="pr-cost-content"><p id="pr-comparison-summary" class="pr-comparison-summary" aria-live="polite">Run to compare all four controllers</p><div class="pr-cost-tools"><select id="pr-cost-metric" aria-label="Cost measure"><option value="total" selected>Cumulative cost</option><option value="gap">Gap to scalar adaptation</option></select></div><svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative cost of active controllers"></svg><table class="pr-cost-table tabular-nums" aria-label="Cumulative controller costs"><thead><tr><th scope="col">Method</th><th scope="col">Cumulative cost</th><th scope="col">vs feedback</th></tr></thead><tbody id="pr-cost-detail"></tbody></table><p id="pr-cost-note" class="pr-caption pr-comparison-note">Dense messages during learning · Adaptation starts at 30 s</p></div>
+      <div id="pr-cost-content"><p id="pr-comparison-summary" class="pr-comparison-summary" aria-live="polite">Run to compare all four controllers</p><div class="pr-cost-tools"><select id="pr-cost-metric" aria-label="Cost measure"><option value="total" selected>Cumulative cost</option><option value="gap">Difference vs scalar</option></select></div><svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative cost of active controllers"></svg><table class="pr-cost-table tabular-nums" aria-label="Cumulative controller costs"><thead><tr><th scope="col">Method</th><th scope="col">Cumulative cost</th><th scope="col">vs feedback</th></tr></thead><tbody id="pr-cost-detail"></tbody></table><p id="pr-cost-note" class="pr-caption pr-comparison-note">Dense messages during learning · Adaptation starts at 30 s</p></div>
     </section>
   </div>
   <div class="pr-bottomline">

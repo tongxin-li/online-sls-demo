@@ -144,6 +144,49 @@ test('deployment starts a fresh paired physical trial and preserves only the sel
   assert.equal(state.deployedSupport.scoreSamples,discovery.predictionDiagnostics.scoreSamples);
 });
 
+test('forecast reliability changes survive deployment without rewriting sealed predictions or discovery replay',()=>{
+  const seed=17,sim=communication({seed}),reference=communication({seed});
+  run(sim,40);run(reference,40);
+  const originalOptions=clone(sim.initialOptions),sealed=clone(sim.forecasts);
+  assert.equal(sim.toggleFault(7),true);
+  assert.equal(sim.toggleFault(12),false);
+  const finalFaults=sim.snapshot().faults;
+  const changedAt=sim.t;
+  sim.step();reference.step();
+  assert.deepEqual(sim.forecasts.slice(0,sealed.length),sealed,'issued predictions must remain immutable');
+  assert.equal(sim.forecasts.length,sealed.length+1);
+  const future=sim.forecasts.at(-1),unchanged=reference.forecasts.at(-1);
+  assert.equal(future.issuedAt,changedAt);
+  assert.deepEqual(future.base,unchanged.base);
+  const previous=sim.forecasts.at(-2).base;
+  const truth=math.matvec(model.powerToVoltage,future.base.map((value,j)=>value-model.lag*previous[j]));
+  assert.ok(Math.abs((future.forecast[6]-truth[6])-80*(unchanged.forecast[6]-truth[6]))<1e-14);
+  assert.ok(Math.abs(80*(future.forecast[11]-truth[11])-(unchanged.forecast[11]-truth[11]))<1e-14);
+  run(sim,24);
+  assert.ok(sim.deployTopology());
+  const deployed=sim.snapshot(),record=sim.discoveryRecord;
+  assert.deepEqual(deployed.faults,finalFaults);
+  assert.deepEqual(sim.initialOptions.faultBuses,finalFaults);
+  assert.deepEqual(record.options,originalOptions,'discovery begins from its original source map during replay');
+  assert.deepEqual(record.events.filter(event=>event.type==='forecast').map(({t,bus,faulty})=>({t,bus,faulty})),[
+    {t:changedAt,bus:7,faulty:true},{t:changedAt,bus:12,faulty:false}
+  ]);
+  assert.equal(deployed.seed,(seed^0x9E3779B9)>>>0);
+  assert.equal(deployed.t,0);assert.equal(deployed.sampleCount,0);
+  const fresh=communication({seed:deployed.seed,faultBuses:finalFaults});
+  assert.deepEqual(sim.forecasts,fresh.forecasts,'the held out stream starts with the final discovery source map');
+  const replay=communication(record.options);
+  for(let t=0;t<record.t;t++){
+    for(const event of record.events)if(event.t===t&&event.type==='forecast')replay.toggleFault(event.bus);
+    replay.step();
+  }
+  assert.ok(replay.deployTopology());
+  assert.deepEqual(replay.snapshot().faults,deployed.faults);
+  assert.deepEqual(replay.forecasts,sim.forecasts);
+  assert.deepEqual(replay.deployedSupport.learned,sim.deployedSupport.learned);
+  assert.deepEqual(replay.deployedSupport.fixed,sim.deployedSupport.fixed);
+});
+
 test('deployed commands use fixed synthesized gains and raw forecasts while forbidden sources remain zero',()=>{
   const sim=communication({horizon:80});run(sim,65);assert.ok(sim.deployTopology());
   for(const key of ['online','scalar']){
@@ -190,4 +233,38 @@ test('held out observations and repeated attacks cannot change frozen comparison
     for(const key of ['online','scalar','static'])assert.equal(sim.segments[0].designs[key],designs[key]);
   }
   assert.equal(sim.samples.length,70,'comparison observations are recorded even though policies are fixed');
+});
+
+test('unforecast pulses share the same unsaturated feedback response despite different prediction commands',()=>{
+  const clean=communication({horizon:80}),attacked=communication({horizon:80});
+  for(const sim of [clean,attacked]){run(sim,65);assert.ok(sim.deployTopology());}
+  assert.deepEqual(attacked.deployedSupport,clean.deployedSupport);
+  assert.notDeepEqual(clean.deployedSupport.learned,clean.deployedSupport.fixed);
+  const executedCost=Object.fromEntries(keys.map(key=>[key,0]));let predictionDifference=0;
+  for(let t=0;t<40;t++){
+    if(t===8){
+      const sealed=clone(attacked.forecasts);attacked.queuePulse(24,50);
+      assert.deepEqual(attacked.forecasts,sealed,'a physical pulse cannot rewrite an issued forecast');
+    }
+    const a=clean.step(),b=attacked.step();
+    assert.deepEqual(attacked.forecasts,clean.forecasts,'the entire paired forecast stream stays unchanged');
+    const dx=b.states.online.map((value,j)=>value-a.states.online[j]);
+    const du=b.lastInputs.online.map((value,j)=>value-a.lastInputs.online[j]);
+    if(t===8)assert.ok(dx.some(value=>Math.abs(value)>1e-6),'the unforecast pulse must affect the physical state');
+    for(const key of keys){
+      assert.ok(!a.saturation[key].some(Boolean)&&!b.saturation[key].some(Boolean));
+      near(b.states[key].map((value,j)=>value-a.states[key][j]),dx,1e-12);
+      near(b.lastInputs[key].map((value,j)=>value-a.lastInputs[key][j]),du,1e-12);
+      const fullStage=35*b.costStates[key].reduce((sum,value,j)=>sum+(value-model.baseDrop[j])**2,0)
+        +.08*b.lastInputs[key].reduce((sum,value)=>sum+value*value,0);
+      assert.ok(Math.abs(b.stage[key]-fullStage)<1e-12);
+      executedCost[key]+=fullStage;
+      assert.ok(Math.abs(b.cumulative[key]-executedCost[key])<1e-12);
+    }
+    // Initial state is zero, so the first commands contain prediction only.
+    if(t===0)predictionDifference=Math.max(...a.lastInputs.online.map((value,j)=>Math.abs(value-a.lastInputs.scalar[j])));
+  }
+  assert.ok(predictionDifference>1e-6,'different selected links must still produce different prediction commands');
+  assert.ok(Math.abs(attacked.cumulative.online-clean.cumulative.online)>1e-9,
+    'reported cost must retain the pulse effect rather than subtracting it');
 });

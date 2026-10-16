@@ -24,6 +24,7 @@ const source=withoutCards.replace(anchor,
   '  drawMatrix=drawTopologyHistory;\n'+
   '  root.bindTestBus=(element,bus)=>bindAttackTarget(element,()=>bus);\n'+
   '  root.testSummary=()=>comparisonSummary();\n'+
+  '  root.testPowerContext=()=>powerRecoveryContext();\n'+
   '  root.testShownReference=()=>[...topologyFrame().reference];\n'+
   '  root.testComparison=()=>({active:activeSeries().map(item=>item.key),plotted:plottedSeries().map(item=>item.key),sameSparseSupport:sameSparseSupport()});\n'+anchor);
 const plain=value=>JSON.parse(JSON.stringify(value));
@@ -109,7 +110,7 @@ function harness(saved,experiment='prediction') {
     {filename:'interface.js'});
   const node=id=>nodes.get('pr-'+id);
   return {clock,document,window,node,
-    comparison:()=>plain(root.testComparison()),summary:()=>root.testSummary(),shownReference:()=>plain(root.testShownReference()),seriesButton:key=>seriesButtons.get(key),
+    comparison:()=>plain(root.testComparison()),summary:()=>root.testSummary(),powerContext:()=>root.testPowerContext(),shownReference:()=>plain(root.testShownReference()),seriesButton:key=>seriesButtons.get(key),
     samples:count=>clock.advance(count*1000/Number(node('speed').value)),
     bus:bus=>{const svg=element('g');svg.dataset.bus=String(bus);root.bindTestBus(svg,bus);return svg;},
     pointer(type,underPointer,detail={}){
@@ -335,20 +336,20 @@ test('changing speed during a hold replaces the timer without losing or doubling
 
 test('old algorithm saves start a clean paused trial instead of replaying incompatible controls',async()=>{
   const h=harness();h.change('attack-mode','pulse');h.quickClick();await h.samples(3);h.click('run');
-  for(const version of [7,8,9,10,11]){
+  for(const version of [7,8,9,10,11,12]){
     const old=plain(h.saved());old.privateContent.version=version;
     const restored=harness(old);
     assert.equal(restored.snapshot().t,0);assert.equal(restored.snapshot().phase,'discovery');
     assert.ok(Object.values(restored.snapshot().cumulative).every(value=>value===0));
     assert.equal(restored.snapshot().eventLog.length,0);assert.equal(restored.state().playing,false);
     assert.equal(restored.node('attack-mode').value,'continuous');assert.equal(restored.node('view').value,'cost');
-    restored.quickClick();assert.equal(restored.saved().privateContent.version,12);
+    restored.quickClick();assert.equal(restored.saved().privateContent.version,13);
   }
 });
 
-test('version twelve replay retains speed, attack mode and matrix view',async()=>{
+test('version thirteen replay retains speed, attack mode and matrix view',async()=>{
   const h=harness();h.change('attack-mode','pulse');h.change('speed',16);h.change('matrix-view','change');h.quickClick();await h.samples(3);h.click('run');
-  assert.equal(h.saved().privateContent.version,12);
+  assert.equal(h.saved().privateContent.version,13);
   const restored=harness(h.saved());assert.equal(restored.node('speed').value,'16');assert.equal(restored.node('matrix-view').value,'change');
   assert.equal(restored.node('attack-mode').value,'pulse');
   assert.deepEqual(restored.snapshot().cumulative,h.snapshot().cumulative);assert.deepEqual(restored.snapshot().eventLog,h.snapshot().eventLog);
@@ -357,7 +358,7 @@ test('version twelve replay retains speed, attack mode and matrix view',async()=
 // A seeded integration fixture. Topology observations must agree across stepping,
 // batch advancement and saved replay under the current learning algorithm.
 function topologyHarness(){
-  return harness({privateContent:{version:12,phase:'discovery',preset:'mixed',
+  return harness({privateContent:{version:13,phase:'discovery',preset:'mixed',
     initialOptions:{seed:7,preset:'mixed'},t:0,events:[],selectedBus:7,
     automaticComparison:false,speed:'8',pulseStrength:'100',view:'cost',matrixView:'links'}});
 }
@@ -378,7 +379,7 @@ test('Advance 180 retains every actual topology change observed by single steppi
   assert.deepEqual(single.snapshot().cumulative,fast.snapshot().cumulative);
 });
 
-test('version twelve replay reconstructs topology events from every physical sample',async()=>{
+test('version thirteen replay reconstructs topology events from every physical sample',async()=>{
   const h=topologyHarness();await compare(h);
   const bus=h.bus(14);h.pointer('pointerdown',bus);await h.samples(7);h.pointer('pointerup',bus);h.click('run');
   const restored=harness(h.saved());
@@ -545,7 +546,7 @@ test('Pause ends a continuous attack and Run resumes only the plant',async()=>{
 
 test('reloading an active continuous trial restores physical history but never restarts the attack',async()=>{
   const h=harness(),bus=h.bus(14);pointerClick(h,bus);await h.samples(4);
-  h.change('speed',32);const saved=h.saved();assert.equal(saved.privateContent.version,12);assert.equal(saved.privateContent.attackMode,'continuous');
+  h.change('speed',32);const saved=h.saved();assert.equal(saved.privateContent.version,13);assert.equal(saved.privateContent.attackMode,'continuous');
   const restored=harness(saved);assert.equal(restored.node('attack-mode').value,'continuous');assert.equal(restored.node('speed').value,'32');
   assert.equal(restored.state().playing,false);assert.equal(restored.node('pulse')['aria-pressed'],'false');
   assert.deepEqual(restored.snapshot().cumulative,h.snapshot().cumulative);assert.deepEqual(restored.snapshot().eventLog,h.snapshot().eventLog);
@@ -722,7 +723,7 @@ test('Learn again cancels comparison playback and attacks and restores the disco
 
 test('comparison gap measure survives saved replay without resuming playback or changing costs',async()=>{
   const h=harness();h.check('auto-compare',false);await compare(h);h.click('deploy');await h.samples(5);h.change('cost-metric','gap');
-  const saved=h.saved();assert.equal(saved.privateContent.version,12);assert.equal(saved.privateContent.costMetric,'gap');
+  const saved=h.saved();assert.equal(saved.privateContent.version,13);assert.equal(saved.privateContent.costMetric,'gap');
   const restored=harness(saved);
   assert.equal(restored.snapshot().phase,'deployment');assert.equal(restored.node('cost-metric').value,'gap');
   assert.equal(restored.node('cost-metric').hidden,false);assert.equal(restored.state().playing,false);
@@ -734,7 +735,7 @@ test('comparison gap measure survives saved replay without resuming playback or 
     const old=harness(legacy);assert.equal(old.node('cost-metric').value,'total');assert.equal(old.state().playing,false);
     assert.deepEqual(old.snapshot().cumulative,h.snapshot().cumulative);
   }
-  const discovery=harness({privateContent:{version:12,phase:'discovery',t:0,events:[],costMetric:'gap'}});
+  const discovery=harness({privateContent:{version:13,phase:'discovery',t:0,events:[],costMetric:'gap'}});
   assert.equal(discovery.node('cost-metric').value,'gap');assert.equal(discovery.node('cost-metric').hidden,false);
 });
 
@@ -944,7 +945,7 @@ test('communication comparison keeps all policies and reports actual gains or lo
 });
 
 test('continuous attacks survive communication handoff and saved trial replays paused with frozen control',async()=>{
-  const h=harness(undefined,'communication');h.change('noise',2);
+  const h=harness(undefined,'communication');h.change('noise',2);h.change('intervention','power');
   const bus=h.bus(23);pointerClick(h,bus);await h.samples(185);h.click('run');
   assert.equal(h.snapshot().phase,'deployment');assert.ok(h.snapshot().eventLog.filter(e=>e.type==='pulse').length>=5);
   h.change('cost-metric','gap');const saved=h.saved(),r=harness(saved,'communication');
@@ -963,4 +964,109 @@ test('switching experiments resets the trial without carrying topology or attack
   h.change('preset','uniform');assert.equal(h.snapshot().preset,'uniform');
   h.change('experiment','communication');assert.equal(h.snapshot().preset,'mixed');assert.equal(h.snapshot().beta,1);
   assert.equal(h.snapshot().deployedSupport,null);assert.equal(h.node('view').value,'learning');
+});
+
+
+const forecastEvents=h=>h.snapshot().eventLog.filter(event=>event.type==='forecast');
+
+test('new sessions default to the relevant bus interaction and hide irrelevant controls',()=>{
+  const communication=harness(undefined,'communication'),prediction=harness();
+  assert.equal(communication.node('intervention').value,'forecast');
+  assert.equal(communication.node('attack-mode').hidden,true);assert.equal(communication.node('strength').hidden,true);
+  assert.equal(prediction.node('intervention').value,'power');
+  assert.equal(prediction.node('attack-mode').hidden,false);assert.equal(prediction.node('strength').hidden,false);
+  assert.match(communication.node('pulse-label').textContent,/Corrupt bus 7/);
+});
+
+test('forecast bus pointer gesture toggles once and never creates a power pulse',async()=>{
+  const h=harness(undefined,'communication'),bus=h.bus(7);
+  assert.equal(h.snapshot().faults.includes(7),false);
+  pointerClick(h,bus);assert.equal(h.snapshot().faults.includes(7),true);
+  assert.equal(forecastEvents(h).length,1);assert.equal(pulses(h).length,0);
+  assert.equal(h.snapshot().pendingPulses.length,0);assert.equal(h.snapshot().activePulses.length,0);
+  assert.equal(h.snapshot().t,0);assert.equal(h.state().playing,true);
+  assert.equal(h.state().selectedBus,7);assert.equal(h.node('pulse-label').textContent,'Repair bus 7');
+  await h.samples(6);assert.equal(forecastEvents(h).length,1);assert.equal(pulses(h).length,0);
+  pointerClick(h,bus);assert.equal(h.snapshot().faults.includes(7),false);
+  assert.equal(forecastEvents(h).length,2);assert.equal(h.node('pulse-label').textContent,'Corrupt bus 7');
+  assert.ok(Object.values(h.snapshot().cumulative).every(Number.isFinite));
+});
+
+test('forecast Enter, Space and D toggle once despite key repeats and key release',async()=>{
+  for(const key of ['Enter',' ','d']){
+    const h=harness(undefined,'communication'),bus=h.bus(7);
+    if(key==='d') {h.key('keydown',key);h.key('keydown',key,{repeat:true});}
+    else {bus.dispatch('keydown',{key});bus.dispatch('keydown',{key,repeat:true});}
+    await h.samples(4);
+    if(key==='d')h.key('keyup',key);else bus.dispatch('keyup',{key});
+    assert.equal(forecastEvents(h).length,1,key);assert.equal(h.snapshot().faults.includes(7),true,key);
+    assert.equal(pulses(h).length,0,key);assert.equal(h.node('pulse').dataset.holding,'false',key);
+    if(key==='d')h.key('keydown',key);else bus.dispatch('keydown',{key});
+    assert.equal(forecastEvents(h).length,2,key);assert.equal(h.snapshot().faults.includes(7),false,key);
+  }
+});
+
+test('forecast primary action and assistive click toggle the selected bus without power requests',()=>{
+  const h=harness(undefined,'communication');h.change('bus',14);
+  h.quickClick();assert.equal(h.snapshot().faults.includes(14),true);assert.equal(forecastEvents(h).length,1);
+  h.click('pulse',0);assert.equal(h.snapshot().faults.includes(14),false);assert.equal(forecastEvents(h).length,2);
+  assert.equal(pulses(h).length,0);assert.equal(h.node('attack-mode').hidden,true);
+});
+
+test('switching interaction ends continuous power requests and preserves physical tails and costs',async()=>{
+  const h=harness(undefined,'communication');h.change('intervention','power');
+  pointerClick(h,h.bus(23));await h.samples(4);
+  const before=h.snapshot(),count=pulses(h).length;
+  h.change('intervention','forecast');
+  assert.equal(h.node('pulse').dataset.holding,'false');assert.equal(h.node('attack-mode').hidden,true);
+  assert.deepEqual(h.snapshot().cumulative,before.cumulative);assert.deepEqual(h.snapshot().activePulses,before.activePulses);
+  await h.samples(4);assert.equal(pulses(h).length,count);assert.ok(h.snapshot().activePulses.length>0);
+  pointerClick(h,h.bus(7));assert.equal(forecastEvents(h).length,1);assert.equal(pulses(h).length,count);
+  assert.equal(h.powerContext(),'Includes load recovery · Clicked power disturbances are not forecast');
+  h.change('intervention','power');assert.equal(h.node('attack-mode').hidden,false);
+  pointerClick(h,h.bus(23));await h.samples(2);assert.ok(pulses(h).length>count);
+});
+
+test('forecast interaction save restores the exact paused trial and selected action',async()=>{
+  const h=harness(undefined,'communication');pointerClick(h,h.bus(7));await h.samples(45);
+  pointerClick(h,h.bus(12));await h.samples(5);h.click('run');
+  const saved=h.saved(),r=harness(saved);
+  assert.equal(saved.privateContent.version,13);assert.equal(saved.privateContent.intervention,'forecast');
+  assert.equal(r.node('intervention').value,'forecast');assert.equal(r.node('attack-mode').hidden,true);
+  assert.deepEqual(r.snapshot().cumulative,h.snapshot().cumulative);
+  assert.deepEqual(r.snapshot().states,h.snapshot().states);assert.deepEqual(r.snapshot().faults,h.snapshot().faults);
+  assert.deepEqual(r.snapshot().eventLog,h.snapshot().eventLog);assert.equal(r.state().playing,false);
+  assert.equal(pulses(r).length,0);assert.equal(r.powerContext(),'');
+});
+
+test('forecast source settings survive automatic comparison and deployed replay',async()=>{
+  const h=harness(undefined,'communication');pointerClick(h,h.bus(7));
+  await h.samples(185);h.click('run');
+  assert.equal(h.snapshot().phase,'deployment');assert.equal(h.snapshot().faults.includes(7),true);
+  assert.equal(h.node('intervention').value,'forecast');assert.equal(pulses(h).length,0);
+  assert.equal(h.snapshot().calibration.updates,0);assert.equal(h.node('view').value,'cost');
+  const r=harness(h.saved());assert.equal(r.node('intervention').value,'forecast');
+  assert.deepEqual(r.snapshot().cumulative,h.snapshot().cumulative);
+  assert.deepEqual(r.snapshot().deployedSupport,h.snapshot().deployedSupport);
+  assert.deepEqual(r.snapshot().faults,h.snapshot().faults);assert.equal(r.state().playing,false);
+});
+
+test('reliability changes leave deployed links fixed and Learn again retains the current source map',async()=>{
+  const h=harness(undefined,'communication');await compare(h);
+  const support=plain(h.snapshot().deployedSupport.learned);
+  pointerClick(h,h.bus(7));assert.equal(h.snapshot().faults.includes(7),true);
+  assert.match(h.node('event').textContent,/Links remain fixed/);
+  await h.samples(4);assert.deepEqual(h.snapshot().deployedSupport.learned,support);
+  const currentFaults=plain(h.snapshot().faults);
+  h.click('deploy');assert.equal(h.snapshot().phase,'discovery');assert.equal(h.snapshot().t,0);
+  assert.deepEqual(h.snapshot().faults,currentFaults);assert.equal(h.node('intervention').value,'forecast');
+  assert.equal(h.snapshot().deployedSupport,null);assert.equal(h.state().playing,false);
+});
+
+test('zero noise forecast configuration is explicit and never claims active corruption',()=>{
+  const h=harness(undefined,'communication');h.change('noise',0);pointerClick(h,h.bus(7));
+  assert.equal(h.snapshot().faults.includes(7),true);assert.equal(pulses(h).length,0);
+  assert.equal(h.node('pulse').dataset.attackState,'quiet');
+  assert.match(h.node('attack-hint').textContent,/No noise at β 0/);
+  assert.match(h.node('pulse').title,/disabled at β 0/);assert.match(h.node('event').textContent,/No noise at β 0/);
 });

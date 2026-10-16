@@ -80,3 +80,24 @@
 .pe-paused .pe-burst { display:none; }
 
 .pe-attack-badge { pointer-events:all; cursor:pointer; }
+
+
+/* Forecast faults describe information quality, independently of power pulses. */
+.pr-forecast-badge circle { fill:#fff0d5; stroke:#b77b21; stroke-width:1; }
+.pr-forecast-badge path { fill:none; stroke:#a76a16; stroke-width:1.5; stroke-linejoin:round; stroke-linecap:round; }
+.pr-forecast-signal { display:none; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linejoin:round; stroke-linecap:round; }
+#power-response-demo[data-interaction='forecast'] .btn-attack .pr-attack-bolt,
+#power-response-demo[data-interaction='forecast'] .btn-attack .pr-attack-stop,
+#power-response-demo[data-interaction='forecast'] .pe-target-bolt { display:none; }
+#power-response-demo[data-interaction='forecast'] .btn-attack .pr-forecast-signal { display:block; fill:none; }
+#power-response-demo[data-interaction='forecast'] .btn-attack[data-attack-state='noisy'] { background:#fff0d5; color:#905b14; }
+#pr-intervention { background:#f4f4f6; color:var(--foreground); }
+@media(max-width:650px) {
+  #pr-intervention { grid-column:1 / -1; }
+  #power-response-demo[data-interaction='forecast'] .pr-actions { grid-template-columns:minmax(0,1fr) minmax(0,1.35fr); }
+  #power-response-demo[data-interaction='forecast'] #pr-intervention,
+  #power-response-demo[data-interaction='forecast'] .btn-attack { grid-column:auto; }
+}
+@media(max-width:650px),(pointer:coarse) {
+  #pr-intervention, #pr-pulse { min-height:44px; }
+}

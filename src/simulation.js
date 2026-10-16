@@ -579,7 +579,10 @@
         scoreSamples:this.communicationScoreSamples,
         trainingSamples:this.samples.slice(-WINDOW),
         discoveryDiagnostics:this.predictionDiagnostics});
+      // A fresh physical trial retains the reliability map observed at the end
+      // of discovery. Original options and events above remain replayable.
       this.phase='deployment';this.initialOptions={...this.discoveryRecord.options,
+        faultBuses:[...this.faults].sort((a,b)=>a-b),
         seed:(this.discoveryRecord.options.seed^0x9E3779B9)>>>0};return this.reset();
     }
     snapshot(){

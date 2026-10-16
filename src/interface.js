@@ -35,6 +35,16 @@
     return series;
   }
   function gapReference() { return communicationComparison()?'fixed sparse':'scalar adaptation'; }
+  function forecastMode() { return $('intervention').value==='forecast'; }
+  function forecastNoiseEnabled() { return snapshot.experiment!=='communication'||snapshot.beta>0; }
+  function forecastNoisy(bus) { return forecastNoiseEnabled()&&snapshot.faults.includes(bus); }
+  function powerRecoveryContext() {
+    return journal.some(item=>item.type==='pulse')?'Includes load recovery · Clicked power disturbances are not forecast':'';
+  }
+  function forecastInstruction(bus=selectedBus) {
+    if(!forecastNoiseEnabled()) return 'No forecast noise at β 0';
+    return snapshot.faults.includes(bus)?'Bus '+bus+' forecast noisy · Click to repair':'Click a bus to corrupt its forecast';
+  }
   function predictionBudget(displayedLinks=null) {
     const receivers=PowerDemo.constants.inverterBuses;
     const sources=snapshot.predictionDiagnostics?.sourceBuses || Array.from({length:23},(_,i)=>i+2);
@@ -59,6 +69,7 @@
   let nextTickAt = 0;
   let heldAttack = null;
   let snapshot = simulation.snapshot();
+  $('intervention').value=snapshot.experiment==='communication'?'forecast':'power';
   const topology = new TopologyTimeline(snapshot);
   let historyIndex = null;
   let visualTopologyEvent = null;
@@ -222,7 +233,7 @@
     const events=snapshot.eventLog || [];
     const state = {
       modelContent: { scenario:'24 bus LinDistFlow voltage regulation', variant:snapshot.experiment==='communication'?'Communication topology comparison':'Shared prediction adaptation and sparse deployment', phase:snapshot.phase, step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
-      privateContent: { version:12, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, automaticComparison:automaticComparison(), view:$('view').value, costMetric:$('cost-metric').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, speed:$('speed').value, allLinks:$('all-links').checked }
+      privateContent: { version:13, intervention:$('intervention').value, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, automaticComparison:automaticComparison(), view:$('view').value, costMetric:$('cost-metric').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, speed:$('speed').value, allLinks:$('all-links').checked }
     };
     window.openai.setWidgetState(state).catch(() => {});
   }
@@ -253,13 +264,14 @@
   }
   function hydrate(saved) {
     const data=saved?.privateContent;
-    if(restored||!data||data.version!==12) return;
+    if(restored||!data||data.version!==13) return;
     restored=true;
     $('auto-compare').checked=data.automaticComparison!==false;
     selectedBus=Math.max(1,Math.min(24,Math.floor(Number(data.selectedBus)||7)));
     $('bus').value=String(selectedBus);
     $('speed').value=['2','4','8','16','32'].includes(data.speed)?data.speed:'16';
     $('attack-mode').value=data.attackMode==='pulse'?'pulse':'continuous';
+    $('intervention').value=data.intervention==='forecast'?'forecast':'power';
     if(['50','100','150'].includes(data.pulseStrength)) $('strength').value=data.pulseStrength;
     $('all-links').checked=!!data.allLinks;
     $('matrix-view').value=data.matrixView==='change'?'change':'links';
@@ -358,7 +370,7 @@
     if (isFit()) { simulation.fitStep(100); fitSteps+=100; }
     else advanceLiveSample();
     snapshot = simulation.snapshot();
-    if (!isFit() && lastPulse && snapshot.t>lastPulse.t) {
+    if (!forecastMode() && !isFit() && lastPulse && snapshot.t>lastPulse.t) {
       const state=attackState(lastPulse.bus);
       announce((state==='continuous'||state==='held'?'Adding attacks':state==='fading'?'Disturbance fading':state==='paused'?'Paused':'Disturbance ended')+' · Bus '+lastPulse.bus+' · t = '+snapshot.t+' s');
     }
@@ -394,7 +406,8 @@
   $('deploy').addEventListener('click', () => {
     if(comparing) return;
     if(snapshot.phase==='deployment') {
-      simulation=new PowerDemo.Simulation(optionsFromControls());resetExperiment();
+      simulation=new PowerDemo.Simulation({...optionsFromControls(),faultBuses:snapshot.faults.slice()});resetExperiment();
+      $('intervention').value=snapshot.experiment==='communication'?'forecast':'power';
       $('matrix-view').value='links';announce('New discovery · Press Run or attack a bus');render();save();return;
     }
     if(!snapshot.canDeploy) return;
@@ -406,7 +419,8 @@
   });
   function startSelectedExperiment() {
     stop(); simulation=new PowerDemo.Simulation(optionsFromControls());
-    resetExperiment(); visible.clear();series.forEach(item=>visible.add(item.key));
+    resetExperiment(); $('intervention').value=snapshot.experiment==='communication'?'forecast':'power';
+    visible.clear();series.forEach(item=>visible.add(item.key));
     announce((snapshot.experiment==='communication'?'Communication topology':snapshot.presetLabel)+' · New learning trial'); render(); save();
   }
   $('preset').addEventListener('change',startSelectedExperiment);
@@ -442,6 +456,11 @@
   $('cost-metric').addEventListener('change',()=>{drawCost();save();});
   $('strength').addEventListener('change', () => { drawNetwork(); save(); });
   $('attack-mode').addEventListener('change',()=>{releaseAttack();renderControls();drawNetwork();save();});
+  $('intervention').addEventListener('change',()=>{
+    const stopped=!!heldAttack;releaseAttack();
+    announce((stopped?'Power attack stopped · ':'')+(forecastMode()?'Click a bus to change forecast reliability':'Click a bus to disturb physical power'));
+    render();save();
+  });
   if ($('matrix-view')) $('matrix-view').addEventListener('change',()=>{historyIndex=null;drawNetwork();drawMatrix();save();});
   $('topology-history').addEventListener('input',()=>reviewTopology(Number($('topology-history').value)));
   $('history-live').addEventListener('click',()=>reviewTopology(null));
@@ -497,23 +516,27 @@
     // Queuing an event must not restart every chart transition.
     if(!repeated) { renderControls(); drawNetwork(); save(); }
   }
-  function fault() {
-    if (!canAttack(selectedBus)) return;
+  function fault(bus=selectedBus,{startPlayback=false}={}) {
+    if (!canAttack(bus)) return;
+    selectedBus=bus;$('bus').value=String(bus);
     resumePlant();
     simulation.toggleFault(selectedBus); journal.push({t:snapshot.t,type:'fault',bus:selectedBus});
     snapshot=simulation.snapshot();
-    const message='Bus '+selectedBus+' forecast '+(snapshot.faults.includes(selectedBus)?'corrupted':'repaired');
+    const message='Bus '+selectedBus+' forecast '+(snapshot.faults.includes(selectedBus)?'marked noisy':'marked quiet')
+      +(!forecastNoiseEnabled()?' · No noise at β 0':snapshot.phase==='deployment'?' · Links remain fixed':' · New forecasts use this setting');
+    if(startPlayback&&!playing&&!comparing) {playing=true;nextTickAt=0;schedule();}
     announce(message); actionNote(message);
     render(); save();
   }
   function continuousMode() { return $('attack-mode').value==='continuous'; }
-  function attackInstruction() { return continuousMode()?'Click a bus to start · Click again to stop':'Click for a pulse · Hold to repeat'; }
+  function attackInstruction() { return forecastMode()?forecastInstruction():continuousMode()?'Click a bus to start · Click again to stop':'Click for a pulse · Hold to repeat'; }
   function finishAttack() {
     const bus=heldAttack?.bus;
     releaseAttack();renderControls();drawNetwork();save();
     if(bus) announce('New attacks stopped · Bus '+bus+(pulseStatus(bus).active || pulseStatus(bus).queued?' · Existing disturbance remains':''));
   }
   function activateAttack(bus,owner) {
+    if(forecastMode()) { fault(bus,{startPlayback:true});return; }
     if(continuousMode()) {
       if(heldAttack?.latched && heldAttack.bus===bus) finishAttack();
       else beginAttack(bus,null,true);
@@ -547,7 +570,7 @@
     element.addEventListener('click',event=>{
       event.preventDefault();event.stopPropagation();
       if(event.detail===0) {
-        if(continuousMode()) activateAttack(getBus(),element);
+        if(forecastMode()||continuousMode()) activateAttack(getBus(),element);
         else if(!heldAttack) pulse(getBus());
       }
     });
@@ -568,16 +591,16 @@
     });
   }
   bindAttackTarget($('pulse'),()=>heldAttack?.latched ? heldAttack.bus : selectedBus);
-  document.addEventListener('keyup',event=>{if(event.key.toLowerCase()==='d' && !heldAttack?.latched && !heldAttack?.owner) finishAttack();});
+  document.addEventListener('keyup',event=>{if(event.key.toLowerCase()==='d' && !forecastMode() && !heldAttack?.latched && !heldAttack?.owner) finishAttack();});
   window.addEventListener('blur',()=>{if(heldAttack) finishAttack();});
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden) { stop(); renderControls(); drawNetwork(); save(); }
   });
-  $('fault').addEventListener('click', fault);
+  $('fault').addEventListener('click',()=>fault());
   document.addEventListener('keydown', e => {
     if (e.defaultPrevented || e.repeat || e.altKey || e.ctrlKey || e.metaKey || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
     const key = e.key.toLowerCase();
-    if (key === 'd') { e.preventDefault(); beginAttack(); }
+    if (key === 'd') { e.preventDefault(); if(forecastMode()) activateAttack(selectedBus,null); else beginAttack(); }
     else if (key === 'e') { e.preventDefault(); fault(); }
     else if (key === ' ' && !e.target.closest('button, [role=button], summary, a[href]')) { e.preventDefault(); toggleRun(); }
   });
@@ -618,7 +641,7 @@
     $('noise-caption').title='Forecast error standard deviation in pu uses the declared physical voltage forcing reference scale for each source. This scale is set by the feeder and disturbance generator, not estimated from the current run. β multiplies all source noise levels.';
     $('experiment').disabled=comparing; $('noise').disabled=comparing;
     const gapOption=$('cost-metric').querySelector('option[value="gap"]');
-    if(gapOption) gapOption.textContent='Gap to '+gapReference();
+    if(gapOption) gapOption.textContent=communicationComparison()?'Difference vs fixed sparse':'Difference vs scalar';
     const matrixChangeOption=$('matrix-view').querySelector('option[value="change"]');
     if(matrixChangeOption) matrixChangeOption.textContent=communicationComparison()?'Learned scores':'Learning weights';
     $('cost-metric').hidden=false;
@@ -641,12 +664,16 @@
     $('restart').disabled=comparing;
     $('run').setAttribute('aria-label',playing?'Pause simulation':frozen?'Run frozen fit':'Run simulation');
     $('run').setAttribute('aria-pressed',String(playing));
-    if ($('pulse-label')) $('pulse-label').textContent=heldAttack?.latched?'Stop attack':selectedBus===1?'Fixed substation':'Attack bus '+selectedBus;
-    $('pulse').setAttribute('aria-pressed',String(!!heldAttack));
-    $('pulse').title=heldAttack?.latched?'Stop the continuous attack at bus '+heldAttack.bus:attackInstruction();
+    const forecast=forecastMode();root.dataset.interaction=forecast?'forecast':'power';
+    $('attack-mode').hidden=forecast;$('strength').hidden=forecast;
+    if ($('pulse-label')) $('pulse-label').textContent=!forecast&&heldAttack?.latched?'Stop attack':selectedBus===1?'Fixed substation':forecast
+      ?(snapshot.faults.includes(selectedBus)?'Repair':'Corrupt')+' bus '+selectedBus:'Attack bus '+selectedBus;
+    $('pulse').setAttribute('aria-pressed',String(forecast?snapshot.faults.includes(selectedBus):!!heldAttack));
+    $('pulse').dataset.holding=String(!!heldAttack);
+    $('pulse').title=forecast?(!forecastNoiseEnabled()?'Noise is disabled at β 0. This toggles the configured source label only.':'Toggle noisy forecasts from bus '+selectedBus+'. Only newly issued forecasts change.'):heldAttack?.latched?'Stop the continuous attack at bus '+heldAttack.bus:attackInstruction();
     const feedback=attackFeedback(heldAttack?.bus ?? selectedBus);
-    $('pulse').dataset.attackState=feedback.state;
-    $('attack-hint').textContent=feedback.hint;
+    $('pulse').dataset.attackState=forecast?(forecastNoisy(selectedBus)?'noisy':'quiet'):feedback.state;
+    $('attack-hint').textContent=forecast?(snapshot.phase==='deployment'?'Links remain fixed':forecastNoiseEnabled()?'New forecasts only':'No noise at β 0'):feedback.hint;
     $('step').textContent=frozen?'100 fit steps':'Step';
     $('step').disabled=comparing || snapshot.mode==='converged';
     $('freeze').hidden=true;
@@ -671,7 +698,7 @@
     const width = Math.max(240, el.getBoundingClientRect().width);
     const height = 220;
     const svg = d3.select(el).attr('viewBox', '0 0 ' + width + ' ' + height).attr('height', height)
-      .attr('role','group').attr('aria-label','Radial power feeder. '+attackInstruction()+'. Disturbances change load, solar generation or battery charging.');
+      .attr('role','group').attr('aria-label','Radial power feeder. '+attackInstruction()+(forecastMode()?'. Changes forecast reliability, not physical power.':'. Disturbances change load, solar generation or battery charging.'));
     const point = bus => [25 + positions[bus - 1][0] * (width - 54), 26 + positions[bus - 1][1] * (height - 54)];
     if (svg.select('defs').empty()) {
       svg.append('title').text('Radial electrical feeder and prediction source links');
@@ -720,12 +747,16 @@
       g.append('text').attr('class','bus-number').attr('pointer-events','none');
       g.append('text').attr('class','fault-mark').attr('pointer-events','none');
       if (window.PowerEquipment) g.each(function(bus){PowerEquipment.render(d3.select(this),busRole(bus));});
+      const forecastBadge=g.append('g').attr('class','pr-forecast-badge').attr('transform','translate(16 11)').attr('pointer-events','none');
+      forecastBadge.append('circle').attr('r',8);
+      forecastBadge.append('path').attr('d','M-5 0H-3L-1-4 2 4 4 0H5');
+      forecastBadge.append('title');
       g.append('title').attr('class','bus-description');
       g.each(function(bus){bindAttackTarget(this,()=>bus);});
       return g;
     }).attr('transform',bus => 'translate('+point(bus).join(',')+')')
       .attr('data-bus',bus => bus).attr('data-role',bus => busRole(bus))
-      .attr('aria-label',bus => bus===1 ? 'Fixed substation at bus 1' : (heldAttack?.latched && heldAttack.bus===bus?'Stop attack at bus ':continuousMode()?'Toggle continuous attack at bus ':'Hold to attack bus ')+bus)
+      .attr('aria-label',bus => bus===1 ? 'Fixed substation at bus 1' : forecastMode()?(snapshot.faults.includes(bus)?'Repair':'Corrupt')+' forecast at bus '+bus:(heldAttack?.latched && heldAttack.bus===bus?'Stop attack at bus ':continuousMode()?'Toggle continuous attack at bus ':'Hold to attack bus ')+bus)
       .attr('aria-description',bus => busRole(bus)+', '+busVoltage(bus).toFixed(4)+' pu'+(appliedPulse(bus)?', '+appliedPulseLabel(bus):pulseStatus(bus).queued?', pulse pending':''))
       .attr('aria-disabled',bus => String(!canAttack(bus)))
       .style('cursor',bus=>canAttack(bus) ? 'pointer' : 'default')
@@ -751,8 +782,11 @@
     });
     nodes.select('.bus-number').attr('text-anchor','middle').attr('x',0).attr('y',27)
       .style('fill','var(--muted-foreground)').style('font-size','9px').text(bus=>bus);
-    nodes.select('.fault-mark').attr('x',17).attr('y',-12).text(bus=>snapshot.faults.includes(bus)?'×':'');
-    nodes.select('.bus-description').text(bus=>busRole(bus)+' · Bus '+bus+' · '+busVoltage(bus).toFixed(4)+' pu · '+powerDescription(bus)+(hasInverter(bus)?' · Q '+reactivePower(bus).toFixed(0)+' kvar':'')+'. '+(bus===1?'Fixed voltage substation.':disturbanceName(bus)+' '+pulseMagnitude($('strength').value)+' requested. '+attackInstruction()+'.'));
+    nodes.attr('data-forecast-noisy',bus=>String(forecastNoisy(bus)));
+    nodes.select('.pr-forecast-badge').attr('display',bus=>forecastNoisy(bus)?null:'none')
+      .select('title').text(bus=>'Bus '+bus+' has a noisy forecast channel. This marker shows the current error generator setting, not a learner input.');
+    nodes.select('.fault-mark').text('');
+    nodes.select('.bus-description').text(bus=>busRole(bus)+' · Bus '+bus+' · '+busVoltage(bus).toFixed(4)+' pu · '+powerDescription(bus)+(hasInverter(bus)?' · Q '+reactivePower(bus).toFixed(0)+' kvar':'')+'. '+(bus===1?'Fixed voltage substation.':forecastMode()?(forecastNoisy(bus)?'Noisy forecast channel. ':'Quiet forecast channel. ')+(snapshot.faults.includes(bus)?'Click to repair new forecasts.':'Click to corrupt new forecasts.'):disturbanceName(bus)+' '+pulseMagnitude($('strength').value)+' requested. '+attackInstruction()+'.'));
     showBusDetail(selectedBus);
     const voltages=d3.range(1,25).map(bus=>busVoltage(bus));
     const low=Math.min(...voltages), high=Math.max(...voltages);
@@ -760,7 +794,8 @@
     const nearNominal=voltages.every((voltage,index)=>Math.abs(voltage-referenceVoltage(index+1))<.001);
     const feedbackBus=heldAttack?.bus ?? (attackState(selectedBus)!=='idle'?selectedBus:lastPulse?.bus ?? selectedBus);
     const feedback=attackFeedback(feedbackBus);
-    if(feedback.state==='continuous' || feedback.state==='held') actionNote('Adding attacks · Bus '+feedbackBus);
+    if(forecastMode()) actionNote(forecastInstruction());
+    else if(feedback.state==='continuous' || feedback.state==='held') actionNote('Adding attacks · Bus '+feedbackBus);
     else if(feedback.state==='pending') actionNote('Queued at bus '+feedbackBus+' · Next sample');
     else if(feedback.state==='fading' || feedback.state==='paused') actionNote((feedback.state==='paused'?'Paused':'Fading')+' · '+appliedPulseLabel(feedbackBus));
     else actionNote(nearNominal ? attackInstruction() : 'Restoring the nominal profile');
@@ -777,7 +812,8 @@
     const status=pulseStatus(bus);
     $('bus-detail').textContent='Bus '+bus+' · '+busVoltage(bus).toFixed(4)+' pu · '+powerDescription(bus)
       +(hasInverter(bus)?' · Q '+reactivePower(bus).toFixed(0)+' kvar':'')
-      +(status.queued?' · '+status.queued+' queued':hovered && canAttack(bus)?(continuousMode()?' · Click to toggle attack':' · Hold to keep attacking'):'');
+      +(forecastMode()&&bus!==1?' · Forecast '+(forecastNoisy(bus)?'noisy':'quiet'):'')
+      +(status.queued?' · '+status.queued+' queued':hovered && canAttack(bus)?(forecastMode()?' · Click to '+(snapshot.faults.includes(bus)?'repair':'corrupt'):continuousMode()?' · Click to toggle attack':' · Hold to keep attacking'):'');
   }
 
   function drawMatrix() {
@@ -1061,8 +1097,9 @@
       row.dataset.method=item.key; row.append(label,value,difference); $('cost-detail').append(row);
     }
     $('comparison-summary').textContent=comparisonSummary();
-    $('cost-note').textContent=gap?'Difference from '+gapReference()+' · Below zero is better · Table shows totals'
-      : snapshot.phase==='deployment'?(communicationComparison()?'Learning costs excluded · Prediction links only · Common feedback unchanged':'Fresh comparison · Learning costs excluded · Identical disturbances'):'Dense messages during learning · Adaptation starts at 30 s';
+    const recovery=powerRecoveryContext();
+    $('cost-note').textContent=gap?'Below zero is cheaper · '+(recovery?'Totals include load recovery':'Table shows totals')
+      : recovery || (snapshot.phase==='deployment'?(communicationComparison()?'Learning costs excluded · Prediction links only · Common feedback unchanged':'Fresh comparison · Learning costs excluded · Identical disturbances'):'Dense messages during learning · Adaptation starts at 30 s');
   }
   function comparisonSummary() {
     const c=snapshot.cumulative,comparison=comparativeCost(c.online,c.scalar);
@@ -1104,7 +1141,7 @@
       summary=snapshot.t===lastPulse.t ? 'Queued at t '+lastPulse.t+' · Run or Step' : charge ? 'Cost '+d3.format('.3~g')(lastPulse.before)+' → '+d3.format('.3~g')(charge.stage.online) : 'Voltage changed · Cost appears next step';
     }
     if ($('impact-note')) $('impact-note').textContent=summary;
-    if ($('pulse-summary')) $('pulse-summary').textContent=summary;
+    if ($('pulse-summary')) $('pulse-summary').textContent=forecastMode()?'':summary;
   }
   function drawVoltage() {
     const el=$('voltage'); if(!el)return;
@@ -1164,5 +1201,5 @@
   new ResizeObserver(()=>render()).observe(root);
   render();
   // A read only inspection hook supports deterministic browser verification.
-  root.powerDemo = { getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,playing,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null,topology:topology.export(),historyIndex}) };
+  root.powerDemo = { getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,playing,intervention:$('intervention').value,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null,topology:topology.export(),historyIndex}) };
 })();
