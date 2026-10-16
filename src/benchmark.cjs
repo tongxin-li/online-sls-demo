@@ -4,7 +4,15 @@
 const {Simulation,constants,model}=require('./simulation.js');
 const seeds=Array.from({length:20},(_,i)=>i+1),horizon=180;
 const keys=['online','scalar','static','causal'];
-const labels={online:'Learned sparse',scalar:'Fixed sparse',static:'Dense prediction',causal:'Feedback only'};
+const stress=process.argv.includes('--attacks');
+// Fixed before evaluating any attack run. No attacks enter the forecasts.
+const interventions=stress?[
+  {t:20,bus:23,strength:100},{t:21,bus:23,strength:100},
+  ...Array.from({length:10},(_,i)=>({t:60+i,bus:7,strength:50})),
+  ...Array.from({length:10},(_,i)=>({t:100+i,bus:12,strength:50})),
+  ...Array.from({length:10},(_,i)=>({t:140+i,bus:23,strength:50}))
+]:[];
+const labels={online:'Matrix adaptation',scalar:'Scalar adaptation',static:'Fixed prediction',causal:'Feedback only'};
 const mean=a=>a.reduce((s,v)=>s+v,0)/a.length;
 const stdev=a=>{const m=mean(a);return Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/(a.length-1));};
 const results=constants.forecastPresets.map(preset=>{
@@ -17,6 +25,7 @@ const results=constants.forecastPresets.map(preset=>{
     const voltageRange=Object.fromEntries(keys.map(k=>[k,{min:Math.min(...state.voltages[k]),max:Math.max(...state.voltages[k])}]));
     const saturationCount=Object.fromEntries(keys.map(k=>[k,0]));
     for(let t=0;t<horizon;t++){
+      for(const event of interventions)if(event.t===t)sim.queuePulse(event.bus,event.strength);
       state=sim.step();
       for(const key of keys){
         voltageRange[key].min=Math.min(voltageRange[key].min,...state.voltages[key]);
@@ -42,13 +51,13 @@ const results=constants.forecastPresets.map(preset=>{
   }]));
   return {preset:preset.id,label:preset.label,means,standardDeviations,comparisons,voltageRange,runs};
 });
-const report={seeds,discoverySamples:horizon,deploymentSamples:horizon,interventions:[],controllers:labels,
+const report={seeds,discoverySamples:horizon,deploymentSamples:horizon,interventions,controllers:labels,
   model:'Balanced LinDistFlow with bounded inverter commands and actuator lag',
   physicalBases:{kv:constants.baseKv,mva:constants.baseMva},
   referenceVoltage:model.referenceVoltage,
-  learning:'Literal Algorithm 1 completed row delayed support projected update',
-  deployment:'Feasible predictive SLS resynthesis with forbidden realizing gains equal to zero',
-  remoteBudget:3,previewDepth:5,ridge:1e-6,
+  learning:'Shared matrix and scalar rolling ridge on revealed pairs, warmup 30 and window 60',
+  deployment:'Sparse SLS synthesis plus support compatible shared calibration, with discovery observations carried into the new trial',
+  remoteBudget:3,previewDepth:5,ridge:1.27e-5,
   discoveryAndDeploymentIndependent:true,topologyFixedBeforeTesting:true,
   objective:'Sum of executed stage costs plus terminal x transpose P x',
   currentWebsiteCurves:'Executed stage costs only, with no terminal jump during ongoing playback',results};
@@ -56,5 +65,5 @@ if(process.argv.includes('--json'))console.log(JSON.stringify(report,null,2));
 else {
   console.table(results.map(r=>({preset:r.preset,...r.means})));
   console.table(results.flatMap(r=>keys.slice(1).map(k=>({preset:r.preset,baseline:labels[k],...r.comparisons[k]}))));
-  console.log('Positive savings mean lower learned sparse cost. Final costs include the terminal penalty.');
+  console.log('Positive savings mean lower matrix adaptation cost. Final costs include the terminal penalty.');
 }

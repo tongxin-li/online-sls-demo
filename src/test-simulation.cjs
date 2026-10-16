@@ -4,6 +4,7 @@ const test=require('node:test');
 const {Simulation,model,constants,math}=require('./simulation.js');
 const {multiply,transpose,combine,frobenius,matvec,solveSPD}=math;
 const Response=require('./response-controller.js');
+const Calibration=require('./forecast-calibration.js');
 const controllers=constants.controllers;
 const distance=(a,b)=>frobenius(combine(a,b,1,-1));
 const vectorDistance=(a,b)=>Math.hypot(...a.map((v,i)=>v-b[i]));
@@ -87,21 +88,52 @@ test('prediction links affect real commands and forbidden channels have zero eff
   assert.ok(forbiddenEffect<1e-14);assert.ok(allowedEffect>1e-5);assert.ok(difference>1e-3);
 });
 
-test('discovery executes fixed feasible predictive responses while literal learning only changes completed rows',()=>{
+test('discovery calibrates future commands after warmup while completed row diagnostics preserve their original responses',()=>{
   const sim=new Simulation({horizon:80}),reference=sim.segments[0].dense;
-  const frozenFuture=JSON.stringify(reference.rows[55]);
+  const frozenFuture=JSON.stringify(reference.rows[55]);let matrixDiffers=false,scalarDiffers=false;
   for(let t=0;t<60;t++){
-    const previous=sim.snapshot(),snap=sim.step(),row=reference.rows[t];
-    let expected=matvec(model.K,reg(previous.states.static));
-    for(const block of row){const term=matvec(block.L,sim.forecasts[block.k-1].forecast.slice(1));expected=expected.map((v,i)=>v+term[i]);}
-    assert.ok(vectorDistance(snap.lastInputs.static,math.padInput(bounded(expected)))<1e-14);
-    assert.deepEqual(snap.states.online,snap.states.static);assert.deepEqual(snap.states.scalar,snap.states.static);
+    const previous=sim.snapshot(),revealed=sim.samples.slice(-60),snap=sim.step(),row=reference.rows[t];
+    if(t<30){
+      assert.deepEqual(snap.calibration.matrix,math.eye(23));assert.equal(snap.calibration.scalar,1);
+      assert.deepEqual(snap.states.online,snap.states.static);assert.deepEqual(snap.states.scalar,snap.states.static);
+    }else{
+      const fit=Calibration.fit(revealed);
+      assert.deepEqual(snap.calibration.matrix,fit.matrix);assert.equal(snap.calibration.scalar,fit.scalar);
+      assert.equal(snap.calibration.trainedThrough,t-1);assert.equal(snap.calibration.windowSize,Math.min(t,60));
+      assert.equal(snap.calibration.updates,t-29);
+    }
+    for(const key of ['online','scalar','static']){
+      let expected=matvec(model.K,reg(previous.states[key]));
+      for(const block of row){
+        const forecast=sim.forecasts[block.k-1].forecast.slice(1);
+        const corrected=key==='online'?matvec(snap.calibration.matrix,forecast):key==='scalar'?forecast.map(v=>v*snap.calibration.scalar):forecast;
+        const term=matvec(block.L,corrected);expected=expected.map((v,i)=>v+term[i]);
+      }
+      assert.ok(vectorDistance(snap.lastInputs[key],math.padInput(bounded(expected)))<1e-14);
+    }
+    matrixDiffers ||= vectorDistance(snap.lastInputs.online,snap.lastInputs.static)>1e-7;
+    scalarDiffers ||= vectorDistance(snap.lastInputs.scalar,snap.lastInputs.static)>1e-7;
     assert.deepEqual(snap.lastInputs.causal,math.padInput(bounded(matvec(model.K,reg(previous.states.causal)))));
     assert.equal(snap.learning.completedRows,Math.max(0,t-4));
     if(t>=5){assert.equal(sim.rows.at(-1).t,t-5);assert.ok(sim.rows.at(-1).blocks.every(block=>block.k-1<=t-1));}
     assert.equal(JSON.stringify(reference.rows[55]),frozenFuture);
   }
+  assert.ok(matrixDiffers);assert.ok(scalarDiffers);
   assert.ok(sim.rows.some(row=>row.beta>0));assert.ok(Object.isFrozen(reference.rows[55][0].L));
+});
+
+test('calibration never sees an unrevealed attack and uses only the latest sixty completed samples',()=>{
+  const clean=new Simulation({horizon:100}),attacked=new Simulation({horizon:100});run(clean,65);run(attacked,65);
+  attacked.queuePulse(23,150);
+  const a=clean.step(),b=attacked.step();
+  assert.deepEqual(a.calibration,b.calibration);assert.deepEqual(a.lastInputs,b.lastInputs);
+  assert.notDeepEqual(a.lastSample.disturbance,b.lastSample.disturbance);
+  assert.equal(b.calibration.windowSize,60);assert.equal(b.calibration.trainedThrough,64);
+  const revealed=attacked.samples.slice(-60),expected=Calibration.fit(revealed),next=attacked.step();clean.step();
+  assert.deepEqual(next.calibration.matrix,expected.matrix);assert.equal(next.calibration.scalar,expected.scalar);
+  assert.notDeepEqual(next.calibration.matrix,clean.snapshot().calibration.matrix);
+  const saved=attacked.snapshot();saved.calibration.matrix[0][0]+=10;
+  assert.notEqual(saved.calibration.matrix[0][0],attacked.snapshot().calibration.matrix[0][0]);
 });
 
 test('Algorithm 1 uses the stored t-d response iterate rather than current or t-d+1',()=>{
@@ -218,22 +250,58 @@ test('repeat attacks use physical role limits, exact decay, and no cooldown whil
   for(const bad of [NaN,Infinity,0,9,151,'100'])assert.throws(()=>sim.queuePulse(3,bad),RangeError);
 });
 
-test('deployment starts an independent trial and executes feasible frozen learned and fixed supports',()=>{
+test('deployment starts an independent trial and continuously calibrates within frozen feasible prediction supports',()=>{
   const sim=new Simulation({seed:13,horizon:70});run(sim,40);const discovery=sim.snapshot(),selected=discovery.recommendations.map(e=>[e.from,e.to]);
+  const carried=sim.samples.slice(-60);
   assert.ok(discovery.canDeploy);const fresh=sim.deployTopology();assert.equal(fresh.t,0);assert.equal(fresh.phase,'deployment');
   assert.notEqual(fresh.seed,discovery.seed);assert.equal(fresh.canFreeze,false);assert.deepEqual(fresh.cumulative,{online:0,scalar:0,static:0,causal:0});
   assert.deepEqual(fresh.recommendations.map(e=>[e.from,e.to]),selected);
+  assert.deepEqual(fresh.deployedSupport.trainingSamples,carried);assert.equal(fresh.calibration.carriedSamples,40);
+  const fit=Calibration.fit(carried,{support:fresh.deployedSupport.learned});
+  assert.deepEqual(fresh.calibration.matrix,fit.matrix);assert.equal(fresh.calibration.scalar,fit.scalar);
   const support=JSON.stringify(fresh.deployedSupport);let differs=false;
   for(let t=0;t<70;t++){
-    const previous=sim.snapshot(),s=sim.step();assert.equal(JSON.stringify(s.deployedSupport),support);
+    const previous=sim.snapshot(),revealed=[...carried,...sim.samples].slice(-60),s=sim.step();
+    assert.equal(JSON.stringify(s.deployedSupport),support);assert.equal(s.calibration.trainedThrough,t-1);
+    assert.equal(s.calibration.windowSize,Math.min(40+t,60));assert.equal(s.calibration.carriedSamples,Math.max(0,Math.min(40,60-t)));
+    assert.deepEqual(s.calibration.matrix,Calibration.fit(revealed,{support:s.deployedSupport.learned}).matrix);
     for(const key of ['online','scalar','static']){
       let expected=matvec(model.K,reg(previous.states[key]));
-      for(const block of sim.segments[0].designs[key].rows[t]){const term=matvec(block.L,sim.forecasts[block.k-1].forecast.slice(1));expected=expected.map((v,i)=>v+term[i]);}
+      for(const block of sim.segments[0].designs[key].rows[t]){
+        const forecast=sim.forecasts[block.k-1].forecast.slice(1);
+        const corrected=key==='online'?matvec(s.calibration.matrix,forecast):key==='scalar'?forecast.map(v=>v*s.calibration.scalar):forecast;
+        const term=matvec(block.L,corrected);expected=expected.map((v,i)=>v+term[i]);
+      }
       assert.ok(vectorDistance(s.lastInputs[key],math.padInput(bounded(expected)))<1e-14);
     }
     differs ||= vectorDistance(s.lastInputs.online,s.lastInputs.static)>1e-6;
   }
   assert.ok(differs);const final=sim.snapshot();sim.reset();assert.equal(sim.phase,'deployment');run(sim,70);assert.deepEqual(sim.snapshot(),final);
+});
+
+test('identical sparse support does not erase carried matrix and scalar calibration or violate SLS recurrence',()=>{
+  const sim=new Simulation({seed:13,horizon:70});run(sim,40);sim.deployTopology();
+  // Hold the communication mask identical to isolate matrix versus scalar learning.
+  sim.deployedSupport={...sim.deployedSupport,fixed:sim.deployedSupport.learned,fixedLinks:sim.deployedSupport.links};sim.reset();
+  assert.equal(sim.segments[0].designs.online,sim.segments[0].designs.scalar);
+  const fresh=sim.snapshot(),C=fresh.calibration.matrix,support=fresh.deployedSupport.learned;
+  assert.ok(distance(C,math.eye(23).map(row=>row.map(v=>v*fresh.calibration.scalar)))>1e-6);
+  for(const column of sim.segments[0].designs.online.columns)for(const [key,U] of Object.entries(column.U)){
+    const t=Number(key),X=multiply(column.X[t],C),UC=multiply(U,C),LC=multiply(column.L[t],C);
+    const next=multiply(column.X[t+1]||zeros(23),C);
+    assert.ok(distance(next,combine(multiply(model.A,X),multiply(model.B,UC)))<1e-12);
+    assert.ok(distance(LC,combine(UC,multiply(model.K,X),1,-1))<1e-12);
+    for(let i=0;i<8;i++)for(let j=0;j<23;j++)if(!support[i][j])assert.ok(Math.abs(LC[i][j])<1e-12);
+  }
+  let differs=false;
+  for(let t=0;t<8;t++){
+    const s=sim.step();differs ||= vectorDistance(s.lastInputs.online,s.lastInputs.scalar)>1e-7;
+    for(const block of sim.segments[0].designs.online.rows[t]){
+      const actual=multiply(block.L,s.calibration.matrix);
+      for(let i=0;i<8;i++)for(let j=0;j<23;j++)if(!support[i][j])assert.ok(Math.abs(actual[i][j])<1e-12);
+    }
+  }
+  assert.ok(differs,'shared support must not collapse distinct learned prediction corrections');
 });
 
 test('only inverter receivers and physical nonslack source channels are ranked with a fixed remote budget',()=>{
@@ -243,41 +311,40 @@ test('only inverter receivers and physical nonslack source channels are ranked w
   for(let bus=1;bus<=24;bus++)if(!constants.inverterBuses.includes(bus))assert.deepEqual(s.directGain[bus-1],Array(24).fill(0));
 });
 
-test('learning visibility compares reconstructed realizing gains on the same completed rows and remains frozen after deployment',()=>{
+test('learning visibility measures executed calibrated gains and stays live after topology deployment',()=>{
   const sim=new Simulation({horizon:70});
   assert.equal(sim.snapshot().predictionDiagnostics.available,false);
   assert.equal(sim.snapshot().predictionDiagnostics.relativeGainChange,null);
   for(let t=0;t<45;t++){if(t===20||t===21)sim.queuePulse(7,100);sim.step();}
-  const diagnostic=sim.snapshot().predictionDiagnostics,baseline=zeros(8,23),learned=zeros(8,23);
-  let changeSquared=0,baselineSquared=0;
-  for(const row of sim.rows)for(let b=0;b<row.blocks.length;b++){
-    const block=row.blocks[b];
-    const X=block.X.map((line,i)=>line.map((v,j)=>v+row.beta*row.ex[i]*row.h[b][j]));
-    const U=block.U.map((line,i)=>line.map((v,j)=>v+row.beta*row.eu[i]*row.h[b][j]));
-    const actual=combine(U,multiply(model.K,X),1,-1),offline=combine(block.U,multiply(model.K,block.X),1,-1);
-    for(let i=0;i<8;i++)for(let j=0;j<23;j++){
-      baseline[i][j]+=offline[i][j]**2/sim.rows.length;
-      learned[i][j]+=actual[i][j]**2/sim.rows.length;
-      changeSquared+=(actual[i][j]-offline[i][j])**2;baselineSquared+=offline[i][j]**2;
+  function verifyScores(){
+    const snap=sim.snapshot(),diagnostic=snap.predictionDiagnostics,design=sim.segments[0].designs.online;
+    const baseline=zeros(8,23),learned=zeros(8,23);let changeSquared=0,baselineSquared=0;
+    for(const row of design.rows)for(const block of row){
+      const actual=multiply(block.L,snap.calibration.matrix);
+      for(let i=0;i<8;i++)for(let j=0;j<23;j++){
+        baseline[i][j]+=block.L[i][j]**2/design.T;
+        learned[i][j]+=actual[i][j]**2/design.T;
+        changeSquared+=(actual[i][j]-block.L[i][j])**2;baselineSquared+=block.L[i][j]**2;
+      }
     }
+    assert.deepEqual(diagnostic.receiverBuses,constants.inverterBuses);
+    assert.deepEqual(diagnostic.sourceBuses,Array.from({length:23},(_,i)=>i+2));
+    assert.equal(diagnostic.completedRows,snap.calibration.windowSize);assert.ok(diagnostic.relativeGainChange>0);
+    assert.ok(distance(diagnostic.baselineScores,baseline)/frobenius(baseline)<1e-12);
+    assert.ok(distance(diagnostic.learnedScores,learned)/frobenius(learned)<1e-12);
+    assert.ok(Math.abs(diagnostic.relativeGainChange-Math.sqrt(changeSquared/baselineSquared))<1e-12);
+    for(let i=0;i<8;i++)for(let j=0;j<23;j++){
+      const delta=learned[i][j]-baseline[i][j],total=baseline[i].reduce((sum,v)=>sum+v,0);
+      assert.ok(Math.abs(diagnostic.receiverNormalizedChange[i][j]-delta/total)<1e-12);
+      if(baseline[i][j]===0)assert.equal(diagnostic.relativeEnergyChange[i][j],null);
+    }
+    assert.ok(Object.isFrozen(diagnostic.receiverNormalizedChange[0]));return diagnostic;
   }
-  assert.deepEqual(diagnostic.receiverBuses,constants.inverterBuses);
-  assert.deepEqual(diagnostic.sourceBuses,Array.from({length:23},(_,i)=>i+2));
-  assert.equal(diagnostic.completedRows,sim.rows.length);assert.ok(diagnostic.relativeGainChange>0);
-  assert.ok(distance(diagnostic.baselineScores,baseline)/frobenius(baseline)<1e-12);
-  assert.ok(distance(diagnostic.learnedScores,learned)/frobenius(learned)<1e-12);
-  assert.ok(Math.abs(diagnostic.relativeGainChange-Math.sqrt(changeSquared/baselineSquared))<1e-12);
-  for(let i=0;i<8;i++)for(let j=0;j<23;j++){
-    const delta=learned[i][j]-baseline[i][j],total=baseline[i].reduce((sum,v)=>sum+v,0);
-    assert.ok(Math.abs(diagnostic.receiverNormalizedChange[i][j]-delta/total)<1e-12);
-    if(baseline[i][j]===0)assert.equal(diagnostic.relativeEnergyChange[i][j],null);
-  }
-  assert.ok(diagnostic.relativeEnergyChange.flat().some(v=>v===null));
-  assert.ok(Object.isFrozen(diagnostic.receiverNormalizedChange[0]));
-  sim.freeze();sim.fitStep(12);assert.deepEqual(sim.snapshot().predictionDiagnostics,diagnostic);sim.resume();
-  const fresh=sim.deployTopology();assert.deepEqual(fresh.predictionDiagnostics,{...diagnostic,frozen:true});
-  const deployed=fresh.predictionDiagnostics;sim.queuePulse(23,100);run(sim,10);
-  assert.deepEqual(sim.snapshot().predictionDiagnostics,deployed);
+  const diagnostic=verifyScores();sim.freeze();sim.fitStep(12);assert.deepEqual(sim.snapshot().predictionDiagnostics,diagnostic);sim.resume();
+  const fresh=sim.deployTopology();assert.equal(fresh.predictionDiagnostics.frozen,false);const deployed=verifyScores();
+  const links=fresh.recommendations.map(e=>[e.from,e.to]);sim.queuePulse(23,100);run(sim,10);verifyScores();
+  assert.notDeepEqual(sim.snapshot().predictionDiagnostics.learnedScores,deployed.learnedScores);
+  assert.deepEqual(sim.snapshot().recommendations.map(e=>[e.from,e.to]),links);
 });
 
 test('independent nonlinear AC reference validates representative physical cases and loss balance',()=>{

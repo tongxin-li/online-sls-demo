@@ -404,7 +404,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       <div class="pr-panel-foot"><span id="pr-bus-detail" class="tabular-nums"></span><span class="pr-live-stage">Cost <strong id="pr-live-cost" class="tabular-nums">0.0000</strong></span></div>
     </section>
     <section class="pr-panel pr-matrix-panel" aria-labelledby="pr-matrix-title">
-      <div class="pr-subhead"><h2 id="pr-matrix-title">Learning prediction links</h2><select id="pr-matrix-view" aria-label="Prediction matrix view"><option value="links" selected>Connectivity</option><option value="change">Learning weights</option></select></div>
+      <div class="pr-subhead"><h2 id="pr-matrix-title">Candidate prediction links</h2><select id="pr-matrix-view" aria-label="Prediction matrix view"><option value="links" selected>Connectivity</option><option value="change">Learning weights</option></select></div>
       <div class="pr-matrix-key" id="pr-matrix-key"></div><svg class="pr-chart" id="pr-matrix" role="group" aria-label="Candidate prediction links. Rows receive forecasts from columns"></svg>
       <p id="pr-matrix-inspect-hint" class="pr-caption">Tap a cell to inspect a connection</p>
       <div class="pr-panel-foot pr-matrix-detail"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div><div class="pr-topology-status"><strong id="pr-topology-status">Connectivity unchanged</strong><span id="pr-topology-gain">Weights changed 0%</span></div><div id="pr-topology-events" class="pr-topology-events" aria-label="Recent topology changes" hidden></div><div class="pr-topology-history"><label for="pr-topology-history" id="pr-history-count">0 link updates</label><input id="pr-topology-history" type="range" min="0" max="0" step="1" value="0" aria-label="Topology history" disabled><button type="button" id="pr-history-live" aria-pressed="true">Latest</button></div><p id="pr-topology-note" class="pr-caption" aria-live="polite"></p>
@@ -420,24 +420,24 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     <section class="pr-panel pr-learning-panel" aria-labelledby="pr-learning-title">
       <div class="pr-subhead"><h2 id="pr-learning-title">Cost comparison</h2><select id="pr-view" aria-label="Controller view"><option value="cost" selected>Cost</option><option value="learning">Learning</option></select></div>
       <div id="pr-learning-content" hidden>
-        <div class="pr-algorithm-flow" id="pr-learning-flow" aria-label="Completed response learning cycle">
+        <div class="pr-algorithm-flow" id="pr-learning-flow" aria-label="Shared prediction adaptation cycle">
           <div><span class="pr-flow-index">01</span><strong>Forecast</strong><span id="pr-flow-predict">Voltage forcing</span></div>
           <div><span class="pr-flow-index">02</span><strong>Control</strong><span id="pr-flow-control">Reactive support</span></div>
-          <div><span class="pr-flow-index">03</span><strong>Observe</strong><span id="pr-flow-observe">Completed response</span></div>
-          <div><span class="pr-flow-index">04</span><strong>Learn</strong><span id="pr-flow-update">Projected update</span></div>
+          <div><span class="pr-flow-index">03</span><strong>Observe</strong><span id="pr-flow-observe">Measured disturbance</span></div>
+          <div><span class="pr-flow-index">04</span><strong>Learn</strong><span id="pr-flow-update">Revealed samples</span></div>
         </div>
-        <div class="pr-learning-caption"><span id="pr-learning-kind">Completed responses · Relative error (%)</span><button type="button" class="btn btn-fit" id="pr-freeze">Inspect fixed data</button></div>
+        <div class="pr-learning-caption"><span id="pr-learning-kind">Original dashed · Matrix adaptation solid</span><button type="button" class="btn btn-fit" id="pr-freeze" hidden disabled>Inspect fixed data</button></div>
         <svg class="pr-chart" id="pr-convergence" role="img" aria-label="Learning diagnostic over time"></svg>
         <p id="pr-mode-note" class="pr-caption"></p>
       </div>
-      <div id="pr-cost-content"><p id="pr-comparison-summary" class="pr-comparison-summary" aria-live="polite">Learning uses dense prediction. Comparison starts automatically after learning.</p><div class="pr-cost-tools"><select id="pr-cost-metric" aria-label="Cost measure" hidden><option value="total" selected>Cumulative cost</option><option value="gap">Gap to fixed sparse</option></select></div><svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative cost of active controllers"></svg><table class="pr-cost-table tabular-nums" aria-label="Cumulative controller costs"><thead><tr><th scope="col">Method</th><th scope="col">Cumulative cost</th><th scope="col">vs feedback</th></tr></thead><tbody id="pr-cost-detail"></tbody></table><p id="pr-cost-note" class="pr-caption pr-comparison-note">Two active controllers · Learning continues as the trial runs</p></div>
+      <div id="pr-cost-content"><p id="pr-comparison-summary" class="pr-comparison-summary" aria-live="polite">Run to compare all four controllers</p><div class="pr-cost-tools"><select id="pr-cost-metric" aria-label="Cost measure"><option value="total" selected>Cumulative cost</option><option value="gap">Gap to scalar adaptation</option></select></div><svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative cost of active controllers"></svg><table class="pr-cost-table tabular-nums" aria-label="Cumulative controller costs"><thead><tr><th scope="col">Method</th><th scope="col">Cumulative cost</th><th scope="col">vs feedback</th></tr></thead><tbody id="pr-cost-detail"></tbody></table><p id="pr-cost-note" class="pr-caption pr-comparison-note">Dense messages during learning · Adaptation starts at 30 s</p></div>
     </section>
   </div>
   <div class="pr-bottomline">
-    <div class="pr-legend" aria-label="Controller curves"><button type="button" data-series="online" aria-pressed="true"><span class="pr-swatch online"></span>Learned sparse</button><button type="button" data-series="scalar" aria-pressed="true"><span class="pr-swatch scalar"></span>Fixed sparse</button><button type="button" data-series="static" aria-pressed="true"><span class="pr-swatch static"></span>Dense prediction</button><button type="button" data-series="causal" aria-pressed="true"><span class="pr-swatch causal"></span>Feedback only</button></div>
+    <div class="pr-legend" aria-label="Controller curves"><button type="button" data-series="online" aria-pressed="true"><span class="pr-swatch online"></span>Matrix adaptation</button><button type="button" data-series="scalar" aria-pressed="true"><span class="pr-swatch scalar"></span>Scalar adaptation</button><button type="button" data-series="static" aria-pressed="true"><span class="pr-swatch static"></span>Fixed prediction</button><button type="button" data-series="causal" aria-pressed="true"><span class="pr-swatch causal"></span>Feedback only</button></div>
     <span id="pr-event" role="status" aria-live="polite">Ready · Space to run</span>
   </div>
-  <p id="pr-phase-note" class="pr-overlap-note">Colors and line styles identify controllers · Hover for exact values</p>
+  <p id="pr-phase-note" class="pr-overlap-note">Physical attacks test disturbance recovery · Forecast settings test prediction adaptation</p>
   <details class="pr-adaptation" id="pr-adaptation">
     <summary>Experiment settings <span aria-hidden="true">+</span></summary>
     <div class="pr-comparison-controls">
@@ -601,12 +601,131 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   }
   return{Synthesizer,supportFromScores,scores,math:{zeros,mv,mm,dot,transpose,nullspace}};
 });
+
+/* Shared predictive-input calibration for the manuscript's experimental
+ * matrix/scalar comparison, not the completed-row Algorithm 1 update.
+ *
+ * fit accepts an array of already revealed {forecast, disturbance} pairs.
+ * Each vector contains 23 nonslack voltage-forcing coordinates in physical pu,
+ * or 24 coordinates with an exactly zero slack coordinate at index zero.
+ * The caller owns causality and warmup. Only pass observations available before
+ * the current action. This module retains the last 60 supplied observations.
+ *
+ * Both estimators minimize the same objective
+ *   0.5 sum_s ||C forecast_s - disturbance_s||^2
+ *       + 0.5 lambda ||C - I||_F^2.
+ * The scalar estimator restricts C to c I. The matrix estimator can additionally
+ * restrict C so applying it never introduces a forbidden raw prediction source.
+ */
+(function(root,factory){
+  const api=factory();
+  if(typeof module==='object'&&module.exports)module.exports=api;
+  else root.ForecastCalibration=api;
+})(typeof globalThis!=='undefined'?globalThis:this,function(){
+  'use strict';
+  const DIMENSION=23,WINDOW=60,LAMBDA=1.27e-5;
+  const identity=(n=DIMENSION)=>Array.from({length:n},(_,i)=>Array.from({length:n},(_,j)=>+(i===j)));
+  const squared=values=>values.reduce((sum,value)=>sum+value*value,0);
+
+  function coordinates(values){
+    if(!Array.isArray(values)||![DIMENSION,DIMENSION+1].includes(values.length))
+      throw new RangeError('Expected 23 nonslack or 24 slack-padded coordinates');
+    if(values.some(value=>!Number.isFinite(value)))throw new TypeError('Coordinates must be finite numbers');
+    if(values.length===DIMENSION+1&&values[0]!==0)throw new RangeError('The padded slack coordinate must be zero');
+    return values.length===DIMENSION+1?values.slice(1):values.slice();
+  }
+
+  function compatibleMask(support=null){
+    if(support!==null&&(!Array.isArray(support)||!support.length||support.some(row=>
+      !Array.isArray(row)||row.length!==DIMENSION||row.some(value=>typeof value!=='boolean'))))
+      throw new TypeError('Support must contain boolean receiver rows with 23 source columns');
+    // C[a][b] lets raw source b influence calibrated source a. Every receiver
+    // already using a must also be allowed to receive b. Diagonal terms survive.
+    return Array.from({length:DIMENSION},(_,a)=>Array.from({length:DIMENSION},(_,b)=>
+      support===null||support.every(row=>!row[a]||row[b])));
+  }
+
+  function solveSPD(matrix,rhs){
+    const n=rhs.length,L=Array.from({length:n},()=>Array(n).fill(0));
+    for(let i=0;i<n;i++)for(let j=0;j<=i;j++){
+      let value=matrix[i][j];for(let k=0;k<j;k++)value-=L[i][k]*L[j][k];
+      if(i===j){
+        if(!(value>0))throw new Error('Calibration covariance must be positive definite');
+        L[i][j]=Math.sqrt(value);
+      }else L[i][j]=value/L[j][j];
+    }
+    const y=Array(n).fill(0),x=Array(n).fill(0);
+    for(let i=0;i<n;i++){
+      let value=rhs[i];for(let j=0;j<i;j++)value-=L[i][j]*y[j];y[i]=value/L[i][i];
+    }
+    for(let i=n-1;i>=0;i--){
+      let value=y[i];for(let j=i+1;j<n;j++)value-=L[j][i]*x[j];x[i]=value/L[i][i];
+    }
+    return x;
+  }
+
+  function apply(matrix,vector){
+    const input=coordinates(vector);
+    if(!Array.isArray(matrix)||matrix.length!==DIMENSION||matrix.some(row=>
+      !Array.isArray(row)||row.length!==DIMENSION||row.some(value=>!Number.isFinite(value))))
+      throw new TypeError('Correction matrix must be a finite 23 by 23 array');
+    const output=matrix.map(row=>row.reduce((sum,value,j)=>sum+value*input[j],0));
+    return vector.length===DIMENSION+1?[0,...output]:output;
+  }
+
+  function fit(samples,{support=null,lambda=LAMBDA}={}){
+    if(!Array.isArray(samples))throw new TypeError('Revealed samples must be an array');
+    if(!Number.isFinite(lambda)||lambda<=0)throw new RangeError('Ridge parameter must be positive');
+    const mask=compatibleMask(support),observed=samples.slice(-WINDOW).map(sample=>({
+      forecast:coordinates(sample.forecast),disturbance:coordinates(sample.disturbance)
+    }));
+    if(!observed.length)return{matrix:identity(),scalar:1,windowSize:0,lambda,
+      rawRms:null,matrixRms:null,scalarRms:null,matrixDelta:0,scalarDelta:0,
+      rawObjective:0,matrixObjective:0,scalarObjective:0};
+    const covariance=identity().map(row=>row.map(value=>lambda*value));
+    const cross=identity().map(row=>row.map(value=>lambda*value));
+    let scalarNumerator=lambda*DIMENSION,scalarDenominator=lambda*DIMENSION;
+    for(const {forecast,disturbance} of observed){
+      for(let a=0;a<DIMENSION;a++){
+        scalarNumerator+=disturbance[a]*forecast[a];scalarDenominator+=forecast[a]*forecast[a];
+        for(let b=0;b<DIMENSION;b++){
+          covariance[a][b]+=forecast[a]*forecast[b];
+          cross[a][b]+=disturbance[a]*forecast[b];
+        }
+      }
+    }
+    const matrix=identity().map((_,a)=>{
+      const allowed=mask[a].flatMap((ok,b)=>ok?[b]:[]);
+      const coefficients=solveSPD(allowed.map(b=>allowed.map(c=>covariance[b][c])),allowed.map(b=>cross[a][b]));
+      const row=Array(DIMENSION).fill(0);allowed.forEach((b,j)=>row[b]=coefficients[j]);return row;
+    });
+    const scalar=scalarNumerator/scalarDenominator;
+    let rawSquared=0,matrixSquared=0,scalarSquared=0;
+    for(const {forecast,disturbance} of observed){
+      const corrected=apply(matrix,forecast);
+      rawSquared+=squared(forecast.map((value,a)=>value-disturbance[a]));
+      matrixSquared+=squared(corrected.map((value,a)=>value-disturbance[a]));
+      scalarSquared+=squared(forecast.map((value,a)=>scalar*value-disturbance[a]));
+    }
+    const matrixDeltaSquared=matrix.reduce((sum,row,a)=>sum+squared(row.map((value,b)=>value-+(a===b))),0);
+    const scalarDeltaSquared=DIMENSION*(scalar-1)**2,count=observed.length*DIMENSION;
+    return {matrix,scalar,windowSize:observed.length,lambda,
+      rawRms:count?Math.sqrt(rawSquared/count):null,
+      matrixRms:count?Math.sqrt(matrixSquared/count):null,
+      scalarRms:count?Math.sqrt(scalarSquared/count):null,
+      matrixDelta:Math.sqrt(matrixDeltaSquared),scalarDelta:Math.sqrt(scalarDeltaSquared),
+      rawObjective:.5*rawSquared,
+      matrixObjective:.5*(matrixSquared+lambda*matrixDeltaSquared),
+      scalarObjective:.5*(scalarSquared+lambda*scalarDeltaSquared)};
+  }
+  return {fit,identity,apply,compatibleMask,constants:Object.freeze({dimension:DIMENSION,window:WINDOW,lambda:LAMBDA})};
+});
 </script>
 <script>/* Synthetic radial LinDistFlow feeder with bounded inverter commands.
- * Discovery executes a fixed feasible predictive controller while literal
- * Algorithm 1 updates completed response rows with the delayed gradient.
- * Deployment resynthesizes a feasible controller under frozen prediction links.
- * Support-space learning does not preserve achievability or change future rows. */
+ * Shared rolling forecast calibration changes executed prediction gains.
+ * Sparse deployment constrains calibration to preserve actual message support.
+ * This experimental shared-parameter specialization is not literal Algorithm 1.
+ * Completed-row delayed gradients remain an independent legacy diagnostic. */
 (function (root, factory) {
   const api=factory();
   if(typeof module==='object'&&module.exports)module.exports=api;
@@ -839,7 +958,30 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 
   const Response=typeof module==='object'&&module.exports?require('./response-controller.js'):globalThis.ResponseController;
   if(!Response)throw new Error('Load response-controller.js before simulation.js');
-  const synthesizer=new Response.Synthesizer(model,PREVIEW),designCache=new Map();
+  const Calibration=typeof module==='object'&&module.exports?require('./forecast-calibration.js'):globalThis.ForecastCalibration;
+  if(!Calibration)throw new Error('Load forecast-calibration.js before simulation.js');
+  const synthesizer=new Response.Synthesizer(model,PREVIEW),designCache=new Map(),gramCache=new WeakMap();
+  // Sum L' L once per receiver and design. Scores of L C can then be computed
+  // exactly without rebuilding every temporal response block each sample.
+  function calibratedScores(design,C){
+    if(!gramCache.has(design)){
+      const grams=Array.from({length:M},()=>zeros(N-1));
+      for(const row of design.rows.slice(0,design.T))for(const block of row)for(let r=0;r<M;r++)
+        for(let a=0;a<N-1;a++)for(let b=0;b<N-1;b++)grams[r][a][b]+=block.L[r][a]*block.L[r][b]/design.T;
+      gramCache.set(design,grams);
+    }
+    const grams=gramCache.get(design),delta=combine(C,eye(N-1),1,-1);
+    const scores=zeros(M,N-1),baseline=zeros(M,N-1);let changeSquared=0;
+    for(let r=0;r<M;r++){
+      const GC=multiply(grams[r],C),GD=multiply(grams[r],delta);
+      for(let j=0;j<N-1;j++){
+        baseline[r][j]=grams[r][j][j];
+        for(let a=0;a<N-1;a++){scores[r][j]+=C[a][j]*GC[a][j];changeSquared+=delta[a][j]*GD[a][j];}
+        scores[r][j]=Math.max(0,scores[r][j]);
+      }
+    }
+    return{scores,baseline,changeSquared:Math.max(0,changeSquared)};
+  }
   function getDesign(horizon,support=null){
     const key=JSON.stringify([horizon,support]);
     if(!designCache.has(key))designCache.set(key,deepFreeze(synthesizer.synthesize(horizon,support)));
@@ -881,7 +1023,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       this.fit=null;this.fitHistory=[];this.fitError=null;this.fitObjective=null;this.fitIteration=0;
       this.drift=0;this.changedEdges=0;this.sinceStable=0;this.lastTrainingTime=null;this.lastTrainingSampleCount=0;
       this.directGain=null;this.recommendations=[];
-      this.refreshScores();this.sealPreview();return this.snapshot();
+      this._calibrationAt=null;this.calibration={matrix:eye(N-1),scalar:1,windowSize:0,updates:0,trainedThrough:null,parameterChange:0};
+      this.updateCalibration();this.refreshScores();this.sealPreview();return this.snapshot();
     }
     addSegment(start,length){
       const dense=getDesign(length),offlineScores=Response.scores(dense);
@@ -983,20 +1126,24 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       this.learning.prefixError=metrics.error;this.learning.prefixLoss=metrics.loss;
       this.lastTrainingTime=this.learning.windowEnd;this.lastTrainingSampleCount=this.rows.length;
     }
+    updateCalibration(){
+      // Current truth is not yet available. All pairs here were observed before
+      // this action, including the carried discovery window on a fresh trial.
+      if(this._calibrationAt===this.t)return;
+      const carried=this.phase==='deployment'?this.deployedSupport.trainingSamples:[];
+      const samples=[...carried,...this.samples].slice(-WINDOW);
+      if(samples.length<WARMUP)return;
+      this._calibrationAt=this.t;
+      const previous=this.calibration.matrix;
+      const fit=Calibration.fit(samples,{support:this.phase==='deployment'?this.deployedSupport.learned:null});
+      this.calibration={...fit,updates:this.calibration.updates+1,trainedThrough:this.t-1,
+        carriedSamples:Math.max(0,samples.length-this.samples.length),
+        parameterChange:frobenius(combine(fit.matrix,previous,1,-1))};
+    }
     refreshScores(){
-      let scores=zeros(M,N-1),baselineScores=zeros(M,N-1),gainChangeSquared=0;
-      if(this.phase==='deployment'){
-        const segment=this.segments.find(s=>this.t>=s.start&&this.t<s.end)||this.segments.at(-1);
-        scores=Response.scores(segment.designs.online).map(row=>row.map(v=>v/segment.length));
-      }else if(this.rows.length){
-        for(const row of this.rows)for(let i=0;i<M;i++)for(let j=0;j<N-1;j++){
-          scores[i][j]+=row.score0[i][j]+row.beta*row.score1[i][j]+row.beta*row.beta*row.score2[i][j];
-          baselineScores[i][j]+=row.score0[i][j];
-          gainChangeSquared+=row.beta*row.beta*row.score2[i][j];
-        }
-        scores=scores.map(row=>row.map(v=>Math.max(0,v)/this.rows.length));
-        baselineScores=baselineScores.map(row=>row.map(v=>v/this.rows.length));
-      }else scores=this.segments[0].offlineScores.map(row=>row.map(v=>v/this.segments[0].length));
+      const segment=this.segments.find(s=>this.t>=s.start&&this.t<s.end)||this.segments.at(-1);
+      const measured=calibratedScores(segment.designs.online,this.calibration.matrix);
+      const scores=measured.scores,baselineScores=measured.baseline;
       const selection=Response.supportFromScores(scores,INVERTER_BUSES,REMOTE_BUDGET),gain=scoreGain(scores);
       const next=this.phase==='deployment'?this.deployedSupport.links.map(e=>({...e,weight:scores[INVERTER_BUSES.indexOf(e.to)][e.from-2]})):selection.links;
       if(this.directGain){
@@ -1004,34 +1151,27 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         this.changedEdges=edgeChanges(this.recommendations,next);this.sinceStable=this.changedEdges===0?this.sinceStable+1:0;
       }
       this.directGain=gain;this.recommendations=next.map(e=>({...e}));this.predictionScores=scores;
-      if(this.phase==='deployment'){
-        this.predictionDiagnostics=deepFreeze({...this.deployedSupport.discoveryDiagnostics,frozen:true});
-      }else{
-        // Compare learned and offline gains on exactly the same completed rows.
-        // Dividing by each receiver's total energy also covers initially zero
-        // channels without inventing a relative percentage or a denominator floor.
-        const count=this.rows.length,learnedScores=count?scores:zeros(M,N-1);
-        const receiverEnergy=baselineScores.map(row=>row.reduce((sum,v)=>sum+v,0));
-        const baselineEnergy=receiverEnergy.reduce((sum,v)=>sum+v,0);
-        const energyChange=learnedScores.map((row,i)=>row.map((v,j)=>v-baselineScores[i][j]));
-        const relativeEnergyChange=energyChange.map((row,i)=>row.map((v,j)=>baselineScores[i][j]>0?v/baselineScores[i][j]:null));
-        const receiverNormalizedChange=energyChange.map((row,i)=>row.map(v=>receiverEnergy[i]>0?v/receiverEnergy[i]:0));
-        const offlineLinks=count?Response.supportFromScores(baselineScores,INVERTER_BUSES,REMOTE_BUDGET).links:[];
-        const offlineKeys=new Set(offlineLinks.map(e=>e.to+','+e.from)),learnedKeys=new Set(count?selection.links.map(e=>e.to+','+e.from):[]);
-        const addedLinkCount=[...learnedKeys].filter(key=>!offlineKeys.has(key)).length;
-        const removedLinkCount=[...offlineKeys].filter(key=>!learnedKeys.has(key)).length;
-        this.predictionDiagnostics=deepFreeze({available:count>0,frozen:false,completedRows:count,
-          receiverBuses:INVERTER_BUSES.slice(),sourceBuses:Array.from({length:N-1},(_,i)=>i+2),
-          baselineScores,learnedScores,energyChange,relativeEnergyChange,receiverNormalizedChange,
-          relativeGainChange:baselineEnergy>0?Math.sqrt(gainChangeSquared/(count*baselineEnergy)):null,
-          overallRelativeEnergyChange:baselineEnergy>0?energyChange.flat().reduce((sum,v)=>sum+v,0)/baselineEnergy:null,
-          offlineLinks,addedLinkCount,removedLinkCount,changedLinkCount:addedLinkCount+removedLinkCount});
-      }
+      const count=this.calibration.windowSize,receiverEnergy=baselineScores.map(row=>row.reduce((sum,v)=>sum+v,0));
+      const baselineEnergy=receiverEnergy.reduce((sum,v)=>sum+v,0);
+      const energyChange=scores.map((row,i)=>row.map((v,j)=>v-baselineScores[i][j]));
+      const relativeEnergyChange=energyChange.map((row,i)=>row.map((v,j)=>baselineScores[i][j]>0?v/baselineScores[i][j]:null));
+      const receiverNormalizedChange=energyChange.map((row,i)=>row.map(v=>receiverEnergy[i]>0?v/receiverEnergy[i]:0));
+      const offlineLinks=this.phase==='deployment'?this.deployedSupport.fixedLinks:Response.supportFromScores(baselineScores,INVERTER_BUSES,REMOTE_BUDGET).links;
+      const offlineKeys=new Set(offlineLinks.map(e=>e.to+','+e.from)),learnedKeys=new Set(next.map(e=>e.to+','+e.from));
+      const addedLinkCount=[...learnedKeys].filter(key=>!offlineKeys.has(key)).length;
+      const removedLinkCount=[...offlineKeys].filter(key=>!learnedKeys.has(key)).length;
+      this.predictionDiagnostics=deepFreeze({available:count>0,frozen:false,completedRows:count,
+        receiverBuses:INVERTER_BUSES.slice(),sourceBuses:Array.from({length:N-1},(_,i)=>i+2),
+        baselineScores,learnedScores:scores,energyChange,relativeEnergyChange,receiverNormalizedChange,
+        relativeGainChange:count&&baselineEnergy>0?Math.sqrt(measured.changeSquared/baselineEnergy):null,
+        overallRelativeEnergyChange:baselineEnergy>0?energyChange.flat().reduce((sum,v)=>sum+v,0)/baselineEnergy:null,
+        offlineLinks,addedLinkCount,removedLinkCount,changedLinkCount:addedLinkCount+removedLinkCount});
     }
     step(){
       if(this.mode!=='running')return this.snapshot();
       if(this.t>=this.options.horizon){this.mode='completed';return this.snapshot();}
       const time=this.t,segment=this.segments.find(s=>time>=s.start&&time<s.end),local=time-segment.start;
+      this.updateCalibration();
       this.sealPreview();this.lastPreview=segment.dense.rows[local].map(block=>this.forecasts[segment.start+block.k-1]);
       const issued=this.forecasts[time],background=issued.base,requested=Array(N).fill(0);
       for(const event of this.pulses){event.requestedKw=event.strength*Math.exp(-event.age/event.decay);requested[event.bus-1]+=event.requestedKw;}
@@ -1047,7 +1187,9 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         const x=this.states[key].slice(1).map((v,i)=>v-model.baseDrop[i+1]);
         const raw=matvec(model.K,x);
         if(key!=='causal')for(const block of segment.designs[key].rows[local]){
-          const contribution=matvec(block.L,this.forecasts[segment.start+block.k-1].forecast.slice(1));
+          const forecast=this.forecasts[segment.start+block.k-1].forecast.slice(1);
+          const corrected=key==='online'?matvec(this.calibration.matrix,forecast):key==='scalar'?forecast.map(v=>v*this.calibration.scalar):forecast;
+          const contribution=matvec(block.L,corrected);
           for(let i=0;i<M;i++)raw[i]+=contribution[i];
         }
         const bounded=raw.map(v=>Math.max(-Q_LIMIT,Math.min(Q_LIMIT,v)));
@@ -1069,12 +1211,14 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         this.addCompletedRow(completedSegment,completedTime-completedSegment.start);
       }
       if(this.phase==='discovery'&&this.rows.length)this.updateResponses();
-      else{this.drift=0;this.changedEdges=0;this.sinceStable++;}
+      else this.refreshScores();
       this.t++;
       this.history.push(deepFreeze({t:this.t,costTime:time,stateTime:this.t,...this.cumulative,stage:{...this.stage},rms,regulationRms,
         pulse:sample.pulse,costStates:this.costStates,states:Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].slice()])),
         regulationStates:Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].map((v,i)=>v-model.baseDrop[i])])),
-        rawForecastRms:this.learning.rawRms,prefixError:this.learning.prefixError,prefixLoss:this.learning.prefixLoss,
+        rawForecastRms:this.learning.rawRms,
+        calibratedForecastRms:Math.sqrt(squared(matvec(this.calibration.matrix,sample.forecast.slice(1)).map((v,i)=>v-sample.disturbance[i+1]))/(N-1)),
+        prefixError:this.learning.prefixError,prefixLoss:this.learning.prefixLoss,
         completedRows:this.rows.length,drift:this.drift,changedEdges:this.changedEdges}));
       if(this.t>=this.options.horizon)this.mode='completed';return this.snapshot();
     }
@@ -1102,7 +1246,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       this.eventLog.push(deepFreeze({t:this.t,type:'resume',message:'Physical trial resumed'}));return this.snapshot();
     }
     deployTopology(){
-      if(this.phase!=='discovery'||this.rows.length<WARMUP)return false;
+      if(this.phase!=='discovery'||this.samples.length<WARMUP)return false;
       this.discoveryRecord=deepFreeze({options:{...this.initialOptions,faultBuses:this.initialOptions.faultBuses.slice()},
         t:this.t,events:this.eventLog.slice()});
       const learned=Response.supportFromScores(this.predictionScores,INVERTER_BUSES,REMOTE_BUDGET);
@@ -1110,6 +1254,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       const fixed=Response.supportFromScores(offline,INVERTER_BUSES,REMOTE_BUDGET);
       this.deployedSupport=deepFreeze({learned:learned.support,fixed:fixed.support,links:learned.links,fixedLinks:fixed.links,
         scores:this.predictionScores.map(row=>row.slice()),completedRows:this.rows.length,discoveryTime:this.t,
+        trainingSamples:this.samples.slice(-WINDOW),
         discoveryDiagnostics:this.predictionDiagnostics});
       this.phase='deployment';this.initialOptions={...this.discoveryRecord.options,
         seed:(this.discoveryRecord.options.seed^0x9E3779B9)>>>0};return this.reset();
@@ -1123,7 +1268,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         const x=this.states[key].slice(1).map((v,i)=>v-model.baseDrop[i+1]),px=matvec(model.P,x);return[key,x.reduce((sum,v,i)=>sum+v*px[i],0)];}));
       return{t:this.t,costTime:this.lastSample?this.lastSample.t:null,stateTime:this.t,horizon:this.options.horizon,
         initialOptions:{...this.initialOptions,faultBuses:this.initialOptions.faultBuses.slice()},
-        phase:this.phase,canDeploy:this.phase==='discovery'&&this.rows.length>=WARMUP,
+        phase:this.phase,canDeploy:this.phase==='discovery'&&this.samples.length>=WARMUP,
         discoveryRecord:this.discoveryRecord,deployedSupport:this.deployedSupport,
         segments:this.segments.map(s=>({start:s.start,end:s.end,length:s.length})),
         mode:this.mode,seed:this.options.seed,preset:this.options.preset,presetLabel:this.preset.label,
@@ -1133,7 +1278,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         ...Object.fromEntries(Object.entries(this.power).map(([key,value])=>[key,value.slice()])),powerDeviation:this.powerDeviation.slice(),
         edgeData:model.edgeData.map((edge,i)=>({...edge,pKw:flows.online[i].pKw,qKvar:Object.fromEntries(CONTROLLERS.map(key=>[key,flows[key][i].qKvar]))})),
         lastPulseApplications:this.lastPulseApplications.map(p=>({...p})),costStates:Object.fromEntries(CONTROLLERS.map(key=>[key,this.costStates[key].slice()])),
-        learning:{...this.learning},predictionDiagnostics:this.predictionDiagnostics,lastPreview:this.lastPreview.slice(),
+        learning:{...this.learning},calibration:{...this.calibration,matrix:copy(this.calibration.matrix)},predictionDiagnostics:this.predictionDiagnostics,lastPreview:this.lastPreview.slice(),
         pendingPulses:this.pulses.filter(e=>e.age===0).map(e=>({...e})),activePulses:this.pulses.filter(e=>e.age>0).map(e=>({...e})),
         states:Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].slice()])),
         regulationStates:Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].map((v,i)=>v-model.baseDrop[i])])),
@@ -1154,7 +1299,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     busProfiles:BUS_PROFILES,controllers:CONTROLLERS,forecastPresets:FORECAST_PRESETS,tolerance:TOLERANCE,horizon:480,
     pulseDefault:PULSE_DEFAULT,pulseMin:PULSE_MIN,pulseMax:PULSE_MAX,pulseUnits:'kW',powerBaseKw:POWER_BASE_KW,
     baseKv:BASE_KV,baseMva:BASE_MVA,sampleSeconds:SAMPLE_SECONDS,tauSeconds:TAU_SECONDS,inverterKvar:70}),
-    math:{zeros,eye,transpose,multiply,matvec,combine,frobenius,normInf,solveSPD,getDesign,Response,
+    math:{zeros,eye,transpose,multiply,matvec,combine,frobenius,normInf,solveSPD,getDesign,Response,calibratedScores,
       recommendations,physicalPower,voltageFrom,branchFlows,radialAC,padInput}};
 });
 </script>
@@ -1476,17 +1621,16 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   const d3 = window.d3;
   let simulation = new PowerDemo.Simulation({preset:'mixed'});
   const series = [
-    { key:'online', label:'Learned sparse', color:'var(--viz-series-1)', dash:null },
-    { key:'scalar', label:'Fixed sparse', color:'var(--viz-series-4)', dash:'8 3' },
-    { key:'static', label:'Dense prediction', color:'var(--viz-series-2)', dash:'5 3 1 3' },
+    { key:'online', label:'Matrix adaptation', color:'var(--viz-series-1)', dash:null },
+    { key:'scalar', label:'Scalar adaptation', color:'var(--viz-series-4)', dash:'8 3' },
+    { key:'static', label:'Fixed prediction', color:'var(--viz-series-2)', dash:'5 3 1 3' },
     { key:'causal', label:'Feedback only', color:'var(--viz-series-3)', dash:'1 4' }
   ];
   const visible = new Set(series.map(s => s.key));
   const DISCOVERY_SAMPLES=180;
   const automaticComparison=()=>$('auto-compare').checked;
-  // Discovery executes one dense predictive policy plus the feedback baseline.
-  // Sparse labels become meaningful only after their constrained designs exist.
-  function activeSeries() { return snapshot.phase==='deployment' ? series : series.filter(s=>s.key==='static'||s.key==='causal'); }
+  // All four policies execute throughout discovery and the fresh comparison.
+  function activeSeries() { return series; }
   function plottedSeries() { return activeSeries().filter(s=>visible.has(s.key)); }
   function sameSparseSupport() {
     const support=snapshot.deployedSupport;
@@ -1636,9 +1780,9 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       : event ? (historyIndex===null?(snapshot.phase==='deployment'?'Last discovery':'Latest'):'Viewing')+' update at '+event.t+' s · Added '+label(event.added)+' · Removed '+label(event.removed)
       : historyIndex===0 ? 'Initial prediction links · Move the slider to review each update.'
       : snapshot.phase==='deployment' ? 'No link changes during discovery. Deployed links stay fixed.'
-      : snapshot.t<6 ? 'Learning starts after five samples. Each link update is kept here.'
+      : snapshot.t<30 ? 'Weights start adapting at 30 s. Each link update is kept here.'
       : 'No links have changed yet. Learning weights may still change.';
-    $('topology-note').title=snapshot.phase==='deployment' ? 'Discovery history. The deployed controller stays fixed.' : 'History displays observed connectivity only. Reviewing an update does not change the controller.';
+    $('topology-note').title=snapshot.phase==='deployment' ? 'Discovery history. Deployed links stay fixed while prediction weights continue adapting.' : 'History displays observed connectivity only. Reviewing an update does not change the controller.';
   }
   function selectBus(bus) {
     selectedBus = bus;
@@ -1659,8 +1803,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     if (!window.openai?.setWidgetState) return;
     const events=snapshot.eventLog || [];
     const state = {
-      modelContent: { scenario:'24 bus LinDistFlow voltage regulation', variant:'Completed response learning and separate sparse deployment', phase:snapshot.phase, step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
-      privateContent: { version:9, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, automaticComparison:automaticComparison(), view:$('view').value, costMetric:$('cost-metric').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, speed:$('speed').value, allLinks:$('all-links').checked }
+      modelContent: { scenario:'24 bus LinDistFlow voltage regulation', variant:'Shared prediction adaptation and sparse deployment', phase:snapshot.phase, step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
+      privateContent: { version:10, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, automaticComparison:automaticComparison(), view:$('view').value, costMetric:$('cost-metric').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, speed:$('speed').value, allLinks:$('all-links').checked }
     };
     window.openai.setWidgetState(state).catch(() => {});
   }
@@ -1691,16 +1835,16 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   }
   function hydrate(saved) {
     const data=saved?.privateContent;
-    if(restored||!data||![7,8,9].includes(data.version)) return;
+    if(restored||!data||data.version!==10) return;
     restored=true;
     $('auto-compare').checked=data.automaticComparison!==false;
     selectedBus=Math.max(1,Math.min(24,Math.floor(Number(data.selectedBus)||7)));
     $('bus').value=String(selectedBus);
-    $('speed').value=data.version===9 && ['2','4','8','16','32'].includes(data.speed)?data.speed:'16';
-    $('attack-mode').value=data.version===9 && data.attackMode==='pulse'?'pulse':'continuous';
+    $('speed').value=['2','4','8','16','32'].includes(data.speed)?data.speed:'16';
+    $('attack-mode').value=data.attackMode==='pulse'?'pulse':'continuous';
     if(['50','100','150'].includes(data.pulseStrength)) $('strength').value=data.pulseStrength;
     $('all-links').checked=!!data.allLinks;
-    $('matrix-view').value=data.version>=8 && data.matrixView==='change'?'change':'links';
+    $('matrix-view').value=data.matrixView==='change'?'change':'links';
     const preset=['reliable','uniform','mixed'].includes(data.preset)?data.preset:'mixed';
     if(data.phase==='deployment' && data.discoveryRecord) {
       simulation=new PowerDemo.Simulation(data.discoveryRecord.options || {preset});
@@ -1717,7 +1861,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     snapshot=simulation.snapshot();
     $('preset').value=snapshot.preset;
     $('view').value=data.view==='learning'?'learning':'cost';
-    $('cost-metric').value=data.costMetric==='gap' && snapshot.phase==='deployment'?'gap':'total';
+    $('cost-metric').value=data.costMetric==='gap'?'gap':'total';
     journal=(snapshot.eventLog || []).filter(item=>item.type==='pulse'||item.type==='forecast'||item.type==='fault').map(item=>({...item,type:item.type==='forecast'?'fault':item.type}));
     fitSteps=snapshot.fitIteration || 0;
     if(data.matrixReference?.recommendations) matrixReference={...data.matrixReference,edges:new Set(data.matrixReference.recommendations.map(recommendationKey))};
@@ -2004,19 +2148,6 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     if(document.hidden) { stop(); renderControls(); drawNetwork(); save(); }
   });
   $('fault').addEventListener('click', fault);
-  $('freeze').addEventListener('click', () => {
-    stop();
-    if (isFit()) {
-      resumePlant();
-      announce(snapshot.mode === 'completed' ? 'Episode complete' : 'Live data resumed · Press Run to continue');
-    } else {
-      if (!simulation.freeze()) return;
-      snapshot = simulation.snapshot(); fitSteps = 0;
-      if ($('view')) $('view').value='learning';
-      playing = true; schedule(); announce('Data frozen · Voltage and cost are held');
-    }
-    render(); save();
-  });
   document.addEventListener('keydown', e => {
     if (e.defaultPrevented || e.repeat || e.altKey || e.ctrlKey || e.metaKey || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
     const key = e.key.toLowerCase();
@@ -2034,34 +2165,32 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     });
   });
   function renderLearningView() {
-    const preparing=snapshot.phase==='discovery' && automaticComparison();
-    const showCost=!preparing && $('view')?.value==='cost';
-    $('view').hidden=preparing;
+    const showCost=$('view')?.value==='cost';
+    $('view').hidden=false;
     if ($('cost-content')) $('cost-content').hidden=!showCost;
     if ($('learning-content')) $('learning-content').hidden=showCost;
     if ($('cost')) { $('cost').hidden=!showCost; $('cost').style.display=showCost?'':'none'; }
     if ($('convergence')) { $('convergence').hidden=showCost; $('convergence').style.display=showCost?'none':''; }
     if ($('learning-flow')) $('learning-flow').hidden=showCost;
-    if ($('learning-title')) $('learning-title').textContent=preparing ? 'Learning progress' : showCost ? (snapshot.phase==='deployment'?'Controller comparison':'Learning run') : isFit() ? 'Fixed data diagnostic' : snapshot.phase==='deployment' ? 'Deployed controller' : 'Completed response learning';
-    if ($('learning-kind')) $('learning-kind').textContent=showCost ? 'Accumulated quadratic cost' : isFit() ? 'Relative error (%)' : snapshot.phase==='deployment' ? 'Fixed prediction support' : 'Completed responses · Relative error (%)';
+    if ($('learning-title')) $('learning-title').textContent=showCost ? 'Controller comparison' : 'Forecast learning';
+    if ($('learning-kind')) $('learning-kind').textContent='Original dashed · Matrix adaptation solid';
   }
   function renderControls() {
     const frozen=isFit();
     const deployed=snapshot.phase==='deployment';
     const completedRows=snapshot.learning?.completedRows || 0;
     const preparing=!deployed && automaticComparison();
-    if($('phase')) { $('phase').textContent=deployed?'Comparison trial':preparing?'Learning '+Math.min(DISCOVERY_SAMPLES,snapshot.t)+' / '+DISCOVERY_SAMPLES+' s':snapshot.canDeploy?'Ready to compare':'Learning '+Math.min(30,completedRows)+'/30'; $('phase').dataset.phase=deployed?'deployment':'discovery'; }
-    if($('deploy')) { $('deploy').hidden=preparing; $('deploy').disabled=comparing || (!deployed && !snapshot.canDeploy); $('deploy').textContent=deployed?'Learn again':'Compare controllers'; $('deploy').title=deployed?'Start a new discovery trial with these forecast settings':snapshot.canDeploy?'Start four controllers on the same fresh disturbance sequence':(snapshot.learning?.completedRows || 0)+' of 30 completed responses'; }
-    if($('phase-note')) $('phase-note').textContent='Colors and line styles identify controllers · Hover for exact values';
-    $('cost-metric').hidden=!deployed;
-    if(!deployed) $('cost-metric').value='total';
+    if($('phase')) { $('phase').textContent=deployed?'Comparison trial':preparing?'Learning '+Math.min(DISCOVERY_SAMPLES,snapshot.t)+' / '+DISCOVERY_SAMPLES+' s':snapshot.canDeploy?'Ready to compare':'Learning '+Math.min(30,snapshot.sampleCount || 0)+'/30'; $('phase').dataset.phase=deployed?'deployment':'discovery'; }
+    if($('deploy')) { $('deploy').hidden=preparing; $('deploy').disabled=comparing || (!deployed && !snapshot.canDeploy); $('deploy').textContent=deployed?'Learn again':'Compare controllers'; $('deploy').title=deployed?'Start a new discovery trial with these forecast settings':snapshot.canDeploy?'Start four controllers on the same fresh disturbance sequence':'Collecting observed samples for comparison'; }
+    if($('phase-note')) $('phase-note').textContent='Physical attacks test disturbance recovery · Forecast settings test prediction adaptation';
+    $('cost-metric').hidden=false;
     if(!plottedSeries().length) activeSeries().forEach(item=>visible.add(item.key));
     root.querySelectorAll('[data-series]').forEach(button=>{
       const item=series.find(item=>item.key===button.dataset.series);
       button.hidden=!activeSeries().includes(item);
       button.setAttribute('aria-pressed',String(visible.has(item.key)));
     });
-    if($('matrix-title')) $('matrix-title').textContent=deployed?'Deployed prediction links':'Learning prediction links';
+    if($('matrix-title')) $('matrix-title').textContent=deployed?'Deployed prediction links':'Candidate prediction links';
     $('clock').textContent=(deployed?'Comparison t = ':'Learning t = ')+snapshot.t+' s';
     $('learning').textContent=frozen?'Plant held · '+snapshot.mode:deployed?'Prediction links fixed':completedRows+' completed responses';
     $('run').textContent=playing?'Pause':frozen && snapshot.mode!=='converged'?'Fit':'Run';
@@ -2080,20 +2209,20 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     $('attack-hint').textContent=feedback.hint;
     $('step').textContent=frozen?'100 fit steps':'Step';
     $('step').disabled=comparing || snapshot.mode==='converged';
-    $('freeze').textContent=frozen?'Return to simulation':'Inspect fixed data';
-    $('freeze').disabled=comparing || deployed || !snapshot.canFreeze;
-    $('freeze').hidden=preparing && !frozen;
+    $('freeze').hidden=true;
+    $('freeze').disabled=true;
     $('pulse').disabled=!heldAttack && !canAttack(selectedBus); $('strength').disabled=false; $('fault').disabled=!canAttack(selectedBus);
     $('fault').textContent=(snapshot.faults.includes(selectedBus)?'Repair':'Corrupt')+' forecast';
-    $('fit-title').textContent=frozen?'Fixed data diagnostic':deployed?'Deployed prediction support':'Completed response learning';
-    $('fit-detail').textContent=frozen?'Relative error '+d3.format('.2~g')(100*(snapshot.fitError || 0))+'%':deployed?'Prediction links stay fixed in this trial':completedRows+' completed responses · '+(snapshot.learning?.delay || 0)+' second completion delay';
-    $('mode-note').textContent=frozen?'Trial and controller paused. Learned links stay unchanged.':deployed?'Change the forecast preset to begin a new discovery trial':preparing?(snapshot.t>=DISCOVERY_SAMPLES?'Comparison starts when playback resumes. Its costs start at zero.':'Comparison starts automatically after '+DISCOVERY_SAMPLES+' s of learning. Its costs start at zero.'):'The target changes as responses complete. Freeze to inspect convergence.';
+    const calibration=snapshot.calibration;
+    $('fit-title').textContent='Shared prediction adaptation';
+    $('fit-detail').textContent='First update at 30 s · Uses up to 60 revealed samples · Five second preview';
+    $('mode-note').textContent=(deployed?'Links stay fixed while prediction weights adapt. ':preparing?'Fresh comparison starts after 180 s. ':'')+'Errors are measured before each observed sample enters learning.';
     const i=selectedBus-1, sample=snapshot.lastSample;
     const write=(id,value)=>{if($(id))$(id).textContent=value;};
     write('flow-predict',selectedBus===1 ? 'Fixed slack' : sample ? 'ŵ '+d3.format('+.2~g')(sample.forecast[i])+' pu' : 'Awaiting forecast');
     write('flow-control',hasInverter(selectedBus) ? 'Q* '+d3.format('+.0f')(reactiveCommand(selectedBus))+' kvar' : 'No inverter');
     write('flow-observe',selectedBus===1 ? busVoltage(1).toFixed(3)+' pu' : sample ? 'w '+d3.format('+.2~g')(sample.disturbance[i])+' pu' : 'Awaiting response');
-    write('flow-update',frozen ? snapshot.fitIteration+' iterations' : deployed ? 'Support fixed' : completedRows+' completed rows');
+    write('flow-update',calibration?.updates ? calibration.windowSize+' revealed samples' : 'Starts at 30 s');
     renderLearningView();
   }
   function drawNetwork() {
@@ -2220,14 +2349,14 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     const left=40,cellWidth=(width-left-8)/sources.length,cellHeight=17;
     const staggered=cellWidth<18,top=staggered?48:35,height=top+153;
     const frame=topologyFrame(),recommendations=frame.links || [],current=new Set(recommendations.map(recommendationKey));
-    $('matrix-title').textContent=historyIndex===null ? (deployed?'Deployed prediction links':'Learning prediction links') : 'Prediction links at '+(frame.event?.t ?? topology.initialT)+' s';
+    $('matrix-title').textContent=historyIndex===null ? (deployed?'Deployed prediction links':'Candidate prediction links') : 'Prediction links at '+(frame.event?.t ?? topology.initialT)+' s';
     const added=[...current].filter(key=>!frame.reference.has(key)),removed=[...frame.reference].filter(key=>!current.has(key));
     const gainPercent=100*(diagnostics?.relativeGainChange || 0);
     const replaced=diagnostics?.changedLinkCount || 0;
     const matrixReceiver=hasInverter(selectedBus)?selectedBus:null;
     const selectedSources=recommendations.filter(e=>e.to===selectedBus).map(e=>e.from).sort((a,b)=>a-b);
     $('matrix-detail').textContent=changing ? 'Coefficient change '+d3.format('.3~g')(gainPercent)+'%' : matrixReceiver ? 'Inverter '+selectedBus+' ← '+selectedSources.join(', ') : 'Eight inverter receivers';
-    $('matrix-changes').textContent=(deployed?(historyIndex===null?'Fixed deployment · ':'Discovery history · '):'')+added.length+' added · '+removed.length+' removed';
+    $('matrix-changes').textContent=(deployed?(historyIndex===null?'Fixed links · ':'Discovery history · '):'')+added.length+' added · '+removed.length+' removed';
     $('matrix-changes').title='Changes in the displayed topology update';
     drawTopologyHistory();
     const delta=diagnostics?.receiverNormalizedChange || receivers.map(()=>sources.map(()=>0));
@@ -2450,11 +2579,11 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   }
   function drawCost() {
     const active=activeSeries(),items=plottedSeries();
-    const gap=snapshot.phase==='deployment' && $('cost-metric').value==='gap';
+    const gap=$('cost-metric').value==='gap';
     const observations=[{x:0,...Object.fromEntries(series.map(item=>[item.key,0]))},...snapshot.history.map(d=>({x:d.t,...Object.fromEntries(series.map(item=>[item.key,d[item.key]-(gap?d.scalar:0)]))}))];
     if ($('cost').hidden) return;
-    $('cost').setAttribute('aria-label',gap?'Cumulative cost difference from fixed sparse. Zero is the fixed sparse baseline. Lower is better.':'Cumulative cost of '+active.length+' active controllers');
-    const chart=chartBase($('cost'),observations,items.map(s=>s.key),gap?'Cost difference from fixed sparse':'Cumulative cost','Time (s)',140);
+    $('cost').setAttribute('aria-label',gap?'Cumulative cost difference from scalar adaptation. Zero is the scalar adaptation baseline. Lower is better.':'Cumulative cost of '+active.length+' active controllers');
+    const chart=chartBase($('cost'),observations,items.map(s=>s.key),gap?'Cost difference':'Cumulative cost','Time (s)',140);
     chart.marks.selectAll('line.cost-reference').data(gap?[0]:[]).join('line').attr('class','cost-reference')
       .attr('x1',chart.frame.x).attr('x2',chart.frame.x+chart.frame.w).attr('y1',chart.y(0)).attr('y2',chart.y(0))
       .attr('stroke','var(--muted-foreground)').attr('stroke-opacity',.35);
@@ -2472,14 +2601,16 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       difference.textContent=item.key==='causal' ? 'Reference' : comparativeCost(c[item.key],c.causal);
       row.dataset.method=item.key; row.append(label,value,difference); $('cost-detail').append(row);
     }
-    const sparseComparison=comparativeCost(c.online,c.scalar);
-    $('comparison-summary').textContent=snapshot.phase!=='deployment'
-      ? 'Learning uses dense prediction. Sparse controllers are tested after you select Compare controllers.'
-      : sameSparseSupport() ? 'Learned and fixed sparse selected identical links, so their curves coincide.'
-      : c.scalar>1e-12 ? sparseComparison==='Equal' ? 'Different links · Equal cost so far' : sparseComparison==='Nearly equal' ? 'Different links · Nearly equal cost so far' : 'Learned cost is '+sparseComparison+' than fixed sparse'
-      : 'Four controllers · Identical disturbances';
-    $('cost-note').textContent=gap?'Gap = cumulative cost − fixed sparse cost · Below zero is better · Table shows total costs'
-      : snapshot.phase==='deployment'?'Fresh comparison trial · Learning costs excluded · Identical disturbances':'Two active controllers · Learning continues as the trial runs';
+    $('comparison-summary').textContent=comparisonSummary();
+    $('cost-note').textContent=gap?'Difference from scalar adaptation · Below zero is better · Table shows totals'
+      : snapshot.phase==='deployment'?'Fresh comparison · Learning costs excluded · Identical disturbances':'Dense messages during learning · Adaptation starts at 30 s';
+  }
+  function comparisonSummary() {
+    const c=snapshot.cumulative,comparison=comparativeCost(c.online,c.scalar);
+    const support=snapshot.phase==='deployment' && sameSparseSupport() ? 'Same links · Weights adapt independently. ' : '';
+    return support+(comparison==='Pending'?'Run to compare all four controllers':comparison==='Equal' || comparison==='Nearly equal'
+      ? 'Matrix and scalar costs are '+comparison.toLowerCase()+' so far'
+      : 'Matrix cost is '+comparison+' than scalar adaptation');
   }
   function comparativeCost(value,reference) {
     if (!(reference>1e-12)) return 'Pending';
@@ -2537,43 +2668,23 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   }
   function drawConvergence() {
     if (!$('convergence') || $('convergence').hidden) return;
-    const frozen=isFit(), deployed=snapshot.phase==='deployment';
-    const el=$('convergence'), svg=d3.select(el);
-    const completedRows=snapshot.learning?.completedRows || 0;
-    if(!frozen && (deployed || !snapshot.learning?.updateCount)) {
-      const width=Math.max(240,el.getBoundingClientRect().width), height=140;
-      const heading=deployed?'Prediction links are deployed':'Waiting for completed responses';
-      const detail=deployed?'Support stays fixed throughout this trial':automaticComparison()?'Comparison will start automatically':'Run to collect completed responses';
-      svg.attr('viewBox','0 0 '+width+' '+height).attr('height',height)
-        .attr('aria-label',heading+'. '+detail+'.');
+    const el=$('convergence'),svg=d3.select(el);
+    const observations=snapshot.history.filter(d=>Number.isFinite(d.rawForecastRms) && Number.isFinite(d.calibratedForecastRms))
+      .map(d=>({x:d.t,raw:d.rawForecastRms,adapted:d.calibratedForecastRms}));
+    if(!observations.length) {
+      const width=Math.max(240,el.getBoundingClientRect().width),height=140;
+      svg.attr('viewBox','0 0 '+width+' '+height).attr('height',height).attr('aria-label','Run to observe forecast errors');
       svg.selectAll('*').remove();
-      const wait=svg.append('g').attr('class','learning-wait');
-      wait.append('text').attr('x',width/2).attr('y',48).attr('text-anchor','middle')
-        .attr('fill','var(--foreground)').attr('font-size',13).text(heading);
-      wait.append('text').attr('x',width/2).attr('y',70).attr('text-anchor','middle')
-        .attr('fill','var(--muted-foreground)').attr('font-size',11).text(detail);
-      if(!deployed) {
-        wait.append('line').attr('x1',width/2-64).attr('x2',width/2+64).attr('y1',88).attr('y2',88)
-          .attr('stroke','var(--border)').attr('stroke-width',3).attr('stroke-linecap','round');
-        wait.append('line').attr('x1',width/2-64).attr('x2',width/2-64+128*Math.min(1,completedRows/30)).attr('y1',88).attr('y2',88)
-          .attr('stroke','var(--primary)').attr('stroke-width',3).attr('stroke-linecap','round');
-      }
+      svg.append('text').attr('class','learning-wait').attr('x',width/2).attr('y',60).attr('text-anchor','middle')
+        .attr('fill','var(--muted-foreground)').attr('font-size',12).text('Run to observe forecast errors');
       return;
     }
     if(!svg.select('.learning-wait').empty()) svg.selectAll('*').remove();
-    const observations=frozen
-      ? snapshot.fitHistory.filter(d=>Number.isFinite(d.error)).map(d=>({x:d.iteration,value:100*d.error}))
-      : snapshot.history.filter(d=>Number.isFinite(d.prefixError)).map(d=>({x:d.t,value:100*d.prefixError}));
-    if(!observations.length) return;
-    $('convergence').setAttribute('aria-label',frozen?'Fixed data diagnostic. Relative error to the exact completed response optimizer on frozen data':'Relative error to the changing completed response optimizer');
-    const chart=chartBase($('convergence'),observations,['value'],'Relative error (%)',frozen?'Gradient iteration':'Time (s)',140);
-    if (!frozen) drawInterventions(chart);
-    else {
-      chart.marks.select('.intervention-markers').selectAll('*').remove();
-      chart.svg.select('.intervention-labels').selectAll('*').remove();
-    }
-    drawSeries(chart,observations,[{key:'value',color:'var(--viz-series-1)'}]);
-    hover(chart,observations,[{key:'value',label:'Relative error (%)',color:'var(--viz-series-1)'}],frozen?'Iteration':'Time (s)');
+    const items=[{key:'raw',label:'Original forecast',color:'var(--viz-series-2)',dash:'5 3'},
+      {key:'adapted',label:'Matrix adaptation',color:'var(--viz-series-1)'}];
+    el.setAttribute('aria-label','Original and matrix adapted forecast error in per unit, measured before learning each sample');
+    const chart=chartBase(el,observations,items.map(item=>item.key),'Forecast error (pu)','Time (s)',140);
+    drawInterventions(chart);drawSeries(chart,observations,items);hover(chart,observations,items,'Time (s)');
   }
   function render() {
     $('tooltip').style.display='none'; pin=null;

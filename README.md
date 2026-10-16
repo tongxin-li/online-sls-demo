@@ -10,38 +10,56 @@ Continuous mode is selected by default. Click a bus to start an attack that adds
 
 Orange lightning badges show the actual applied disturbance in kW after equipment limits. Pending means that a request is queued for the next physical sample. The badges do not count attacks or sum requested power. Attack on means new requests are being added. Fading means requests have stopped while the existing disturbance decays. Paused means plant time is stopped and the disturbance remains. A softer badge identifies this residual power, and pausing also stops equipment animation. Click the bus or its badge to toggle the continuous attack. Chart badges say Attack or Attacks, while shaded intervals locate the disturbances.
 
-The prediction matrix shows eight inverter receivers and 23 source buses. Connectivity is the default view. Its history slider and recent event cards retain actual support changes over time, with added links in green and removed links in amber. Changed cells and links briefly flash when an update arrives. Returning to the starting topology does not erase earlier events. Connectivity can remain stable while coefficients change, and the display identifies these quantities separately. Learning weights displays the signed change in realizing gain energy relative to the offline energy of the same completed rows. Its color scale is shown explicitly and selected sources remain outlined. Coefficient change is the relative Frobenius norm of the actual learned gain correction. Learning weights can change without changing the strongest sources. During deployment both the selected support and retained discovery diagnostic stay fixed. Learn again starts new discovery.
+The prediction matrix shows eight inverter receivers and 23 source buses. Connectivity is the default view. Its history slider and recent event cards retain actual support changes over time, with added links in green and removed links in amber. Changed cells and links briefly flash when an update arrives. Returning to the starting topology does not erase earlier events. Connectivity can remain stable while coefficients change, and the display identifies these quantities separately. Learning weights displays the signed change in realizing gain energy relative to the offline energy over the same finite planning segment. Its color scale is shown explicitly and selected sources remain outlined. Coefficient change is the relative Frobenius norm of the actual learned gain correction. Learning weights can change without changing the strongest sources. During deployment the selected support stays fixed and the executed prediction coefficients continue adapting. Learn again starts new discovery.
 
-Run collects 180 physical samples for learning, then automatically starts an independent four controller comparison. The right panel shows learning progress during preparation. The comparison clock and costs start at zero, while discovery topology history remains available. Ongoing attacks and unapplied requests continue across the transition. Decaying disturbances from the old plant do not transfer.
+Run collects 180 physical samples for learning, then automatically starts an independent four controller comparison. All four executed cost curves are visible during preparation and comparison. The Learning view shows prediction errors evaluated on newly revealed observations, before those observations enter the fit. The comparison clock and costs start at zero, while discovery topology history remains available. Ongoing attacks and unapplied requests continue across the transition. Decaying disturbances from the old plant do not transfer.
 
 Saved trials restore paused in their original phase. Automatic transition resumes with live sampling. Step stays paused. Advance 180 executes exactly 180 samples across the phases and preserves ongoing attacks. Disable automatic comparison in Experiment settings to inspect a longer learning run or choose deployment manually. Forecast selection and Advance 180 are also in Experiment settings, keeping the main controls focused on playback and disturbances.
 
-Curves use colors and line styles. Equal learned and fixed supports are identified explicitly. Gap to fixed sparse subtracts actual cumulative costs, while the table retains totals.
+Curves use colors and line styles. Identical support does not imply identical controllers because matrix and scalar corrections can differ. Gap to scalar subtracts actual cumulative costs, while the table retains totals.
 
 ## Execution contract
 
-Discovery follows the delayed update printed in Algorithm 1 of `manuscript.tex`. Predictions of the canonical disturbance are issued once and retained. After applying the bounded command, the observed next state reveals the actual disturbance. At round t, only completed rows through t − d are updated, with the gradient evaluated at the stored iterate from t − d. The projection preserves the printed temporal support set.
+This version implements a shared forecast calibration specialization inspired by the manuscript experiments. Earlier versions updated completed response rows and discarded their coefficients when deploying selected links. That could not transfer forecast learning into future control and frequently produced identical sparse controllers.
 
-This has a consequence that the demo makes explicit. A completed row update never changes the current or future row used for control. Discovery therefore executes the offline predictive controller while fitting historical responses. Its three predictive cost curves coincide. Replacing this with shared parameters across time would change the algorithm.
+Before action t, the matrix and scalar estimators use only revealed forecast and disturbance pairs with indices less than t. Both begin with identity correction, first update at action 30, and retain the most recent 60 observations. Predictions are issued once and remain immutable. The same fitted correction acts on every temporal predictive block in the current row
 
-The printed support projection also does not generally preserve response achievability. Historical learned coefficients are used for discovery only. They are never installed as a controller directly. The topology is selected from their realized prediction gain scores, then a new feasible controller is synthesized and deployed on a separate trial. This combines the manuscript update with a discovery and deployment workflow. It is not an online joint topology algorithm or a reproduction of the paper's reported cost percentages.
+```text
+u_t = K x_t + sum_k L_off[t,k] C_t forecast[k-1]
+L_off = U_off - K X_off
+```
+
+Both fits minimize the same explicitly specified ridge objective in physical voltage forcing units
+
+```text
+0.5 sum_s ||C forecast_s - disturbance_s||^2 + 0.5 lambda ||C - I||_F^2
+lambda = 1.27e-5
+```
+
+Scalar adaptation restricts C to cI and therefore uses 23 lambda in its scalar regularizer. Matrix adaptation fits source dependent corrections. This is the manuscript experimental shared parameter mechanism with a declared ridge implementation and a communication restriction for this feeder. The archived experimental protocol describes this unweighted forecast fit. The active appendix instead prints a response weighted scalar expression and does not provide an unambiguous full matrix update. This website is not an exact reproduction of Algorithm 1 or of the manuscript numerical results.
+
+A fixed common C multiplying both X and U preserves homogeneous response recursion and temporal support. Changing C between actions gives adaptive feedforward with common stabilizing feedback. It does not make the executed switched trajectory one fixed lifted response, and no prefix convergence theorem is claimed for this implementation.
 
 ## Deployed prediction links
 
-The selected support imposes hard zeros on the actual realizing gain `L = U − KX`. Sparse synthesis enforces these zeros together with predictive dynamics, temporal support and the initial boundary. The offline quadratic objective and fixed causal feedback are common to every predictive design.
+All predictive controllers use dense messages during the 180 sample discovery trial. The displayed sparse links are candidates during this phase. They are selected from actual calibrated gain energies of L C, summed over the finite planning segment. The Learning weights view shows these measured coefficient changes, not artificial adaptation animation.
 
-The comparison uses four controllers
+Deployment selects the learned support before starting an independent disturbance stream. Sparse synthesis imposes hard zeros on L together with predictive dynamics, temporal support and initial boundary conditions. The most recent discovery observations are carried into the new trial, so learned correction is available at its first action. Costs and physical states restart. New revealed observations replace the carried window as the trial runs.
 
-| Controller | Prediction messages |
-| --- | --- |
-| Learned sparse | Local source and three remote sources selected from completed learned responses |
-| Fixed sparse | The same message budget selected from offline response scores |
-| Dense prediction | Every source permitted |
-| Feedback only | No prediction messages |
+A full unconstrained C would reopen forbidden message links. The deployed matrix fit permits C[a,b] only if every receiver allowed source a also permits source b. This restriction contains diagonal corrections and cI. It ensures that L C is zero on every forbidden raw forecast channel. The restriction is part of the fitting objective, not an output mask applied after fitting.
 
-During deployment the selected support and controller coefficients remain fixed. Interventions still enter every compared physical plant identically. Starting another discovery experiment clears the deployed support.
+| Controller | Discovery | Comparison |
+| --- | --- | --- |
+| Matrix adaptation | Dense shared matrix correction | Learned local plus three remote sources with a compatible matrix correction |
+| Scalar adaptation | Dense shared scalar correction | Offline selected local plus three remote sources with a scalar correction |
+| Fixed prediction | Dense fixed coefficients | Dense fixed coefficients |
+| Feedback only | No prediction input | No prediction input |
 
-These links carry predicted voltage forcing. They are not physical feeder lines. The fixed dense feedback still uses state measurements, so the plot does not represent total system communication or total communication savings.
+Matrix and scalar have the same sparse message budget in comparison but can select different sources. Their cost difference combines correction and selection effects. Fixed prediction has more prediction messages. These comparisons do not isolate a pure topology advantage. All controllers receive the same disturbances, issued forecasts, initial conditions, feedback gain, objective and actuator limits.
+
+Unexpected clicked power pulses are absent from forecasts and primarily test the common feedback. They need not produce a large performance gap. The forecast presets test adaptation to prediction quality. No controller is guaranteed to win under every preset or intervention.
+
+Prediction links carry voltage forcing forecasts, not physical power. The common dense state feedback still uses state measurements. The matrix does not represent total communication savings.
 
 ## Reproduction
 
@@ -49,6 +67,7 @@ The checked in `index.html`, `environment.html` and bundled assets deploy direct
 
 ```sh
 python3 build.py
+node src/test-forecast-calibration.cjs
 node src/test-simulation.cjs
 node src/test-interactions.cjs
 node src/test-topology-timeline.cjs
@@ -58,22 +77,31 @@ python3 -m http.server 8000
 
 ## Numerical implementation
 
-The preview depth is 5. The row regularizer is 10⁻⁶ in voltage forcing units. At each update the causal step is 0.05 divided by six times the sum of the regularizer and the largest completed row forecast energy. This declared varying step is not asserted to satisfy the manuscript's conservative constant step theorem.
+Preview depth is 5. Shared calibration uses a Cholesky solve with the fixed ridge above. Score evaluation uses cached receiver Gram matrices to compute the exact energy of L C without rebuilding all temporal response blocks at each sample.
 
-Each completed response row starts at its offline design. Its exact delayed gradient iterates remain an offline row plus a rank one correction. The engine stores the correction coefficient and six delayed snapshots instead of duplicating large response matrices. The fixed data diagnostic copies the completed rows, continues the delayed update on its own optimization clock and compares it with the exact regularized row optimum. The live rows and topology stay unchanged. Resuming discards this diagnostic copy, and deployment always uses the actual discovery rows.
+The previous completed response gradient code remains available as an independent diagnostic in the source and tests. It does not drive controller coefficients, topology selection or the displayed learning curves. It is hidden from the interactive experiment to avoid confusing two different learning algorithms.
 
-Finite horizon synthesis includes the terminal Riccati penalty and the initial and finite support endpoint conditions. A nullspace solve imposes forbidden entries of the realizing gain exactly. Continuing beyond a planning horizon starts a separately synthesized finite segment from the measured state. Existing segments, samples and cost history remain unchanged. Live plots show stage costs, while the benchmark adds the terminal penalty once at the end of its declared horizon.
+Finite horizon synthesis includes the terminal Riccati penalty and the initial and finite support endpoint conditions. A nullspace solve imposes forbidden entries of the realizing gain. Continuing beyond a planning horizon starts a separately synthesized finite segment from the measured state. Existing samples and costs remain unchanged. Live plots show stage costs, while the benchmark adds the terminal penalty once at the end of its declared horizon.
+
+Saved trials from earlier algorithm versions are not replayed as this experiment. Current trials restore deterministically from the initial seed and event journal.
 
 ## Paired deployment results
 
-The checked in [benchmark results](benchmark-results.json) use seeds 1 through 20, 180 discovery samples and 180 deployment samples per seed. Deployment uses a separate deterministic random stream. All four controllers receive the same disturbances within each trial. The support budget and parameters were fixed before comparing costs. These runs contain no clicked interventions and no command saturation.
+The checked in [benchmark results](benchmark-results.json) use seeds 1 through 20, 180 discovery samples and 180 deployment samples per seed. Deployment uses a separate deterministic random stream. Every controller receives identical disturbances within each trial. Physical parameters, forecast presets, seed list and message budget were retained from the previous benchmark. The ridge was fixed before evaluation. These trials contain no clicked interventions.
 
-| Forecast setting | Learned sparse | Fixed sparse | Dense prediction | Feedback only |
+| Forecast setting | Matrix adaptation | Scalar adaptation | Fixed prediction | Feedback only |
 | --- | --- | --- | --- | --- |
-| Reliable | 0.01249219 | 0.01249074 | 0.01041358 | 0.01447046 |
-| Uniform corruption | 0.01313935 | 0.01313797 | 0.01115768 | 0.01447046 |
-| Mixed reliability | 0.01333664 | 0.01333637 | 0.01145050 | 0.01447046 |
+| Reliable forecasts | 0.01249414 | 0.01249210 | 0.01041358 | 0.01447046 |
+| Uniform corruption | 0.01309367 | 0.01323765 | 0.01115768 | 0.01447046 |
+| Mixed reliability | 0.01238564 | 0.01351434 | 0.01145050 | 0.01447046 |
 
-Values are mean total costs including the terminal penalty. Learned sparse reduces mean cost relative to feedback only by 7.8 to 13.7 percent. It does not improve over fixed sparse on average and costs more than dense prediction. In mixed reliability, learned and fixed sparse tie on 14 of 20 seeds. This experiment therefore demonstrates an executed communication constraint, but does not establish a benefit from learned topology selection.
+Values are mean total costs including the terminal penalty. Under mixed reliability, matrix adaptation reduces mean cost by 8.35 percent versus scalar adaptation and wins on all 20 seeds. The gain is 1.09 percent under uniform corruption. Under reliable forecasts matrix adaptation is 0.016 percent worse on average. Dense fixed prediction remains cheaper in all three settings and receives more messages. These results do not establish a universal or isolated topology advantage.
 
-The manuscript is not included in the public repository. Plant and forecast assumptions are a declared interactive environment, not a measured utility dataset. Saturation is included in the executed plant. When it activates, the unconstrained linear response identities and guarantees do not describe that saturated trajectory exactly.
+The [fixed attack stress protocol](benchmark-attacks.json) repeats the same 20 seeds and all three presets with identical discovery data. It applies two 100 kW requests at bus 23 at samples 20 and 21, then 50 kW each sample during 60 through 69 at solar bus 7, 100 through 109 at battery bus 12, and 140 through 149 at homes bus 23. This schedule was declared before evaluating attack results. In mixed reliability matrix cost is 2.31 percent below scalar adaptation, with 20 wins. Under uniform corruption the difference is 0.36 percent, and under reliable forecasts matrix cost is 0.014 percent higher. The physical attack cost dominates much of the comparison. Neither benchmark activates reactive command saturation.
+
+```sh
+node src/benchmark.cjs --attacks --json
+```
+
+
+The manuscript is not included in the public repository. Plant and forecast assumptions are a declared interactive environment, not a measured utility dataset. Saturation is included in the executed plant. The unconstrained linear response identities do not describe saturated trajectories exactly.

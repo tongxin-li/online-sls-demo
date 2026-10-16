@@ -25,7 +25,7 @@
       <div class="pr-panel-foot"><span id="pr-bus-detail" class="tabular-nums"></span><span class="pr-live-stage">Cost <strong id="pr-live-cost" class="tabular-nums">0.0000</strong></span></div>
     </section>
     <section class="pr-panel pr-matrix-panel" aria-labelledby="pr-matrix-title">
-      <div class="pr-subhead"><h2 id="pr-matrix-title">Learning prediction links</h2><select id="pr-matrix-view" aria-label="Prediction matrix view"><option value="links" selected>Connectivity</option><option value="change">Learning weights</option></select></div>
+      <div class="pr-subhead"><h2 id="pr-matrix-title">Candidate prediction links</h2><select id="pr-matrix-view" aria-label="Prediction matrix view"><option value="links" selected>Connectivity</option><option value="change">Learning weights</option></select></div>
       <div class="pr-matrix-key" id="pr-matrix-key"></div><svg class="pr-chart" id="pr-matrix" role="group" aria-label="Candidate prediction links. Rows receive forecasts from columns"></svg>
       <p id="pr-matrix-inspect-hint" class="pr-caption">Tap a cell to inspect a connection</p>
       <div class="pr-panel-foot pr-matrix-detail"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div><div class="pr-topology-status"><strong id="pr-topology-status">Connectivity unchanged</strong><span id="pr-topology-gain">Weights changed 0%</span></div><div id="pr-topology-events" class="pr-topology-events" aria-label="Recent topology changes" hidden></div><div class="pr-topology-history"><label for="pr-topology-history" id="pr-history-count">0 link updates</label><input id="pr-topology-history" type="range" min="0" max="0" step="1" value="0" aria-label="Topology history" disabled><button type="button" id="pr-history-live" aria-pressed="true">Latest</button></div><p id="pr-topology-note" class="pr-caption" aria-live="polite"></p>
@@ -41,24 +41,24 @@
     <section class="pr-panel pr-learning-panel" aria-labelledby="pr-learning-title">
       <div class="pr-subhead"><h2 id="pr-learning-title">Cost comparison</h2><select id="pr-view" aria-label="Controller view"><option value="cost" selected>Cost</option><option value="learning">Learning</option></select></div>
       <div id="pr-learning-content" hidden>
-        <div class="pr-algorithm-flow" id="pr-learning-flow" aria-label="Completed response learning cycle">
+        <div class="pr-algorithm-flow" id="pr-learning-flow" aria-label="Shared prediction adaptation cycle">
           <div><span class="pr-flow-index">01</span><strong>Forecast</strong><span id="pr-flow-predict">Voltage forcing</span></div>
           <div><span class="pr-flow-index">02</span><strong>Control</strong><span id="pr-flow-control">Reactive support</span></div>
-          <div><span class="pr-flow-index">03</span><strong>Observe</strong><span id="pr-flow-observe">Completed response</span></div>
-          <div><span class="pr-flow-index">04</span><strong>Learn</strong><span id="pr-flow-update">Projected update</span></div>
+          <div><span class="pr-flow-index">03</span><strong>Observe</strong><span id="pr-flow-observe">Measured disturbance</span></div>
+          <div><span class="pr-flow-index">04</span><strong>Learn</strong><span id="pr-flow-update">Revealed samples</span></div>
         </div>
-        <div class="pr-learning-caption"><span id="pr-learning-kind">Completed responses · Relative error (%)</span><button type="button" class="btn btn-fit" id="pr-freeze">Inspect fixed data</button></div>
+        <div class="pr-learning-caption"><span id="pr-learning-kind">Original dashed · Matrix adaptation solid</span><button type="button" class="btn btn-fit" id="pr-freeze" hidden disabled>Inspect fixed data</button></div>
         <svg class="pr-chart" id="pr-convergence" role="img" aria-label="Learning diagnostic over time"></svg>
         <p id="pr-mode-note" class="pr-caption"></p>
       </div>
-      <div id="pr-cost-content"><p id="pr-comparison-summary" class="pr-comparison-summary" aria-live="polite">Learning uses dense prediction. Comparison starts automatically after learning.</p><div class="pr-cost-tools"><select id="pr-cost-metric" aria-label="Cost measure" hidden><option value="total" selected>Cumulative cost</option><option value="gap">Gap to fixed sparse</option></select></div><svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative cost of active controllers"></svg><table class="pr-cost-table tabular-nums" aria-label="Cumulative controller costs"><thead><tr><th scope="col">Method</th><th scope="col">Cumulative cost</th><th scope="col">vs feedback</th></tr></thead><tbody id="pr-cost-detail"></tbody></table><p id="pr-cost-note" class="pr-caption pr-comparison-note">Two active controllers · Learning continues as the trial runs</p></div>
+      <div id="pr-cost-content"><p id="pr-comparison-summary" class="pr-comparison-summary" aria-live="polite">Run to compare all four controllers</p><div class="pr-cost-tools"><select id="pr-cost-metric" aria-label="Cost measure"><option value="total" selected>Cumulative cost</option><option value="gap">Gap to scalar adaptation</option></select></div><svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative cost of active controllers"></svg><table class="pr-cost-table tabular-nums" aria-label="Cumulative controller costs"><thead><tr><th scope="col">Method</th><th scope="col">Cumulative cost</th><th scope="col">vs feedback</th></tr></thead><tbody id="pr-cost-detail"></tbody></table><p id="pr-cost-note" class="pr-caption pr-comparison-note">Dense messages during learning · Adaptation starts at 30 s</p></div>
     </section>
   </div>
   <div class="pr-bottomline">
-    <div class="pr-legend" aria-label="Controller curves"><button type="button" data-series="online" aria-pressed="true"><span class="pr-swatch online"></span>Learned sparse</button><button type="button" data-series="scalar" aria-pressed="true"><span class="pr-swatch scalar"></span>Fixed sparse</button><button type="button" data-series="static" aria-pressed="true"><span class="pr-swatch static"></span>Dense prediction</button><button type="button" data-series="causal" aria-pressed="true"><span class="pr-swatch causal"></span>Feedback only</button></div>
+    <div class="pr-legend" aria-label="Controller curves"><button type="button" data-series="online" aria-pressed="true"><span class="pr-swatch online"></span>Matrix adaptation</button><button type="button" data-series="scalar" aria-pressed="true"><span class="pr-swatch scalar"></span>Scalar adaptation</button><button type="button" data-series="static" aria-pressed="true"><span class="pr-swatch static"></span>Fixed prediction</button><button type="button" data-series="causal" aria-pressed="true"><span class="pr-swatch causal"></span>Feedback only</button></div>
     <span id="pr-event" role="status" aria-live="polite">Ready · Space to run</span>
   </div>
-  <p id="pr-phase-note" class="pr-overlap-note">Colors and line styles identify controllers · Hover for exact values</p>
+  <p id="pr-phase-note" class="pr-overlap-note">Physical attacks test disturbance recovery · Forecast settings test prediction adaptation</p>
   <details class="pr-adaptation" id="pr-adaptation">
     <summary>Experiment settings <span aria-hidden="true">+</span></summary>
     <div class="pr-comparison-controls">

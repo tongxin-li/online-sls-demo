@@ -1,8 +1,8 @@
 /* Synthetic radial LinDistFlow feeder with bounded inverter commands.
- * Discovery executes a fixed feasible predictive controller while literal
- * Algorithm 1 updates completed response rows with the delayed gradient.
- * Deployment resynthesizes a feasible controller under frozen prediction links.
- * Support-space learning does not preserve achievability or change future rows. */
+ * Shared rolling forecast calibration changes executed prediction gains.
+ * Sparse deployment constrains calibration to preserve actual message support.
+ * This experimental shared-parameter specialization is not literal Algorithm 1.
+ * Completed-row delayed gradients remain an independent legacy diagnostic. */
 (function (root, factory) {
   const api=factory();
   if(typeof module==='object'&&module.exports)module.exports=api;
@@ -235,7 +235,30 @@
 
   const Response=typeof module==='object'&&module.exports?require('./response-controller.js'):globalThis.ResponseController;
   if(!Response)throw new Error('Load response-controller.js before simulation.js');
-  const synthesizer=new Response.Synthesizer(model,PREVIEW),designCache=new Map();
+  const Calibration=typeof module==='object'&&module.exports?require('./forecast-calibration.js'):globalThis.ForecastCalibration;
+  if(!Calibration)throw new Error('Load forecast-calibration.js before simulation.js');
+  const synthesizer=new Response.Synthesizer(model,PREVIEW),designCache=new Map(),gramCache=new WeakMap();
+  // Sum L' L once per receiver and design. Scores of L C can then be computed
+  // exactly without rebuilding every temporal response block each sample.
+  function calibratedScores(design,C){
+    if(!gramCache.has(design)){
+      const grams=Array.from({length:M},()=>zeros(N-1));
+      for(const row of design.rows.slice(0,design.T))for(const block of row)for(let r=0;r<M;r++)
+        for(let a=0;a<N-1;a++)for(let b=0;b<N-1;b++)grams[r][a][b]+=block.L[r][a]*block.L[r][b]/design.T;
+      gramCache.set(design,grams);
+    }
+    const grams=gramCache.get(design),delta=combine(C,eye(N-1),1,-1);
+    const scores=zeros(M,N-1),baseline=zeros(M,N-1);let changeSquared=0;
+    for(let r=0;r<M;r++){
+      const GC=multiply(grams[r],C),GD=multiply(grams[r],delta);
+      for(let j=0;j<N-1;j++){
+        baseline[r][j]=grams[r][j][j];
+        for(let a=0;a<N-1;a++){scores[r][j]+=C[a][j]*GC[a][j];changeSquared+=delta[a][j]*GD[a][j];}
+        scores[r][j]=Math.max(0,scores[r][j]);
+      }
+    }
+    return{scores,baseline,changeSquared:Math.max(0,changeSquared)};
+  }
   function getDesign(horizon,support=null){
     const key=JSON.stringify([horizon,support]);
     if(!designCache.has(key))designCache.set(key,deepFreeze(synthesizer.synthesize(horizon,support)));
@@ -277,7 +300,8 @@
       this.fit=null;this.fitHistory=[];this.fitError=null;this.fitObjective=null;this.fitIteration=0;
       this.drift=0;this.changedEdges=0;this.sinceStable=0;this.lastTrainingTime=null;this.lastTrainingSampleCount=0;
       this.directGain=null;this.recommendations=[];
-      this.refreshScores();this.sealPreview();return this.snapshot();
+      this._calibrationAt=null;this.calibration={matrix:eye(N-1),scalar:1,windowSize:0,updates:0,trainedThrough:null,parameterChange:0};
+      this.updateCalibration();this.refreshScores();this.sealPreview();return this.snapshot();
     }
     addSegment(start,length){
       const dense=getDesign(length),offlineScores=Response.scores(dense);
@@ -379,20 +403,24 @@
       this.learning.prefixError=metrics.error;this.learning.prefixLoss=metrics.loss;
       this.lastTrainingTime=this.learning.windowEnd;this.lastTrainingSampleCount=this.rows.length;
     }
+    updateCalibration(){
+      // Current truth is not yet available. All pairs here were observed before
+      // this action, including the carried discovery window on a fresh trial.
+      if(this._calibrationAt===this.t)return;
+      const carried=this.phase==='deployment'?this.deployedSupport.trainingSamples:[];
+      const samples=[...carried,...this.samples].slice(-WINDOW);
+      if(samples.length<WARMUP)return;
+      this._calibrationAt=this.t;
+      const previous=this.calibration.matrix;
+      const fit=Calibration.fit(samples,{support:this.phase==='deployment'?this.deployedSupport.learned:null});
+      this.calibration={...fit,updates:this.calibration.updates+1,trainedThrough:this.t-1,
+        carriedSamples:Math.max(0,samples.length-this.samples.length),
+        parameterChange:frobenius(combine(fit.matrix,previous,1,-1))};
+    }
     refreshScores(){
-      let scores=zeros(M,N-1),baselineScores=zeros(M,N-1),gainChangeSquared=0;
-      if(this.phase==='deployment'){
-        const segment=this.segments.find(s=>this.t>=s.start&&this.t<s.end)||this.segments.at(-1);
-        scores=Response.scores(segment.designs.online).map(row=>row.map(v=>v/segment.length));
-      }else if(this.rows.length){
-        for(const row of this.rows)for(let i=0;i<M;i++)for(let j=0;j<N-1;j++){
-          scores[i][j]+=row.score0[i][j]+row.beta*row.score1[i][j]+row.beta*row.beta*row.score2[i][j];
-          baselineScores[i][j]+=row.score0[i][j];
-          gainChangeSquared+=row.beta*row.beta*row.score2[i][j];
-        }
-        scores=scores.map(row=>row.map(v=>Math.max(0,v)/this.rows.length));
-        baselineScores=baselineScores.map(row=>row.map(v=>v/this.rows.length));
-      }else scores=this.segments[0].offlineScores.map(row=>row.map(v=>v/this.segments[0].length));
+      const segment=this.segments.find(s=>this.t>=s.start&&this.t<s.end)||this.segments.at(-1);
+      const measured=calibratedScores(segment.designs.online,this.calibration.matrix);
+      const scores=measured.scores,baselineScores=measured.baseline;
       const selection=Response.supportFromScores(scores,INVERTER_BUSES,REMOTE_BUDGET),gain=scoreGain(scores);
       const next=this.phase==='deployment'?this.deployedSupport.links.map(e=>({...e,weight:scores[INVERTER_BUSES.indexOf(e.to)][e.from-2]})):selection.links;
       if(this.directGain){
@@ -400,34 +428,27 @@
         this.changedEdges=edgeChanges(this.recommendations,next);this.sinceStable=this.changedEdges===0?this.sinceStable+1:0;
       }
       this.directGain=gain;this.recommendations=next.map(e=>({...e}));this.predictionScores=scores;
-      if(this.phase==='deployment'){
-        this.predictionDiagnostics=deepFreeze({...this.deployedSupport.discoveryDiagnostics,frozen:true});
-      }else{
-        // Compare learned and offline gains on exactly the same completed rows.
-        // Dividing by each receiver's total energy also covers initially zero
-        // channels without inventing a relative percentage or a denominator floor.
-        const count=this.rows.length,learnedScores=count?scores:zeros(M,N-1);
-        const receiverEnergy=baselineScores.map(row=>row.reduce((sum,v)=>sum+v,0));
-        const baselineEnergy=receiverEnergy.reduce((sum,v)=>sum+v,0);
-        const energyChange=learnedScores.map((row,i)=>row.map((v,j)=>v-baselineScores[i][j]));
-        const relativeEnergyChange=energyChange.map((row,i)=>row.map((v,j)=>baselineScores[i][j]>0?v/baselineScores[i][j]:null));
-        const receiverNormalizedChange=energyChange.map((row,i)=>row.map(v=>receiverEnergy[i]>0?v/receiverEnergy[i]:0));
-        const offlineLinks=count?Response.supportFromScores(baselineScores,INVERTER_BUSES,REMOTE_BUDGET).links:[];
-        const offlineKeys=new Set(offlineLinks.map(e=>e.to+','+e.from)),learnedKeys=new Set(count?selection.links.map(e=>e.to+','+e.from):[]);
-        const addedLinkCount=[...learnedKeys].filter(key=>!offlineKeys.has(key)).length;
-        const removedLinkCount=[...offlineKeys].filter(key=>!learnedKeys.has(key)).length;
-        this.predictionDiagnostics=deepFreeze({available:count>0,frozen:false,completedRows:count,
-          receiverBuses:INVERTER_BUSES.slice(),sourceBuses:Array.from({length:N-1},(_,i)=>i+2),
-          baselineScores,learnedScores,energyChange,relativeEnergyChange,receiverNormalizedChange,
-          relativeGainChange:baselineEnergy>0?Math.sqrt(gainChangeSquared/(count*baselineEnergy)):null,
-          overallRelativeEnergyChange:baselineEnergy>0?energyChange.flat().reduce((sum,v)=>sum+v,0)/baselineEnergy:null,
-          offlineLinks,addedLinkCount,removedLinkCount,changedLinkCount:addedLinkCount+removedLinkCount});
-      }
+      const count=this.calibration.windowSize,receiverEnergy=baselineScores.map(row=>row.reduce((sum,v)=>sum+v,0));
+      const baselineEnergy=receiverEnergy.reduce((sum,v)=>sum+v,0);
+      const energyChange=scores.map((row,i)=>row.map((v,j)=>v-baselineScores[i][j]));
+      const relativeEnergyChange=energyChange.map((row,i)=>row.map((v,j)=>baselineScores[i][j]>0?v/baselineScores[i][j]:null));
+      const receiverNormalizedChange=energyChange.map((row,i)=>row.map(v=>receiverEnergy[i]>0?v/receiverEnergy[i]:0));
+      const offlineLinks=this.phase==='deployment'?this.deployedSupport.fixedLinks:Response.supportFromScores(baselineScores,INVERTER_BUSES,REMOTE_BUDGET).links;
+      const offlineKeys=new Set(offlineLinks.map(e=>e.to+','+e.from)),learnedKeys=new Set(next.map(e=>e.to+','+e.from));
+      const addedLinkCount=[...learnedKeys].filter(key=>!offlineKeys.has(key)).length;
+      const removedLinkCount=[...offlineKeys].filter(key=>!learnedKeys.has(key)).length;
+      this.predictionDiagnostics=deepFreeze({available:count>0,frozen:false,completedRows:count,
+        receiverBuses:INVERTER_BUSES.slice(),sourceBuses:Array.from({length:N-1},(_,i)=>i+2),
+        baselineScores,learnedScores:scores,energyChange,relativeEnergyChange,receiverNormalizedChange,
+        relativeGainChange:count&&baselineEnergy>0?Math.sqrt(measured.changeSquared/baselineEnergy):null,
+        overallRelativeEnergyChange:baselineEnergy>0?energyChange.flat().reduce((sum,v)=>sum+v,0)/baselineEnergy:null,
+        offlineLinks,addedLinkCount,removedLinkCount,changedLinkCount:addedLinkCount+removedLinkCount});
     }
     step(){
       if(this.mode!=='running')return this.snapshot();
       if(this.t>=this.options.horizon){this.mode='completed';return this.snapshot();}
       const time=this.t,segment=this.segments.find(s=>time>=s.start&&time<s.end),local=time-segment.start;
+      this.updateCalibration();
       this.sealPreview();this.lastPreview=segment.dense.rows[local].map(block=>this.forecasts[segment.start+block.k-1]);
       const issued=this.forecasts[time],background=issued.base,requested=Array(N).fill(0);
       for(const event of this.pulses){event.requestedKw=event.strength*Math.exp(-event.age/event.decay);requested[event.bus-1]+=event.requestedKw;}
@@ -443,7 +464,9 @@
         const x=this.states[key].slice(1).map((v,i)=>v-model.baseDrop[i+1]);
         const raw=matvec(model.K,x);
         if(key!=='causal')for(const block of segment.designs[key].rows[local]){
-          const contribution=matvec(block.L,this.forecasts[segment.start+block.k-1].forecast.slice(1));
+          const forecast=this.forecasts[segment.start+block.k-1].forecast.slice(1);
+          const corrected=key==='online'?matvec(this.calibration.matrix,forecast):key==='scalar'?forecast.map(v=>v*this.calibration.scalar):forecast;
+          const contribution=matvec(block.L,corrected);
           for(let i=0;i<M;i++)raw[i]+=contribution[i];
         }
         const bounded=raw.map(v=>Math.max(-Q_LIMIT,Math.min(Q_LIMIT,v)));
@@ -465,12 +488,14 @@
         this.addCompletedRow(completedSegment,completedTime-completedSegment.start);
       }
       if(this.phase==='discovery'&&this.rows.length)this.updateResponses();
-      else{this.drift=0;this.changedEdges=0;this.sinceStable++;}
+      else this.refreshScores();
       this.t++;
       this.history.push(deepFreeze({t:this.t,costTime:time,stateTime:this.t,...this.cumulative,stage:{...this.stage},rms,regulationRms,
         pulse:sample.pulse,costStates:this.costStates,states:Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].slice()])),
         regulationStates:Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].map((v,i)=>v-model.baseDrop[i])])),
-        rawForecastRms:this.learning.rawRms,prefixError:this.learning.prefixError,prefixLoss:this.learning.prefixLoss,
+        rawForecastRms:this.learning.rawRms,
+        calibratedForecastRms:Math.sqrt(squared(matvec(this.calibration.matrix,sample.forecast.slice(1)).map((v,i)=>v-sample.disturbance[i+1]))/(N-1)),
+        prefixError:this.learning.prefixError,prefixLoss:this.learning.prefixLoss,
         completedRows:this.rows.length,drift:this.drift,changedEdges:this.changedEdges}));
       if(this.t>=this.options.horizon)this.mode='completed';return this.snapshot();
     }
@@ -498,7 +523,7 @@
       this.eventLog.push(deepFreeze({t:this.t,type:'resume',message:'Physical trial resumed'}));return this.snapshot();
     }
     deployTopology(){
-      if(this.phase!=='discovery'||this.rows.length<WARMUP)return false;
+      if(this.phase!=='discovery'||this.samples.length<WARMUP)return false;
       this.discoveryRecord=deepFreeze({options:{...this.initialOptions,faultBuses:this.initialOptions.faultBuses.slice()},
         t:this.t,events:this.eventLog.slice()});
       const learned=Response.supportFromScores(this.predictionScores,INVERTER_BUSES,REMOTE_BUDGET);
@@ -506,6 +531,7 @@
       const fixed=Response.supportFromScores(offline,INVERTER_BUSES,REMOTE_BUDGET);
       this.deployedSupport=deepFreeze({learned:learned.support,fixed:fixed.support,links:learned.links,fixedLinks:fixed.links,
         scores:this.predictionScores.map(row=>row.slice()),completedRows:this.rows.length,discoveryTime:this.t,
+        trainingSamples:this.samples.slice(-WINDOW),
         discoveryDiagnostics:this.predictionDiagnostics});
       this.phase='deployment';this.initialOptions={...this.discoveryRecord.options,
         seed:(this.discoveryRecord.options.seed^0x9E3779B9)>>>0};return this.reset();
@@ -519,7 +545,7 @@
         const x=this.states[key].slice(1).map((v,i)=>v-model.baseDrop[i+1]),px=matvec(model.P,x);return[key,x.reduce((sum,v,i)=>sum+v*px[i],0)];}));
       return{t:this.t,costTime:this.lastSample?this.lastSample.t:null,stateTime:this.t,horizon:this.options.horizon,
         initialOptions:{...this.initialOptions,faultBuses:this.initialOptions.faultBuses.slice()},
-        phase:this.phase,canDeploy:this.phase==='discovery'&&this.rows.length>=WARMUP,
+        phase:this.phase,canDeploy:this.phase==='discovery'&&this.samples.length>=WARMUP,
         discoveryRecord:this.discoveryRecord,deployedSupport:this.deployedSupport,
         segments:this.segments.map(s=>({start:s.start,end:s.end,length:s.length})),
         mode:this.mode,seed:this.options.seed,preset:this.options.preset,presetLabel:this.preset.label,
@@ -529,7 +555,7 @@
         ...Object.fromEntries(Object.entries(this.power).map(([key,value])=>[key,value.slice()])),powerDeviation:this.powerDeviation.slice(),
         edgeData:model.edgeData.map((edge,i)=>({...edge,pKw:flows.online[i].pKw,qKvar:Object.fromEntries(CONTROLLERS.map(key=>[key,flows[key][i].qKvar]))})),
         lastPulseApplications:this.lastPulseApplications.map(p=>({...p})),costStates:Object.fromEntries(CONTROLLERS.map(key=>[key,this.costStates[key].slice()])),
-        learning:{...this.learning},predictionDiagnostics:this.predictionDiagnostics,lastPreview:this.lastPreview.slice(),
+        learning:{...this.learning},calibration:{...this.calibration,matrix:copy(this.calibration.matrix)},predictionDiagnostics:this.predictionDiagnostics,lastPreview:this.lastPreview.slice(),
         pendingPulses:this.pulses.filter(e=>e.age===0).map(e=>({...e})),activePulses:this.pulses.filter(e=>e.age>0).map(e=>({...e})),
         states:Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].slice()])),
         regulationStates:Object.fromEntries(CONTROLLERS.map(key=>[key,this.states[key].map((v,i)=>v-model.baseDrop[i])])),
@@ -550,6 +576,6 @@
     busProfiles:BUS_PROFILES,controllers:CONTROLLERS,forecastPresets:FORECAST_PRESETS,tolerance:TOLERANCE,horizon:480,
     pulseDefault:PULSE_DEFAULT,pulseMin:PULSE_MIN,pulseMax:PULSE_MAX,pulseUnits:'kW',powerBaseKw:POWER_BASE_KW,
     baseKv:BASE_KV,baseMva:BASE_MVA,sampleSeconds:SAMPLE_SECONDS,tauSeconds:TAU_SECONDS,inverterKvar:70}),
-    math:{zeros,eye,transpose,multiply,matvec,combine,frobenius,normInf,solveSPD,getDesign,Response,
+    math:{zeros,eye,transpose,multiply,matvec,combine,frobenius,normInf,solveSPD,getDesign,Response,calibratedScores,
       recommendations,physicalPower,voltageFrom,branchFlows,radialAC,padInput}};
 });
