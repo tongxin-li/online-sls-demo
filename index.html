@@ -302,6 +302,10 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 .pr-source-controls .btn { min-height:44px; max-width:100%; white-space:normal; }
 #pr-source-status { flex:1 1 150px; line-height:1.5; }
 
+.pr-voltage-table { margin-top:8px; }
+.pr-voltage-table th,.pr-voltage-table td { padding:3px 2px; }
+#pr-voltage-metrics-note { margin:4px 0 10px; font-size:10px; line-height:1.5; }
+
 /* Artwork stays decorative. The enclosing bus handles hit area and badge input. */
 .pe-host { -webkit-user-select:none; user-select:none; touch-action:manipulation; }
 .pe-hit { fill:transparent; pointer-events:all; }
@@ -469,6 +473,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       <div class="pr-subhead"><h2 id="pr-stage-title">Voltage and cost</h2><strong id="pr-state-value" class="pr-state-value tabular-nums">1.000 pu</strong></div>
       <div class="pr-plot-label"><span id="pr-voltage-detail">Bus 7 voltage</span><span id="pr-voltage-reference" class="pr-target-key">Nominal voltage</span></div>
       <svg class="pr-chart" id="pr-voltage" role="img" aria-label="Selected bus voltage in per unit with its nominal reference profile"></svg>
+      <table class="pr-cost-table pr-voltage-table tabular-nums" aria-label="Voltage deviation from nominal profile" aria-describedby="pr-voltage-metrics-note"><thead><tr><th scope="col">Method</th><th scope="col">Now</th><th scope="col">Peak</th><th scope="col" title="Inverters with clipped reactive commands at the last action">Limited</th></tr></thead><tbody id="pr-voltage-metrics"></tbody></table>
+      <p id="pr-voltage-metrics-note" class="pr-caption">Worst bus deviation · 1 mpu = 0.001 pu · Peak resets for comparison</p>
       <div class="pr-plot-label"><span>Normalized cost per second</span><span id="pr-pulse-summary" class="tabular-nums" aria-live="polite"></span></div>
       <svg class="pr-chart" id="pr-stage" role="img" aria-label="Normalized voltage and reactive effort cost under identical power disturbances"></svg>
       <div id="pr-stage-detail" class="pr-panel-foot tabular-nums"></div>
@@ -1406,7 +1412,31 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         canFreeze:this.phase==='discovery'&&this.rows.length>=WARMUP};
     }
   }
-  return{Simulation,model,constants:deepFreeze({N,M,edges:EDGES,edgeData:model.edgeData,inverterBuses:INVERTER_BUSES,
+  // Pure diagnostics over executed states. These never enter control or cost.
+  function voltageMetrics(snapshot) {
+    const reference=snapshot.referenceVoltage;
+    const worst=(values,absolute=false)=>{
+      let value=-Infinity,bus=1;
+      for(let i=0;i<reference.length;i++) {
+        const error=Math.abs((absolute?values[i]:1+values[i])-reference[i]);
+        if(error>value) {value=error;bus=i+1;}
+      }
+      return {value,bus};
+    };
+    return Object.fromEntries(CONTROLLERS.map(key=>{
+      const current=worst(snapshot.states[key]);
+      let peak=worst(snapshot.initialVoltage,true),peakTime=0;
+      for(const entry of snapshot.history || []) {
+        if(!entry.states?.[key]) continue;
+        const candidate=worst(entry.states[key]);
+        if(candidate.value>peak.value) {peak=candidate;peakTime=entry.stateTime ?? entry.t;}
+      }
+      if(current.value>peak.value) {peak=current;peakTime=snapshot.t;}
+      return [key,{currentMaxPu:current.value,currentBus:current.bus,peakMaxPu:peak.value,peakBus:peak.bus,peakTime,
+        limitedCount:(snapshot.saturation?.[key] || []).filter(Boolean).length}];
+    }));
+  }
+  return{Simulation,model,voltageMetrics,constants:deepFreeze({N,M,edges:EDGES,edgeData:model.edgeData,inverterBuses:INVERTER_BUSES,
     amplitude:AMPLITUDE,ridge:RIDGE,rawRidge:RAW_RIDGE,remoteBudget:REMOTE_BUDGET,preview:PREVIEW,window:WINDOW,warmup:WARMUP,
     busProfiles:BUS_PROFILES,controllers:CONTROLLERS,forecastPresets:FORECAST_PRESETS,communicationBetas:COMMUNICATION_BETAS,tolerance:TOLERANCE,horizon:480,
     pulseDefault:PULSE_DEFAULT,pulseMin:PULSE_MIN,pulseMax:PULSE_MAX,pulseUnits:'kW',powerBaseKw:POWER_BASE_KW,
@@ -2921,6 +2951,21 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   }
   function drawVoltage() {
     const el=$('voltage'); if(!el)return;
+    const metrics=PowerDemo.voltageMetrics(snapshot);
+    const rows=d3.select($('voltage-metrics')).selectAll('tr').data(activeSeries(),item=>item.key).join(enter=>{
+      const row=enter.append('tr');row.append('th').attr('scope','row');
+      row.append('td').attr('class','current-deviation');row.append('td').attr('class','peak-deviation');
+      row.append('td').attr('class','limited-inverters');return row;
+    }).attr('data-controller',item=>item.key)
+      .attr('data-current-pu',item=>metrics[item.key].currentMaxPu).attr('data-peak-pu',item=>metrics[item.key].peakMaxPu)
+      .attr('data-limited',item=>metrics[item.key].limitedCount);
+    rows.select('th').text(item=>item.label);
+    rows.select('.current-deviation').text(item=>(1000*metrics[item.key].currentMaxPu).toFixed(2))
+      .attr('title',item=>'Largest absolute departure from nominal now at bus '+metrics[item.key].currentBus);
+    rows.select('.peak-deviation').text(item=>(1000*metrics[item.key].peakMaxPu).toFixed(2))
+      .attr('title',item=>'Peak at bus '+metrics[item.key].peakBus+' at t '+metrics[item.key].peakTime+' s in this phase');
+    rows.select('.limited-inverters').text(item=>metrics[item.key].limitedCount+'/'+PowerDemo.constants.inverterBuses.length)
+      .attr('title','Inverters whose reactive command was clipped at the last executed action');
     const domain=responseWindow(), index=selectedBus-1;
     let observations=snapshot.history.filter(item=>(item.stateTime ?? item.t)>=domain[0]).map(item=>({
       x:item.stateTime ?? item.t,
@@ -2941,7 +2986,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       .attr('x1',chart.frame.x).attr('x2',chart.frame.x+chart.frame.w).attr('y1',d=>chart.y(d)).attr('y2',d=>chart.y(d))
       .attr('stroke','var(--primary)').attr('stroke-opacity',d=>d===reference?.5:.18).attr('stroke-dasharray','3 4');
     drawInterventions(chart); drawSeries(chart,observations,items,true); hover(chart,observations,items,'Voltage at t');
-    if($('voltage-detail'))$('voltage-detail').textContent='Bus '+selectedBus+' voltage';
+    if($('voltage-detail'))$('voltage-detail').textContent='Bus '+selectedBus+' · Δ '+d3.format('+.2f')(1000*(busVoltage(selectedBus)-reference))+' mpu';
     if($('voltage-reference'))$('voltage-reference').textContent='Nominal '+reference.toFixed(4)+' pu';
     if($('state-value'))$('state-value').textContent=busVoltage(selectedBus).toFixed(4)+' pu';
   }
