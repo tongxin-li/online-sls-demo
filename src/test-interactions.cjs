@@ -24,6 +24,8 @@ const source=withoutCards.replace(anchor,
   '  drawMatrix=drawTopologyHistory;\n'+
   '  root.bindTestBus=(element,bus)=>bindAttackTarget(element,()=>bus);\n'+
   '  root.testSummary=()=>comparisonSummary();\n'+
+  '  root.testInspectPredictionLink=(receiver,source)=>inspectPredictionLink(receiver,source);\n'+
+  '  root.testInspection=()=>predictionInspection();\n'+
   '  root.testDrawSeries=drawSeries;\n'+
   '  root.testPin=(value)=>{if(value!==undefined)pin=value;return pin;};\n'+
   '  root.testPowerContext=()=>powerRecoveryContext();\n'+
@@ -121,6 +123,7 @@ function harness(saved,experiment='prediction',reducedMotion=true) {
       if(type==='pointerup'||type==='pointercancel')recipient.releasePointerCapture(id);
       return result;
     },
+    inspectLink:(receiver,source)=>root.testInspectPredictionLink(receiver,source),inspection:()=>plain(root.testInspection()),
     snapshot:()=>root.powerDemo.getSnapshot(),state:()=>plain(root.powerDemo.getState()),
     saved:()=>savedStates.at(-1),
     event:(id,type,detail)=>node(id).dispatch(type,detail),
@@ -1143,4 +1146,31 @@ test('zero detail touch clicks preserve a latched power attack until the next ta
   await h.samples(3);assert.equal(pulses(h).length,3);
   tap(52);assert.equal(h.node('pulse')['aria-pressed'],'false');
   const count=pulses(h).length;await h.samples(2);assert.equal(pulses(h).length,count);
+});
+
+test('prediction link inspection uses current support without changing plant or forecast state',async()=>{
+  const h=harness(undefined,'communication');
+  const verify=()=>{
+    const before=plain(h.snapshot());
+    const edge=before.recommendations.find(edge=>edge.from!==edge.to);
+    assert.ok(edge,'Actual candidate or deployed support exists');
+    h.inspectLink(edge.to,edge.from);
+    assert.deepEqual(h.inspection(),{source:edge.from,receiver:edge.to,local:false,connected:true,
+      label:'Source bus '+edge.from+' → inverter '+edge.to+' · Selected link · '+(before.phase==='deployment'?'Deployed':'Candidate')});
+    const absent=Array.from({length:23},(_,i)=>i+2).find(bus=>bus!==edge.to&&!before.recommendations.some(e=>e.to===edge.to&&e.from===bus));
+    h.inspectLink(edge.to,absent);
+    assert.equal(h.inspection().connected,false,'An absent source must not fabricate a link');
+    h.inspectLink(edge.to,edge.to);
+    assert.equal(h.inspection().local,true);
+    assert.equal(h.inspection().connected,true);
+    assert.deepEqual(plain(h.snapshot()),before,'Inspection cannot change samples, faults, controls or deployed support');
+    assert.equal(h.state().playing,false,'Inspection cannot start playback');
+    assert.equal(h.state().journal.length,0,'Inspection cannot inject interventions');
+  };
+  verify();
+  h.check('auto-compare',false);await compare(h);h.click('deploy');h.click('run');
+  assert.equal(h.snapshot().phase,'deployment');
+  verify();
+  h.change('bus',2);
+  assert.equal(h.inspection(),null,'Selecting a nonreceiver clears stale inspection');
 });

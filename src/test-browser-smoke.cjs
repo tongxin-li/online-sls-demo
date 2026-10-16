@@ -59,6 +59,41 @@ async function main() {
       }
     };
 
+    const inspectLinks = async () => {
+      const before = await page.evaluate(() => JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
+      const edge = await page.locator('#pr-matrix .matrix-cell[data-connected="true"]').evaluateAll(cells => {
+        const cell=cells.find(cell=>cell.dataset.receiver!==cell.dataset.source);
+        return {receiver:Number(cell.dataset.receiver),source:Number(cell.dataset.source)};
+      });
+      const inspect = async (source,connected,local=false) => {
+        await page.locator('#pr-matrix .matrix-cell[data-receiver="'+edge.receiver+'"][data-source="'+source+'"]').click();
+        const reading=await page.evaluate(() => {
+          const root=document.querySelector('#power-response-demo');
+          return {state:root.powerDemo.getState(),snapshot:JSON.stringify(root.powerDemo.getSnapshot())};
+        });
+        assert.equal(reading.snapshot,before,'Inspection changes no physical, forecast or control state');
+        assert.equal(reading.state.selectedBus,edge.receiver);
+        assert.equal(reading.state.inspectedSource,source);
+        assert.equal(reading.state.playing,false);
+        assert.equal(await page.locator('#pr-network [data-bus="'+source+'"]').getAttribute('data-inspection-role'),local?'local':'source');
+        if(!local) assert.equal(await page.locator('#pr-network [data-bus="'+edge.receiver+'"]').getAttribute('data-inspection-role'),'receiver');
+        const arcs=page.locator('#pr-network .recommended path[data-inspected="true"]');
+        assert.equal(await arcs.count(),connected&&!local?1:0,'Highlight only the actual remote connection');
+        if(connected&&!local) {
+          assert.equal(await arcs.getAttribute('data-from'),String(source));
+          assert.equal(await arcs.getAttribute('data-to'),String(edge.receiver));
+          assert.notEqual(await arcs.getAttribute('data-change'),'removed');
+        }
+        assert.match(await page.locator('#pr-network').getAttribute('aria-description'),local?/Local source/:connected?/Selected link/:/No link/);
+      };
+      await inspect(edge.source,true);
+      const absent=await page.locator('#pr-matrix .matrix-cell[data-receiver="'+edge.receiver+'"][data-connected="false"]').first().getAttribute('data-source');
+      await inspect(Number(absent),false);
+      await inspect(edge.receiver,true,true);
+      await inspect(edge.source,true);
+    };
+    await inspectLinks();
+
     // Ordinary playback and repeated forecast toggles use the actual bus targets.
     await page.locator('#pr-run').click();
     await waitSamples(3);
@@ -85,6 +120,7 @@ async function main() {
     await page.locator('#pr-adaptation > summary').click();
     assert.equal(await page.locator('#pr-cost-detail tr').count(), 4);
     await checkPlots();
+    await inspectLinks();
 
     // Metric changes during playback must retain finite curves and bounded labels.
     await page.locator('#pr-run').click();

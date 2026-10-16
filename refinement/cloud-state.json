@@ -15,7 +15,13 @@
     "started_at": "2026-10-17T02:58:30+08:00",
     "expires_at": "2026-10-17T03:38:30+08:00",
     "branch": "cloud/refine/20261017-0200",
-    "focus": "Synchronize inspected matrix connection with actual physical source, receiver and link."
+    "focus": "Synchronize inspected matrix connection with actual physical source, receiver and link.",
+    "stage": "candidate_validation",
+    "changes": [
+      "Matrix inspection marks actual source and receiver buses and the exact existing remote link.",
+      "Local and absent links remain explicit without drawing a fabricated connection.",
+      "Added plant-state invariance regression and real browser assertions for discovery and deployed inspection."
+    ]
   },
   "next_focus": "Connect selected forecast sources and receiving inverters between the matrix and physical network using actual controller support.",
   "priorities": [

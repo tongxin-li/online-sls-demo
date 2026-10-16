@@ -213,8 +213,22 @@
       : 'No links have changed yet. Learning weights may still change.';
     $('topology-note').title=snapshot.phase==='deployment' ? (communicationComparison()?'Discovery history. Deployed links and prediction weights stay fixed.':'Discovery history. Deployed links stay fixed while prediction weights continue adapting.') : 'History displays observed connectivity only. Reviewing an update does not change the controller.';
   }
+  function inspectPredictionLink(receiver,source) {
+    inspectedSource=source;
+    selectBus(receiver);
+  }
+  function predictionInspection() {
+    if(inspectedSource===null || !hasInverter(selectedBus)) return null;
+    const frame=topologyFrame();
+    const local=inspectedSource===selectedBus;
+    const connected=local || (frame.links || []).some(edge=>edge.from===inspectedSource && edge.to===selectedBus);
+    return {source:inspectedSource,receiver:selectedBus,local,connected,
+      label:'Source bus '+inspectedSource+' → inverter '+selectedBus+' · '+(local?'Local source':connected?'Selected link':'No link')
+        +' · '+(historyIndex!==null?'Saved discovery':snapshot.phase==='deployment'?'Deployed':'Candidate')};
+  }
   function selectBus(bus) {
     selectedBus = bus;
+    if(!hasInverter(bus)) inspectedSource=null;
     $('bus').value = String(bus);
     render(); save();
   }
@@ -720,7 +734,8 @@
     svg.select('.physical').selectAll('line').data(PowerDemo.constants.edges).join('line')
       .attr('x1',e => point(e[0])[0]).attr('y1',e => point(e[0])[1]).attr('x2',e => point(e[1])[0]).attr('y2',e => point(e[1])[1])
       .attr('stroke','var(--foreground)').attr('stroke-opacity',.15).attr('stroke-width',1.3);
-    const frame=topologyFrame(),recommendations=frame.links || [];
+    const frame=topologyFrame(),recommendations=frame.links || [],inspection=predictionInspection();
+    svg.attr('aria-description',inspection?inspection.label:'Inspect a matrix cell to locate its source and inverter here.');
     const current = new Set(recommendations.map(recommendationKey));
     const reference = frame.reference;
     const retained = recommendations.map(edge => ({...edge, change:reference.has(recommendationKey(edge)) ? 'retained' : 'added'}));
@@ -742,15 +757,17 @@
       update => update,
       exit => { if (reducedMotion) exit.remove(); else exit.interrupt('update').transition('update').duration(240).attr('opacity',0).remove(); }
     ).attr('fill','none').attr('data-from',e => e.from).attr('data-to',e => e.to).attr('data-change',e => e.change)
+      .attr('data-inspected',e=>String(!!inspection && inspection.connected && !inspection.local && e.change!=='removed' && e.from===inspection.source && e.to===inspection.receiver))
       .attr('stroke-dasharray',e => e.change === 'removed' ? '3 4' : null)
       .attr('marker-end',e => 'url(#pr-arrow-'+e.change+')');
     animate(links).attr('d',arc)
       .attr('stroke',e => color(e.change === 'retained' ? 'var(--viz-series-1)' : matrixColors[e.change]))
-      .attr('stroke-width',e => e.change !== 'retained' ? 2.5 : Number.isFinite(e.weight)?strength(e.weight):1.5)
-      .attr('opacity',e => e.change !== 'retained' ? .95 : e.to === selectedBus ? .7 : .12);
+      .attr('stroke-width',e => inspection?.connected && e.change!=='removed' && e.from===inspection.source && e.to===inspection.receiver ? 4 : e.change !== 'retained' ? 2.5 : Number.isFinite(e.weight)?strength(e.weight):1.5)
+      .attr('opacity',e => inspection?.connected && e.change!=='removed' && e.from===inspection.source && e.to===inspection.receiver ? 1 : e.change !== 'retained' ? .95 : e.to === selectedBus ? .7 : .12);
     const nodes = svg.select('.nodes').selectAll('g.bus-node').data(d3.range(1,25),bus => bus).join(enter => {
       const g=enter.append('g').attr('class','bus-node').attr('role','button').attr('tabindex',0)
         .style('cursor','pointer').style('user-select','none');
+      g.append('circle').attr('class','pr-inspection-ring').attr('r',21).attr('fill','none').attr('pointer-events','none');
       g.append('text').attr('class','bus-number').attr('pointer-events','none');
       g.append('text').attr('class','fault-mark').attr('pointer-events','none');
       if (window.PowerEquipment) g.each(function(bus){PowerEquipment.render(d3.select(this),busRole(bus));});
@@ -763,6 +780,7 @@
       return g;
     }).attr('transform',bus => 'translate('+point(bus).join(',')+')')
       .attr('data-bus',bus => bus).attr('data-role',bus => busRole(bus))
+      .attr('data-inspection-role',bus=>inspection ? (bus===inspection.source && bus===inspection.receiver?'local':bus===inspection.source?'source':bus===inspection.receiver?'receiver':'none') : 'none')
       .attr('aria-label',bus => bus===1 ? 'Fixed substation at bus 1' : forecastMode()?(snapshot.faults.includes(bus)?'Repair':'Corrupt')+' forecast at bus '+bus:(heldAttack?.latched && heldAttack.bus===bus?'Stop attack at bus ':continuousMode()?'Toggle continuous attack at bus ':'Hold to attack bus ')+bus)
       .attr('aria-description',bus => busRole(bus)+', '+busVoltage(bus).toFixed(4)+' pu'+(appliedPulse(bus)?', '+appliedPulseLabel(bus):pulseStatus(bus).queued?', pulse pending':''))
       .attr('aria-disabled',bus => String(!canAttack(bus)))
@@ -789,6 +807,10 @@
     });
     nodes.select('.bus-number').attr('text-anchor','middle').attr('x',0).attr('y',27)
       .style('fill','var(--muted-foreground)').style('font-size','9px').text(bus=>bus);
+    nodes.select('.pr-inspection-ring')
+      .attr('display',bus=>inspection && (bus===inspection.source || bus===inspection.receiver)?null:'none')
+      .attr('stroke',bus=>bus===inspection?.source?'var(--primary)':'var(--foreground)').attr('stroke-width',2)
+      .attr('stroke-dasharray',bus=>bus===inspection?.source && bus!==inspection.receiver?'3 3':null);
     nodes.attr('data-forecast-noisy',bus=>String(forecastNoisy(bus)));
     nodes.select('.pr-forecast-badge').attr('display',bus=>forecastNoisy(bus)?null:'none')
       .select('title').text(bus=>'Bus '+bus+' has a noisy forecast channel. This marker shows the current error generator setting, not a learner input.');
@@ -904,7 +926,7 @@
     $('matrix-detail').title=inspected?'Inspect with arrow keys. This only changes the view.':'Tap a cell to inspect a source and receiver. This only changes the view.';
     $('matrix-inspect-hint').style.visibility=inspected?'hidden':'visible';
     const inspect=(receiver,source,focus=false)=>{
-      inspectedSource=source;selectBus(receiver);
+      inspectPredictionLink(receiver,source);
       if(focus) svg.select('.matrix-cells').selectAll('rect').filter(d=>d.receiver===receiver&&d.source===source).node()?.focus();
     };
     const marks=svg.select('.matrix-cells').selectAll('rect').data(cells,d=>d.receiver+','+d.source).join(enter=>{const r=enter.append('rect').attr('class','matrix-cell');r.append('title');return r;})
@@ -1212,5 +1234,5 @@
   new ResizeObserver(()=>render()).observe(root);
   render();
   // A read only inspection hook supports deterministic browser verification.
-  root.powerDemo = { getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,playing,intervention:$('intervention').value,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null,topology:topology.export(),historyIndex}) };
+  root.powerDemo = { getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,inspectedSource,playing,intervention:$('intervention').value,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null,topology:topology.export(),historyIndex}) };
 })();
