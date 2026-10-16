@@ -276,6 +276,10 @@ async function main() {
     const attackBounds = await phone.locator('#pr-pulse').boundingBox();
     assert.ok(attackBounds.width >= 44 && attackBounds.height >= 44, 'Primary touch target remains at least 44 pixels');
     await phone.screenshot({ path: path.join(output, 'mobile.png'), fullPage: true });
+    await phone.goto(address+'/environment.html',{waitUntil:'networkidle'});
+    const reportLayout=await phone.evaluate(()=>({page:document.documentElement.scrollWidth,viewport:innerWidth}));
+    assert.ok(reportLayout.page<=reportLayout.viewport+1,'Scientific report stays within the mobile page');
+    await phone.screenshot({path:path.join(output,'environment.png'),fullPage:true});
     assert.deepEqual(errors, [], 'No browser runtime errors');
     await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), touchEvents, checks: ['playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'continuous mobile power attack', 'mobile touch and layout'], errors }, null, 2));
     console.log('Browser smoke passed');
