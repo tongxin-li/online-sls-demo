@@ -16,6 +16,7 @@
   const LAG=Math.exp(-SAMPLE_SECONDS/TAU_SECONDS),Q_LIMIT=.07,S_RATING=.12;
   const PULSE_DEFAULT=100,PULSE_MIN=10,PULSE_MAX=150;
   const CONTROLLERS=['online','scalar','static','causal'];
+  const COMMUNICATION_BETAS=[0,.25,.5,1,2];
   const INVERTER_BUSES=[5,7,8,12,14,18,21,24];
   const SOLAR_BUSES=[5,7,14,21],BATTERY_BUSES=[8,12,18,24];
   const PF_RATIO=Math.tan(Math.acos(.95));
@@ -279,11 +280,15 @@
   function addScores(a,b){for(let i=0;i<M;i++)for(let j=0;j<N-1;j++)a[i][j]+=b[i][j];}
   class Simulation{
     constructor(options={}){
+      const experiment=options.experiment===undefined?'prediction':options.experiment;
+      if(!['prediction','communication'].includes(experiment))throw new RangeError('Unknown experiment');
+      const beta=options.beta===undefined?1:options.beta;
+      if(!COMMUNICATION_BETAS.includes(beta))throw new RangeError('Invalid communication noise level');
       const id=options.preset===undefined?'mixed':options.preset;
       const preset=FORECAST_PRESETS.find(p=>p.id===id);
       if(!preset)throw new RangeError('Forecast preset must be reliable, uniform, or mixed');
       this.preset=preset;
-      this.initialOptions={seed:options.seed===undefined?20261013:options.seed,
+      this.initialOptions={experiment,beta,seed:options.seed===undefined?20261013:options.seed,
         horizon:options.horizon===undefined?480:options.horizon,preset:id,
         faultBuses:options.faultBuses===undefined?preset.faultBuses.slice():options.faultBuses.slice()};
       if(!Number.isInteger(this.initialOptions.horizon)||this.initialOptions.horizon<1)throw new Error('Invalid horizon');
@@ -309,6 +314,7 @@
       this.fit=null;this.fitHistory=[];this.fitError=null;this.fitObjective=null;this.fitIteration=0;
       this.drift=0;this.changedEdges=0;this.sinceStable=0;this.lastTrainingTime=null;this.lastTrainingSampleCount=0;
       this.directGain=null;this.recommendations=[];
+      this.communicationScores=zeros(M,N-1);this.communicationOfflineScores=zeros(M,N-1);this.communicationScoreSamples=0;this._scoreAt=null;
       this._calibrationAt=null;this.calibration={matrix:eye(N-1),scalar:1,windowSize:0,updates:0,trainedThrough:null,parameterChange:0};
       this.updateCalibration();this.refreshScores();this.sealPreview();return this.snapshot();
     }
@@ -349,6 +355,7 @@
         const forecast=baseW.map((v,i)=>{
           const faulty=this.faults.has(i+1),noise=this.random.normal();
           const scale=model.forecastForcingScales[i];
+          if(this.options.experiment==='communication')return i===0?0:v+scale*this.options.beta*(faulty?4:.05)*noise;
           return i===0?0:(faulty?this.preset.faultyGain:this.preset.gain)*v
             +scale*(faulty?this.preset.faultyNoise:this.preset.noise)*noise;
         });
@@ -416,6 +423,9 @@
       // Current truth is not yet available. All pairs here were observed before
       // this action, including the carried discovery window on a fresh trial.
       if(this._calibrationAt===this.t)return;
+      // Communication comparison isolates topology. All predictive policies
+      // execute their fixed synthesized coefficients on the held out trial.
+      if(this.phase==='deployment'&&this.options.experiment==='communication')return;
       const carried=this.phase==='deployment'?this.deployedSupport.trainingSamples:[];
       const samples=[...carried,...this.samples].slice(-WINDOW);
       if(samples.length<WARMUP)return;
@@ -429,8 +439,29 @@
     refreshScores(){
       const segment=this.segments.find(s=>this.t>=s.start&&this.t<s.end)||this.segments.at(-1);
       const measured=calibratedScores(segment.designs.online,this.calibration.matrix);
-      const scores=measured.scores,baselineScores=measured.baseline;
-      const selection=Response.supportFromScores(scores,INVERTER_BUSES,REMOTE_BUDGET),gain=scoreGain(scores);
+      let scores=measured.scores;
+      let baselineScores=measured.baseline;
+      if(this.options.experiment==='communication'){
+        if(this.phase==='discovery'&&this.t>=WARMUP&&this._scoreAt!==this.t){
+          const local=this.t-segment.start;
+          // Accumulate the actual current row's direct prediction gains only.
+          // The fitted matrix used for this action saw observations before t.
+          for(const block of segment.dense.rows[local]||[]){
+            const gain=multiply(block.L,this.calibration.matrix);
+            for(let i=0;i<M;i++)for(let j=0;j<N-1;j++){
+              this.communicationScores[i][j]+=gain[i][j]**2;
+              this.communicationOfflineScores[i][j]+=block.L[i][j]**2;
+            }
+          }
+          this.communicationScoreSamples++;this._scoreAt=this.t;
+        }
+        if(this.phase==='deployment')scores=this.deployedSupport.scores.map(row=>row.slice());
+        else if(this.communicationScoreSamples){
+          scores=this.communicationScores.map(row=>row.map(v=>v/this.communicationScoreSamples));
+          baselineScores=this.communicationOfflineScores.map(row=>row.map(v=>v/this.communicationScoreSamples));
+        }
+      }
+      const selection=Response.supportFromScores(scores,INVERTER_BUSES,REMOTE_BUDGET,this.options.experiment==='communication'?1e-12:0),gain=scoreGain(scores);
       const next=this.phase==='deployment'?this.deployedSupport.links.map(e=>({...e,weight:scores[INVERTER_BUSES.indexOf(e.to)][e.from-2]})):selection.links;
       if(this.directGain){
         this.drift=frobenius(combine(gain,this.directGain,1,-1))/Math.max(frobenius(this.directGain),1e-12);
@@ -442,16 +473,19 @@
       const energyChange=scores.map((row,i)=>row.map((v,j)=>v-baselineScores[i][j]));
       const relativeEnergyChange=energyChange.map((row,i)=>row.map((v,j)=>baselineScores[i][j]>0?v/baselineScores[i][j]:null));
       const receiverNormalizedChange=energyChange.map((row,i)=>row.map(v=>receiverEnergy[i]>0?v/receiverEnergy[i]:0));
-      const offlineLinks=this.phase==='deployment'?this.deployedSupport.fixedLinks:Response.supportFromScores(baselineScores,INVERTER_BUSES,REMOTE_BUDGET).links;
+      const offlineLinks=this.phase==='deployment'?this.deployedSupport.fixedLinks:Response.supportFromScores(baselineScores,INVERTER_BUSES,REMOTE_BUDGET,this.options.experiment==='communication'?1e-12:0).links;
       const offlineKeys=new Set(offlineLinks.map(e=>e.to+','+e.from)),learnedKeys=new Set(next.map(e=>e.to+','+e.from));
       const addedLinkCount=[...learnedKeys].filter(key=>!offlineKeys.has(key)).length;
       const removedLinkCount=[...offlineKeys].filter(key=>!learnedKeys.has(key)).length;
-      this.predictionDiagnostics=deepFreeze({available:count>0,frozen:false,completedRows:count,
+      this.predictionDiagnostics=deepFreeze({available:count>0||this.phase==='deployment',frozen:this.phase==='deployment'&&this.options.experiment==='communication',completedRows:count,
+        scoreSamples:this.phase==='deployment'?this.deployedSupport.scoreSamples:this.communicationScoreSamples,
         receiverBuses:INVERTER_BUSES.slice(),sourceBuses:Array.from({length:N-1},(_,i)=>i+2),
         baselineScores,learnedScores:scores,energyChange,relativeEnergyChange,receiverNormalizedChange,
         relativeGainChange:count&&baselineEnergy>0?Math.sqrt(measured.changeSquared/baselineEnergy):null,
         overallRelativeEnergyChange:baselineEnergy>0?energyChange.flat().reduce((sum,v)=>sum+v,0)/baselineEnergy:null,
         offlineLinks,addedLinkCount,removedLinkCount,changedLinkCount:addedLinkCount+removedLinkCount});
+      if(this.phase==='deployment'&&this.options.experiment==='communication')
+        this.predictionDiagnostics=deepFreeze({...this.deployedSupport.discoveryDiagnostics,frozen:true});
     }
     step(){
       if(this.mode!=='running')return this.snapshot();
@@ -474,7 +508,8 @@
         const raw=matvec(model.K,x);
         if(key!=='causal')for(const block of segment.designs[key].rows[local]){
           const forecast=this.forecasts[segment.start+block.k-1].forecast.slice(1);
-          const corrected=key==='online'?matvec(this.calibration.matrix,forecast):key==='scalar'?forecast.map(v=>v*this.calibration.scalar):forecast;
+          const fixedTopologyTrial=this.phase==='deployment'&&this.options.experiment==='communication';
+          const corrected=fixedTopologyTrial?forecast:key==='online'?matvec(this.calibration.matrix,forecast):key==='scalar'?forecast.map(v=>v*this.calibration.scalar):forecast;
           const contribution=matvec(block.L,corrected);
           for(let i=0;i<M;i++)raw[i]+=contribution[i];
         }
@@ -533,13 +568,15 @@
     }
     deployTopology(){
       if(this.phase!=='discovery'||this.samples.length<WARMUP)return false;
+      if(this.options.experiment==='communication'&&!this.communicationScoreSamples)return false;
       this.discoveryRecord=deepFreeze({options:{...this.initialOptions,faultBuses:this.initialOptions.faultBuses.slice()},
         t:this.t,events:this.eventLog.slice()});
-      const learned=Response.supportFromScores(this.predictionScores,INVERTER_BUSES,REMOTE_BUDGET);
+      const learned=Response.supportFromScores(this.predictionScores,INVERTER_BUSES,REMOTE_BUDGET,this.options.experiment==='communication'?1e-12:0);
       const offline=zeros(M,N-1);for(const segment of this.segments)addScores(offline,segment.offlineScores);
-      const fixed=Response.supportFromScores(offline,INVERTER_BUSES,REMOTE_BUDGET);
+      const fixed=Response.supportFromScores(this.options.experiment==='communication'?this.communicationOfflineScores:offline,INVERTER_BUSES,REMOTE_BUDGET,this.options.experiment==='communication'?1e-12:0);
       this.deployedSupport=deepFreeze({learned:learned.support,fixed:fixed.support,links:learned.links,fixedLinks:fixed.links,
         scores:this.predictionScores.map(row=>row.slice()),completedRows:this.rows.length,discoveryTime:this.t,
+        scoreSamples:this.communicationScoreSamples,
         trainingSamples:this.samples.slice(-WINDOW),
         discoveryDiagnostics:this.predictionDiagnostics});
       this.phase='deployment';this.initialOptions={...this.discoveryRecord.options,
@@ -554,7 +591,7 @@
         const x=this.states[key].slice(1).map((v,i)=>v-model.baseDrop[i+1]),px=matvec(model.P,x);return[key,x.reduce((sum,v,i)=>sum+v*px[i],0)];}));
       return{t:this.t,costTime:this.lastSample?this.lastSample.t:null,stateTime:this.t,horizon:this.options.horizon,
         initialOptions:{...this.initialOptions,faultBuses:this.initialOptions.faultBuses.slice()},
-        phase:this.phase,canDeploy:this.phase==='discovery'&&this.samples.length>=WARMUP,
+        phase:this.phase,experiment:this.options.experiment,beta:this.options.beta,canDeploy:this.phase==='discovery'&&this.samples.length>=WARMUP&&(this.options.experiment!=='communication'||this.communicationScoreSamples>0),
         discoveryRecord:this.discoveryRecord,deployedSupport:this.deployedSupport,
         segments:this.segments.map(s=>({start:s.start,end:s.end,length:s.length})),
         mode:this.mode,seed:this.options.seed,preset:this.options.preset,presetLabel:this.preset.label,
@@ -582,7 +619,7 @@
   }
   return{Simulation,model,constants:deepFreeze({N,M,edges:EDGES,edgeData:model.edgeData,inverterBuses:INVERTER_BUSES,
     amplitude:AMPLITUDE,ridge:RIDGE,rawRidge:RAW_RIDGE,remoteBudget:REMOTE_BUDGET,preview:PREVIEW,window:WINDOW,warmup:WARMUP,
-    busProfiles:BUS_PROFILES,controllers:CONTROLLERS,forecastPresets:FORECAST_PRESETS,tolerance:TOLERANCE,horizon:480,
+    busProfiles:BUS_PROFILES,controllers:CONTROLLERS,forecastPresets:FORECAST_PRESETS,communicationBetas:COMMUNICATION_BETAS,tolerance:TOLERANCE,horizon:480,
     pulseDefault:PULSE_DEFAULT,pulseMin:PULSE_MIN,pulseMax:PULSE_MAX,pulseUnits:'kW',powerBaseKw:POWER_BASE_KW,
     baseKv:BASE_KV,baseMva:BASE_MVA,sampleSeconds:SAMPLE_SECONDS,tauSeconds:TAU_SECONDS,inverterKvar:70}),
     math:{zeros,eye,transpose,multiply,matvec,combine,frobenius,normInf,solveSPD,getDesign,Response,calibratedScores,

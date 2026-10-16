@@ -1,4 +1,9 @@
 <div id="power-response-demo">
+  <div class="pr-experiment-bar" aria-label="Experiment selection">
+    <label class="pr-experiment-choice" for="pr-experiment">Experiment <select id="pr-experiment" aria-label="Experiment"><option value="communication" selected>Communication topology</option><option value="prediction">Prediction adaptation</option></select></label>
+    <label class="pr-noise-control" id="pr-noise-control" for="pr-noise">Forecast noise <select id="pr-noise" aria-label="Forecast noise level"><option value="0">None · β 0</option><option value="0.25">Low · β 0.25</option><option value="0.5">Moderate · β 0.5</option><option value="1" selected>High · β 1</option><option value="2">Severe · β 2</option></select></label>
+    <span id="pr-noise-caption" class="pr-caption">Noisy buses 4× reference scale · Quiet buses 0.05×</span>
+  </div>
   <div class="pr-controlbar" aria-label="Simulation controls">
     <div class="pr-toolbar">
       <button type="button" class="btn btn-play" id="pr-run">Run</button>
@@ -26,7 +31,7 @@
     </section>
     <section class="pr-panel pr-matrix-panel" aria-labelledby="pr-matrix-title">
       <div class="pr-subhead"><h2 id="pr-matrix-title">Candidate prediction links</h2><select id="pr-matrix-view" aria-label="Prediction matrix view"><option value="links" selected>Connectivity</option><option value="change">Learning weights</option></select></div>
-      <div class="pr-matrix-key" id="pr-matrix-key"></div><svg class="pr-chart" id="pr-matrix" role="group" aria-label="Candidate prediction links. Rows receive forecasts from columns"></svg>
+      <p id="pr-link-budget" class="pr-caption pr-link-budget"></p><p id="pr-noisy-links" class="pr-caption pr-noisy-links" hidden></p><div class="pr-matrix-key" id="pr-matrix-key"></div><svg class="pr-chart" id="pr-matrix" role="group" aria-label="Candidate prediction links. Rows receive forecasts from columns"></svg>
       <p id="pr-matrix-inspect-hint" class="pr-caption">Tap a cell to inspect a connection</p>
       <div class="pr-panel-foot pr-matrix-detail"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div><div class="pr-topology-status"><strong id="pr-topology-status">Connectivity unchanged</strong><span id="pr-topology-gain">Weights changed 0%</span></div><div id="pr-topology-events" class="pr-topology-events" aria-label="Recent topology changes" hidden></div><div class="pr-topology-history"><label for="pr-topology-history" id="pr-history-count">0 link updates</label><input id="pr-topology-history" type="range" min="0" max="0" step="1" value="0" aria-label="Topology history" disabled><button type="button" id="pr-history-live" aria-pressed="true">Latest</button></div><p id="pr-topology-note" class="pr-caption" aria-live="polite"></p>
     </section>
@@ -39,7 +44,7 @@
       <div id="pr-stage-detail" class="pr-panel-foot tabular-nums"></div>
     </section>
     <section class="pr-panel pr-learning-panel" aria-labelledby="pr-learning-title">
-      <div class="pr-subhead"><h2 id="pr-learning-title">Cost comparison</h2><select id="pr-view" aria-label="Controller view"><option value="cost" selected>Cost</option><option value="learning">Learning</option></select></div>
+      <div class="pr-subhead"><h2 id="pr-learning-title">Cost comparison</h2><select id="pr-view" aria-label="Controller view"><option value="cost">Cost</option><option value="learning" selected>Learning</option></select></div>
       <div id="pr-learning-content" hidden>
         <div class="pr-algorithm-flow" id="pr-learning-flow" aria-label="Shared prediction adaptation cycle">
           <div><span class="pr-flow-index">01</span><strong>Forecast</strong><span id="pr-flow-predict">Voltage forcing</span></div>
@@ -62,7 +67,7 @@
   <details class="pr-adaptation" id="pr-adaptation">
     <summary>Experiment settings <span aria-hidden="true">+</span></summary>
     <div class="pr-comparison-controls">
-      <label for="pr-preset">Forecasts <select id="pr-preset" aria-label="Forecast preset" title="Changing forecasts starts a new discovery trial"><option value="reliable">Reliable forecasts</option><option value="uniform">Uniform noise</option><option value="mixed" selected>Mixed reliability</option></select></label>
+      <label id="pr-preset-control" for="pr-preset">Forecasts <select id="pr-preset" aria-label="Forecast preset" title="Changing forecasts starts a new discovery trial"><option value="reliable">Reliable forecasts</option><option value="uniform">Uniform noise</option><option value="mixed" selected>Mixed reliability</option></select></label>
       <button type="button" class="btn btn-compare" id="pr-compare" title="Advance 180 samples across learning and comparison">Advance 180</button>
     </div>
     <div class="pr-settings"><label class="form-check"><input type="checkbox" id="pr-auto-compare" checked>Start comparison automatically</label><label>Bus <select id="pr-bus" aria-label="Selected bus"></select></label><button type="button" class="btn" id="pr-fault">Repair forecast</button><label class="form-check"><input type="checkbox" id="pr-all-links" checked>All prediction links</label></div>

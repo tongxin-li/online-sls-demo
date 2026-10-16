@@ -128,12 +128,16 @@
       return{T,rows,columns,support:support?support.map(row=>row.slice()):null};
     }
   }
-  function supportFromScores(scores,inverterBuses,remoteBudget=3){
+  function supportFromScores(scores,inverterBuses,remoteBudget=3,relativeTieTolerance=0){
     const support=scores.map(()=>Array(scores[0].length).fill(false)),links=[];
     scores.forEach((row,i)=>{
       const bus=inverterBuses[i];support[i][bus-2]=true;
+      // Quantized rank keys give a transitive, deterministic source-index tie
+      // break for numerically identical gains. Original score values are kept.
+      const quantum=Math.max(...row)*relativeTieTolerance;
+      const rank=value=>quantum>0?Math.round(value/quantum):value;
       const ranked=row.map((weight,j)=>({from:j+2,to:bus,weight})).filter(e=>e.from!==bus&&e.weight>1e-20)
-        .sort((a,b)=>b.weight-a.weight||a.from-b.from).slice(0,remoteBudget);
+        .sort((a,b)=>rank(b.weight)-rank(a.weight)||a.from-b.from).slice(0,remoteBudget);
       for(const edge of ranked){support[i][edge.from-2]=true;links.push(edge);}
     });return{support,links};
   }
