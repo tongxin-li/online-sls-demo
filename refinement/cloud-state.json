@@ -270,7 +270,14 @@
       "direct_live_inspection": "unverified, previously denied browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-17T07:00:00+08:00",
+    "started_at": "2026-10-17T07:03:44+08:00",
+    "lease_expires_at": "2026-10-17T07:43:44+08:00",
+    "branch": "cloud/refine/20261017-0700",
+    "base_main": "f9d089f70a8d6bde3388a9661c30b0b94f53d504",
+    "focus": "Read only inspected source forecast error and issuance timing from revealed observations"
+  },
   "next_focus": "Make inspected source forecast errors and issuance timing observable against revealed forcing, without leaking future observations or changing frozen deployed links. Preserve the reference and audited solar outage scenarios.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
