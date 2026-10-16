@@ -105,8 +105,36 @@ async function main() {
     const phone = await mobile.newPage();
     phone.on('pageerror', error => errors.push(error.message));
     await phone.goto(address, { waitUntil: 'networkidle' });
-    await phone.getByRole('button', { name: 'Corrupt forecast at bus 7', exact: true }).tap();
-    await phone.getByRole('button', { name: 'Repair forecast at bus 7', exact: true }).waitFor();
+    const touchEvents = [];
+    await phone.exposeFunction('__recordSmokeTouch', event => touchEvents.push(event));
+    await phone.evaluate(() => {
+      for (const type of ['pointerdown', 'pointerup', 'pointercancel', 'click', 'gotpointercapture', 'lostpointercapture']) {
+        document.addEventListener(type, event => {
+          const bus = event.target.closest('[data-bus]');
+          window.__recordSmokeTouch({ type, detail: event.detail, pointerType: event.pointerType, bus: bus?.getAttribute('data-bus'), label: bus?.getAttribute('aria-label'), target: event.target.tagName, x: event.clientX, y: event.clientY });
+        }, true);
+      }
+    });
+    try {
+      await phone.getByRole('button', { name: 'Corrupt forecast at bus 7', exact: true }).tap();
+      await phone.getByRole('button', { name: 'Repair forecast at bus 7', exact: true }).waitFor();
+    } catch (error) {
+      const details = await phone.evaluate(() => ({
+        bus7: document.querySelector('[data-bus="7"]')?.getAttribute('aria-label'),
+        selectedAction: document.querySelector('#pr-pulse-label')?.textContent,
+        clock: document.querySelector('#pr-clock')?.textContent,
+        status: document.querySelector('#pr-event')?.textContent,
+        alert: document.querySelector('#pr-error')?.textContent,
+        pageWidth: document.documentElement.scrollWidth,
+        viewportWidth: innerWidth,
+        scrollY
+      }));
+      const diagnostic = { passed: false, browser: browser.version(), check: 'mobile forecast tap', details, touchEvents, errors, failure: error.message };
+      console.error(JSON.stringify(diagnostic, null, 2));
+      await fs.writeFile(path.join(output, 'mobile-failure.json'), JSON.stringify(diagnostic, null, 2));
+      await phone.screenshot({ path: path.join(output, 'mobile-failure.png'), fullPage: true });
+      throw error;
+    }
     await phone.locator('#pr-run').tap();
     const dimensions = await phone.evaluate(() => ({ page: document.documentElement.scrollWidth, viewport: innerWidth }));
     assert.ok(dimensions.page <= dimensions.viewport + 1, 'Mobile page does not overflow horizontally');
@@ -114,7 +142,7 @@ async function main() {
     assert.ok(attackBounds.width >= 44 && attackBounds.height >= 44, 'Primary touch target remains at least 44 pixels');
     await phone.screenshot({ path: path.join(output, 'mobile.png'), fullPage: true });
     assert.deepEqual(errors, [], 'No browser runtime errors');
-    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, checks: ['playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'four controller curves', 'live cost switching', 'mobile touch and layout'], errors }, null, 2));
+    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), touchEvents, checks: ['playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'four controller curves', 'live cost switching', 'mobile touch and layout'], errors }, null, 2));
     console.log('Browser smoke passed');
   } finally {
     if (browser) await browser.close();
