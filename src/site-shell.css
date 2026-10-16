@@ -288,3 +288,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 @media(max-width:650px),(pointer:coarse) {
   .pr-experiment-bar select { min-height:44px; padding:8px 10px; }
 }
+
+.pr-source-controls { display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; margin:8px 0; }
+.pr-source-controls .btn { min-height:44px; max-width:100%; white-space:normal; }
+#pr-source-status { flex:1 1 150px; line-height:1.5; }

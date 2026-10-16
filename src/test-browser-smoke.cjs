@@ -91,6 +91,24 @@ async function main() {
       await inspect(Number(absent),false);
       await inspect(edge.receiver,true,true);
       await inspect(edge.source,true);
+      const sourceState=async()=>page.evaluate(()=>{
+        const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),state=root.powerDemo.getState();
+        return {faults:snapshot.faults,state:{selectedBus:state.selectedBus,inspectedSource:state.inspectedSource,playing:state.playing},
+          unchanged:JSON.stringify({t:snapshot.t,phase:snapshot.phase,states:snapshot.states,cumulative:snapshot.cumulative,
+            support:snapshot.deployedSupport,lastInputs:snapshot.lastInputs,pending:snapshot.pendingPulses,active:snapshot.activePulses,recommendations:snapshot.recommendations})};
+      });
+      const initial=await sourceState();
+      for(let i=0;i<2;i++) {
+        const prior=await sourceState(),wasNoisy=prior.faults.includes(edge.source);
+        assert.equal(await page.locator('#pr-source-fault').getAttribute('aria-label'),(wasNoisy?'Repair':'Corrupt')+' forecast source at bus '+edge.source);
+        await page.locator('#pr-source-fault').click();
+        const after=await sourceState();
+        assert.equal(after.faults.includes(edge.source),!wasNoisy,'Each explicit action toggles once');
+        assert.deepEqual(after.faults.filter(bus=>bus!==edge.source),initial.faults.filter(bus=>bus!==edge.source),'Only inspected source changes');
+        assert.deepEqual(after.state,initial.state,'Receiver, source selection and pause state remain unchanged');
+        assert.equal(after.unchanged,initial.unchanged,'Reliability actions do not rewrite controls, state, costs or topology');
+      }
+      assert.deepEqual((await sourceState()).faults,initial.faults,'Second action repairs or corrupts back to initial state');
     };
     await inspectLinks();
 
@@ -183,13 +201,32 @@ async function main() {
       throw error;
     }
     await phone.locator('#pr-run').tap();
+    await phone.locator('#pr-matrix .matrix-cell[data-receiver="5"][data-source="7"]').tap();
+    const mobileBefore=await phone.evaluate(()=>{
+      const root=document.querySelector('#power-response-demo');return {state:root.powerDemo.getState(),snapshot:root.powerDemo.getSnapshot()};
+    });
+    assert.equal(mobileBefore.state.playing,false);
+    for(const action of ['Corrupt','Repair']) {
+      await phone.getByRole('button',{name:action+' forecast source at bus 7',exact:true}).tap();
+      const mobileAfter=await phone.evaluate(()=>{
+        const root=document.querySelector('#power-response-demo');return {state:root.powerDemo.getState(),snapshot:root.powerDemo.getSnapshot()};
+      });
+      assert.equal(mobileAfter.snapshot.faults.includes(7),action==='Corrupt');
+      assert.equal(mobileAfter.state.selectedBus,5);assert.equal(mobileAfter.state.inspectedSource,7);
+      assert.equal(mobileAfter.state.playing,false);
+      assert.equal(mobileAfter.snapshot.t,mobileBefore.snapshot.t);
+      assert.deepEqual(mobileAfter.snapshot.states,mobileBefore.snapshot.states);
+      assert.deepEqual(mobileAfter.snapshot.cumulative,mobileBefore.snapshot.cumulative);
+    }
+    const sourceBounds=await phone.locator('#pr-source-fault').boundingBox();
+    assert.ok(sourceBounds.width>=44&&sourceBounds.height>=44,'Explicit source action has a usable touch target');
     const dimensions = await phone.evaluate(() => ({ page: document.documentElement.scrollWidth, viewport: innerWidth }));
     assert.ok(dimensions.page <= dimensions.viewport + 1, 'Mobile page does not overflow horizontally');
     const attackBounds = await phone.locator('#pr-pulse').boundingBox();
     assert.ok(attackBounds.width >= 44 && attackBounds.height >= 44, 'Primary touch target remains at least 44 pixels');
     await phone.screenshot({ path: path.join(output, 'mobile.png'), fullPage: true });
     assert.deepEqual(errors, [], 'No browser runtime errors');
-    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), touchEvents, checks: ['playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'four controller curves', 'live cost switching', 'repeated mobile forecast taps', 'continuous mobile power attack', 'mobile touch and layout'], errors }, null, 2));
+    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), touchEvents, checks: ['playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'four controller curves', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'continuous mobile power attack', 'mobile touch and layout'], errors }, null, 2));
     console.log('Browser smoke passed');
   } finally {
     if (browser) await browser.close();

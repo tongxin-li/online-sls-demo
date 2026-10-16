@@ -26,6 +26,7 @@ const source=withoutCards.replace(anchor,
   '  root.testSummary=()=>comparisonSummary();\n'+
   '  root.testInspectPredictionLink=(receiver,source)=>inspectPredictionLink(receiver,source);\n'+
   '  root.testInspection=()=>predictionInspection();\n'+
+  '  root.testIssuedForecasts=()=>simulation.forecasts;\n'+
   '  root.testDrawSeries=drawSeries;\n'+
   '  root.testPin=(value)=>{if(value!==undefined)pin=value;return pin;};\n'+
   '  root.testPowerContext=()=>powerRecoveryContext();\n'+
@@ -123,7 +124,7 @@ function harness(saved,experiment='prediction',reducedMotion=true) {
       if(type==='pointerup'||type==='pointercancel')recipient.releasePointerCapture(id);
       return result;
     },
-    inspectLink:(receiver,source)=>root.testInspectPredictionLink(receiver,source),inspection:()=>plain(root.testInspection()),
+    inspectLink:(receiver,source)=>root.testInspectPredictionLink(receiver,source),inspection:()=>plain(root.testInspection()),issuedForecasts:()=>plain(root.testIssuedForecasts()),
     snapshot:()=>root.powerDemo.getSnapshot(),state:()=>plain(root.powerDemo.getState()),
     saved:()=>savedStates.at(-1),
     event:(id,type,detail)=>node(id).dispatch(type,detail),
@@ -1173,4 +1174,76 @@ test('prediction link inspection uses current support without changing plant or 
   verify();
   h.change('bus',2);
   assert.equal(h.inspection(),null,'Selecting a nonreceiver clears stale inspection');
+});
+
+test('inspected source action toggles reliability without selecting the receiver as the fault target',()=>{
+  const h=harness(undefined,'communication');h.inspectLink(5,7);
+  const before=plain(h.snapshot());
+  assert.equal(h.node('source-controls').hidden,false);assert.equal(h.node('source-fault').textContent,'Corrupt source 7');
+  h.click('source-fault');
+  assert.equal(h.state().selectedBus,5);assert.equal(h.state().inspectedSource,7);
+  assert.equal(h.state().playing,false);assert.equal(h.snapshot().t,before.t);
+  assert.deepEqual(plain(h.snapshot().faults),before.faults.concat(7).sort((a,b)=>a-b));
+  assert.deepEqual(plain(h.snapshot().cumulative),before.cumulative);
+  assert.deepEqual(plain(h.snapshot().states),before.states);
+  assert.deepEqual(plain(h.snapshot().pendingPulses),before.pendingPulses);
+  assert.equal(h.state().journal.at(-1).bus,7);assert.equal(h.state().journal.at(-1).type,'fault');
+  assert.equal(h.node('source-fault').textContent,'Repair source 7');
+  const restored=harness(h.saved());
+  assert.equal(restored.state().selectedBus,5);assert.equal(restored.state().inspectedSource,7);
+  assert.deepEqual(restored.snapshot().faults,h.snapshot().faults);
+  assert.deepEqual(restored.snapshot().eventLog,h.snapshot().eventLog);
+  assert.deepEqual(restored.snapshot().states,h.snapshot().states);
+  restored.click('source-fault');assert.deepEqual(plain(restored.snapshot().faults),before.faults);
+  assert.equal(restored.state().playing,false);
+});
+
+test('inspected reliability action changes only newly issued forecasts at its source',()=>{
+  const changed=harness(undefined,'communication'),reference=harness(undefined,'communication');
+  for(const h of [changed,reference]) {h.click('step');h.inspectLink(5,7);}
+  const issued=changed.issuedForecasts();assert.ok(issued.length>0);
+  changed.click('source-fault');
+  assert.deepEqual(changed.issuedForecasts(),issued,'Already issued forecasts cannot be rewritten');
+  for(let i=0;i<7;i++) {changed.click('step');reference.click('step');}
+  const actual=changed.issuedForecasts(),control=reference.issuedForecasts();
+  assert.equal(actual.length,control.length);
+  let different=0;
+  for(let i=0;i<actual.length;i++) {
+    assert.deepEqual(actual[i].base,control[i].base,'Physical disturbance generator stays paired');
+    for(let j=0;j<24;j++) {
+      if(j===6&&i>=issued.length) {if(actual[i].forecast[j]!==control[i].forecast[j])different++;}
+      else assert.equal(actual[i].forecast[j],control[i].forecast[j],'Other sources and issued forecasts stay identical');
+    }
+  }
+  assert.ok(different>0,'Future source 7 forecasts actually change');
+});
+
+test('inspected source action preserves deployed support, replay and Learn again reliability',async()=>{
+  const h=harness(undefined,'communication');h.check('auto-compare',false);await compare(h);h.click('deploy');h.click('run');
+  h.inspectLink(5,7);
+  const before=plain(h.snapshot());h.click('source-fault');
+  assert.deepEqual(plain(h.snapshot().deployedSupport),before.deployedSupport);
+  assert.deepEqual(plain(h.snapshot().predictionDiagnostics),before.predictionDiagnostics);
+  assert.deepEqual(plain(h.snapshot().cumulative),before.cumulative);
+  assert.deepEqual(plain(h.snapshot().states),before.states);
+  assert.match(h.node('source-status').textContent,/Links fixed/);
+  const restored=harness(h.saved());
+  assert.equal(restored.state().inspectedSource,7);
+  assert.deepEqual(restored.snapshot().deployedSupport,h.snapshot().deployedSupport);
+  assert.deepEqual(restored.snapshot().cumulative,h.snapshot().cumulative);
+  assert.deepEqual(restored.snapshot().eventLog,h.snapshot().eventLog);
+  const faults=plain(h.snapshot().faults);
+  h.click('deploy');assert.equal(h.snapshot().phase,'discovery');assert.deepEqual(plain(h.snapshot().faults),faults);
+});
+
+test('source actions cannot mutate reliability in saved history or with zero forecast noise',()=>{
+  const h=harness(undefined,'communication');h.inspectLink(5,7);
+  const before=plain(h.snapshot());h.event('topology-history','input');
+  assert.equal(h.node('source-fault').disabled,true);h.click('source-fault');
+  assert.deepEqual(plain(h.snapshot()),before);
+  h.click('history-live');assert.equal(h.node('source-fault').disabled,false);
+  h.change('noise',0);h.inspectLink(5,7);
+  assert.equal(h.node('source-fault').disabled,true);const quiet=plain(h.snapshot());h.click('source-fault');
+  assert.deepEqual(plain(h.snapshot()),quiet);
+  h.change('bus',2);assert.equal(h.node('source-controls').hidden,true);
 });

@@ -164,7 +164,7 @@
   function reviewTopology(index) {
     historyIndex=index;visualTopologyEvent=index ? topology.events[index-1] : null;
     if(index!==null) $('matrix-view').value='links';
-    drawNetwork();drawMatrix();highlightTopology();
+    renderInspectedSource();drawNetwork();drawMatrix();highlightTopology();
   }
   function highlightTopology() {
     if(!visualTopologyEvent) return;
@@ -213,6 +213,25 @@
       : 'No links have changed yet. Learning weights may still change.';
     $('topology-note').title=snapshot.phase==='deployment' ? (communicationComparison()?'Discovery history. Deployed links and prediction weights stay fixed.':'Discovery history. Deployed links stay fixed while prediction weights continue adapting.') : 'History displays observed connectivity only. Reviewing an update does not change the controller.';
   }
+  function renderInspectedSource() {
+    const inspection=predictionInspection(),control=$('source-fault');
+    $('source-controls').hidden=!inspection;
+    const bus=inspection?.source;
+    const noisy=!!inspection && snapshot.faults.includes(bus);
+    control.textContent=(noisy?'Repair':'Corrupt')+' source '+(bus || '');
+    control.setAttribute('aria-label',(noisy?'Repair':'Corrupt')+' forecast source at bus '+(bus || ''));
+    control.setAttribute('aria-pressed',String(noisy));
+    control.disabled=!inspection || comparing || historyIndex!==null || !forecastNoiseEnabled();
+    control.dataset.source=bus || '';
+    $('source-status').textContent=!inspection?'':historyIndex!==null?'Saved links · Show latest to change reliability'
+      :!forecastNoiseEnabled()?'Noise disabled at β 0':(noisy?'Noisy until repaired':'Quiet until corrupted')+' · New forecasts only'+(snapshot.phase==='deployment'?' · Links fixed':'');
+    control.title='Change forecast source '+(bus || '')+' without changing the receiving inverter or starting playback. Already issued forecasts remain unchanged.';
+  }
+  function toggleInspectedForecast() {
+    const inspection=predictionInspection();
+    if(!inspection || comparing || historyIndex!==null || !forecastNoiseEnabled()) return;
+    fault(inspection.source,{preserveSelection:true});
+  }
   function inspectPredictionLink(receiver,source) {
     inspectedSource=source;
     selectBus(receiver);
@@ -247,7 +266,7 @@
     const events=snapshot.eventLog || [];
     const state = {
       modelContent: { scenario:'24 bus LinDistFlow voltage regulation', variant:snapshot.experiment==='communication'?'Communication topology comparison':'Shared prediction adaptation and sparse deployment', phase:snapshot.phase, step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
-      privateContent: { version:13, intervention:$('intervention').value, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, automaticComparison:automaticComparison(), view:$('view').value, costMetric:$('cost-metric').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, speed:$('speed').value, allLinks:$('all-links').checked }
+      privateContent: { version:13, intervention:$('intervention').value, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, automaticComparison:automaticComparison(), view:$('view').value, costMetric:$('cost-metric').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, inspectedSource, speed:$('speed').value, allLinks:$('all-links').checked }
     };
     window.openai.setWidgetState(state).catch(() => {});
   }
@@ -283,6 +302,7 @@
     $('auto-compare').checked=data.automaticComparison!==false;
     selectedBus=Math.max(1,Math.min(24,Math.floor(Number(data.selectedBus)||7)));
     $('bus').value=String(selectedBus);
+    inspectedSource=hasInverter(selectedBus)&&Number.isInteger(data.inspectedSource)&&data.inspectedSource>=2&&data.inspectedSource<=24?data.inspectedSource:null;
     $('speed').value=['2','4','8','16','32'].includes(data.speed)?data.speed:'16';
     $('attack-mode').value=data.attackMode==='pulse'?'pulse':'continuous';
     $('intervention').value=data.intervention==='forecast'?'forecast':'power';
@@ -485,6 +505,7 @@
   if ($('view')) $('view').addEventListener('change', () => { renderLearningView(); drawConvergence(); drawCost(); save(); });
   $('bus').addEventListener('change', () => selectBus(Number($('bus').value)));
   $('all-links').addEventListener('change', () => { drawNetwork(); save(); });
+  $('source-fault').addEventListener('click',toggleInspectedForecast);
   if ($('reference')) $('reference').addEventListener('click', () => {
     captureMatrixReference(); drawNetwork(); drawMatrix();
     announce('Connectivity reference saved at step ' + snapshot.t);
@@ -534,13 +555,13 @@
     // Queuing an event must not restart every chart transition.
     if(!repeated) { renderControls(); drawNetwork(); save(); }
   }
-  function fault(bus=selectedBus,{startPlayback=false}={}) {
+  function fault(bus=selectedBus,{startPlayback=false,preserveSelection=false}={}) {
     if (!canAttack(bus)) return;
-    selectedBus=bus;$('bus').value=String(bus);
+    if(!preserveSelection) {selectedBus=bus;$('bus').value=String(bus);}
     resumePlant();
-    simulation.toggleFault(selectedBus); journal.push({t:snapshot.t,type:'fault',bus:selectedBus});
+    simulation.toggleFault(bus); journal.push({t:snapshot.t,type:'fault',bus});
     snapshot=simulation.snapshot();
-    const message='Bus '+selectedBus+' forecast '+(snapshot.faults.includes(selectedBus)?'marked noisy':'marked quiet')
+    const message='Bus '+bus+' forecast '+(snapshot.faults.includes(bus)?'marked noisy':'marked quiet')
       +(!forecastNoiseEnabled()?' · No noise at β 0':snapshot.phase==='deployment'?' · Links remain fixed':' · New forecasts use this setting');
     if(startPlayback&&!playing&&!comparing) {playing=true;nextTickAt=0;schedule();}
     announce(message); actionNote(message);
@@ -647,6 +668,7 @@
     if ($('learning-kind')) $('learning-kind').textContent='Original dashed · Matrix adaptation solid';
   }
   function renderControls() {
+    renderInspectedSource();
     const frozen=isFit();
     const deployed=snapshot.phase==='deployment',communication=snapshot.experiment==='communication';
     const completedRows=snapshot.learning?.completedRows || 0;

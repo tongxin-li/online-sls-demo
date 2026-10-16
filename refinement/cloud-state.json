@@ -46,7 +46,13 @@
     "started_at": "2026-10-17T04:00:18+08:00",
     "expires_at": "2026-10-17T04:40:18+08:00",
     "branch": "cloud/refine/20261017-0400",
-    "focus": "Explicit reliability toggle for inspected source, separate from inverter receiver selection."
+    "focus": "Explicit reliability toggle for inspected source, separate from inverter receiver selection.",
+    "stage": "candidate_validation",
+    "changes": [
+      "Added explicit Corrupt or Repair action for the inspected forecast source without changing its receiving inverter or pause state.",
+      "Show persistent reliability state and disable source changes in saved topology history and zero noise.",
+      "Preserved version 13 replay with optional source inspection; added issued-forecast causality, deployment persistence and desktop/mobile action regressions."
+    ]
   },
   "next_focus": "Make inspected source reliability actions explicit and separate from inverter receiver selection, preserving persistent toggles and frozen deployed links.",
   "priorities": [
