@@ -385,7 +385,13 @@
     "lease_expires_at": "2026-10-17T10:35:25+08:00",
     "branch": "cloud/refine/20261017-1000",
     "base_main": "8db9309a98f94eea032b2b214168fe18c92a60fe",
-    "focus": "Truthful protocol phase receipt and saved discovery versus live comparison inspection"
+    "focus": "Truthful protocol phase receipt and saved discovery versus live comparison inspection",
+    "status": "candidate validation",
+    "changes": [
+      "Expose actual discovery count and completed offline selection/synthesis, distinguishing frozen communication comparison from adaptive prediction correction.",
+      "Synchronize archived discovery link headers and protocol context while retaining current plant, costs, playback and deployed support.",
+      "Do not overlay current source quality on archived links. Returning via matrix view restores live source controls and diagnostics immediately without a plant step."
+    ]
   },
   "next_focus": "Audit phase presentation against the actual protocol. Clearly distinguish dense discovery, offline link selection and synthesis, then a fresh held out comparison with frozen support and coefficients. Keep prediction adaptation separate and do not imply joint online topology adaptation. Prefer concise existing status areas over more controls or visual redesign. Add actual phase transition and source-map persistence assertions if gaps exist.",
   "priorities": [

@@ -26,6 +26,7 @@ const source=withoutCards.replace(anchor,
   '  root.testSummary=()=>comparisonSummary();\n'+
   '  root.testInspectPredictionLink=(receiver,source)=>inspectPredictionLink(receiver,source);\n'+
   '  root.testInspection=()=>predictionInspection();\n'+
+  '  root.testProtocol=()=>protocolStatus();\n'+
   '  root.testForecastObservation=()=>inspectedForecastObservation();\n'+
   '  root.testSourceHistory=()=>inspectedSourceHistory();\n'+
   '  root.testErrorWindow=forecastErrorWindow;\n'+
@@ -129,7 +130,7 @@ function harness(saved,experiment='prediction',reducedMotion=true) {
       if(type==='pointerup'||type==='pointercancel')recipient.releasePointerCapture(id);
       return result;
     },
-    inspectLink:(receiver,source)=>root.testInspectPredictionLink(receiver,source),inspection:()=>plain(root.testInspection()),forecastObservation:()=>plain(root.testForecastObservation()),sourceHistory:()=>plain(root.testSourceHistory()),errorWindow:(...args)=>plain(root.testErrorWindow(...args)),commandInspection:()=>plain(root.testInspectedCommand()),decompose:(...args)=>plain(root.testDecompose(...args)),issuedForecasts:()=>plain(root.testIssuedForecasts()),
+    inspectLink:(receiver,source)=>root.testInspectPredictionLink(receiver,source),inspection:()=>plain(root.testInspection()),protocol:()=>plain(root.testProtocol()),forecastObservation:()=>plain(root.testForecastObservation()),sourceHistory:()=>plain(root.testSourceHistory()),errorWindow:(...args)=>plain(root.testErrorWindow(...args)),commandInspection:()=>plain(root.testInspectedCommand()),decompose:(...args)=>plain(root.testDecompose(...args)),issuedForecasts:()=>plain(root.testIssuedForecasts()),
     snapshot:()=>root.powerDemo.getSnapshot(),state:()=>plain(root.powerDemo.getState()),
     saved:()=>savedStates.at(-1),
     event:(id,type,detail)=>node(id).dispatch(type,detail),
@@ -768,7 +769,7 @@ test('automatic comparison keeps the four controller cost view visible during le
   assert.equal(h.node('deploy').hidden,true);assert.equal(h.node('view').hidden,false);
   assert.equal(h.node('cost-content').hidden,false);assert.equal(h.node('learning-content').hidden,true);
   assert.equal(h.node('learning-title').textContent,'Controller comparison');
-  assert.equal(h.node('phase').textContent,'Learning 0 / 180 s');
+  assert.equal(h.node('phase').textContent,'Discovery 0 / 180 s');
   h.change('view','learning');assert.equal(h.node('cost-content').hidden,true);assert.equal(h.node('learning-content').hidden,false);
   assert.equal(h.node('learning-title').textContent,'Forecast learning');assert.equal(h.node('freeze').hidden,true);
   h.change('view','cost');h.check('auto-compare',false);
@@ -847,7 +848,7 @@ test('Advance 180 counts physical samples across the automatic boundary and rema
   assert.equal(h.snapshot().phase,'deployment');assert.equal(h.snapshot().discoveryRecord.t,180);
   assert.equal(h.snapshot().t,130,'50 discovery and 130 comparison samples must total exactly 180');
   assert.equal(h.state().playing,false);assert.equal(h.clock.tasks.size,0);
-  assert.match(h.node('event').textContent,/Learning complete.*t = 130 s/);
+  assert.match(h.node('event').textContent,/Discovery complete.*t = 130 s/);
   await compare(h);assert.equal(h.snapshot().t,310);
   assert.match(h.node('event').textContent,/180 samples added.*t = 310 s/);
 });
@@ -1491,4 +1492,64 @@ test('rolling error history preserves exact replay, phase resets, saved history 
   physical.change('attack-mode','pulse');physical.change('bus',23);physical.quickClick();physical.click('run');physical.inspectLink(5,24);
   physical.click('step');assert.ok(physical.sourceHistory().stats.rmse>1e-7,'Unexpected physical forcing still produces error at zero forecast noise');
   assert.match(physical.node('forecast-change').textContent,/Noise disabled.*Unforecast power/);
+});
+
+
+test('protocol receipt follows automatic discovery selection synthesis and fixed comparison with retained source settings',async()=>{
+  const h=harness(undefined,'communication');h.inspectLink(5,7);
+  assert.deepEqual(h.protocol(),{phase:'discovery',view:'discovery',discoverySamples:0,comparisonSamples:0,
+    selection:'pending',synthesis:'pending',links:'candidates',predictionWeights:'adaptive',historyAt:null});
+  assert.match(h.node('phase-note').textContent,/Dense discovery.*Offline selection and synthesis/);
+  h.click('source-fault');h.click('run');await h.samples(180);h.click('run');
+  assert.equal(h.snapshot().phase,'deployment');assert.equal(h.snapshot().t,0);
+  assert.equal(h.snapshot().faults.includes(7),true);
+  const receipt=h.protocol();
+  assert.deepEqual(receipt,{phase:'deployment',view:'comparison',discoverySamples:180,comparisonSamples:0,
+    selection:'complete',synthesis:'complete',links:'fixed',predictionWeights:'fixed',historyAt:null});
+  assert.equal(h.node('phase').dataset.discoverySamples,'180');
+  assert.match(h.node('phase-note').textContent,/Offline selection and synthesis complete.*180 discovery samples.*Links and prediction weights fixed/);
+  assert.equal(Object.values(h.snapshot().cumulative).every(value=>value===0),true);
+  const support=plain(h.snapshot().deployedSupport),calibration=plain(h.snapshot().calibration);
+  for(let i=0;i<8;i++)h.click('step');
+  assert.deepEqual(plain(h.snapshot().deployedSupport),support);assert.deepEqual(plain(h.snapshot().calibration),calibration);
+  assert.equal(h.protocol().comparisonSamples,8);
+  const restored=harness(h.saved());assert.deepEqual(restored.protocol(),h.protocol());
+  h.click('deploy');assert.equal(h.protocol().selection,'pending');assert.equal(h.protocol().discoverySamples,0);
+  assert.equal(h.snapshot().faults.includes(7),true);assert.match(h.node('phase').textContent,/Discovery/);
+});
+
+test('manual comparison receipt reports actual sample count and separates prediction adaptation from fixed topology evaluation',()=>{
+  for(const experiment of ['communication','prediction']){
+    const h=harness(undefined,experiment);h.check('auto-compare',false);
+    for(let i=0;i<31;i++)h.click('step');
+    assert.equal(h.protocol().discoverySamples,31);assert.equal(h.protocol().selection,'pending');
+    assert.match(h.node('phase').textContent,/Discovery 31 s/);
+    h.click('deploy');h.click('run');
+    assert.equal(h.protocol().discoverySamples,31,'Never invent an automatic 180 sample discovery for manual comparison');
+    assert.equal(h.protocol().selection,'complete');assert.equal(h.protocol().synthesis,'complete');
+    assert.equal(h.protocol().predictionWeights,experiment==='communication'?'fixed':'adaptive');
+    assert.match(h.node('phase-note').textContent,experiment==='communication'?/prediction weights fixed/:/Prediction correction adapts/);
+    const before=plain(h.snapshot());
+    h.event('topology-history','input');
+    assert.equal(h.protocol().view,'saved-discovery');assert.equal(h.node('phase').dataset.phase,'deployment');
+    assert.match(h.node('phase-note').textContent,/Saved discovery links.*Plant and costs remain in comparison/);
+    assert.deepEqual(plain(h.snapshot()),before,'Archive view cannot reselect links or change the plant');
+    h.click('history-live');assert.equal(h.protocol().view,'comparison');
+    assert.deepEqual(plain(h.snapshot()),before);
+  }
+});
+
+test('leaving saved discovery through matrix mode restores live source controls without a plant step or autoplay',async()=>{
+  const h=harness(undefined,'communication');await compare(h);if(h.state().playing)h.click('run');
+  h.click('step');h.inspectLink(5,7);
+  const before=plain(h.snapshot());assert.ok(h.sourceHistory().stats);
+  h.event('topology-history','input');
+  assert.equal(h.protocol().view,'saved-discovery');assert.equal(h.node('source-fault').disabled,true);
+  assert.equal(h.sourceHistory(),null);assert.match(h.node('matrix-title').textContent,/Discovery links at/);
+  h.change('matrix-view','change');
+  assert.equal(h.state().historyIndex,null);assert.equal(h.protocol().view,'comparison');
+  assert.equal(h.node('source-fault').disabled,false);assert.ok(h.sourceHistory().stats);
+  assert.ok(h.commandInspection());assert.equal(h.state().playing,false);
+  assert.match(h.node('matrix-title').textContent,/Deployed prediction links/);
+  assert.deepEqual(plain(h.snapshot()),before);
 });

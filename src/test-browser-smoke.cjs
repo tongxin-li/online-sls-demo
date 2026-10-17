@@ -153,8 +153,31 @@ async function main() {
         if(key==='causal'){assert.equal(source,0);assert.equal(other,0);assert.equal(Number(data.gainNorm),0);}
       }
     };
+    const checkProtocol = async surface => {
+      const reading=await surface.evaluate(()=>{
+        const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),state=root.powerDemo.getState();
+        const phase=document.querySelector('#pr-phase');
+        return {snapshot,state,data:{...phase.dataset},badge:phase.textContent,note:document.querySelector('#pr-phase-note').textContent,
+          title:document.querySelector('#pr-matrix-title').textContent};
+      });
+      const {snapshot,state,data}=reading,deployed=snapshot.phase==='deployment',saved=state.historyIndex!==null;
+      assert.equal(data.phase,snapshot.phase);
+      assert.equal(data.view,saved?'saved-discovery':deployed?'comparison':'discovery');
+      assert.equal(Number(data.discoverySamples),deployed?snapshot.discoveryRecord.t:snapshot.t);
+      assert.equal(Number(data.comparisonSamples),deployed?snapshot.t:0);
+      assert.equal(data.selection,deployed?'complete':'pending');assert.equal(data.synthesis,deployed?'complete':'pending');
+      assert.equal(data.links,deployed?'fixed':'candidates');
+      assert.equal(data.predictionWeights,deployed&&snapshot.experiment==='communication'?'fixed':'adaptive');
+      if(saved){
+        assert.match(reading.note,/Saved discovery links.*Plant and costs remain/);
+        assert.match(reading.title,/Discovery links at/);
+      }else if(deployed)assert.match(reading.note,/Offline selection and synthesis complete.*discovery samples.*Links/);
+      else {assert.match(reading.badge,/Discovery/);assert.match(reading.note,/Dense discovery/);}
+      return reading;
+    };
     const checkPlots = async () => {
       await checkVoltageMetrics(page);
+      await checkProtocol(page);
       await checkForecastObservation(page);
       await checkSourceHistory(page);
       await checkCommandInspection(page);
@@ -225,6 +248,7 @@ async function main() {
     };
     await inspectLinks();
     await checkVoltageMetrics(page);
+    await checkProtocol(page);
     await page.locator('#pr-command-title').click();
     assert.equal(await page.locator('#pr-command-inspector').getAttribute('open'),'');
 
@@ -255,6 +279,22 @@ async function main() {
     assert.equal(await page.locator('#pr-cost-detail tr').count(), 4);
     await checkPlots();
     await inspectLinks();
+
+    // Archived discovery connectivity is not a change to the deployed controller.
+    const liveBefore=await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
+    assert.ok(Number(await page.locator('#pr-topology-history').getAttribute('max'))>0,'Discovery produced inspectable link changes');
+    await page.locator('#pr-topology-history').press('Home');
+    await checkProtocol(page);
+    assert.equal(await page.locator('#pr-matrix .matrix-columns text[data-noisy="true"]').count(),0,'Current quality is not painted onto historical links');
+    assert.equal(await page.locator('#pr-source-fault').isDisabled(),true);
+    assert.equal(await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),liveBefore);
+    await page.screenshot({path:path.join(output,'protocol-history.png'),fullPage:true});
+    await page.locator('#pr-matrix-view').selectOption('change');
+    await checkProtocol(page);await checkForecastObservation(page);await checkSourceHistory(page);await checkCommandInspection(page);
+    assert.equal(await page.locator('#pr-source-fault').isDisabled(),false,'Leaving history through matrix view restores live source actions immediately');
+    assert.ok(await page.locator('#pr-matrix .matrix-columns text[data-noisy="true"]').count()>0,'Live source quality returns with current links');
+    assert.equal(await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),liveBefore);
+    await page.locator('#pr-matrix-view').selectOption('links');
 
     // Metric changes during playback must retain finite curves and bounded labels.
     await page.locator('#pr-run').click();
@@ -382,6 +422,7 @@ async function main() {
       assert.deepEqual(mobileAfter.snapshot.cumulative,mobileBefore.snapshot.cumulative);
     }
     await checkVoltageMetrics(phone);
+    await checkProtocol(phone);
     const sourceBounds=await phone.locator('#pr-source-fault').boundingBox();
     assert.ok(sourceBounds.width>=44&&sourceBounds.height>=44,'Explicit source action has a usable touch target');
     const dimensions = await phone.evaluate(() => ({ page: document.documentElement.scrollWidth, viewport: innerWidth }));
@@ -394,7 +435,7 @@ async function main() {
     assert.ok(reportLayout.page<=reportLayout.viewport+1,'Scientific report stays within the mobile page');
     await phone.screenshot({path:path.join(output,'environment.png'),fullPage:true});
     assert.deepEqual(errors, [], 'No browser runtime errors');
-    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), touchEvents, checks: ['playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'continuous mobile power attack', 'mobile touch and layout'], errors }, null, 2));
+    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), touchEvents, checks: ['playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'actual protocol receipt and archived discovery view', 'matrix mode exit restores live source controls without advancing plant', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'continuous mobile power attack', 'mobile touch and layout'], errors }, null, 2));
     console.log('Browser smoke passed');
   } finally {
     if (browser) await browser.close();

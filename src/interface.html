@@ -22,7 +22,7 @@
   <div class="pr-mission">
     <span class="pr-mission-goal"><span class="pr-status-dot" id="pr-voltage-status" aria-hidden="true"></span>Restore the <strong>nominal voltage profile</strong><span class="pr-target"> · Illustrative band 0.95 to 1.05 pu</span></span>
     <span id="pr-voltage-range" class="tabular-nums"></span>
-    <div class="pr-phase-actions"><span id="pr-phase" class="pr-phase-badge">Learning 0 / 180 s</span><button type="button" id="pr-deploy" class="btn btn-deploy" disabled title="Start four controllers on the same fresh disturbance sequence">Compare controllers</button></div>
+    <div class="pr-phase-actions"><span id="pr-phase" class="pr-phase-badge">Discovery 0 / 180 s</span><button type="button" id="pr-deploy" class="btn btn-deploy" disabled title="Start four controllers on the same fresh disturbance sequence">Compare controllers</button></div>
   </div>
   <p id="pr-scenario-status" class="pr-caption" role="status" hidden></p>
   <div class="pr-dashboard">
@@ -95,7 +95,7 @@
     <div class="pr-comparison-controls">
       <label for="pr-power-scenario">Power scenario <select id="pr-power-scenario" aria-label="Power scenario" title="Changing the scenario starts a fresh discovery trial"><option value="reference" selected>Reference</option><option value="solar-outage">Solar outage · 20 s</option></select></label>
       <label id="pr-preset-control" for="pr-preset">Forecasts <select id="pr-preset" aria-label="Forecast preset" title="Changing forecasts starts a new discovery trial"><option value="reliable">Reliable forecasts</option><option value="uniform">Uniform noise</option><option value="mixed" selected>Mixed reliability</option></select></label>
-      <button type="button" class="btn btn-compare" id="pr-compare" title="Advance 180 samples across learning and comparison">Advance 180</button>
+      <button type="button" class="btn btn-compare" id="pr-compare" title="Advance 180 samples across discovery and comparison">Advance 180</button>
     </div>
     <div class="pr-settings"><label class="form-check"><input type="checkbox" id="pr-auto-compare" checked>Start comparison automatically</label><label>Bus <select id="pr-bus" aria-label="Selected bus"></select></label><button type="button" class="btn" id="pr-fault">Repair forecast</button><label class="form-check"><input type="checkbox" id="pr-all-links" checked>All prediction links</label></div>
     <p class="pr-caption" id="pr-fit-detail"></p>
