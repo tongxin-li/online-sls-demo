@@ -487,6 +487,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
           <div><dt>Error <span title="Raw forecast minus revealed forcing">f − w</span></dt><dd id="pr-observed-error">—</dd></div>
         </dl>
         <p class="pr-caption">mpu · 1 mpu = 0.001 pu · Error includes unforecast power changes</p>
+        <p id="pr-forecast-window" class="pr-caption"></p>
+        <p id="pr-forecast-change" class="pr-caption"></p>
         <p id="pr-forecast-support" class="pr-caption"></p>
         <details id="pr-command-inspector" class="pr-command-inspector" hidden>
           <summary id="pr-command-title">Command breakdown</summary>
@@ -2074,9 +2076,57 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       issuedAt:Math.max(0,sample.t-PowerDemo.constants.preview+1),observedAt:sample.t+1,
       forecast,realized,error:forecast-realized};
   }
+  function forecastErrorWindow(samples,source,observedThrough,limit=60) {
+    const window=samples.filter(sample=>sample.t<observedThrough).slice(-limit);
+    if(!window.length) return null;
+    const errors=window.map(sample=>sample.forecast[source-1]-sample.disturbance[source-1]);
+    return {count:window.length,firstAction:window[0].t,lastAction:window.at(-1).t,
+      firstObservedAt:window[0].t+1,lastObservedAt:window.at(-1).t+1,
+      rmse:Math.sqrt(errors.reduce((sum,error)=>sum+error*error,0)/errors.length),
+      bias:errors.reduce((sum,error)=>sum+error,0)/errors.length};
+  }
+  function inspectedSourceHistory() {
+    const inspection=predictionInspection();
+    if(!inspection || historyIndex!==null) return null;
+    const source=inspection.source,stats=forecastErrorWindow(simulation.samples,source,snapshot.t);
+    const event=snapshot.eventLog.filter(event=>event.type==='forecast'&&event.bus===source).at(-1);
+    let change=null;
+    if(event) {
+      // Reset seals the initial preview at t=0. Later actions seal one new
+      // message before executing. Paused toggles cannot rewrite that prefix.
+      const issuedAt=Math.max(1,event.t),firstAction=issuedAt+PowerDemo.constants.preview-1;
+      const message=simulation.forecasts[firstAction];
+      change={changedAt:event.t,firstAction,issuedAt,pairAt:firstAction+1,
+        issued:!!message,observed:!!stats&&stats.lastAction>=firstAction,
+        pairsInWindow:simulation.samples.filter(sample=>sample.t<snapshot.t).slice(-60).filter(sample=>sample.t>=firstAction).length};
+    }
+    return {source,stats,change};
+  }
+  function renderSourceHistory() {
+    const reading=inspectedSourceHistory(),stats=reading?.stats,change=reading?.change;
+    const window=$('forecast-window'),timing=$('forecast-change');
+    window.hidden=timing.hidden=!reading;
+    window.dataset.available=String(!!stats);
+    for(const key of ['count','firstAction','lastAction','firstObservedAt','lastObservedAt','rmse','bias'])
+      window.dataset[key]=stats ? String(stats[key]) : '';
+    window.textContent=stats ? 'Last '+stats.count+' revealed pairs · RMSE '+(1000*stats.rmse).toFixed(3)+' mpu · Bias '+(1000*stats.bias).toFixed(3)+' mpu'
+      : 'No revealed pairs yet';
+    window.title=stats ? 'Observed '+stats.firstObservedAt+' to '+stats.lastObservedAt+' s in this phase. RMSE is root mean square raw forecast minus forcing error. Bias is its signed mean. Past settings and unforecast power may contribute.'
+      : 'Only revealed observations enter this summary. The window holds at most 60 pairs.';
+    timing.dataset.available=String(!!change);
+    for(const key of ['changedAt','firstAction','issuedAt','pairAt','issued','observed','pairsInWindow'])
+      timing.dataset[key]=change ? String(change[key]) : '';
+    timing.textContent=!reading ? '' : !forecastNoiseEnabled() ? 'Noise disabled at β 0 · Unforecast power may still cause error'
+      : !change ? 'Initial setting in this phase · Issued forecasts stay fixed'
+      : (change.issued?'Issued ':'Next issue ')+change.issuedAt+' s · Forecast target '+change.firstAction+' s'
+        +' · First pair '+(change.observed?'revealed ':'due ')+change.pairAt+' s · '+change.pairsInWindow+'/'+(stats?.count || 0)+' window pairs use latest setting';
+    timing.title=change ? 'Latest source setting changed at '+change.changedAt+' s. A newly issued message can enter the current preview command before its target is observed. These times do not promise improved error. Repeated toggles before issue use the latest setting.'
+      : 'Reliability is a setting for newly issued forecasts, not a label inferred from observed error.';
+  }
   function renderForecastObservation(inspection) {
     const panel=$('forecast-observation'),observation=inspectedForecastObservation();
     panel.hidden=!inspection;
+    renderSourceHistory();
     $('forecast-values').hidden=!observation;
     panel.dataset.available=String(!!observation);
     for(const key of ['source','receiver','action','issuedAt','observedAt','forecast','realized','error'])
