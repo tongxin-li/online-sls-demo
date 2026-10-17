@@ -783,13 +783,8 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-18T03:00:00+08:00",
-    "branch": "cloud/refine/20261018-0300",
-    "started_at": "2026-10-18T03:00:37+08:00",
-    "expires_at": "2026-10-18T03:40:37+08:00"
-  },
-  "next_focus": "Validate actual costs and winner handling in the compact communication ledger, inspect desktop and mobile screenshot pixels, then publish only after all checks and expected main guard.",
+  "active_run": null,
+  "next_focus": "Review the existing phase badge and gain learning, support selection and controller synthesis explanation for a compact measured visual progression. Reuse current panels rather than adding another control or diagnostic block. Preserve the readable four-method communication ledger, actual inspected link receipt, recorded reliability regimes, fixed deployment labels and every unfavorable result. No broad numerical study until the primary visual story is clear.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -899,11 +894,11 @@
       "pages_run": 39052070867
     },
     "renewed_completion": {
-      "slot": "2026-10-18T02:00:00+08:00",
-      "branch": "cloud/refine/20261018-0200",
-      "product_ready_commit": "2aacbf0abbb7b8ec32cb9a6bba70068e9ae009e3",
+      "slot": "2026-10-18T03:00:00+08:00",
+      "branch": "cloud/refine/20261018-0300",
+      "product_ready_commit": "156d89bf616f6e5a7b368f775817c1a828bc1fb3",
       "scope": "Completion record only, no product changes",
-      "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and branch workflow results when recovering metadata. Never increment either program count for metadata validation or promote an older branch over newer main."
+      "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and candidate workflow results for metadata recovery. Never count metadata validation as a new invocation or improvement, or promote an older candidate over newer main."
     },
     "previous_renewed_metadata_verification": {
       "commit": "93e438707604f359e1cbb6b758bfa62547a81d91",
@@ -919,6 +914,13 @@
         "product_ready_commit": "45b343518f52427efed17219edbe6799236f0b59",
         "scope": "Completion record only, no product changes",
         "instruction": "This slot is already counted once in renewed_program.completed_count. Read current branch/main workflow state when recovering metadata validation. Do not promote an older source over newer main or increment either count for this metadata record."
+      },
+      {
+        "slot": "2026-10-18T02:00:00+08:00",
+        "branch": "cloud/refine/20261018-0200",
+        "product_ready_commit": "2aacbf0abbb7b8ec32cb9a6bba70068e9ae009e3",
+        "scope": "Completion record only, no product changes",
+        "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and branch workflow results when recovering metadata. Never increment either program count for metadata validation or promote an older branch over newer main."
       }
     ]
   },
@@ -1005,7 +1007,7 @@
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
     "invocation_count": 3,
-    "completed_count": 2,
+    "completed_count": 3,
     "runs": [
       {
         "slot": "2026-10-18T01:00:00+08:00",
@@ -1094,30 +1096,48 @@
       {
         "slot": "2026-10-18T03:00:00+08:00",
         "started_at": "2026-10-18T03:00:37+08:00",
-        "status": "validating_candidate",
+        "status": "completed",
         "candidate_branch": "cloud/refine/20261018-0300",
         "base_commit": "93e438707604f359e1cbb6b758bfa62547a81d91",
-        "counted_completed": false,
+        "counted_completed": true,
         "changes": [
           "Replace the communication plot hover-only key with a compact four-method ledger of actual deployed remote links and cumulative stage cost. Lowest follows actual winners and ties, not a preferred policy; pending zero costs declare no winner.",
           "Raise scoped plot text to 12 px and retain exact plot coordinates, coincident markers, all four policies, closed recorded study, stable cost controls and every scientific setting.",
           "Add read-only pending/value/replay/winner regressions, desktop/mobile data and layout checks, and authorized screenshot pixel previews. No broad benchmark rerun."
         ],
         "tests": {
-          "status": "pending"
+          "suites": 7,
+          "total": 207,
+          "failed": 0,
+          "candidate": "passed",
+          "main_consistency": "passed",
+          "interaction": "Exact current costs, actual remote counts, pending no-winner, ties, feedback winner, exact replay, curve visibility and cost-view independence remain read only.",
+          "browser": "Full desktop/mobile browser suite passed. Every ledger cell matches actual cumulative costs and support counts; 12 px minimum text, nonoverlapping columns and viewport containment verified. Native playback, repeated/continuous attacks, forecast toggles, automatic handoff, thirty live cost switches, all four curves and exact replay remain covered.",
+          "benchmarks": "Not rerun. No engine, controller, objective, limit, gain, source error, forecast timing, physical scenario/default, learning or recorded result changes.",
+          "main": "All 207 tests, build consistency and the full desktop/mobile browser suite passed."
         },
         "screenshots": {
-          "pixel_review": "pending authorized Actions preview"
+          "artifact_id": 12111605771,
+          "artifact_digest": "sha256:723bd8c5f006ef7d7251a5efc4d17fd0ff50fe3ae5fe2b928d74fc7f38dcc9af",
+          "captures": [
+            "communication-ledger-1440.png",
+            "communication-ledger-390.png",
+            "communication-ledger-1440.jpg",
+            "communication-ledger-390.jpg"
+          ],
+          "pixel_review": "Actual desktop 1440 and phone 390 communication section pixels reviewed through authorized Actions JPEG previews. All four method names, remote counts, stage costs and Lowest labels are readable without overlap or clipping. The desktop default marks Learned sparse lowest; the phone reference correctly marks Fixed sparse lowest. Exact coincident sparse point coordinates and honest cost differences are retained."
         },
-        "publication": "unpublished"
+        "publication": "Candidate and main validation succeeded. Generated ready child has the tested source as its single parent and only index.html changed. Expected-main guarded promotion with force false succeeded. Pages succeeded for that exact build version; deployment logs verified.",
+        "source_commit": "c36374407a400cc4db1025ba4533c8cb7308fbab",
+        "published_commit": "156d89bf616f6e5a7b368f775817c1a828bc1fb3",
+        "candidate_run": 39060808257,
+        "main_run": 39061305602,
+        "pages_run": 39061305579,
+        "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed. No public HTTP byte comparison was performed this pass.",
+        "completed_at": "2026-10-17T19:19:37.692Z"
       }
     ],
-    "active_run": {
-      "slot": "2026-10-18T03:00:00+08:00",
-      "branch": "cloud/refine/20261018-0300",
-      "started_at": "2026-10-18T03:00:37+08:00",
-      "expires_at": "2026-10-18T03:40:37+08:00"
-    },
+    "active_run": null,
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
@@ -1137,5 +1157,5 @@
     "baseline_main": "2a9ff26b59565ecac1eb5274fbea4d813a18f24f"
   },
   "completed_count_scope": "Original bounded program, retained at 15. Renewed counts are tracked independently in renewed_program.",
-  "total_completed_count": 17
+  "total_completed_count": 18
 }
