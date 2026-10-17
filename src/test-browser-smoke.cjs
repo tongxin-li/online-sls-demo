@@ -43,27 +43,34 @@ async function main() {
     page.setDefaultTimeout(20000);
     page.on('pageerror', error => errors.push(error.message));
     const address = `http://127.0.0.1:${server.address().port}`;
-    const selectSetting=async(surface,id,value)=>{
+    const withinSettings=async(surface,action)=>{
       const opened=await surface.locator('#pr-adaptation').getAttribute('open')!==null;
       if(!opened)await surface.locator('#pr-adaptation > summary').click();
-      await surface.locator('#pr-'+id).selectOption(value);
+      await action();
       if(!opened)await surface.locator('#pr-adaptation > summary').click();
     };
+    const selectSetting=(surface,id,value)=>withinSettings(surface,()=>surface.locator('#pr-'+id).selectOption(value));
+    const stepSetting=surface=>withinSettings(surface,()=>surface.locator('#pr-step').click());
     const useReference=async surface=>{
-      await surface.locator('#pr-adaptation > summary').click();
-      await surface.locator('#pr-power-scenario').selectOption('reference');
-      await surface.locator('#pr-noise').selectOption('1');
-      await surface.locator('#pr-adaptation > summary').click();
+      await selectSetting(surface,'power-scenario','reference');
+      await selectSetting(surface,'noise','1');
     };
     await page.goto(address, { waitUntil: 'networkidle' });
     await page.locator('#pr-run').waitFor();
-    await page.locator('#pr-speed').selectOption('32');
-    const sample = async () => Number((await page.locator('#pr-clock').textContent()).match(/t = (\d+)/)[1]);
+    assert.equal(await page.locator('#pr-adaptation').getAttribute('open'),null,'Settings start closed');
+    assert.equal(await page.locator('#pr-voltage-details').getAttribute('open'),null,'Voltage diagnostics start closed');
+    assert.equal(await page.locator('#pr-link-history-details').getAttribute('open'),null,'Link archive starts closed');
+    assert.equal(await page.locator('#pr-restart').textContent(),'Restart demo');
+    for(const id of ['step','speed','deploy','attack-mode','strength','view','matrix-view'])assert.equal(await page.locator('#pr-'+id).isVisible(),false,'Advanced '+id+' stays out of the primary flow');
+    for(const id of ['network','matrix','voltage','convergence'])assert.equal(await page.locator('#pr-'+id).isVisible(),true,'Main panel '+id+' stays visible');
+    await page.screenshot({path:path.join(output,'concise-start-desktop.png'),fullPage:true});
+    await selectSetting(page,'speed','32');
+    const sample = async () => Number((await page.locator('#pr-clock').textContent()).match(/(\d+) s/)[1]);
     const waitSamples = async count => {
       const initial = await sample();
       await page.waitForFunction(target => {
         const text = document.querySelector('#pr-clock').textContent;
-        return Number(text.match(/t = (\d+)/)[1]) >= target;
+        return Number(text.match(/(\d+) s/)[1]) >= target;
       }, initial + count);
     };
     const pause = async () => {
@@ -192,7 +199,7 @@ async function main() {
         assert.match(reading.note,/Saved discovery links.*Plant and costs remain/);
         assert.match(reading.title,/Discovery links at/);
       }else if(deployed)assert.match(reading.note,/Offline selection and synthesis complete.*discovery samples.*Links/);
-      else {assert.match(reading.badge,/Discovery/);assert.match(reading.note,/Dense discovery/);}
+      else {assert.match(reading.badge,/Learning/);assert.match(reading.note,/Dense discovery/);}
       return reading;
     };
 
@@ -364,7 +371,7 @@ async function main() {
     });
     assert.deepEqual(initialDefault,{scenario:'forecasted-demand',beta:4,phase:'discovery',t:0});
     assert.equal(await page.locator('#pr-new-scenario').isVisible(),false);
-    assert.match(await page.locator('#pr-scenario-description').textContent(),/Forecast stress β 4/);
+    assert.match(await page.locator('#pr-scenario-description').textContent(),/compare four controllers automatically/);
     await page.locator('#pr-run').click();
     await page.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getState().comparisonComplete,null,{timeout:45000});
     const reviewed=await page.evaluate(()=>{
@@ -407,6 +414,12 @@ async function main() {
       assert.equal(await page.locator('#pr-forecast-change').getAttribute('data-issued'),'false');
       assert.equal(await page.locator('#pr-cost path.data-series').count(),4);
     }
+    const beforeVoltageDetails=await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
+    await page.locator('#pr-voltage-details > summary').click();
+    assert.equal(await page.locator('#pr-voltage-metrics').isVisible(),true);
+    await checkVoltageMetrics(page);
+    assert.equal(await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),beforeVoltageDetails,'Opening voltage details does not change the trial');
+    await page.locator('#pr-voltage-details > summary').click();
     await page.screenshot({path:path.join(output,'completed-source-settings.png'),fullPage:true});
     await page.reload({waitUntil:'networkidle'});
     assert.equal(await page.locator('#pr-run').textContent(),'Continue');
@@ -416,7 +429,21 @@ async function main() {
     assert.equal(completedRestored.continued,false);assert.equal(completedRestored.mode,'completed');
     assert.deepEqual(completedRestored.costs,completedBefore.costs);
     assert.deepEqual(completedRestored.segments,completedBefore.segments);
-    await page.locator('#pr-step').click();assert.equal(await sample(),181);
+    await stepSetting(page);assert.equal(await sample(),181);
+    await page.getByRole('button',{name:'Restart demo',exact:true}).click();
+    const restarted=await page.evaluate(()=>{
+      const root=document.querySelector('#power-response-demo');return {snapshot:root.powerDemo.getSnapshot(),state:root.powerDemo.getState()};
+    });
+    assert.equal(restarted.snapshot.phase,'discovery');assert.equal(restarted.snapshot.t,0);
+    assert.equal(restarted.snapshot.powerScenario,'forecasted-demand');assert.equal(restarted.snapshot.beta,4);
+    assert.equal(restarted.snapshot.deployedSupport,null);assert.equal(restarted.snapshot.discoveryRecord,null);
+    assert.ok(Object.values(restarted.snapshot.cumulative).every(value=>value===0));
+    assert.equal(restarted.snapshot.eventLog.length,0);assert.equal(restarted.state.playing,false);
+    assert.deepEqual(restarted.state.activeAttackBuses,[]);assert.equal(restarted.state.historyIndex,null);
+    assert.equal(await page.locator('#pr-speed').inputValue(),'32');
+    assert.equal(await page.locator('#pr-adaptation').getAttribute('open'),null);
+    assert.equal(await page.locator('#pr-run').textContent(),'Run');
+    await page.screenshot({path:path.join(output,'concise-restarted-desktop.png'),fullPage:true});
     await useReference(page);
     await mark('default scenario completed restored and explicitly continued');
     await mark('loaded');
@@ -441,7 +468,9 @@ async function main() {
     // Independent continuous attacks survive discovery and stop one bus at a time.
     await page.locator('#pr-command-title').click();
     await page.locator('#pr-intervention').selectOption('power');
-    await page.locator('#pr-strength').selectOption('150');
+    await selectSetting(page,'strength','150');
+    assert.equal(await page.locator('#pr-strength').isVisible(),false);
+    assert.match(await page.locator('#pr-attack-hint').textContent(),/^150 kW per pulse · /);
     for(const bus of [20,22,23])await page.getByRole('button',{name:'Toggle continuous attack at bus '+bus,exact:true}).click();
     await waitSamples(3);
     const attacksBefore=await checkPowerAttacks(page,[20,22,23]);
@@ -492,18 +521,20 @@ async function main() {
     // Archived discovery connectivity is not a change to the deployed controller.
     const liveBefore=await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
     assert.ok(Number(await page.locator('#pr-topology-history').getAttribute('max'))>0,'Discovery produced inspectable link changes');
+    await page.locator('#pr-link-history-details > summary').click();
     await page.locator('#pr-topology-history').press('Home');
     await checkProtocol(page);
     assert.equal(await page.locator('#pr-matrix .matrix-columns text[data-noisy="true"]').count(),0,'Current quality is not painted onto historical links');
     assert.equal(await page.locator('#pr-source-fault').isDisabled(),true);
     assert.equal(await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),liveBefore);
     await page.screenshot({path:path.join(output,'protocol-history.png'),fullPage:true});
-    await page.locator('#pr-matrix-view').selectOption('change');
+    await selectSetting(page,'matrix-view','change');
     await checkProtocol(page);await checkForecastObservation(page);await checkSourceHistory(page);await checkCommandInspection(page);
     assert.equal(await page.locator('#pr-source-fault').isDisabled(),false,'Leaving history through matrix view restores live source actions immediately');
     assert.ok(await page.locator('#pr-matrix .matrix-columns text[data-noisy="true"]').count()>0,'Live source quality returns with current links');
     assert.equal(await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),liveBefore);
-    await page.locator('#pr-matrix-view').selectOption('links');
+    await selectSetting(page,'matrix-view','links');
+    await page.locator('#pr-link-history-details > summary').click();
 
     await mark('archived protocol inspection');
 
@@ -559,7 +590,7 @@ async function main() {
     const errorsSeen=[];
     for(let i=0;i<62;i++){
       if(i===3)await audit.locator('#pr-source-fault').click();
-      await audit.locator('#pr-step').click();
+      await stepSetting(audit);
       const reading=await checkSourceHistory(audit),sample=reading.snapshot.lastSample;
       assert.equal(reading.state.playing,false);
       errorsSeen.push(sample.forecast[6]-sample.disturbance[6]);
@@ -577,13 +608,14 @@ async function main() {
     await pulseTail.goto(address,{waitUntil:'networkidle'});
     await useReference(pulseTail);
     await pulseTail.locator('#pr-intervention').selectOption('power');
-    await pulseTail.locator('#pr-attack-mode').selectOption('pulse');
+    await selectSetting(pulseTail,'attack-mode','pulse');
     const finalPulseEvidence=[];
     for(const [bus,steps,width] of [[23,12,1440],[7,24,1440],[8,8,1440],[8,8,390]]){
       await pulseTail.setViewportSize({width,height:1000});
       await selectSetting(pulseTail,'bus',String(bus));
       const result=await pulseTail.evaluate(({bus,steps,width})=>{
         document.querySelector('#pr-restart').click();
+        const intervention=document.querySelector('#pr-intervention');intervention.value='power';intervention.dispatchEvent(new Event('change'));
         document.querySelector('#pr-pulse').click();
         document.querySelector('#pr-run').click();
         if(width===390){
@@ -619,7 +651,7 @@ async function main() {
       },bus);
       for(const key of ['t','costs','states','events','applied','badgePower','status','toolbar'])assert.deepEqual(replay[key],result[key],'Final applied sample replay '+key);
       if(bus===8)await pulseTail.screenshot({path:path.join(output,width===390?'final-applied-power-mobile.png':'final-applied-power.png'),fullPage:true});
-      await pulseTail.locator('#pr-step').click();
+      await stepSetting(pulseTail);
       const cleared=await pulseTail.evaluate(bus=>{
         const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot();
         const badge=document.querySelector('#pr-network [data-bus="'+bus+'"] .pe-attack-badge');
@@ -705,7 +737,7 @@ async function main() {
     stress.on('pageerror',error=>errors.push(error.message));
     await stress.goto(address,{waitUntil:'networkidle'});
     await useReference(stress);
-    await stress.locator('#pr-speed').selectOption('32');
+    await selectSetting(stress,'speed','32');
     await stress.locator('#pr-intervention').selectOption('power');
     for(const bus of [20,23])await stress.getByRole('button',{name:'Toggle continuous attack at bus '+bus,exact:true}).click();
     await stress.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t>=3);
@@ -722,11 +754,11 @@ async function main() {
     });
     assert.equal(legacy.scenario,'reference');assert.equal(legacy.t,legacySaved.privateContent.t);assert.equal(legacy.state.playing,false);
     assert.deepEqual(legacy.costs,legacySaved.modelContent.cumulativeCost);
-    assert.equal(await migration.locator('#pr-new-scenario').isVisible(),true);
+    await withinSettings(migration,async()=>assert.equal(await migration.locator('#pr-new-scenario').isVisible(),true));
     assert.match(await migration.locator('#pr-scenario-description').textContent(),/Restored run/);
     assert.match(await migration.locator('#pr-trial-context').textContent(),/unforecast power requests/);
     await migration.screenshot({path:path.join(output,'restored-trial-new-scenario.png'),fullPage:true});
-    await migration.locator('#pr-new-scenario').click();
+    await withinSettings(migration,()=>migration.locator('#pr-new-scenario').click());
     const started=await migration.evaluate(()=>{
       const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot();
       return {scenario:snapshot.powerScenario,beta:snapshot.beta,events:snapshot.eventLog,state:root.powerDemo.getState()};
@@ -742,9 +774,9 @@ async function main() {
     await migration.locator('#pr-adaptation > summary').click();
     assert.equal(await migration.locator('#pr-trial-context').isVisible(),true);
     assert.match(await migration.locator('#pr-trial-context').textContent(),/All forecast sources are noisy.*No reliable alternative to select/);
-    assert.equal(await migration.locator('#pr-new-scenario').isVisible(),true);
+    await withinSettings(migration,async()=>assert.equal(await migration.locator('#pr-new-scenario').isVisible(),true));
     await migration.screenshot({path:path.join(output,'all-sources-noisy.png'),fullPage:true});
-    await migration.locator('#pr-new-scenario').click();
+    await withinSettings(migration,()=>migration.locator('#pr-new-scenario').click());
     assert.equal(await migration.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().faults.length),15);
     assert.equal(await migration.locator('#pr-trial-context').isVisible(),false);
     await migration.close();
@@ -798,7 +830,7 @@ async function main() {
     await stress.screenshot({path:path.join(output,'forecast-stress-desktop.png'),fullPage:true});
     await fs.writeFile(path.join(output,'forecast-stress.json'),JSON.stringify({fresh:freshStress,comparison:stressResult},null,2));
     await selectSetting(stress,'noise','16');
-    for(let i=0;i<6;i++)await stress.locator('#pr-step').click();
+    for(let i=0;i<6;i++)await stepSetting(stress);
     const savedStress=await stress.evaluate(()=>({saved:window.openai.widgetState,
       snapshot:((snapshot)=>({beta:snapshot.beta,t:snapshot.t,states:snapshot.states,cumulative:snapshot.cumulative}))(document.querySelector('#power-response-demo').powerDemo.getSnapshot())}));
     assert.equal(savedStress.saved.privateContent.initialOptions.beta,16);
@@ -827,7 +859,7 @@ async function main() {
     await phone.goto(address, { waitUntil: 'networkidle' });
     const mobileDefault=await phone.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().powerScenario);
     assert.equal(mobileDefault,'forecasted-demand');
-    await phone.locator('#pr-step').tap();
+    await stepSetting(phone);
     assert.ok(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Default scenario fits the narrow mobile page');
     await phone.screenshot({path:path.join(output,'default-scenario-mobile.png'),fullPage:true});
     await useReference(phone);
@@ -850,13 +882,13 @@ async function main() {
       for(const bus of [20,22,23])await phone.getByRole('button',{name:'Toggle continuous attack at bus '+bus,exact:true}).tap();
       await phone.getByRole('button',{name:'Stop attack at bus 23',exact:true}).waitFor();
       assert.equal(await phone.locator('#pr-pulse').getAttribute('aria-pressed'),'true');
-      const attackStart=Number((await phone.locator('#pr-clock').textContent()).match(/t = (\d+)/)[1]);
-      await phone.waitForFunction(target=>Number(document.querySelector('#pr-clock').textContent.match(/t = (\d+)/)[1])>=target,attackStart+3);
+      const attackStart=Number((await phone.locator('#pr-clock').textContent()).match(/(\d+) s/)[1]);
+      await phone.waitForFunction(target=>Number(document.querySelector('#pr-clock').textContent.match(/(\d+) s/)[1])>=target,attackStart+3);
       await checkPowerAttacks(phone,[20,22,23]);
       await phone.screenshot({path:path.join(output,'concurrent-attacks-mobile.png'),fullPage:true});
       await phone.getByRole('button',{name:'Stop attack at bus 22',exact:true}).tap();
       const mobileStopped=await readPowerAttacks(phone);
-      await phone.waitForFunction(target=>Number(document.querySelector('#pr-clock').textContent.match(/t = (\d+)/)[1])>=target,mobileStopped.t+3);
+      await phone.waitForFunction(target=>Number(document.querySelector('#pr-clock').textContent.match(/(\d+) s/)[1])>=target,mobileStopped.t+3);
       const mobileContinuing=await checkPowerAttacks(phone,[20,23]);
       assert.equal(mobileContinuing.counts[22],mobileStopped.counts[22],'A touch stops only its bus');
       for(const bus of [20,23])assert.ok(mobileContinuing.counts[bus]>mobileStopped.counts[bus]);
@@ -938,7 +970,7 @@ async function main() {
     await phone.screenshot({ path: path.join(output, 'mobile.png'), fullPage: true });
     await selectSetting(phone,'noise','8');
     assert.match(await phone.locator('#pr-noise-caption').textContent(),/(?=.*Stress)(?=.*mpu)/i);
-    await phone.locator('#pr-step').tap();
+    await stepSetting(phone);
     const stressLayout=await phone.evaluate(()=>({page:document.documentElement.scrollWidth,viewport:innerWidth,
       beta:document.querySelector('#power-response-demo').powerDemo.getSnapshot().beta}));
     assert.equal(stressLayout.beta,8);assert.ok(stressLayout.page<=stressLayout.viewport+1,'Forecast stress controls fit the mobile page');
@@ -949,7 +981,7 @@ async function main() {
     await phone.screenshot({path:path.join(output,'environment.png'),fullPage:true});
     await mark('mobile inspection and responsive evidence');
     assert.deepEqual(errors, [], 'No browser runtime errors');
-    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), timings, touchEvents, checks: ['pending source settings at every finite segment preserve exact replay and first new issuance', 'final applied power remains visible after request expiry with exact replay', 'paused completed source settings preserve Continue and exact replay', 'restored mixed trial preserves old costs until explicit new scenario', 'all noisy sources notice and fresh reliable inverter map', 'shipped demand and solar default completes and pauses after 180 comparison samples', 'actual scheduled power visual metadata and forecasted event labels', 'completed default restores and explicitly continues', 'extended forecast stress clears previous power attacks and costs', 'all four measured forecast stress curves and actual prediction commands', 'extended stress saved trial replay and reference return', 'forecast stress desktop and mobile layout', 'actual forecast setting timestamps and typed mixed event markers', 'keyboard matrix inspection and native command table scrolling', 'visible temporal source gain without hover', 'playback', 'repeated forecast bus clicks', 'three simultaneous continuous power attacks and independent stop', 'all attack sources survive automatic handoff', 'actual protocol receipt and archived discovery view', 'matrix mode exit restores live source controls without advancing plant', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'three simultaneous mobile power attacks and independent stop', 'mobile touch and layout'], errors }, null, 2));
+    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), timings, touchEvents, checks: ['primary controls and four panels stay visible while advanced settings start closed', 'restart returns to a fresh learning trial with selected options', 'pending source settings at every finite segment preserve exact replay and first new issuance', 'final applied power remains visible after request expiry with exact replay', 'paused completed source settings preserve Continue and exact replay', 'restored mixed trial preserves old costs until explicit new scenario', 'all noisy sources notice and fresh reliable inverter map', 'shipped demand and solar default completes and pauses after 180 comparison samples', 'actual scheduled power visual metadata and forecasted event labels', 'completed default restores and explicitly continues', 'extended forecast stress clears previous power attacks and costs', 'all four measured forecast stress curves and actual prediction commands', 'extended stress saved trial replay and reference return', 'forecast stress desktop and mobile layout', 'actual forecast setting timestamps and typed mixed event markers', 'keyboard matrix inspection and native command table scrolling', 'visible temporal source gain without hover', 'playback', 'repeated forecast bus clicks', 'three simultaneous continuous power attacks and independent stop', 'all attack sources survive automatic handoff', 'actual protocol receipt and archived discovery view', 'matrix mode exit restores live source controls without advancing plant', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'three simultaneous mobile power attacks and independent stop', 'mobile touch and layout'], errors }, null, 2));
     console.log('Browser smoke passed');
   } finally {
     if (browser) await browser.close();

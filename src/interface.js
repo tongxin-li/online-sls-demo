@@ -653,7 +653,12 @@
   });
   $('step').addEventListener('click', () => { if(comparisonComplete())comparisonContinued=true;stop(); if(snapshot.mode==='completed'){simulation.extend();snapshot=simulation.snapshot();} tick(); save(); });
   $('restart').addEventListener('click', () => {
-    resetExperiment(); announce('Ready'); render(); save();
+    if(comparing) return;
+    // Restart is one complete new trial under the selected settings.
+    // The optional link rebuild in settings preserves edited source reliability.
+    startSelectedExperiment();
+    $('matrix-view').value='links';
+    announce('Ready · Run to learn and compare'); render(); save();
   });
   $('speed').addEventListener('change', () => { if (playing) { clearTimeout(timer); nextTickAt=0; schedule(); } save(); });
   $('auto-compare').addEventListener('change',()=>{render();save();});
@@ -662,7 +667,7 @@
     $('tooltip').style.display='none';pin=null;
     drawCost();save();
   });
-  $('strength').addEventListener('change', () => { drawNetwork(); save(); });
+  $('strength').addEventListener('change', () => { renderControls(); drawNetwork(); save(); });
   $('attack-mode').addEventListener('change',()=>{releaseAttack();renderControls();drawNetwork();save();});
   $('intervention').addEventListener('change',()=>{
     const stopped=activeAttacks().length>0;releaseAttack();
@@ -856,7 +861,7 @@
     if ($('cost')) { $('cost').hidden=!showCost; $('cost').style.display=showCost?'':'none'; }
     if ($('convergence')) { $('convergence').hidden=showCost; $('convergence').style.display=showCost?'none':''; }
     if ($('learning-flow')) $('learning-flow').hidden=showCost;
-    if ($('learning-title')) $('learning-title').textContent=showCost ? (snapshot.experiment==='communication'&&snapshot.phase==='discovery'?'Discovery costs':'Controller comparison') : snapshot.experiment==='communication'?'Learning the topology':'Forecast learning';
+    if ($('learning-title')) $('learning-title').textContent=showCost ? (snapshot.experiment==='communication'&&snapshot.phase==='discovery'?'Learning costs':'Controller comparison') : snapshot.experiment==='communication'?'Learning the topology':'Forecast learning';
     if ($('learning-kind')) $('learning-kind').textContent='Original dashed · Matrix adaptation solid';
   }
   function protocolStatus() {
@@ -872,8 +877,8 @@
     const receipt=deployed?'Offline selection and synthesis complete · '+status.discoverySamples+' discovery samples · Fresh comparison · '
       +(status.predictionWeights==='fixed'?'Links and prediction weights fixed':'Links fixed · Prediction correction adapts')
       :'Dense discovery · Candidate sparse links · Offline selection and synthesis at comparison';
-    phase.textContent=deployed?(comparisonComplete()?'Comparison complete':'Comparison trial'):automaticComparison()
-      ?'Discovery '+snapshot.t+' / '+DISCOVERY_SAMPLES+' s':'Discovery '+snapshot.t+' s';
+    phase.textContent=deployed?(comparisonComplete()?'Comparison complete':'Comparing controllers'):automaticComparison()
+      ?'Learning '+snapshot.t+' / '+DISCOVERY_SAMPLES+' s':'Learning '+snapshot.t+' s';
     for(const [key,value] of Object.entries(status))phase.dataset[key]=value===null?'':String(value);
     phase.title=receipt+' · No joint online topology adaptation is claimed.';
     $('phase-note').textContent=status.view==='saved-discovery'
@@ -892,11 +897,11 @@
     const allNoisy=scheduled && snapshot.beta>0 && Array.from({length:PowerDemo.constants.N-1},(_,i)=>i+2).every(bus=>snapshot.faults.includes(bus));
     $('scenario-name').textContent=scheduled?'Demand and solar cycle':snapshot.powerScenario==='solar-outage'?'Solar outage trial':'Reference trial';
     $('scenario-description').textContent=scheduled
-      ?'Forecasts arrive up to 4 s ahead · Forecast stress β '+snapshot.beta
+      ?(automaticComparison()?'Run to learn the links, then compare four controllers automatically':'Manual comparison enabled in Experiment settings')
       :(restoredTrial?'Restored run · ':'')+'Forecast stress β '+snapshot.beta+' · Previous samples and costs retained';
     $('new-scenario').hidden=scheduled && !powers && !allNoisy;
     $('new-scenario').disabled=comparing;
-    $('new-scenario').textContent=scheduled?'Start fresh scenario':'Start new scenario';
+    $('new-scenario').textContent='Restore default scenario';
     $('new-scenario').title='Start a new demand and solar scenario with forecast stress β 4. The new trial starts learning and clears previous trial costs.';
     const status=$('scheduled-power'),applied=Number(scenario.appliedKw)||0;
     status.hidden=!scheduled;
@@ -916,7 +921,7 @@
     const completedRows=snapshot.learning?.completedRows || 0;
     const preparing=!deployed && automaticComparison();
     renderProtocol();renderScenario();
-    if($('deploy')) { $('deploy').hidden=preparing; $('deploy').disabled=comparing || (!deployed && !snapshot.canDeploy); $('deploy').textContent=deployed?'Learn again':'Compare controllers'; $('deploy').title=deployed?'Start a new discovery trial with these forecast settings':snapshot.canDeploy?'Start four controllers on the same fresh disturbance sequence':'Collecting observed samples for comparison'; }
+    if($('deploy')) { $('deploy').hidden=preparing; $('deploy').disabled=comparing || (!deployed && !snapshot.canDeploy); $('deploy').textContent=deployed?'Rebuild prediction links':'Compare now'; $('deploy').title=deployed?'Discard this trial and learn new links from the current forecast source settings':snapshot.canDeploy?'Start four controllers on the same fresh disturbance sequence':'Collecting observed samples for comparison'; }
 
     $('noise-control').hidden=!communication; $('noise-caption').hidden=!communication; $('preset-control').hidden=communication;
     const beta=snapshot.beta || 0;
@@ -941,7 +946,8 @@
       button.setAttribute('aria-pressed',String(visible.has(item.key)));
     });
 
-    $('clock').textContent=(deployed?'Comparison t = ':'Discovery t = ')+snapshot.t+' s';
+    $('clock').textContent=snapshot.t+' s';
+    $('clock').hidden=!deployed;
     $('learning').textContent=frozen?'Plant held · '+snapshot.mode:deployed?'Prediction links fixed':completedRows+' completed responses';
     $('run').textContent=playing?'Pause':comparisonComplete()?'Continue':frozen && snapshot.mode!=='converged'?'Fit':'Run';
     $('run').disabled=comparing;
@@ -971,7 +977,7 @@
       $('stop-attacks').title='Stop new requests at all '+attackCount+' active '+(attackCount===1?'bus':'buses')+'. Existing disturbances will decay.';
     }
     $('pulse').dataset.attackState=forecast?(forecastNoisy(selectedBus)?'noisy':'quiet'):feedback.state;
-    $('attack-hint').textContent=forecast?(snapshot.phase==='deployment'?'Links remain fixed':forecastNoiseEnabled()?'New forecasts only':'No noise at β 0'):feedback.hint;
+    $('attack-hint').textContent=forecast?(snapshot.phase==='deployment'?'Links remain fixed':forecastNoiseEnabled()?'New forecasts only':'No noise at β 0'):Number($('strength').value)+' kW per pulse · '+feedback.hint;
     $('step').textContent=frozen?'100 fit steps':'Step';
     $('step').disabled=comparing || snapshot.mode==='converged';
     $('freeze').hidden=true;

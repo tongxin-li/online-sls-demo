@@ -323,3 +323,94 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   .pr-scenario-heading .btn { min-height:44px; }
   .pr-scheduled-power { font-size:10px; line-height:1.5; }
 }
+
+/* Keep the experiment visible and place optional controls behind disclosure. */
+.research-header { padding:22px 0 18px; }
+.pr-scenario-heading { margin-bottom:14px; }
+.pr-scenario-heading strong { font-size:16px; font-weight:600; letter-spacing:-.3px; }
+.pr-scenario-heading p { margin-top:4px; font-size:12px; line-height:1.5; }
+.pr-controlbar { padding-bottom:14px; gap:14px 22px; }
+.pr-toolbar { flex-shrink:0; }
+.pr-toolbar .btn-play { min-width:92px; }
+#pr-restart { background:transparent; color:var(--muted-foreground); padding:8px 9px; }
+#pr-restart:hover { background:var(--muted); color:var(--foreground); }
+.pr-toolbar .pr-phase-badge { margin-left:5px; }
+#pr-clock { min-width:36px; font-size:12px; }
+.pr-actions { flex-wrap:wrap; justify-content:flex-end; gap:8px; }
+#pr-intervention { background:transparent; border-color:var(--border); max-width:100%; }
+.pr-attack-hint { flex-basis:100%; text-align:right; font-size:11px; }
+.pr-mission { gap:8px 16px; padding-bottom:12px; font-size:11px; }
+#pr-voltage-range { margin-left:auto; }
+.pr-dashboard { gap:12px; }
+.pr-panel { border-radius:18px; padding:15px 17px 12px; }
+.pr-subhead { min-height:26px; gap:5px 12px; }
+.pr-subhead h2 { font-size:16px; letter-spacing:-.3px; }
+.pr-comparison-summary { font-size:12px; line-height:1.45; }
+.pr-panel-details { margin-top:6px; border-top:1px solid var(--border); }
+.pr-panel-details>summary { min-height:32px; padding:7px 0 5px; font-size:11px; width:100%; }
+.pr-panel-details>summary::after { content:'›'; margin-left:auto; padding-right:2px; font-size:19px; line-height:14px; transform:rotate(90deg); transition:transform .15s; }
+.pr-panel-details[open]>summary::after { transform:rotate(-90deg); }
+.pr-panel-details .pr-voltage-table { margin-top:5px; }
+.pr-panel-details #pr-voltage-metrics-note { margin-bottom:5px; }
+.pr-panel-details #pr-topology-note { margin:5px 0 3px; line-height:1.5; }
+.pr-topology-status { margin-bottom:5px; }
+.pr-bottomline { min-height:42px; gap:10px 16px; }
+.pr-adaptation { padding-bottom:5px; }
+.pr-adaptation>summary { min-height:42px; font-size:12px; }
+.pr-settings-group { display:flex; align-items:center; flex-wrap:wrap; gap:12px 20px; padding:8px 0 12px; }
+.pr-setting-control { display:inline-flex; align-items:center; gap:9px; color:var(--muted-foreground); font-size:12px; }
+.pr-setting-control:has(select[hidden]) { display:none; }
+.pr-attack-settings:not(:has(select:not([hidden]))) { display:none; }
+.pr-settings-group select,#pr-speed,#pr-view,#pr-matrix-view { min-height:36px; padding:6px 10px; background:#fff; border:1px solid var(--border); border-radius:8px; font-size:12px; color:var(--foreground); }
+.pr-settings-group .btn { min-height:36px; padding:6px 12px; font-size:12px; }
+.pr-session-settings { padding-top:0; }
+.pr-adaptation .pr-overlap-note { margin:0 0 10px; max-width:1000px; line-height:1.55; }
+.pr-adaptation .pr-experiment-bar { padding-top:10px; border-top:1px solid var(--border); }
+.pr-adaptation .pr-comparison-controls { padding:4px 0 8px; }
+.pr-adaptation .pr-settings { padding:8px 0 12px; }
+.pr-adaptation #pr-fit-detail:empty { display:none; }
+@media(max-width:1100px) {
+  .pr-controlbar { flex-wrap:wrap; }
+  .pr-actions { margin-left:auto; }
+  .pr-attack-hint { display:none; }
+}
+@media(max-width:650px) {
+  .research-header { padding:19px 0 16px; }
+  .pr-scenario-heading { margin-bottom:12px; }
+  .pr-controlbar { gap:12px; padding-bottom:12px; }
+  .pr-toolbar { width:100%; flex-wrap:nowrap; gap:5px; }
+  .pr-toolbar .btn-play { min-width:82px; }
+  .pr-toolbar .pr-phase-badge { margin-left:auto; font-size:10px; padding:5px 7px; }
+  #pr-restart { padding-left:7px; padding-right:7px; font-size:12px; }
+  #pr-clock { flex-basis:auto; margin-left:2px; min-width:33px; font-size:11px; }
+  .pr-actions { display:flex; width:100%; gap:8px; margin-left:0; }
+  .pr-actions #pr-intervention { flex:1 1 120px; width:auto; padding:8px 10px; font-size:12px; }
+  .pr-actions .btn-attack { flex:1 1 120px; width:auto; padding:8px 10px; font-size:12px; }
+  .pr-actions .btn-stop-attacks { flex:0 1 auto; min-height:44px; margin-left:auto; }
+  .pr-mission { padding-bottom:10px; gap:6px 12px; }
+  .pr-mission-goal { flex-basis:auto; }
+  #pr-voltage-range { font-size:11px; }
+  .pr-panel { padding:13px 12px 10px; border-radius:16px; }
+  .pr-subhead h2 { font-size:15px; }
+  .pr-panel-details>summary { min-height:44px; padding:10px 0 8px; font-size:12px; }
+  .pr-settings-group { align-items:flex-start; gap:10px 14px; padding-bottom:12px; }
+  .pr-setting-control { flex:1 1 160px; justify-content:space-between; gap:8px; font-size:12px; }
+  .pr-setting-control select { min-width:0; max-width:70%; }
+  .pr-settings-group select,.pr-settings-group .btn,#pr-speed,#pr-view,#pr-matrix-view { min-height:44px; padding:8px 10px; }
+  .pr-adaptation>summary { min-height:46px; }
+}
+@media(max-width:360px) {
+  .pr-toolbar { flex-wrap:wrap; }
+  .pr-toolbar .pr-phase-badge { margin-left:auto; }
+  #pr-clock { min-width:29px; }
+  .pr-actions .btn-attack { grid-column:auto; }
+}
+@media(pointer:coarse) {
+  .pr-panel-details>summary,.pr-settings-group select,.pr-settings-group .btn,#pr-speed,#pr-view,#pr-matrix-view { min-height:44px; }
+}
+#power-response-demo[data-interaction='power'] .pr-attack-hint { display:block; }
+@media(max-width:650px) {
+  #power-response-demo[data-interaction='power'] .pr-attack-hint { text-align:left; font-size:11px; }
+}
+
+.pr-controlbar { align-items:flex-start; }

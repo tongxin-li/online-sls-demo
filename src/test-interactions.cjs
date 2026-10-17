@@ -259,10 +259,10 @@ test('matrix reference survives pulses, forecast changes and exact saved replay'
   restored.click('fault');assert.deepEqual(restored.saved().privateContent.matrixReference,reference);
 });
 
-test('deployment replay is exact and Learn again starts a fresh discovery trial',async()=>{
+test('deployment replay is exact and Rebuild prediction links starts a fresh discovery trial',async()=>{
   const h=harness();h.check('auto-compare',false);h.change('attack-mode','pulse');const comparison=h.click('compare');await h.clock.until(()=>!h.node('compare').disabled);await comparison;
   assert.equal(h.snapshot().canDeploy,true);h.click('deploy');assert.equal(h.snapshot().phase,'deployment');assert.equal(h.snapshot().t,0);
-  assert.equal(h.node('deploy').textContent,'Learn again');assert.equal(h.node('deploy').disabled,false);
+  assert.equal(h.node('deploy').textContent,'Rebuild prediction links');assert.equal(h.node('deploy').disabled,false);
   h.key('keydown','d');await h.samples(3);h.key('keyup','d');h.click('run');
   const restored=harness(h.saved());assert.equal(restored.snapshot().phase,'deployment');
   assert.deepEqual(restored.snapshot().deployedSupport,h.snapshot().deployedSupport);
@@ -408,7 +408,7 @@ test('version thirteen replay reconstructs topology events from every physical s
   assert.equal(restored.state().historyIndex,null);
 });
 
-test('deployment and its reset preserve the completed discovery history while Learn again clears it',async()=>{
+test('deployment preserves discovery history and primary restart clears the whole trial',async()=>{
   const h=topologyHarness();await compare(h);const discovery=h.state().topology;
   h.click('deploy');const frozen=h.state().topology;
   assert.deepEqual(frozen,{...discovery,phase:'deployment'});assert.equal(h.snapshot().t,0);
@@ -416,9 +416,9 @@ test('deployment and its reset preserve the completed discovery history while Le
   const restored=harness(h.saved());assert.deepEqual(restored.state().topology,frozen);
   assert.equal(restored.snapshot().phase,'deployment');
   h.node('topology-history').value='1';h.event('topology-history','input');
-  h.click('restart');assert.equal(h.snapshot().t,0);assert.equal(h.snapshot().phase,'deployment');
-  assert.deepEqual(h.state().topology,frozen);assert.equal(h.state().historyIndex,null);
-  h.click('deploy');assert.equal(h.snapshot().phase,'discovery');assert.equal(h.snapshot().t,0);
+  h.click('restart');assert.equal(h.snapshot().t,0);assert.equal(h.snapshot().phase,'discovery');
+  assert.equal(h.snapshot().deployedSupport,null);assert.equal(h.snapshot().discoveryRecord,null);
+  assert.equal(h.state().historyIndex,null);
   assert.equal(h.state().topology.events.length,0);assert.equal(h.state().topology.lastT,0);
   assert.equal(h.state().topology.phase,'discovery');assert.equal(h.state().historyIndex,null);
 });
@@ -480,7 +480,7 @@ test('Continuous is the default and a released bus click repeats one pulse per s
   assert.equal(h.snapshot().t,16);assert.equal(pulses(h).length,16);
   assert.deepEqual(pulses(h).map(event=>event.t),Array.from({length:16},(_,i)=>i));
   assert.ok(pulses(h).every(event=>event.bus===14));
-  assert.equal(h.node('attack-hint').textContent,'Repeats until stopped');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Repeats until stopped');
 });
 
 test('clicking the same bus stops a continuous attack without adding a final pulse',async()=>{
@@ -570,7 +570,7 @@ test('continuous attacks survive ordinary focus changes but stop on window blur'
   assert.equal(pulses(h).length,4);assert.equal(h.node('pulse')['aria-pressed'],'true');
   h.window.dispatch('blur');
   assert.equal(h.node('pulse').dataset.attackState,'fading','Window blur must repaint the released attack before another physical sample');
-  assert.equal(h.node('attack-hint').textContent,'Disturbance fading');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Disturbance fading');
   assert.equal(h.node('pulse')['aria-pressed'],'false');
   await h.samples(2);
   assert.equal(pulses(h).length,4);assert.equal(h.node('pulse')['aria-pressed'],'false');assert.equal(h.state().playing,true);
@@ -620,20 +620,20 @@ test('changing attack mode stops repetition without deleting pending or applied 
 test('attack feedback separates continuous requests from fading and paused physical disturbances',async()=>{
   const h=harness(),bus=h.bus(7);
   assert.equal(h.node('pulse').dataset.attackState,'idle');
-  assert.equal(h.node('attack-hint').textContent,'Click to start or stop');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Click to start or stop');
   pointerClick(h,bus);
   assert.equal(h.snapshot().pendingPulses.length,1);
   assert.equal(h.node('pulse').dataset.attackState,'continuous','Active repetition takes precedence over its queued request');
-  assert.equal(h.node('attack-hint').textContent,'Repeats until stopped');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Repeats until stopped');
   await h.samples(4);
   const tails=plain(h.snapshot().activePulses);
   pointerClick(h,bus);
   assert.deepEqual(h.snapshot().activePulses,tails,'Stopping new requests must preserve the applied disturbance');
   assert.equal(h.node('pulse').dataset.attackState,'fading');
-  assert.equal(h.node('attack-hint').textContent,'Disturbance fading');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Disturbance fading');
   h.click('run');
   assert.equal(h.node('pulse').dataset.attackState,'paused');
-  assert.equal(h.node('attack-hint').textContent,'Paused · Disturbance remains');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Paused · Disturbance remains');
   await h.samples(3);
   assert.deepEqual(h.snapshot().activePulses,tails,'Pause holds the physical disturbance at its current age');
   h.click('run');
@@ -650,19 +650,19 @@ test('attack feedback separates continuous requests from fading and paused physi
   await h.samples(1);
   assert.equal(h.snapshot().lastPulseApplications.length,0);
   assert.equal(h.node('pulse').dataset.attackState,'idle');
-  assert.equal(h.node('attack-hint').textContent,'Click to start or stop');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Click to start or stop');
 });
 
 test('pulse feedback distinguishes a held gesture from pending requests and fading tails',async()=>{
   const h=harness();h.change('attack-mode','pulse');
-  assert.equal(h.node('attack-hint').textContent,'Click or hold');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Click or hold');
   h.event('pulse','pointerdown');
   assert.equal(h.node('pulse').dataset.attackState,'held');
-  assert.equal(h.node('attack-hint').textContent,'Release to stop');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Release to stop');
   assert.equal(h.snapshot().pendingPulses.length,1);
   h.event('pulse','pointerup');h.click('pulse',1);
   assert.equal(h.node('pulse').dataset.attackState,'pending');
-  assert.equal(h.node('attack-hint').textContent,'Queued for next sample');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Queued for next sample');
   await h.samples(1);
   assert.equal(h.node('pulse').dataset.attackState,'fading');
   h.quickClick();
@@ -670,7 +670,7 @@ test('pulse feedback distinguishes a held gesture from pending requests and fadi
   assert.equal(h.node('pulse').dataset.attackState,'pending','A fresh pending request takes precedence over an older fading tail');
   h.key('keydown','d');
   assert.equal(h.node('pulse').dataset.attackState,'held','An explicit keyboard hold takes precedence over pending requests');
-  assert.equal(h.node('attack-hint').textContent,'Release to stop');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Release to stop');
   h.key('keyup','d');
   assert.equal(h.node('pulse').dataset.attackState,'pending');
   await h.samples(1);
@@ -683,13 +683,13 @@ test('attack feedback belongs to the selected bus while other continuous attacks
   h.change('bus',14);
   assert.equal(h.node('pulse').dataset.attackState,'idle');
   assert.equal(h.node('pulse-label').textContent,'Attack bus 14');
-  assert.equal(h.node('attack-hint').textContent,'Click to start or stop');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Click to start or stop');
   pointerClick(h,h.node('pulse'));
   assert.deepEqual(h.state().activeAttackBuses,[7,14]);assert.equal(h.node('pulse').dataset.attackState,'continuous');
   assert.equal(h.state().selectedBus,14);assert.ok(h.snapshot().activePulses.every(event=>event.bus===7));
   h.change('bus',7);
   assert.equal(h.node('pulse').dataset.attackState,'continuous');
-  assert.equal(h.node('attack-hint').textContent,'Repeats until stopped');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Repeats until stopped');
 });
 
 test('switching attack mode updates feedback while retaining queued and applied disturbances',async()=>{
@@ -697,14 +697,14 @@ test('switching attack mode updates feedback while retaining queued and applied 
   h.change('attack-mode','pulse');
   assert.equal(h.snapshot().pendingPulses.length,1);
   assert.equal(h.node('pulse').dataset.attackState,'pending');
-  assert.equal(h.node('attack-hint').textContent,'Queued for next sample');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Queued for next sample');
   await h.samples(2);
   h.key('keydown','d');await h.samples(1);
   const tails=plain(h.snapshot().activePulses);
   h.change('attack-mode','continuous');
   assert.deepEqual(h.snapshot().activePulses,tails);
   assert.equal(h.node('pulse').dataset.attackState,'fading');
-  assert.equal(h.node('attack-hint').textContent,'Disturbance fading');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Disturbance fading');
   assert.equal(h.node('pulse')['aria-pressed'],'false');
 });
 
@@ -759,7 +759,7 @@ test('Compare controllers clears discovery attacks and schedules a fresh visible
   h.seriesButton('causal').dispatch('click');assert.deepEqual(h.comparison().plotted,['causal']);
 });
 
-test('Learn again cancels comparison playback and attacks and restores the discovery cost view',async()=>{
+test('Rebuild prediction links cancels comparison playback and attacks and restores the discovery cost view',async()=>{
   const h=harness();h.check('auto-compare',false);await compare(h);h.click('deploy');h.change('cost-metric','gap');
   pointerClick(h,h.bus(14));await h.samples(3);assert.ok(pulses(h).length>0);
   h.click('deploy');
@@ -768,7 +768,7 @@ test('Learn again cancels comparison playback and attacks and restores the disco
   assert.equal(h.snapshot().eventLog.length,0);assert.equal(h.snapshot().activePulses.length,0);
   assert.deepEqual(h.comparison().active,['online','scalar','static','causal']);assert.deepEqual(h.comparison().plotted,['online','scalar','static','causal']);
   assert.equal(h.node('cost-metric').hidden,false);assert.equal(h.node('cost-metric').value,'total');
-  assert.equal(h.node('deploy').textContent,'Compare controllers');assert.equal(h.node('deploy').disabled,true);
+  assert.equal(h.node('deploy').textContent,'Compare now');assert.equal(h.node('deploy').disabled,true);
   await h.samples(3);assert.equal(h.snapshot().t,0);
 });
 
@@ -808,7 +808,7 @@ test('automatic comparison keeps the four controller cost view visible during le
   assert.equal(h.node('deploy').hidden,true);assert.equal(h.node('view').hidden,false);
   assert.equal(h.node('cost-content').hidden,false);assert.equal(h.node('learning-content').hidden,true);
   assert.equal(h.node('learning-title').textContent,'Controller comparison');
-  assert.equal(h.node('phase').textContent,'Discovery 0 / 180 s');
+  assert.equal(h.node('phase').textContent,'Learning 0 / 180 s');
   h.change('view','learning');assert.equal(h.node('cost-content').hidden,true);assert.equal(h.node('learning-content').hidden,false);
   assert.equal(h.node('learning-title').textContent,'Forecast learning');assert.equal(h.node('freeze').hidden,true);
   h.change('view','cost');h.check('auto-compare',false);
@@ -830,7 +830,7 @@ test('playback hands off exactly after 180 discovery samples and starts comparis
   assert.equal(h.state().playing,true);assert.equal(h.clock.tasks.size,1);
   assert.deepEqual(h.comparison().active,['online','scalar','static','causal']);
   assert.equal(h.node('cost-content').hidden,false);assert.equal(h.node('learning-content').hidden,true);
-  assert.equal(h.node('deploy').textContent,'Learn again');assert.equal(h.node('deploy').hidden,false);
+  assert.equal(h.node('deploy').textContent,'Rebuild prediction links');assert.equal(h.node('deploy').hidden,false);
   assert.equal(h.saved().privateContent.phase,'deployment');assert.equal(h.saved().privateContent.t,0);
   await h.samples(2);assert.equal(h.snapshot().t,2);assert.ok(h.snapshot().cumulative.static>0);
 });
@@ -844,7 +844,7 @@ test('held and continuous attacks survive the automatic handoff with one fresh p
     assert.equal(h.snapshot().phase,'deployment');assert.equal(h.snapshot().t,0);
     assert.equal(h.node('pulse')['aria-pressed'],'true');
     assert.equal(h.node('pulse').dataset.attackState,mode==='pulse'?'held':'continuous');
-    assert.equal(h.node('attack-hint').textContent,mode==='pulse'?'Release to stop':'Repeats until stopped');
+    assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · '+(mode==='pulse'?'Release to stop':'Repeats until stopped'));
     assert.equal(h.snapshot().activePulses.length,0,'The comparison plant must not inherit discovery pulse tails');
     assert.equal(h.snapshot().pendingPulses.length,1);assert.equal(pulses(h).length,1);
     assert.deepEqual(pulses(h).map(event=>[event.t,event.bus]),[[0,7]]);
@@ -946,7 +946,7 @@ test('Advance 180 preserves an already continuous attack across handoff and resu
   assert.equal(h.state().playing,true);assert.equal(h.clock.tasks.size,1);
 });
 
-test('Learn again retains the automatic preference and returns to paused controller costs',async()=>{
+test('Rebuild prediction links retains the automatic preference and returns to paused controller costs',async()=>{
   const h=harness();await compare(h);
   assert.equal(h.snapshot().phase,'deployment');assert.equal(h.snapshot().t,0);
   pointerClick(h,h.bus(7));await h.samples(2);h.click('deploy');
@@ -1012,8 +1012,7 @@ test('communication starts in learning and preserves the chosen noise across res
   h.change('noise',2);assert.equal(h.snapshot().beta,2);assert.equal(h.snapshot().t,0);
   await compare(h);assert.equal(h.snapshot().phase,'deployment');assert.equal(h.node('view').value,'cost');
   assert.equal(h.node('view').hidden,true);assert.equal(h.snapshot().calibration.updates,0);
-  h.click('restart');assert.equal(h.snapshot().phase,'deployment');assert.equal(h.snapshot().beta,2);
-  h.click('deploy');assert.equal(h.snapshot().phase,'discovery');assert.equal(h.snapshot().beta,2);
+  h.click('restart');assert.equal(h.snapshot().phase,'discovery');assert.equal(h.snapshot().beta,2);
   assert.equal(h.node('view').value,'learning');assert.equal(h.node('experiment').value,'communication');
 });
 
@@ -1177,7 +1176,7 @@ test('forecast source settings survive automatic comparison and deployed replay'
   assert.deepEqual(r.snapshot().faults,h.snapshot().faults);assert.equal(r.state().playing,false);
 });
 
-test('reliability changes leave deployed links fixed and Learn again retains the current source map',async()=>{
+test('reliability changes leave deployed links fixed and Rebuild prediction links retains the current source map',async()=>{
   const h=harness(undefined,'communication');await compare(h);
   const support=plain(h.snapshot().deployedSupport.learned);
   pointerClick(h,h.bus(7));assert.equal(h.snapshot().faults.includes(7),true);
@@ -1338,7 +1337,7 @@ test('inspected reliability action changes only newly issued forecasts at its so
   assert.ok(different>0,'Future source 7 forecasts actually change');
 });
 
-test('inspected source action preserves deployed support, replay and Learn again reliability',async()=>{
+test('inspected source action preserves deployed support, replay and Rebuild prediction links reliability',async()=>{
   const h=harness(undefined,'communication');h.check('auto-compare',false);await compare(h);h.click('deploy');h.click('run');
   h.inspectLink(5,7);
   const before=plain(h.snapshot());h.click('source-fault');
@@ -1368,7 +1367,7 @@ test('source actions cannot mutate reliability in saved history or with zero for
   h.change('bus',2);assert.equal(h.node('source-controls').hidden,true);
 });
 
-test('power scenario selection preserves exact replay and Learn again while keeping reference available',async()=>{
+test('power scenario selection preserves exact replay and Rebuild prediction links while keeping reference available',async()=>{
   const h=harness(undefined,'communication');
   assert.equal(h.snapshot().powerScenario,'reference');
   h.change('power-scenario','solar-outage');await compare(h);
@@ -1632,7 +1631,7 @@ test('protocol receipt follows automatic discovery selection synthesis and fixed
   assert.equal(h.protocol().comparisonSamples,8);
   const restored=harness(h.saved());assert.deepEqual(restored.protocol(),h.protocol());
   h.click('deploy');assert.equal(h.protocol().selection,'pending');assert.equal(h.protocol().discoverySamples,0);
-  assert.equal(h.snapshot().faults.includes(7),true);assert.match(h.node('phase').textContent,/Discovery/);
+  assert.equal(h.snapshot().faults.includes(7),true);assert.match(h.node('phase').textContent,/Learning/);
 });
 
 test('manual comparison receipt reports actual sample count and separates prediction adaptation from fixed topology evaluation',()=>{
@@ -1640,7 +1639,7 @@ test('manual comparison receipt reports actual sample count and separates predic
     const h=harness(undefined,experiment);h.check('auto-compare',false);
     for(let i=0;i<31;i++)h.click('step');
     assert.equal(h.protocol().discoverySamples,31);assert.equal(h.protocol().selection,'pending');
-    assert.match(h.node('phase').textContent,/Discovery 31 s/);
+    assert.match(h.node('phase').textContent,/Learning 31 s/);
     h.click('deploy');h.click('run');
     assert.equal(h.protocol().discoverySamples,31,'Never invent an automatic 180 sample discovery for manual comparison');
     assert.equal(h.protocol().selection,'complete');assert.equal(h.protocol().synthesis,'complete');
@@ -1737,7 +1736,7 @@ test('the shipped default runs demand and solar discovery then pauses the comple
   assert.equal(h.snapshot().experiment,'communication');
   assert.equal(h.snapshot().powerScenario,'forecasted-demand');assert.equal(h.snapshot().beta,4);
   assert.equal(h.node('auto-compare').checked,true);assert.equal(h.node('new-scenario').hidden,true);
-  assert.match(h.node('scenario-description').textContent,/Forecast stress β 4/);
+  assert.match(h.node('scenario-description').textContent,/compare four controllers automatically/);
   h.click('run');await h.clock.until(()=>h.snapshot().phase==='deployment');
   assert.equal(h.snapshot().t,0);assert.equal(h.state().playing,true);
   await h.clock.until(()=>h.state().comparisonComplete);
@@ -1961,4 +1960,43 @@ test('restored guided trials with wider horizons keep the 180 sample review pend
   for(const key of ['t','horizon','mode','segments','states','cumulative','deployedSupport'])assert.deepEqual(h.snapshot()[key],before[key]);
   assert.deepEqual(h.issuedForecasts(),sealed);
   assert.deepEqual(harness(h.saved()).snapshot(),h.snapshot(),'The wider legacy horizon replays exactly');
+});
+
+
+test('primary restart clears comparison, attacks and custom source changes while preserving selected experiment settings',async()=>{
+  const h=harness(undefined,'communication');
+  h.change('noise','8');h.change('power-scenario','solar-outage');h.change('speed','32');
+  h.change('attack-mode','continuous');h.change('strength','150');
+  await compare(h);assert.equal(h.snapshot().phase,'deployment');
+  h.change('intervention','power');pointerClick(h,h.bus(23));await h.samples(4);
+  h.change('bus','7');h.click('fault');h.change('cost-metric','gap');h.change('matrix-view','change');
+  assert.ok(Object.values(h.snapshot().cumulative).some(value=>value>0));
+  assert.ok(h.snapshot().eventLog.length>0);assert.ok(h.state().activeAttackBuses.length>0);
+  h.click('restart');const restarted=h.snapshot();
+  assert.equal(restarted.phase,'discovery');assert.equal(restarted.t,0);assert.equal(restarted.deployedSupport,null);
+  assert.equal(restarted.discoveryRecord,null);assert.equal(restarted.experiment,'communication');
+  assert.equal(restarted.beta,8);assert.equal(restarted.powerScenario,'solar-outage');
+  assert.equal(h.node('speed').value,'32');assert.equal(h.node('attack-mode').value,'continuous');assert.equal(h.node('strength').value,'150');
+  assert.equal(h.node('auto-compare').checked,true);assert.equal(h.node('view').value,'learning');
+  assert.equal(h.node('matrix-view').value,'links');assert.equal(h.node('cost-metric').value,'total');
+  assert.deepEqual(restarted.faults,new PowerDemo.Simulation({experiment:'communication',beta:8,powerScenario:'solar-outage'}).snapshot().faults);
+  assert.ok(Object.values(restarted.cumulative).every(value=>value===0));
+  assert.equal(restarted.eventLog.length,0);assert.equal(restarted.activePulses.length,0);assert.equal(restarted.pendingPulses.length,0);
+  assert.deepEqual(h.state().activeAttackBuses,[]);assert.equal(h.state().playing,false);assert.equal(h.clock.tasks.size,0);
+  assert.equal(h.state().topology.events.length,0);assert.equal(h.state().historyIndex,null);assert.equal(h.state().inspectedSource,null);
+  assert.deepEqual(h.comparison().plotted,['online','scalar','static','causal']);
+  await h.samples(3);assert.equal(h.snapshot().t,0,'Restart stays paused until the next explicit Run');
+  h.click('run');await h.clock.until(()=>h.snapshot().phase==='deployment');
+  assert.equal(h.snapshot().discoveryRecord.t,180);assert.equal(h.snapshot().t,0);
+  assert.ok(Object.values(h.snapshot().cumulative).every(value=>value===0),'Automatic comparison still starts fresh');
+});
+
+
+test('primary attack hint exposes the configured units even while advanced strength is closed',()=>{
+  const h=harness();
+  for(const strength of ['50','150','100']){
+    h.change('strength',strength);
+    assert.equal(h.node('attack-hint').textContent,strength+' kW per pulse · Click to start or stop');
+    assert.equal(h.snapshot().t,0);assert.equal(h.snapshot().eventLog.length,0);
+  }
 });
