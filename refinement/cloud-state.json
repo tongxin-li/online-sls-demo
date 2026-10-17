@@ -352,7 +352,13 @@
     "lease_expires_at": "2026-10-17T09:40:22+08:00",
     "branch": "cloud/refine/20261017-0900",
     "base_main": "545c90a6a5071c6378c25c3e8679ff4f7d6b5f32",
-    "focus": "Observed rolling source error and actual sealed-preview issuance delay"
+    "focus": "Observed rolling source error and actual sealed-preview issuance delay",
+    "status": "candidate validation",
+    "changes": [
+      "Added raw rolling forecast RMSE and signed bias over up to 60 revealed current-phase pairs, without reading future forcing.",
+      "Show actual sealed-prefix timing for the latest source setting, distinguishing first issue, forecast target, revealed pair and mixed-window cohort.",
+      "Causal regression verifies a newly issued future message can change current preview commands before its error is observable. Preserve frozen support, phase reset and exact replay."
+    ]
   },
   "next_focus": "Make source reliability changes understandable over time with a rolling error summary from revealed forecast/forcing pairs and explicit sealed-preview issuance delay. Keep current reliability separate from past observed errors, distinguish unforecast physical changes, avoid future forcing reads and do not change controller parameters or frozen support.",
   "priorities": [

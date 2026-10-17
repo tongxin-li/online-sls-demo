@@ -101,6 +101,32 @@ async function main() {
         assert.match(reading.context,reading.phase==='discovery'?/Discovery uses dense messages/:/deployed support.*Links fixed/);
       }else assert.equal(reading.data.forecast,'','Unavailable observations clear stale numeric metadata');
     };
+    const checkSourceHistory = async surface => {
+      const reading=await surface.evaluate(()=>{
+        const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),state=root.powerDemo.getState();
+        const window=document.querySelector('#pr-forecast-window'),change=document.querySelector('#pr-forecast-change');
+        return {snapshot,state,window:{...window.dataset},change:{...change.dataset},text:window.textContent,timing:change.textContent};
+      });
+      const {snapshot,state,window,change}=reading;
+      const active=state.inspectedSource!==null&&[5,7,8,12,14,18,21,24].includes(state.selectedBus)&&state.historyIndex===null;
+      assert.equal(window.available,String(!!active&&snapshot.t>0));
+      if(active&&snapshot.t>0){
+        assert.equal(Number(window.count),Math.min(60,snapshot.t));
+        assert.equal(Number(window.firstObservedAt),Math.max(1,snapshot.t-59));assert.equal(Number(window.lastObservedAt),snapshot.t);
+        assert.ok(Number(window.rmse)>=Math.abs(Number(window.bias))-1e-12);
+        assert.match(reading.text,/revealed pairs.*RMSE.*mpu.*Bias.*mpu/);
+      }else assert.equal(window.rmse,'','No stale or future statistics');
+      const event=active?snapshot.eventLog.filter(event=>event.type==='forecast'&&event.bus===state.inspectedSource).at(-1):null;
+      assert.equal(change.available,String(!!event));
+      if(event){
+        const issuedAt=Math.max(1,event.t),target=issuedAt+4;
+        assert.equal(Number(change.changedAt),event.t);assert.equal(Number(change.issuedAt),issuedAt);
+        assert.equal(Number(change.firstAction),target);assert.equal(Number(change.pairAt),target+1);
+        assert.equal(change.issued,String(snapshot.t>issuedAt));assert.equal(change.observed,String(snapshot.t>target));
+        assert.equal(Number(change.pairsInWindow),Math.min(60,Math.max(0,snapshot.t-target)));
+      }
+      return reading;
+    };
     const checkCommandInspection = async surface => {
       const result=await surface.evaluate(()=>{
         const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),state=root.powerDemo.getState();
@@ -130,6 +156,7 @@ async function main() {
     const checkPlots = async () => {
       await checkVoltageMetrics(page);
       await checkForecastObservation(page);
+      await checkSourceHistory(page);
       await checkCommandInspection(page);
       for (const chart of ['pr-cost', 'pr-stage', 'pr-voltage']) {
         const paths = await page.locator(`#${chart} path.data-series`).evaluateAll(elements => elements.map(element => element.getAttribute('d')));
@@ -152,6 +179,7 @@ async function main() {
           return {state:root.powerDemo.getState(),snapshot:JSON.stringify(root.powerDemo.getSnapshot())};
         });
         await checkForecastObservation(page);
+      await checkSourceHistory(page);
       await checkCommandInspection(page);
         assert.equal(reading.snapshot,before,'Inspection changes no physical, forecast or control state');
         assert.equal(reading.state.selectedBus,edge.receiver);
@@ -186,6 +214,7 @@ async function main() {
         await page.locator('#pr-source-fault').click();
         const after=await sourceState();
         await checkForecastObservation(page);
+      await checkSourceHistory(page);
       await checkCommandInspection(page);
         assert.equal(after.faults.includes(edge.source),!wasNoisy,'Each explicit action toggles once');
         assert.deepEqual(after.faults.filter(bus=>bus!==edge.source),initial.faults.filter(bus=>bus!==edge.source),'Only inspected source changes');
@@ -253,6 +282,7 @@ async function main() {
     for(const bus of [5,7,14,21])assert.ok(Math.abs(outage.generationP[bus-1])<1e-8);
     await page.locator('#pr-matrix .matrix-cell[data-receiver="5"][data-source="7"]').click();
     await checkForecastObservation(page);
+      await checkSourceHistory(page);
       await checkCommandInspection(page);
     await page.screenshot({path:path.join(output,'solar-outage.png'),fullPage:true});
     await page.locator('#pr-run').click();
@@ -262,6 +292,25 @@ async function main() {
     assert.ok(await page.locator('.intervention-badge[aria-label*="Solar"]').count()>0,'Markers identify actual solar changes');
     await checkPlots();
     await page.screenshot({ path: path.join(output, 'desktop.png'), fullPage: true });
+
+    const audit=await browser.newPage({viewport:{width:1440,height:1000}});
+    audit.on('pageerror',error=>errors.push(error.message));
+    await audit.goto(address,{waitUntil:'networkidle'});
+    await audit.locator('#pr-matrix .matrix-cell[data-receiver="5"][data-source="7"]').click();
+    await audit.locator('#pr-source-fault').click();
+    const errorsSeen=[];
+    for(let i=0;i<62;i++){
+      if(i===3)await audit.locator('#pr-source-fault').click();
+      await audit.locator('#pr-step').click();
+      const reading=await checkSourceHistory(audit),sample=reading.snapshot.lastSample;
+      assert.equal(reading.state.playing,false);
+      errorsSeen.push(sample.forecast[6]-sample.disturbance[6]);
+      const window=errorsSeen.slice(-60),rmse=Math.sqrt(window.reduce((sum,value)=>sum+value*value,0)/window.length),bias=window.reduce((sum,value)=>sum+value,0)/window.length;
+      assert.ok(Math.abs(Number(reading.window.rmse)-rmse)<1e-12,'DOM rolling error matches independently collected revealed pairs');
+      assert.ok(Math.abs(Number(reading.window.bias)-bias)<1e-12,'DOM bias uses the actual signed errors');
+    }
+    await audit.screenshot({path:path.join(output,'forecast-history.png'),fullPage:true});
+    await audit.close();
 
     // A narrow touch viewport keeps the controls usable and the page in bounds.
     const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
@@ -323,6 +372,7 @@ async function main() {
         const root=document.querySelector('#power-response-demo');return {state:root.powerDemo.getState(),snapshot:root.powerDemo.getSnapshot()};
       });
       await checkForecastObservation(phone);
+      await checkSourceHistory(phone);
       await checkCommandInspection(phone);
       assert.equal(mobileAfter.snapshot.faults.includes(7),action==='Corrupt');
       assert.equal(mobileAfter.state.selectedBus,5);assert.equal(mobileAfter.state.inspectedSource,7);
@@ -344,7 +394,7 @@ async function main() {
     assert.ok(reportLayout.page<=reportLayout.viewport+1,'Scientific report stays within the mobile page');
     await phone.screenshot({path:path.join(output,'environment.png'),fullPage:true});
     assert.deepEqual(errors, [], 'No browser runtime errors');
-    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), touchEvents, checks: ['playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'actual receiver command decomposition and limiter on desktop and mobile', 'continuous mobile power attack', 'mobile touch and layout'], errors }, null, 2));
+    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), touchEvents, checks: ['playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'continuous mobile power attack', 'mobile touch and layout'], errors }, null, 2));
     console.log('Browser smoke passed');
   } finally {
     if (browser) await browser.close();

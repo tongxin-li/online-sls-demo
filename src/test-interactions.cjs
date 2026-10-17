@@ -27,6 +27,8 @@ const source=withoutCards.replace(anchor,
   '  root.testInspectPredictionLink=(receiver,source)=>inspectPredictionLink(receiver,source);\n'+
   '  root.testInspection=()=>predictionInspection();\n'+
   '  root.testForecastObservation=()=>inspectedForecastObservation();\n'+
+  '  root.testSourceHistory=()=>inspectedSourceHistory();\n'+
+  '  root.testErrorWindow=forecastErrorWindow;\n'+
   '  root.testInspectedCommand=()=>inspectedCommand();\n'+
   '  root.testDecompose=commandContributions;\n'+
   '  root.testIssuedForecasts=()=>simulation.forecasts;\n'+
@@ -127,7 +129,7 @@ function harness(saved,experiment='prediction',reducedMotion=true) {
       if(type==='pointerup'||type==='pointercancel')recipient.releasePointerCapture(id);
       return result;
     },
-    inspectLink:(receiver,source)=>root.testInspectPredictionLink(receiver,source),inspection:()=>plain(root.testInspection()),forecastObservation:()=>plain(root.testForecastObservation()),commandInspection:()=>plain(root.testInspectedCommand()),decompose:(...args)=>plain(root.testDecompose(...args)),issuedForecasts:()=>plain(root.testIssuedForecasts()),
+    inspectLink:(receiver,source)=>root.testInspectPredictionLink(receiver,source),inspection:()=>plain(root.testInspection()),forecastObservation:()=>plain(root.testForecastObservation()),sourceHistory:()=>plain(root.testSourceHistory()),errorWindow:(...args)=>plain(root.testErrorWindow(...args)),commandInspection:()=>plain(root.testInspectedCommand()),decompose:(...args)=>plain(root.testDecompose(...args)),issuedForecasts:()=>plain(root.testIssuedForecasts()),
     snapshot:()=>root.powerDemo.getSnapshot(),state:()=>plain(root.powerDemo.getState()),
     saved:()=>savedStates.at(-1),
     event:(id,type,detail)=>node(id).dispatch(type,detail),
@@ -1411,4 +1413,82 @@ test('prediction adaptation and segment extension keep command inspection tied t
   };
   verify();sim.extend(12);for(let i=0;i<8;i++)sim.step();verify();
   sim.deployTopology();for(let i=0;i<35;i++)sim.step();verify();
+});
+
+
+test('rolling source errors use only revealed pairs with a bounded window and signed raw bias',()=>{
+  const h=harness(undefined,'communication');
+  const samples=Array.from({length:65},(_,t)=>({t,forecast:Array(24).fill(0),disturbance:Array(24).fill(0)}));
+  for(const sample of samples)sample.forecast[6]=sample.t%2?4:3;
+  const future={t:65,get forecast(){throw Error('Future forecast accessed');},get disturbance(){throw Error('Future truth accessed');}};
+  assert.equal(h.errorWindow(samples,7,0),null);
+  const pair=h.errorWindow(samples,7,2);
+  assert.equal(pair.count,2);assert.equal(pair.bias,3.5);assert.equal(pair.rmse,Math.sqrt(12.5));
+  const before=JSON.stringify(samples),window=h.errorWindow([...samples,future],7,65);
+  const values=samples.slice(-60).map(sample=>sample.forecast[6]);
+  assert.equal(window.count,60);assert.equal(window.firstAction,5);assert.equal(window.lastAction,64);
+  assert.equal(window.firstObservedAt,6);assert.equal(window.lastObservedAt,65);
+  assert.equal(window.bias,values.reduce((sum,v)=>sum+v,0)/60);
+  assert.equal(window.rmse,Math.sqrt(values.reduce((sum,v)=>sum+v*v,0)/60));
+  assert.equal(JSON.stringify(samples),before,'Computing error cannot mutate observations');
+});
+
+test('reliability timing follows the actual sealed prefix at zero, one and later sample times',()=>{
+  for(const time of [0,1,35]){
+    const h=harness(undefined,'communication');for(let i=0;i<time;i++)h.click('step');
+    h.inspectLink(5,7);const issued=h.issuedForecasts(),before=h.sourceHistory().stats;
+    for(let i=0;i<3;i++)h.click('source-fault');
+    const change=h.sourceHistory().change;
+    assert.equal(change.firstAction,issued.length,'First affected target starts beyond the actual sealed prefix');
+    assert.equal(change.issuedAt,Math.max(1,time));assert.equal(change.pairAt,issued.length+1);
+    assert.equal(change.issued,false);assert.equal(change.observed,false);assert.equal(change.pairsInWindow,0);
+    assert.deepEqual(h.sourceHistory().stats,before,'Changing a setting cannot rewrite observed errors');
+    assert.deepEqual(h.issuedForecasts(),issued);
+    while(h.snapshot().t<=change.issuedAt)h.click('step');
+    const message=h.issuedForecasts()[change.firstAction];
+    assert.equal(message.issuedAt,change.issuedAt);assert.equal(h.sourceHistory().change.issued,true);
+    assert.equal(h.sourceHistory().change.observed,false);
+    while(h.snapshot().t<change.pairAt)h.click('step');
+    assert.equal(h.sourceHistory().change.observed,true);assert.equal(h.sourceHistory().change.pairsInWindow,1);
+    assert.equal(h.sourceHistory().stats.lastAction,change.firstAction);
+    assert.equal(h.state().playing,false);
+  }
+});
+
+test('new source messages affect preview commands before their targets enter observed errors',()=>{
+  const changed=harness(undefined,'communication'),reference=harness(undefined,'communication');
+  for(const h of [changed,reference])h.inspectLink(5,7);
+  changed.click('source-fault');
+  for(const h of [changed,reference])h.click('step');
+  assert.deepEqual(changed.snapshot().commandQ,reference.snapshot().commandQ,'Initial preview was already sealed');
+  for(const h of [changed,reference])h.click('step');
+  const first=changed.sourceHistory().change;
+  assert.equal(first.firstAction,5);assert.equal(first.issuedAt,1);assert.equal(first.issued,true);assert.equal(first.observed,false);
+  assert.notDeepEqual(changed.snapshot().commandQ.static,reference.snapshot().commandQ.static,'Issued future message is available to the current preview controller');
+  assert.deepEqual(changed.snapshot().lastSample.forecast,reference.snapshot().lastSample.forecast,'Current observed target still belongs to the sealed prefix');
+  assert.ok(Math.abs(changed.sourceHistory().stats.rmse-reference.sourceHistory().stats.rmse)<1e-12,'Control changes cannot masquerade as newly observed source error');
+  assert.deepEqual(changed.issuedForecasts()[5].base,reference.issuedForecasts()[5].base,'Physical background stays paired');
+});
+
+test('rolling error history preserves exact replay, phase resets, saved history guards and unforecast physical error',async()=>{
+  const h=harness(undefined,'communication');h.inspectLink(5,7);h.click('source-fault');
+  const errors=[];
+  for(let i=0;i<65;i++){h.click('step');const sample=h.snapshot().lastSample;errors.push(sample.forecast[6]-sample.disturbance[6]);}
+  const history=h.sourceHistory(),values=errors.slice(-60),before=plain(h.snapshot());
+  assert.equal(history.stats.count,60);assert.equal(history.stats.firstObservedAt,6);
+  assert.equal(history.stats.rmse,Math.sqrt(values.reduce((sum,v)=>sum+v*v,0)/60));
+  assert.equal(history.stats.bias,values.reduce((sum,v)=>sum+v,0)/60);
+  h.click('source-fault');assert.deepEqual(h.sourceHistory().stats,history.stats);
+  assert.deepEqual(plain(h.snapshot().states),before.states);assert.deepEqual(plain(h.snapshot().cumulative),before.cumulative);
+  const restored=harness(h.saved());assert.deepEqual(restored.sourceHistory(),h.sourceHistory());
+  h.event('topology-history','input');assert.equal(h.sourceHistory(),null);
+  assert.equal(h.node('forecast-window').dataset.rmse,'');assert.equal(h.node('forecast-change').dataset.firstAction,'');
+  h.click('history-live');assert.ok(h.sourceHistory().stats);
+  h.check('auto-compare',false);await compare(h);h.click('deploy');h.click('run');h.inspectLink(5,7);
+  assert.equal(h.sourceHistory().stats,null);assert.equal(h.sourceHistory().change,null,'Phase reset keeps source setting, not old message events');
+  assert.match(h.node('forecast-change').textContent,/Initial setting/);
+  const physical=harness(undefined,'communication');physical.change('noise',0);physical.change('intervention','power');
+  physical.change('attack-mode','pulse');physical.change('bus',23);physical.quickClick();physical.click('run');physical.inspectLink(5,24);
+  physical.click('step');assert.ok(physical.sourceHistory().stats.rmse>1e-7,'Unexpected physical forcing still produces error at zero forecast noise');
+  assert.match(physical.node('forecast-change').textContent,/Noise disabled.*Unforecast power/);
 });
