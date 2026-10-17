@@ -333,7 +333,40 @@ async function main() {
       }
       assert.deepEqual(measured.ablation.map(item=>item.key).sort(),['causal','online','scalar','static']);
       for(const point of measured.ablation)assert.equal(point.ratio,benchmark.allNoisyAblation.means[point.key]/benchmark.allNoisyAblation.means.causal);
+      const regimeViews=await surface.locator('.pr-study-regime').evaluateAll(elements=>elements.map(element=>({
+        id:element.dataset.regime,winner:element.dataset.winner,
+        rows:Array.from(element.querySelectorAll('[data-regime-method]')).map(row=>{
+          const track=row.querySelector('.pr-regime-track').getBoundingClientRect(),bar=row.querySelector('.pr-regime-track i').getBoundingClientRect();
+          return {key:row.dataset.regimeMethod,ratio:Number(row.dataset.costRatio),fraction:bar.width/track.width,
+            font:Number.parseFloat(getComputedStyle(row.querySelector('dt')).fontSize),
+            text:row.querySelector('.pr-regime-value').textContent,label:row.querySelector('dt').textContent,
+            labelRight:row.querySelector('dt').getBoundingClientRect().right,trackLeft:track.left,trackWidth:track.width};
+        })
+      })));
+      const sources=[benchmark.heldout[0],benchmark.heldout[3],benchmark.allNoisyAblation],keys=['online','scalar','static','causal'];
+      const ratioMax=Math.ceil(Math.max(...sources.flatMap(row=>keys.map(key=>row.means[key]/row.means.causal)))*2)/2;
+      assert.deepEqual(regimeViews.map(view=>view.id),['reliable','mixed','corrupted']);
+      const labels={online:'Learned sparse',scalar:'Fixed sparse',static:'Dense prediction',causal:'Feedback only'};
+      regimeViews.forEach((view,index)=>{
+        const row=sources[index],minimum=Math.min(...keys.map(key=>row.means[key]));
+        assert.equal(view.winner,keys.filter(key=>Math.abs(row.means[key]-minimum)<1e-12).map(key=>labels[key]).join('|'));
+        assert.deepEqual(view.rows.map(point=>point.key),keys);
+        for(const point of view.rows){
+          const ratio=row.means[point.key]/row.means.causal;
+          assert.equal(point.ratio,ratio);assert.equal(point.text,ratio.toFixed(3)+'×');assert.equal(point.label,labels[point.key]);
+          assert.ok(point.trackWidth>15,'Phone chart retains a visible quantitative bar');
+          assert.ok(Math.abs(point.fraction-ratio/ratioMax)<.012,'Shared scale matches the actual cost ratios');
+          assert.ok(point.font>=12,'Regime method names stay readable');
+          assert.ok(point.labelRight<=point.trackLeft,'Method labels cannot overlap their bars');
+        }
+      });
+      const detail=surface.locator('#pr-reference-study details > summary');
+      await detail.click();
+      assert.equal(await surface.locator('#pr-reference-study [data-study-method="online"]').isVisible(),true,'Every error level remains available');
+      await detail.click();
       await surface.locator('#pr-reference-study').screenshot({path:path.join(output,'reference-study-'+surface.viewportSize().width+'.png')});
+      const preview=await surface.locator('.pr-study-overview').screenshot({type:'jpeg',quality:85,path:path.join(output,'reference-overview-'+surface.viewportSize().width+'.jpg')});
+      console.log('CLOUD_STUDY_PREVIEW_'+surface.viewportSize().width+' '+preview.toString('base64'));
       await surface.locator('#pr-reference-study > summary').click();
       assert.equal(await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),before,'Closing the study leaves the run intact');
     };

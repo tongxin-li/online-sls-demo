@@ -783,8 +783,13 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
-  "next_focus": "First make the recorded reliable, mixed and all-corrupted forecast regimes immediately understandable through a compact visual treatment, retaining all four methods, actual winners and available uncertainty. Distinguish terminal-cost recorded studies from the live stage-cost trial. Then make actual source-to-receiver communication and controller resynthesis inspectable without implying online topology adaptation. Use the consolidated renewed automation prompt as the current task.",
+  "active_run": {
+    "slot": "2026-10-18T01:00:00+08:00",
+    "branch": "cloud/refine/20261018-0100",
+    "started_at": "2026-10-18T01:02:16+08:00",
+    "expires_at": "2026-10-18T01:42:16+08:00"
+  },
+  "next_focus": "Complete cloud validation and screenshot pixel review of the three measured forecast quality regimes. Keep substantial visual candidates unpublished if review is unavailable.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -884,10 +889,12 @@
       "scope": "Only refinement/cloud-state.json",
       "configured_at": "2026-10-17T16:08:20.808Z",
       "native_readback": "exact prompt, schedule, enabled state and timezone verified",
-      "status": "Native renewal saved. Metadata candidate requires normal validation and expected-main guarded publication.",
+      "status": "Metadata candidate 39048118960 passed validate and prepare-candidate, changed only cloud-state.json, and was guardedly promoted at the first renewed invocation. No invocation or improvement counted for configuration.",
       "counts_as_invocation": false,
       "counts_as_improvement": false,
-      "instruction": "Read actual branch and workflow state before recovery. Promote only validated metadata based on matching main. Do not increment either program count for configuration persistence."
+      "instruction": "Read actual branch and workflow state before recovery. Promote only validated metadata based on matching main. Do not increment either program count for configuration persistence.",
+      "published_commit": "f1f64daf1d0bab3d6aa49282388106405265335d",
+      "candidate_run": 39048118960
     }
   },
   "parent_handoffs": [
@@ -972,10 +979,36 @@
     "hard_deadline": "2026-10-19T01:00:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 0,
+    "invocation_count": 1,
     "completed_count": 0,
-    "runs": [],
-    "active_run": null,
+    "runs": [
+      {
+        "slot": "2026-10-18T01:00:00+08:00",
+        "started_at": "2026-10-18T01:02:16+08:00",
+        "status": "validating_candidate",
+        "candidate_branch": "cloud/refine/20261018-0100",
+        "base_commit": "f1f64daf1d0bab3d6aa49282388106405265335d",
+        "counted_completed": false,
+        "changes": [
+          "Replace the recorded study's diffuse text with three compact measured cost-ratio regimes naming the actual winner, retaining all four controllers on one bar scale.",
+          "Keep all error levels and paired uncertainty in the existing nested disclosure. No physical model, controller, objective, limits, forecasts, interaction semantics or recorded results change.",
+          "Add data/winner/uncertainty validation, desktop/mobile layout and state invariance assertions, plus authorized cloud screenshot previews for pixel review."
+        ],
+        "tests": {
+          "status": "pending"
+        },
+        "screenshots": {
+          "pixel_review": "pending authorized GitHub Actions screenshot preview"
+        },
+        "publication": "unpublished"
+      }
+    ],
+    "active_run": {
+      "slot": "2026-10-18T01:00:00+08:00",
+      "branch": "cloud/refine/20261018-0100",
+      "started_at": "2026-10-18T01:02:16+08:00",
+      "expires_at": "2026-10-18T01:42:16+08:00"
+    },
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",

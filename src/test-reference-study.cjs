@@ -36,3 +36,30 @@ test('Recorded means cannot be silently changed independently of the seed eviden
   altered.heldout[0].means.online+=.01;
   assert.throws(()=>build(altered),/Recorded means match every seed/);
 });
+
+test('Regime overview names actual mean winners and retains every controller on a common ratio scale',()=>{
+  const html=build(report);
+  const regimes=[['reliable',report.heldout[0]],['mixed',report.heldout[3]],['corrupted',report.allNoisyAblation]];
+  const max=Math.ceil(Math.max(...regimes.flatMap(([,row])=>methods.map(method=>row.means[method.key]/row.means.causal)))*2)/2;
+  for(const [id,row] of regimes){
+    const section=html.split('data-regime="'+id+'"')[1].split('</section>')[0];
+    const best=Math.min(...methods.map(method=>row.means[method.key]));
+    const winners=methods.filter(method=>Math.abs(row.means[method.key]-best)<1e-12).map(method=>method.label).join('|');
+    assert.ok(section.includes('data-winner="'+winners+'"'));
+    for(const method of methods){
+      const ratio=row.means[method.key]/row.means.causal;
+      assert.ok(section.includes('data-regime-method="'+method.key+'" data-cost-ratio="'+ratio+'"'));
+      assert.ok(section.includes('width:'+ratio/max*100+'%'));
+    }
+  }
+  assert.equal((html.match(/data-regime-method=/g)||[]).length,12);
+  assert.match(html,/Separate from your live trial/);
+  assert.match(html,/No interval reported/);
+  assert.match(html,/All error levels and uncertainty/);
+});
+
+test('All corrupted mean evidence is checked as strictly as the twenty seed sweep',()=>{
+  const altered=JSON.parse(JSON.stringify(report));
+  altered.allNoisyAblation.means.causal+=.01;
+  assert.throws(()=>build(altered),/Recorded regime means match every seed/);
+});

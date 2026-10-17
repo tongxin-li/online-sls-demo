@@ -170,6 +170,8 @@ The displayed sequence connects completed gain learning, support selection and c
 
 Across forecast quality contains the recorded twenty seed sweep at every published error level and a separate five seed case with every source corrupted. All four methods and all recorded settings remain visible. These study costs include the terminal penalty, unlike live cumulative stage costs. The generated fragment can be checked with `node src/build-reference-study.cjs --check` and `node src/test-reference-study.cjs`. It does not reset, alter or substitute for the current live experiment.
 
+Its compact overview contrasts reliable forecasts, mixed source reliability and the separate all corrupted case. Every case retains all four mean cost ratios on one common bar scale and names the actual lowest mean. Available paired savings intervals stay attached to their recorded comparison; the five trial counterexample explicitly has no reported interval. All four error levels, coincident results and complete uncertainty tables remain in the nested detail. This presentation changes no numerical result or live experiment.
+
 ## Implementation scope
 
 The shared correction follows the explicit archived experimental mean moment equations, with a declared physical scale transfer and sparse restriction. It is not a literal implementation of Algorithm 1. No completed prefix convergence theorem is claimed for the executed adaptive controller.
