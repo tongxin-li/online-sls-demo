@@ -384,9 +384,37 @@ async function main() {
     await page.screenshot({path:path.join(output,'default-scenario-complete.png'),fullPage:true});
     await page.locator('.pr-learning-panel').screenshot({path:path.join(output,'default-scenario-costs.png')});
     await fs.writeFile(path.join(output,'default-scenario.json'),JSON.stringify(reviewed,null,2));
+    // Completed results stay reviewed while source settings are edited in place.
+    await page.locator('#pr-matrix .matrix-cell[data-receiver="5"][data-source="7"]').click();
+    const boundary=async()=>page.evaluate(()=>{
+      const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),state=root.powerDemo.getState();
+      return {t:snapshot.t,horizon:snapshot.horizon,mode:snapshot.mode,segments:snapshot.segments,
+        states:snapshot.states,costs:snapshot.cumulative,support:snapshot.deployedSupport,lastSample:snapshot.lastSample,
+        events:snapshot.eventLog,faults:snapshot.faults,playing:state.playing,complete:state.comparisonComplete,continued:state.comparisonContinued};
+    });
+    const completedBefore=await boundary();
+    for(const noisy of [true,false,true]){
+      await page.locator('#pr-source-fault').click();
+      const after=await boundary();
+      assert.equal(after.faults.includes(7),noisy);
+      assert.equal(after.complete,true);assert.equal(after.continued,false);assert.equal(after.playing,false);
+      assert.equal(after.t,180);assert.equal(after.mode,'completed');
+      for(const key of ['horizon','segments','states','costs','support','lastSample'])assert.deepEqual(after[key],completedBefore[key],'Paused endpoint setting preserves '+key);
+      assert.equal(after.events.some(event=>event.type==='extend'),false,'A setting does not implicitly extend the completed trial');
+      assert.equal(await page.locator('#pr-run').textContent(),'Continue');
+      await checkForecastObservation(page);await checkSourceHistory(page);await checkCommandInspection(page);await checkEventMarkers(page);
+      assert.equal(await page.locator('#pr-forecast-change').getAttribute('data-issued'),'false');
+      assert.equal(await page.locator('#pr-cost path.data-series').count(),4);
+    }
+    await page.screenshot({path:path.join(output,'completed-source-settings.png'),fullPage:true});
     await page.reload({waitUntil:'networkidle'});
     assert.equal(await page.locator('#pr-run').textContent(),'Continue');
     assert.equal(await page.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t),180);
+    const completedRestored=await boundary();
+    assert.equal(completedRestored.faults.includes(7),true);assert.equal(completedRestored.complete,true);
+    assert.equal(completedRestored.continued,false);assert.equal(completedRestored.mode,'completed');
+    assert.deepEqual(completedRestored.costs,completedBefore.costs);
+    assert.deepEqual(completedRestored.segments,completedBefore.segments);
     await page.locator('#pr-step').click();assert.equal(await sample(),181);
     await useReference(page);
     await mark('default scenario completed restored and explicitly continued');
@@ -791,7 +819,7 @@ async function main() {
     await phone.screenshot({path:path.join(output,'environment.png'),fullPage:true});
     await mark('mobile inspection and responsive evidence');
     assert.deepEqual(errors, [], 'No browser runtime errors');
-    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), timings, touchEvents, checks: ['restored mixed trial preserves old costs until explicit new scenario', 'all noisy sources notice and fresh reliable inverter map', 'shipped demand and solar default completes and pauses after 180 comparison samples', 'actual scheduled power visual metadata and forecasted event labels', 'completed default restores and explicitly continues', 'extended forecast stress clears previous power attacks and costs', 'all four measured forecast stress curves and actual prediction commands', 'extended stress saved trial replay and reference return', 'forecast stress desktop and mobile layout', 'actual forecast setting timestamps and typed mixed event markers', 'keyboard matrix inspection and native command table scrolling', 'visible temporal source gain without hover', 'playback', 'repeated forecast bus clicks', 'three simultaneous continuous power attacks and independent stop', 'all attack sources survive automatic handoff', 'actual protocol receipt and archived discovery view', 'matrix mode exit restores live source controls without advancing plant', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'three simultaneous mobile power attacks and independent stop', 'mobile touch and layout'], errors }, null, 2));
+    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), timings, touchEvents, checks: ['paused completed source settings preserve Continue and exact replay', 'restored mixed trial preserves old costs until explicit new scenario', 'all noisy sources notice and fresh reliable inverter map', 'shipped demand and solar default completes and pauses after 180 comparison samples', 'actual scheduled power visual metadata and forecasted event labels', 'completed default restores and explicitly continues', 'extended forecast stress clears previous power attacks and costs', 'all four measured forecast stress curves and actual prediction commands', 'extended stress saved trial replay and reference return', 'forecast stress desktop and mobile layout', 'actual forecast setting timestamps and typed mixed event markers', 'keyboard matrix inspection and native command table scrolling', 'visible temporal source gain without hover', 'playback', 'repeated forecast bus clicks', 'three simultaneous continuous power attacks and independent stop', 'all attack sources survive automatic handoff', 'actual protocol receipt and archived discovery view', 'matrix mode exit restores live source controls without advancing plant', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'three simultaneous mobile power attacks and independent stop', 'mobile touch and layout'], errors }, null, 2));
     console.log('Browser smoke passed');
   } finally {
     if (browser) await browser.close();

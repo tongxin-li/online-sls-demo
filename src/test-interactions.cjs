@@ -1814,3 +1814,37 @@ test('Advance 180 reports an early comparison endpoint honestly and can explicit
   assert.match(h.node('event').textContent,/180 samples added/);
   for(const key of ['online','scalar','static','causal'])assert.ok(h.snapshot().cumulative[key]>finished[key]);
 });
+
+
+test('paused completed source actions retain reviewed results and continue with exact replay and first issue timing',async()=>{
+  const h=harness(undefined,null);h.click('run');
+  await h.clock.until(()=>h.state().comparisonComplete);
+  h.inspectLink(5,7);
+  const finished=plain(h.snapshot()),issued=h.issuedForecasts();
+  for(const faulty of [true,false,true]){
+    h.click('source-fault');
+    const current=h.snapshot();
+    assert.equal(current.faults.includes(7),faulty);
+    assert.equal(current.t,180);assert.equal(current.mode,'completed');assert.equal(current.horizon,finished.horizon);
+    assert.equal(h.state().comparisonComplete,true);assert.equal(h.state().comparisonContinued,false);
+    assert.equal(h.state().playing,false);assert.equal(h.node('run').textContent,'Continue');
+    assert.equal(h.state().selectedBus,5);assert.equal(h.state().inspectedSource,7);
+    assert.deepEqual(current.cumulative,finished.cumulative);assert.deepEqual(current.states,finished.states);
+    assert.deepEqual(current.segments,finished.segments);assert.deepEqual(current.deployedSupport,finished.deployedSupport);
+    assert.deepEqual(h.issuedForecasts(),issued);
+    assert.equal(current.eventLog.some(event=>event.type==='extend'),false);
+    assert.equal(h.sourceHistory().change.issued,false);
+  }
+  const saved=h.saved(),direct=harness(saved),bus=harness(saved);
+  assert.deepEqual(direct.snapshot(),h.snapshot(),'Version 13 restores the pending endpoint settings exactly');
+  assert.equal(direct.state().comparisonComplete,true);assert.equal(direct.node('run').textContent,'Continue');
+  // A paused repair followed by Continue must match an explicit bus repair that starts playback.
+  direct.click('source-fault');assert.equal(direct.state().comparisonComplete,true);direct.click('run');
+  pointerClick(bus,bus.bus(7));assert.equal(bus.state().playing,true);assert.equal(bus.state().comparisonContinued,true);
+  assert.equal(bus.snapshot().t,180);await bus.samples(1);
+  assert.deepEqual(bus.snapshot(),direct.snapshot(),'Click-to-play applies the setting before the first extended preview is issued');
+  assert.deepEqual(bus.issuedForecasts(),direct.issuedForecasts());
+  assert.equal(bus.snapshot().t,181);assert.equal(bus.snapshot().faults.includes(7),false);
+  bus.click('run');assert.equal(bus.state().playing,false);
+  assert.deepEqual(harness(bus.saved()).snapshot(),bus.snapshot());
+});

@@ -491,3 +491,30 @@ test('solar outage is bounded, comparison only and absent from issued forecasts'
   assert.ok(stress.snapshot().generationP[4]>0);
   assert.deepEqual(stress.snapshot().pendingPulses,[],'Scenario does not fabricate clicked attacks');
 });
+
+
+test('completed trials accept pending source settings without extending time or rewriting issued forecasts',()=>{
+  for(const beta of [0,4]){
+    const options={experiment:'communication',powerScenario:'forecasted-demand',beta,seed:21,horizon:45};
+    const changed=new Simulation(options),control=new Simulation(options);
+    for(const sim of [changed,control]){run(sim,45);assert.ok(sim.deployTopology());run(sim,45);}
+    const before=changed.snapshot(),issued=changed.forecasts.slice(),support=JSON.stringify(before.deployedSupport);
+    assert.equal(before.mode,'completed');assert.equal(before.faults.includes(7),false);
+    assert.equal(changed.toggleFault(7),true);
+    const configured=changed.snapshot();
+    assert.equal(configured.mode,'completed');assert.equal(configured.t,45);assert.equal(configured.horizon,before.horizon);
+    assert.deepEqual(configured.segments,before.segments);assert.deepEqual(changed.forecasts,issued);
+    assert.deepEqual(configured.cumulative,before.cumulative);assert.deepEqual(configured.states,before.states);
+    assert.equal(JSON.stringify(configured.deployedSupport),support);
+    assert.deepEqual(configured.eventLog.at(-1),{t:45,type:'forecast',bus:7,faulty:true,message:'Future voltage-forcing forecasts corrupted'});
+    assert.deepEqual(changed.step().states,before.states,'Pending setting cannot advance a completed plant');
+    changed.extend(10);control.extend(10);
+    assert.deepEqual(changed.forecasts.slice(0,issued.length),issued,'The sealed prefix is immutable');
+    assert.equal(changed.forecasts.length,issued.length+1);
+    const a=changed.forecasts.at(-1),b=control.forecasts.at(-1);
+    assert.equal(a.issuedAt,45);assert.equal(a.t,49);assert.deepEqual(a.base,b.base);
+    for(let i=0;i<24;i++)if(i!==6||beta===0)assert.equal(a.forecast[i],b.forecast[i]);
+    if(beta)assert.notEqual(a.forecast[6],b.forecast[6],'The first newly issued source message uses the pending setting');
+    assert.equal(JSON.stringify(changed.snapshot().deployedSupport),support);
+  }
+});

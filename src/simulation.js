@@ -381,7 +381,7 @@
       }
     }
     toggleFault(bus){
-      this.checkBus(bus);if(bus===1||this.mode!=='running')return false;
+      this.checkBus(bus);if(bus===1||!['running','completed'].includes(this.mode))return false;
       if(this.faults.has(bus))this.faults.delete(bus);else this.faults.add(bus);
       this.eventLog.push(deepFreeze({t:this.t,type:'forecast',bus,faulty:this.faults.has(bus),
         message:'Future voltage-forcing forecasts '+(this.faults.has(bus)?'corrupted':'repaired')}));return this.faults.has(bus);

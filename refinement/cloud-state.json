@@ -556,8 +556,13 @@
     "lease_expires_at": "2026-10-17T16:35:43+08:00",
     "branch": "cloud/refine/20261017-1600",
     "base_main": "83b211821aaa8a13dc594cbf0857a19e6d08acbb",
-    "status": "claimed",
-    "focus": "Preserve reviewed finite comparison while changing paused source reliability, with exact replay and first new issue causality"
+    "status": "candidate validation",
+    "focus": "Preserve reviewed finite comparison while changing paused source reliability, with exact replay and first new issue causality",
+    "changes": [
+      "Keep a paused inspected source setting from implicitly continuing or extending a completed finite comparison.",
+      "Allow completed engine trials to record pending source settings without advancing samples or rewriting sealed forecasts. Explicit click-to-play sets reliability before the extended preview is issued.",
+      "Regress paused repeated settings, all four retained results, frozen support, exact version 13 replay and first new message timing in engine, UI and real browser checks."
+    ]
   },
   "next_focus": "Keep paused source setting changes separate from explicitly continuing a completed comparison. Preserve all existing controller results, baseline curves, default scenario and scientific parameters.",
   "priorities": [
