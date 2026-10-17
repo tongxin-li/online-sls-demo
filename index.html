@@ -3040,25 +3040,51 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     }
     overlay.on('pointermove',event=>{if(!pin)show(event);}).on('pointerleave',()=>{if(!pin){tip.style.display='none';guide.attr('display','none');dots.selectAll('circle').remove();}}).on('click',event=>{pin=pin?null:svg.node().id;show(event);});
   }
-  function drawInterventions(chart) {
-    const domain=chart.x.domain();
-    const scenarioEvents=(snapshot.eventLog || []).filter(item=>item.type==='scenario').map(item=>({...item,bus:0}));
-    const events=[...journal,...scenarioEvents].sort((a,b)=>a.t-b.t).filter(item=>['pulse','fault','scenario'].includes(item.type) && item.t<snapshot.t && item.t+1>=domain[0] && item.t+1<=domain[1]);
-    const groups=[];
+  function interventionEvents(view) {
+    return (view.eventLog || []).map((item,order)=>({...item,order,type:item.type==='fault'?'forecast':item.type}))
+      .filter(item=>['pulse','forecast','scenario'].includes(item.type)
+        && (item.type==='forecast'?item.t<=view.t:item.t<view.t))
+      .map(item=>({...item,at:item.t+(item.type==='forecast'?0:1)}))
+      .sort((a,b)=>a.at-b.at||a.order-b.order);
+  }
+  function interventionGroups(view,domain,x,frame) {
+    const events=interventionEvents(view).filter(item=>item.at>=domain[0]&&item.at<=domain[1]),groups=[];
     for(const item of events) {
-      const x=chart.x(item.t+1), previous=groups.at(-1);
-      if(previous && x-previous.right<120) {previous.items.push(item);previous.right=x;}
-      else groups.push({left:x,right:x,items:[item]});
+      const position=x(item.at),previous=groups.at(-1);
+      if(previous&&position-previous.right<120){previous.items.push(item);previous.right=position;}
+      else groups.push({left:position,right:position,items:[item]});
     }
-    groups.forEach(group=>{
-      const first=group.items[0]; group.key=first.t+'_'+first.type+'_'+first.bus;
+    return groups.map(group=>{
+      const first=group.items[0];group.key=first.order+'_'+first.t+'_'+first.type;
       group.attacks=group.items.filter(item=>item.type==='pulse').length;
-      group.count=group.attacks || group.items.length;
-      group.scenario=group.items.some(item=>item.type==='scenario');
-      group.label=group.scenario?'Solar event':group.attacks?(group.count>1?'Attacks':'Attack'):'Forecast changed';
+      group.forecasts=group.items.filter(item=>item.type==='forecast').length;
+      group.scenarios=group.items.filter(item=>item.type==='scenario').length;
+      const kinds=[group.attacks,group.forecasts,group.scenarios].filter(Boolean).length;
+      group.label=kinds>1?'Events ×'+group.items.length:group.scenarios?'Solar event'
+        :group.attacks?'Power'+(group.attacks>1?' ×'+group.attacks:'')
+        :group.forecasts>1?'Forecast ×'+group.forecasts:typeof first.faulty==='boolean'?(first.faulty?'Marked noisy':'Marked quiet'):'Forecast changed';
+      group.summary=[group.attacks?group.attacks+' power request'+(group.attacks===1?'':'s'):'',group.forecasts?group.forecasts+' forecast setting change'+(group.forecasts===1?'':'s'):'',
+        group.scenarios?group.scenarios+' solar event'+(group.scenarios===1?'':'s'):''].filter(Boolean).join(' · ');
+      group.details=group.items.slice(-8).map(item=>{
+        if(item.type==='pulse')return pulseMagnitude(item.strength || 100)+' requested at bus '+item.bus
+          +' · Action '+item.t+' s · First state '+item.at+' s · Applied power is bounded';
+        if(item.type==='scenario')return item.message+' · Action '+item.t+' s · First state '+item.at+' s · Absent from forecasts';
+        const issuedAt=Math.max(1,item.t),target=issuedAt+PowerDemo.constants.preview-1;
+        return 'Bus '+item.bus+(typeof item.faulty==='boolean'?(item.faulty?' marked noisy':' marked quiet'):' forecast setting changed')
+          +' at '+item.t+' s · First eligible issue '+issuedAt+' s · Target '+target+' s · Pair '+(target+1)+' s'
+          +(view.experiment==='communication'&&view.beta===0?' · Noise disabled at β 0':'');
+      });
+      group.description=group.summary+(group.items.length>8?' · Latest 8 events shown':'')
+        +(group.forecasts?' · Setting changes are not physical disturbances · Issued forecasts stay fixed':'')+'\n'+group.details.join('\n');
+      group.accessible=group.summary+(group.items.length>8?' · Latest 8 event details shown':'')+' · '+group.items.filter(item=>item.type==='scenario').map(item=>item.message).join(' · ')
+        +' · '+group.details.join(' · ');
       group.width=(group.attacks?24:16)+group.label.length*6;
-      group.x=Math.max(chart.frame.x+group.width/2,Math.min(chart.frame.x+chart.frame.w-group.width/2,(group.left+group.right)/2));
+      group.x=Math.max(frame.x+group.width/2,Math.min(frame.x+frame.w-group.width/2,(group.left+group.right)/2));
+      return group;
     });
+  }
+  function drawInterventions(chart) {
+    const groups=interventionGroups(snapshot,chart.x.domain(),chart.x,chart.frame);
     const markers=chart.marks.selectAll('g.intervention-markers').data([null]).join('g').attr('class','intervention-markers');
     markers.selectAll('rect').data(groups,group=>group.key).join('rect')
       .attr('x',g=>g.left-2).attr('width',g=>Math.max(4,g.right-g.left+4))
@@ -3071,8 +3097,10 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       const badge=enter.append('g').attr('class','intervention-badge').attr('role','img');
       badge.append('title');badge.append('rect');badge.append('path');badge.append('text');return badge;
     }).attr('data-event-count',g=>g.items.length).attr('data-disturbance-count',g=>g.attacks)
-      .attr('data-event-steps',g=>g.items.map(item=>item.t+1).join(','))
-      .attr('aria-label',g=>g.scenario?g.items.filter(item=>item.type==='scenario').map(item=>item.message).join(' · '):g.attacks?g.attacks+' power pulses and '+(g.items.length-g.attacks)+' forecast changes':'Forecast reliability changed at '+[...new Set(g.items.map(item=>'bus '+item.bus))].join(', '));
+      .attr('data-event-steps',g=>g.items.map(item=>item.at).join(','))
+      .attr('data-event-types',g=>g.items.map(item=>item.type).join(','))
+      .attr('data-forecast-count',g=>g.forecasts).attr('data-scenario-count',g=>g.scenarios)
+      .attr('aria-label',g=>g.accessible);
     // Position badges directly. They must never fly in from a stale chart scale.
     labels.interrupt().interrupt('update').attr('transform',g=>'translate('+g.x+','+(chart.frame.y-14)+')');
     labels.select('rect').attr('x',g=>-g.width/2).attr('y',-10).attr('width',g=>g.width).attr('height',20).attr('rx',6)
@@ -3081,14 +3109,9 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       .attr('d',g=>g.attacks?'M14 1 3 13h7l-1 10L21 9h-8z':null).attr('fill','#fff');
     labels.select('text').attr('x',g=>g.attacks?8:0).attr('y',.5).attr('text-anchor','middle').attr('dominant-baseline','middle')
       .style('font-size','11px').style('font-weight','650').style('fill','#fff').text(g=>g.label);
-    labels.select('title').text(g=>{
-      const details=g.items.slice(-8).map(item=>item.type==='pulse'
-        ? pulseMagnitude(item.strength || 100)+' at bus '+item.bus+' · Voltage and cost at t '+(item.t+1)+' s'
-        : item.type==='scenario'?item.message+' · Applied at t '+(item.t+1)+' s': 'Bus '+item.bus+' forecast reliability changed · New forecasts only · t '+item.t+' s');
-      const explanation=g.scenario?'Scheduled physical generation change · Absent from forecasts':g.attacks?g.attacks+' individual power pulses in this shaded interval':'Forecast settings changed here · This marker is not a power disturbance';
-      return explanation+(g.items.length>8?' · Latest 8 events shown':'')+'\n'+details.join('\n');
-    });
+    labels.select('title').text(g=>g.description);
   }
+
   function drawCost() {
     const active=activeSeries(),items=plottedSeries();
     const gap=$('cost-metric').value==='gap';
