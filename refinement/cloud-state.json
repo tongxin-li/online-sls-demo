@@ -309,7 +309,14 @@
       }
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-17T08:00:00+08:00",
+    "started_at": "2026-10-17T08:00:17+08:00",
+    "lease_expires_at": "2026-10-17T08:40:17+08:00",
+    "branch": "cloud/refine/20261017-0800",
+    "base_main": "3c0fc734c0f9ba9285e5cdaefc11d94bfa905d07",
+    "focus": "Read only latest receiver command decomposition by actual issued source messages"
+  },
   "next_focus": "Audit the inspected source’s actual contribution to the latest receiver command using only issued forecasts and executed coefficients. Distinguish permitted support from a nonzero gain, including dense discovery and frozen comparison. Avoid fabricated links or future observations. Preserve both audited power scenarios and all baseline curves.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
