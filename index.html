@@ -490,7 +490,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         <p id="pr-forecast-support" class="pr-caption"></p>
         <details id="pr-command-inspector" class="pr-command-inspector" hidden>
           <summary id="pr-command-title">Command breakdown</summary>
-          <p class="pr-caption">kvar · Source and other messages before limiting · Includes the full issued preview, not just the revealed pair</p>
+          <p class="pr-caption">kvar · Source and other messages before limiting · Includes the full issued preview, not just the revealed pair · Highlighted links belong to the learned or matrix controller</p>
           <div class="pr-command-scroll"><table aria-label="Latest receiver command decomposition in kvar">
             <thead><tr><th>Controller</th><th>Source</th><th>Other</th><th>Feedback</th><th>Request</th><th>Command</th></tr></thead>
             <tbody id="pr-command-rows"></tbody>
@@ -2089,7 +2089,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       $('observed-'+key).textContent=observation ? (1000*observation[key]).toFixed(3) : '—';
     $('forecast-support').textContent=!inspection ? '' : historyIndex!==null ? 'Current sample hidden while reviewing saved links'
       : snapshot.phase==='discovery' ? 'Discovery uses dense messages · Displayed links are candidates'
-      : (inspection.connected ? 'Permitted by deployed support' : 'Excluded from deployed support')+' at inverter '+inspection.receiver+' · Links fixed';
+      : (inspection.connected ? 'Permitted by deployed support' : 'Excluded from deployed support')+' at inverter '+inspection.receiver+' · '+(snapshot.experiment==='communication'?'Learned sparse':'Matrix adaptation')+' · Links fixed';
   }
   function renderInspectedSource() {
     const inspection=predictionInspection(),control=$('source-fault');
