@@ -472,6 +472,18 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 /* Current configuration replaces generic heading copy without another panel. */
 .pr-scenario-heading p[data-forecast-settings='true'] { color:#53535a; font-weight:500; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
 
+/* Identify each measured policy before the shared plots, especially on phones. */
+.pr-controller-key { margin:0 0 10px; gap:6px 18px; }
+.pr-controller-key button { min-height:32px; padding:6px 2px; font-size:12px; line-height:1.4; color:#53535a; border-radius:7px; }
+.pr-controller-key button:hover { color:var(--foreground); background:var(--muted); }
+.pr-controller-key button[aria-pressed='false'] { opacity:1; text-decoration:line-through; }
+.pr-controller-key button[aria-pressed='false'] .pr-swatch { opacity:.35; }
+.pr-controller-key .pr-swatch { flex-shrink:0; }
+@media(max-width:650px),(pointer:coarse) {
+  .pr-controller-key { gap:6px; }
+  .pr-controller-key button { min-height:44px; padding:8px 10px; }
+}
+
 /* Artwork stays decorative. The enclosing bus handles hit area and badge input. */
 .pe-host { -webkit-user-select:none; user-select:none; touch-action:manipulation; }
 .pe-hit { fill:transparent; pointer-events:all; }
@@ -619,6 +631,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     <span id="pr-voltage-range" class="tabular-nums"></span>
   </div>
   <p id="pr-scenario-status" class="pr-caption" role="status" hidden></p>
+  <div id="pr-controller-key" class="pr-legend pr-controller-key" role="group" aria-label="Controller curves"><button type="button" data-series="online" aria-pressed="true"><span class="pr-swatch online"></span>Matrix adaptation</button><button type="button" data-series="scalar" aria-pressed="true"><span class="pr-swatch scalar"></span>Scalar adaptation</button><button type="button" data-series="static" aria-pressed="true"><span class="pr-swatch static"></span>Fixed prediction</button><button type="button" data-series="causal" aria-pressed="true"><span class="pr-swatch causal"></span>Feedback only</button></div>
   <div class="pr-dashboard">
     <section class="pr-panel pr-network-panel" aria-labelledby="pr-network-title">
       <div class="pr-subhead"><h2 id="pr-network-title">Power network</h2><span id="pr-action-note" class="pr-caption" aria-live="polite">Click a bus to start · Click again to stop</span></div>
@@ -785,7 +798,6 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     </section>
   </div>
   <div class="pr-bottomline">
-    <div class="pr-legend" aria-label="Controller curves"><button type="button" data-series="online" aria-pressed="true"><span class="pr-swatch online"></span>Matrix adaptation</button><button type="button" data-series="scalar" aria-pressed="true"><span class="pr-swatch scalar"></span>Scalar adaptation</button><button type="button" data-series="static" aria-pressed="true"><span class="pr-swatch static"></span>Fixed prediction</button><button type="button" data-series="causal" aria-pressed="true"><span class="pr-swatch causal"></span>Feedback only</button></div>
     <span id="pr-event" role="status" aria-live="polite">Ready · Space to run</span>
   </div>
   <details class="pr-adaptation" id="pr-adaptation">
