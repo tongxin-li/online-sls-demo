@@ -320,6 +320,19 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 .pr-voltage-table th,.pr-voltage-table td { padding:3px 2px; }
 #pr-voltage-metrics-note { margin:4px 0 10px; font-size:10px; line-height:1.5; }
 
+.pr-scenario-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px; }
+.pr-scenario-heading strong { font-size:15px; font-weight:550; letter-spacing:-.2px; }
+.pr-scenario-heading p { margin-top:3px; }
+.pr-scheduled-power { margin:5px 0 2px; color:#467b72; }
+#pr-network .pr-scheduled-ring { stroke:#399b8b; stroke-width:2; }
+.pr-trial-context { margin:8px 0; padding:7px 9px; background:#fff7ed; border-radius:7px; color:#93601f; font-size:11px; }
+.pr-adaptation .pr-experiment-bar { padding-top:8px; }
+@media(max-width:650px) {
+  .pr-scenario-heading { align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
+  .pr-scenario-heading .btn { min-height:44px; }
+  .pr-scheduled-power { font-size:10px; line-height:1.5; }
+}
+
 /* Artwork stays decorative. The enclosing bus handles hit area and badge input. */
 .pe-host { -webkit-user-select:none; user-select:none; touch-action:manipulation; }
 .pe-hit { fill:transparent; pointer-events:all; }
@@ -445,10 +458,9 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 </header>
 
 <main id="power-response-demo">
-  <div class="pr-experiment-bar" aria-label="Experiment selection">
-    <label class="pr-experiment-choice" for="pr-experiment">Experiment <select id="pr-experiment" aria-label="Experiment"><option value="communication" selected>Communication topology</option><option value="prediction">Prediction adaptation</option></select></label>
-    <label class="pr-noise-control" id="pr-noise-control" for="pr-noise">Forecast error <select id="pr-noise" aria-label="Forecast noise level" title="Starts a fresh learning and comparison trial. Previous power attack costs are cleared"><optgroup label="Reference range"><option value="0">None · β 0</option><option value="0.25">Reference · β 0.25</option><option value="0.5">Reference · β 0.5</option><option value="1" selected>Reference · β 1</option><option value="2">Reference · β 2</option></optgroup><optgroup label="Extended feeder stress"><option value="4">Stress · β 4</option><option value="8">Stress · β 8</option><option value="16">Stress · β 16</option></optgroup></select></label>
-    <span id="pr-noise-caption" class="pr-caption">Selected source forecast error in mpu</span>
+  <div class="pr-scenario-heading">
+    <div><strong id="pr-scenario-name">Forecasted demand</strong><p id="pr-scenario-description" class="pr-caption">Learn from changing demand, then compare four controllers</p></div>
+    <button type="button" class="btn btn-play" id="pr-new-scenario" hidden>Start new scenario</button>
   </div>
   <div class="pr-controlbar" aria-label="Simulation controls">
     <div class="pr-toolbar">
@@ -459,7 +471,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       <span id="pr-clock" class="tabular-nums">t = 0 s</span>
     </div>
     <div class="pr-actions">
-      <select id="pr-intervention" aria-label="Bus interaction" title="Choose what clicking a bus changes"><option value="forecast" selected>Forecast</option><option value="power">Power disturbance</option></select>
+      <select id="pr-intervention" aria-label="Bus interaction" title="Choose what clicking a bus changes"><option value="forecast" selected>Forecast</option><option value="power">Unforecast power stress</option></select>
       <select id="pr-attack-mode" aria-label="Attack mode"><option value="continuous" selected>Continuous</option><option value="pulse">Pulse</option></select>
       <select id="pr-strength" aria-label="Pulse strength" title="Requested power per pulse. Applied power respects equipment limits"><option value="50">50 kW</option><option value="100" selected>100 kW</option><option value="150">150 kW</option></select>
       <button type="button" class="btn btn-attack" id="pr-pulse" aria-keyshortcuts="D" title="Click for a pulse or hold for one pulse each sample"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path class="pr-forecast-signal" d="M3 12h3l3-7 6 14 3-7h3"/><path class="pr-attack-bolt" d="M14 2 5 14h6l-1 8 9-13h-6z"/><rect class="pr-attack-stop" x="6" y="6" width="12" height="12" rx="2"/></svg><span id="pr-pulse-label">Attack bus 7</span></button>
@@ -476,6 +488,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   <div class="pr-dashboard">
     <section class="pr-panel pr-network-panel" aria-labelledby="pr-network-title">
       <div class="pr-subhead"><h2 id="pr-network-title">Power network</h2><span id="pr-action-note" class="pr-caption" aria-live="polite">Click a bus to start · Click again to stop</span></div>
+      <p id="pr-scheduled-power" class="pr-caption pr-scheduled-power" hidden></p>
       <svg class="pr-chart" id="pr-network" role="group" aria-label="24 bus radial power feeder. Click a load, solar, or battery bus to start a continuous disturbance. Click again to stop."></svg>
       <div class="pr-panel-foot"><span id="pr-bus-detail" class="tabular-nums"></span><span class="pr-live-stage">Cost <strong id="pr-live-cost" class="tabular-nums">0.0000</strong></span></div>
     </section>
@@ -520,6 +533,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     </section>
     <section class="pr-panel pr-learning-panel" aria-labelledby="pr-learning-title">
       <div class="pr-subhead"><h2 id="pr-learning-title">Cost comparison</h2><select id="pr-view" aria-label="Controller view"><option value="cost">Cost</option><option value="learning" selected>Learning</option></select></div>
+      <p id="pr-trial-context" class="pr-trial-context" hidden></p>
       <div id="pr-learning-content" hidden>
         <div class="pr-algorithm-flow" id="pr-learning-flow" aria-label="Shared prediction adaptation cycle">
           <div><span class="pr-flow-index">01</span><strong>Forecast</strong><span id="pr-flow-predict">Voltage forcing</span></div>
@@ -541,8 +555,13 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   <p id="pr-phase-note" class="pr-overlap-note">Physical attacks test disturbance recovery · Forecast settings test prediction adaptation</p>
   <details class="pr-adaptation" id="pr-adaptation">
     <summary>Experiment settings <span aria-hidden="true">+</span></summary>
+  <div class="pr-experiment-bar" aria-label="Experiment selection">
+    <label class="pr-experiment-choice" for="pr-experiment">Experiment <select id="pr-experiment" aria-label="Experiment"><option value="communication" selected>Communication topology</option><option value="prediction">Prediction adaptation</option></select></label>
+    <label class="pr-noise-control" id="pr-noise-control" for="pr-noise">Forecast error <select id="pr-noise" aria-label="Forecast noise level" title="Starts a fresh learning and comparison trial. Previous power attack costs are cleared"><optgroup label="Reference range"><option value="0">None · β 0</option><option value="0.25">Reference · β 0.25</option><option value="0.5">Reference · β 0.5</option><option value="1">Reference · β 1</option><option value="2">Reference · β 2</option></optgroup><optgroup label="Extended feeder stress"><option value="4" selected>Stress · β 4</option><option value="8">Stress · β 8</option><option value="16">Stress · β 16</option></optgroup></select></label>
+    <span id="pr-noise-caption" class="pr-caption">Selected source forecast error in mpu</span>
+  </div>
     <div class="pr-comparison-controls">
-      <label for="pr-power-scenario">Power scenario <select id="pr-power-scenario" aria-label="Power scenario" title="Changing the scenario starts a fresh discovery trial"><option value="reference" selected>Reference</option><option value="solar-outage">Solar outage · 20 s</option></select></label>
+      <label for="pr-power-scenario">Power scenario <select id="pr-power-scenario" aria-label="Power scenario" title="Changing the scenario starts a fresh discovery trial"><option value="forecasted-demand" selected>Forecasted demand</option><option value="reference">Reference</option><option value="solar-outage">Solar outage · 20 s</option></select></label>
       <label id="pr-preset-control" for="pr-preset">Forecasts <select id="pr-preset" aria-label="Forecast preset" title="Changing forecasts starts a new discovery trial"><option value="reliable">Reliable forecasts</option><option value="uniform">Uniform noise</option><option value="mixed" selected>Mixed reliability</option></select></label>
       <button type="button" class="btn btn-compare" id="pr-compare" title="Advance 180 samples across discovery and comparison">Advance 180</button>
     </div>
@@ -875,6 +894,17 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       baseDemandKw:battery?50:70,baseGenerationKw:solar?80:0,
       activePowerLimitKw:solar||battery?90:null,reactiveRatio:solar||battery?0:PF_RATIO};
   });
+  const FORECASTED_DEMAND={id:'forecasted-demand',label:'Forecastable demand and solar',periodSeconds:60,
+    homeAmplitudeKw:35,solarLossMaxKw:30,batteryAmplitudeKw:15,maxScheduledKw:35,
+    phaseRule:'2 pi times bus modulo 6 divided by 6',previewSamples:PREVIEW,leadSteps:PREVIEW-1,
+    noisySources:BUS_PROFILES.filter(profile=>profile.role==='Homes').map(profile=>profile.bus)};
+  function scheduledPower(bus,t){
+    const profile=BUS_PROFILES[bus-1],phase=2*Math.PI*(bus%6)/6;
+    if(profile.role==='Solar')return .030*(1-Math.cos(2*Math.PI*t/60))/2;
+    if(profile.role==='Battery')return .015*Math.sin(2*Math.PI*t/60+phase);
+    if(profile.role==='Homes')return .035*Math.sin(2*Math.PI*t/60+phase);
+    return 0;
+  }
   function zeros(n = N, m = n) { return Array.from({length:n}, () => Array(m).fill(0)); }
   function eye(n = N) { const a = zeros(n); for (let i=0;i<n;i++) a[i][i]=1; return a; }
   function copy(a) { return a.map(row => row.slice()); }
@@ -1121,11 +1151,11 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       const preset=FORECAST_PRESETS.find(p=>p.id===id);
       if(!preset)throw new RangeError('Forecast preset must be reliable, uniform, or mixed');
       const powerScenario=options.powerScenario || 'reference';
-      if(!['reference','solar-outage'].includes(powerScenario))throw new RangeError('Unknown power scenario');
+      if(!['reference','solar-outage','forecasted-demand'].includes(powerScenario))throw new RangeError('Unknown power scenario');
       this.preset=preset;
       this.initialOptions={experiment,beta,powerScenario,seed:options.seed===undefined?20261013:options.seed,
         horizon:options.horizon===undefined?480:options.horizon,preset:id,
-        faultBuses:options.faultBuses===undefined?preset.faultBuses.slice():options.faultBuses.slice()};
+        faultBuses:options.faultBuses===undefined?(powerScenario==='forecasted-demand'&&id==='mixed'?FORECASTED_DEMAND.noisySources:preset.faultBuses).slice():options.faultBuses.slice()};
       if(!Number.isInteger(this.initialOptions.horizon)||this.initialOptions.horizon<1)throw new Error('Invalid horizon');
       this.phase='discovery';this.discoveryRecord=null;this.deployedSupport=null;this.reset();
     }
@@ -1184,7 +1214,9 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       while(this.forecasts.length<this.t+PREVIEW){
         const s=this.forecasts.length,rho=.72,innovation=Math.sqrt(1-rho*rho);
         this.latent=this.latent.map(v=>rho*v+innovation*this.random.normal());
-        const base=Array.from({length:N},(_,i)=>i===0?0:boundedPowerDeviation(i+1,AMPLITUDE*(.35*this.latent[0]+.65*this.latent[i+1])));
+        const scheduled=this.options.powerScenario==='forecasted-demand'?Array.from({length:N},(_,i)=>scheduledPower(i+1,s)):null;
+        const randomBase=Array.from({length:N},(_,i)=>i===0?0:AMPLITUDE*(.35*this.latent[0]+.65*this.latent[i+1]));
+        const base=randomBase.map((value,i)=>i===0?0:boundedPowerDeviation(i+1,scheduled?scheduled[i]+value:value));
         const previous=s?this.forecasts[s-1].base:Array(N).fill(0);
         const baseW=matvec(model.powerToVoltage,base.map((v,i)=>v-LAG*previous[i]));
         const forecast=baseW.map((v,i)=>{
@@ -1194,7 +1226,9 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
           return i===0?0:(faulty?this.preset.faultyGain:this.preset.gain)*v
             +scale*(faulty?this.preset.faultyNoise:this.preset.noise)*noise;
         });
-        this.forecasts.push(deepFreeze({t:s,issuedAt:Math.max(0,s-PREVIEW+1),base,forecast,units:'pu voltage forcing'}));
+        const scheduledMetadata=scheduled?{scheduledPowerKw:scheduled.map(value=>value*POWER_BASE_KW),
+          scheduledAppliedKw:base.map((value,i)=>(value-boundedPowerDeviation(i+1,randomBase[i]))*POWER_BASE_KW)}:{};
+        this.forecasts.push(deepFreeze({t:s,issuedAt:Math.max(0,s-PREVIEW+1),base,forecast,units:'pu voltage forcing',...scheduledMetadata}));
       }
     }
     toggleFault(bus){
@@ -1334,7 +1368,11 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       const outage=this.phase==='deployment'&&this.options.powerScenario==='solar-outage'&&time>=30&&time<50;
       const scenarioRequest=background.map((v,i)=>outage&&SOLAR_BUSES.includes(i+1)?Math.max(0,BUS_PROFILES[i].baseGenerationKw-v*1000):0);
       const scenarioBase=background.map((v,i)=>boundedPowerDeviation(i+1,v+scenarioRequest[i]/1000));
-      this.lastScenarioApplications=scenarioRequest.flatMap((requestedKw,i)=>requestedKw>0?[{bus:i+1,requestedKw,appliedKw:(scenarioBase[i]-background[i])*1000}]:[]);
+      this.lastScenarioApplications=issued.scheduledPowerKw
+        ?issued.scheduledPowerKw.flatMap((requestedKw,i)=>i>0?[{bus:i+1,requestedKw,appliedKw:issued.scheduledAppliedKw[i],forecasted:true,role:BUS_PROFILES[i].role}]:[])
+        :scenarioRequest.flatMap((requestedKw,i)=>requestedKw>0?[{bus:i+1,requestedKw,appliedKw:(scenarioBase[i]-background[i])*1000}]:[]);
+      if(this.options.powerScenario==='forecasted-demand'&&time%FORECASTED_DEMAND.periodSeconds===0)
+        this.eventLog.push(deepFreeze({t:time,type:'scenario',kind:'demand',forecasted:true,message:'Scheduled demand and solar cycle'}));
       if(this.phase==='deployment'&&this.options.powerScenario==='solar-outage'&&(time===30||time===50))
         this.eventLog.push(deepFreeze({t:time,type:'scenario',action:time===30?'start':'restore',buses:SOLAR_BUSES.slice(),message:time===30?'Solar outage begins':'Solar generation restored'}));
       for(const event of this.pulses){event.requestedKw=event.strength*Math.exp(-event.age/event.decay);requested[event.bus-1]+=event.requestedKw;}
@@ -1367,7 +1405,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       }
       const sample=deepFreeze({t:time,forecast:issued.forecast,disturbance:recovered.online,
         voltageDisturbance:recovered.online,disturbances:recovered,base:background,powerDeviation:nextPower,
-        pulse,scenarioApplications:this.lastScenarioApplications.map(p=>({...p})),pulseApplications:this.lastPulseApplications.map(p=>({...p})),units:'pu voltage forcing',pulseUnits:'kW'});
+        pulse,scenarioApplications:this.lastScenarioApplications.map(p=>({...p})),pulseApplications:this.lastPulseApplications.map(p=>({...p})),units:'pu voltage forcing',pulseUnits:'kW',
+        ...(issued.scheduledPowerKw?{scheduledPowerKw:issued.scheduledPowerKw,scheduledAppliedKw:issued.scheduledAppliedKw}:{})});
       this.powerDeviation=nextPower.slice();this.power=physicalPower(nextPower);this.lastInputs=deepFreeze(inputs);this.lastSample=sample;this.samples.push(sample);
       this.learning.rawRms=Math.sqrt(squared(sample.forecast.map((v,i)=>v-sample.disturbance[i]))/(N-1));
       if(this.phase==='discovery'&&time>=PREVIEW){
@@ -1435,6 +1474,14 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       const flows=Object.fromEntries(CONTROLLERS.map(key=>[key,branchFlows(this.power.loadP,this.power.loadQ,this.q[key])]));
       const terminalCost=Object.fromEntries(CONTROLLERS.map(key=>{
         const x=this.states[key].slice(1).map((v,i)=>v-model.baseDrop[i+1]),px=matvec(model.P,x);return[key,x.reduce((sum,v,i)=>sum+v*px[i],0)];}));
+      const scheduled=this.options.powerScenario==='forecasted-demand';
+      const sumScheduled=role=>this.lastScenarioApplications.filter(item=>!role||item.role===role).reduce((sum,item)=>sum+item.appliedKw,0);
+      const scenario=scheduled?{...FORECASTED_DEMAND,forecasted:true,phaseLabel:'Demand and solar cycle',
+        action:this.lastSample?.t ?? null,active:this.t>0,
+        requestedKw:this.lastScenarioApplications.reduce((sum,item)=>sum+item.requestedKw,0),appliedKw:sumScheduled(),
+        demandChangeKw:sumScheduled('Homes'),solarLossKw:sumScheduled('Solar'),batteryChangeKw:sumScheduled('Battery'),
+        absoluteAppliedKw:this.lastScenarioApplications.reduce((sum,item)=>sum+Math.abs(item.appliedKw),0)}
+        :{id:this.options.powerScenario,start:30,end:50,active:this.phase==='deployment'&&this.t>30&&this.t<=50,requestedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.requestedKw,0),appliedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.appliedKw,0)};
       return{t:this.t,costTime:this.lastSample?this.lastSample.t:null,stateTime:this.t,horizon:this.options.horizon,
         initialOptions:{...this.initialOptions,faultBuses:this.initialOptions.faultBuses.slice()},
         phase:this.phase,experiment:this.options.experiment,beta:this.options.beta,canDeploy:this.phase==='discovery'&&this.samples.length>=WARMUP&&(this.options.experiment!=='communication'||this.communicationScoreSamples>0),
@@ -1446,7 +1493,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         saturation:Object.fromEntries(CONTROLLERS.map(key=>[key,this.saturation[key].map(Boolean)])),
         ...Object.fromEntries(Object.entries(this.power).map(([key,value])=>[key,value.slice()])),powerDeviation:this.powerDeviation.slice(),
         edgeData:model.edgeData.map((edge,i)=>({...edge,pKw:flows.online[i].pKw,qKvar:Object.fromEntries(CONTROLLERS.map(key=>[key,flows[key][i].qKvar]))})),
-        powerScenario:this.options.powerScenario,scenario:{id:this.options.powerScenario,start:30,end:50,active:this.phase==='deployment'&&this.t>30&&this.t<=50,requestedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.requestedKw,0),appliedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.appliedKw,0)},
+        powerScenario:this.options.powerScenario,scenario,
+        ...(scheduled?{scheduledPowerKw:this.lastSample?.scheduledPowerKw.slice() || Array(N).fill(0)}:{}),
         lastScenarioApplications:this.lastScenarioApplications.map(p=>({...p})),lastPulseApplications:this.lastPulseApplications.map(p=>({...p})),costStates:Object.fromEntries(CONTROLLERS.map(key=>[key,this.costStates[key].slice()])),
         learning:{...this.learning},calibration:{...this.calibration,matrix:copy(this.calibration.matrix)},predictionDiagnostics:this.predictionDiagnostics,lastPreview:this.lastPreview.slice(),
         pendingPulses:this.pulses.filter(e=>e.age===0).map(e=>({...e})),activePulses:this.pulses.filter(e=>e.age>0).map(e=>({...e})),
@@ -1491,11 +1539,11 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   return{Simulation,model,voltageMetrics,constants:deepFreeze({N,M,edges:EDGES,edgeData:model.edgeData,inverterBuses:INVERTER_BUSES,
     amplitude:AMPLITUDE,ridge:RIDGE,rawRidge:RAW_RIDGE,remoteBudget:REMOTE_BUDGET,preview:PREVIEW,window:WINDOW,warmup:WARMUP,
     busProfiles:BUS_PROFILES,controllers:CONTROLLERS,forecastPresets:FORECAST_PRESETS,communicationBetas:COMMUNICATION_BETAS,
-    communicationStressBetas:COMMUNICATION_STRESS_BETAS,tolerance:TOLERANCE,horizon:480,
+    communicationStressBetas:COMMUNICATION_STRESS_BETAS,forecastedDemand:FORECASTED_DEMAND,tolerance:TOLERANCE,horizon:480,
     pulseDefault:PULSE_DEFAULT,pulseMin:PULSE_MIN,pulseMax:PULSE_MAX,pulseUnits:'kW',powerBaseKw:POWER_BASE_KW,
     baseKv:BASE_KV,baseMva:BASE_MVA,sampleSeconds:SAMPLE_SECONDS,tauSeconds:TAU_SECONDS,inverterKvar:70}),
     math:{zeros,eye,transpose,multiply,matvec,combine,frobenius,normInf,solveSPD,getDesign,Response,calibratedScores,
-      recommendations,physicalPower,voltageFrom,branchFlows,radialAC,padInput}};
+      recommendations,physicalPower,voltageFrom,branchFlows,radialAC,padInput,scheduledPower}};
 });
 </script>
 <script>/* Native SVG equipment for the power network.
@@ -1814,11 +1862,13 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     return;
   }
   const d3 = window.d3;
+  const DEFAULT_SCENARIO='forecasted-demand';
+  const COMPARISON_SAMPLES=180;
   const communicationNoiseLevels=[...PowerDemo.constants.communicationBetas,...(PowerDemo.constants.communicationStressBetas || [])];
   function optionsFromControls() {
     const experiment=$('experiment').value==='prediction'?'prediction':'communication';
     const beta=Number($('noise').value);
-    return {experiment,powerScenario:$('power-scenario').value || 'reference',beta:communicationNoiseLevels.includes(beta)?beta:1,preset:experiment==='communication'?'mixed':$('preset').value,
+    return {experiment,powerScenario:$('power-scenario').value || DEFAULT_SCENARIO,beta:communicationNoiseLevels.includes(beta)?beta:1,preset:experiment==='communication'?'mixed':$('preset').value,
       ...(experiment==='communication'?{horizon:180}:{})};
   }
   let simulation = new PowerDemo.Simulation(optionsFromControls());
@@ -1840,6 +1890,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     return series;
   }
   function gapReference() { return communicationComparison()?'fixed sparse':'scalar adaptation'; }
+  function guidedScenario() { return snapshot.experiment==='communication'&&snapshot.powerScenario===DEFAULT_SCENARIO; }
+  function comparisonComplete() { return guidedScenario()&&snapshot.phase==='deployment'&&snapshot.t>=COMPARISON_SAMPLES&&!comparisonContinued; }
   function forecastMode() { return $('intervention').value==='forecast'; }
   function forecastNoiseEnabled() { return snapshot.experiment!=='communication'||snapshot.beta>0; }
   function forecastNoisy(bus) { return forecastNoiseEnabled()&&snapshot.faults.includes(bus); }
@@ -1885,6 +1937,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   let journal = [];
   let fitSteps = 0;
   let restored = false;
+  let restoredTrial = false;
+  let comparisonContinued = false;
   let pin = null;
   let matrixReference = null;
   let inspectedSource = null;
@@ -2195,6 +2249,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     render(); save();
   }
   function resumePlant() {
+    if(comparisonComplete()) comparisonContinued=true;
     if (isFit()) {
       simulation.resume();
       journal.push({t:snapshot.t,type:'fit',count:fitSteps});
@@ -2209,7 +2264,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     const events=snapshot.eventLog || [];
     const state = {
       modelContent: { scenario:'24 bus LinDistFlow voltage regulation', variant:snapshot.experiment==='communication'?'Communication topology comparison':'Shared prediction adaptation and sparse deployment', phase:snapshot.phase, step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
-      privateContent: { version:13, intervention:$('intervention').value, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, automaticComparison:automaticComparison(), view:$('view').value, costMetric:$('cost-metric').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, inspectedSource, speed:$('speed').value, allLinks:$('all-links').checked }
+      privateContent: { version:13, comparisonContinued, intervention:$('intervention').value, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, automaticComparison:automaticComparison(), view:$('view').value, costMetric:$('cost-metric').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, inspectedSource, speed:$('speed').value, allLinks:$('all-links').checked }
     };
     window.openai.setWidgetState(state).catch(() => {});
   }
@@ -2241,7 +2296,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   function hydrate(saved) {
     const data=saved?.privateContent;
     if(restored||!data||data.version!==13) return;
-    restored=true;
+    restored=true;restoredTrial=true;
+    comparisonContinued=!!data.comparisonContinued || (data.phase==='deployment'&&data.t>COMPARISON_SAMPLES);
     $('auto-compare').checked=data.automaticComparison!==false;
     selectedBus=Math.max(1,Math.min(24,Math.floor(Number(data.selectedBus)||7)));
     $('bus').value=String(selectedBus);
@@ -2257,7 +2313,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     $('experiment').value=savedOptions?.experiment==='prediction'?'prediction':'communication';
     $('noise').value=String(communicationNoiseLevels.includes(savedOptions?.beta)?savedOptions.beta:1);
     $('preset').value=preset;
-    $('power-scenario').value=savedOptions?.powerScenario==='solar-outage'?'solar-outage':'reference';
+    $('power-scenario').value=['reference','solar-outage',DEFAULT_SCENARIO].includes(savedOptions?.powerScenario)?savedOptions.powerScenario:'reference';
     if(data.phase==='deployment' && data.discoveryRecord) {
       simulation=new PowerDemo.Simulation(data.discoveryRecord.options || optionsFromControls());
       topology.reset(simulation.snapshot());
@@ -2317,7 +2373,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     if(!simulation.deployTopology()) return false;
     snapshot=simulation.snapshot();
     topology.observe(snapshot);historyIndex=null;visualTopologyEvent=null;
-    journal=[];fitSteps=0;pin=null;lastPulse=null;
+    journal=[];fitSteps=0;pin=null;lastPulse=null;comparisonContinued=false;
     if(preserveAttack) {
       for(const attack of activeAttacks()) {
         if(!requests.some(p=>p.bus===attack.bus)) requests.push({bus:attack.bus,strength:Number($('strength').value)});
@@ -2341,6 +2397,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     return enterComparison(true);
   }
   function advanceLiveSample() {
+    if(comparisonComplete()) return false;
     // Replayed records never call this function. Their historical phase is retained.
     let transitioned=startAutomaticComparison();
     if(simulation.mode==='completed') simulation.extend();
@@ -2349,7 +2406,10 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     }
     advanceSample();snapshot=simulation.snapshot();
     transitioned=startAutomaticComparison() || transitioned;
-    if(transitioned) save();
+    if(comparisonComplete()) {
+      stop();announce('Comparison complete · All costs retained · Continue to explore');
+    }
+    if(transitioned || comparisonComplete()) save();
     return transitioned;
   }
   function tick() {
@@ -2360,13 +2420,14 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       const state=attackState(lastPulse.bus);
       announce((state==='continuous'||state==='held'?'Adding attacks':state==='fading'?'Disturbance fading':state==='paused'?'Paused':'Disturbance ended')+' · Bus '+lastPulse.bus+' · t = '+snapshot.t+' s');
     }
-    if (snapshot.mode === 'completed' && !playing) announce('Run or Step to continue');
+    if(comparisonComplete()) announce('Comparison complete · All costs retained · Continue to explore');
+    else if (snapshot.mode === 'completed' && !playing) announce('Run or Step to continue');
     if (snapshot.mode === 'converged') { stop(); announce('Fit converged · Return to simulation'); }
     render();
     if (snapshot.t % 30 === 0 || !playing) save();
   }
   function resetExperiment() {
-    stop(); simulation.reset();
+    stop(); simulation.reset();comparisonContinued=false;restoredTrial=false;
     snapshot = simulation.snapshot(); journal = []; fitSteps = 0; pin = null; lastPulse = null;
     if(snapshot.phase==='discovery') topology.reset(snapshot);
     else topology.observe(snapshot);
@@ -2379,6 +2440,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     if (comparing) return;
     if (playing) { stop(); announce('Paused'); save(); }
     else {
+      if(comparisonComplete()) comparisonContinued=true;
       if (snapshot.mode === 'completed') { simulation.extend(); snapshot=simulation.snapshot(); }
       if (snapshot.mode === 'converged') resumePlant();
       playing = true;
@@ -2409,6 +2471,12 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     visible.clear();series.forEach(item=>visible.add(item.key));
     announce((snapshot.experiment==='communication'?'Communication topology':snapshot.presetLabel)+' · New learning trial'); render(); save();
   }
+  $('new-scenario').addEventListener('click',()=>{
+    if(comparing) return;
+    $('experiment').value='communication';$('power-scenario').value=DEFAULT_SCENARIO;
+    $('noise').value='4';$('preset').value='mixed';$('auto-compare').checked=true;
+    startSelectedExperiment();toggleRun();
+  });
   $('preset').addEventListener('change',startSelectedExperiment);
   $('experiment').addEventListener('change',startSelectedExperiment);
   $('noise').addEventListener('change',startSelectedExperiment);
@@ -2418,23 +2486,24 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     stop(true); resumePlant(); comparing=true; $('view').value='cost';
     const startingPhase=snapshot.phase;
     try {
-      for (let done=0; done<180; done+=12) {
+      let done=0;
+      while(done<180 && !comparisonComplete()) {
         // Yield between batches so progress and controls remain responsive.
         renderControls();
         await new Promise(resolve=>setTimeout(resolve,0));
-        for (let k=0;k<12;k++) advanceLiveSample();
+        for(let k=0;k<12 && done<180 && !comparisonComplete();k++,done++) advanceLiveSample();
         snapshot=simulation.snapshot();
-        announce('Advancing '+(done+12)+' / 180 samples');
-        if ((done+12)%36===0) render();
+        announce(comparisonComplete()?'Comparison complete · All costs retained':'Advancing '+done+' / 180 samples');
+        if(done%36===0) render();
       }
-      announce(startingPhase!==snapshot.phase?'Discovery complete · Fresh comparison trial · t = '+snapshot.t+' s':'180 samples added · t = '+snapshot.t+' s');
+      announce(comparisonComplete()?'Comparison complete · All costs retained · Continue to explore':startingPhase!==snapshot.phase?'Discovery complete · Fresh comparison trial · t = '+snapshot.t+' s':done+' samples added · t = '+snapshot.t+' s');
     } finally {
       comparing=false;
       if(activeAttacks().length && !playing) {playing=true;nextTickAt=0;schedule();}
       render(); save();
     }
   });
-  $('step').addEventListener('click', () => { stop(); if(snapshot.mode==='completed'){simulation.extend();snapshot=simulation.snapshot();} tick(); save(); });
+  $('step').addEventListener('click', () => { if(comparisonComplete())comparisonContinued=true;stop(); if(snapshot.mode==='completed'){simulation.extend();snapshot=simulation.snapshot();} tick(); save(); });
   $('restart').addEventListener('click', () => {
     resetExperiment(); announce('Ready'); render(); save();
   });
@@ -2649,7 +2718,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     const receipt=deployed?'Offline selection and synthesis complete · '+status.discoverySamples+' discovery samples · Fresh comparison · '
       +(status.predictionWeights==='fixed'?'Links and prediction weights fixed':'Links fixed · Prediction correction adapts')
       :'Dense discovery · Candidate sparse links · Offline selection and synthesis at comparison';
-    phase.textContent=deployed?'Comparison trial':automaticComparison()
+    phase.textContent=deployed?(comparisonComplete()?'Comparison complete':'Comparison trial'):automaticComparison()
       ?'Discovery '+snapshot.t+' / '+DISCOVERY_SAMPLES+' s':'Discovery '+snapshot.t+' s';
     for(const [key,value] of Object.entries(status))phase.dataset[key]=value===null?'':String(value);
     phase.title=receipt+' · No joint online topology adaptation is claimed.';
@@ -2660,13 +2729,39 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     $('matrix-title').textContent=status.view==='saved-discovery'?'Discovery links at '+status.historyAt+' s'
       :deployed?'Deployed prediction links':'Candidate prediction links';
   }
+  function scheduledApplications() {
+    return snapshot.powerScenario===DEFAULT_SCENARIO ? (snapshot.lastScenarioApplications || []) : [];
+  }
+  function renderScenario() {
+    const scheduled=snapshot.powerScenario===DEFAULT_SCENARIO,scenario=snapshot.scenario || {};
+    const powers=(snapshot.eventLog || []).filter(event=>event.type==='pulse').length;
+    const allNoisy=scheduled && snapshot.beta>0 && Array.from({length:PowerDemo.constants.N-1},(_,i)=>i+2).every(bus=>snapshot.faults.includes(bus));
+    $('scenario-name').textContent=scheduled?'Demand and solar cycle':snapshot.powerScenario==='solar-outage'?'Solar outage trial':'Reference trial';
+    $('scenario-description').textContent=scheduled
+      ?'Forecasts arrive up to 4 s ahead · Forecast stress β '+snapshot.beta
+      :(restoredTrial?'Restored run · ':'')+'Forecast stress β '+snapshot.beta+' · Previous samples and costs retained';
+    $('new-scenario').hidden=scheduled && !powers && !allNoisy;
+    $('new-scenario').disabled=comparing;
+    $('new-scenario').textContent=scheduled?'Start fresh scenario':'Start new scenario';
+    $('new-scenario').title='Start a new demand and solar scenario with forecast stress β 4. The new trial starts learning and clears previous trial costs.';
+    const status=$('scheduled-power'),applied=Number(scenario.appliedKw)||0;
+    status.hidden=!scheduled;
+    status.dataset.appliedKw=String(applied);status.dataset.action=String(scenario.action ?? '');
+    status.textContent=scheduled?(scenario.phaseLabel || 'Scheduled demand and solar')+' · '+d3.format('+.0f')(applied)+' kW net change · Teal rings show scheduled power':'';
+    const context=$('trial-context');
+    context.hidden=!powers && !allNoisy && snapshot.powerScenario!=='solar-outage';
+    context.dataset.powerRequests=String(powers);context.dataset.allSourcesNoisy=String(allNoisy);
+    const physical=powers?'Mixed trial · '+powers+' unforecast power request'+(powers===1?'':'s')+' · All recovery costs included'
+      :snapshot.powerScenario==='solar-outage'?'Includes an unforecast solar outage · All recovery costs included':'';
+    context.textContent=[physical,allNoisy?'All forecast sources are noisy · No reliable alternative to select':''].filter(Boolean).join(' · ');
+  }
   function renderControls() {
     renderInspectedSource();
     const frozen=isFit();
     const deployed=snapshot.phase==='deployment',communication=snapshot.experiment==='communication';
     const completedRows=snapshot.learning?.completedRows || 0;
     const preparing=!deployed && automaticComparison();
-    renderProtocol();
+    renderProtocol();renderScenario();
     if($('deploy')) { $('deploy').hidden=preparing; $('deploy').disabled=comparing || (!deployed && !snapshot.canDeploy); $('deploy').textContent=deployed?'Learn again':'Compare controllers'; $('deploy').title=deployed?'Start a new discovery trial with these forecast settings':snapshot.canDeploy?'Start four controllers on the same fresh disturbance sequence':'Collecting observed samples for comparison'; }
 
     $('noise-control').hidden=!communication; $('noise-caption').hidden=!communication; $('preset-control').hidden=communication;
@@ -2694,13 +2789,13 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 
     $('clock').textContent=(deployed?'Comparison t = ':'Discovery t = ')+snapshot.t+' s';
     $('learning').textContent=frozen?'Plant held · '+snapshot.mode:deployed?'Prediction links fixed':completedRows+' completed responses';
-    $('run').textContent=playing?'Pause':frozen && snapshot.mode!=='converged'?'Fit':'Run';
+    $('run').textContent=playing?'Pause':comparisonComplete()?'Continue':frozen && snapshot.mode!=='converged'?'Fit':'Run';
     $('run').disabled=comparing;
     $('compare').disabled=comparing;
     $('compare').textContent=comparing ? 'Running…' : 'Advance 180';
     $('preset').disabled=comparing;
     $('restart').disabled=comparing;
-    $('run').setAttribute('aria-label',playing?'Pause simulation':frozen?'Run frozen fit':'Run simulation');
+    $('run').setAttribute('aria-label',playing?'Pause simulation':comparisonComplete()?'Continue simulation':frozen?'Run frozen fit':'Run simulation');
     $('run').setAttribute('aria-pressed',String(playing));
     const forecast=forecastMode();root.dataset.interaction=forecast?'forecast':'power';
     $('attack-mode').hidden=forecast;$('strength').hidden=forecast;
@@ -2795,6 +2890,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     const nodes = svg.select('.nodes').selectAll('g.bus-node').data(d3.range(1,25),bus => bus).join(enter => {
       const g=enter.append('g').attr('class','bus-node').attr('role','button').attr('tabindex',0)
         .style('cursor','pointer').style('user-select','none');
+      g.append('circle').attr('class','pr-scheduled-ring').attr('r',18).attr('fill','none').attr('pointer-events','none');
       g.append('circle').attr('class','pr-inspection-ring').attr('r',21).attr('fill','none').attr('pointer-events','none');
       g.append('text').attr('class','bus-number').attr('pointer-events','none');
       g.append('text').attr('class','fault-mark').attr('pointer-events','none');
@@ -2838,6 +2934,12 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       const badgeWidth=Number(badge.select('rect').attr('width')) || 60;
       badge.attr('transform','translate('+(point(bus)[0]>width-95 ? -badgeWidth-10 : 13)+' -16)');
     });
+    const scheduledByBus=new Map(scheduledApplications().map(item=>[item.bus,item.appliedKw]));
+    const scheduleScale=Math.max(1,snapshot.scenario?.maxScheduledKw || 35);
+    nodes.attr('data-scheduled-kw',bus=>String(scheduledByBus.get(bus) || 0));
+    animate(nodes.select('.pr-scheduled-ring')).attr('r',bus=>17+3*Math.min(1,Math.abs(scheduledByBus.get(bus) || 0)/scheduleScale))
+      .attr('stroke-opacity',bus=>Math.min(.85,Math.abs(scheduledByBus.get(bus) || 0)/scheduleScale))
+      .attr('stroke-dasharray',bus=>(scheduledByBus.get(bus) || 0)<0?'3 2':null);
     nodes.select('.bus-number').attr('text-anchor','middle').attr('x',0).attr('y',27)
       .style('fill','var(--muted-foreground)').style('font-size','9px').text(bus=>bus);
     nodes.select('.pr-inspection-ring')
@@ -3113,15 +3215,16 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       group.forecasts=group.items.filter(item=>item.type==='forecast').length;
       group.scenarios=group.items.filter(item=>item.type==='scenario').length;
       const kinds=[group.attacks,group.forecasts,group.scenarios].filter(Boolean).length;
-      group.label=kinds>1?'Events ×'+group.items.length:group.scenarios?'Solar event'
+      const scheduled=group.items.some(item=>item.type==='scenario'&&item.forecasted);
+      group.label=kinds>1?'Events ×'+group.items.length:group.scenarios?(scheduled?'Scheduled cycle':'Solar event')
         :group.attacks?'Power'+(group.attacks>1?' ×'+group.attacks:'')
         :group.forecasts>1?'Forecast ×'+group.forecasts:typeof first.faulty==='boolean'?(first.faulty?'Marked noisy':'Marked quiet'):'Forecast changed';
       group.summary=[group.attacks?group.attacks+' power request'+(group.attacks===1?'':'s'):'',group.forecasts?group.forecasts+' forecast setting change'+(group.forecasts===1?'':'s'):'',
-        group.scenarios?group.scenarios+' solar event'+(group.scenarios===1?'':'s'):''].filter(Boolean).join(' · ');
+        group.scenarios?group.scenarios+' '+(scheduled?'scheduled cycle':'solar event')+(group.scenarios===1?'':'s'):''].filter(Boolean).join(' · ');
       group.details=group.items.slice(-8).map(item=>{
         if(item.type==='pulse')return pulseMagnitude(item.strength || 100)+' requested at bus '+item.bus
           +' · Action '+item.t+' s · First state '+item.at+' s · Applied power is bounded';
-        if(item.type==='scenario')return item.message+' · Action '+item.t+' s · First state '+item.at+' s · Absent from forecasts';
+        if(item.type==='scenario')return item.message+' · Action '+item.t+' s · First state '+item.at+' s · '+(item.forecasted?'Included in issued forecasts':'Absent from forecasts');
         const issuedAt=Math.max(1,item.t),target=issuedAt+PowerDemo.constants.preview-1;
         return 'Bus '+item.bus+(typeof item.faulty==='boolean'?(item.faulty?' marked noisy':' marked quiet'):' forecast setting changed')
           +' at '+item.t+' s · First eligible issue '+issuedAt+' s · Target '+target+' s · Pair '+(target+1)+' s'
@@ -3309,7 +3412,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   new ResizeObserver(()=>render()).observe(root);
   render();
   // A read only inspection hook supports deterministic browser verification.
-  root.powerDemo = { getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,inspectedSource,playing,activeAttackBuses:activeAttacks().map(attack=>attack.bus),intervention:$('intervention').value,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null,topology:topology.export(),historyIndex}) };
+  root.powerDemo = { getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,inspectedSource,playing,activeAttackBuses:activeAttacks().map(attack=>attack.bus),intervention:$('intervention').value,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null,topology:topology.export(),historyIndex,comparisonComplete:comparisonComplete(),comparisonContinued}) };
 })();
 </script>
 </body>
