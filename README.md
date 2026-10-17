@@ -30,6 +30,8 @@ Physical attacks do not automatically separate these curves. The controller has 
 
 Saved trials restore paused. Step stays paused. Advance 180 preserves attacks across automatic comparison. Experiment settings can disable the automatic transition. Playback speed changes only viewing pace, with interpolation between physical samples. Each sample still represents one second.
 
+Chart markers use the immutable simulation event log. A forecast setting marker appears immediately at the actual toggle time, including while paused, and distinguishes marked noisy from marked quiet. Its first eligible issue, target and reveal times do not promise that a message changed, since later toggles before issuance can replace the setting. Issued forecasts stay fixed. Power markers identify bounded requests after execution, at the first affected state time, rather than claiming every requested kW was applied. Solar events, power requests and forecast changes have separate counts in mixed groups. These annotations change no controller, sample, cost or saved replay.
+
 ## Bounded solar outage
 
 Experiment settings retains Reference and adds a 20 second solar outage in held out comparison only. Solar active output at four existing sites goes to zero at actions 30 through 49 and restores at action 50. Inverters remain grid connected with unchanged reactive support. Lost generation is bounded by existing site limits, at most 360 kW total and nominally 320 kW. The outage is absent from forecasts, leaves discovery and deployed supports unchanged, and may add a largely common recovery cost. Requested and applied power and actual event markers remain visible. Changing scenario starts a fresh trial. No gains, costs or baselines are retuned.

@@ -34,6 +34,7 @@ const source=withoutCards.replace(anchor,
   '  root.testDecompose=commandContributions;\n'+
   '  root.testIssuedForecasts=()=>simulation.forecasts;\n'+
   '  root.testDrawSeries=drawSeries;\n'+
+  '  root.testInterventionEvents=interventionEvents;root.testInterventionGroups=interventionGroups;\n'+
   '  root.testPin=(value)=>{if(value!==undefined)pin=value;return pin;};\n'+
   '  root.testPowerContext=()=>powerRecoveryContext();\n'+
   '  root.testShownReference=()=>[...topologyFrame().reference];\n'+
@@ -121,6 +122,7 @@ function harness(saved,experiment='prediction',reducedMotion=true) {
     {filename:'interface.js'});
   const node=id=>nodes.get('pr-'+id);
   return {clock,document,window,node,drawSeries:(...args)=>root.testDrawSeries(...args),pin:value=>root.testPin(value),
+    interventionEvents:(view=root.powerDemo.getSnapshot())=>plain(root.testInterventionEvents(view)),interventionGroups:(view,domain=[0,20],scale=10)=>plain(root.testInterventionGroups(view,domain,v=>v*scale,{x:0,w:600})),
     comparison:()=>plain(root.testComparison()),summary:()=>root.testSummary(),powerContext:()=>root.testPowerContext(),shownReference:()=>plain(root.testShownReference()),seriesButton:key=>seriesButtons.get(key),
     samples:count=>clock.advance(count*1000/Number(node('speed').value)),
     bus:bus=>{const svg=element('g');svg.dataset.bus=String(bus);root.bindTestBus(svg,bus);return svg;},
@@ -1574,4 +1576,45 @@ test('temporal source gain norms are visible for every controller without hover 
   h.click('history-live');assert.equal(h.node('command-rows').children.length,4);
   const restored=harness(h.saved());
   assert.deepEqual(restored.commandInspection(),h.commandInspection(),'Replay preserves the same executed gains');
+});
+
+test('forecast markers show paused changes at their actual setting time and preserve repeated actions and replay',()=>{
+  const h=harness(undefined,'communication');h.inspectLink(5,7);
+  const before=plain(h.snapshot());h.click('source-fault');h.click('source-fault');h.click('source-fault');
+  const events=h.interventionEvents();
+  assert.equal(events.length,3);assert.deepEqual(events.map(e=>e.at),[0,0,0]);
+  assert.deepEqual(events.map(e=>e.faulty),[true,false,true]);
+  assert.deepEqual(plain(h.snapshot().states),before.states);assert.deepEqual(plain(h.snapshot().cumulative),before.cumulative);
+  const groups=h.interventionGroups(h.snapshot());assert.equal(groups[0].forecasts,3);assert.equal(groups[0].attacks,0);
+  assert.match(groups[0].description,/marked noisy at 0 s.*First eligible issue 1 s.*Target 5 s.*Pair 6 s/);
+  assert.match(groups[0].description,/marked quiet at 0 s/);
+  const restored=harness(h.saved());assert.deepEqual(restored.interventionEvents(),events,'Use immutable log equally before and after replay');
+  h.click('step');const history=h.interventionEvents();assert.deepEqual(history,events,'A later sample cannot rewrite setting times or actions');
+});
+
+test('mixed event groups count power forecasts and solar changes independently without showing pending physical events',()=>{
+  const h=harness(undefined,'communication'),view={t:6,experiment:'communication',beta:1,eventLog:[
+    {t:0,type:'pulse',bus:23,strength:100},{t:0,type:'forecast',bus:7,faulty:true},
+    {t:1,type:'forecast',bus:7,faulty:false},{t:1,type:'scenario',message:'Solar outage restored'},
+    {t:6,type:'forecast',bus:8,faulty:true},{t:6,type:'pulse',bus:23,strength:50},
+    {t:7,type:'forecast',bus:9,faulty:true},{t:0,type:'extend',steps:20}]};
+  const before=JSON.stringify(view),events=h.interventionEvents(view),groups=h.interventionGroups(view);
+  assert.deepEqual(events.map(e=>e.at),[0,1,1,2,6]);
+  assert.equal(groups.length,1);assert.equal(groups[0].attacks,1);assert.equal(groups[0].forecasts,3);assert.equal(groups[0].scenarios,1);
+  assert.equal(groups[0].label,'Events ×5');assert.match(groups[0].accessible,/1 power request.*3 forecast setting changes.*1 solar event.*Solar outage restored/);
+  assert.match(groups[0].description,/100 kW requested.*Applied power is bounded/);
+  assert.equal(JSON.stringify(view),before);
+  const separate=h.interventionGroups(view,[1,2],200);
+  assert.equal(separate.reduce((n,g)=>n+g.items.length,0),3,'Domain filtering uses displayed event time, not a blanket next sample offset');
+  const zero=h.interventionGroups({...view,beta:0})[0];assert.match(zero.description,/Noise disabled at β 0/);
+});
+
+test('comparison resets marker history while retaining source reliability and exact held out replay',async()=>{
+  const h=harness(undefined,'communication');h.inspectLink(5,7);h.click('source-fault');
+  h.check('auto-compare',false);for(let i=0;i<31;i++)h.click('step');
+  h.click('deploy');h.click('run');assert.equal(h.snapshot().phase,'deployment');
+  assert.equal(h.snapshot().faults.includes(7),true);assert.deepEqual(h.interventionEvents(),[]);
+  h.inspectLink(5,7);h.click('source-fault');
+  assert.deepEqual(h.interventionEvents().map(e=>[e.at,e.faulty]),[[0,false]]);
+  const restored=harness(h.saved());assert.deepEqual(restored.interventionEvents(),h.interventionEvents());
 });

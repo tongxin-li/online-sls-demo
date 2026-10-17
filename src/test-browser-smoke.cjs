@@ -176,7 +176,43 @@ async function main() {
       else {assert.match(reading.badge,/Discovery/);assert.match(reading.note,/Dense discovery/);}
       return reading;
     };
+
+    const checkEventMarkers = async surface => {
+      const result=await surface.evaluate(()=>{
+        const snapshot=document.querySelector('#power-response-demo').powerDemo.getSnapshot();
+        return {snapshot,charts:['pr-cost','pr-stage','pr-voltage'].map(id=>{
+          const svg=document.getElementById(id),frame=svg.querySelector('[data-chart-frame]');
+          return {id,hidden:svg.hidden||svg.style.display==='none',frame:frame?{x:Number(frame.getAttribute('x')),w:Number(frame.getAttribute('width'))}:null,
+            badges:Array.from(svg.querySelectorAll('.intervention-badge')).map(node=>({data:{...node.dataset},label:node.getAttribute('aria-label'),title:node.querySelector('title').textContent})),
+            lines:Array.from(svg.querySelectorAll('.intervention-markers line')).map(node=>({x1:Number(node.getAttribute('x1')),x2:Number(node.getAttribute('x2'))}))};
+        })};
+      });
+      const snapshot=result.snapshot;
+      for(const chart of result.charts.filter(chart=>!chart.hidden)){
+        const domain=[chart.id==='pr-cost'?0:Math.max(0,snapshot.t-80),Math.max(1,snapshot.t)];
+        const expected=snapshot.eventLog.map((event,order)=>({...event,order,type:event.type==='fault'?'forecast':event.type}))
+          .filter(event=>['forecast','pulse','scenario'].includes(event.type)&&(event.type==='forecast'?event.t<=snapshot.t:event.t<snapshot.t))
+          .map(event=>({...event,at:event.t+(event.type==='forecast'?0:1)}))
+          .filter(event=>event.at>=domain[0]&&event.at<=domain[1]).sort((a,b)=>a.at-b.at||a.order-b.order);
+        const times=chart.badges.flatMap(badge=>badge.data.eventSteps.split(',').map(Number));
+        const types=chart.badges.flatMap(badge=>badge.data.eventTypes.split(','));
+        assert.deepEqual(times,expected.map(event=>event.at),'Markers use actual setting time or first physical state time');
+        assert.deepEqual(types,expected.map(event=>event.type),'No mixed events are relabeled as forecasts');
+        assert.equal(chart.lines.length,chart.badges.length);
+        for(let i=0;i<chart.badges.length;i++){
+          const {data}=chart.badges[i],kinds=data.eventTypes.split(',');
+          assert.equal(Number(data.disturbanceCount),kinds.filter(type=>type==='pulse').length);
+          assert.equal(Number(data.forecastCount),kinds.filter(type=>type==='forecast').length);
+          assert.equal(Number(data.scenarioCount),kinds.filter(type=>type==='scenario').length);
+          const at=Number(data.eventSteps.split(',')[0]),x=chart.frame.x+2+(at-domain[0])/(domain[1]-domain[0])*(chart.frame.w-4);
+          assert.ok(Math.abs(chart.lines[i].x1-x)<1e-7,'Marker geometry uses the current chart scale immediately');
+          assert.equal(chart.lines[i].x1,chart.lines[i].x2);
+        }
+      }
+    };
+
     const checkPlots = async () => {
+      await checkEventMarkers(page);
       await checkVoltageMetrics(page);
       await checkProtocol(page);
       await checkForecastObservation(page);
@@ -265,6 +301,7 @@ async function main() {
         assert.equal(await page.locator('#pr-source-fault').getAttribute('aria-label'),(wasNoisy?'Repair':'Corrupt')+' forecast source at bus '+edge.source);
         await page.locator('#pr-source-fault').click();
         const after=await sourceState();
+        await checkEventMarkers(page);
         await checkForecastObservation(page);
       await checkSourceHistory(page);
       await checkCommandInspection(page);
@@ -355,6 +392,9 @@ async function main() {
     await checkForecastObservation(page);
       await checkSourceHistory(page);
       await checkCommandInspection(page);
+    await checkEventMarkers(page);
+    await page.locator('#pr-source-fault').click();
+    await checkEventMarkers(page);
     await page.screenshot({path:path.join(output,'solar-outage.png'),fullPage:true});
     await page.locator('#pr-run').click();
     await page.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t>=51);
@@ -468,6 +508,7 @@ async function main() {
     }
     await checkVoltageMetrics(phone);
     await checkProtocol(phone);
+    await checkEventMarkers(phone);
     const sourceBounds=await phone.locator('#pr-source-fault').boundingBox();
     assert.ok(sourceBounds.width>=44&&sourceBounds.height>=44,'Explicit source action has a usable touch target');
     const dimensions = await phone.evaluate(() => ({ page: document.documentElement.scrollWidth, viewport: innerWidth }));
@@ -480,7 +521,7 @@ async function main() {
     assert.ok(reportLayout.page<=reportLayout.viewport+1,'Scientific report stays within the mobile page');
     await phone.screenshot({path:path.join(output,'environment.png'),fullPage:true});
     assert.deepEqual(errors, [], 'No browser runtime errors');
-    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), touchEvents, checks: ['keyboard matrix inspection and native command table scrolling', 'visible temporal source gain without hover', 'playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'actual protocol receipt and archived discovery view', 'matrix mode exit restores live source controls without advancing plant', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'continuous mobile power attack', 'mobile touch and layout'], errors }, null, 2));
+    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), touchEvents, checks: ['actual forecast setting timestamps and typed mixed event markers', 'keyboard matrix inspection and native command table scrolling', 'visible temporal source gain without hover', 'playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'actual protocol receipt and archived discovery view', 'matrix mode exit restores live source controls without advancing plant', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'continuous mobile power attack', 'mobile touch and layout'], errors }, null, 2));
     console.log('Browser smoke passed');
   } finally {
     if (browser) await browser.close();

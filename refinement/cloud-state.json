@@ -459,7 +459,12 @@
     "branch": "cloud/refine/20261017-1200",
     "base_main": "a9a6743245c7d612b145473e9c5ea73df6228a86",
     "focus": "Truthful forecast setting time and typed mixed event markers from immutable simulation log",
-    "status": "preparing candidate"
+    "status": "candidate validation",
+    "changes": [
+      "Use immutable simulation events for live and restored chart markers. Show forecast setting changes immediately at their actual toggle time, not the next physical sample.",
+      "Report marked noisy or quiet and first eligible issuance/target/reveal times without rewriting sealed messages. Keep physical request markers at the first affected state and label requested rather than guaranteed applied power.",
+      "Separate forecast, power request and solar counts in mixed groups. Regress paused toggles, domain/scale changes, exact replay and comparison resets."
+    ]
   },
   "next_focus": "Audit repeated paused source toggles and power start/stop event markers against the actual event log and issued-message timing. Preserve costs and all four curves and fix only demonstrated discrepancies. Avoid adding more exposition or controls without a verified interaction need.",
   "priorities": [
