@@ -645,6 +645,10 @@ test('attack feedback separates continuous requests from fading and paused physi
   assert.ok(h.snapshot().activePulses.length>0);
   await h.samples(1);
   assert.equal(h.snapshot().activePulses.length,0);
+  assert.ok(h.snapshot().lastPulseApplications.some(item=>item.bus===7&&item.appliedKw>0));
+  assert.equal(h.node('pulse').dataset.attackState,'fading','The last applied power is still the current physical sample');
+  await h.samples(1);
+  assert.equal(h.snapshot().lastPulseApplications.length,0);
   assert.equal(h.node('pulse').dataset.attackState,'idle');
   assert.equal(h.node('attack-hint').textContent,'Click to start or stop');
 });

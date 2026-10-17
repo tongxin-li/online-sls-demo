@@ -611,6 +611,14 @@
       "expected": "paused",
       "actual": "idle",
       "published": false
+    },
+    "superseded_candidate": {
+      "source": "aac4c7784cb76178725e33f5467376f3282f5bbc",
+      "run": 39019863716,
+      "job": 117359361781,
+      "step": "Test controllers and interactions",
+      "test": "attack feedback separates continuous requests from fading and paused physical disturbances",
+      "error": "Older test equated request expiry with the current physical application ending. Preserve the final application and assert idle only after the next sample has no applied request. New homes/solar/battery expiry regression passes."
     }
   },
   "next_focus": "Audit actual attack usability and selected-bus applied power through selection, mode switches and saved trials. Make a coherent correction only for a demonstrated behavioral or causality issue. Preserve the forecasted-demand default beta 4 and seed, finite comparison, all controllers, held-out conditional results and scientific parameters. Avoid new explanatory controls or cosmetic releases without an interaction need.",
