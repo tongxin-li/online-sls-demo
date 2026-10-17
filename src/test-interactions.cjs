@@ -1911,12 +1911,54 @@ test('every completed segment defers source settings until explicit continuation
     const changed=direct.issuedForecasts(),baseline=unchanged.issuedForecasts(),target=finished.t+4;
     assert.deepEqual(changed.slice(0,sealed.length),sealed,'Issued history remains immutable');
     assert.equal(changed[target].issuedAt,finished.t,'The extension issues at the boundary');
-    assert.equal(changed[target].faultBuses.includes(7),!wasNoisy,'The first new message uses the pending setting');
-    assert.equal(baseline[target].faultBuses.includes(7),wasNoisy);
+    assert.equal(direct.snapshot().faults.includes(7),!wasNoisy);
+    assert.equal(unchanged.snapshot().faults.includes(7),wasNoisy);
     assert.deepEqual(changed[target].base,baseline[target].base,'Paired physical realization is unchanged');
     assert.notEqual(changed[target].forecast[6],baseline[target].forecast[6],'Positive noise changes the selected newly issued source');
     for(let j=0;j<24;j++)if(j!==6)assert.equal(changed[target].forecast[j],baseline[target].forecast[j],'Other issued sources are identical');
     direct.click('run');
     assert.deepEqual(harness(direct.saved()).snapshot(),direct.snapshot(),phase+' continued replay stays exact');
   }
+});
+
+
+test('pending boundary settings preserve paired physical power for all original and reserved seeds',()=>{
+  const template=harness(undefined,'communication');template.check('auto-compare',false);
+  const record=plain(template.saved());
+  record.privateContent.initialOptions.horizon=6; // Short finite segment for the boundary-only regression.
+  for(const seed of [...Array.from({length:40},(_,i)=>i+1),20261013]){
+    record.privateContent.initialOptions.seed=seed;record.privateContent.initialOptions.beta=4;
+    const changed=harness(record),baseline=harness(record);
+    for(const surface of [changed,baseline]){
+      for(let i=0;i<6;i++)surface.click('step');
+      surface.inspectLink(5,7);
+    }
+    const before=plain(changed.snapshot()),sealed=changed.issuedForecasts();
+    changed.click('source-fault');
+    assert.equal(changed.snapshot().mode,'completed','Seed '+seed+' keeps the closed segment');
+    assert.equal(changed.snapshot().horizon,6);
+    assert.deepEqual(changed.issuedForecasts(),sealed);
+    for(const key of ['states','cumulative','segments'])assert.deepEqual(changed.snapshot()[key],before[key]);
+    for(const surface of [changed,baseline])surface.click('step');
+    const message=changed.issuedForecasts()[10],counterfactual=baseline.issuedForecasts()[10];
+    assert.equal(message.issuedAt,6);assert.equal(counterfactual.issuedAt,6);
+    assert.deepEqual(message.base,counterfactual.base,'Seed '+seed+' keeps paired realized power');
+    assert.notEqual(message.forecast[6],counterfactual.forecast[6],'Seed '+seed+' applies the selected source setting on first issuance');
+    for(let j=0;j<24;j++)if(j!==6)assert.equal(message.forecast[j],counterfactual.forecast[j],'Seed '+seed+' leaves all other sources identical');
+  }
+});
+
+
+test('restored guided trials with wider horizons keep the 180 sample review pending',async()=>{
+  const template=harness(undefined,null);template.check('auto-compare',true);
+  const saved=plain(template.saved());saved.privateContent.initialOptions.horizon=480;
+  const h=harness(saved);h.click('run');await h.clock.until(()=>h.state().comparisonComplete);
+  assert.equal(h.snapshot().t,180);assert.equal(h.snapshot().mode,'running','The guided stop can precede the engine horizon');
+  h.inspectLink(5,7);const before=plain(h.snapshot()),sealed=h.issuedForecasts();
+  h.click('source-fault');
+  assert.equal(h.state().comparisonComplete,true);assert.equal(h.state().comparisonContinued,false);
+  assert.equal(h.state().playing,false);assert.equal(h.node('run').textContent,'Continue');
+  for(const key of ['t','horizon','mode','segments','states','cumulative','deployedSupport'])assert.deepEqual(h.snapshot()[key],before[key]);
+  assert.deepEqual(h.issuedForecasts(),sealed);
+  assert.deepEqual(harness(h.saved()).snapshot(),h.snapshot(),'The wider legacy horizon replays exactly');
 });

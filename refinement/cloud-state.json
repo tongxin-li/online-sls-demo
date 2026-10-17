@@ -655,7 +655,18 @@
     "expires_at": "2026-10-17T18:44:15+08:00",
     "base_commit": "37aa669ed2239ada293c4fcd86db066478c01ba2",
     "branch": "cloud/refine/20261017-1800",
-    "focus": "Audit pending source settings at finite segment boundaries, preserving all scientific parameters and exact replay"
+    "focus": "Audit pending source settings at finite segment boundaries, preserving all scientific parameters and exact replay",
+    "diagnosed_issue": "Paused source actions at an ordinary completed planning segment extend and seal the new preview before changing reliability. The existing guided comparison guard covered only the first reviewed default comparison.",
+    "regression_before_fix": {
+      "source": "332fac74481f91fdebb7387659be4d5f90fac932",
+      "run": 39023617080,
+      "job": 117370162617,
+      "step": "Test controllers and interactions",
+      "test": "every completed segment defers source settings until explicit continuation without stale first issuance",
+      "expected": "completed",
+      "actual": "running",
+      "published": false
+    }
   },
   "next_focus": "Audit interaction correctness at discovery/comparison boundaries and pending forecast setting issuance. Make another product change only for a demonstrated behavior or causality issue. Preserve the forecasted-demand beta 4 default and seed, all four controllers and full costs, frozen deployed supports, exact replay and conditional scientific results. Do not retune for an advantage or add cosmetic controls.",
   "priorities": [

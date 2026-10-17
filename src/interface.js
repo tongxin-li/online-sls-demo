@@ -731,12 +731,12 @@
   function fault(bus=selectedBus,{startPlayback=false,preserveSelection=false}={}) {
     if (!canAttack(bus)) return;
     if(!preserveSelection) {selectedBus=bus;$('bus').value=String(bus);}
-    // Paused source settings do not continue a reviewed comparison. If the
-    // action starts playback, set reliability before issuing an extended preview.
-    const reviewedComparison=comparisonComplete();
-    if(!reviewedComparison) resumePlant();
+    // At every completed planning segment, set reliability before any explicit
+    // continuation issues a new preview. A paused setting never extends it.
+    const deferContinuation=comparisonComplete()||simulation.mode==='completed';
+    if(!deferContinuation) resumePlant();
     simulation.toggleFault(bus); journal.push({t:snapshot.t,type:'fault',bus});
-    if(reviewedComparison && startPlayback) resumePlant();
+    if(deferContinuation && startPlayback) resumePlant();
     snapshot=simulation.snapshot();
     const message='Bus '+bus+' forecast '+(snapshot.faults.includes(bus)?'marked noisy':'marked quiet')
       +(!forecastNoiseEnabled()?' · No noise at β 0':snapshot.phase==='deployment'?' · Links remain fixed':' · New forecasts use this setting');
