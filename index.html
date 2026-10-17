@@ -437,7 +437,13 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 /* The selected support and its measured control cost share one panel. */
 .pr-codesign { margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
 .pr-codesign h3 { margin:0; font-size:13px; font-weight:600; letter-spacing:-.015em; }
-.pr-codesign-flow { margin:7px 0 10px; color:var(--muted-foreground); font-size:12px; line-height:1.5; }
+.pr-codesign-flow { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; padding:0; margin:10px 0 12px; list-style:none; font-size:12px; line-height:1.45; }
+.pr-codesign-flow li { min-width:0; padding:9px 8px; border-radius:8px; background:var(--muted); }
+.pr-codesign-flow li[aria-current='step'] { background:#eef5fc; }
+.pr-protocol-label,.pr-protocol-detail { display:block; color:var(--muted-foreground); }
+.pr-protocol-label { margin-bottom:5px; }
+.pr-codesign-flow strong { display:block; margin-bottom:4px; color:var(--foreground); font-size:14px; font-weight:600; }
+@media(max-width:600px) { .pr-codesign-flow { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 .pr-codesign-ledger { width:100%; border-collapse:collapse; margin:8px 0; font-size:12px; line-height:1.5; }
 .pr-codesign-ledger th,.pr-codesign-ledger td { padding:7px 5px; border-bottom:1px solid var(--border); text-align:right; white-space:nowrap; }
 .pr-codesign-ledger th:first-child { text-align:left; white-space:normal; }
@@ -618,7 +624,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       <div class="pr-panel-foot"><span id="pr-bus-detail" class="tabular-nums"></span><span class="pr-live-stage">Cost <strong id="pr-live-cost" class="tabular-nums">0.0000</strong></span></div>
       <div id="pr-codesign" class="pr-codesign" hidden>
         <div class="pr-subhead"><h3>Cost and communication</h3><span class="pr-caption">Current trial</span></div>
-        <p id="pr-codesign-flow" class="pr-codesign-flow"></p>
+        <ol id="pr-codesign-flow" class="pr-codesign-flow" aria-label="Completed discovery, offline selection and synthesis, then fixed comparison"></ol>
         <div class="pr-plot-label"><span>Cumulative cost</span><span>Lower and left is better</span></div>
         <svg id="pr-codesign-chart" class="pr-chart" role="img" aria-label="Current controller costs and remote prediction link counts"></svg>
         <table class="pr-codesign-ledger tabular-nums" aria-label="Current stage costs and deployed remote prediction links"><thead><tr><th scope="col">Method</th><th scope="col" title="Local prediction channels and shared state feedback are excluded">Remote links</th><th scope="col">Stage cost</th></tr></thead><tbody id="pr-codesign-key"></tbody></table>
@@ -2177,8 +2183,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     $('codesign').hidden=!metrics;
     if(!metrics) return;
     const {points,denseLinks,learnedLinks,savedPercent,status}=metrics;
-    $('codesign-flow').textContent='Learn gains → Select '+learnedLinks+' links → Rebuild controller';
-    $('codesign-flow').title='Completed discovery selects the deployed support. The controller is synthesized under those links, then tested on a fresh disturbance sequence. Links and prediction coefficients stay fixed during this comparison.';
+    renderDeploymentReceipt();
     $('codesign-summary').textContent=d3.format('.1f')(savedPercent)+'% fewer remote prediction links than dense · '+status;
     const el=$('codesign-chart');
     el.setAttribute('aria-label','Four evaluated designs. Lower cost and fewer remote prediction links are favorable. '+points.map(point=>point.label+', '+point.links+' remote links, cost '+d3.format('.6~g')(point.cost)).join('. ')+'. Shared feedback and local prediction channels are excluded.');
@@ -2196,6 +2201,36 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       .attr('stroke',point=>point.color).attr('stroke-width',point=>point.key==='scalar'?2:1.5);
     marks.select('title').text(point=>point.label+' · '+point.links+' remote links · Cost '+d3.format('.6~g')(point.cost));
     renderCodesignKey(metrics);
+  }
+  function deploymentReceipt() {
+    if(!communicationComparison()||!snapshot.deployedSupport)return null;
+    const support=snapshot.deployedSupport;
+    if(!Array.isArray(support.links)||!Array.isArray(support.fixedLinks))return null;
+    const budget=predictionBudget();
+    const fixedLinks=support.fixedLinks.filter(link=>link.from!==link.to).length;
+    const scoreSamples=Number.isInteger(support.scoreSamples)?support.scoreSamples:null;
+    return {discoverySamples:protocolStatus().discoverySamples,scoreSamples,remoteLinks:budget.remote,fixedLinks,
+      newLinks:budget.replaced,comparisonSamples:snapshot.t,
+      stages:[
+        {key:'discovery',label:'Learn',value:protocolStatus().discoverySamples+' samples',detail:scoreSamples===null?'Scores unrecorded':scoreSamples+' scored actions',status:'complete'},
+        {key:'selection',label:'Select',value:budget.remote+' remote links',detail:budget.replaced+(budget.remote===fixedLinks?' replaced':' new vs fixed'),status:'complete'},
+        {key:'synthesis',label:'Synthesize',value:'Complete',detail:'Support constrained',status:'complete'},
+        {key:'comparison',label:'Compare',value:snapshot.t+' samples',detail:'Fresh stream · Links fixed',status:'current'}
+      ]};
+  }
+  function renderDeploymentReceipt() {
+    const panel=$('codesign-flow'),receipt=deploymentReceipt();panel.replaceChildren();
+    if(!receipt)return;
+    panel.title='Actual discovery and offline support selection precede controller resynthesis. The comparison uses fresh plant states and costs. Remote counts exclude local prediction and common feedback. Selected support and prediction correction stay fixed; this is not joint online topology optimization.';
+    for(const stage of receipt.stages){
+      const item=document.createElement('li'),label=document.createElement('span'),value=document.createElement('strong'),detail=document.createElement('span');
+      item.dataset.stage=stage.key;item.dataset.status=stage.status;
+      if(stage.status==='current')item.setAttribute('aria-current','step');
+      label.className='pr-protocol-label';label.textContent=stage.label;value.textContent=stage.value;
+      detail.className='pr-protocol-detail';detail.textContent=stage.detail;
+      item.append(label,value,detail);panel.append(item);
+    }
+    for(const key of ['discoverySamples','scoreSamples','remoteLinks','fixedLinks','newLinks','comparisonSamples'])panel.dataset[key]=receipt[key]===null?'':String(receipt[key]);
   }
   function renderCodesignKey(metrics) {
     const key=$('codesign-key');key.replaceChildren();
