@@ -69,6 +69,9 @@
   let timer = null;
   let nextTickAt = 0;
   let heldAttack = null;
+  const continuousAttacks = new Map();
+  const activeAttacks = () => [...continuousAttacks.values(), ...(heldAttack ? [heldAttack] : [])];
+  const attackAt = bus => continuousAttacks.get(bus) || (heldAttack?.bus===bus ? heldAttack : null);
   let snapshot = simulation.snapshot();
   $('intervention').value=snapshot.experiment==='communication'?'forecast':'power';
   const topology = new TopologyTimeline(snapshot);
@@ -475,9 +478,13 @@
     announce('Trial restored · Press Run');
   }
 
-  function releaseAttack() {
+  function releaseHeldAttack() {
     if(heldAttack?.owner) heldAttack.owner.dataset.holding='false';
-    heldAttack = null;
+    heldAttack=null;
+  }
+  function releaseAttack() {
+    releaseHeldAttack();
+    continuousAttacks.clear();
     $('pulse').dataset.holding='false';
   }
   function stop(preserveAttack=false) {
@@ -506,9 +513,11 @@
     snapshot=simulation.snapshot();
     topology.observe(snapshot);historyIndex=null;visualTopologyEvent=null;
     journal=[];fitSteps=0;pin=null;lastPulse=null;
-    if(preserveAttack && heldAttack) {
-      if(!requests.some(p=>p.bus===heldAttack.bus)) requests.push({bus:heldAttack.bus,strength:Number($('strength').value)});
-      heldAttack.lastQueuedAt=0;
+    if(preserveAttack) {
+      for(const attack of activeAttacks()) {
+        if(!requests.some(p=>p.bus===attack.bus)) requests.push({bus:attack.bus,strength:Number($('strength').value)});
+        attack.lastQueuedAt=0;
+      }
     } else releaseAttack();
     for(const request of requests) {
       simulation.queuePulse(request.bus,request.strength);
@@ -530,7 +539,9 @@
     // Replayed records never call this function. Their historical phase is retained.
     let transitioned=startAutomaticComparison();
     if(simulation.mode==='completed') simulation.extend();
-    if(heldAttack && heldAttack.lastQueuedAt<simulation.t) pulse(heldAttack.bus,{repeated:true});
+    for(const attack of activeAttacks()) {
+      if(attack.lastQueuedAt<simulation.t) pulse(attack.bus,{repeated:true});
+    }
     advanceSample();snapshot=simulation.snapshot();
     transitioned=startAutomaticComparison() || transitioned;
     if(transitioned) save();
@@ -614,7 +625,7 @@
       announce(startingPhase!==snapshot.phase?'Discovery complete · Fresh comparison trial · t = '+snapshot.t+' s':'180 samples added · t = '+snapshot.t+' s');
     } finally {
       comparing=false;
-      if(heldAttack && !playing) {playing=true;nextTickAt=0;schedule();}
+      if(activeAttacks().length && !playing) {playing=true;nextTickAt=0;schedule();}
       render(); save();
     }
   });
@@ -632,7 +643,7 @@
   $('strength').addEventListener('change', () => { drawNetwork(); save(); });
   $('attack-mode').addEventListener('change',()=>{releaseAttack();renderControls();drawNetwork();save();});
   $('intervention').addEventListener('change',()=>{
-    const stopped=!!heldAttack;releaseAttack();
+    const stopped=activeAttacks().length>0;releaseAttack();
     announce((stopped?'Power attack stopped · ':'')+(forecastMode()?'Click a bus to change forecast reliability':'Click a bus to disturb physical power'));
     render();save();
   });
@@ -656,7 +667,8 @@
       id:latest ? latest.t+'_'+applied.length : null};
   }
   function attackState(bus=selectedBus) {
-    if(heldAttack?.bus===bus) return heldAttack.latched?'continuous':'held';
+    const attack=attackAt(bus);
+    if(attack) return attack.latched?'continuous':'held';
     const status=pulseStatus(bus);
     if(status.queued) return 'pending';
     if(status.active) return (playing && !isFit()) || comparing ? 'fading' : 'paused';
@@ -670,27 +682,27 @@
   function pulse(bus = selectedBus,{repeated=false}={}) {
     if (!canAttack(bus)) return;
     // A click schedules an unexpected disturbance for the next control sample.
-    // It never advances plant time or removes an earlier attack.
-    resumePlant();
-    selectedBus = bus;
-    $('bus').value = String(bus);
+    // Repeated requests share the sample's existing state and one later render.
+    if(!repeated) {resumePlant();selectedBus=bus;$('bus').value=String(bus);}
     const strength = Number($('strength').value);
     const before = snapshot.stage.online;
-    const pulseStep = snapshot.t;
-    simulation.queuePulse(selectedBus, strength);
-    journal.push({t:pulseStep,type:'pulse',bus:selectedBus,strength});
+    const pulseStep = simulation.t;
+    simulation.queuePulse(bus, strength);
+    journal.push({t:pulseStep,type:'pulse',bus,strength});
+    const attack=attackAt(bus);
+    if(attack) attack.lastQueuedAt=pulseStep;
+    lastPulse={bus,strength,t:pulseStep,before};
+    if(repeated) return;
     snapshot=simulation.snapshot();
-    if(heldAttack) heldAttack.lastQueuedAt=pulseStep;
-    lastPulse={bus:selectedBus,strength,t:pulseStep,before};
     const count=pulseStatus(bus).queued;
     const message=disturbanceName(bus)+' · '+pulseMagnitude(strength)+' queued'+(count>1?' × '+count:'')+' at bus '+bus;
     announce(message+' · t = '+pulseStep);
     if(!playing && !comparing) {
       playing=true; nextTickAt=0; schedule();
     }
-    actionNote(heldAttack?(heldAttack.latched?'Continuous attack · Bus ':'Holding bus ')+selectedBus:'Pulse queued');
+    actionNote(attack?(attack.latched?'Continuous attack · Bus ':'Holding bus ')+bus:'Pulse queued');
     // Queuing an event must not restart every chart transition.
-    if(!repeated) { renderControls(); drawNetwork(); save(); }
+    renderControls(); drawNetwork(); save();
   }
   function fault(bus=selectedBus,{startPlayback=false,preserveSelection=false}={}) {
     if (!canAttack(bus)) return;
@@ -705,24 +717,38 @@
     render(); save();
   }
   function continuousMode() { return $('attack-mode').value==='continuous'; }
-  function attackInstruction() { return forecastMode()?forecastInstruction():continuousMode()?'Click a bus to start · Click again to stop':'Click for a pulse · Hold to repeat'; }
-  function finishAttack() {
-    const bus=heldAttack?.bus;
+  function attackInstruction() { return forecastMode()?forecastInstruction():continuousMode()?'Click buses to attack together · Click again to stop each':'Click for a pulse · Hold to repeat'; }
+  function finishAttack(bus=heldAttack?.bus) {
+    if(bus===undefined) return;
+    if(heldAttack?.bus===bus) releaseHeldAttack();
+    continuousAttacks.delete(bus);
+    renderControls();drawNetwork();save();
+    announce('New attacks stopped · Bus '+bus+(pulseStatus(bus).active || pulseStatus(bus).queued?' · Existing disturbance remains':''));
+  }
+  function finishAllAttacks() {
+    if(!activeAttacks().length) return;
     releaseAttack();renderControls();drawNetwork();save();
-    if(bus) announce('New attacks stopped · Bus '+bus+(pulseStatus(bus).active || pulseStatus(bus).queued?' · Existing disturbance remains':''));
+    announce('All new attacks stopped · Existing disturbances remain');
   }
   function activateAttack(bus,owner) {
     if(forecastMode()) { fault(bus,{startPlayback:true});return; }
     if(continuousMode()) {
-      if(heldAttack?.latched && heldAttack.bus===bus) finishAttack();
+      selectedBus=bus;$('bus').value=String(bus);
+      if(continuousAttacks.has(bus)) finishAttack(bus);
       else beginAttack(bus,null,true);
     } else beginAttack(bus,owner);
   }
   function beginAttack(bus=selectedBus,owner=null,latched=false) {
     if(!canAttack(bus)) return;
-    releaseAttack();
-    heldAttack={bus,lastQueuedAt:-1,owner,latched}; $('pulse').dataset.holding='true';
-    if(owner) owner.dataset.holding='true';
+    if(continuousAttacks.has(bus)) return;
+    if(latched) {
+      if(heldAttack?.bus===bus) releaseHeldAttack();
+      continuousAttacks.set(bus,{bus,lastQueuedAt:-1,owner:null,latched:true});
+    } else {
+      releaseHeldAttack();
+      heldAttack={bus,lastQueuedAt:-1,owner,latched:false};
+      if(owner) owner.dataset.holding='true';
+    }
     pulse(bus);
   }
   function bindAttackTarget(element,getBus) {
@@ -740,7 +766,7 @@
     });
     for(const type of ['pointercancel','lostpointercapture']) element.addEventListener(type,event=>{
       event.stopPropagation();
-      if(pointerBus!==null && heldAttack?.bus===pointerBus) finishAttack();
+      if(pointerBus!==null && attackAt(pointerBus)) finishAttack(pointerBus);
       pointerBus=null;
     });
     element.addEventListener('click',event=>{
@@ -769,9 +795,10 @@
       }
     });
   }
-  bindAttackTarget($('pulse'),()=>heldAttack?.latched ? heldAttack.bus : selectedBus);
+  bindAttackTarget($('pulse'),()=>selectedBus);
+  if($('stop-attacks')) $('stop-attacks').addEventListener('click',finishAllAttacks);
   document.addEventListener('keyup',event=>{if(event.key.toLowerCase()==='d' && !forecastMode() && !heldAttack?.latched && !heldAttack?.owner) finishAttack();});
-  window.addEventListener('blur',()=>{if(heldAttack) finishAttack();});
+  window.addEventListener('blur',finishAllAttacks);
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden) { stop(); renderControls(); drawNetwork(); save(); }
   });
@@ -871,19 +898,30 @@
     $('run').setAttribute('aria-pressed',String(playing));
     const forecast=forecastMode();root.dataset.interaction=forecast?'forecast':'power';
     $('attack-mode').hidden=forecast;$('strength').hidden=forecast;
-    if ($('pulse-label')) $('pulse-label').textContent=!forecast&&heldAttack?.latched?'Stop attack':selectedBus===1?'Fixed substation':forecast
+    const selectedAttack=attackAt(selectedBus),attackCount=activeAttacks().length;
+    if ($('pulse-label')) $('pulse-label').textContent=!forecast&&selectedAttack?.latched?'Stop bus '+selectedBus:selectedBus===1?'Fixed substation':forecast
       ?(snapshot.faults.includes(selectedBus)?'Repair':'Corrupt')+' bus '+selectedBus:'Attack bus '+selectedBus;
-    $('pulse').setAttribute('aria-pressed',String(forecast?snapshot.faults.includes(selectedBus):!!heldAttack));
-    $('pulse').dataset.holding=String(!!heldAttack);
-    $('pulse').title=forecast?(!forecastNoiseEnabled()?'Noise is disabled at β 0. This toggles the configured source label only.':'Toggle noisy forecasts from bus '+selectedBus+'. Only newly issued forecasts change.'):heldAttack?.latched?'Stop the continuous attack at bus '+heldAttack.bus:attackInstruction();
-    const feedback=attackFeedback(heldAttack?.bus ?? selectedBus);
+    $('pulse').setAttribute('aria-pressed',String(forecast?snapshot.faults.includes(selectedBus):!!selectedAttack));
+    $('pulse').dataset.holding=String(!!selectedAttack);
+    $('pulse').title=forecast?(!forecastNoiseEnabled()?'Noise is disabled at β 0. This toggles the configured source label only.':'Toggle noisy forecasts from bus '+selectedBus+'. Only newly issued forecasts change.'):selectedAttack?.latched?'Stop the continuous attack at bus '+selectedBus:attackInstruction();
+    const feedback=attackFeedback(selectedBus);
+    if($('attack-count')) {
+      $('attack-count').hidden=forecast||attackCount===0;
+      $('attack-count').textContent=String(attackCount);
+    }
+    if($('stop-attacks')) {
+      $('stop-attacks').hidden=forecast||attackCount===0;
+      $('stop-attacks').disabled=attackCount===0;
+      $('stop-attacks').setAttribute('aria-label','Stop all '+attackCount+' active '+(attackCount===1?'bus':'buses'));
+      $('stop-attacks').title='Stop new requests at all '+attackCount+' active '+(attackCount===1?'bus':'buses')+'. Existing disturbances will decay.';
+    }
     $('pulse').dataset.attackState=forecast?(forecastNoisy(selectedBus)?'noisy':'quiet'):feedback.state;
     $('attack-hint').textContent=forecast?(snapshot.phase==='deployment'?'Links remain fixed':forecastNoiseEnabled()?'New forecasts only':'No noise at β 0'):feedback.hint;
     $('step').textContent=frozen?'100 fit steps':'Step';
     $('step').disabled=comparing || snapshot.mode==='converged';
     $('freeze').hidden=true;
     $('freeze').disabled=true;
-    $('pulse').disabled=!heldAttack && !canAttack(selectedBus); $('strength').disabled=false; $('fault').disabled=!canAttack(selectedBus);
+    $('pulse').disabled=!canAttack(selectedBus); $('strength').disabled=false; $('fault').disabled=!canAttack(selectedBus);
     $('fault').textContent=(snapshot.faults.includes(selectedBus)?'Repair':'Corrupt')+' forecast';
     const calibration=snapshot.calibration;
     $('fit-title').textContent='Shared prediction adaptation';
@@ -965,8 +1003,9 @@
     }).attr('transform',bus => 'translate('+point(bus).join(',')+')')
       .attr('data-bus',bus => bus).attr('data-role',bus => busRole(bus))
       .attr('data-inspection-role',bus=>inspection ? (bus===inspection.source && bus===inspection.receiver?'local':bus===inspection.source?'source':bus===inspection.receiver?'receiver':'none') : 'none')
-      .attr('aria-label',bus => bus===1 ? 'Fixed substation at bus 1' : forecastMode()?(snapshot.faults.includes(bus)?'Repair':'Corrupt')+' forecast at bus '+bus:(heldAttack?.latched && heldAttack.bus===bus?'Stop attack at bus ':continuousMode()?'Toggle continuous attack at bus ':'Hold to attack bus ')+bus)
+      .attr('aria-label',bus => bus===1 ? 'Fixed substation at bus 1' : forecastMode()?(snapshot.faults.includes(bus)?'Repair':'Corrupt')+' forecast at bus '+bus:(continuousAttacks.has(bus)?'Stop attack at bus ':continuousMode()?'Toggle continuous attack at bus ':'Hold to attack bus ')+bus)
       .attr('aria-description',bus => busRole(bus)+', '+busVoltage(bus).toFixed(4)+' pu'+(appliedPulse(bus)?', '+appliedPulseLabel(bus):pulseStatus(bus).queued?', pulse pending':''))
+      .attr('aria-pressed',bus => String(forecastMode()?snapshot.faults.includes(bus):!!attackAt(bus)))
       .attr('aria-disabled',bus => String(!canAttack(bus)))
       .style('cursor',bus=>canAttack(bus) ? 'pointer' : 'default')
       .on('pointerenter',function(_event,bus) {
@@ -977,15 +1016,19 @@
         showBusDetail(bus,true);
       })
       .on('blur',function() { showBusDetail(selectedBus); });
+    // Dense disturbances keep their orange equipment halos. Show one power
+    // label at a time so adjacent buses cannot obscure the selected reading.
+    const disturbedBuses=new Set([...activeAttacks(),...(snapshot.pendingPulses || []),...(snapshot.activePulses || [])].map(item=>item.bus));
     nodes.each(function(bus){
       if (!window.PowerEquipment) return;
       const status=pulseStatus(bus);
       PowerEquipment.update(d3.select(this),{
         voltage:busVoltage(bus),referenceVoltage:referenceVoltage(bus),input:reactivePower(bus),
         inputScale:PowerDemo.constants.busProfiles?.[bus-1]?.inverterKvar || 100,selected:bus===selectedBus,activePulse:status.active,activePulses:status.activeCount,queuedPulses:status.queued,
-        pulseId:status.id,phase:snapshot.t,attackPowerKw:appliedPulse(bus)?.applied,attackHeld:heldAttack?.bus===bus,attackLatched:heldAttack?.bus===bus && heldAttack.latched,paused:!((playing && !isFit()) || comparing)
+        pulseId:status.id,phase:snapshot.t,attackPowerKw:appliedPulse(bus)?.applied,attackHeld:!!attackAt(bus),attackLatched:continuousAttacks.has(bus),paused:!((playing && !isFit()) || comparing)
       });
-      const badge=d3.select(this).select('.pe-attack-badge');
+      const badge=d3.select(this).select('.pe-attack-badge')
+        .style('display',disturbedBuses.size>1 && bus!==selectedBus?'none':null);
       const badgeWidth=Number(badge.select('rect').attr('width')) || 60;
       badge.attr('transform','translate('+(point(bus)[0]>width-95 ? -badgeWidth-10 : 13)+' -16)');
     });
@@ -1005,9 +1048,10 @@
     const low=Math.min(...voltages), high=Math.max(...voltages);
     const inRange=low>=.95 && high<=1.05;
     const nearNominal=voltages.every((voltage,index)=>Math.abs(voltage-referenceVoltage(index+1))<.001);
-    const feedbackBus=heldAttack?.bus ?? (attackState(selectedBus)!=='idle'?selectedBus:lastPulse?.bus ?? selectedBus);
+    const feedbackBus=attackState(selectedBus)!=='idle'?selectedBus:lastPulse?.bus ?? selectedBus;
     const feedback=attackFeedback(feedbackBus);
     if(forecastMode()) actionNote(forecastInstruction());
+    else if(activeAttacks().length>1) actionNote('Attacking '+activeAttacks().length+' buses · Click an active bus to stop it');
     else if(feedback.state==='continuous' || feedback.state==='held') actionNote('Adding attacks · Bus '+feedbackBus);
     else if(feedback.state==='pending') actionNote('Queued at bus '+feedbackBus+' · Next sample');
     else if(feedback.state==='fading' || feedback.state==='paused') actionNote((feedback.state==='paused'?'Paused':'Fading')+' · '+appliedPulseLabel(feedbackBus));
@@ -1459,5 +1503,5 @@
   new ResizeObserver(()=>render()).observe(root);
   render();
   // A read only inspection hook supports deterministic browser verification.
-  root.powerDemo = { getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,inspectedSource,playing,intervention:$('intervention').value,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null,topology:topology.export(),historyIndex}) };
+  root.powerDemo = { getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,inspectedSource,playing,activeAttackBuses:activeAttacks().map(attack=>attack.bus),intervention:$('intervention').value,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null,topology:topology.export(),historyIndex}) };
 })();

@@ -218,6 +218,31 @@ async function main() {
       }
     };
 
+    const readPowerAttacks = async surface => surface.evaluate(() => {
+      const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot();
+      return {t:snapshot.t,phase:snapshot.phase,selected:root.powerDemo.getState().selectedBus,
+        visibleBadges:Array.from(document.querySelectorAll('#pr-network .pe-attack-badge')).filter(node=>getComputedStyle(node).display!=='none').map(node=>Number(node.closest('[data-bus]').dataset.bus)),
+        marked:Array.from(document.querySelectorAll('#pr-network [data-bus]')).filter(node=>node.querySelector('.pe-attacked')).map(node=>Number(node.dataset.bus)),
+        counts:Object.fromEntries([20,22,23].map(bus=>[bus,snapshot.eventLog.filter(event=>event.type==='pulse'&&event.bus===bus).length])),
+        active:Array.from(document.querySelectorAll('#pr-network [data-bus]')).filter(node=>node.getAttribute('aria-label')==='Stop attack at bus '+node.dataset.bus).map(node=>Number(node.dataset.bus)).sort((a,b)=>a-b),
+        applied:snapshot.lastPulseApplications.map(item=>({bus:item.bus,appliedKw:item.appliedKw})),
+        minimumVoltage:Object.fromEntries(Object.entries(snapshot.voltages).map(([key,values])=>[key,Math.min(...values)])),
+        cumulative:{...snapshot.cumulative}};
+    });
+    const checkPowerAttacks = async (surface,buses) => {
+      const reading=await readPowerAttacks(surface);
+      assert.deepEqual(reading.active,buses,'Each latched bus has its own visible stop action');
+      assert.equal(await surface.locator('#pr-attack-count').textContent(),String(buses.length));
+      assert.equal(await surface.locator('#pr-stop-attacks').isVisible(),buses.length>0);
+      assert.deepEqual(reading.visibleBadges,[reading.selected],'Only the inspected disturbed bus shows the full power badge');
+      for(const bus of buses) {
+        assert.ok(reading.marked.includes(bus),'Other active buses retain their orange attack marking');
+        assert.ok(reading.counts[bus]>0,'Bus '+bus+' has actual queued attack events');
+        assert.ok(reading.applied.some(item=>item.bus===bus&&item.appliedKw>0),'Bus '+bus+' has a measured power disturbance');
+      }
+      return reading;
+    };
+
     const checkPlots = async () => {
       await checkEventMarkers(page);
       await checkVoltageMetrics(page);
@@ -338,18 +363,48 @@ async function main() {
     await waitSamples(2);
     await pause();
 
-    // A continuous bus attack survives the automatic learning handoff.
+    // Independent continuous attacks survive discovery and stop one bus at a time.
+    await page.locator('#pr-command-title').click();
     await page.locator('#pr-intervention').selectOption('power');
-    await page.getByRole('button', { name: 'Toggle continuous attack at bus 23', exact: true }).click();
+    await page.locator('#pr-strength').selectOption('150');
+    for(const bus of [20,22,23])await page.getByRole('button',{name:'Toggle continuous attack at bus '+bus,exact:true}).click();
     await waitSamples(3);
-    assert.equal(await page.locator('#pr-pulse').getAttribute('aria-pressed'), 'true');
+    const attacksBefore=await checkPowerAttacks(page,[20,22,23]);
+    assert.equal(await page.locator('#pr-pulse').getAttribute('aria-pressed'),'true');
+    await waitSamples(3);
+    const attacksRepeating=await checkPowerAttacks(page,[20,22,23]);
+    for(const bus of [20,22,23])assert.ok(attacksRepeating.counts[bus]>attacksBefore.counts[bus],'Bus '+bus+' repeats while other buses remain active');
     await page.locator('#pr-adaptation > summary').click();
     await page.locator('#pr-compare').click();
     await page.waitForFunction(() => document.querySelector('#pr-phase').dataset.phase === 'deployment' && !document.querySelector('#pr-compare').disabled);
-    assert.equal(await page.locator('#pr-pulse').getAttribute('aria-pressed'), 'true');
     await waitSamples(3);
+    const attacksDeployed=await checkPowerAttacks(page,[20,22,23]);
+    assert.equal(attacksDeployed.phase,'deployment');
+    assert.equal(await page.locator('#pr-pulse').getAttribute('aria-pressed'),'true');
+    await page.locator('#pr-bus').selectOption('20');
+    assert.deepEqual((await readPowerAttacks(page)).visibleBadges,[20],'Selection moves the full kW reading without stopping other buses');
+    await page.locator('#pr-bus').selectOption('23');
+    await page.locator('#pr-adaptation > summary').click();
+    await page.screenshot({path:path.join(output,'concurrent-attacks.png'),fullPage:true});
+    await page.locator('#pr-adaptation > summary').click();
+    await page.getByRole('button',{name:'Stop attack at bus 22',exact:true}).click();
+    const stoppedBus=await readPowerAttacks(page);
+    await waitSamples(3);
+    const attacksAfterStop=await checkPowerAttacks(page,[20,23]);
+    assert.equal(attacksAfterStop.counts[22],stoppedBus.counts[22],'Stopping bus 22 adds no further attacks there');
+    for(const bus of [20,23])assert.ok(attacksAfterStop.counts[bus]>stoppedBus.counts[bus],'Stopping one bus preserves the other continuous attacks');
+    await fs.writeFile(path.join(output,'concurrent-attacks.json'),JSON.stringify({before:attacksBefore,repeating:attacksRepeating,deployed:attacksDeployed,stopped:stoppedBus,afterStop:attacksAfterStop},null,2));
+    await page.locator('#pr-bus').selectOption('23');
     await page.locator('#pr-pulse').click();
-    assert.equal(await page.locator('#pr-pulse').getAttribute('aria-pressed'), 'false');
+    assert.equal(await page.locator('#pr-pulse').getAttribute('aria-pressed'),'false');
+    assert.deepEqual((await readPowerAttacks(page)).active,[20],'The primary action stops only its selected bus');
+    await page.getByRole('button',{name:'Toggle continuous attack at bus 23',exact:true}).click();
+    await page.getByRole('button',{name:'Stop all 2 active buses',exact:true}).click();
+    const allStopped=await readPowerAttacks(page);
+    assert.deepEqual(allStopped.active,[],'Stop all releases every continuous attack');
+    assert.equal(await page.locator('#pr-stop-attacks').isVisible(),false);
+    await waitSamples(3);
+    assert.deepEqual((await readPowerAttacks(page)).counts,allStopped.counts,'Stop all prevents new requests while existing disturbances decay');
     await pause();
     await page.locator('#pr-adaptation > summary').click();
     assert.equal(await page.locator('#pr-cost-detail tr').count(), 4);
@@ -461,14 +516,25 @@ async function main() {
       await phone.getByRole('button', { name: 'Repair forecast at bus 7', exact: true }).tap();
       await phone.getByRole('button', { name: 'Corrupt forecast at bus 7', exact: true }).waitFor();
       await phone.locator('#pr-intervention').selectOption('power');
-      await phone.getByRole('button', { name: 'Toggle continuous attack at bus 23', exact: true }).tap();
-      await phone.getByRole('button', { name: 'Stop attack at bus 23', exact: true }).waitFor();
-      assert.equal(await phone.locator('#pr-pulse').getAttribute('aria-pressed'), 'true');
-      const attackStart = Number((await phone.locator('#pr-clock').textContent()).match(/t = (\d+)/)[1]);
-      await phone.waitForFunction(target => Number(document.querySelector('#pr-clock').textContent.match(/t = (\d+)/)[1]) >= target, attackStart + 3);
-      await phone.getByRole('button', { name: 'Stop attack at bus 23', exact: true }).tap();
-      await phone.getByRole('button', { name: 'Toggle continuous attack at bus 23', exact: true }).waitFor();
-      assert.equal(await phone.locator('#pr-pulse').getAttribute('aria-pressed'), 'false');
+      for(const bus of [20,22,23])await phone.getByRole('button',{name:'Toggle continuous attack at bus '+bus,exact:true}).tap();
+      await phone.getByRole('button',{name:'Stop attack at bus 23',exact:true}).waitFor();
+      assert.equal(await phone.locator('#pr-pulse').getAttribute('aria-pressed'),'true');
+      const attackStart=Number((await phone.locator('#pr-clock').textContent()).match(/t = (\d+)/)[1]);
+      await phone.waitForFunction(target=>Number(document.querySelector('#pr-clock').textContent.match(/t = (\d+)/)[1])>=target,attackStart+3);
+      await checkPowerAttacks(phone,[20,22,23]);
+      await phone.screenshot({path:path.join(output,'concurrent-attacks-mobile.png'),fullPage:true});
+      await phone.getByRole('button',{name:'Stop attack at bus 22',exact:true}).tap();
+      const mobileStopped=await readPowerAttacks(phone);
+      await phone.waitForFunction(target=>Number(document.querySelector('#pr-clock').textContent.match(/t = (\d+)/)[1])>=target,mobileStopped.t+3);
+      const mobileContinuing=await checkPowerAttacks(phone,[20,23]);
+      assert.equal(mobileContinuing.counts[22],mobileStopped.counts[22],'A touch stops only its bus');
+      for(const bus of [20,23])assert.ok(mobileContinuing.counts[bus]>mobileStopped.counts[bus]);
+      const stopBounds=await phone.locator('#pr-stop-attacks').boundingBox();
+      assert.ok(stopBounds.width>=44&&stopBounds.height>=44,'Stop all has a usable touch target');
+      await phone.getByRole('button',{name:'Stop all 2 active buses',exact:true}).tap();
+      await phone.getByRole('button',{name:'Toggle continuous attack at bus 23',exact:true}).waitFor();
+      assert.equal(await phone.locator('#pr-pulse').getAttribute('aria-pressed'),'false');
+      assert.deepEqual((await readPowerAttacks(phone)).active,[]);
     } catch (error) {
       const details = await phone.evaluate(() => ({
         bus7: document.querySelector('[data-bus="7"]')?.getAttribute('aria-label'),
@@ -527,8 +593,13 @@ async function main() {
     await checkVoltageMetrics(phone);
     await checkProtocol(phone);
     await checkEventMarkers(phone);
+    // A touch briefly scales the button. Check its settled target after that animation.
+    await phone.waitForFunction(()=>{
+      const bounds=document.querySelector('#pr-source-fault').getBoundingClientRect();
+      return bounds.width>=44&&bounds.height>=44;
+    });
     const sourceBounds=await phone.locator('#pr-source-fault').boundingBox();
-    assert.ok(sourceBounds.width>=44&&sourceBounds.height>=44,'Explicit source action has a usable touch target');
+    assert.ok(sourceBounds.width>=44&&sourceBounds.height>=44,'Explicit source action has a usable touch target '+JSON.stringify(sourceBounds));
     const dimensions = await phone.evaluate(() => ({ page: document.documentElement.scrollWidth, viewport: innerWidth }));
     assert.ok(dimensions.page <= dimensions.viewport + 1, 'Mobile page does not overflow horizontally');
     const attackBounds = await phone.locator('#pr-pulse').boundingBox();
@@ -540,7 +611,7 @@ async function main() {
     await phone.screenshot({path:path.join(output,'environment.png'),fullPage:true});
     await mark('mobile inspection and responsive evidence');
     assert.deepEqual(errors, [], 'No browser runtime errors');
-    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), timings, touchEvents, checks: ['actual forecast setting timestamps and typed mixed event markers', 'keyboard matrix inspection and native command table scrolling', 'visible temporal source gain without hover', 'playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'actual protocol receipt and archived discovery view', 'matrix mode exit restores live source controls without advancing plant', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'continuous mobile power attack', 'mobile touch and layout'], errors }, null, 2));
+    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), timings, touchEvents, checks: ['actual forecast setting timestamps and typed mixed event markers', 'keyboard matrix inspection and native command table scrolling', 'visible temporal source gain without hover', 'playback', 'repeated forecast bus clicks', 'three simultaneous continuous power attacks and independent stop', 'all attack sources survive automatic handoff', 'actual protocol receipt and archived discovery view', 'matrix mode exit restores live source controls without advancing plant', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'three simultaneous mobile power attacks and independent stop', 'mobile touch and layout'], errors }, null, 2));
     console.log('Browser smoke passed');
   } finally {
     if (browser) await browser.close();

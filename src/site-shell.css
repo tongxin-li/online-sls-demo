@@ -157,6 +157,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 .btn-attack { background:#fff0de; color:#a34a00; min-width:150px; min-height:40px; }
 .btn-attack svg { width:21px; height:21px; }
 .btn-attack[data-holding='true'] { background:#bd570a; color:#fff; box-shadow:0 0 0 4px #bd570a18; }
+.btn-stop-attacks { color:#a34a00; background:#fff0de; }
+.pr-attack-count { display:inline-grid; place-items:center; min-width:21px; min-height:21px; padding:0 4px; border-radius:6px; background:#a34a0014; font-size:12px; }
 #pr-matrix-view { min-height:27px; padding:3px 7px; font-size:11px; }
 #pr-matrix-key { min-height:24px; justify-content:flex-end; font-size:10px; gap:12px; }
 #pr-matrix-key .change-scale { display:none; }
@@ -202,7 +204,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 /* The primary actions stay together as the available width narrows. */
 @media(max-width:1100px) {
   .pr-controlbar { flex-wrap:wrap; gap:12px 20px; }
-  .pr-actions { margin-left:auto; }
+  .pr-actions { margin-left:auto; flex-wrap:wrap; }
   .pr-mission { gap:8px 14px; }
   .pr-mission .pr-target { display:none; }
 }
@@ -249,6 +251,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 /* Secondary controls stay compact with a mouse and comfortable to tap. */
 :focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
 @media(max-width:650px),(pointer:coarse) {
+  .btn-stop-attacks { min-height:44px; }
   #pr-matrix-view,#pr-view,#pr-cost-metric { min-height:44px; padding:8px 10px; font-size:12px; }
   .btn-fit,.btn-deploy { min-height:44px; padding:8px 12px; font-size:12px; }
   .pr-topology-history { gap:8px; }

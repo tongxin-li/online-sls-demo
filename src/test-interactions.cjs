@@ -471,7 +471,7 @@ test('Continuous is the default and a released bus click repeats one pulse per s
   pointerClick(h,bus,51);
   assert.equal(bus.hasPointerCapture(51),false,'Native pointer release also delivers lostpointercapture');
   assert.equal(pulses(h).length,1,'Compatibility click must not toggle or duplicate activation');
-  assert.equal(h.node('pulse-label').textContent,'Stop attack');assert.equal(h.node('pulse')['aria-pressed'],'true');
+  assert.equal(h.node('pulse-label').textContent,'Stop bus '+h.state().selectedBus);assert.equal(h.node('pulse')['aria-pressed'],'true');
   await h.clock.advance(1000);
   assert.equal(h.snapshot().t,16);assert.equal(pulses(h).length,16);
   assert.deepEqual(pulses(h).map(event=>event.t),Array.from({length:16},(_,i)=>i));
@@ -487,22 +487,51 @@ test('clicking the same bus stops a continuous attack without adding a final pul
   await h.samples(3);assert.equal(h.snapshot().t,7);assert.equal(pulses(h).length,4);assert.equal(h.state().playing,true);
 });
 
-test('Stop attack targets the active continuous bus even after selection changes to the slack bus',async()=>{
+test('the toolbar targets the selected bus without stopping a different active bus',async()=>{
   const h=harness(),bus=h.bus(8);pointerClick(h,bus);await h.samples(3);
-  h.change('bus',1);assert.equal(h.node('pulse').disabled,false);assert.equal(h.node('pulse-label').textContent,'Stop attack');
-  pointerClick(h,h.node('pulse'),23);await h.samples(3);
-  assert.equal(pulses(h).length,3);assert.equal(h.snapshot().t,6);assert.equal(h.state().selectedBus,1);
-  assert.equal(h.node('pulse-label').textContent,'Fixed substation');assert.equal(h.node('pulse').disabled,true);
+  h.change('bus',1);assert.equal(h.node('pulse').disabled,true);assert.equal(h.node('pulse-label').textContent,'Fixed substation');
+  pointerClick(h,h.node('pulse'),23);await h.samples(2);
+  assert.equal(pulses(h).length,5);assert.deepEqual(h.state().activeAttackBuses,[8]);assert.equal(h.state().selectedBus,1);
+  h.change('bus',14);pointerClick(h,h.node('pulse'));await h.samples(2);
+  assert.deepEqual(h.state().activeAttackBuses,[8,14]);assert.equal(h.node('pulse-label').textContent,'Stop bus 14');
+  pointerClick(h,h.node('pulse'));await h.samples(2);
+  assert.deepEqual(h.state().activeAttackBuses,[8]);
+  assert.equal(pulses(h).filter(event=>event.bus===8).length,9);
+  assert.equal(pulses(h).filter(event=>event.bus===14).length,2);
 });
 
-test('clicking another bus transfers continuous attacks and preserves earlier applied pulses',async()=>{
-  const h=harness(),first=h.bus(7),second=h.bus(14);
-  pointerClick(h,first);await h.samples(3);const firstCount=h.snapshot().activePulses.filter(event=>event.bus===7).length;
-  pointerClick(h,second,24);assert.equal(h.snapshot().activePulses.filter(event=>event.bus===7).length,firstCount);
+test('three continuous bus attacks repeat independently and stopping one preserves the others',async()=>{
+  const h=harness(),buses=[20,22,23];
+  for(const bus of buses)pointerClick(h,h.bus(bus),bus);
+  assert.deepEqual(h.state().activeAttackBuses,buses);
+  await h.samples(4);
+  assert.equal(h.state().selectedBus,23,'Repeated requests must not change the selected bus');
+  for(const bus of buses)assert.deepEqual(pulses(h).filter(event=>event.bus===bus).map(event=>event.t),[0,1,2,3]);
+  const tails=plain(h.snapshot().activePulses);
+  pointerClick(h,h.bus(22),22);
+  assert.deepEqual(h.snapshot().activePulses,tails,'Stopping repetition must not erase its existing physical tail');
+  assert.deepEqual(h.state().activeAttackBuses,[20,23]);
   await h.samples(3);
-  assert.deepEqual(pulses(h).map(event=>event.bus),[7,7,7,14,14,14]);
-  assert.deepEqual(pulses(h).map(event=>event.t),[0,1,2,3,4,5]);
-  assert.equal(h.state().selectedBus,14);assert.equal(h.node('pulse-label').textContent,'Stop attack');
+  assert.equal(pulses(h).filter(event=>event.bus===22).length,4);
+  for(const bus of [20,23])assert.deepEqual(pulses(h).filter(event=>event.bus===bus).map(event=>event.t),[0,1,2,3,4,5,6]);
+  assert.equal(h.state().selectedBus,22);assert.equal(h.node('pulse-label').textContent,'Attack bus 22');
+});
+
+test('Stop all reports the active bus count and stops requests while preserving physical tails',async()=>{
+  const h=harness();assert.equal(h.node('stop-attacks').hidden,true);
+  for(const bus of [20,22,23])pointerClick(h,h.bus(bus),bus);
+  assert.equal(h.node('stop-attacks').hidden,false);assert.equal(h.node('attack-count').textContent,'3');
+  assert.equal(h.node('stop-attacks')['aria-label'],'Stop all 3 active buses');
+  await h.samples(4);const tails=plain(h.snapshot().activePulses),count=pulses(h).length;
+  h.change('bus',1);h.click('stop-attacks');
+  assert.deepEqual(h.state().activeAttackBuses,[]);assert.equal(h.node('stop-attacks').hidden,true);
+  assert.equal(h.node('attack-count').textContent,'0');assert.deepEqual(h.snapshot().activePulses,tails);
+  assert.equal(h.state().selectedBus,1);assert.equal(h.state().playing,true);
+  await h.samples(3);assert.equal(pulses(h).length,count);
+  for(const bus of [20,22,23])pointerClick(h,h.bus(bus),bus);
+  h.document.hidden=true;h.document.dispatch('visibilitychange');
+  assert.deepEqual(h.state().activeAttackBuses,[]);assert.equal(h.state().playing,false);
+  h.click('restart');assert.deepEqual(h.state().activeAttackBuses,[]);assert.equal(h.snapshot().activePulses.length,0);
 });
 
 test('touch cancellation stops a continuous attack while normal release keeps it active',async()=>{
@@ -641,18 +670,18 @@ test('pulse feedback distinguishes a held gesture from pending requests and fadi
   assert.equal(h.snapshot().activePulses.length,3);
 });
 
-test('attack feedback follows the active bus before selection and then the selected bus',async()=>{
+test('attack feedback belongs to the selected bus while other continuous attacks keep running',async()=>{
   const h=harness();pointerClick(h,h.bus(7));await h.samples(2);
   h.change('bus',14);
-  assert.equal(h.node('pulse').dataset.attackState,'continuous');
-  assert.equal(h.node('pulse-label').textContent,'Stop attack');
-  assert.equal(h.node('attack-hint').textContent,'Repeats until stopped');
+  assert.equal(h.node('pulse').dataset.attackState,'idle');
+  assert.equal(h.node('pulse-label').textContent,'Attack bus 14');
+  assert.equal(h.node('attack-hint').textContent,'Click to start or stop');
   pointerClick(h,h.node('pulse'));
+  assert.deepEqual(h.state().activeAttackBuses,[7,14]);assert.equal(h.node('pulse').dataset.attackState,'continuous');
   assert.equal(h.state().selectedBus,14);assert.ok(h.snapshot().activePulses.every(event=>event.bus===7));
-  assert.equal(h.node('pulse').dataset.attackState,'idle','An unrelated selected bus must not inherit another bus disturbance');
   h.change('bus',7);
-  assert.equal(h.node('pulse').dataset.attackState,'fading');
-  assert.equal(h.node('attack-hint').textContent,'Disturbance fading');
+  assert.equal(h.node('pulse').dataset.attackState,'continuous');
+  assert.equal(h.node('attack-hint').textContent,'Repeats until stopped');
 });
 
 test('switching attack mode updates feedback while retaining queued and applied disturbances',async()=>{
@@ -815,7 +844,7 @@ test('held and continuous attacks survive the automatic handoff with one fresh p
     assert.ok(Object.values(h.snapshot().cumulative).every(value=>value===0));
     if(mode==='pulse'){
       assert.equal(bus.dataset.holding,'true');assert.equal(bus.hasPointerCapture(61),true);
-    }else assert.equal(h.node('pulse-label').textContent,'Stop attack');
+    }else assert.equal(h.node('pulse-label').textContent,'Stop bus '+h.state().selectedBus);
     await h.samples(1);assert.equal(h.snapshot().t,1);assert.equal(pulses(h).length,1);
     await h.samples(1);assert.equal(h.snapshot().t,2);assert.deepEqual(pulses(h).map(event=>event.t),[0,1]);
     if(mode==='pulse')h.pointer('pointerup',bus,{pointerId:61});else pointerClick(h,bus,62);
@@ -823,6 +852,43 @@ test('held and continuous attacks survive the automatic handoff with one fresh p
     assert.equal(h.state().playing,true);
     assert.equal(h.node('pulse').dataset.attackState,'fading');
   }
+});
+
+test('every simultaneous continuous attack crosses automatic comparison once per sample',async()=>{
+  const h=harness(undefined,'communication');h.change('intervention','power');
+  const buses=[20,22,23];for(const bus of buses)pointerClick(h,h.bus(bus),bus);
+  await h.samples(180);
+  assert.equal(h.snapshot().phase,'deployment');assert.equal(h.snapshot().t,0);
+  assert.deepEqual(h.state().activeAttackBuses,buses);
+  assert.equal(h.snapshot().activePulses.length,0);
+  assert.deepEqual(pulses(h).map(event=>[event.t,event.bus]),buses.map(bus=>[0,bus]));
+  await h.samples(4);
+  for(const bus of buses)assert.deepEqual(pulses(h).filter(event=>event.bus===bus).map(event=>event.t),[0,1,2,3]);
+  assert.equal(h.clock.tasks.size,1);
+  h.click('run');assert.deepEqual(h.state().activeAttackBuses,[]);
+  const count=pulses(h).length;await h.samples(2);assert.equal(pulses(h).length,count);
+  h.click('run');await h.samples(2);assert.equal(pulses(h).length,count,'Resume must not restart cleared attacks');
+});
+
+test('transient D hold is independent of other continuous attacks and cannot duplicate its own bus',async()=>{
+  const h=harness();pointerClick(h,h.bus(20));pointerClick(h,h.bus(23));
+  h.key('keydown','d');h.key('keydown','d',{repeat:true});h.key('keyup','d');
+  await h.samples(3);
+  for(const bus of [20,23])assert.equal(pulses(h).filter(event=>event.bus===bus).length,3);
+  h.change('bus',22);h.key('keydown','d');await h.samples(2);h.key('keyup','d');await h.samples(2);
+  assert.deepEqual(h.state().activeAttackBuses,[20,23]);
+  assert.equal(pulses(h).filter(event=>event.bus===22).length,2);
+  for(const bus of [20,23])assert.equal(pulses(h).filter(event=>event.bus===bus).length,7);
+});
+
+test('canceling one pointer leaves unrelated continuous attacks active',async()=>{
+  const h=harness();pointerClick(h,h.bus(20));pointerClick(h,h.bus(23));
+  const bus=h.bus(22);h.pointer('pointerdown',bus,{pointerId:22,pointerType:'touch'});await h.samples(2);
+  h.pointer('pointercancel',bus,{pointerId:22,pointerType:'touch'});await h.samples(2);
+  assert.deepEqual(h.state().activeAttackBuses,[20,23]);
+  assert.equal(pulses(h).filter(event=>event.bus===22).length,2);
+  for(const other of [20,23])assert.equal(pulses(h).filter(event=>event.bus===other).length,4);
+  h.window.dispatch('blur');assert.deepEqual(h.state().activeAttackBuses,[]);
 });
 
 test('pausing after automatic handoff clears continuous attack intent and resume never reactivates it',async()=>{
@@ -863,7 +929,7 @@ test('Advance 180 preserves an already continuous attack across handoff and resu
   assert.equal(h.snapshot().t,40);assert.equal(pulses(h).length,40);
   assert.deepEqual(pulses(h).map(event=>event.t),Array.from({length:40},(_,i)=>i));
   assert.ok(pulses(h).every(event=>event.bus===7));
-  assert.equal(h.node('pulse-label').textContent,'Stop attack');
+  assert.equal(h.node('pulse-label').textContent,'Stop bus '+h.state().selectedBus);
   assert.equal(h.state().playing,true);assert.equal(h.clock.tasks.size,1);
   await h.samples(1);assert.equal(h.snapshot().t,41);assert.equal(pulses(h).length,41);
   pointerClick(h,bus);await h.samples(2);
