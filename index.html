@@ -310,7 +310,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 .pr-forecast-observation {margin:8px 0;padding:8px 10px;background:var(--surface-subtle,#f5f5f7);border-radius:8px}
 .pr-forecast-observation p {margin:3px 0;overflow-wrap:anywhere}
 .pr-forecast-values {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:7px 0}
-.pr-forecast-values dt {font-size:11px;color:var(--muted,#6e6e73);line-height:1.4}
+.pr-forecast-values dt {font-size:12px;color:var(--muted-foreground,#626269);line-height:1.4}
 .pr-forecast-values dd {margin:3px 0;font-size:14px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .pr-source-controls { display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; margin:8px 0; }
 .pr-source-controls .btn { min-height:44px; max-width:100%; white-space:normal; }
@@ -331,6 +331,19 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   .pr-scenario-heading { align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
   .pr-scenario-heading .btn { min-height:44px; }
   .pr-scheduled-power { font-size:10px; line-height:1.5; }
+}
+
+/* Readable source observations without altering the four panel layout. */
+.pr-forecast-observation { padding:12px; border:1px solid var(--border); border-radius:12px; }
+.pr-forecast-values { gap:8px; margin:10px 0; }
+.pr-forecast-values > div { min-width:0; padding:9px 10px; background:#fff; border:1px solid var(--border); border-radius:8px; }
+.pr-forecast-values dd { margin-top:5px; color:var(--foreground); font-size:16px; font-weight:600; line-height:1.4; }
+#pr-forecast-timing { color:var(--foreground); font-weight:500; line-height:1.5; }
+.pr-forecast-observation .pr-caption { line-height:1.5; }
+@media(max-width:380px) {
+  .pr-forecast-values { grid-template-columns:minmax(0,1fr); gap:6px; }
+  .pr-forecast-values > div { display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
+  .pr-forecast-values dd { margin:0; flex-shrink:0; }
 }
 
 /* Artwork stays decorative. The enclosing bus handles hit area and badge input. */
