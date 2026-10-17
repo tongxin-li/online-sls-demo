@@ -913,6 +913,7 @@ async function main() {
     await phone.screenshot({path:path.join(output,'default-scenario-mobile.png'),fullPage:true});
     await useReference(phone);
     await selectSetting(phone,'speed','32');
+    await selectSetting(phone,'view','cost');
     await phone.locator('#pr-run').tap();
     for(const metric of ['gap','total','gap']){
       await phone.locator('#pr-cost-'+metric).tap();await checkCostSwitch(phone,metric,'scalar adaptation');
