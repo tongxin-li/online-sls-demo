@@ -295,7 +295,7 @@
       $('observed-'+key).textContent=observation ? (1000*observation[key]).toFixed(3) : '—';
     $('forecast-support').textContent=!inspection ? '' : historyIndex!==null ? 'Current sample hidden while reviewing saved links'
       : snapshot.phase==='discovery' ? 'Discovery uses dense messages · Displayed links are candidates'
-      : (inspection.connected ? 'Permitted by deployed support' : 'Excluded from deployed support')+' at inverter '+inspection.receiver+' · Links fixed';
+      : (inspection.connected ? 'Permitted by deployed support' : 'Excluded from deployed support')+' at inverter '+inspection.receiver+' · '+(snapshot.experiment==='communication'?'Learned sparse':'Matrix adaptation')+' · Links fixed';
   }
   function renderInspectedSource() {
     const inspection=predictionInspection(),control=$('source-fault');

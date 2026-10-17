@@ -1326,6 +1326,7 @@ test('source observation distinguishes dense discovery from frozen deployed supp
   h.inspectLink(edge.to,edge.from);assert.match(h.node('forecast-support').textContent,/Permitted by deployed support/);
   const absent=Array.from({length:23},(_,i)=>i+2).find(bus=>bus!==edge.to&&!snapshot.recommendations.some(e=>e.to===edge.to&&e.from===bus));
   h.inspectLink(edge.to,absent);assert.match(h.node('forecast-support').textContent,/Excluded from deployed support/);
+  assert.match(h.node('forecast-support').textContent,/Learned sparse/,'Support label identifies its controller, not all four policies');
   assert.equal(h.forecastObservation().forecast,snapshot.lastSample.forecast[absent-1],'Excluded source can be audited, not sent on a fabricated link');
   assert.deepEqual(plain(h.snapshot()),snapshot);
 });
