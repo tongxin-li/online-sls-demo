@@ -783,16 +783,8 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-18T07:00:00+08:00",
-    "branch": "cloud/refine/20261018-0700",
-    "base_commit": "b7128cafd86fbcee02aa85f84036468227d76afa",
-    "started_at": "2026-10-18T06:58:42+08:00",
-    "lease_expires_at": "2026-10-18T07:38:42+08:00",
-    "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
-    "scope": "Readable voltage and physical cost timing captions only"
-  },
-  "next_focus": "Use the reviewed actual desktop and phone panel screenshots to choose one focused layout correction. The phone stage annotation is cramped and the desktop uninspected matrix panel has substantial stretched empty space. Preserve four clear panels, the existing single method key, all four costs and honest winners, recorded reliability regimes, selected link evidence and fixed deployment stages. Do not add panels or controls, infer numerical improvement, or begin a broad numerical study for style work. Require actual screenshot pixels and responsive interaction assertions for material layout changes.",
+  "active_run": null,
+  "next_focus": "Use actual desktop and phone panel screenshot evidence to evaluate the substantial empty space in the uninspected desktop matrix panel. Keep the four main panels, meaningful reading order and synchronized source/receiver inspection without adding always visible diagnostics, panels or controls. Preserve the now readable physical timing captions, single method key, honest live costs/winners, recorded regimes and fixed-deployment receipt. Require measured responsive geometry and screenshot pixel review before a material layout correction. No scientific retuning or broad numerical study for style work.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -902,11 +894,11 @@
       "pages_run": 39052070867
     },
     "renewed_completion": {
-      "slot": "2026-10-18T06:00:00+08:00",
-      "branch": "cloud/refine/20261018-0600",
-      "product_ready_commit": "9414a828d0733f24c434b631674d31aeb41b8f0e",
+      "slot": "2026-10-18T07:00:00+08:00",
+      "branch": "cloud/refine/20261018-0700",
+      "product_ready_commit": "e0258d02c77089c0b6346f7bb546db9aef59dfa5",
       "scope": "Completion record only, no product changes",
-      "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and candidate workflow results for metadata recovery. Do not count metadata validation as an invocation or improvement, or promote an older branch over newer main."
+      "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and candidate workflow results for metadata recovery. Do not count metadata validation as a new invocation or improvement, or promote an older branch over newer main."
     },
     "previous_renewed_metadata_verification": {
       "commit": "b7128cafd86fbcee02aa85f84036468227d76afa",
@@ -948,6 +940,13 @@
         "slot": "2026-10-18T05:00:00+08:00",
         "branch": "cloud/refine/20261018-0500",
         "product_ready_commit": "a4669c1a11afff75e160b98b0accb027b4dd35a5",
+        "scope": "Completion record only, no product changes",
+        "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and candidate workflow results for metadata recovery. Do not count metadata validation as an invocation or improvement, or promote an older branch over newer main."
+      },
+      "5": {
+        "slot": "2026-10-18T06:00:00+08:00",
+        "branch": "cloud/refine/20261018-0600",
+        "product_ready_commit": "9414a828d0733f24c434b631674d31aeb41b8f0e",
         "scope": "Completion record only, no product changes",
         "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and candidate workflow results for metadata recovery. Do not count metadata validation as an invocation or improvement, or promote an older branch over newer main."
       }
@@ -1036,7 +1035,7 @@
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
     "invocation_count": 7,
-    "completed_count": 6,
+    "completed_count": 7,
     "runs": [
       {
         "slot": "2026-10-18T01:00:00+08:00",
@@ -1315,31 +1314,48 @@
       {
         "slot": "2026-10-18T07:00:00+08:00",
         "started_at": "2026-10-18T06:58:42+08:00",
-        "status": "in_progress",
+        "status": "completed",
         "candidate_branch": "cloud/refine/20261018-0700",
         "base_commit": "b7128cafd86fbcee02aa85f84036468227d76afa",
-        "counted_completed": false,
+        "counted_completed": true,
         "changes": [
           "Separate power timing annotation from the stage cost label on phones, retain full voltage/cost units and raise scoped captions to readable 12 px text with accessible contrast.",
           "Keep queued, first affected state and following-action cost timing unchanged. Add actual glyph containment checks and real queued/applied/charged state, exact replay and four-curve browser regressions at desktop, phone and 320 px widths."
         ],
         "tests": {
-          "status": "pending"
+          "suites": 7,
+          "total": 211,
+          "failed": 0,
+          "candidate": "passed",
+          "main": "All 211 tests, build consistency and the full desktop/phone browser suite passed, including caption timing and exact replay at the narrow 320 px width.",
+          "build": "passed",
+          "browser": "Full desktop/phone suite passed, with new caption glyph containment, 12 px minimum size, contrast and separate phone timing line checks. Actual queued, first applied and charged states, four curves, unchanged physical snapshots and exact version 13 replay are verified at 1440, 390 and 320 px. Existing playback, repeated/continuous attacks, source toggles, automatic handoff, stable cost buttons, selected links and recorded regimes remain covered.",
+          "benchmarks": "Not rerun. No engine, controller, learning, objective, actuator bound, gain, source error, physical scenario/default, forecast timing or recorded result changes.",
+          "main_consistency": "passed"
         },
         "screenshots": {
-          "pixel_review": "pending"
-        }
+          "artifact_id": 12117960705,
+          "artifact_digest": "sha256:4848502dfdcc356a19c300f848d01501333e356b80fa7a7ed978c7608ef72d6b",
+          "captures": [
+            "power-timing-1440.jpg",
+            "power-timing-390.jpg",
+            "panel-voltage-1440.jpg",
+            "panel-voltage-390.jpg"
+          ],
+          "pixel_review": "Actual desktop 1440 and phone 390 voltage/cost panel pixels reviewed through authorized Actions JPEG previews, both at the first physical pulse state and in an ordinary comparison. The full following-action cost annotation is readable; phone places it on a separate line. Voltage deviation and nominal pu text remain readable, with no overlap or clipping. Forecast mode reserves no empty annotation line. Narrow 320 px layout is verified by glyph and interaction assertions, not separately claimed pixel reviewed.",
+          "remaining_visual_limitations": "The desktop uninspected matrix panel still stretches to the taller network panel, leaving substantial empty space. That separate issue is not changed or claimed solved in this caption pass."
+        },
+        "source_commit": "bd87485b4466025ce08af3515cf42ba4b89a4961",
+        "published_commit": "e0258d02c77089c0b6346f7bb546db9aef59dfa5",
+        "candidate_run": 39077477020,
+        "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed. No public HTTP byte comparison performed this pass.",
+        "main_run": 39078056472,
+        "pages_run": 39078056814,
+        "publication": "Candidate and main validation succeeded. Ready child has tested source as its single parent and only index.html changed. Promoted with an expected current main SHA and force false. Pages succeeded for that exact ready build and deployment logs were read.",
+        "completed_at": "2026-10-17T23:21:06.412Z"
       }
     ],
-    "active_run": {
-      "slot": "2026-10-18T07:00:00+08:00",
-      "branch": "cloud/refine/20261018-0700",
-      "base_commit": "b7128cafd86fbcee02aa85f84036468227d76afa",
-      "started_at": "2026-10-18T06:58:42+08:00",
-      "lease_expires_at": "2026-10-18T07:38:42+08:00",
-      "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
-      "scope": "Readable voltage and physical cost timing captions only"
-    },
+    "active_run": null,
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
@@ -1359,5 +1375,5 @@
     "baseline_main": "2a9ff26b59565ecac1eb5274fbea4d813a18f24f"
   },
   "completed_count_scope": "Original bounded program, retained at 15. Renewed counts are tracked independently in renewed_program.",
-  "total_completed_count": 21
+  "total_completed_count": 22
 }
