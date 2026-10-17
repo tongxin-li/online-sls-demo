@@ -8,7 +8,7 @@
   "hard_deadline": "2026-10-18T01:45:00+08:00",
   "max_scheduled_runs": 24,
   "max_minutes_per_run": 40,
-  "completed_count": 6,
+  "completed_count": 7,
   "runs": [
     {
       "slot": "2026-10-17T02:00:00+08:00",
@@ -344,23 +344,43 @@
       },
       "deployment": "GitHub Pages success",
       "direct_live_inspection": "unverified, previously denied browser access not retried"
+    },
+    {
+      "slot": "2026-10-17T09:00:00+08:00",
+      "started_at": "2026-10-17T09:00:22+08:00",
+      "completed_at": "2026-10-17 01:16:11 UTC",
+      "status": "completed",
+      "changes": [
+        "Added raw rolling forecast RMSE and signed bias over up to 60 revealed current-phase pairs, without reading future forcing.",
+        "Show actual sealed-prefix timing for the latest source setting, distinguishing first issue, forecast target, revealed pair and mixed-window cohort.",
+        "Causal regression verifies a newly issued future message can change current preview commands before its error is observable. Preserve frozen support, phase reset and exact replay."
+      ],
+      "source_commit": "b8005f3f53847941c8e01ef564e8ca4470061c98",
+      "published_commit": "9ce8be1be931c6150352f413e66ecf0182e859e7",
+      "candidate_run": 38989395284,
+      "main_run": 38989664800,
+      "pages_run": 38989664707,
+      "tests": {
+        "suites": 5,
+        "total": 157,
+        "failed": 0,
+        "build": "passed",
+        "main_consistency": "passed",
+        "diagnostics": "Exact rolling RMSE/bias, 60-pair bound, poisoned future observations unread. Actual sealed prefix at time 0,1,35, repeated paused toggles, first issue and reveal timing. Newly issued future message changes current preview command before its target error is observed. Phase reset, history guards, exact replay, and physical error at zero forecast noise.",
+        "browser": "Independent paused 62-pair browser stream verifies DOM RMSE and bias against separately collected revealed samples, plus issuance/cohort timing. Desktop/mobile source summaries, command decomposition, repeated forecast and power actions, handoff, thirty chart switches, four curves and responsive layout pass.",
+        "benchmarks": "Not rerun. Simulation engine, controllers, gains, objective, physical scenarios and scientific parameters unchanged."
+      },
+      "screenshots": {
+        "artifact_id": 12084622388,
+        "additional_capture": "forecast-history.png",
+        "pixel_review": "unverified"
+      },
+      "deployment": "GitHub Pages success",
+      "direct_live_inspection": "unverified, previously denied browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-17T09:00:00+08:00",
-    "started_at": "2026-10-17T09:00:22+08:00",
-    "lease_expires_at": "2026-10-17T09:40:22+08:00",
-    "branch": "cloud/refine/20261017-0900",
-    "base_main": "545c90a6a5071c6378c25c3e8679ff4f7d6b5f32",
-    "focus": "Observed rolling source error and actual sealed-preview issuance delay",
-    "status": "candidate validation",
-    "changes": [
-      "Added raw rolling forecast RMSE and signed bias over up to 60 revealed current-phase pairs, without reading future forcing.",
-      "Show actual sealed-prefix timing for the latest source setting, distinguishing first issue, forecast target, revealed pair and mixed-window cohort.",
-      "Causal regression verifies a newly issued future message can change current preview commands before its error is observable. Preserve frozen support, phase reset and exact replay."
-    ]
-  },
-  "next_focus": "Make source reliability changes understandable over time with a rolling error summary from revealed forecast/forcing pairs and explicit sealed-preview issuance delay. Keep current reliability separate from past observed errors, distinguish unforecast physical changes, avoid future forcing reads and do not change controller parameters or frozen support.",
+  "active_run": null,
+  "next_focus": "Audit phase presentation against the actual protocol. Clearly distinguish dense discovery, offline link selection and synthesis, then a fresh held out comparison with frozen support and coefficients. Keep prediction adaptation separate and do not imply joint online topology adaptation. Prefer concise existing status areas over more controls or visual redesign. Add actual phase transition and source-map persistence assertions if gaps exist.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -408,6 +428,11 @@
     "metadata_commit": "545c90a6a5071c6378c25c3e8679ff4f7d6b5f32",
     "candidate_run": 38985906338,
     "validation": "success",
-    "note": "Recovered validated documentation-only completion after interruption. Counted slot once."
+    "note": "Recovered validated documentation-only completion after interruption. Counted slot once.",
+    "main_verification": {
+      "run": 38989664800,
+      "result": "success",
+      "note": "Current main validation includes the recovered prior completion and current improvement. Prior completed slot counted once."
+    }
   }
 }
