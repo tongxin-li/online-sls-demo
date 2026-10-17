@@ -373,7 +373,7 @@ async function main() {
       const values=Array.from(document.querySelectorAll('.pr-forecast-values dt,.pr-forecast-values dd'));
       return {viewport:innerWidth,page:document.documentElement.scrollWidth,panels:document.querySelectorAll('.pr-dashboard > .pr-panel').length,
         items:values.map(node=>{const style=getComputedStyle(node),bg=background(node),a=luminance(style.color),b=luminance(bg),r=node.getBoundingClientRect();
-          return {text:node.textContent,color:style.color,background:bg,contrast:(Math.max(a,b)+.05)/(Math.min(a,b)+.05),fontSize:parseFloat(style.fontSize),left:r.left,right:r.right,width:r.width,scroll:node.scrollWidth,client:node.clientWidth};})};
+          return {text:node.textContent,color:style.color,background:bg,contrast:(Math.max(a,b)+.05)/(Math.min(a,b)+.05),fontSize:parseFloat(style.fontSize),left:r.left,right:r.right,width:r.width,bottom:r.bottom,scroll:node.scrollWidth,client:node.clientWidth};})};
     });
     const preview=async name=>{
       await appearance.locator('#pr-forecast-observation').screenshot({path:path.join(output,name+'.png')});
@@ -409,6 +409,7 @@ async function main() {
         assert.ok(item.left>=0&&item.right<=width+1,'Source reading stays inside the viewport');
         assert.ok(item.scroll<=item.client+1,'Source text is not clipped at '+width+' '+JSON.stringify(item));
       }
+      if(width>380){const bottoms=measured.items.filter((_,i)=>i%2===1).map(item=>item.bottom);assert.ok(Math.max(...bottoms)-Math.min(...bottoms)<1,'Metric values align despite wrapped labels');}
       await checkForecastObservation(appearance);await checkCommandInspection(appearance);
       assert.equal(await appearance.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),appearanceBefore,'Styling and responsive inspection preserve the complete experiment');
       if(width!==768)await preview('source-readability-'+width);
