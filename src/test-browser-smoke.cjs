@@ -78,7 +78,39 @@ async function main() {
     const pause = async () => {
       if (await page.locator('#pr-run').textContent() === 'Pause') await page.locator('#pr-run').click();
     };
+
+    const checkStageCaptions = async surface => {
+      const reading=await surface.evaluate(()=>{
+        const panel=document.querySelector('.pr-stage-panel'),summary=document.querySelector('#pr-pulse-summary'),root=document.querySelector('#power-response-demo');
+        return {playing:root.powerDemo.getState().playing,width:innerWidth,overflow:document.documentElement.scrollWidth,summary:summary.textContent,summaryDisplay:getComputedStyle(summary).display,
+          rows:Array.from(panel.querySelectorAll('.pr-plot-label')).map(row=>({box:row.getBoundingClientRect().toJSON(),spans:Array.from(row.children).filter(node=>node.textContent.trim()).map(node=>{
+            const range=document.createRange();range.selectNodeContents(node);
+            return {text:node.textContent,font:parseFloat(getComputedStyle(node).fontSize),color:getComputedStyle(node).color,
+              box:node.getBoundingClientRect().toJSON(),glyphs:Array.from(range.getClientRects()).map(rect=>rect.toJSON())};
+          })})),snapshot:JSON.stringify(root.powerDemo.getSnapshot())};
+      });
+      assert.ok(reading.overflow<=reading.width+1,'Full timing text cannot widen the page');
+      for(const row of reading.rows)for(const span of row.spans){
+        assert.ok(span.font>=12,'Voltage and cost captions remain readable');
+        for(const glyph of span.glyphs){
+          assert.ok(glyph.left>=row.box.left-1&&glyph.right<=row.box.right+1,'Every caption glyph fits the chart label row: '+span.text);
+          assert.ok(glyph.top>=row.box.top-1&&glyph.bottom<=row.box.bottom+1,'Wrapping cannot clip caption text');
+        }
+        const rgb=span.color.match(/[\d.]+/g).slice(0,3).map(Number).map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2;});
+        const luminance=.2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2];
+        assert.ok(1.05/(luminance+.05)>=4.5,'Small caption text retains readable contrast');
+      }
+      if(reading.summary&&reading.width<=650){
+        const row=reading.rows[1];assert.equal(row.spans.length,2);
+        assert.ok(row.spans[1].box.top>=row.spans[0].box.bottom-1,'Phone timing annotation gets its own line');
+      }
+      if(!reading.summary)assert.equal(reading.summaryDisplay,'none','An empty forecast caption reserves no extra line');
+      if(!reading.playing)assert.equal(await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),reading.snapshot,'Paused caption measurement is read only');
+      return reading;
+    };
+
     const checkVoltageMetrics = async surface => {
+      await checkStageCaptions(surface);
       const result=await surface.evaluate(()=>{
         const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot();
         const rows=Array.from(document.querySelectorAll('#pr-voltage-metrics tr')).map(row=>({
@@ -1004,6 +1036,49 @@ async function main() {
     await fs.writeFile(path.join(output,'final-applied-power.json'),JSON.stringify(finalPulseEvidence,null,2));
     await pulseTail.close();
     await mark('final applied power sample and exact replay');
+
+    // Actual paused pulse states distinguish request, voltage effect and charged cost.
+    for(const width of [1440,390,320]){
+      const context=await browser.newContext({viewport:{width,height:1000},isMobile:width<=650,hasTouch:width<=650});
+      const surface=await context.newPage();surface.on('pageerror',error=>errors.push(error.message));
+      await surface.goto(address,{waitUntil:'networkidle'});
+      await surface.locator('#pr-intervention').selectOption('power');
+      await selectSetting(surface,'attack-mode','pulse');
+      const before=await surface.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot());
+      // Queue and pause synchronously to avoid a viewing-speed timing assumption.
+      await surface.evaluate(()=>{document.querySelector('#pr-pulse').click();document.querySelector('#pr-run').click();});
+      const queued=await surface.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot());
+      assert.equal(queued.t,0);assert.equal(queued.pendingPulses.length,1);
+      assert.deepEqual(queued.states,before.states);assert.deepEqual(queued.cumulative,before.cumulative);
+      let caption=await checkStageCaptions(surface);assert.match(caption.summary,/Queued at t 0.*Run or Step/);
+      await stepSetting(surface);
+      const first=await surface.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot());
+      assert.equal(first.t,1);assert.ok(first.lastPulseApplications.some(item=>item.appliedKw>0));
+      caption=await checkStageCaptions(surface);assert.equal(caption.summary,'Voltage changed · Cost appears next step');
+      if(width!==320){
+        const preview=await surface.locator('.pr-stage-panel').screenshot({path:path.join(output,'power-timing-'+width+'.jpg'),type:'jpeg',quality:90});
+        console.log('CLOUD_TIMING_PREVIEW_'+width+' '+preview.toString('base64'));
+        assert.equal(await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),caption.snapshot,'Timing screenshot cannot step the plant');
+      }
+      await stepSetting(surface);
+      const charged=await surface.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot());
+      const expected=await surface.evaluate(beforeCost=>{
+        const snapshot=document.querySelector('#power-response-demo').powerDemo.getSnapshot();
+        return 'Cost '+d3.format('.3~g')(beforeCost)+' → '+d3.format('.3~g')(snapshot.history.find(item=>(item.costTime??item.t-1)===1).stage.online);
+      },before.stage.online);
+      caption=await checkStageCaptions(surface);assert.equal(caption.summary,expected,'The caption uses the real following action cost, never a fabricated immediate charge');
+      await surface.reload({waitUntil:'networkidle'});
+      assert.equal(await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),JSON.stringify(charged),'Caption layout preserves exact version 13 replay');
+      await checkStageCaptions(surface);
+      const replay=await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
+      await surface.locator('#pr-intervention').selectOption('forecast');
+      caption=await checkStageCaptions(surface);assert.equal(caption.summary,'');
+      assert.equal(await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),replay,'Hiding an empty caption cannot erase power or cost');
+      for(const chart of ['pr-voltage','pr-stage'])assert.equal(await surface.locator('#'+chart+' path.data-series').count(),4);
+      await context.close();
+    }
+    await mark('queued applied and charged caption layout plus exact replay');
+
 
     // A later segment must use a pending source setting before issuing its preview.
     const segmentEvidence=[];

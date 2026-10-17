@@ -783,7 +783,15 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-18T07:00:00+08:00",
+    "branch": "cloud/refine/20261018-0700",
+    "base_commit": "b7128cafd86fbcee02aa85f84036468227d76afa",
+    "started_at": "2026-10-18T06:58:42+08:00",
+    "lease_expires_at": "2026-10-18T07:38:42+08:00",
+    "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
+    "scope": "Readable voltage and physical cost timing captions only"
+  },
   "next_focus": "Use the reviewed actual desktop and phone panel screenshots to choose one focused layout correction. The phone stage annotation is cramped and the desktop uninspected matrix panel has substantial stretched empty space. Preserve four clear panels, the existing single method key, all four costs and honest winners, recorded reliability regimes, selected link evidence and fixed deployment stages. Do not add panels or controls, infer numerical improvement, or begin a broad numerical study for style work. Require actual screenshot pixels and responsive interaction assertions for material layout changes.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
@@ -901,10 +909,10 @@
       "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and candidate workflow results for metadata recovery. Do not count metadata validation as an invocation or improvement, or promote an older branch over newer main."
     },
     "previous_renewed_metadata_verification": {
-      "commit": "95fbe28dd9f9fc5fce56f289852a666b4d8f0df0",
-      "candidate_run": 39071063996,
-      "main_run": 39071757227,
-      "pages_run": 39071756929,
+      "commit": "b7128cafd86fbcee02aa85f84036468227d76afa",
+      "candidate_run": 39074862128,
+      "main_run": 39075501525,
+      "pages_run": 39075501373,
       "result": "success independently verified before this slot"
     },
     "renewed_completion_history": {
@@ -1027,7 +1035,7 @@
     "hard_deadline": "2026-10-19T01:00:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 6,
+    "invocation_count": 7,
     "completed_count": 6,
     "runs": [
       {
@@ -1303,9 +1311,35 @@
         "pages_run": 39074189222,
         "publication": "Candidate and main validation succeeded. Ready child has tested source as its single parent and only index.html changed. Expected-main guarded promotion with force false succeeded. Pages succeeded for that exact ready version and deployment logs were read.",
         "completed_at": "2026-10-17T22:22:56.997Z"
+      },
+      {
+        "slot": "2026-10-18T07:00:00+08:00",
+        "started_at": "2026-10-18T06:58:42+08:00",
+        "status": "in_progress",
+        "candidate_branch": "cloud/refine/20261018-0700",
+        "base_commit": "b7128cafd86fbcee02aa85f84036468227d76afa",
+        "counted_completed": false,
+        "changes": [
+          "Separate power timing annotation from the stage cost label on phones, retain full voltage/cost units and raise scoped captions to readable 12 px text with accessible contrast.",
+          "Keep queued, first affected state and following-action cost timing unchanged. Add actual glyph containment checks and real queued/applied/charged state, exact replay and four-curve browser regressions at desktop, phone and 320 px widths."
+        ],
+        "tests": {
+          "status": "pending"
+        },
+        "screenshots": {
+          "pixel_review": "pending"
+        }
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "slot": "2026-10-18T07:00:00+08:00",
+      "branch": "cloud/refine/20261018-0700",
+      "base_commit": "b7128cafd86fbcee02aa85f84036468227d76afa",
+      "started_at": "2026-10-18T06:58:42+08:00",
+      "lease_expires_at": "2026-10-18T07:38:42+08:00",
+      "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
+      "scope": "Readable voltage and physical cost timing captions only"
+    },
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",

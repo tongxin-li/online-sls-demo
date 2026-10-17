@@ -34,6 +34,8 @@ Physical attacks do not automatically separate these curves. The controller has 
 
 Saved trials restore paused. Step stays paused. Advance 180 preserves attacks across automatic comparison. Experiment settings can disable the automatic transition. Playback speed changes only viewing pace, with interpolation between physical samples. Each sample still represents one second.
 
+Voltage and stage cost captions retain their full units and actual power timing text. On phones the power timing annotation uses its own line rather than competing with the cost label; an empty forecast-mode annotation adds no line. Queued, first affected state and next-action cost remain distinct. This is layout only, not a change to when physical costs are charged.
+
 Chart markers use the immutable simulation event log. A forecast setting marker appears immediately at the actual toggle time, including while paused, and distinguishes marked noisy from marked quiet. Its first eligible issue, target and reveal times do not promise that a message changed, since later toggles before issuance can replace the setting. Issued forecasts stay fixed. Power markers identify bounded requests after execution, at the first affected state time, rather than claiming every requested kW was applied. Solar events, power requests and forecast changes have separate counts in mixed groups. These annotations change no controller, sample, cost or saved replay.
 
 ## Bounded solar outage

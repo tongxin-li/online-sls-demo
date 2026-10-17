@@ -474,3 +474,13 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   .pr-controller-key { gap:6px; }
   .pr-controller-key button { min-height:44px; padding:8px 10px; }
 }
+
+/* Keep physical timing captions readable without competing with chart units. */
+.pr-stage-panel .pr-plot-label { flex-wrap:wrap; align-items:baseline; row-gap:2px; line-height:1.5; font-size:12px; }
+.pr-stage-panel .pr-plot-label>span { min-width:0; max-width:100%; overflow-wrap:anywhere; }
+.pr-stage-panel .pr-target-key { font-size:12px; }
+.pr-stage-panel #pr-pulse-summary { font-size:12px; color:#93551c; }
+.pr-stage-panel #pr-pulse-summary:empty { display:none; }
+@media(max-width:650px) {
+  .pr-stage-label #pr-pulse-summary:not(:empty) { flex-basis:100%; text-align:left; }
+}
