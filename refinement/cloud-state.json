@@ -697,7 +697,16 @@
       "direct_live_inspection": "unverified, prior denied browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-17T20:00:00+08:00",
+    "started_at": "2026-10-17T19:59:45+08:00",
+    "expires_at": "2026-10-17T20:39:45+08:00",
+    "branch": "cloud/refine/20261017-2000",
+    "base_main": "d01631a3c1502df713be55eef87f8c01e4687678",
+    "status": "candidate_validation",
+    "focus": "Repair invisible forecast metric labels and improve the source inspection card hierarchy with responsive, contrast and unchanged-state checks",
+    "lease_scope": "Candidate branch progress record. Main publication is guarded by expected current head; no unvalidated metadata is published to main."
+  },
   "next_focus": "Audit actual source and receiver inspection through history and interaction mode changes, including keyboard focus and accessible fault actions. Make a product correction only for a demonstrated behavior or causality issue. Preserve the forecasted-demand beta 4 default and seed, all four curves and full costs, frozen deployed topology, exact saved replay and conditional scientific results. Avoid noise knobs, retuning or cosmetic releases to force an advantage.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
@@ -754,10 +763,10 @@
       "job": 117310942294
     },
     "last_metadata_verification": {
-      "commit": "37aa669ed2239ada293c4fcd86db066478c01ba2",
-      "candidate_run": 39020936035,
-      "main_run": 39021334717,
-      "pages_run": 39021334639,
+      "commit": "d01631a3c1502df713be55eef87f8c01e4687678",
+      "candidate_run": 39024605710,
+      "main_run": 39025105567,
+      "pages_run": 39025105236,
       "result": "success"
     },
     "interrupted_invocation": {
@@ -775,12 +784,6 @@
       "parent_solar_run": 39014465950,
       "verified": "success",
       "recovery_branch": "cloud/refine/recover-20261017-1500"
-    },
-    "latest_completion_candidate": {
-      "slot": "2026-10-17T18:00:00+08:00",
-      "branch": "cloud/refine/20261017-1800",
-      "expected_main": "18f5271661d89b7e92c30c078275ed1396bb31d2",
-      "instruction": "Metadata-only completion candidate. Validate normally and promote only with matching current main. Count 18:00 once. Do not promote the superseded 15:00 audit."
     }
   },
   "parent_handoffs": [
@@ -813,5 +816,10 @@
       "verified": "success",
       "counts_as_scheduled_refinement": false
     }
-  ]
+  ],
+  "appearance_preference": {
+    "requested": "2026-10-17",
+    "scope": "Include coherent visual polish, typography, spacing, control hierarchy and accessible contrast alongside behavior work. Preserve scientific settings, four panels and all controls.",
+    "automation_prompt_verified": true
+  }
 }

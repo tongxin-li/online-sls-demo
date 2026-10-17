@@ -357,6 +357,68 @@ async function main() {
       }
       assert.deepEqual((await sourceState()).faults,initial.faults,'Second action repairs or corrupts back to initial state');
     };
+
+    // Cloud-only visual evidence and measured contrast for the source inspector.
+    // Preview bytes describe this runner's localhost page, never an external live URL.
+    const appearance=await browser.newPage({viewport:{width:1440,height:1000}});
+    appearance.on('pageerror',error=>errors.push(error.message));
+    await appearance.goto(address,{waitUntil:'networkidle'});
+    await appearance.locator('#pr-step').click();
+    await appearance.locator('#pr-matrix .matrix-cell[data-receiver="5"][data-source="7"]').click();
+    const appearanceBefore=await appearance.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
+    const readReadability=async()=>appearance.evaluate(()=>{
+      const rgb=value=>value.match(/[\d.]+/g).slice(0,3).map(Number);
+      const luminance=value=>rgb(value).map(channel=>{const n=channel/255;return n<=.04045?n/12.92:Math.pow((n+.055)/1.055,2.4);}).reduce((sum,n,i)=>sum+n*[.2126,.7152,.0722][i],0);
+      const background=node=>{for(let el=node;el;el=el.parentElement){const color=getComputedStyle(el).backgroundColor;if(color!=='rgba(0, 0, 0, 0)'&&color!=='transparent')return color;}return 'rgb(255, 255, 255)';};
+      const values=Array.from(document.querySelectorAll('.pr-forecast-values dt,.pr-forecast-values dd'));
+      return {viewport:innerWidth,page:document.documentElement.scrollWidth,panels:document.querySelectorAll('.pr-dashboard > .pr-panel').length,
+        items:values.map(node=>{const style=getComputedStyle(node),bg=background(node),a=luminance(style.color),b=luminance(bg),r=node.getBoundingClientRect();
+          return {text:node.textContent,color:style.color,background:bg,contrast:(Math.max(a,b)+.05)/(Math.min(a,b)+.05),fontSize:parseFloat(style.fontSize),left:r.left,right:r.right,width:r.width,scroll:node.scrollWidth,client:node.clientWidth};})};
+    });
+    const preview=async name=>{
+      await appearance.locator('#pr-forecast-observation').screenshot({path:path.join(output,name+'.png')});
+      const bytes=await appearance.locator('#pr-forecast-observation').screenshot({type:'jpeg',quality:82});
+      const encoded=bytes.toString('base64');
+      console.log('VISUAL_PREVIEW_BEGIN '+name);
+      for(let i=0;i<encoded.length;i+=6000)console.log('VISUAL_PREVIEW_DATA '+encoded.slice(i,i+6000));
+      console.log('VISUAL_PREVIEW_END '+name);
+    };
+    // Reproduce the prior background-token defect without altering the experiment.
+    const priorStyle=await appearance.addStyleTag({content:`
+      .pr-forecast-observation {padding:8px 10px;border:0;border-radius:8px}
+      .pr-forecast-values {gap:8px;margin:7px 0}
+      .pr-forecast-values > div {display:block;padding:0;background:transparent;border:0;border-radius:0}
+      .pr-forecast-values dt {font-size:11px;color:var(--muted,#6e6e73);line-height:1.4}
+      .pr-forecast-values dd {margin:3px 0;font-size:14px;font-weight:400}
+      #pr-forecast-timing {color:var(--muted-foreground);font-weight:400}
+    `});
+    const priorReadability=await readReadability();
+    assert.ok(priorReadability.items.filter((_,i)=>i%2===0).every(item=>Math.abs(item.contrast-1)<.001),'Prior labels reproduce the same color as their background');
+    await preview('source-readability-before');
+    await priorStyle.evaluate(node=>node.remove());
+    const readability=[];
+    for(const width of [1440,768,390,320]){
+      await appearance.setViewportSize({width,height:1000});
+      const measured=await readReadability();
+      assert.equal(measured.panels,4,'All four experiment panels remain');
+      assert.ok(measured.page<=width+1,'No page overflow at '+width);
+      assert.equal(measured.items.length,6);
+      for(const item of measured.items){
+        assert.ok(item.contrast>=4.5,'Readable source text contrast at '+width+' '+JSON.stringify(item));
+        assert.ok(item.fontSize>=12,'Source labels remain at least 12px');
+        assert.ok(item.left>=0&&item.right<=width+1,'Source reading stays inside the viewport');
+        assert.ok(item.scroll<=item.client+1,'Source text is not clipped at '+width+' '+JSON.stringify(item));
+      }
+      await checkForecastObservation(appearance);await checkCommandInspection(appearance);
+      assert.equal(await appearance.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),appearanceBefore,'Styling and responsive inspection preserve the complete experiment');
+      if(width!==768)await preview('source-readability-'+width);
+      await appearance.screenshot({path:path.join(output,'source-layout-'+width+'.png'),fullPage:true});
+      readability.push(measured);
+    }
+    await fs.writeFile(path.join(output,'source-readability.json'),JSON.stringify({prior:priorReadability,current:readability,unchangedExperiment:true},null,2));
+    await appearance.close();
+    await mark('source readability contrast and responsive visual evidence');
+
     // The shipped default is a complete application scenario, not an optional knob.
     const initialDefault=await page.evaluate(()=>{
       const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot();
