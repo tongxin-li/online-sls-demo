@@ -8,7 +8,7 @@
   "hard_deadline": "2026-10-18T01:45:00+08:00",
   "max_scheduled_runs": 24,
   "max_minutes_per_run": 40,
-  "completed_count": 14,
+  "completed_count": 15,
   "runs": [
     {
       "slot": "2026-10-17T02:00:00+08:00",
@@ -730,19 +730,61 @@
       "changes": [
         "Pending continuous power target protocol retained. Repository writes stopped on the parent cost button ownership hold. No publication or completion increment."
       ]
+    },
+    {
+      "slot": "2026-10-17T22:00:00+08:00",
+      "started_at": "2026-10-17T21:57:04+08:00",
+      "completed_at": "2026-10-17T14:21:56.836Z",
+      "status": "completed",
+      "counted_completed": true,
+      "changes": [
+        "Rebase the pending continuous target work onto the concise interface and stable Total cost / Difference buttons, preserving all current parent handlers and tests.",
+        "Continuous refresh replaces only the same bus held-target-v1 component so selected additional requested kW stays bounded. Existing equipment limits still bound actual power and the final request decays after stopping.",
+        "Explicit and untagged legacy pulses remain additive. The protocol marker survives automatic comparison and exact version 13 saved replay without restarting active requests.",
+        "Retain all four costs, unchanged controllers, gains, objective, limits, background, default scenario/beta/seed and sealed forecast timing."
+      ],
+      "source_commit": "ebfd36eef1cef802029d4efd33c19795038126e5",
+      "published_commit": "5bd7db2ad9305370f48e2a99bccb3199ab697068",
+      "candidate_run": 39039292743,
+      "main_run": 39039957384,
+      "pages_run": 39039956780,
+      "candidate_solar_run": 39038810514,
+      "main_solar_run": 39039957378,
+      "tests": {
+        "suites": 6,
+        "total": 197,
+        "failed": 0,
+        "build": "passed",
+        "main_consistency": "passed",
+        "browser": "Desktop and phone repeated forecast/continuous attacks, independent stop, target request equals selected kW and one continuous component per active bus, automatic comparison, legacy and new exact replay, full restart, closed disclosures, thirty live cost button switches plus held native pointer/keyboard and four curves all passed.",
+        "protocol_audit": "All 41 original, reserved and unchanged demonstration seeds, 90 sample discovery protocol regression, 23 simultaneous 150 kW targets on actions 5 through 64. Identical original forecasts/base draws across bounded and legacy protocols; all four stage and total costs retained in refinement/continuous-target-audit.json. Not a held out topology advantage claim.",
+        "reference_audit": "Candidate and published main 60-case solar outage reports exactly equal archived benchmark-stress.json, including all costs, frozen support and unchanged forecasts.",
+        "legacy": "Exact version 13 untagged stacked replay and additive explicit pulses retained; new tagged targets also replay exactly."
+      },
+      "superseded_candidate": {
+        "source": "1368621301737271d8ae326b069aa0f9b73c777e",
+        "run": 39038810519,
+        "job": 117413942529,
+        "step": "Check browser interactions and responsive layout",
+        "line": 501,
+        "error": "Old Continuous mode hint expected 150 kW per pulse; actual correctly states 150 kW target per bus. Update expected wording only and retain all assertions. Full 197 numerical/interaction tests had passed. No failed candidate publication."
+      },
+      "screenshots": {
+        "artifact_id": 12103885803,
+        "captures": [
+          "concurrent-attacks.png",
+          "concurrent-attacks-mobile.png",
+          "concise-start-desktop.png",
+          "mobile.png"
+        ],
+        "pixel_review": "unverified for this release"
+      },
+      "deployment": "GitHub Pages success",
+      "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-17T22:00:00+08:00",
-    "started_at": "2026-10-17T21:57:04+08:00",
-    "expires_at": "2026-10-17T22:37:04+08:00",
-    "branch": "cloud/refine/20261017-2200",
-    "base_main": "2634715580bb1cb50306ac9a476f8385637126ce",
-    "status": "candidate_validation",
-    "focus": "Rebased bounded continuous target intervention with exact legacy replay and current cost buttons",
-    "lease_scope": "Durable candidate branch record; main promotion requires successful cloud checks and matching expected main."
-  },
-  "next_focus": "Finish the continuous target protocol with physical bounds, explicit additive pulse behavior, exact old replay, all four full costs and preserved cost buttons. Then audit a paired announced/unannounced physical event without changing physical realizations, source errors, feedback-only trajectory, objective or limits.",
+  "active_run": null,
+  "next_focus": "Audit an identical announced and unannounced physical event, declared at least five samples ahead and entering only newly issued forecasts with original source errors. Verify identical physical realizations and feedback-only trajectories across all predefined seeds before any scenario change or advantage claim. Preserve concise main controls, cost buttons, old/new replay and all four full costs; keep appearance work compatible with closed advanced disclosures.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -819,6 +861,12 @@
       "parent_solar_run": 39014465950,
       "verified": "success",
       "recovery_branch": "cloud/refine/recover-20261017-1500"
+    },
+    "latest_completion_candidate": {
+      "slot": "2026-10-17T22:00:00+08:00",
+      "branch": "cloud/refine/20261017-2200",
+      "expected_main": "5bd7db2ad9305370f48e2a99bccb3199ab697068",
+      "instruction": "Documentation-only verified completion and full protocol evidence. Validate normally and promote only with matching current main. Count 22:00 once; 19:00 configuration and 20:00 superseded/21:00 interrupted work remain uncounted."
     }
   },
   "parent_handoffs": [

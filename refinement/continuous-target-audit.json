@@ -1,0 +1,1353 @@
+{
+  "protocol": "Bounded continuous target versus preserved additive legacy pulse protocol",
+  "scope": "discovery protocol regression, not held out algorithm ranking",
+  "settingKw": 150,
+  "activeActions": [
+    5,
+    64
+  ],
+  "samples": 90,
+  "seeds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    20261013
+  ],
+  "environment": "Forecasted-demand, beta 4, identical seed and sealed forecast stream in both protocols. This 90 sample discovery regression is not a held out topology advantage benchmark.",
+  "bounds": "Each continuous refresh replaces only the same bus held-target-v1 component. Explicit and untagged legacy pulses retain independent decay. Requested target is 150 kW at each of buses 2 through 24; existing equipment limits bound actual applied power.",
+  "shared": "All four controllers share each realized physical stream, feedback, objective and actuator limits. Their full stage and total costs remain in every result.",
+  "controllerKeys": {
+    "online": "Matrix adaptation during discovery",
+    "scalar": "Scalar adaptation during discovery",
+    "static": "Dense fixed prediction",
+    "causal": "Feedback only"
+  },
+  "limitations": [
+    "These costs compare two physical intervention protocols and do not establish a learned topology advantage.",
+    "Different physical power under the legacy stacking control explains the large total cost change.",
+    "All original and reserved seeds and the unchanged demonstration seed are retained, including unfavorable controller outcomes.",
+    "Simultaneous requests at all 23 buses are a severe diagnostic, not a realistic feeder operating recommendation."
+  ],
+  "provenance": {
+    "base_main": "2634715580bb1cb50306ac9a476f8385637126ce",
+    "source_commit": "ebfd36eef1cef802029d4efd33c19795038126e5",
+    "ready_commit": "5bd7db2ad9305370f48e2a99bccb3199ab697068",
+    "validation_run": 39039292743,
+    "solar_audit_run": 39038810514,
+    "solar_archive_match": true,
+    "main_validation_run": 39039957384,
+    "pages_run": 39039956780,
+    "main_solar_run": 39039957378,
+    "verified_at": "2026-10-17T14:21:56.836Z"
+  },
+  "results": [
+    {
+      "seed": 1,
+      "peakAppliedKw": 2956.7679925940206,
+      "legacyPeakAppliedKw": 8498.774287791271,
+      "minVoltage": 0.9597946500829839,
+      "legacyMinVoltage": 0.9095403231538448,
+      "stageCosts": {
+        "online": 14.447988602608017,
+        "scalar": 14.420637064265106,
+        "static": 14.432659514048664,
+        "causal": 14.406362455635273
+      },
+      "totalCosts": {
+        "online": 14.448293981131643,
+        "scalar": 14.42309381040211,
+        "static": 14.432995859398227,
+        "causal": 14.40882579368804
+      },
+      "legacyStageCosts": {
+        "online": 132.9829008731235,
+        "scalar": 132.93260978902458,
+        "static": 132.93712986373126,
+        "causal": 132.91023600992614
+      },
+      "legacyTotalCosts": {
+        "online": 132.98305133314707,
+        "scalar": 132.93509946992876,
+        "static": 132.9374561506656,
+        "causal": 132.91266974009065
+      }
+    },
+    {
+      "seed": 2,
+      "peakAppliedKw": 2935.5582708222855,
+      "legacyPeakAppliedKw": 8477.564566019537,
+      "minVoltage": 0.9597949648926257,
+      "legacyMinVoltage": 0.9081833659032419,
+      "stageCosts": {
+        "online": 14.63772144974066,
+        "scalar": 14.339012239538777,
+        "static": 14.347583007309884,
+        "causal": 14.315922903903653
+      },
+      "totalCosts": {
+        "online": 14.638197957599054,
+        "scalar": 14.341921976430955,
+        "static": 14.34985350777722,
+        "causal": 14.318780771495948
+      },
+      "legacyStageCosts": {
+        "online": 133.0614728420731,
+        "scalar": 132.72336721763426,
+        "static": 132.73167871463866,
+        "causal": 132.69041824852664
+      },
+      "legacyTotalCosts": {
+        "online": 133.061626763881,
+        "scalar": 132.72635497664362,
+        "static": 132.73391545697828,
+        "causal": 132.6932441514481
+      }
+    },
+    {
+      "seed": 3,
+      "peakAppliedKw": 2945.243223447052,
+      "legacyPeakAppliedKw": 8481.18516672502,
+      "minVoltage": 0.9606003078881701,
+      "legacyMinVoltage": 0.9095443618869065,
+      "stageCosts": {
+        "online": 14.586855426479081,
+        "scalar": 14.429714573183665,
+        "static": 14.438058792764044,
+        "causal": 14.408297351985498
+      },
+      "totalCosts": {
+        "online": 14.587125878394717,
+        "scalar": 14.43203748566651,
+        "static": 14.439091442997265,
+        "causal": 14.410774582150287
+      },
+      "legacyStageCosts": {
+        "online": 133.10944192102522,
+        "scalar": 133.04333849411267,
+        "static": 133.0498890697065,
+        "causal": 133.00896020271767
+      },
+      "legacyTotalCosts": {
+        "online": 133.10961696849114,
+        "scalar": 133.0453808163438,
+        "static": 133.050903986123,
+        "causal": 133.01140791777277
+      }
+    },
+    {
+      "seed": 4,
+      "peakAppliedKw": 2959.1870453324627,
+      "legacyPeakAppliedKw": 8501.193340529713,
+      "minVoltage": 0.9592237035185005,
+      "legacyMinVoltage": 0.9075784483917543,
+      "stageCosts": {
+        "online": 14.728702077894322,
+        "scalar": 14.45872960152281,
+        "static": 14.46640693872067,
+        "causal": 14.402189678990313
+      },
+      "totalCosts": {
+        "online": 14.729459707818117,
+        "scalar": 14.460244366716497,
+        "static": 14.467077179185306,
+        "causal": 14.40372530307975
+      },
+      "legacyStageCosts": {
+        "online": 133.57241554551604,
+        "scalar": 133.0428865000423,
+        "static": 133.04567341899303,
+        "causal": 132.95582520875163
+      },
+      "legacyTotalCosts": {
+        "online": 133.5737719190246,
+        "scalar": 133.04438523534154,
+        "static": 133.04633430147086,
+        "causal": 132.9573380975317
+      }
+    },
+    {
+      "seed": 5,
+      "peakAppliedKw": 2966.583220131018,
+      "legacyPeakAppliedKw": 8508.589515328269,
+      "minVoltage": 0.9600366407515949,
+      "legacyMinVoltage": 0.9093494392746784,
+      "stageCosts": {
+        "online": 14.417069888171612,
+        "scalar": 14.214113251270756,
+        "static": 14.229046294802698,
+        "causal": 14.225531385989893
+      },
+      "totalCosts": {
+        "online": 14.417409325844195,
+        "scalar": 14.215961661091768,
+        "static": 14.23025858765618,
+        "causal": 14.227340940218838
+      },
+      "legacyStageCosts": {
+        "online": 132.61380720546794,
+        "scalar": 132.34011075992916,
+        "static": 132.3520453208259,
+        "causal": 132.3625308175074
+      },
+      "legacyTotalCosts": {
+        "online": 132.61420304136206,
+        "scalar": 132.34201882204496,
+        "static": 132.3532373337959,
+        "causal": 132.36431552338937
+      }
+    },
+    {
+      "seed": 6,
+      "peakAppliedKw": 2978.2715228277675,
+      "legacyPeakAppliedKw": 8520.277818025017,
+      "minVoltage": 0.9595484027799471,
+      "legacyMinVoltage": 0.9083777213451856,
+      "stageCosts": {
+        "online": 14.640229347180384,
+        "scalar": 14.384602429943177,
+        "static": 14.390469947535504,
+        "causal": 14.353601653067024
+      },
+      "totalCosts": {
+        "online": 14.640518577844217,
+        "scalar": 14.384874728368144,
+        "static": 14.390613684397058,
+        "causal": 14.353891703407003
+      },
+      "legacyStageCosts": {
+        "online": 133.1860205481648,
+        "scalar": 132.83316232413202,
+        "static": 132.83617262426563,
+        "causal": 132.78550069298464
+      },
+      "legacyTotalCosts": {
+        "online": 133.18638564747033,
+        "scalar": 132.83341678573592,
+        "static": 132.83632179420178,
+        "causal": 132.78578154841287
+      }
+    },
+    {
+      "seed": 7,
+      "peakAppliedKw": 2936.3161594604735,
+      "legacyPeakAppliedKw": 8478.322454657724,
+      "minVoltage": 0.9601485088827308,
+      "legacyMinVoltage": 0.9096352211301707,
+      "stageCosts": {
+        "online": 14.512078246151386,
+        "scalar": 14.265595743242754,
+        "static": 14.270622767847778,
+        "causal": 14.298349948904873
+      },
+      "totalCosts": {
+        "online": 14.512227433710864,
+        "scalar": 14.266765350324986,
+        "static": 14.271639552002464,
+        "causal": 14.299519420775175
+      },
+      "legacyStageCosts": {
+        "online": 132.82290188285666,
+        "scalar": 132.57555453219507,
+        "static": 132.57737607173382,
+        "causal": 132.63493483677289
+      },
+      "legacyTotalCosts": {
+        "online": 132.82297142050547,
+        "scalar": 132.57670727128348,
+        "static": 132.57837458149763,
+        "causal": 132.63608424111888
+      }
+    },
+    {
+      "seed": 8,
+      "peakAppliedKw": 2921.305409797344,
+      "legacyPeakAppliedKw": 8463.311704994594,
+      "minVoltage": 0.9602884196434903,
+      "legacyMinVoltage": 0.9095726989509823,
+      "stageCosts": {
+        "online": 14.610344893061834,
+        "scalar": 14.543328322416695,
+        "static": 14.55114847405464,
+        "causal": 14.575629328975241
+      },
+      "totalCosts": {
+        "online": 14.610624773121595,
+        "scalar": 14.544931315936742,
+        "static": 14.552000299503497,
+        "causal": 14.577321788935482
+      },
+      "legacyStageCosts": {
+        "online": 133.4362079325985,
+        "scalar": 133.40847784431566,
+        "static": 133.4130554710232,
+        "causal": 133.46415278182997
+      },
+      "legacyTotalCosts": {
+        "online": 133.4365711509969,
+        "scalar": 133.40993646891266,
+        "static": 133.41389739402047,
+        "causal": 133.46582121330522
+      }
+    },
+    {
+      "seed": 9,
+      "peakAppliedKw": 2952.243223296366,
+      "legacyPeakAppliedKw": 8494.249518493616,
+      "minVoltage": 0.9602611064119302,
+      "legacyMinVoltage": 0.9096901406667872,
+      "stageCosts": {
+        "online": 14.456613308320723,
+        "scalar": 14.250679073885316,
+        "static": 14.259730847649971,
+        "causal": 14.244361764035423
+      },
+      "totalCosts": {
+        "online": 14.457137074892161,
+        "scalar": 14.251393394015752,
+        "static": 14.260133435301476,
+        "causal": 14.24509735852757
+      },
+      "legacyStageCosts": {
+        "online": 132.57797020746773,
+        "scalar": 132.4696695105172,
+        "static": 132.47369705877824,
+        "causal": 132.46028618643828
+      },
+      "legacyTotalCosts": {
+        "online": 132.57892901634028,
+        "scalar": 132.4703437780669,
+        "static": 132.47409305679594,
+        "causal": 132.46100666171435
+      }
+    },
+    {
+      "seed": 10,
+      "peakAppliedKw": 2975.516066062797,
+      "legacyPeakAppliedKw": 8517.522361260048,
+      "minVoltage": 0.9597117136514932,
+      "legacyMinVoltage": 0.9080585668053248,
+      "stageCosts": {
+        "online": 14.750454563645468,
+        "scalar": 14.567651586779716,
+        "static": 14.575967331882373,
+        "causal": 14.536602964132252
+      },
+      "totalCosts": {
+        "online": 14.750715289372073,
+        "scalar": 14.568609936191502,
+        "static": 14.576700122563794,
+        "causal": 14.53756161370669
+      },
+      "legacyStageCosts": {
+        "online": 133.90148186458327,
+        "scalar": 133.37272977672083,
+        "static": 133.37755375677713,
+        "causal": 133.3258969528755
+      },
+      "legacyTotalCosts": {
+        "online": 133.90215257814418,
+        "scalar": 133.3736890831747,
+        "static": 133.3782782034061,
+        "causal": 133.32683849440605
+      }
+    },
+    {
+      "seed": 11,
+      "peakAppliedKw": 2943.6985317647373,
+      "legacyPeakAppliedKw": 8485.704826961986,
+      "minVoltage": 0.9601603318643779,
+      "legacyMinVoltage": 0.908355010490168,
+      "stageCosts": {
+        "online": 14.575368847180082,
+        "scalar": 14.41265008025005,
+        "static": 14.428053118988371,
+        "causal": 14.407781281431106
+      },
+      "totalCosts": {
+        "online": 14.576043875704924,
+        "scalar": 14.41390822939617,
+        "static": 14.42957421721598,
+        "causal": 14.409033309652822
+      },
+      "legacyStageCosts": {
+        "online": 133.34836894952238,
+        "scalar": 132.93570700442106,
+        "static": 132.94553421532157,
+        "causal": 132.93347372447286
+      },
+      "legacyTotalCosts": {
+        "online": 133.3490862806437,
+        "scalar": 132.93695225874998,
+        "static": 132.94703248309654,
+        "causal": 132.9347053309581
+      }
+    },
+    {
+      "seed": 12,
+      "peakAppliedKw": 2947.639399226014,
+      "legacyPeakAppliedKw": 8489.645694423263,
+      "minVoltage": 0.9603807553326087,
+      "legacyMinVoltage": 0.9083099112509544,
+      "stageCosts": {
+        "online": 14.362636429326448,
+        "scalar": 14.215378619220662,
+        "static": 14.231222155746085,
+        "causal": 14.236249703219416
+      },
+      "totalCosts": {
+        "online": 14.363545932014574,
+        "scalar": 14.217834020568008,
+        "static": 14.232651323072538,
+        "causal": 14.238756450095895
+      },
+      "legacyStageCosts": {
+        "online": 132.7417188476743,
+        "scalar": 132.40818365258446,
+        "static": 132.411906205807,
+        "causal": 132.44620714491464
+      },
+      "legacyTotalCosts": {
+        "online": 132.7421907017288,
+        "scalar": 132.41052073919593,
+        "static": 132.41331387317373,
+        "causal": 132.44868412740456
+      }
+    },
+    {
+      "seed": 13,
+      "peakAppliedKw": 2935.424228466265,
+      "legacyPeakAppliedKw": 8477.430523663515,
+      "minVoltage": 0.9593585882066251,
+      "legacyMinVoltage": 0.908299629665863,
+      "stageCosts": {
+        "online": 14.72924955409263,
+        "scalar": 14.544874504960024,
+        "static": 14.557229870788321,
+        "causal": 14.514570344252888
+      },
+      "totalCosts": {
+        "online": 14.72950020715268,
+        "scalar": 14.545352826207756,
+        "static": 14.557587543323177,
+        "causal": 14.515048372311465
+      },
+      "legacyStageCosts": {
+        "online": 133.68410722442175,
+        "scalar": 133.2991385643567,
+        "static": 133.30474310151132,
+        "causal": 133.25174729749887
+      },
+      "legacyTotalCosts": {
+        "online": 133.68434753714283,
+        "scalar": 133.29960760572058,
+        "static": 133.30509053831244,
+        "causal": 133.2522132645348
+      }
+    },
+    {
+      "seed": 14,
+      "peakAppliedKw": 2986.830652232983,
+      "legacyPeakAppliedKw": 8528.836947430234,
+      "minVoltage": 0.9601053647781539,
+      "legacyMinVoltage": 0.9079711975864652,
+      "stageCosts": {
+        "online": 14.675797878072888,
+        "scalar": 14.377576497314164,
+        "static": 14.392334260659572,
+        "causal": 14.398148078786692
+      },
+      "totalCosts": {
+        "online": 14.676359281228525,
+        "scalar": 14.378056619490858,
+        "static": 14.392503612658816,
+        "causal": 14.398631114055163
+      },
+      "legacyStageCosts": {
+        "online": 133.304880995655,
+        "scalar": 132.86784282273342,
+        "static": 132.8725729949036,
+        "causal": 132.91023061530342
+      },
+      "legacyTotalCosts": {
+        "online": 133.30573079521022,
+        "scalar": 132.86832332301347,
+        "static": 132.87273752935175,
+        "causal": 132.91070202533217
+      }
+    },
+    {
+      "seed": 15,
+      "peakAppliedKw": 2949.245486655303,
+      "legacyPeakAppliedKw": 8491.251781852554,
+      "minVoltage": 0.9603660046476837,
+      "legacyMinVoltage": 0.9093148564308688,
+      "stageCosts": {
+        "online": 14.669921072641644,
+        "scalar": 14.47982150933642,
+        "static": 14.490426392483,
+        "causal": 14.483393242784414
+      },
+      "totalCosts": {
+        "online": 14.670239248916763,
+        "scalar": 14.480912608297135,
+        "static": 14.490942350165907,
+        "causal": 14.484538540489416
+      },
+      "legacyStageCosts": {
+        "online": 133.4099737696259,
+        "scalar": 133.16695067360857,
+        "static": 133.1720723107385,
+        "causal": 133.17496992980304
+      },
+      "legacyTotalCosts": {
+        "online": 133.41058471016598,
+        "scalar": 133.1679496954366,
+        "static": 133.17257941427638,
+        "causal": 133.17609570613945
+      }
+    },
+    {
+      "seed": 16,
+      "peakAppliedKw": 2932.0894583775253,
+      "legacyPeakAppliedKw": 8474.095753574777,
+      "minVoltage": 0.960290182924471,
+      "legacyMinVoltage": 0.9088960043072016,
+      "stageCosts": {
+        "online": 14.643732391739633,
+        "scalar": 14.591502547995193,
+        "static": 14.599986193433883,
+        "causal": 14.608035427681468
+      },
+      "totalCosts": {
+        "online": 14.64420525835963,
+        "scalar": 14.592373427781705,
+        "static": 14.600266373129745,
+        "causal": 14.608940846633681
+      },
+      "legacyStageCosts": {
+        "online": 133.58608482112245,
+        "scalar": 133.55090908381496,
+        "static": 133.55825974955889,
+        "causal": 133.57907507819732
+      },
+      "legacyTotalCosts": {
+        "online": 133.58674106638748,
+        "scalar": 133.55174133993066,
+        "static": 133.5585393935202,
+        "causal": 133.579963498959
+      }
+    },
+    {
+      "seed": 17,
+      "peakAppliedKw": 2951.2922017473343,
+      "legacyPeakAppliedKw": 8493.298496944586,
+      "minVoltage": 0.9598534166725765,
+      "legacyMinVoltage": 0.9093589465518651,
+      "stageCosts": {
+        "online": 14.612237832530825,
+        "scalar": 14.449988319620084,
+        "static": 14.4615202223858,
+        "causal": 14.449082886990745
+      },
+      "totalCosts": {
+        "online": 14.612657806862897,
+        "scalar": 14.450834637809107,
+        "static": 14.462187291930702,
+        "causal": 14.449939042405324
+      },
+      "legacyStageCosts": {
+        "online": 133.16416927592712,
+        "scalar": 133.07200437721932,
+        "static": 133.07427037277387,
+        "causal": 133.07161680920018
+      },
+      "legacyTotalCosts": {
+        "online": 133.1649213382475,
+        "scalar": 133.07282178630044,
+        "static": 133.0749230768884,
+        "causal": 133.07245584794737
+      }
+    },
+    {
+      "seed": 18,
+      "peakAppliedKw": 2958.4802142940207,
+      "legacyPeakAppliedKw": 8500.48650949127,
+      "minVoltage": 0.9605697607488036,
+      "legacyMinVoltage": 0.909673949282311,
+      "stageCosts": {
+        "online": 14.266703795769411,
+        "scalar": 14.139517218001485,
+        "static": 14.144478948349603,
+        "causal": 14.151588410518146
+      },
+      "totalCosts": {
+        "online": 14.270880513794456,
+        "scalar": 14.14055812063683,
+        "static": 14.14583451430426,
+        "causal": 14.152625343929733
+      },
+      "legacyStageCosts": {
+        "online": 132.36819745251918,
+        "scalar": 132.1122532479753,
+        "static": 132.11303748107787,
+        "causal": 132.13323714532663
+      },
+      "legacyTotalCosts": {
+        "online": 132.37711870778452,
+        "scalar": 132.11327858174639,
+        "static": 132.11437134565088,
+        "causal": 132.134255962368
+      }
+    },
+    {
+      "seed": 19,
+      "peakAppliedKw": 2953.903492148279,
+      "legacyPeakAppliedKw": 8495.90978734553,
+      "minVoltage": 0.9594803903153146,
+      "legacyMinVoltage": 0.9094386191495387,
+      "stageCosts": {
+        "online": 14.444402861470785,
+        "scalar": 14.36687018254551,
+        "static": 14.37978459954089,
+        "causal": 14.32972403508482
+      },
+      "totalCosts": {
+        "online": 14.444664205698476,
+        "scalar": 14.36933513324337,
+        "static": 14.38167850449851,
+        "causal": 14.332169064315492
+      },
+      "legacyStageCosts": {
+        "online": 132.8346160946609,
+        "scalar": 132.79614327953797,
+        "static": 132.80487096020383,
+        "causal": 132.74083929712188
+      },
+      "legacyTotalCosts": {
+        "online": 132.8348961175,
+        "scalar": 132.79862652966955,
+        "static": 132.80673949031092,
+        "causal": 132.7432553670129
+      }
+    },
+    {
+      "seed": 20,
+      "peakAppliedKw": 2946.2254243891666,
+      "legacyPeakAppliedKw": 8488.231719586416,
+      "minVoltage": 0.9602843767045932,
+      "legacyMinVoltage": 0.9094552210084406,
+      "stageCosts": {
+        "online": 14.695413316462602,
+        "scalar": 14.50893541573468,
+        "static": 14.522232618695536,
+        "causal": 14.513712901802219
+      },
+      "totalCosts": {
+        "online": 14.699280182968073,
+        "scalar": 14.510592721429468,
+        "static": 14.522749637778626,
+        "causal": 14.515315759763736
+      },
+      "legacyStageCosts": {
+        "online": 133.5120304366782,
+        "scalar": 133.2819693448256,
+        "static": 133.28270317602167,
+        "causal": 133.29199841697692
+      },
+      "legacyTotalCosts": {
+        "online": 133.51716902595194,
+        "scalar": 133.28374663245953,
+        "static": 133.2832075132401,
+        "causal": 133.29357743267022
+      }
+    },
+    {
+      "seed": 21,
+      "peakAppliedKw": 2949.332730684213,
+      "legacyPeakAppliedKw": 8491.339025881463,
+      "minVoltage": 0.9601420299164838,
+      "legacyMinVoltage": 0.9092587265395379,
+      "stageCosts": {
+        "online": 14.574000985816864,
+        "scalar": 14.46663046803544,
+        "static": 14.47399426082391,
+        "causal": 14.476661864543008
+      },
+      "totalCosts": {
+        "online": 14.574455467712156,
+        "scalar": 14.46732010020985,
+        "static": 14.474543898604114,
+        "causal": 14.477352332966646
+      },
+      "legacyStageCosts": {
+        "online": 133.1984834932701,
+        "scalar": 133.13957258906743,
+        "static": 133.1453149680448,
+        "causal": 133.15639443647657
+      },
+      "legacyTotalCosts": {
+        "online": 133.199625594743,
+        "scalar": 133.1402552806893,
+        "static": 133.14585740795363,
+        "causal": 133.15707117304453
+      }
+    },
+    {
+      "seed": 22,
+      "peakAppliedKw": 2956.649259661046,
+      "legacyPeakAppliedKw": 8498.655554858296,
+      "minVoltage": 0.9605215713320033,
+      "legacyMinVoltage": 0.9092896467992971,
+      "stageCosts": {
+        "online": 14.624074464668562,
+        "scalar": 14.514294128998285,
+        "static": 14.520157326475971,
+        "causal": 14.522332924682523
+      },
+      "totalCosts": {
+        "online": 14.624876586717402,
+        "scalar": 14.51532511539268,
+        "static": 14.521591287191056,
+        "causal": 14.523365627183404
+      },
+      "legacyStageCosts": {
+        "online": 133.37265740541974,
+        "scalar": 133.29747525812067,
+        "static": 133.3022450011707,
+        "causal": 133.31140633224817
+      },
+      "legacyTotalCosts": {
+        "online": 133.37383299142627,
+        "scalar": 133.29848746879642,
+        "static": 133.30365753962792,
+        "causal": 133.31242225150538
+      }
+    },
+    {
+      "seed": 23,
+      "peakAppliedKw": 2942.4057118155024,
+      "legacyPeakAppliedKw": 8484.412007012752,
+      "minVoltage": 0.960396717435081,
+      "legacyMinVoltage": 0.9095124906081455,
+      "stageCosts": {
+        "online": 14.72608462823346,
+        "scalar": 14.401937130175064,
+        "static": 14.403549280645597,
+        "causal": 14.426198269104189
+      },
+      "totalCosts": {
+        "online": 14.726408641571869,
+        "scalar": 14.403539747718721,
+        "static": 14.405326037385171,
+        "causal": 14.427806460518694
+      },
+      "legacyStageCosts": {
+        "online": 133.22361267833534,
+        "scalar": 132.94430719652263,
+        "static": 132.94492979984082,
+        "causal": 132.98560185424734
+      },
+      "legacyTotalCosts": {
+        "online": 133.22407497328592,
+        "scalar": 132.94587229331788,
+        "static": 132.94668167705504,
+        "causal": 132.98718667289086
+      }
+    },
+    {
+      "seed": 24,
+      "peakAppliedKw": 2928.2147567679176,
+      "legacyPeakAppliedKw": 8470.221051965169,
+      "minVoltage": 0.9595199758687663,
+      "legacyMinVoltage": 0.9088701737148697,
+      "stageCosts": {
+        "online": 14.76816548386515,
+        "scalar": 14.633500526510195,
+        "static": 14.635753539568015,
+        "causal": 14.595023484994964
+      },
+      "totalCosts": {
+        "online": 14.768821282963682,
+        "scalar": 14.634704772214812,
+        "static": 14.636441172009881,
+        "causal": 14.596261294269107
+      },
+      "legacyStageCosts": {
+        "online": 133.69075126276417,
+        "scalar": 133.58095368586547,
+        "static": 133.58029074700423,
+        "causal": 133.52186447141375
+      },
+      "legacyTotalCosts": {
+        "online": 133.69172468969097,
+        "scalar": 133.58209181947933,
+        "static": 133.58096400282076,
+        "causal": 133.5230819138665
+      }
+    },
+    {
+      "seed": 25,
+      "peakAppliedKw": 2932.2217765266855,
+      "legacyPeakAppliedKw": 8474.228071723935,
+      "minVoltage": 0.9600944840432979,
+      "legacyMinVoltage": 0.9096075689693428,
+      "stageCosts": {
+        "online": 14.404780931070038,
+        "scalar": 14.323551216289244,
+        "static": 14.333246840409775,
+        "causal": 14.342011288446207
+      },
+      "totalCosts": {
+        "online": 14.405549595714755,
+        "scalar": 14.324910632055943,
+        "static": 14.333944140129693,
+        "causal": 14.343396226830052
+      },
+      "legacyStageCosts": {
+        "online": 132.7397301078568,
+        "scalar": 132.68140741138967,
+        "static": 132.68448133904585,
+        "causal": 132.71591746888254
+      },
+      "legacyTotalCosts": {
+        "online": 132.74055609173917,
+        "scalar": 132.68271852560915,
+        "static": 132.6851634548172,
+        "causal": 132.71728075551871
+      }
+    },
+    {
+      "seed": 26,
+      "peakAppliedKw": 2949.5038963492293,
+      "legacyPeakAppliedKw": 8491.51019154648,
+      "minVoltage": 0.9608467803196794,
+      "legacyMinVoltage": 0.9095736827297942,
+      "stageCosts": {
+        "online": 14.460020427614063,
+        "scalar": 14.39354258010008,
+        "static": 14.40523891946903,
+        "causal": 14.397334279615787
+      },
+      "totalCosts": {
+        "online": 14.460128955132928,
+        "scalar": 14.394234631002664,
+        "static": 14.405492899544857,
+        "causal": 14.398084994674853
+      },
+      "legacyStageCosts": {
+        "online": 133.0080947064379,
+        "scalar": 132.96151679983603,
+        "static": 132.97101697613493,
+        "causal": 132.97339096154124
+      },
+      "legacyTotalCosts": {
+        "online": 133.0083832639844,
+        "scalar": 132.9621042207734,
+        "static": 132.97126687878878,
+        "causal": 132.9741258960214
+      }
+    },
+    {
+      "seed": 27,
+      "peakAppliedKw": 2925.064731167578,
+      "legacyPeakAppliedKw": 8467.071026364827,
+      "minVoltage": 0.9598965493855272,
+      "legacyMinVoltage": 0.9094421751892099,
+      "stageCosts": {
+        "online": 14.610787015546912,
+        "scalar": 14.469710382267388,
+        "static": 14.472621851931716,
+        "causal": 14.448625501093336
+      },
+      "totalCosts": {
+        "online": 14.61142770228561,
+        "scalar": 14.47132217163976,
+        "static": 14.473135203425656,
+        "causal": 14.450296572694864
+      },
+      "legacyStageCosts": {
+        "online": 133.30236837410646,
+        "scalar": 133.10348446924533,
+        "static": 133.10275761904703,
+        "causal": 133.07132202966667
+      },
+      "legacyTotalCosts": {
+        "online": 133.30283198560844,
+        "scalar": 133.10499924174997,
+        "static": 133.10326077657712,
+        "causal": 133.072970010244
+      }
+    },
+    {
+      "seed": 28,
+      "peakAppliedKw": 2960.4116553982853,
+      "legacyPeakAppliedKw": 8502.417950595536,
+      "minVoltage": 0.9593111520313414,
+      "legacyMinVoltage": 0.9097151474868177,
+      "stageCosts": {
+        "online": 14.614781819199777,
+        "scalar": 14.474707447382935,
+        "static": 14.483489686917306,
+        "causal": 14.438680733658824
+      },
+      "totalCosts": {
+        "online": 14.615435193127189,
+        "scalar": 14.476626640556752,
+        "static": 14.486208168068767,
+        "causal": 14.44057243940812
+      },
+      "legacyStageCosts": {
+        "online": 133.28365512627977,
+        "scalar": 133.10906185305265,
+        "static": 133.11557395531372,
+        "causal": 133.05140455414872
+      },
+      "legacyTotalCosts": {
+        "online": 133.2842968021598,
+        "scalar": 133.11101130922154,
+        "static": 133.1182615283047,
+        "causal": 133.05327149330327
+      }
+    },
+    {
+      "seed": 29,
+      "peakAppliedKw": 2963.867576808809,
+      "legacyPeakAppliedKw": 8505.87387200606,
+      "minVoltage": 0.9598385963889046,
+      "legacyMinVoltage": 0.9094952013126354,
+      "stageCosts": {
+        "online": 14.443305549769052,
+        "scalar": 14.283942031457885,
+        "static": 14.29678226978177,
+        "causal": 14.261026657929074
+      },
+      "totalCosts": {
+        "online": 14.443622842496747,
+        "scalar": 14.286441876663643,
+        "static": 14.298314477600211,
+        "causal": 14.263521434392356
+      },
+      "legacyStageCosts": {
+        "online": 132.64318754357973,
+        "scalar": 132.50430609540163,
+        "static": 132.50621671338308,
+        "causal": 132.47018412351022
+      },
+      "legacyTotalCosts": {
+        "online": 132.64335798926462,
+        "scalar": 132.50681081255084,
+        "static": 132.5077270186309,
+        "causal": 132.4726494121625
+      }
+    },
+    {
+      "seed": 30,
+      "peakAppliedKw": 2962.626713997504,
+      "legacyPeakAppliedKw": 8504.633009194755,
+      "minVoltage": 0.9599449181153842,
+      "legacyMinVoltage": 0.9095882728578847,
+      "stageCosts": {
+        "online": 14.452754065716446,
+        "scalar": 14.262422187614334,
+        "static": 14.276327650636569,
+        "causal": 14.260987958056317
+      },
+      "totalCosts": {
+        "online": 14.455705395294439,
+        "scalar": 14.263461861303464,
+        "static": 14.277058443083144,
+        "causal": 14.262023090585833
+      },
+      "legacyStageCosts": {
+        "online": 132.6326335875927,
+        "scalar": 132.50186797061497,
+        "static": 132.51284175688752,
+        "causal": 132.50128719958843
+      },
+      "legacyTotalCosts": {
+        "online": 132.63992982866495,
+        "scalar": 132.50290583007146,
+        "static": 132.51355711505906,
+        "causal": 132.50230455685724
+      }
+    },
+    {
+      "seed": 31,
+      "peakAppliedKw": 2950.627521708414,
+      "legacyPeakAppliedKw": 8492.633816905663,
+      "minVoltage": 0.9600901817023254,
+      "legacyMinVoltage": 0.9089593805194992,
+      "stageCosts": {
+        "online": 14.594268578201305,
+        "scalar": 14.438657101061827,
+        "static": 14.45375935232684,
+        "causal": 14.425584035553184
+      },
+      "totalCosts": {
+        "online": 14.59457420661946,
+        "scalar": 14.440325565877348,
+        "static": 14.454559151782833,
+        "causal": 14.427225225281665
+      },
+      "legacyStageCosts": {
+        "online": 133.0967725215323,
+        "scalar": 133.00475100483567,
+        "static": 133.01377877932282,
+        "causal": 132.98583057295173
+      },
+      "legacyTotalCosts": {
+        "online": 133.0968772425745,
+        "scalar": 133.00646257129702,
+        "static": 133.01456335159588,
+        "causal": 132.9874482650441
+      }
+    },
+    {
+      "seed": 32,
+      "peakAppliedKw": 2946.676937168742,
+      "legacyPeakAppliedKw": 8488.683232365993,
+      "minVoltage": 0.9606686983685785,
+      "legacyMinVoltage": 0.9092593681763006,
+      "stageCosts": {
+        "online": 14.600844147695478,
+        "scalar": 14.525199222884462,
+        "static": 14.548574677008913,
+        "causal": 14.545474782400463
+      },
+      "totalCosts": {
+        "online": 14.601867278602239,
+        "scalar": 14.525810764404792,
+        "static": 14.548976555518598,
+        "causal": 14.546100000807758
+      },
+      "legacyStageCosts": {
+        "online": 133.41912499925206,
+        "scalar": 133.35630555999003,
+        "static": 133.36062094360204,
+        "causal": 133.39280096533136
+      },
+      "legacyTotalCosts": {
+        "online": 133.4219796455622,
+        "scalar": 133.35688373867646,
+        "static": 133.36101189280342,
+        "causal": 133.39341198990462
+      }
+    },
+    {
+      "seed": 33,
+      "peakAppliedKw": 2949.6174887636275,
+      "legacyPeakAppliedKw": 8491.623783960878,
+      "minVoltage": 0.9597227007051459,
+      "legacyMinVoltage": 0.9094214186370679,
+      "stageCosts": {
+        "online": 14.76247350346747,
+        "scalar": 14.52760942961545,
+        "static": 14.535535414739176,
+        "causal": 14.511591054220068
+      },
+      "totalCosts": {
+        "online": 14.762893258138563,
+        "scalar": 14.52908825163206,
+        "static": 14.538059880635412,
+        "causal": 14.513103402060814
+      },
+      "legacyStageCosts": {
+        "online": 133.41112784452704,
+        "scalar": 133.26540893598033,
+        "static": 133.26923576200556,
+        "causal": 133.24727561576555
+      },
+      "legacyTotalCosts": {
+        "online": 133.4116713479451,
+        "scalar": 133.26678287340354,
+        "static": 133.27173121078653,
+        "causal": 133.2487652117635
+      }
+    },
+    {
+      "seed": 34,
+      "peakAppliedKw": 2939.558802576928,
+      "legacyPeakAppliedKw": 8481.565097774177,
+      "minVoltage": 0.9596470860415861,
+      "legacyMinVoltage": 0.9092881832160278,
+      "stageCosts": {
+        "online": 14.6518554796182,
+        "scalar": 14.592097765235534,
+        "static": 14.610386492285068,
+        "causal": 14.562249916956407
+      },
+      "totalCosts": {
+        "online": 14.652419475943924,
+        "scalar": 14.595063021135571,
+        "static": 14.611186847286156,
+        "causal": 14.565262171011486
+      },
+      "legacyStageCosts": {
+        "online": 133.57802348330256,
+        "scalar": 133.52369238098527,
+        "static": 133.53390091240632,
+        "causal": 133.4754515715093
+      },
+      "legacyTotalCosts": {
+        "online": 133.57827374615886,
+        "scalar": 133.5265809127083,
+        "static": 133.53468633448273,
+        "causal": 133.4784309547721
+      }
+    },
+    {
+      "seed": 35,
+      "peakAppliedKw": 2975.7360694799136,
+      "legacyPeakAppliedKw": 8517.742364677164,
+      "minVoltage": 0.9603464746570084,
+      "legacyMinVoltage": 0.90945284658571,
+      "stageCosts": {
+        "online": 14.745924065188794,
+        "scalar": 14.477257412111124,
+        "static": 14.481363764665728,
+        "causal": 14.483571202295703
+      },
+      "totalCosts": {
+        "online": 14.746243452769354,
+        "scalar": 14.478992411146088,
+        "static": 14.483409377475382,
+        "causal": 14.48531266140616
+      },
+      "legacyStageCosts": {
+        "online": 133.38966785117995,
+        "scalar": 133.17051117031875,
+        "static": 133.17212047110607,
+        "causal": 133.18836004153258
+      },
+      "legacyTotalCosts": {
+        "online": 133.38995945564432,
+        "scalar": 133.1722014096388,
+        "static": 133.17414047507478,
+        "causal": 133.19007758803116
+      }
+    },
+    {
+      "seed": 36,
+      "peakAppliedKw": 2961.142973488115,
+      "legacyPeakAppliedKw": 8503.149268685363,
+      "minVoltage": 0.95951096644748,
+      "legacyMinVoltage": 0.9082209353674944,
+      "stageCosts": {
+        "online": 14.720779007994436,
+        "scalar": 14.569904737569495,
+        "static": 14.581110779667734,
+        "causal": 14.533180646406885
+      },
+      "totalCosts": {
+        "online": 14.721143518955136,
+        "scalar": 14.57134682941175,
+        "static": 14.582453573260652,
+        "causal": 14.534648374385526
+      },
+      "legacyStageCosts": {
+        "online": 133.81481038932705,
+        "scalar": 133.36822295018487,
+        "static": 133.37130290677908,
+        "causal": 133.31265900528996
+      },
+      "legacyTotalCosts": {
+        "online": 133.81512646697593,
+        "scalar": 133.36960333196075,
+        "static": 133.37262866717282,
+        "causal": 133.31410498647907
+      }
+    },
+    {
+      "seed": 37,
+      "peakAppliedKw": 2955.007332484912,
+      "legacyPeakAppliedKw": 8497.013627682161,
+      "minVoltage": 0.9602757851587338,
+      "legacyMinVoltage": 0.909069099703184,
+      "stageCosts": {
+        "online": 14.455333356337588,
+        "scalar": 14.390906944161863,
+        "static": 14.404253140892164,
+        "causal": 14.432046863948083
+      },
+      "totalCosts": {
+        "online": 14.455559075440643,
+        "scalar": 14.391484382348082,
+        "static": 14.40468211508736,
+        "causal": 14.432634248136383
+      },
+      "legacyStageCosts": {
+        "online": 132.96696471358155,
+        "scalar": 132.94011864391442,
+        "static": 132.9485757386705,
+        "causal": 133.00855490777815
+      },
+      "legacyTotalCosts": {
+        "online": 132.9673027529698,
+        "scalar": 132.94066932868708,
+        "static": 132.94899344349037,
+        "causal": 133.00912916798862
+      }
+    },
+    {
+      "seed": 38,
+      "peakAppliedKw": 2942.5067137373185,
+      "legacyPeakAppliedKw": 8484.513008934568,
+      "minVoltage": 0.9605943314207386,
+      "legacyMinVoltage": 0.9092877552983866,
+      "stageCosts": {
+        "online": 14.64737048941659,
+        "scalar": 14.545769334934707,
+        "static": 14.548248971461224,
+        "causal": 14.570528255024245
+      },
+      "totalCosts": {
+        "online": 14.647583676569006,
+        "scalar": 14.54792666655996,
+        "static": 14.550827288441589,
+        "causal": 14.572695883495747
+      },
+      "legacyStageCosts": {
+        "online": 133.5954238107849,
+        "scalar": 133.4483621793684,
+        "static": 133.44496602249413,
+        "causal": 133.49408142368546
+      },
+      "legacyTotalCosts": {
+        "online": 133.5956494998862,
+        "scalar": 133.45046528854456,
+        "static": 133.4475143066472,
+        "causal": 133.49622163247773
+      }
+    },
+    {
+      "seed": 39,
+      "peakAppliedKw": 2959.183718611331,
+      "legacyPeakAppliedKw": 8501.19001380858,
+      "minVoltage": 0.9589656068333555,
+      "legacyMinVoltage": 0.9085513971869715,
+      "stageCosts": {
+        "online": 14.66257208701544,
+        "scalar": 14.465981724551034,
+        "static": 14.47560328279535,
+        "causal": 14.424136804354767
+      },
+      "totalCosts": {
+        "online": 14.663127135825683,
+        "scalar": 14.466900595228822,
+        "static": 14.476142100536956,
+        "causal": 14.425090946793057
+      },
+      "legacyStageCosts": {
+        "online": 133.5482641555529,
+        "scalar": 133.00393948990742,
+        "static": 133.0059300329289,
+        "causal": 132.93944175007096
+      },
+      "legacyTotalCosts": {
+        "online": 133.54932710845085,
+        "scalar": 133.00478849096194,
+        "static": 133.00645735810502,
+        "causal": 132.94037784092876
+      }
+    },
+    {
+      "seed": 40,
+      "peakAppliedKw": 2944.892508629194,
+      "legacyPeakAppliedKw": 8486.898803826443,
+      "minVoltage": 0.9602445465502568,
+      "legacyMinVoltage": 0.9095020390897698,
+      "stageCosts": {
+        "online": 14.598843827756099,
+        "scalar": 14.454116345930442,
+        "static": 14.464363854515936,
+        "causal": 14.451051501086889
+      },
+      "totalCosts": {
+        "online": 14.599214190451661,
+        "scalar": 14.455086397549952,
+        "static": 14.465073950206223,
+        "causal": 14.452004639036096
+      },
+      "legacyStageCosts": {
+        "online": 133.29092381170716,
+        "scalar": 133.07773848873686,
+        "static": 133.08936801308835,
+        "causal": 133.0742559097642
+      },
+      "legacyTotalCosts": {
+        "online": 133.2915798287675,
+        "scalar": 133.07872762990513,
+        "static": 133.09006269200324,
+        "causal": 133.07519108258066
+      }
+    },
+    {
+      "seed": 20261013,
+      "peakAppliedKw": 2948.9517502211625,
+      "legacyPeakAppliedKw": 8490.958045418412,
+      "minVoltage": 0.9600818994239739,
+      "legacyMinVoltage": 0.909362031400669,
+      "stageCosts": {
+        "online": 14.656980018384495,
+        "scalar": 14.4680091160842,
+        "static": 14.476261897771593,
+        "causal": 14.492059540495816
+      },
+      "totalCosts": {
+        "online": 14.657166304531097,
+        "scalar": 14.469317136189423,
+        "static": 14.477363366021548,
+        "causal": 14.493366564670223
+      },
+      "legacyStageCosts": {
+        "online": 133.33852005047018,
+        "scalar": 133.16129251083262,
+        "static": 133.16371777796525,
+        "causal": 133.20232139758014
+      },
+      "legacyTotalCosts": {
+        "online": 133.33903486565526,
+        "scalar": 133.16258763327622,
+        "static": 133.16480107507334,
+        "causal": 133.20360726986655
+      }
+    }
+  ]
+}
