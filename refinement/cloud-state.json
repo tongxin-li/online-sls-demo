@@ -8,7 +8,7 @@
   "hard_deadline": "2026-10-18T01:45:00+08:00",
   "max_scheduled_runs": 24,
   "max_minutes_per_run": 40,
-  "completed_count": 12,
+  "completed_count": 13,
   "runs": [
     {
       "slot": "2026-10-17T02:00:00+08:00",
@@ -592,36 +592,65 @@
       },
       "deployment": "GitHub Pages success",
       "direct_live_inspection": "unverified, prior denied browser access not retried"
+    },
+    {
+      "slot": "2026-10-17T17:00:00+08:00",
+      "started_at": "2026-10-17T16:59:38+08:00",
+      "completed_at": "2026-10-17T09:23:09.061Z",
+      "status": "completed",
+      "changes": [
+        "Preserve the final actually applied attack power sample after its request expires, instead of reporting idle and hiding the badge one sample early.",
+        "Use actual applications when restricting full power badges to the selected disturbed bus, including mixed expired and unexpired requests.",
+        "Regress homes, solar and battery expiry, selection and interaction invariance, exact version 13 replay, the next sample clearing state, and mobile selection with another disturbed bus. Physical engine and all scientific parameters unchanged."
+      ],
+      "source_commit": "d26cdbe3566b4473aabfbacb9e8934ff228ec4f0",
+      "published_commit": "5431056691c19511f72b835925019fb91f7f9356",
+      "candidate_run": 39020045746,
+      "main_run": 39020489209,
+      "pages_run": 39020488791,
+      "tests": {
+        "suites": 6,
+        "total": 188,
+        "failed": 0,
+        "build": "passed",
+        "main_consistency": "passed",
+        "interaction": "Homes, solar and battery final executed application remains visible after all requests for that bus expire. Selection and mode switches preserve states/costs/events; exact replay and next sample with no application clears the status. Existing continuous feedback expiry test now checks actual application before declaring idle.",
+        "browser": "Desktop and mobile final power badge equals actual bounded kW, selected full badge stays unique with another unexpired bus, mode switches/reload preserve exact physical states/costs/events, next sample clears actual application. Existing repeated forecast/power attacks, automatic comparison, thirty metric switches, all four curves and mobile layout pass.",
+        "benchmarks": "Not rerun. Simulation engine, scenario, controllers, gain synthesis, objective, feedback, limits, noise/default seed and scientific parameters are unchanged."
+      },
+      "regression_before_fix": {
+        "source": "af188450b346cc7cec2bb59f0d6a358751afc93c",
+        "run": 39019571012,
+        "job": 117358501364,
+        "step": "Test controllers and interactions",
+        "test": "the final applied pulse sample stays visible after its request expires and replays exactly",
+        "expected": "paused",
+        "actual": "idle",
+        "published": false
+      },
+      "superseded_candidate": {
+        "source": "aac4c7784cb76178725e33f5467376f3282f5bbc",
+        "run": 39019863716,
+        "job": 117359361781,
+        "step": "Test controllers and interactions",
+        "test": "attack feedback separates continuous requests from fading and paused physical disturbances",
+        "error": "Older test equated request expiry with the current physical application ending. Preserve the final application and assert idle only after the next sample has no applied request. New homes/solar/battery expiry regression passes."
+      },
+      "screenshots": {
+        "artifact_id": 12096302976,
+        "additional_captures": [
+          "final-applied-power.png",
+          "final-applied-power-mobile.png"
+        ],
+        "machine_evidence": "final-applied-power.json",
+        "pixel_review": "unverified"
+      },
+      "deployment": "GitHub Pages success",
+      "direct_live_inspection": "unverified, prior denied browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-17T17:00:00+08:00",
-    "started_at": "2026-10-17T16:59:38+08:00",
-    "expires_at": "2026-10-17T17:39:38+08:00",
-    "base_commit": "712cf4f520663d20bef06e5db7f093396933d4ad",
-    "branch": "cloud/refine/20261017-1700",
-    "focus": "Audit real attack usability and applied power with unchanged scientific parameters",
-    "diagnosed_issue": "The final applied pulse is removed from the display when its request expires before the snapshot, even though current lastPulseApplications still contains its actual bounded power.",
-    "expected_regression_failure": {
-      "source": "af188450b346cc7cec2bb59f0d6a358751afc93c",
-      "run": 39019571012,
-      "job": 117358501364,
-      "step": "Test controllers and interactions",
-      "test": "the final applied pulse sample stays visible after its request expires and replays exactly",
-      "expected": "paused",
-      "actual": "idle",
-      "published": false
-    },
-    "superseded_candidate": {
-      "source": "aac4c7784cb76178725e33f5467376f3282f5bbc",
-      "run": 39019863716,
-      "job": 117359361781,
-      "step": "Test controllers and interactions",
-      "test": "attack feedback separates continuous requests from fading and paused physical disturbances",
-      "error": "Older test equated request expiry with the current physical application ending. Preserve the final application and assert idle only after the next sample has no applied request. New homes/solar/battery expiry regression passes."
-    }
-  },
-  "next_focus": "Audit actual attack usability and selected-bus applied power through selection, mode switches and saved trials. Make a coherent correction only for a demonstrated behavioral or causality issue. Preserve the forecasted-demand default beta 4 and seed, finite comparison, all controllers, held-out conditional results and scientific parameters. Avoid new explanatory controls or cosmetic releases without an interaction need.",
+  "active_run": null,
+  "next_focus": "Audit interaction correctness at discovery/comparison boundaries and pending forecast setting issuance. Make another product change only for a demonstrated behavior or causality issue. Preserve the forecasted-demand beta 4 default and seed, all four controllers and full costs, frozen deployed supports, exact replay and conditional scientific results. Do not retune for an advantage or add cosmetic controls.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -698,6 +727,12 @@
       "parent_solar_run": 39014465950,
       "verified": "success",
       "recovery_branch": "cloud/refine/recover-20261017-1500"
+    },
+    "latest_completion_candidate": {
+      "slot": "2026-10-17T17:00:00+08:00",
+      "branch": "cloud/refine/20261017-1700",
+      "expected_main": "5431056691c19511f72b835925019fb91f7f9356",
+      "instruction": "Metadata-only completion candidate. Validate normally and promote only with matching current main. Count 17:00 once. Do not promote the superseded 15:00 audit."
     }
   },
   "parent_handoffs": [
