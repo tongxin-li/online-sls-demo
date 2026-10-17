@@ -662,11 +662,23 @@
   });
   $('speed').addEventListener('change', () => { if (playing) { clearTimeout(timer); nextTickAt=0; schedule(); } save(); });
   $('auto-compare').addEventListener('change',()=>{render();save();});
-  $('cost-metric').addEventListener('change',()=>{
+  function renderCostMetric() {
+    const gap=$('cost-metric').value==='gap';
+    $('cost-total').setAttribute('aria-pressed',String(!gap));
+    $('cost-gap').setAttribute('aria-pressed',String(gap));
+    const label='Difference from '+gapReference();
+    $('cost-gap').setAttribute('aria-label',label);
+    $('cost-gap').title=label;
+  }
+  function selectCostMetric(value) {
+    $('cost-metric').value=value==='gap'?'gap':'total';
     // A pinned reading belongs to the previous quantity and scale.
     $('tooltip').style.display='none';pin=null;
-    drawCost();save();
-  });
+    renderCostMetric();drawCost();save();
+  }
+  $('cost-metric').addEventListener('change',()=>selectCostMetric($('cost-metric').value));
+  $('cost-total').addEventListener('click',()=>selectCostMetric('total'));
+  $('cost-gap').addEventListener('click',()=>selectCostMetric('gap'));
   $('strength').addEventListener('change', () => { renderControls(); drawNetwork(); save(); });
   $('attack-mode').addEventListener('change',()=>{releaseAttack();renderControls();drawNetwork();save();});
   $('intervention').addEventListener('change',()=>{
@@ -932,11 +944,10 @@
     const scenario=snapshot.scenario;
     $('scenario-status').hidden=scenario?.id!=='solar-outage';
     $('scenario-status').textContent=snapshot.phase!=='deployment'?'Solar outage reserved for comparison · Four sites · 30 to 50 s':snapshot.t<=30?'Solar outage starts at comparison 30 s':scenario.active?'Solar outage · '+scenario.requestedKw.toFixed(1)+' kW requested · '+scenario.appliedKw.toFixed(1)+' kW applied':'Solar restored · Background power continues';
-    const gapOption=$('cost-metric').querySelector('option[value="gap"]');
-    if(gapOption) gapOption.textContent=communicationComparison()?'Difference vs fixed sparse':'Difference vs scalar';
+    renderCostMetric();
     const matrixChangeOption=$('matrix-view').querySelector('option[value="change"]');
-    if(matrixChangeOption) matrixChangeOption.textContent=communicationComparison()?'Learned scores':'Learning weights';
-    $('cost-metric').hidden=false;
+    const matrixChangeLabel=communicationComparison()?'Learned scores':'Learning weights';
+    if(matrixChangeOption && matrixChangeOption.textContent!==matrixChangeLabel) matrixChangeOption.textContent=matrixChangeLabel;
     if(!plottedSeries().length) activeSeries().forEach(item=>visible.add(item.key));
     root.querySelectorAll('[data-series]').forEach(button=>{
       const item=series.find(item=>item.key===button.dataset.series);
@@ -1458,7 +1469,7 @@
     }
     $('comparison-summary').textContent=comparisonSummary();
     const recovery=powerRecoveryContext();
-    $('cost-note').textContent=gap?'Below zero is cheaper · '+(recovery?'Totals include load recovery':'Table shows totals')
+    $('cost-note').textContent=gap?'Compared with '+gapReference()+' · Below zero is cheaper · '+(recovery?'Totals include load recovery':'Table shows totals')
       : recovery || (snapshot.phase==='deployment'?(communicationComparison()?'Learning costs excluded · Prediction links only · Common feedback unchanged':'Fresh comparison · Learning costs excluded · Identical disturbances'):'Dense messages during learning · Adaptation starts at 30 s');
   }
   function comparisonSummary() {

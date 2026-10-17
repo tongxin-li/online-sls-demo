@@ -94,7 +94,10 @@ function harness(saved,experiment='prediction',reducedMotion=true) {
     const node=element(match[1].toUpperCase());node.id=match[2];nodes.set(node.id,node);
   }
   for(const input of html.matchAll(/<input\b[^>]*\bid="(pr-[^"]+)"[^>]*>/g)){
-    nodes.get(input[1]).checked=/\bchecked\b/.test(input[0]);
+    const node=nodes.get(input[1]);
+    node.checked=/\bchecked\b/.test(input[0]);
+    node.hidden=/\bhidden(?:\s|>)/.test(input[0]);
+    node.value=input[0].match(/\bvalue="([^"]*)"/)?.[1]||'';
   }
   // Read actual selected defaults so the harness cannot hide an HTML speed bug.
   for(const select of html.matchAll(/<select\b[^>]*\bid="(pr-[^"]+)"[^>]*>([\s\S]*?)<\/select>/g)){
@@ -723,7 +726,7 @@ test('discovery exposes four executing controllers and cannot hide the last curv
   const all=['online','scalar','static','causal'];
   assert.deepEqual(h.comparison(),{active:all,plotted:all,sameSparseSupport:false});
   for(const key of all)assert.equal(h.seriesButton(key).hidden,false);
-  assert.equal(h.node('cost-metric').hidden,false);assert.equal(h.node('cost-metric').value,'total');
+  assert.equal(h.node('cost-metric').hidden,true);assert.equal(h.node('cost-metric').value,'total');
   for(const key of ['online','scalar','static'])h.seriesButton(key).dispatch('click');
   assert.deepEqual(h.comparison().plotted,['causal']);
   h.seriesButton('causal').dispatch('click');assert.deepEqual(h.comparison().plotted,['causal']);
@@ -746,7 +749,7 @@ test('Compare controllers clears discovery attacks and schedules a fresh visible
   assert.ok(Object.values(h.snapshot().cumulative).every(value=>value===0));
   assert.equal(h.snapshot().eventLog.length,0);assert.equal(h.snapshot().pendingPulses.length,0);
   assert.equal(h.snapshot().activePulses.length,0);assert.equal(h.state().journal.length,0);
-  assert.equal(h.node('pulse')['aria-pressed'],'false');assert.equal(h.node('cost-metric').hidden,false);
+  assert.equal(h.node('pulse')['aria-pressed'],'false');assert.equal(h.node('cost-metric').hidden,true);
   assert.notEqual(h.snapshot().initialOptions.seed,discoveryOptions.seed,'Deployment uses an independent disturbance seed');
   assert.deepEqual(h.comparison().active,['online','scalar','static','causal']);
   assert.deepEqual(h.comparison().plotted,h.comparison().active);
@@ -760,34 +763,37 @@ test('Compare controllers clears discovery attacks and schedules a fresh visible
 });
 
 test('Rebuild prediction links cancels comparison playback and attacks and restores the discovery cost view',async()=>{
-  const h=harness();h.check('auto-compare',false);await compare(h);h.click('deploy');h.change('cost-metric','gap');
+  const h=harness();h.check('auto-compare',false);await compare(h);h.click('deploy');h.click('cost-gap');
   pointerClick(h,h.bus(14));await h.samples(3);assert.ok(pulses(h).length>0);
   h.click('deploy');
   assert.equal(h.snapshot().phase,'discovery');assert.equal(h.snapshot().t,0);assert.equal(h.state().playing,false);
   assert.equal(h.clock.tasks.size,0);assert.equal(h.node('pulse')['aria-pressed'],'false');
   assert.equal(h.snapshot().eventLog.length,0);assert.equal(h.snapshot().activePulses.length,0);
   assert.deepEqual(h.comparison().active,['online','scalar','static','causal']);assert.deepEqual(h.comparison().plotted,['online','scalar','static','causal']);
-  assert.equal(h.node('cost-metric').hidden,false);assert.equal(h.node('cost-metric').value,'total');
+  assert.equal(h.node('cost-metric').hidden,true);assert.equal(h.node('cost-metric').value,'total');
   assert.equal(h.node('deploy').textContent,'Compare now');assert.equal(h.node('deploy').disabled,true);
   await h.samples(3);assert.equal(h.snapshot().t,0);
 });
 
 test('comparison gap measure survives saved replay without resuming playback or changing costs',async()=>{
-  const h=harness();h.check('auto-compare',false);await compare(h);h.click('deploy');await h.samples(5);h.change('cost-metric','gap');
+  const h=harness();h.check('auto-compare',false);await compare(h);h.click('deploy');await h.samples(5);h.click('cost-gap');
   const saved=h.saved();assert.equal(saved.privateContent.version,13);assert.equal(saved.privateContent.costMetric,'gap');
   const restored=harness(saved);
   assert.equal(restored.snapshot().phase,'deployment');assert.equal(restored.node('cost-metric').value,'gap');
-  assert.equal(restored.node('cost-metric').hidden,false);assert.equal(restored.state().playing,false);
+  assert.equal(restored.node('cost-metric').hidden,true);assert.equal(restored.state().playing,false);
+  assert.equal(restored.node('cost-gap')['aria-pressed'],'true');assert.equal(restored.node('cost-total')['aria-pressed'],'false');
   assert.equal(restored.clock.tasks.size,0);assert.deepEqual(restored.snapshot().cumulative,h.snapshot().cumulative);
   assert.deepEqual(restored.snapshot().deployedSupport,h.snapshot().deployedSupport);
   assert.deepEqual(restored.comparison().active,['online','scalar','static','causal']);
   for(const value of [undefined,'invalid']){
     const legacy=plain(saved);if(value===undefined)delete legacy.privateContent.costMetric;else legacy.privateContent.costMetric=value;
     const old=harness(legacy);assert.equal(old.node('cost-metric').value,'total');assert.equal(old.state().playing,false);
+    assert.equal(old.node('cost-total')['aria-pressed'],'true');assert.equal(old.node('cost-gap')['aria-pressed'],'false');
     assert.deepEqual(old.snapshot().cumulative,h.snapshot().cumulative);
   }
   const discovery=harness({privateContent:{version:13,phase:'discovery',t:0,events:[],costMetric:'gap'}});
-  assert.equal(discovery.node('cost-metric').value,'gap');assert.equal(discovery.node('cost-metric').hidden,false);
+  assert.equal(discovery.node('cost-metric').value,'gap');assert.equal(discovery.node('cost-metric').hidden,true);
+  assert.equal(discovery.node('cost-gap')['aria-pressed'],'true');assert.equal(discovery.node('cost-total')['aria-pressed'],'false');
 });
 
 test('comparison reports measured costs without treating support equality as controller equality',async()=>{
@@ -821,8 +827,10 @@ test('playback hands off exactly after 180 discovery samples and starts comparis
   assert.equal(h.snapshot().phase,'discovery');assert.equal(h.snapshot().t,179);
   assert.ok(h.snapshot().cumulative.static>0);assert.equal(h.node('cost-content').hidden,false);
   const learningSeed=h.snapshot().initialOptions.seed;
+  h.click('cost-gap');assert.equal(h.node('cost-gap')['aria-pressed'],'true');
   await h.samples(1);
   assert.equal(h.snapshot().phase,'deployment');assert.equal(h.snapshot().t,0);
+  assert.equal(h.node('cost-total')['aria-pressed'],'true');assert.equal(h.node('cost-gap')['aria-pressed'],'false');
   assert.equal(h.snapshot().discoveryRecord.t,180);
   assert.ok(Object.values(h.snapshot().cumulative).every(value=>value===0));
   assert.notEqual(h.snapshot().initialOptions.seed,learningSeed);
@@ -1073,7 +1081,7 @@ test('continuous attacks survive communication handoff and saved trial replays p
   const h=harness(undefined,'communication');h.change('noise',2);h.change('intervention','power');
   const bus=h.bus(23);pointerClick(h,bus);await h.samples(185);h.click('run');
   assert.equal(h.snapshot().phase,'deployment');assert.ok(h.snapshot().eventLog.filter(e=>e.type==='pulse').length>=5);
-  h.change('cost-metric','gap');const saved=h.saved(),r=harness(saved,'communication');
+  h.click('cost-gap');const saved=h.saved(),r=harness(saved,'communication');
   assert.equal(r.snapshot().experiment,'communication');assert.equal(r.snapshot().beta,2);
   assert.equal(r.node('noise').value,'2');assert.equal(r.node('cost-metric').value,'gap');
   assert.equal(r.state().playing,false);assert.equal(r.snapshot().calibration.updates,0);
@@ -1201,11 +1209,16 @@ test('switching cost quantities during playback clears stale readings without ch
   const h=harness(undefined,'communication');h.click('run');await h.samples(20);
   const initial=h.snapshot(),tasks=h.clock.tasks.size;
   for(const metric of ['gap','total','gap','total']){
-    h.node('tooltip').style.display='block';h.pin('pr-cost');h.change('cost-metric',metric);
+    h.node('tooltip').style.display='block';h.pin('pr-cost');h.click('cost-'+metric);
     assert.equal(h.pin(),null,'Pinned values from the former quantity must be dismissed');
     assert.equal(h.node('tooltip').style.display,'none');
     assert.equal(h.state().playing,true);assert.equal(h.clock.tasks.size,tasks);
     assert.equal(h.snapshot().t,initial.t);assert.deepEqual(h.snapshot().cumulative,initial.cumulative);
+    assert.equal(h.node('cost-metric').hidden,true);assert.equal(h.node('cost-metric').value,metric);
+    assert.equal(h.node('cost-'+metric)['aria-pressed'],'true');
+    assert.equal(h.node('cost-'+(metric==='gap'?'total':'gap'))['aria-pressed'],'false');
+    assert.equal(h.node('cost-gap')['aria-label'],'Difference from scalar adaptation');
+    assert.equal(h.saved().privateContent.costMetric,metric);
   }
   await h.samples(2);assert.equal(h.snapshot().t,initial.t+2);
 });
@@ -1969,7 +1982,7 @@ test('primary restart clears comparison, attacks and custom source changes while
   h.change('attack-mode','continuous');h.change('strength','150');
   await compare(h);assert.equal(h.snapshot().phase,'deployment');
   h.change('intervention','power');pointerClick(h,h.bus(23));await h.samples(4);
-  h.change('bus','7');h.click('fault');h.change('cost-metric','gap');h.change('matrix-view','change');
+  h.change('bus','7');h.click('fault');h.click('cost-gap');h.change('matrix-view','change');
   assert.ok(Object.values(h.snapshot().cumulative).some(value=>value>0));
   assert.ok(h.snapshot().eventLog.length>0);assert.ok(h.state().activeAttackBuses.length>0);
   h.click('restart');const restarted=h.snapshot();
@@ -1979,6 +1992,7 @@ test('primary restart clears comparison, attacks and custom source changes while
   assert.equal(h.node('speed').value,'32');assert.equal(h.node('attack-mode').value,'continuous');assert.equal(h.node('strength').value,'150');
   assert.equal(h.node('auto-compare').checked,true);assert.equal(h.node('view').value,'learning');
   assert.equal(h.node('matrix-view').value,'links');assert.equal(h.node('cost-metric').value,'total');
+  assert.equal(h.node('cost-total')['aria-pressed'],'true');assert.equal(h.node('cost-gap')['aria-pressed'],'false');
   assert.deepEqual(restarted.faults,new PowerDemo.Simulation({experiment:'communication',beta:8,powerScenario:'solar-outage'}).snapshot().faults);
   assert.ok(Object.values(restarted.cumulative).every(value=>value===0));
   assert.equal(restarted.eventLog.length,0);assert.equal(restarted.activePulses.length,0);assert.equal(restarted.pendingPulses.length,0);

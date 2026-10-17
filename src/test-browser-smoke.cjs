@@ -278,6 +278,31 @@ async function main() {
     };
 
 
+    const checkCostSwitch = async (surface,metric,reference) => {
+      const reading=await surface.evaluate(()=>{
+        const input=document.querySelector('#pr-cost-metric'),chart=document.querySelector('#pr-cost');
+        const zero=chart.querySelector('line.cost-reference'),baseline=chart.querySelector('path.data-series[data-series-key="scalar"]');
+        return {value:input.value,hidden:input.hidden,type:input.type,
+          buttons:['total','gap'].map(key=>({key,pressed:document.querySelector('#pr-cost-'+key).getAttribute('aria-pressed')})),
+          label:chart.getAttribute('aria-label'),gapLabel:document.querySelector('#pr-cost-gap').getAttribute('aria-label'),
+          note:document.querySelector('#pr-cost-note').textContent,
+          paths:Array.from(chart.querySelectorAll('path.data-series')).map(node=>({key:node.dataset.seriesKey,d:node.getAttribute('d')})),
+          zeroY:zero?Number(zero.getAttribute('y1')):null,baseline:baseline?.getAttribute('d')};
+      });
+      assert.equal(reading.value,metric);assert.equal(reading.hidden,true);assert.equal(reading.type,'hidden');
+      for(const button of reading.buttons)assert.equal(button.pressed,String(button.key===metric));
+      assert.equal(reading.gapLabel,'Difference from '+reference);
+      assert.deepEqual(reading.paths.map(item=>item.key).sort(),['causal','online','scalar','static']);
+      assert.ok(reading.paths.every(item=>item.d&&!/NaN|Infinity/.test(item.d)),'Both quantities retain all four finite curves');
+      if(metric==='gap'){
+        assert.ok(reading.label.includes('difference from '+reference));
+        assert.match(reading.label,/Zero is the reference/);assert.ok(reading.note.startsWith('Compared with '+reference+' · Below zero is cheaper'));
+        assert.ok(Number.isFinite(reading.zeroY),'Difference shows its zero reference');
+        const coordinates=Array.from(reading.baseline.matchAll(/[ML]([^,]+),([^MLZ]+)/g),match=>Number(match[2]));
+        assert.ok(coordinates.length>0&&coordinates.every(value=>Math.abs(value-reading.zeroY)<.001),'The fixed or scalar baseline is exactly zero at every plotted sample');
+      }else{assert.match(reading.label,/Cumulative cost of 4/);assert.equal(reading.zeroY,null);}
+    };
+
     const checkKeyboardInspection = async () => {
       const before=await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
       let receiver=5,source=7;
@@ -540,19 +565,41 @@ async function main() {
 
     await mark('archived protocol inspection');
 
-    // Metric changes during playback must retain finite curves and bounded labels.
+    // Real buttons remain stable across live renders, including a press held over samples.
+    assert.equal(await page.locator('#pr-speed').inputValue(),'32');
+    assert.equal(await page.locator('#pr-cost-switch').getAttribute('role'),'group');
     await page.locator('#pr-run').click();
     const switchingStart = await sample();
     for (const metric of Array.from({ length: 30 }, (_, index) => index % 2 ? 'total' : 'gap')) {
-      await page.locator('#pr-cost-metric').selectOption(metric);
-      const label = await page.locator('#pr-cost').getAttribute('aria-label');
-      assert.match(label, metric === 'gap' ? /difference from fixed sparse/ : /Cumulative cost of 4/);
+      await page.locator('#pr-cost-'+metric).click();
+      await checkCostSwitch(page,metric,'fixed sparse');
+      assert.equal(await page.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getState().playing),true,'Metric changes never pause playback');
       await checkPlots();
     }
-    await mark('thirty live metric switches');
+    const held=page.locator('#pr-cost-gap');await held.scrollIntoViewIfNeeded();
+    await held.evaluate(node=>{window.__heldCostButton=node;});
+    const heldBounds=await held.boundingBox();
+    await page.mouse.move(heldBounds.x+heldBounds.width/2,heldBounds.y+heldBounds.height/2);
+    await page.mouse.down();await waitSamples(3);
+    assert.equal(await held.evaluate(node=>node===window.__heldCostButton&&document.activeElement===node),true,'Live samples retain the pressed node and native focus');
+    await page.mouse.up();await checkCostSwitch(page,'gap','fixed sparse');
+    for(const [metric,key] of [['total','Enter'],['gap','Space']]){
+      const button=page.locator('#pr-cost-'+metric);await button.focus();await button.press(key);
+      await checkCostSwitch(page,metric,'fixed sparse');
+      assert.equal(await page.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getState().playing),true,'Native '+key+' on a quantity button must not toggle playback');
+    }
+    await mark('thirty live cost button switches plus held pointer and keyboard');
     await waitSamples(2);
     assert.ok(await sample() > switchingStart, 'Playback continues during metric switching');
     await pause();
+    await page.locator('.pr-learning-panel').screenshot({path:path.join(output,'cost-switch-difference-desktop.png')});
+    const savedMetricSnapshot=await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
+    await page.reload({waitUntil:'networkidle'});
+    await checkCostSwitch(page,'gap','fixed sparse');
+    assert.equal(await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),savedMetricSnapshot,'Restored gap changes no measured state or cost');
+    assert.equal(await page.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getState().playing),false,'Restored gap stays paused');
+    await page.locator('#pr-cost-total').click();await checkCostSwitch(page,'total','fixed sparse');
+    await page.locator('.pr-learning-panel').screenshot({path:path.join(output,'cost-switch-total-desktop.png')});
     await page.locator('#pr-adaptation > summary').click();
     await page.locator('#pr-power-scenario').selectOption('solar-outage');
     await page.locator('#pr-compare').click();
@@ -865,6 +912,17 @@ async function main() {
     assert.ok(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Default scenario fits the narrow mobile page');
     await phone.screenshot({path:path.join(output,'default-scenario-mobile.png'),fullPage:true});
     await useReference(phone);
+    await selectSetting(phone,'speed','32');
+    await phone.locator('#pr-run').tap();
+    for(const metric of ['gap','total','gap']){
+      await phone.locator('#pr-cost-'+metric).tap();await checkCostSwitch(phone,metric,'scalar adaptation');
+      assert.equal(await phone.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getState().playing),true,'Mobile quantity taps preserve playback');
+      const bounds=await phone.locator('#pr-cost-'+metric).boundingBox();
+      assert.ok(bounds.width>=44&&bounds.height>=44,'Cost quantity has a usable mobile touch target');
+    }
+    await phone.locator('#pr-run').tap();
+    await phone.locator('.pr-learning-panel').screenshot({path:path.join(output,'cost-switch-difference-mobile.png')});
+    await phone.locator('#pr-cost-total').tap();await checkCostSwitch(phone,'total','scalar adaptation');
     const touchEvents = [];
     await phone.exposeFunction('__recordSmokeTouch', event => touchEvents.push(event));
     await phone.evaluate(() => {
@@ -984,7 +1042,7 @@ async function main() {
     await phone.screenshot({path:path.join(output,'environment.png'),fullPage:true});
     await mark('mobile inspection and responsive evidence');
     assert.deepEqual(errors, [], 'No browser runtime errors');
-    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), timings, touchEvents, checks: ['primary controls and four panels stay visible while advanced settings start closed', 'restart returns to a fresh learning trial with selected options', 'pending source settings at every finite segment preserve exact replay and first new issuance', 'final applied power remains visible after request expiry with exact replay', 'paused completed source settings preserve Continue and exact replay', 'restored mixed trial preserves old costs until explicit new scenario', 'all noisy sources notice and fresh reliable inverter map', 'shipped demand and solar default completes and pauses after 180 comparison samples', 'actual scheduled power visual metadata and forecasted event labels', 'completed default restores and explicitly continues', 'extended forecast stress clears previous power attacks and costs', 'all four measured forecast stress curves and actual prediction commands', 'extended stress saved trial replay and reference return', 'forecast stress desktop and mobile layout', 'actual forecast setting timestamps and typed mixed event markers', 'keyboard matrix inspection and native command table scrolling', 'visible temporal source gain without hover', 'playback', 'repeated forecast bus clicks', 'three simultaneous continuous power attacks and independent stop', 'all attack sources survive automatic handoff', 'actual protocol receipt and archived discovery view', 'matrix mode exit restores live source controls without advancing plant', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'three simultaneous mobile power attacks and independent stop', 'mobile touch and layout'], errors }, null, 2));
+    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), timings, touchEvents, checks: ['primary controls and four panels stay visible while advanced settings start closed', 'restart returns to a fresh learning trial with selected options', 'pending source settings at every finite segment preserve exact replay and first new issuance', 'final applied power remains visible after request expiry with exact replay', 'paused completed source settings preserve Continue and exact replay', 'restored mixed trial preserves old costs until explicit new scenario', 'all noisy sources notice and fresh reliable inverter map', 'shipped demand and solar default completes and pauses after 180 comparison samples', 'actual scheduled power visual metadata and forecasted event labels', 'completed default restores and explicitly continues', 'extended forecast stress clears previous power attacks and costs', 'all four measured forecast stress curves and actual prediction commands', 'extended stress saved trial replay and reference return', 'forecast stress desktop and mobile layout', 'actual forecast setting timestamps and typed mixed event markers', 'keyboard matrix inspection and native command table scrolling', 'visible temporal source gain without hover', 'playback', 'repeated forecast bus clicks', 'three simultaneous continuous power attacks and independent stop', 'all attack sources survive automatic handoff', 'actual protocol receipt and archived discovery view', 'matrix mode exit restores live source controls without advancing plant', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'thirty real cost button clicks at 32x without pausing', 'stable cost button and focus across held pointer samples', 'native Enter and Space cost activation', 'zero baseline and all four curves in both quantities', 'saved gap state restoration', 'mobile cost button taps and target sizes', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'three simultaneous mobile power attacks and independent stop', 'mobile touch and layout'], errors }, null, 2));
     console.log('Browser smoke passed');
   } finally {
     if (browser) await browser.close();

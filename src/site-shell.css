@@ -197,7 +197,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 @media(max-width:1000px) { .pr-attack-hint { display:none; } }
 
 .pr-cost-tools { display:flex; justify-content:flex-end; }
-#pr-cost-metric { min-height:25px; padding:2px 6px; font-size:10px; }
+
 .pr-comparison-summary { margin:5px 0 3px; color:#53535a; line-height:1.4; }
 #pr-deploy:not(:disabled) { background:#0071e3; color:#fff; }
 
@@ -252,7 +252,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 :focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
 @media(max-width:650px),(pointer:coarse) {
   .btn-stop-attacks { min-height:44px; }
-  #pr-matrix-view,#pr-view,#pr-cost-metric { min-height:44px; padding:8px 10px; font-size:12px; }
+  #pr-matrix-view,#pr-view { min-height:44px; padding:8px 10px; font-size:12px; }
   .btn-fit,.btn-deploy { min-height:44px; padding:8px 12px; font-size:12px; }
   .pr-topology-history { gap:8px; }
   .pr-topology-history input { height:44px; }
@@ -414,3 +414,13 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 }
 
 .pr-controlbar { align-items:flex-start; }
+
+/* Direct view selection stays usable while new samples repaint the chart. */
+.pr-cost-switch { display:inline-flex; align-items:stretch; gap:3px; padding:3px; border-radius:10px; background:var(--muted); }
+.pr-cost-switch button { min-height:34px; padding:6px 13px; border:0; border-radius:7px; background:transparent; color:var(--muted-foreground); font-size:12px; font-weight:500; white-space:nowrap; }
+.pr-cost-switch button[aria-pressed='true'] { background:var(--background); color:var(--foreground); box-shadow:0 1px 3px #00000012; }
+.pr-cost-switch button:hover { color:var(--foreground); }
+.pr-cost-switch button:focus-visible { outline:2px solid var(--primary); outline-offset:1px; }
+@media(max-width:650px),(pointer:coarse) {
+  .pr-cost-switch button { min-height:44px; padding:8px 14px; font-size:12px; }
+}
