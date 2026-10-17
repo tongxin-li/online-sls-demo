@@ -336,13 +336,13 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 /* Readable source observations without altering the four panel layout. */
 .pr-forecast-observation { padding:12px; border:1px solid var(--border); border-radius:12px; }
 .pr-forecast-values { gap:8px; margin:10px 0; }
-.pr-forecast-values > div { min-width:0; padding:9px 10px; background:#fff; border:1px solid var(--border); border-radius:8px; }
+.pr-forecast-values > div { display:flex; flex-direction:column; justify-content:space-between; min-width:0; padding:9px 10px; background:#fff; border:1px solid var(--border); border-radius:8px; }
 .pr-forecast-values dd { margin-top:5px; color:var(--foreground); font-size:16px; font-weight:600; line-height:1.4; }
 #pr-forecast-timing { color:var(--foreground); font-weight:500; line-height:1.5; }
 .pr-forecast-observation .pr-caption { line-height:1.5; }
 @media(max-width:380px) {
   .pr-forecast-values { grid-template-columns:minmax(0,1fr); gap:6px; }
-  .pr-forecast-values > div { display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
+  .pr-forecast-values > div { display:flex; flex-direction:row; justify-content:space-between; align-items:baseline; gap:12px; }
   .pr-forecast-values dd { margin:0; flex-shrink:0; }
 }
 
