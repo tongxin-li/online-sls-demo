@@ -419,7 +419,15 @@
       }
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-17T11:00:00+08:00",
+    "started_at": "2026-10-17T10:59:50+08:00",
+    "lease_expires_at": "2026-10-17T11:39:50+08:00",
+    "branch": "cloud/refine/20261017-1100",
+    "base_main": "89206ed1c704b397dfe5d3560540df57fb600053",
+    "focus": "Expose actual temporal source gain norms without hover and verify keyboard/touch link inspection",
+    "status": "preparing candidate"
+  },
   "next_focus": "Audit source and receiver inspection across keyboard and touch, including controller gain details currently available through hover titles. Preserve exact actual support, current phase and saved history distinctions. Keep scientific parameters unchanged unless a specific causal gap warrants a separate all-seed experiment.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
@@ -473,6 +481,12 @@
       "run": 38989664800,
       "result": "success",
       "note": "Current main validation includes the recovered prior completion and current improvement. Prior completed slot counted once."
+    },
+    "last_metadata_verification": {
+      "commit": "89206ed1c704b397dfe5d3560540df57fb600053",
+      "main_run": 38995149121,
+      "pages_run": 38995148790,
+      "result": "success"
     }
   }
 }
