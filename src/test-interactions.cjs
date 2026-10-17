@@ -1353,6 +1353,9 @@ test('command inspection attributes matrix mixed raw sources before limiting wit
   assert.equal(online.requestedKvar,120);assert.equal(online.commandKvar,70);assert.equal(online.limited,true);
   assert.equal(reading.rows[3].sourceKvar,0);assert.equal(reading.rows[3].gainNorm,0);
   assert.equal(JSON.stringify({view,segments,messages}),before,'Inspection is pure');
+  forecast[6]=0;
+  const zeroMessage=h.decompose(view,segments,messages,7,5).rows[0];
+  assert.equal(zeroMessage.sourceKvar,0);assert.equal(zeroMessage.gainNorm,6,'Zero message contribution does not remove the actual source gain');
 });
 
 test('command decomposition reconstructs actual requests and bounded commands for all twenty seeds',()=>{
