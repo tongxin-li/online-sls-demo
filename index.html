@@ -298,6 +298,12 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   .pr-experiment-bar select { min-height:44px; padding:8px 10px; }
 }
 
+.pr-command-inspector {margin-top:8px;border-top:1px solid var(--border,#e5e5e7);padding-top:7px}
+.pr-command-inspector summary {cursor:pointer;font-size:12px;font-weight:600;min-height:44px;display:list-item}
+.pr-command-scroll {max-width:100%;overflow-x:auto}
+.pr-command-scroll table {width:100%;min-width:520px;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums}
+.pr-command-scroll th,.pr-command-scroll td {padding:5px 7px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--border,#e5e5e7)}
+.pr-command-scroll th:first-child {text-align:left}
 .pr-forecast-observation {margin:8px 0;padding:8px 10px;background:var(--surface-subtle,#f5f5f7);border-radius:8px}
 .pr-forecast-observation p {margin:3px 0;overflow-wrap:anywhere}
 .pr-forecast-values {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:7px 0}
@@ -482,6 +488,15 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         </dl>
         <p class="pr-caption">mpu · 1 mpu = 0.001 pu · Error includes unforecast power changes</p>
         <p id="pr-forecast-support" class="pr-caption"></p>
+        <details id="pr-command-inspector" class="pr-command-inspector" hidden>
+          <summary id="pr-command-title">Command breakdown</summary>
+          <p class="pr-caption">kvar · Source and other messages before limiting · Includes the full issued preview, not just the revealed pair</p>
+          <div class="pr-command-scroll"><table aria-label="Latest receiver command decomposition in kvar">
+            <thead><tr><th>Controller</th><th>Source</th><th>Other</th><th>Feedback</th><th>Request</th><th>Command</th></tr></thead>
+            <tbody id="pr-command-rows"></tbody>
+          </table></div>
+          <p class="pr-caption">Request = Source + Other + Feedback · Command is bounded to ±70 kvar · Source is not a causal share after limiting</p>
+        </details>
       </div>
       <div class="pr-panel-foot pr-matrix-detail"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div><div class="pr-topology-status"><strong id="pr-topology-status">Connectivity unchanged</strong><span id="pr-topology-gain">Weights changed 0%</span></div><div id="pr-topology-events" class="pr-topology-events" aria-label="Recent topology changes" hidden></div><div class="pr-topology-history"><label for="pr-topology-history" id="pr-history-count">0 link updates</label><input id="pr-topology-history" type="range" min="0" max="0" step="1" value="0" aria-label="Topology history" disabled><button type="button" id="pr-history-live" aria-pressed="true">Latest</button></div><p id="pr-topology-note" class="pr-caption" aria-live="polite"></p>
     </section>
@@ -1993,6 +2008,62 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       : 'No links have changed yet. Learning weights may still change.';
     $('topology-note').title=snapshot.phase==='deployment' ? (communicationComparison()?'Discovery history. Deployed links and prediction weights stay fixed.':'Discovery history. Deployed links stay fixed while prediction weights continue adapting.') : 'History displays observed connectivity only. Reviewing an update does not change the controller.';
   }
+  // Reconstruct the last executed command from the exact issued preview and
+  // calibration retained for that action. No future realized forcing is read.
+  function commandContributions(view,segments,forecasts,source,receiver) {
+    if(!view.lastSample) return null;
+    const action=view.lastSample.t,row=PowerDemo.constants.inverterBuses.indexOf(receiver),column=source-2;
+    const segment=segments.find(item=>action>=item.start&&action<item.end);
+    if(row<0 || column<0 || column>=23 || !segment) return null;
+    const fixed=view.phase==='deployment'&&view.experiment==='communication';
+    const rows=['online','scalar','static','causal'].map(key=>{
+      const state=view.costStates[key].slice(1).map((value,i)=>value-PowerDemo.model.baseDrop[i+1]);
+      const feedback=PowerDemo.model.K[row].reduce((sum,value,i)=>sum+value*state[i],0);
+      let prediction=0,sourcePart=0,gainSquared=0;
+      if(key!=='causal') for(const block of segment.designs[key].rows[action-segment.start]) {
+        const forecast=forecasts[segment.start+block.k-1].forecast.slice(1),gain=block.L[row];
+        const correction=!fixed&&key==='online'?view.calibration.matrix:null;
+        const corrected=correction?PowerDemo.math.matvec(correction,forecast)
+          :!fixed&&key==='scalar'?forecast.map(value=>value*view.calibration.scalar):forecast;
+        prediction+=gain.reduce((sum,value,j)=>sum+value*corrected[j],0);
+        const sourceGain=correction?gain.reduce((sum,value,j)=>sum+value*correction[j][column],0)
+          :gain[column]*(!fixed&&key==='scalar'?view.calibration.scalar:1);
+        sourcePart+=sourceGain*forecast[column];gainSquared+=sourceGain**2;
+      }
+      return {key,sourceKvar:1000*sourcePart,otherKvar:1000*(prediction-sourcePart),
+        feedbackKvar:1000*feedback,requestedKvar:1000*(feedback+prediction),
+        commandKvar:view.commandQ[key][receiver-1],gainNorm:Math.sqrt(gainSquared),
+        limited:view.saturation[key][receiver-1]};
+    });
+    return {source,receiver,action,rows};
+  }
+  function inspectedCommand() {
+    const inspection=predictionInspection();
+    return !inspection || historyIndex!==null ? null
+      : commandContributions(snapshot,simulation.segments,simulation.forecasts,inspection.source,inspection.receiver);
+  }
+  function renderCommandInspection(inspection) {
+    const reading=inspectedCommand(),panel=$('command-inspector');
+    panel.hidden=!inspection;
+    $('command-title').textContent=reading ? 'Command at inverter '+reading.receiver+' · Action '+reading.action+' s'
+      : 'Command breakdown · '+(historyIndex!==null?'Show Latest':'Step to reveal');
+    const body=$('command-rows');body.replaceChildren();
+    if(!reading) return;
+    const names=Object.fromEntries(activeSeries().map(item=>[item.key,item.label]));
+    const format=value=>(Math.abs(value)<.0005?0:value).toFixed(3);
+    for(const item of reading.rows) {
+      const row=document.createElement('tr');row.dataset.controller=item.key;
+      row.dataset.source=reading.source;row.dataset.receiver=reading.receiver;row.dataset.action=reading.action;
+      for(const key of ['sourceKvar','otherKvar','feedbackKvar','requestedKvar','commandKvar','gainNorm','limited'])row.dataset[key]=String(item[key]);
+      row.title='Temporal source gain norm '+item.gainNorm.toPrecision(4)+' pu command / pu forcing'
+        +(item.limited?' · Request limited to ±70 kvar':' · Request not limited');
+      const label=document.createElement('th');label.scope='row';label.textContent=names[item.key];row.append(label);
+      for(const key of ['sourceKvar','otherKvar','feedbackKvar','requestedKvar','commandKvar']) {
+        const cell=document.createElement('td');cell.textContent=format(item[key]);row.append(cell);
+      }
+      body.append(row);
+    }
+  }
   // Read only the last revealed pair. Never read a future forcing or forecast base.
   function inspectedForecastObservation() {
     const inspection=predictionInspection(),sample=snapshot.lastSample;
@@ -2023,6 +2094,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   function renderInspectedSource() {
     const inspection=predictionInspection(),control=$('source-fault');
     renderForecastObservation(inspection);
+    renderCommandInspection(inspection);
     $('source-controls').hidden=!inspection;
     const bus=inspection?.source;
     const noisy=!!inspection && snapshot.faults.includes(bus);
