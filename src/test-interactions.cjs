@@ -1024,6 +1024,44 @@ test('communication comparison keeps all policies and reports actual gains or lo
   assert.equal(h.seriesButton('scalar').children.at(-1).textContent,'Fixed sparse');
 });
 
+test('forecast stress starts a clean trial and reports the configured source error in physical units',async()=>{
+  const h=harness(undefined,'communication');h.change('intervention','power');
+  for(const bus of [20,22,23])pointerClick(h,h.bus(bus));
+  await h.samples(5);
+  assert.ok(h.snapshot().cumulative.online>0);assert.equal(h.state().activeAttackBuses.length,3);
+  for(const beta of [4,8,16]) {
+    h.change('noise',beta);
+    assert.equal(h.snapshot().beta,beta);assert.equal(h.snapshot().phase,'discovery');assert.equal(h.snapshot().t,0);
+    assert.equal(h.state().playing,false);assert.equal(h.state().intervention,'forecast');
+    assert.deepEqual(h.state().activeAttackBuses,[]);assert.deepEqual(h.snapshot().pendingPulses,[]);
+    assert.deepEqual(h.snapshot().activePulses,[]);assert.equal(h.state().journal.length,0);
+    assert.ok(Object.values(h.snapshot().cumulative).every(value=>value===0));
+    assert.match(h.node('noise-caption').textContent,/mpu.*stress/i);
+  }
+  h.change('noise',8);h.change('bus',7);
+  const configured=()=>Number(h.node('noise-caption').textContent.match(/Noise SD ([\d.e+-]+)/)[1]);
+  assert.match(h.node('noise-caption').textContent,/Quiet/);
+  assert.ok(Math.abs(configured()-.10646)<.001,'Quiet source uses its physical forcing scale');
+  pointerClick(h,h.bus(7));
+  assert.match(h.node('noise-caption').textContent,/Noisy/);
+  assert.ok(Math.abs(configured()-8.51677)<.01,'Corrupting this source increases its configured noise SD eightyfold');
+  h.change('noise',1);assert.equal(h.snapshot().beta,1);
+  assert.doesNotMatch(h.node('noise-caption').textContent,/stress/i);
+  assert.deepEqual(PowerDemo.constants.communicationBetas,[0,.25,.5,1,2],'Reference benchmark levels remain separate');
+});
+
+test('extended forecast stress replays its actual comparison without reverting to reference noise',async()=>{
+  const h=harness(undefined,'communication');h.change('noise',16);
+  await compare(h);h.click('run');await h.samples(5);h.click('run');
+  const restored=harness(h.saved(),'communication');
+  assert.equal(restored.snapshot().phase,'deployment');assert.equal(restored.snapshot().beta,16);
+  assert.equal(restored.node('noise').value,'16');assert.equal(restored.state().playing,false);
+  assert.deepEqual(restored.snapshot().states,h.snapshot().states);
+  assert.deepEqual(restored.snapshot().cumulative,h.snapshot().cumulative);
+  assert.deepEqual(restored.snapshot().deployedSupport,h.snapshot().deployedSupport);
+  assert.deepEqual(restored.comparison().plotted,['online','scalar','static','causal']);
+});
+
 test('continuous attacks survive communication handoff and saved trial replays paused with frozen control',async()=>{
   const h=harness(undefined,'communication');h.change('noise',2);h.change('intervention','power');
   const bus=h.bus(23);pointerClick(h,bus);await h.samples(185);h.click('run');

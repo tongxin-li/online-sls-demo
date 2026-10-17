@@ -10,10 +10,11 @@
     return;
   }
   const d3 = window.d3;
+  const communicationNoiseLevels=[...PowerDemo.constants.communicationBetas,...(PowerDemo.constants.communicationStressBetas || [])];
   function optionsFromControls() {
     const experiment=$('experiment').value==='prediction'?'prediction':'communication';
     const beta=Number($('noise').value);
-    return {experiment,powerScenario:$('power-scenario').value || 'reference',beta:[0,.25,.5,1,2].includes(beta)?beta:1,preset:experiment==='communication'?'mixed':$('preset').value,
+    return {experiment,powerScenario:$('power-scenario').value || 'reference',beta:communicationNoiseLevels.includes(beta)?beta:1,preset:experiment==='communication'?'mixed':$('preset').value,
       ...(experiment==='communication'?{horizon:180}:{})};
   }
   let simulation = new PowerDemo.Simulation(optionsFromControls());
@@ -450,7 +451,7 @@
     const preset=['reliable','uniform','mixed'].includes(data.preset)?data.preset:'mixed';
     const savedOptions=data.phase==='deployment'&&data.discoveryRecord?data.discoveryRecord.options:data.initialOptions;
     $('experiment').value=savedOptions?.experiment==='prediction'?'prediction':'communication';
-    $('noise').value=String([0,.25,.5,1,2].includes(savedOptions?.beta)?savedOptions.beta:1);
+    $('noise').value=String(communicationNoiseLevels.includes(savedOptions?.beta)?savedOptions.beta:1);
     $('preset').value=preset;
     $('power-scenario').value=savedOptions?.powerScenario==='solar-outage'?'solar-outage':'reference';
     if(data.phase==='deployment' && data.discoveryRecord) {
@@ -866,8 +867,9 @@
 
     $('noise-control').hidden=!communication; $('noise-caption').hidden=!communication; $('preset-control').hidden=communication;
     const beta=snapshot.beta || 0;
-    $('noise-caption').textContent=beta===0?'No forecast noise':'Noise SD · Noisy buses '+d3.format('.3~g')(4*beta)+'× reference scale · Quiet buses '+d3.format('.3~g')(.05*beta)+'×';
-    $('noise-caption').title='Forecast error standard deviation in pu uses the declared physical voltage forcing reference scale for each source. This scale is set by the feeder and disturbance generator, not estimated from the current run. β multiplies all source noise levels.';
+    const noiseMpu=1000*PowerDemo.model.forecastForcingScales[selectedBus-1]*beta*(snapshot.faults.includes(selectedBus)?4:.05);
+    $('noise-caption').textContent=beta===0?'No forecast noise':'Bus '+selectedBus+' · '+(snapshot.faults.includes(selectedBus)?'Noisy':'Quiet')+' · Noise SD '+d3.format('.3~g')(noiseMpu)+' mpu'+(beta>2?' · Extended stress':'');
+    $('noise-caption').title='Configured additive error in newly issued voltage forcing forecasts, not actual bus voltage. 1 mpu = 0.001 pu. Noisy sources have 80 times the noise SD of quiet sources. β 4, 8 and 16 are additional feeder stress tests outside the reference grid. Changing β starts a fresh trial.';
     $('experiment').disabled=comparing; $('noise').disabled=comparing; $('power-scenario').disabled=comparing;
     const scenario=snapshot.scenario;
     $('scenario-status').hidden=scenario?.id!=='solar-outage';

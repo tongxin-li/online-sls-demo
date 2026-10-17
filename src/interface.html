@@ -1,8 +1,8 @@
 <div id="power-response-demo">
   <div class="pr-experiment-bar" aria-label="Experiment selection">
     <label class="pr-experiment-choice" for="pr-experiment">Experiment <select id="pr-experiment" aria-label="Experiment"><option value="communication" selected>Communication topology</option><option value="prediction">Prediction adaptation</option></select></label>
-    <label class="pr-noise-control" id="pr-noise-control" for="pr-noise">Forecast noise <select id="pr-noise" aria-label="Forecast noise level"><option value="0">None · β 0</option><option value="0.25">Low · β 0.25</option><option value="0.5">Moderate · β 0.5</option><option value="1" selected>High · β 1</option><option value="2">Severe · β 2</option></select></label>
-    <span id="pr-noise-caption" class="pr-caption">Noisy buses 4× reference scale · Quiet buses 0.05×</span>
+    <label class="pr-noise-control" id="pr-noise-control" for="pr-noise">Forecast error <select id="pr-noise" aria-label="Forecast noise level" title="Starts a fresh learning and comparison trial. Previous power attack costs are cleared"><optgroup label="Reference range"><option value="0">None · β 0</option><option value="0.25">Reference · β 0.25</option><option value="0.5">Reference · β 0.5</option><option value="1" selected>Reference · β 1</option><option value="2">Reference · β 2</option></optgroup><optgroup label="Extended feeder stress"><option value="4">Stress · β 4</option><option value="8">Stress · β 8</option><option value="16">Stress · β 16</option></optgroup></select></label>
+    <span id="pr-noise-caption" class="pr-caption">Selected source forecast error in mpu</span>
   </div>
   <div class="pr-controlbar" aria-label="Simulation controls">
     <div class="pr-toolbar">

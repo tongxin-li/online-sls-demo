@@ -17,6 +17,7 @@
   const PULSE_DEFAULT=100,PULSE_MIN=10,PULSE_MAX=150;
   const CONTROLLERS=['online','scalar','static','causal'];
   const COMMUNICATION_BETAS=[0,.25,.5,1,2];
+  const COMMUNICATION_STRESS_BETAS=[4,8,16];
   const INVERTER_BUSES=[5,7,8,12,14,18,21,24];
   const SOLAR_BUSES=[5,7,14,21],BATTERY_BUSES=[8,12,18,24];
   const PF_RATIO=Math.tan(Math.acos(.95));
@@ -283,7 +284,7 @@
       const experiment=options.experiment===undefined?'prediction':options.experiment;
       if(!['prediction','communication'].includes(experiment))throw new RangeError('Unknown experiment');
       const beta=options.beta===undefined?1:options.beta;
-      if(!COMMUNICATION_BETAS.includes(beta))throw new RangeError('Invalid communication noise level');
+      if(!COMMUNICATION_BETAS.includes(beta)&&!COMMUNICATION_STRESS_BETAS.includes(beta))throw new RangeError('Invalid communication noise level');
       const id=options.preset===undefined?'mixed':options.preset;
       const preset=FORECAST_PRESETS.find(p=>p.id===id);
       if(!preset)throw new RangeError('Forecast preset must be reliable, uniform, or mixed');
@@ -657,7 +658,8 @@
   }
   return{Simulation,model,voltageMetrics,constants:deepFreeze({N,M,edges:EDGES,edgeData:model.edgeData,inverterBuses:INVERTER_BUSES,
     amplitude:AMPLITUDE,ridge:RIDGE,rawRidge:RAW_RIDGE,remoteBudget:REMOTE_BUDGET,preview:PREVIEW,window:WINDOW,warmup:WARMUP,
-    busProfiles:BUS_PROFILES,controllers:CONTROLLERS,forecastPresets:FORECAST_PRESETS,communicationBetas:COMMUNICATION_BETAS,tolerance:TOLERANCE,horizon:480,
+    busProfiles:BUS_PROFILES,controllers:CONTROLLERS,forecastPresets:FORECAST_PRESETS,communicationBetas:COMMUNICATION_BETAS,
+    communicationStressBetas:COMMUNICATION_STRESS_BETAS,tolerance:TOLERANCE,horizon:480,
     pulseDefault:PULSE_DEFAULT,pulseMin:PULSE_MIN,pulseMax:PULSE_MAX,pulseUnits:'kW',powerBaseKw:POWER_BASE_KW,
     baseKv:BASE_KV,baseMva:BASE_MVA,sampleSeconds:SAMPLE_SECONDS,tauSeconds:TAU_SECONDS,inverterKvar:70}),
     math:{zeros,eye,transpose,multiply,matvec,combine,frobenius,normInf,solveSPD,getDesign,Response,calibratedScores,

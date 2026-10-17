@@ -495,6 +495,86 @@ async function main() {
     await audit.close();
     await mark('independent sixty two pair error audit');
 
+    // Forecast stress is a fresh experiment, with no power attacks carried over.
+    const stress=await browser.newPage({viewport:{width:1440,height:1000}});
+    stress.on('pageerror',error=>errors.push(error.message));
+    await stress.goto(address,{waitUntil:'networkidle'});
+    await stress.locator('#pr-speed').selectOption('32');
+    await stress.locator('#pr-intervention').selectOption('power');
+    for(const bus of [20,23])await stress.getByRole('button',{name:'Toggle continuous attack at bus '+bus,exact:true}).click();
+    await stress.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t>=3);
+    assert.deepEqual((await readPowerAttacks(stress)).active,[20,23]);
+    await stress.locator('#pr-noise').selectOption('8');
+    const freshStress=await stress.evaluate(()=>{
+      const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),state=root.powerDemo.getState();
+      return {beta:snapshot.beta,phase:snapshot.phase,t:snapshot.t,cumulative:snapshot.cumulative,
+        events:snapshot.eventLog,pending:snapshot.pendingPulses,physical:snapshot.activePulses,
+        active:state.activeAttackBuses,intervention:state.intervention,playing:state.playing};
+    });
+    assert.equal(freshStress.beta,8);assert.equal(freshStress.phase,'discovery');assert.equal(freshStress.t,0);
+    assert.equal(freshStress.playing,false);assert.equal(freshStress.intervention,'forecast');
+    for(const key of ['online','scalar','static','causal'])assert.equal(freshStress.cumulative[key],0,'New stress trial starts with zero accumulated cost');
+    for(const key of ['events','pending','physical','active'])assert.deepEqual(freshStress[key],[],'New stress trial clears '+key);
+    assert.match(await stress.locator('#pr-noise option:checked').textContent(),/Stress/i);
+    assert.match(await stress.locator('#pr-noise-caption').textContent(),/(?=.*Stress)(?=.*mpu)/i);
+    await stress.locator('#pr-run').click();
+    await stress.waitForFunction(()=>{
+      const snapshot=document.querySelector('#power-response-demo').powerDemo.getSnapshot();
+      return snapshot.phase==='deployment'&&snapshot.t>=60;
+    },null,{timeout:30000});
+    await stress.locator('#pr-run').click();
+    const stressResult=await stress.evaluate(()=>{
+      const snapshot=document.querySelector('#power-response-demo').powerDemo.getSnapshot();
+      return {beta:snapshot.beta,phase:snapshot.phase,t:snapshot.t,cumulative:snapshot.cumulative,
+        commandQ:snapshot.commandQ,events:snapshot.eventLog,
+        table:Array.from(document.querySelectorAll('#pr-cost-detail tr')).map(row=>({key:row.dataset.method,cost:Number(row.querySelector('[data-cost]').dataset.cost)}))};
+    });
+    assert.equal(stressResult.phase,'deployment');assert.equal(stressResult.beta,8);
+    assert.equal(stressResult.events.some(event=>event.type==='pulse'),false,'No hidden physical attack enters the forecast comparison');
+    assert.deepEqual(stressResult.table.map(row=>row.key),['online','scalar','static','causal']);
+    for(const row of stressResult.table)assert.equal(row.cost,stressResult.cumulative[row.key],'Every displayed cost is the actual executed cumulative cost');
+    for(const key of ['online','scalar','static'])assert.ok(stressResult.commandQ[key].some(value=>Math.abs(value)>1e-9),'Stress runs actual predictive controller commands');
+    for(const chart of ['pr-cost','pr-stage','pr-voltage']) {
+      const paths=await stress.locator('#'+chart+' path.data-series').evaluateAll(elements=>elements.map(element=>({key:element.dataset.seriesKey,d:element.getAttribute('d')})));
+      assert.equal(paths.length,4,'Forecast stress retains every '+chart+' controller curve');
+      assert.ok(paths.some(item=>item.key==='causal'),'Feedback remains visible in '+chart);
+      assert.ok(paths.every(item=>item.d&&!/NaN|Infinity/.test(item.d)),'Forecast stress has finite measured paths');
+    }
+    await stress.locator('#pr-matrix .matrix-cell[data-receiver="5"][data-source="6"]').click();
+    await checkCommandInspection(stress);
+    const predictionTerms=await stress.locator('#pr-command-rows tr').evaluateAll(rows=>rows.map(row=>({key:row.dataset.controller,prediction:Number(row.dataset.sourceKvar)+Number(row.dataset.otherKvar)})));
+    for(const key of ['online','scalar','static'])assert.ok(Math.abs(predictionTerms.find(row=>row.key===key).prediction)>1e-9,'Forecast stress contributes to actual '+key+' prediction commands');
+    assert.equal(predictionTerms.find(row=>row.key==='causal').prediction,0,'Feedback only receives no prediction contribution');
+    await checkVoltageMetrics(stress);await checkProtocol(stress);
+    await stress.locator('#pr-adaptation > summary').click();
+    await stress.locator('#pr-bus').selectOption('6');
+    await stress.locator('#pr-adaptation > summary').click();
+    assert.match(await stress.locator('#pr-noise-caption').textContent(),/Bus 6.*mpu/,'The selected noisy source has a visible forcing error scale');
+    await stress.screenshot({path:path.join(output,'forecast-stress-desktop.png'),fullPage:true});
+    await fs.writeFile(path.join(output,'forecast-stress.json'),JSON.stringify({fresh:freshStress,comparison:stressResult},null,2));
+    await stress.locator('#pr-noise').selectOption('16');
+    for(let i=0;i<6;i++)await stress.locator('#pr-step').click();
+    const savedStress=await stress.evaluate(()=>({saved:window.openai.widgetState,
+      snapshot:((snapshot)=>({beta:snapshot.beta,t:snapshot.t,states:snapshot.states,cumulative:snapshot.cumulative}))(document.querySelector('#power-response-demo').powerDemo.getSnapshot())}));
+    assert.equal(savedStress.saved.privateContent.initialOptions.beta,16);
+    const restoredStress=await browser.newPage({viewport:{width:1440,height:1000}});
+    restoredStress.on('pageerror',error=>errors.push(error.message));
+    await restoredStress.addInitScript(saved=>{localStorage.setItem('online-sls-demo-v1',JSON.stringify(saved));},savedStress.saved);
+    await restoredStress.goto(address,{waitUntil:'networkidle'});
+    const restoredResult=await restoredStress.evaluate(()=>{
+      const snapshot=document.querySelector('#power-response-demo').powerDemo.getSnapshot();
+      return {beta:snapshot.beta,t:snapshot.t,states:snapshot.states,cumulative:snapshot.cumulative};
+    });
+    assert.deepEqual(restoredResult,savedStress.snapshot,'Extended stress restores the same measured trial');
+    assert.equal(await restoredStress.locator('#pr-noise').inputValue(),'16');
+    assert.match(await restoredStress.locator('#pr-noise-caption').textContent(),/(?=.*Stress)(?=.*mpu)/i);
+    await restoredStress.locator('#pr-noise').selectOption('1');
+    assert.equal(await restoredStress.locator('#pr-noise').inputValue(),'1');
+    assert.equal(await restoredStress.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t),0);
+    assert.doesNotMatch(await restoredStress.locator('#pr-noise option:checked').textContent(),/Stress/i);
+    await restoredStress.close();await stress.close();
+    await mark('forecast stress reset handoff and saved trial');
+
     // A narrow touch viewport keeps the controls usable and the page in bounds.
     const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
     const phone = await mobile.newPage();
@@ -605,13 +685,20 @@ async function main() {
     const attackBounds = await phone.locator('#pr-pulse').boundingBox();
     assert.ok(attackBounds.width >= 44 && attackBounds.height >= 44, 'Primary touch target remains at least 44 pixels');
     await phone.screenshot({ path: path.join(output, 'mobile.png'), fullPage: true });
+    await phone.locator('#pr-noise').selectOption('8');
+    assert.match(await phone.locator('#pr-noise-caption').textContent(),/(?=.*Stress)(?=.*mpu)/i);
+    await phone.locator('#pr-step').tap();
+    const stressLayout=await phone.evaluate(()=>({page:document.documentElement.scrollWidth,viewport:innerWidth,
+      beta:document.querySelector('#power-response-demo').powerDemo.getSnapshot().beta}));
+    assert.equal(stressLayout.beta,8);assert.ok(stressLayout.page<=stressLayout.viewport+1,'Forecast stress controls fit the mobile page');
+    await phone.screenshot({path:path.join(output,'forecast-stress-mobile.png'),fullPage:true});
     await phone.goto(address+'/environment.html',{waitUntil:'networkidle'});
     const reportLayout=await phone.evaluate(()=>({page:document.documentElement.scrollWidth,viewport:innerWidth}));
     assert.ok(reportLayout.page<=reportLayout.viewport+1,'Scientific report stays within the mobile page');
     await phone.screenshot({path:path.join(output,'environment.png'),fullPage:true});
     await mark('mobile inspection and responsive evidence');
     assert.deepEqual(errors, [], 'No browser runtime errors');
-    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), timings, touchEvents, checks: ['actual forecast setting timestamps and typed mixed event markers', 'keyboard matrix inspection and native command table scrolling', 'visible temporal source gain without hover', 'playback', 'repeated forecast bus clicks', 'three simultaneous continuous power attacks and independent stop', 'all attack sources survive automatic handoff', 'actual protocol receipt and archived discovery view', 'matrix mode exit restores live source controls without advancing plant', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'three simultaneous mobile power attacks and independent stop', 'mobile touch and layout'], errors }, null, 2));
+    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), timings, touchEvents, checks: ['extended forecast stress clears previous power attacks and costs', 'all four measured forecast stress curves and actual prediction commands', 'extended stress saved trial replay and reference return', 'forecast stress desktop and mobile layout', 'actual forecast setting timestamps and typed mixed event markers', 'keyboard matrix inspection and native command table scrolling', 'visible temporal source gain without hover', 'playback', 'repeated forecast bus clicks', 'three simultaneous continuous power attacks and independent stop', 'all attack sources survive automatic handoff', 'actual protocol receipt and archived discovery view', 'matrix mode exit restores live source controls without advancing plant', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'three simultaneous mobile power attacks and independent stop', 'mobile touch and layout'], errors }, null, 2));
     console.log('Browser smoke passed');
   } finally {
     if (browser) await browser.close();

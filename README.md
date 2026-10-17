@@ -86,6 +86,22 @@ The [complete communication benchmark](benchmark-communication.json) reports all
 
 At β = 1, learned sparse costs 5.79 percent less than fixed sparse and 7.60 percent less than dense prediction. At β = 2, the reductions are 13.40 and 36.57 percent. Learned sparse beats fixed sparse on all 20 seeds at each nonzero noise level. At zero noise, their supports and costs coincide. Dense prediction is cheaper at β = 0, 0.25 and 0.5. Feedback only is cheapest at β = 2, where learned sparse costs 19.87 percent more. The selected links improve prediction use in the stated regimes without guaranteeing that prediction is preferable to feedback alone.
 
+## Extended forecast stress
+
+The same selector also offers β 4, 8 and 16 as additional feeder stress tests. The reference grid, default β 1 and its benchmark remain unchanged. Only the synthetic Gaussian forecast error amplitude changes. Noisy sources retain 80 times the standard deviation of quiet sources, with the same standardized draws and the same physical disturbance stream. These additional levels are outside the manuscript reference grid and are not a reproduction of its reported percentages.
+
+The caption gives the selected source's configured noise standard deviation in mpu of voltage forcing. It is not an actual bus voltage deviation. For example, corrupting bus 7 at β 8 changes its noise SD from 0.106 to 8.52 mpu. The forecasts are still immutable once issued. Changing β starts a fresh discovery and comparison, clearing previous physical attacks and accumulated costs. Within a trial all physical costs remain included.
+
+The [complete forecast stress audit](benchmark-forecast-stress.json) reports every seed from 1 through 20 at β 1, 2, 4, 8 and 16. Every forecast trial has a paired physical stress trial with identical issued forecasts and selected supports. The physical diagnostic requests 100 kW at all 23 controllable buses on each of actions 30 through 49. Overlapping requests can accumulate several MW of extra demand. This extreme diagnostic measures cost dilution and is not a realistic feeder operating recommendation. The report retains actual power, forecast and feedback command contributions, voltage ranges, saturation and every controller's full cost.
+
+| Forecast stress β | Learned sparse | Fixed sparse | Dense prediction | Feedback only |
+| --- | --- | --- | --- | --- |
+| 4 | 0.032484 | 0.042487 | 0.075518 | 0.014470 |
+| 8 | 0.078853 | 0.108675 | 0.195165 | 0.014470 |
+| 16 | 0.154798 | 0.227436 | 0.374975 | 0.014470 |
+
+These means use forecast stress alone and include the terminal penalty. At β 4, learned sparse saves 23.54 percent against fixed sparse and 56.99 percent against dense prediction. At β 8, the savings are 27.44 and 59.60 percent. At β 16, they are 31.94 and 58.72 percent. Learned sparse beats both predictive baselines on all 20 seeds at every additional level, while feedback only beats learned sparse on all 20. Stronger errors therefore expose prediction selection differences without establishing an advantage over ignoring predictions. In the paired severe physical stress at β 8, the savings fall to 0.13 and 0.55 percent because common physical recovery dominates the total costs.
+
 ## Prediction adaptation experiment
 
 This option retains the previous shared matrix versus scalar comparison and its existing benchmarks. Both fits use only observations revealed before the current action, start at action 30 and retain the latest 60 pairs. The same fitted correction acts on every available temporal block in the current response row.
@@ -137,6 +153,7 @@ node src/test-communication.cjs
 node src/test-interactions.cjs
 node src/test-topology-timeline.cjs
 node src/benchmark-communication.cjs --json
+node src/benchmark-forecast-stress.cjs --json
 node src/benchmark.cjs --json
 node src/benchmark.cjs --attacks --json
 python3 -m http.server 8000

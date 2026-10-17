@@ -19,13 +19,26 @@ const near=(actual,expected,tolerance=1e-12)=>{
 };
 const communication=options=>new Simulation({experiment:'communication',seed:17,horizon:90,...options});
 
+test('optional forecast stress levels preserve the reference grid and default',()=>{
+  assert.deepEqual(constants.communicationBetas,[0,.25,.5,1,2]);
+  assert.deepEqual(constants.communicationStressBetas,[4,8,16]);
+  assert.equal(communication({horizon:45}).options.beta,1);
+  for(const beta of constants.communicationStressBetas)assert.equal(communication({beta,horizon:45}).options.beta,beta);
+  for(const beta of [-1,3,6,32,NaN,Infinity,'4'])assert.throws(()=>communication({beta,horizon:45}),RangeError);
+});
+
 test('communication noise changes only forecast errors and preserves paired physical disturbances',()=>{
-  const trials=constants.communicationBetas.map(beta=>communication({beta,horizon:45}));
+  const betas=[...constants.communicationBetas,...constants.communicationStressBetas];
+  const trials=betas.map(beta=>communication({beta,horizon:45}));
   for(let t=0;t<40;t++){
+    if(t===12)for(const sim of trials)sim.queuePulse(23,100);
     const states=trials.map(sim=>sim.step());
     for(let i=1;i<trials.length;i++){
       assert.deepEqual(states[i].lastSample.base,states[0].lastSample.base);
       near(states[i].lastSample.disturbance,states[0].lastSample.disturbance,1e-14);
+      assert.deepEqual(states[i].states.causal,states[0].states.causal);
+      assert.deepEqual(states[i].lastInputs.causal,states[0].lastInputs.causal);
+      assert.equal(states[i].cumulative.causal,states[0].cumulative.causal);
     }
   }
   for(let q=0;q<trials[0].forecasts.length;q++){
@@ -33,10 +46,47 @@ test('communication noise changes only forecast errors and preserves paired phys
     const previous=q?trials[0].forecasts[q-1].base:Array(constants.N).fill(0);
     const truth=math.matvec(model.powerToVoltage,zero.base.map((value,j)=>value-model.lag*previous[j]));
     near(zero.forecast,truth,1e-15);
+    for(const sim of trials)assert.equal(sim.forecasts[q].forecast[0],0,'the slack forecast must stay zero at every stress level');
     for(let b=1;b<trials.length;b++)for(let j=0;j<constants.N;j++){
-      const expected=zero.forecast[j]+constants.communicationBetas[b]*(trials[3].forecasts[q].forecast[j]-zero.forecast[j]);
+      const expected=zero.forecast[j]+betas[b]*(trials[3].forecasts[q].forecast[j]-zero.forecast[j]);
       assert.ok(Math.abs(trials[b].forecasts[q].forecast[j]-expected)<1e-14);
     }
+  }
+});
+
+test('extended forecast stress preserves issued messages and deployment settings with finite bounded controllers',()=>{
+  const trials=[0,...constants.communicationStressBetas].map(beta=>communication({beta,horizon:45}));
+  for(const sim of trials){
+    run(sim,35);
+    const sealed=clone(sim.forecasts),beta=sim.options.beta;
+    sim.toggleFault(7);
+    sim.queuePulse(23,100);
+    sim.step();
+    assert.deepEqual(sim.forecasts.slice(0,sealed.length),sealed,'source changes and physical attacks cannot rewrite issued forecasts');
+    for(const entry of sim.forecasts){assert.ok(Object.isFrozen(entry));assert.ok(Object.isFrozen(entry.forecast));}
+    assert.ok(sim.deployTopology());
+    const state=sim.snapshot();
+    assert.equal(state.beta,beta);assert.equal(state.initialOptions.beta,beta);assert.equal(state.discoveryRecord.options.beta,beta);
+    assert.ok(state.faults.includes(7));
+    assert.deepEqual(sim.forecasts,communication({beta,seed:state.seed,horizon:45,faultBuses:state.faults}).forecasts);
+  }
+  for(let t=0;t<40;t++){
+    if(t>=12&&t<16)for(const sim of trials)sim.queuePulse(23,100);
+    const states=trials.map(sim=>sim.step());
+    for(const state of states){
+      assert.deepEqual(state.lastSample.base,states[0].lastSample.base);
+      near(state.lastSample.disturbance,states[0].lastSample.disturbance,1e-14);
+      assert.deepEqual(state.states.causal,states[0].states.causal);
+      assert.deepEqual(state.lastInputs.causal,states[0].lastInputs.causal);
+      assert.equal(state.cumulative.causal,states[0].cumulative.causal);
+      for(const key of keys){
+        assert.ok(Number.isFinite(state.cumulative[key]));assert.ok(Number.isFinite(state.totalCost[key]));
+        assert.ok(state.states[key].every(Number.isFinite));assert.ok(state.commandQ[key].every(Number.isFinite));
+        assert.ok(state.lastInputs[key].every(value=>Number.isFinite(value)&&Math.abs(value)<=model.qLimit));
+        assert.equal(state.states[key][0],0);assert.equal(state.lastInputs[key][0],0);
+      }
+    }
+    for(const sim of trials)assert.ok(sim.forecasts.every(entry=>entry.forecast[0]===0));
   }
 });
 
