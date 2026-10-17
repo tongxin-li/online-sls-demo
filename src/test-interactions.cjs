@@ -1500,7 +1500,7 @@ test('protocol receipt follows automatic discovery selection synthesis and fixed
   assert.deepEqual(h.protocol(),{phase:'discovery',view:'discovery',discoverySamples:0,comparisonSamples:0,
     selection:'pending',synthesis:'pending',links:'candidates',predictionWeights:'adaptive',historyAt:null});
   assert.match(h.node('phase-note').textContent,/Dense discovery.*Offline selection and synthesis/);
-  h.click('source-fault');h.click('run');await h.samples(180);h.click('run');
+  h.click('source-fault');h.click('run');await h.samples(179);h.click('run');
   assert.equal(h.snapshot().phase,'deployment');assert.equal(h.snapshot().t,0);
   assert.equal(h.snapshot().faults.includes(7),true);
   const receipt=h.protocol();

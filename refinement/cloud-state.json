@@ -391,7 +391,14 @@
       "Expose actual discovery count and completed offline selection/synthesis, distinguishing frozen communication comparison from adaptive prediction correction.",
       "Synchronize archived discovery link headers and protocol context while retaining current plant, costs, playback and deployed support.",
       "Do not overlay current source quality on archived links. Returning via matrix view restores live source controls and diagnostics immediately without a plant step."
-    ]
+    ],
+    "superseded_candidate": {
+      "run": 38993331514,
+      "job": 117280378492,
+      "step": "Test controllers and interactions",
+      "test": "protocol receipt follows automatic discovery selection synthesis and fixed comparison with retained source settings",
+      "error": "Expected comparison time 0, observed 1. New fixture waited 180 timers after Run already executed one sample. Corrected wait to 179, preserving exact zero-time and zero-cost assertions. No engine change."
+    }
   },
   "next_focus": "Audit phase presentation against the actual protocol. Clearly distinguish dense discovery, offline link selection and synthesis, then a fresh held out comparison with frozen support and coefficients. Keep prediction adaptation separate and do not imply joint online topology adaptation. Prefer concise existing status areas over more controls or visual redesign. Add actual phase transition and source-map persistence assertions if gaps exist.",
   "priorities": [
