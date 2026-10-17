@@ -1848,3 +1848,26 @@ test('paused completed source actions retain reviewed results and continue with 
   bus.click('run');assert.equal(bus.state().playing,false);
   assert.deepEqual(harness(bus.saved()).snapshot(),bus.snapshot());
 });
+
+
+test('the final applied pulse sample stays visible after its request expires and replays exactly',async()=>{
+  for(const [bus,steps] of [[23,12],[7,24],[8,8]]){
+    const h=harness(undefined,'communication');h.check('auto-compare',false);
+    h.change('intervention','power');h.change('attack-mode','pulse');h.change('bus',bus);h.quickClick();
+    await h.samples(steps);h.click('run');
+    const finished=plain(h.snapshot());
+    assert.equal(finished.t,steps);assert.equal(finished.activePulses.length,0,'No request remains for the next sample');
+    assert.ok(finished.lastPulseApplications.some(item=>item.bus===bus&&item.appliedKw>0),'The current sample still includes actual applied power');
+    assert.equal(h.node('pulse').dataset.attackState,'paused','Do not report idle while the displayed sample contains attack power');
+    h.change('bus',bus===23?7:23);h.change('bus',bus);
+    h.change('intervention','forecast');h.change('intervention','power');
+    assert.equal(h.node('pulse').dataset.attackState,'paused');
+    assert.deepEqual(plain(h.snapshot()),finished,'Selection and interaction mode cannot rewrite physical results');
+    const restored=harness(h.saved());
+    assert.deepEqual(plain(restored.snapshot()),finished);
+    assert.equal(restored.node('pulse').dataset.attackState,'paused','Replay keeps the final applied sample visible');
+    h.click('step');assert.equal(h.snapshot().lastPulseApplications.length,0);
+    assert.equal(h.node('pulse').dataset.attackState,'idle','Clear only after a new sample has no applied request');
+    assert.equal(pulses(h).length,1,'No display operation adds physical requests');
+  }
+});
