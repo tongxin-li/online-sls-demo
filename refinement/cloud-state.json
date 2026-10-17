@@ -695,10 +695,54 @@
       },
       "deployment": "GitHub Pages success",
       "direct_live_inspection": "unverified, prior denied browser access not retried"
+    },
+    {
+      "slot": "2026-10-17T19:00:00+08:00",
+      "status": "configuration_only",
+      "counted_completed": false,
+      "changes": [
+        "Recorded explicit appearance workstream in hosted instructions. No product publication."
+      ]
+    },
+    {
+      "slot": "2026-10-17T20:00:00+08:00",
+      "status": "superseded",
+      "counted_completed": false,
+      "candidate_branch": "cloud/refine/20261017-2000",
+      "source_commit": "2cdd7805610465a207cd25559b4c32c6304a5435",
+      "superseded_by": "b026719c4ce28a08d1d09876424b7e331ef4c759",
+      "changes": [
+        "Unpublished source readability work superseded by the direct user requested concise interface. Never promote the old branch over current main."
+      ]
+    },
+    {
+      "slot": "2026-10-17T21:00:00+08:00",
+      "status": "interrupted_parent_hold",
+      "counted_completed": false,
+      "candidate_branch": "cloud/refine/20261017-2100",
+      "source_commit": "5180b6d068fb8a871e7dd5a9f14e18ae9023bc57",
+      "candidate_run": 39035166285,
+      "job": 117403534520,
+      "validation": "Two old expected values failed; all new bounded target and legacy replay checks passed. No browser or publication.",
+      "recovery": "Rebased for the 22:00 slot onto the new cost buttons and retained every parent test. Fix expected marker and target units without removing assertions.",
+      "solar_run": 39035110090,
+      "solar_result": "success, all 60 paired reference/outage cases match archived report exactly",
+      "changes": [
+        "Pending continuous power target protocol retained. Repository writes stopped on the parent cost button ownership hold. No publication or completion increment."
+      ]
     }
   ],
-  "active_run": null,
-  "next_focus": "Audit actual source and receiver inspection through history and interaction mode changes, including keyboard focus and accessible fault actions. Make a product correction only for a demonstrated behavior or causality issue. Preserve the forecasted-demand beta 4 default and seed, all four curves and full costs, frozen deployed topology, exact saved replay and conditional scientific results. Avoid noise knobs, retuning or cosmetic releases to force an advantage.",
+  "active_run": {
+    "slot": "2026-10-17T22:00:00+08:00",
+    "started_at": "2026-10-17T21:57:04+08:00",
+    "expires_at": "2026-10-17T22:37:04+08:00",
+    "branch": "cloud/refine/20261017-2200",
+    "base_main": "2634715580bb1cb50306ac9a476f8385637126ce",
+    "status": "candidate_validation",
+    "focus": "Rebased bounded continuous target intervention with exact legacy replay and current cost buttons",
+    "lease_scope": "Durable candidate branch record; main promotion requires successful cloud checks and matching expected main."
+  },
+  "next_focus": "Finish the continuous target protocol with physical bounds, explicit additive pulse behavior, exact old replay, all four full costs and preserved cost buttons. Then audit a paired announced/unannounced physical event without changing physical realizations, source errors, feedback-only trajectory, objective or limits.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -754,10 +798,10 @@
       "job": 117310942294
     },
     "last_metadata_verification": {
-      "commit": "37aa669ed2239ada293c4fcd86db066478c01ba2",
-      "candidate_run": 39020936035,
-      "main_run": 39021334717,
-      "pages_run": 39021334639,
+      "commit": "d01631a3c1502df713be55eef87f8c01e4687678",
+      "candidate_run": 39024605710,
+      "main_run": 39025105567,
+      "pages_run": 39025105236,
       "result": "success"
     },
     "interrupted_invocation": {
@@ -775,12 +819,6 @@
       "parent_solar_run": 39014465950,
       "verified": "success",
       "recovery_branch": "cloud/refine/recover-20261017-1500"
-    },
-    "latest_completion_candidate": {
-      "slot": "2026-10-17T18:00:00+08:00",
-      "branch": "cloud/refine/20261017-1800",
-      "expected_main": "18f5271661d89b7e92c30c078275ed1396bb31d2",
-      "instruction": "Metadata-only completion candidate. Validate normally and promote only with matching current main. Count 18:00 once. Do not promote the superseded 15:00 audit."
     }
   },
   "parent_handoffs": [
@@ -812,6 +850,19 @@
       "suites": 6,
       "verified": "success",
       "counts_as_scheduled_refinement": false
+    },
+    {
+      "commit": "2634715580bb1cb50306ac9a476f8385637126ce",
+      "description": "Concise interface and stable Total cost / Difference buttons with native live pointer, keyboard and phone tests",
+      "main_run": 39036437816,
+      "pages_run": 39036437365,
+      "verified": "success",
+      "counts_as_scheduled_refinement": false
     }
-  ]
+  ],
+  "appearance_preference": {
+    "requested": "2026-10-17",
+    "scope": "Modern concise four panel interface with legible typography, spacing and accessible contrast alongside behavior work. Preserve closed advanced controls and current main actions.",
+    "canonical_url": "https://tongxin.me/online-sls-demo/"
+  }
 }

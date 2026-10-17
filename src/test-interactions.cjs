@@ -483,7 +483,7 @@ test('Continuous is the default and a released bus click repeats one pulse per s
   assert.equal(h.snapshot().t,16);assert.equal(pulses(h).length,16);
   assert.deepEqual(pulses(h).map(event=>event.t),Array.from({length:16},(_,i)=>i));
   assert.ok(pulses(h).every(event=>event.bus===14));
-  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Repeats until stopped');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW target per bus · Maintained until stopped');
 });
 
 test('clicking the same bus stops a continuous attack without adding a final pulse',async()=>{
@@ -573,7 +573,7 @@ test('continuous attacks survive ordinary focus changes but stop on window blur'
   assert.equal(pulses(h).length,4);assert.equal(h.node('pulse')['aria-pressed'],'true');
   h.window.dispatch('blur');
   assert.equal(h.node('pulse').dataset.attackState,'fading','Window blur must repaint the released attack before another physical sample');
-  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Disturbance fading');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+(h.node('attack-mode').value==='continuous'&&h.node('pulse').dataset.attackState!=='held'?' kW target per bus · ':' kW per pulse · ')+'Disturbance fading');
   assert.equal(h.node('pulse')['aria-pressed'],'false');
   await h.samples(2);
   assert.equal(pulses(h).length,4);assert.equal(h.node('pulse')['aria-pressed'],'false');assert.equal(h.state().playing,true);
@@ -623,20 +623,20 @@ test('changing attack mode stops repetition without deleting pending or applied 
 test('attack feedback separates continuous requests from fading and paused physical disturbances',async()=>{
   const h=harness(),bus=h.bus(7);
   assert.equal(h.node('pulse').dataset.attackState,'idle');
-  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Click to start or stop');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+(h.node('attack-mode').value==='continuous'&&h.node('pulse').dataset.attackState!=='held'?' kW target per bus · ':' kW per pulse · ')+'Click to start or stop');
   pointerClick(h,bus);
   assert.equal(h.snapshot().pendingPulses.length,1);
   assert.equal(h.node('pulse').dataset.attackState,'continuous','Active repetition takes precedence over its queued request');
-  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Repeats until stopped');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW target per bus · Maintained until stopped');
   await h.samples(4);
   const tails=plain(h.snapshot().activePulses);
   pointerClick(h,bus);
   assert.deepEqual(h.snapshot().activePulses,tails,'Stopping new requests must preserve the applied disturbance');
   assert.equal(h.node('pulse').dataset.attackState,'fading');
-  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Disturbance fading');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+(h.node('attack-mode').value==='continuous'&&h.node('pulse').dataset.attackState!=='held'?' kW target per bus · ':' kW per pulse · ')+'Disturbance fading');
   h.click('run');
   assert.equal(h.node('pulse').dataset.attackState,'paused');
-  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Paused · Disturbance remains');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+(h.node('attack-mode').value==='continuous'&&h.node('pulse').dataset.attackState!=='held'?' kW target per bus · ':' kW per pulse · ')+'Paused · Disturbance remains');
   await h.samples(3);
   assert.deepEqual(h.snapshot().activePulses,tails,'Pause holds the physical disturbance at its current age');
   h.click('run');
@@ -653,7 +653,7 @@ test('attack feedback separates continuous requests from fading and paused physi
   await h.samples(1);
   assert.equal(h.snapshot().lastPulseApplications.length,0);
   assert.equal(h.node('pulse').dataset.attackState,'idle');
-  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Click to start or stop');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+(h.node('attack-mode').value==='continuous'&&h.node('pulse').dataset.attackState!=='held'?' kW target per bus · ':' kW per pulse · ')+'Click to start or stop');
 });
 
 test('pulse feedback distinguishes a held gesture from pending requests and fading tails',async()=>{
@@ -665,7 +665,7 @@ test('pulse feedback distinguishes a held gesture from pending requests and fadi
   assert.equal(h.snapshot().pendingPulses.length,1);
   h.event('pulse','pointerup');h.click('pulse',1);
   assert.equal(h.node('pulse').dataset.attackState,'pending');
-  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Queued for next sample');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+(h.node('attack-mode').value==='continuous'&&h.node('pulse').dataset.attackState!=='held'?' kW target per bus · ':' kW per pulse · ')+'Queued for next sample');
   await h.samples(1);
   assert.equal(h.node('pulse').dataset.attackState,'fading');
   h.quickClick();
@@ -686,13 +686,13 @@ test('attack feedback belongs to the selected bus while other continuous attacks
   h.change('bus',14);
   assert.equal(h.node('pulse').dataset.attackState,'idle');
   assert.equal(h.node('pulse-label').textContent,'Attack bus 14');
-  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Click to start or stop');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+(h.node('attack-mode').value==='continuous'&&h.node('pulse').dataset.attackState!=='held'?' kW target per bus · ':' kW per pulse · ')+'Click to start or stop');
   pointerClick(h,h.node('pulse'));
   assert.deepEqual(h.state().activeAttackBuses,[7,14]);assert.equal(h.node('pulse').dataset.attackState,'continuous');
   assert.equal(h.state().selectedBus,14);assert.ok(h.snapshot().activePulses.every(event=>event.bus===7));
   h.change('bus',7);
   assert.equal(h.node('pulse').dataset.attackState,'continuous');
-  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Repeats until stopped');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW target per bus · Maintained until stopped');
 });
 
 test('switching attack mode updates feedback while retaining queued and applied disturbances',async()=>{
@@ -700,14 +700,14 @@ test('switching attack mode updates feedback while retaining queued and applied 
   h.change('attack-mode','pulse');
   assert.equal(h.snapshot().pendingPulses.length,1);
   assert.equal(h.node('pulse').dataset.attackState,'pending');
-  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Queued for next sample');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+(h.node('attack-mode').value==='continuous'&&h.node('pulse').dataset.attackState!=='held'?' kW target per bus · ':' kW per pulse · ')+'Queued for next sample');
   await h.samples(2);
   h.key('keydown','d');await h.samples(1);
   const tails=plain(h.snapshot().activePulses);
   h.change('attack-mode','continuous');
   assert.deepEqual(h.snapshot().activePulses,tails);
   assert.equal(h.node('pulse').dataset.attackState,'fading');
-  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · Disturbance fading');
+  assert.equal(h.node('attack-hint').textContent,h.node('strength').value+(h.node('attack-mode').value==='continuous'&&h.node('pulse').dataset.attackState!=='held'?' kW target per bus · ':' kW per pulse · ')+'Disturbance fading');
   assert.equal(h.node('pulse')['aria-pressed'],'false');
 });
 
@@ -847,16 +847,16 @@ test('held and continuous attacks survive the automatic handoff with one fresh p
   for(const mode of ['pulse','continuous']){
     const h=harness(),bus=h.bus(7);h.change('attack-mode',mode);
     if(mode==='pulse')h.pointer('pointerdown',bus,{pointerId:61});else pointerClick(h,bus,61);
-    await h.samples(179);assert.equal(h.snapshot().t,179);assert.ok(h.snapshot().activePulses.length>1);
+    await h.samples(179);assert.equal(h.snapshot().t,179);if(mode==='continuous')assert.equal(h.snapshot().activePulses.length,1);else assert.ok(h.snapshot().activePulses.length>1);
     await h.samples(1);
     assert.equal(h.snapshot().phase,'deployment');assert.equal(h.snapshot().t,0);
     assert.equal(h.node('pulse')['aria-pressed'],'true');
     assert.equal(h.node('pulse').dataset.attackState,mode==='pulse'?'held':'continuous');
-    assert.equal(h.node('attack-hint').textContent,h.node('strength').value+' kW per pulse · '+(mode==='pulse'?'Release to stop':'Repeats until stopped'));
+    assert.equal(h.node('attack-hint').textContent,h.node('strength').value+(h.node('attack-mode').value==='continuous'&&h.node('pulse').dataset.attackState!=='held'?' kW target per bus · ':' kW per pulse · ')+(mode==='pulse'?'Release to stop':'Maintained until stopped'));
     assert.equal(h.snapshot().activePulses.length,0,'The comparison plant must not inherit discovery pulse tails');
     assert.equal(h.snapshot().pendingPulses.length,1);assert.equal(pulses(h).length,1);
     assert.deepEqual(pulses(h).map(event=>[event.t,event.bus]),[[0,7]]);
-    assert.deepEqual(h.state().journal,[{t:0,type:'pulse',bus:7,strength:100}]);
+    assert.deepEqual(h.state().journal,[{t:0,type:'pulse',bus:7,strength:100,...(mode==='continuous'?{protocol:'held-target-v1'}:{})}]);
     assert.ok(Object.values(h.snapshot().cumulative).every(value=>value===0));
     if(mode==='pulse'){
       assert.equal(bus.dataset.holding,'true');assert.equal(bus.hasPointerCapture(61),true);
@@ -997,7 +997,7 @@ test('automatic handoff does not duplicate a same bus request queued at the lega
   await h.samples(1);
   assert.equal(h.snapshot().phase,'deployment');assert.equal(h.snapshot().t,1);
   assert.equal(pulses(h).length,1);assert.equal(h.snapshot().activePulses.length,1);
-  assert.deepEqual(h.state().journal,[{t:0,type:'pulse',bus:8,strength:100}]);
+  assert.deepEqual(h.state().journal,[{t:0,type:'pulse',bus:8,strength:100,protocol:'held-target-v1'}]);
   await h.samples(1);assert.deepEqual(pulses(h).map(event=>event.t),[0,1]);
 });
 
@@ -2010,7 +2010,36 @@ test('primary attack hint exposes the configured units even while advanced stren
   const h=harness();
   for(const strength of ['50','150','100']){
     h.change('strength',strength);
-    assert.equal(h.node('attack-hint').textContent,strength+' kW per pulse · Click to start or stop');
+    assert.equal(h.node('attack-hint').textContent,strength+' kW target per bus · Click to start or stop');
     assert.equal(h.snapshot().t,0);assert.equal(h.snapshot().eventLog.length,0);
   }
+});
+
+test('bounded continuous targets maintain independent buses, change strength and replay exactly',async()=>{
+  const h=harness(),buses=[7,8,23];h.change('strength',150);
+  for(const bus of buses)pointerClick(h,h.bus(bus),bus);
+  await h.samples(20);
+  for(const bus of buses){
+    const item=h.snapshot().lastPulseApplications.find(p=>p.bus===bus);
+    assert.equal(item.requestedKw,150);assert.ok(item.appliedKw<=150+1e-9);
+    assert.equal(h.snapshot().activePulses.filter(p=>p.bus===bus&&p.protocol==='held-target-v1').length,1);
+  }
+  pointerClick(h,h.bus(8),8);h.change('strength',50);await h.samples(2);
+  for(const bus of [7,23])assert.equal(h.snapshot().lastPulseApplications.find(p=>p.bus===bus).requestedKw,50);
+  assert.ok(h.snapshot().lastPulseApplications.find(p=>p.bus===8).requestedKw<150);
+  h.click('run');const saved=h.saved(),restored=harness(saved);
+  for(const key of ['states','cumulative','history','eventLog','lastPulseApplications','activePulses'])assert.deepEqual(restored.snapshot()[key],h.snapshot()[key],'Bounded protocol replay '+key);
+  assert.deepEqual(restored.state().activeAttackBuses,[]);
+});
+
+test('untagged version 13 continuous histories keep their original stacked physical replay',()=>{
+  const options={preset:'mixed',seed:20261013,horizon:40};
+  const legacy=new PowerDemo.Simulation(options);
+  for(let t=0;t<8;t++){legacy.queuePulse(23,100);legacy.queuePulse(7,150);legacy.step();}
+  const before=legacy.snapshot();
+  const saved={privateContent:{version:13,phase:'discovery',initialOptions:options,t:before.t,events:before.eventLog,attackMode:'continuous',intervention:'power',selectedBus:23,pulseStrength:'100'}};
+  const restored=harness(saved);
+  for(const key of ['states','cumulative','history','eventLog','lastPulseApplications','activePulses'])assert.deepEqual(restored.snapshot()[key],before[key],'Legacy untagged replay '+key);
+  assert.ok(before.lastPulseApplications.find(p=>p.bus===23).requestedKw>100);
+  assert.equal(restored.state().playing,false);assert.deepEqual(restored.state().activeAttackBuses,[]);
 });

@@ -244,7 +244,8 @@ async function main() {
         marked:Array.from(document.querySelectorAll('#pr-network [data-bus]')).filter(node=>node.querySelector('.pe-attacked')).map(node=>Number(node.dataset.bus)),
         counts:Object.fromEntries([20,22,23].map(bus=>[bus,snapshot.eventLog.filter(event=>event.type==='pulse'&&event.bus===bus).length])),
         active:Array.from(document.querySelectorAll('#pr-network [data-bus]')).filter(node=>node.getAttribute('aria-label')==='Stop attack at bus '+node.dataset.bus).map(node=>Number(node.dataset.bus)).sort((a,b)=>a-b),
-        applied:snapshot.lastPulseApplications.map(item=>({bus:item.bus,appliedKw:item.appliedKw})),
+        applied:snapshot.lastPulseApplications.map(item=>({bus:item.bus,requestedKw:item.requestedKw,appliedKw:item.appliedKw})),
+        targetKw:Number(document.querySelector('#pr-strength').value),continuousComponents:snapshot.activePulses.filter(item=>item.protocol==='held-target-v1').map(item=>item.bus),
         minimumVoltage:Object.fromEntries(Object.entries(snapshot.voltages).map(([key,values])=>[key,Math.min(...values)])),
         cumulative:{...snapshot.cumulative}};
     });
@@ -258,6 +259,8 @@ async function main() {
         assert.ok(reading.marked.includes(bus),'Other active buses retain their orange attack marking');
         assert.ok(reading.counts[bus]>0,'Bus '+bus+' has actual queued attack events');
         assert.ok(reading.applied.some(item=>item.bus===bus&&item.appliedKw>0),'Bus '+bus+' has a measured power disturbance');
+        assert.equal(reading.applied.find(item=>item.bus===bus).requestedKw,reading.targetKw,'Continuous bus '+bus+' maintains the selected requested kW without stacking');
+        assert.equal(reading.continuousComponents.filter(item=>item===bus).length,1,'Exactly one continuous component per bus');
       }
       return reading;
     };
