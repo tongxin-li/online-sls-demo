@@ -206,7 +206,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 @media(max-width:1000px) { .pr-attack-hint { display:none; } }
 
 .pr-cost-tools { display:flex; justify-content:flex-end; }
-#pr-cost-metric { min-height:25px; padding:2px 6px; font-size:10px; }
+
 .pr-comparison-summary { margin:5px 0 3px; color:#53535a; line-height:1.4; }
 #pr-deploy:not(:disabled) { background:#0071e3; color:#fff; }
 
@@ -261,7 +261,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 :focus-visible { outline:2px solid var(--primary); outline-offset:3px; }
 @media(max-width:650px),(pointer:coarse) {
   .btn-stop-attacks { min-height:44px; }
-  #pr-matrix-view,#pr-view,#pr-cost-metric { min-height:44px; padding:8px 10px; font-size:12px; }
+  #pr-matrix-view,#pr-view { min-height:44px; padding:8px 10px; font-size:12px; }
   .btn-fit,.btn-deploy { min-height:44px; padding:8px 12px; font-size:12px; }
   .pr-topology-history { gap:8px; }
   .pr-topology-history input { height:44px; }
@@ -423,6 +423,16 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 }
 
 .pr-controlbar { align-items:flex-start; }
+
+/* Direct view selection stays usable while new samples repaint the chart. */
+.pr-cost-switch { display:inline-flex; align-items:stretch; gap:3px; padding:3px; border-radius:10px; background:var(--muted); }
+.pr-cost-switch button { min-height:34px; padding:6px 13px; border:0; border-radius:7px; background:transparent; color:var(--muted-foreground); font-size:12px; font-weight:500; white-space:nowrap; }
+.pr-cost-switch button[aria-pressed='true'] { background:var(--background); color:var(--foreground); box-shadow:0 1px 3px #00000012; }
+.pr-cost-switch button:hover { color:var(--foreground); }
+.pr-cost-switch button:focus-visible { outline:2px solid var(--primary); outline-offset:1px; }
+@media(max-width:650px),(pointer:coarse) {
+  .pr-cost-switch button { min-height:44px; padding:8px 14px; font-size:12px; }
+}
 
 /* Artwork stays decorative. The enclosing bus handles hit area and badge input. */
 .pe-host { -webkit-user-select:none; user-select:none; touch-action:manipulation; }
@@ -633,7 +643,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         <svg class="pr-chart" id="pr-convergence" role="img" aria-label="Learning diagnostic over time"></svg>
         <p id="pr-mode-note" class="pr-caption"></p>
       </div>
-      <div id="pr-cost-content"><p id="pr-comparison-summary" class="pr-comparison-summary" aria-live="polite">Run to compare all four controllers</p><div class="pr-cost-tools"><select id="pr-cost-metric" aria-label="Cost measure"><option value="total" selected>Cumulative cost</option><option value="gap">Difference vs scalar</option></select></div><svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative cost of active controllers"></svg><table class="pr-cost-table tabular-nums" aria-label="Cumulative controller costs"><thead><tr><th scope="col">Method</th><th scope="col">Cumulative cost</th><th scope="col">vs feedback</th></tr></thead><tbody id="pr-cost-detail"></tbody></table><p id="pr-cost-note" class="pr-caption pr-comparison-note">Dense messages during learning · Adaptation starts at 30 s</p></div>
+      <div id="pr-cost-content"><p id="pr-comparison-summary" class="pr-comparison-summary" aria-live="polite">Run to compare all four controllers</p><div class="pr-cost-tools"><input type="hidden" id="pr-cost-metric" value="total" hidden><div id="pr-cost-switch" class="pr-cost-switch" role="group" aria-label="Cost display"><button type="button" id="pr-cost-total" aria-pressed="true" aria-controls="pr-cost">Total cost</button><button type="button" id="pr-cost-gap" aria-pressed="false" aria-controls="pr-cost">Difference</button></div></div><svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative cost of active controllers"></svg><table class="pr-cost-table tabular-nums" aria-label="Cumulative controller costs"><thead><tr><th scope="col">Method</th><th scope="col">Cumulative cost</th><th scope="col">vs feedback</th></tr></thead><tbody id="pr-cost-detail"></tbody></table><p id="pr-cost-note" class="pr-caption pr-comparison-note">Dense messages during learning · Adaptation starts at 30 s</p></div>
     </section>
   </div>
   <div class="pr-bottomline">
@@ -2613,11 +2623,23 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   });
   $('speed').addEventListener('change', () => { if (playing) { clearTimeout(timer); nextTickAt=0; schedule(); } save(); });
   $('auto-compare').addEventListener('change',()=>{render();save();});
-  $('cost-metric').addEventListener('change',()=>{
+  function renderCostMetric() {
+    const gap=$('cost-metric').value==='gap';
+    $('cost-total').setAttribute('aria-pressed',String(!gap));
+    $('cost-gap').setAttribute('aria-pressed',String(gap));
+    const label='Difference from '+gapReference();
+    $('cost-gap').setAttribute('aria-label',label);
+    $('cost-gap').title=label;
+  }
+  function selectCostMetric(value) {
+    $('cost-metric').value=value==='gap'?'gap':'total';
     // A pinned reading belongs to the previous quantity and scale.
     $('tooltip').style.display='none';pin=null;
-    drawCost();save();
-  });
+    renderCostMetric();drawCost();save();
+  }
+  $('cost-metric').addEventListener('change',()=>selectCostMetric($('cost-metric').value));
+  $('cost-total').addEventListener('click',()=>selectCostMetric('total'));
+  $('cost-gap').addEventListener('click',()=>selectCostMetric('gap'));
   $('strength').addEventListener('change', () => { renderControls(); drawNetwork(); save(); });
   $('attack-mode').addEventListener('change',()=>{releaseAttack();renderControls();drawNetwork();save();});
   $('intervention').addEventListener('change',()=>{
@@ -2883,11 +2905,10 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     const scenario=snapshot.scenario;
     $('scenario-status').hidden=scenario?.id!=='solar-outage';
     $('scenario-status').textContent=snapshot.phase!=='deployment'?'Solar outage reserved for comparison · Four sites · 30 to 50 s':snapshot.t<=30?'Solar outage starts at comparison 30 s':scenario.active?'Solar outage · '+scenario.requestedKw.toFixed(1)+' kW requested · '+scenario.appliedKw.toFixed(1)+' kW applied':'Solar restored · Background power continues';
-    const gapOption=$('cost-metric').querySelector('option[value="gap"]');
-    if(gapOption) gapOption.textContent=communicationComparison()?'Difference vs fixed sparse':'Difference vs scalar';
+    renderCostMetric();
     const matrixChangeOption=$('matrix-view').querySelector('option[value="change"]');
-    if(matrixChangeOption) matrixChangeOption.textContent=communicationComparison()?'Learned scores':'Learning weights';
-    $('cost-metric').hidden=false;
+    const matrixChangeLabel=communicationComparison()?'Learned scores':'Learning weights';
+    if(matrixChangeOption && matrixChangeOption.textContent!==matrixChangeLabel) matrixChangeOption.textContent=matrixChangeLabel;
     if(!plottedSeries().length) activeSeries().forEach(item=>visible.add(item.key));
     root.querySelectorAll('[data-series]').forEach(button=>{
       const item=series.find(item=>item.key===button.dataset.series);
@@ -3409,7 +3430,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     }
     $('comparison-summary').textContent=comparisonSummary();
     const recovery=powerRecoveryContext();
-    $('cost-note').textContent=gap?'Below zero is cheaper · '+(recovery?'Totals include load recovery':'Table shows totals')
+    $('cost-note').textContent=gap?'Compared with '+gapReference()+' · Below zero is cheaper · '+(recovery?'Totals include load recovery':'Table shows totals')
       : recovery || (snapshot.phase==='deployment'?(communicationComparison()?'Learning costs excluded · Prediction links only · Common feedback unchanged':'Fresh comparison · Learning costs excluded · Identical disturbances'):'Dense messages during learning · Adaptation starts at 30 s');
   }
   function comparisonSummary() {
