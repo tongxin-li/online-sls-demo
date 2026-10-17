@@ -532,7 +532,15 @@
       "direct_live_inspection": "unverified, prior denied browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-17T15:00:00+08:00",
+    "started_at": "2026-10-17T14:59:17+08:00",
+    "lease_expires_at": "2026-10-17T15:39:17+08:00",
+    "branch": "cloud/refine/20261017-1500",
+    "base_main": "b76837cfdec8193d10520c236949ffbafea09d1d",
+    "status": "claimed",
+    "focus": "Scientific protocol audit of bounded PV ramps with declared advance information, no production model changes"
+  },
   "next_focus": "Audit physical power requests versus actual applied and residual power at equipment limits and across handoff. Check continuous stop and repeated pulse causality using existing forecasts and all four controllers. Add only a demonstrated behavioral or numerical correction, not explanatory controls or unsupported visual redesign. Keep the bounded reference and outage audit unchanged unless scientific changes justify all predefined seeds.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
@@ -599,5 +607,24 @@
       "expected_main": "36cc541077eb15a6ec6b45126b6562e8b5c9dc13",
       "instruction": "This documentation-only candidate completes the 13:00 test infrastructure pass and recovers 12:00 exactly once. Validate normally, then promote only with matching main head. Metadata validation is not an extra refinement."
     }
-  }
+  },
+  "parent_handoffs": [
+    {
+      "commit": "9286d0227bb49c53793aa07a7cd4e113b6df8f44",
+      "description": "Independent continuous power attacks",
+      "candidate_run": 39008512135,
+      "main_run": 39008764737,
+      "pages_run": 39008764813,
+      "tests": 168
+    },
+    {
+      "commit": "b76837cfdec8193d10520c236949ffbafea09d1d",
+      "description": "Optional extended forecast stress with all baselines and full paired audit",
+      "candidate_run": 39010429654,
+      "main_run": 39010837655,
+      "pages_run": 39010837319,
+      "audit_run": 39010837650,
+      "tests": 172
+    }
+  ]
 }
