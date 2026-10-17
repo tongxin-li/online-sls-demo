@@ -3,9 +3,9 @@
   "timezone": "Asia/Shanghai",
   "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
   "status": "scheduled",
-  "first_run": "2026-10-17T02:00:00+08:00",
-  "last_scheduled_run": "2026-10-18T01:00:00+08:00",
-  "hard_deadline": "2026-10-18T01:45:00+08:00",
+  "first_run": "2026-10-18T01:00:00+08:00",
+  "last_scheduled_run": "2026-10-19T00:00:00+08:00",
+  "hard_deadline": "2026-10-19T01:00:00+08:00",
   "max_scheduled_runs": 24,
   "max_minutes_per_run": 40,
   "completed_count": 15,
@@ -784,7 +784,7 @@
     }
   ],
   "active_run": null,
-  "next_focus": "Audit an identical announced and unannounced physical event, declared at least five samples ahead and entering only newly issued forecasts with original source errors. Verify identical physical realizations and feedback-only trajectories across all predefined seeds before any scenario change or advantage claim. Preserve concise main controls, cost buttons, old/new replay and all four full costs; keep appearance work compatible with closed advanced disclosures.",
+  "next_focus": "First make the recorded reliable, mixed and all-corrupted forecast regimes immediately understandable through a compact visual treatment, retaining all four methods, actual winners and available uncertainty. Distinguish terminal-cost recorded studies from the live stage-cost trial. Then make actual source-to-receiver communication and controller resynthesis inspectable without implying online topology adaptation. Use the consolidated renewed automation prompt as the current task.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -840,11 +840,18 @@
       "job": 117310942294
     },
     "last_metadata_verification": {
-      "commit": "d01631a3c1502df713be55eef87f8c01e4687678",
-      "candidate_run": 39024605710,
-      "main_run": 39025105567,
-      "pages_run": 39025105236,
-      "result": "success"
+      "commit": "315ae9faa095c6a4cd34011dbba3046219c4af16",
+      "candidate_run": 39040451034,
+      "main_run": 39041075967,
+      "pages_run": 39041075575,
+      "result": "success",
+      "supersedes": {
+        "commit": "d01631a3c1502df713be55eef87f8c01e4687678",
+        "candidate_run": 39024605710,
+        "main_run": 39025105567,
+        "pages_run": 39025105236,
+        "result": "success"
+      }
     },
     "interrupted_invocation": {
       "slot": "2026-10-17T15:00:00+08:00",
@@ -866,7 +873,21 @@
       "slot": "2026-10-17T22:00:00+08:00",
       "branch": "cloud/refine/20261017-2200",
       "expected_main": "5bd7db2ad9305370f48e2a99bccb3199ab697068",
-      "instruction": "Documentation-only verified completion and full protocol evidence. Validate normally and promote only with matching current main. Count 22:00 once; 19:00 configuration and 20:00 superseded/21:00 interrupted work remain uncounted."
+      "instruction": "Resolved and published at 315ae9faa095c6a4cd34011dbba3046219c4af16, now an ancestor of latest parent release. Do not promote the old branch or count this completion again.",
+      "original_instruction": "Documentation-only verified completion and full protocol evidence. Validate normally and promote only with matching current main. Count 22:00 once; 19:00 configuration and 20:00 superseded/21:00 interrupted work remain uncounted.",
+      "resolved": true,
+      "published_metadata_commit": "315ae9faa095c6a4cd34011dbba3046219c4af16"
+    },
+    "renewal_configuration": {
+      "branch": "cloud/refine/renew-20261018",
+      "expected_main": "2a9ff26b59565ecac1eb5274fbea4d813a18f24f",
+      "scope": "Only refinement/cloud-state.json",
+      "configured_at": "2026-10-17T16:08:20.808Z",
+      "native_readback": "exact prompt, schedule, enabled state and timezone verified",
+      "status": "Native renewal saved. Metadata candidate requires normal validation and expected-main guarded publication.",
+      "counts_as_invocation": false,
+      "counts_as_improvement": false,
+      "instruction": "Read actual branch and workflow state before recovery. Promote only validated metadata based on matching main. Do not increment either program count for configuration persistence."
     }
   },
   "parent_handoffs": [
@@ -906,11 +927,71 @@
       "pages_run": 39036437365,
       "verified": "success",
       "counts_as_scheduled_refinement": false
+    },
+    {
+      "commit": "2a9ff26b59565ecac1eb5274fbea4d813a18f24f",
+      "description": "Actual Cost and communication plot plus complete recorded Across forecast quality study, preserving concise controls and scientific engine",
+      "source_commit": "fdbfa4561e4dc4ca733aabe81f32c6b822a66d0e",
+      "candidate_run": 39042385440,
+      "main_run": 39043040413,
+      "pages_run": 39043040016,
+      "verified": "success, candidate/main validation and Pages independently read during renewal",
+      "counts_as_scheduled_refinement": false,
+      "reference_dependency": "src/reference-study.html",
+      "reference_generator": "src/build-reference-study.cjs",
+      "reference_tests": "src/test-reference-study.cjs"
     }
   ],
   "appearance_preference": {
     "requested": "2026-10-17",
     "scope": "Modern concise four panel interface with legible typography, spacing and accessible contrast alongside behavior work. Preserve closed advanced controls and current main actions.",
     "canonical_url": "https://tongxin.me/online-sls-demo/"
+  },
+  "program_history": [
+    {
+      "id": "20261017-bounded",
+      "program": "Hourly grid demo refinement",
+      "timezone": "Asia/Shanghai",
+      "first_run": "2026-10-17T02:00:00+08:00",
+      "last_scheduled_run": "2026-10-18T01:00:00+08:00",
+      "hard_deadline": "2026-10-18T01:45:00+08:00",
+      "max_scheduled_runs": 24,
+      "max_minutes_per_run": 40,
+      "completed_count": 15,
+      "history_location": "Existing top-level runs retained unchanged",
+      "closed_by": "Directly authorized renewal configuration, not a scheduled invocation",
+      "renewed_at": "2026-10-17T16:08:20.808Z"
+    }
+  ],
+  "renewed_program": {
+    "id": "20261018-visual-codesign",
+    "status": "scheduled",
+    "timezone": "Asia/Shanghai",
+    "first_run": "2026-10-18T01:00:00+08:00",
+    "last_scheduled_run": "2026-10-19T00:00:00+08:00",
+    "hard_deadline": "2026-10-19T01:00:00+08:00",
+    "max_scheduled_runs": 24,
+    "max_minutes_per_run": 40,
+    "invocation_count": 0,
+    "completed_count": 0,
+    "runs": [],
+    "active_run": null,
+    "configuration": {
+      "configured_at": "2026-10-17T16:08:20.808Z",
+      "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
+      "title": "Grid demo cloud refinement",
+      "enabled": true,
+      "timezone": "Asia/Shanghai",
+      "timing_mode": "exact_schedule",
+      "schedule": "BEGIN:VEVENT\nDTSTART;TZID=Asia/Shanghai:20261018T010000\nRRULE:FREQ=HOURLY;COUNT=24\nEND:VEVENT",
+      "next_run_time": null,
+      "prompt": "Continue improving the single interactive grid control demo at https://tongxin.me/online-sls-demo/ in tongxin-li/online-sls-demo. Work entirely through connected GitHub APIs and existing GitHub Actions cloud compute so the user's computer can be off. Do not depend on local files, the desktop app, paid infrastructure or secret inspection. The old local refinement automation stays paused. Do not create another demo URL, duplicate automation or version selector.\n\nThe renewed program has 24 hourly scheduled starts from 18 October 2026 at 01.00 through 19 October 2026 at 00.00 in Asia/Shanghai. Stop all work by 19 October 2026 at 01.00. Each pass should take at most 40 minutes, reserving time for validation and publication. At the final scheduled invocation or deadline, pause this same hosted automation and report completed passes and unfinished work. Do not start new refinement after the deadline.\n\nRead the latest main branch, README.md, environment.html, build.py, validation workflow, browser smoke tests and refinement/cloud-state.json at each invocation. Preserve concurrent changes. Use the durable state for a lease, overlap prevention, interrupted run recovery and scheduled slot deduplication. Preserve all old history and completed counts. Track the renewed program separately with its own dates, invocation count and completed count. Configuration coordination is not a scheduled refinement. Do not erase historical failures or count metadata recovery as a new improvement.\n\nThe user's central request is a significant improvement in visual clarity and in the explanation of the method's benefits from a communication and control co-design perspective. Make one coherent, reviewable improvement per pass toward that larger result. Inspect the current interface before choosing work. The latest verified parent release 2a9ff26 already added Cost and communication, a recorded Across forecast quality study, stable Total cost and Difference buttons, and a textual learn gains, select links, rebuild controller sequence. Do not merely add these again or accumulate more panels and controls.\n\nFirst make the existing evidence immediately understandable in a compact visual treatment. Show reliable forecasts, mixed source reliability and broadly corrupted forecasts using the existing recorded results. Distinguish those recorded studies from the live interactive trial. Display all four methods, the actual winner and uncertainty where available. The message is selective use of predictions under a limited communication budget. Dense prediction can win with reliable forecasts, learned sparse can win with mixed reliability, and feedback can win when all sources are corrupted. Do not imply a guarantee of being the best controller in every regime.\n\nNext make co-design inspectable through actual data. Connect a selected source and inverter receiver across the network, support matrix, observed forecast error, learned correction or score, selected link and actual controller command. Show measured before and after support at the same remote link budget and the real effect of resynthesis. Use existing diagnostics where possible and give each visual one clear role. Animate only actual measured events. Clearly identify learning, support selection, controller synthesis and fixed deployment. Avoid abstract diagrams or activity animation that imply topology is adapting when it is fixed.\n\nMake the interface modern, simple and elegant, with readable system typography, clear hierarchy, restrained color, efficient spacing and subtle purposeful motion. Keep the interactive experiment central and the four main panels easy to scan. Make the benefit visible without long explanations. Use concise labels, stable controls, accessible contrast, sensible touch targets, keyboard operation and reduced motion support. Avoid tiny labels, repeated event badges, overlap, new dependencies and decorative clutter. Keep detailed environment explanation in the separate environment document.\n\nPreserve the constructed 24 bus LinDistFlow model, eight inverters, physical units, actuator limits, nominal voltage profile, objective, common feedback, forecast timing, controller definitions, learning equations and baseline definitions. Preserve forecasted-demand defaults, beta 4 and seed 20261013, independent comparison after discovery, all physical attack and recovery costs, bounded continuous held-target-v1 attacks, explicit additive pulses, persistent forecast corruption and repair, sealed forecast issuances, exact old trial replay, ongoing attacks across automatic transition, and continuation after the finite comparison. Preserve stable cost buttons during playback.\n\nThe scientific scope is learning prediction corrections, selecting sparse prediction support, and resynthesizing a controller before a held out comparison with fixed deployed links and coefficients. The current correction follows the archived experimental equations described in README, not a literal implementation of manuscript Algorithm 1. Joint online topology optimization is not implemented. Do not invent manuscript contents or claim theorem guarantees or numerical reproduction. Do not edit research files. If a scientific issue requires changes outside this scope, record a concrete proposal and evidence before claiming it solved.\n\nThe 24 versus 176 counts concern remote prediction links only. Shared state feedback and local prediction channels are excluded. Live curves accumulate stage costs; the recorded finite episode reference study also includes a terminal penalty. Keep these cost conventions explicit and separate. Preserve the reference-study.html build dependency and generator. Preserve all recorded beta levels, the full 20 paired held out seeds, the separate five seed all-noisy counterexample and unfavorable outcomes.\n\nDo not retune gains, objective, limits or noise to manufacture an advantage. Do not weaken baselines, hide curves or physical costs, cherry pick seeds, leak future clicks into forecasts, invent a communication price or claim a globally optimal frontier from four designs. A change in visual emphasis is not improved numerical performance. If later passes investigate a communication budget sweep, predeclare all budgets and streams, actually resynthesize each support, compare learned and fixed selection at each budget on common held out seeds, report every result and uncertainty, and preserve the current reference. Do not begin a broad new numerical study until the primary visual story is clear.\n\nImplement on a candidate cloud/refine branch based on current main. Commit only intended demo files and progress. Follow the existing authenticated GitHub API and validated publication route. Run the build and all suites required by the current workflow, including the forecasted scenario and reference artifact checks where present. Add meaningful regression tests for changed behavior. Do not rerun broad numerical benchmarks for purely visual work.\n\nUse real browser interactions to check ordinary playback, repeated and continuous bus attacks, forecast toggles, automatic learning to comparison transition, stable Total cost and Difference switching while running, all four baseline traces, and desktop and mobile layouts when affected. Capture useful screenshots and inspect their pixels through an available authorized cloud artifact path before publishing a substantial visual redesign. Do not claim visual inspection from DOM assertions alone. Do not repeat or bypass previously denied direct live browser access. If screenshot inspection is unavailable, keep substantial visual candidates unpublished with the exact limitation recorded and report an actionable blocker.\n\nRead validation results and logs. Verify the generated candidate child descends from the tested source and contains only expected generated changes. Promote only after successful checks using an expected current main SHA and no force update. On concurrent changes, inspect, reapply and retest. Preserve main, hosting and account settings. Verify Pages deployment and public output through an authorized available route. Keep failed or unverified candidates distinct from live releases. The one permanent user-facing URL is https://tongxin.me/online-sls-demo/.\n\nRecord each scheduled start once, actual changes, test evidence, screenshot review status, source and publication commits, deployment verification, completion time and next focus. Recover expired leases without double counting. Keep important unresolved scientific and visual limitations explicit. Use concise main prose without colons or hyphens, retaining necessary syntax in code, paths and URLs. Stay quiet when no meaningful action is needed. Notify only of a meaningful completed live improvement, an actionable failure, a required decision or final completion.",
+      "prompt_length": 8843,
+      "prompt_replacement": "Replaced accumulated old prompt exactly with the authorized consolidated instructions",
+      "notification_settings": "Delivery fields not exposed by native tools. No delivery setting supplied or changed.",
+      "counts_as_invocation": false,
+      "counts_as_improvement": false
+    },
+    "baseline_main": "2a9ff26b59565ecac1eb5274fbea4d813a18f24f"
   }
 }
