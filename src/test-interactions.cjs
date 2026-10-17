@@ -839,7 +839,7 @@ test('held and continuous attacks survive the automatic handoff with one fresh p
   for(const mode of ['pulse','continuous']){
     const h=harness(),bus=h.bus(7);h.change('attack-mode',mode);
     if(mode==='pulse')h.pointer('pointerdown',bus,{pointerId:61});else pointerClick(h,bus,61);
-    await h.samples(179);assert.equal(h.snapshot().t,179);assert.equal(h.snapshot().activePulses.length,mode==='continuous'?1:h.snapshot().activePulses.length);assert.ok(h.snapshot().activePulses.length>0);
+    await h.samples(179);assert.equal(h.snapshot().t,179);if(mode==='continuous')assert.equal(h.snapshot().activePulses.length,1);else assert.ok(h.snapshot().activePulses.length>1);
     await h.samples(1);
     assert.equal(h.snapshot().phase,'deployment');assert.equal(h.snapshot().t,0);
     assert.equal(h.node('pulse')['aria-pressed'],'true');
