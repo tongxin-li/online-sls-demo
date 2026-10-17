@@ -434,6 +434,15 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   .pr-cost-switch button { min-height:44px; padding:8px 14px; font-size:12px; }
 }
 
+/* The selected support and its measured control cost share one panel. */
+.pr-codesign { margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
+.pr-codesign h3 { margin:0; font-size:13px; font-weight:600; letter-spacing:-.015em; }
+.pr-codesign-flow { margin:7px 0 10px; color:var(--muted-foreground); font-size:11px; }
+.pr-codesign-key { display:grid; grid-template-columns:1fr 1fr; gap:5px 10px; margin:6px 0; font-size:11px; color:var(--muted-foreground); }
+.pr-codesign-key > span { display:flex; align-items:center; gap:6px; }
+.pr-codesign .pr-caption { line-height:1.5; }
+.pr-codesign .pr-plot-label { font-size:10px; }
+
 /* Artwork stays decorative. The enclosing bus handles hit area and badge input. */
 .pe-host { -webkit-user-select:none; user-select:none; touch-action:manipulation; }
 .pe-hit { fill:transparent; pointer-events:all; }
@@ -587,6 +596,14 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       <p id="pr-scheduled-power" class="pr-caption pr-scheduled-power" hidden></p>
       <svg class="pr-chart" id="pr-network" role="group" aria-label="24 bus radial power feeder. Click a load, solar, or battery bus to start a continuous disturbance. Click again to stop."></svg>
       <div class="pr-panel-foot"><span id="pr-bus-detail" class="tabular-nums"></span><span class="pr-live-stage">Cost <strong id="pr-live-cost" class="tabular-nums">0.0000</strong></span></div>
+      <div id="pr-codesign" class="pr-codesign" hidden>
+        <div class="pr-subhead"><h3>Cost and communication</h3><span class="pr-caption">Current trial</span></div>
+        <p id="pr-codesign-flow" class="pr-codesign-flow"></p>
+        <div class="pr-plot-label"><span>Cumulative cost</span><span>Lower and left is better</span></div>
+        <svg id="pr-codesign-chart" class="pr-chart" role="img" aria-label="Current controller costs and remote prediction link counts"></svg>
+        <div id="pr-codesign-key" class="pr-codesign-key" aria-label="Designs and remote link counts"></div>
+        <p id="pr-codesign-summary" class="pr-caption"></p>
+      </div>
     </section>
     <section class="pr-panel pr-matrix-panel" aria-labelledby="pr-matrix-title">
       <div class="pr-subhead"><h2 id="pr-matrix-title">Prediction links</h2></div>
@@ -615,7 +632,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
           <p class="pr-caption">Request = Source + Other + Feedback · Command is bounded to ±70 kvar · Source is not a causal share after limiting</p>
         </details>
       </div>
-      <div class="pr-panel-foot pr-matrix-detail"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div><div class="pr-topology-status"><strong id="pr-topology-status">Connectivity unchanged</strong><span id="pr-topology-gain">Weights changed 0%</span></div><div id="pr-topology-events" class="pr-topology-events" aria-label="Recent topology changes" hidden></div><details id="pr-link-history-details" class="pr-panel-details"><summary>Link history</summary><div class="pr-topology-history"><label for="pr-topology-history" id="pr-history-count">0 link updates</label><input id="pr-topology-history" type="range" min="0" max="0" step="1" value="0" aria-label="Topology history" disabled><button type="button" id="pr-history-live" aria-pressed="true">Latest</button></div><p id="pr-topology-note" class="pr-caption" aria-live="polite"></p></details>
+      <div class="pr-panel-foot pr-matrix-detail"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div><details id="pr-link-history-details" class="pr-panel-details"><summary>Link history</summary><div class="pr-topology-status"><strong id="pr-topology-status">Connectivity unchanged</strong><span id="pr-topology-gain">Weights changed 0%</span></div><div id="pr-topology-events" class="pr-topology-events" aria-label="Recent topology changes" hidden></div><div class="pr-topology-history"><label for="pr-topology-history" id="pr-history-count">0 link updates</label><input id="pr-topology-history" type="range" min="0" max="0" step="1" value="0" aria-label="Topology history" disabled><button type="button" id="pr-history-live" aria-pressed="true">Latest</button></div><p id="pr-topology-note" class="pr-caption" aria-live="polite"></p></details>
     </section>
     <section class="pr-panel pr-stage-panel" aria-labelledby="pr-stage-title">
       <div class="pr-subhead"><h2 id="pr-stage-title">Voltage and cost</h2><strong id="pr-state-value" class="pr-state-value tabular-nums">1.000 pu</strong></div>
@@ -644,6 +661,56 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         <p id="pr-mode-note" class="pr-caption"></p>
       </div>
       <div id="pr-cost-content"><p id="pr-comparison-summary" class="pr-comparison-summary" aria-live="polite">Run to compare all four controllers</p><div class="pr-cost-tools"><input type="hidden" id="pr-cost-metric" value="total" hidden><div id="pr-cost-switch" class="pr-cost-switch" role="group" aria-label="Cost display"><button type="button" id="pr-cost-total" aria-pressed="true" aria-controls="pr-cost">Total cost</button><button type="button" id="pr-cost-gap" aria-pressed="false" aria-controls="pr-cost">Difference</button></div></div><svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative cost of active controllers"></svg><table class="pr-cost-table tabular-nums" aria-label="Cumulative controller costs"><thead><tr><th scope="col">Method</th><th scope="col">Cumulative cost</th><th scope="col">vs feedback</th></tr></thead><tbody id="pr-cost-detail"></tbody></table><p id="pr-cost-note" class="pr-caption pr-comparison-note">Dense messages during learning · Adaptation starts at 30 s</p></div>
+      <details id="pr-reference-study" class="pr-panel-details pr-reference-study">
+  <summary>Across forecast quality</summary>
+  <style>
+    .pr-reference-study p { margin:8px 0; }
+    .pr-reference-study svg { display:block; width:100%; height:auto; max-width:600px; margin:0 auto; overflow:visible; }
+    .pr-reference-study svg text { font:12px var(--font-ui,system-ui,sans-serif); fill:var(--muted-foreground,#626269); }
+    .pr-study-legend { display:grid; grid-template-columns:1fr 1fr; gap:5px 12px; margin:2px 0 12px; font-size:12px; }
+    .pr-study-legend span { display:flex; align-items:center; gap:6px; }
+    .pr-study-swatch { display:inline-block; width:22px; border-top:2px solid var(--study-color); }
+    .pr-study-separate { padding:10px 0; border-top:1px solid var(--border,#e5e5e9); }
+    .pr-study-separate strong { font-size:12px; font-weight:550; }
+    .pr-study-ratios { display:grid; grid-template-columns:1fr 1fr; gap:5px 12px; margin:8px 0 0; font-size:12px; }
+    .pr-study-ratios div { display:flex; gap:8px; justify-content:space-between; }
+    .pr-study-ratios dt,.pr-study-ratios dd { margin:0; }
+    .pr-study-ratios dd { font-variant-numeric:tabular-nums; }
+    .pr-study-table-scroll { overflow-x:auto; max-width:100%; margin:8px 0; }
+    .pr-reference-study table { width:100%; border-collapse:collapse; font-size:11px; font-variant-numeric:tabular-nums; }
+    .pr-reference-study th,.pr-reference-study td { padding:7px 5px; text-align:right; border-bottom:1px solid var(--border,#e5e5e9); }
+    .pr-reference-study th:first-child,.pr-reference-study .pr-study-intervals td:nth-child(2) { text-align:left; }
+    .pr-reference-study th { font-weight:500; }
+    .pr-reference-study caption { text-align:left; font-size:12px; margin:6px 0; }
+    .pr-reference-study a { text-decoration:underline; text-underline-offset:2px; }
+    .pr-reference-study .pr-study-table-scroll:focus-visible { outline:2px solid var(--primary,#0071e3); outline-offset:2px; }
+  </style>
+  <p class="pr-caption">Recorded study · Mixed reliability · 20 seeds per error level · No clicked attacks</p>
+  <svg viewBox="0 0 360 226" role="img" aria-labelledby="pr-study-title pr-study-desc">
+    <title id="pr-study-title">Controller cost across forecast error levels</title>
+    <desc id="pr-study-desc">Ratio of mean total cost to feedback only. Lower is better and feedback is one. Dense prediction is cheapest at beta zero and one. Learned sparse is cheapest at beta two and four. Learned and fixed sparse coincide at beta zero. Each point summarizes the same twenty heldout seeds.</desc>
+    <text x="42" y="17">Cost / feedback</text>
+    <line x1="42" x2="330" y1="181" y2="181" stroke="var(--border,#e5e5e9)"/><text x="34" y="185" text-anchor="end">0.6</text><line x1="42" x2="330" y1="134.33333333332" y2="134.33333333332" stroke="var(--border,#e5e5e9)"/><text x="34" y="138.33333333332" text-anchor="end">1.0</text><line x1="42" x2="330" y1="87.66666666664001" y2="87.66666666664001" stroke="var(--border,#e5e5e9)"/><text x="34" y="91.66666666664001" text-anchor="end">1.4</text><line x1="42" x2="330" y1="40.99999999995998" y2="40.99999999995998" stroke="var(--border,#e5e5e9)"/><text x="34" y="44.99999999995998" text-anchor="end">1.8</text>
+    <g data-study-method="scalar"><path d="M42 142.13710902393467 L114 138.84011514114394 L186 128.94111057066604 L330 90.05542448866282" fill="none" stroke="var(--viz-series-4)" stroke-width="1.8" stroke-dasharray="7 3"/><g data-beta="0" data-ratio="0.9331104940804649"><path d="M42 137.13710902393467l5 5-5 5-5-5z" fill="white" stroke="var(--viz-series-4)" stroke-width="1.7"/><title>Fixed sparse · β 0 · 0.933 times feedback cost</title></g><g data-beta="1" data-ratio="0.9613704416472343"><path d="M114 133.84011514114394l5 5-5 5-5-5z" fill="white" stroke="var(--viz-series-4)" stroke-width="1.7"/><title>Fixed sparse · β 1 · 0.961 times feedback cost</title></g><g data-beta="2" data-ratio="1.0462190522513064"><path d="M186 123.94111057066604l5 5-5 5-5-5z" fill="white" stroke="var(--viz-series-4)" stroke-width="1.7"/><title>Fixed sparse · β 2 · 1.046 times feedback cost</title></g><g data-beta="4" data-ratio="1.379524932954096"><path d="M330 85.05542448866282l5 5-5 5-5-5z" fill="white" stroke="var(--viz-series-4)" stroke-width="1.7"/><title>Fixed sparse · β 4 · 1.380 times feedback cost</title></g></g><g data-study-method="static"><path d="M42 161.74532264916482 L114 154.28693692790995 L186 132.0144020482125 L330 52.29353128376104" fill="none" stroke="var(--viz-series-2)" stroke-width="1.8" stroke-dasharray="5 3 1 3"/><g data-beta="0" data-ratio="0.7650400915785401"><rect x="39" y="158.74532264916482" width="6" height="6" fill="white" stroke="var(--viz-series-2)" stroke-width="1.7"/><title>Dense prediction · β 0 · 0.765 times feedback cost</title></g><g data-beta="1" data-ratio="0.8289691120464207"><rect x="111" y="151.28693692790995" width="6" height="6" fill="white" stroke="var(--viz-series-2)" stroke-width="1.7"/><title>Dense prediction · β 1 · 0.829 times feedback cost</title></g><g data-beta="2" data-ratio="1.0198765538723442"><rect x="183" y="129.0144020482125" width="6" height="6" fill="white" stroke="var(--viz-series-2)" stroke-width="1.7"/><title>Dense prediction · β 2 · 1.020 times feedback cost</title></g><g data-beta="4" data-ratio="1.7031983032817328"><rect x="327" y="49.29353128376104" width="6" height="6" fill="white" stroke="var(--viz-series-2)" stroke-width="1.7"/><title>Dense prediction · β 4 · 1.703 times feedback cost</title></g></g><g data-study-method="causal"><path d="M42 134.33333333332 L114 134.33333333332 L186 134.33333333332 L330 134.33333333332" fill="none" stroke="var(--viz-series-3)" stroke-width="1.8" stroke-dasharray="1 4"/><g data-beta="0" data-ratio="1"><circle cx="42" cy="134.33333333332" r="2.3" fill="white" stroke="var(--viz-series-3)" stroke-width="1.6"/><title>Feedback only · β 0 · 1.000 times feedback cost</title></g><g data-beta="1" data-ratio="1"><circle cx="114" cy="134.33333333332" r="2.3" fill="white" stroke="var(--viz-series-3)" stroke-width="1.6"/><title>Feedback only · β 1 · 1.000 times feedback cost</title></g><g data-beta="2" data-ratio="1"><circle cx="186" cy="134.33333333332" r="2.3" fill="white" stroke="var(--viz-series-3)" stroke-width="1.6"/><title>Feedback only · β 2 · 1.000 times feedback cost</title></g><g data-beta="4" data-ratio="1"><circle cx="330" cy="134.33333333332" r="2.3" fill="white" stroke="var(--viz-series-3)" stroke-width="1.6"/><title>Feedback only · β 4 · 1.000 times feedback cost</title></g></g><g data-study-method="online"><path d="M42 142.13710902393467 L114 151.64772797548616 L186 151.64390921581506 L330 151.63023681079426" fill="none" stroke="var(--viz-series-1)" stroke-width="2.5" stroke-dasharray=""/><g data-beta="0" data-ratio="0.9331104940804649"><circle cx="42" cy="142.13710902393467" r="3.5" fill="var(--viz-series-1)" stroke="var(--viz-series-1)" stroke-width="1.6"/><title>Learned sparse · β 0 · 0.933 times feedback cost</title></g><g data-beta="1" data-ratio="0.8515909030671897"><circle cx="114" cy="151.64772797548616" r="3.5" fill="var(--viz-series-1)" stroke="var(--viz-series-1)" stroke-width="1.6"/><title>Learned sparse · β 1 · 0.852 times feedback cost</title></g><g data-beta="2" data-ratio="0.8516236352929419"><circle cx="186" cy="151.64390921581506" r="3.5" fill="var(--viz-series-1)" stroke="var(--viz-series-1)" stroke-width="1.6"/><title>Learned sparse · β 2 · 0.852 times feedback cost</title></g><g data-beta="4" data-ratio="0.8517408273359772"><circle cx="330" cy="151.63023681079426" r="3.5" fill="var(--viz-series-1)" stroke="var(--viz-series-1)" stroke-width="1.6"/><title>Learned sparse · β 4 · 0.852 times feedback cost</title></g></g>
+    <text x="42" y="201" text-anchor="middle">0</text><text x="114" y="201" text-anchor="middle">1</text><text x="186" y="201" text-anchor="middle">2</text><text x="330" y="201" text-anchor="middle">4</text>
+    <text x="186" y="222" text-anchor="middle">Forecast error β</text>
+  </svg>
+  <div class="pr-study-legend" aria-label="Study controllers"><span><i class="pr-study-swatch" aria-hidden="true" style="--study-color:var(--viz-series-1);"></i>Learned sparse</span><span><i class="pr-study-swatch" aria-hidden="true" style="--study-color:var(--viz-series-4);border-top-style:dashed;"></i>Fixed sparse</span><span><i class="pr-study-swatch" aria-hidden="true" style="--study-color:var(--viz-series-2);border-top-style:dashed;"></i>Dense prediction</span><span><i class="pr-study-swatch" aria-hidden="true" style="--study-color:var(--viz-series-3);border-top-style:dotted;"></i>Feedback only</span></div>
+  <p class="pr-caption">Learned sparse leads at β 2 and 4. Dense prediction leads at β 0 and 1.</p>
+  <div class="pr-study-separate">
+    <strong>All sources corrupted · 5 separate trials · β 4</strong>
+    <dl class="pr-study-ratios" aria-label="All sources corrupted cost ratios to feedback"><div data-ablation-method="online" data-ratio="1.2985646928296157"><dt>Learned sparse</dt><dd>1.299×</dd></div><div data-ablation-method="scalar" data-ratio="1.7485295078703265"><dt>Fixed sparse</dt><dd>1.749×</dd></div><div data-ablation-method="static" data-ratio="2.393615890996797"><dt>Dense prediction</dt><dd>2.394×</dd></div><div data-ablation-method="causal" data-ratio="1"><dt>Feedback only</dt><dd>1.000×</dd></div></dl>
+    <p class="pr-caption">Feedback only leads in this case.</p>
+  </div>
+  <p class="pr-caption">Study costs include the terminal penalty. Live curves show accumulated stage cost. Prediction links only · Shared feedback is unchanged.</p>
+  <details class="pr-panel-details"><summary>Values and uncertainty</summary>
+    <div class="pr-study-table-scroll" role="region" tabindex="0" aria-label="Recorded cost ratios table"><table><caption>Mean total cost divided by mean feedback cost</caption><thead><tr><th scope="col">β</th><th scope="col">Learned sparse</th><th scope="col">Fixed sparse</th><th scope="col">Dense prediction</th><th scope="col">Feedback only</th></tr></thead><tbody><tr><th scope="row">0</th><td>0.933</td><td>0.933</td><td>0.765</td><td>1.000</td></tr><tr><th scope="row">1</th><td>0.852</td><td>0.961</td><td>0.829</td><td>1.000</td></tr><tr><th scope="row">2</th><td>0.852</td><td>1.046</td><td>1.020</td><td>1.000</td></tr><tr><th scope="row">4</th><td>0.852</td><td>1.380</td><td>1.703</td><td>1.000</td></tr></tbody></table></div>
+    <div class="pr-study-table-scroll" role="region" tabindex="0" aria-label="Recorded learned savings uncertainty table"><table class="pr-study-intervals"><caption>Learned savings and 95% paired bootstrap intervals</caption><thead><tr><th scope="col">β</th><th scope="col">Compared with</th><th scope="col">Savings</th><th scope="col">95% interval</th></tr></thead><tbody><tr><th scope="row">0</th><td>Fixed sparse</td><td>0.00%</td><td>0.00% to 0.00%</td></tr><tr><th scope="row">0</th><td>Dense prediction</td><td>−21.97%</td><td>−22.28% to −21.65%</td></tr><tr><th scope="row">0</th><td>Feedback only</td><td>6.69%</td><td>6.58% to 6.80%</td></tr><tr><th scope="row">1</th><td>Fixed sparse</td><td>11.42%</td><td>11.20% to 11.63%</td></tr><tr><th scope="row">1</th><td>Dense prediction</td><td>−2.73%</td><td>−3.23% to −2.16%</td></tr><tr><th scope="row">1</th><td>Feedback only</td><td>14.84%</td><td>14.73% to 14.94%</td></tr><tr><th scope="row">2</th><td>Fixed sparse</td><td>18.60%</td><td>18.17% to 19.00%</td></tr><tr><th scope="row">2</th><td>Dense prediction</td><td>16.50%</td><td>15.26% to 17.84%</td></tr><tr><th scope="row">2</th><td>Feedback only</td><td>14.84%</td><td>14.73% to 14.94%</td></tr><tr><th scope="row">4</th><td>Fixed sparse</td><td>38.26%</td><td>37.50% to 39.05%</td></tr><tr><th scope="row">4</th><td>Dense prediction</td><td>49.99%</td><td>48.42% to 51.79%</td></tr><tr><th scope="row">4</th><td>Feedback only</td><td>14.83%</td><td>14.71% to 14.93%</td></tr></tbody></table></div>
+    <p class="pr-caption">Negative savings mean higher cost. Intervals use 5000 paired resamples of the recorded trials and apply to savings, not individual chart points. This synthetic feeder study does not reproduce the paper’s numerical results.</p>
+    <p class="pr-caption"><a href="benchmark-forecasted-scenario.json">Complete recorded study</a> · <a href="environment.html">Experimental setting</a></p>
+  </details>
+</details>
+
     </section>
   </div>
   <div class="pr-bottomline">
@@ -2028,6 +2095,49 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     return {dense,remote:links.filter(edge=>edge.from!==edge.to).length,
       replaced:links.filter(edge=>edge.from!==edge.to&&!fixedKeys.has(recommendationKey(edge))).length,
       noisy:noisyCount(links),fixedNoisy:noisyCount(fixed)};
+  }
+  function codesignMetrics() {
+    if(!communicationComparison()) return null;
+    const budget=predictionBudget();
+    const fixedLinks=(snapshot.deployedSupport?.fixedLinks || []).filter(link=>link.from!==link.to).length;
+    const counts={online:budget.remote,scalar:fixedLinks,static:budget.dense,causal:0};
+    const points=activeSeries().map(item=>({...item,links:counts[item.key],cost:snapshot.cumulative[item.key]}));
+    const minimum=Math.min(...points.map(point=>point.cost));
+    const pending=points.every(point=>point.cost<=1e-12);
+    const winners=pending?[]:points.filter(point=>Math.abs(point.cost-minimum)<=1e-12);
+    const status=pending?'Run to compare these four designs':winners.length===1?winners[0].label+' has the lowest cost in this run':winners.map(point=>point.label).join(' and ')+' share the lowest cost';
+    return {points,denseLinks:budget.dense,learnedLinks:budget.remote,fixedLinks,
+      savedPercent:budget.dense?100*(budget.dense-budget.remote)/budget.dense:0,
+      sameBudget:budget.remote===fixedLinks,sameSupport:sameSparseSupport(),winnerKeys:winners.map(point=>point.key),status};
+  }
+  function drawCodesign() {
+    const metrics=codesignMetrics();
+    $('codesign').hidden=!metrics;
+    if(!metrics) return;
+    const {points,denseLinks,learnedLinks,savedPercent,status}=metrics;
+    $('codesign-flow').textContent='Learn gains → Select '+learnedLinks+' links → Rebuild controller';
+    $('codesign-flow').title='Completed discovery selects the deployed support. The controller is synthesized under those links, then tested on a fresh disturbance sequence. Links and prediction coefficients stay fixed during this comparison.';
+    $('codesign-summary').textContent=d3.format('.1f')(savedPercent)+'% fewer remote prediction links than dense · '+status;
+    const el=$('codesign-chart');
+    el.setAttribute('aria-label','Four evaluated designs. Lower cost and fewer remote prediction links are favorable. '+points.map(point=>point.label+', '+point.links+' remote links, cost '+d3.format('.6~g')(point.cost)).join('. ')+'. Shared feedback and local prediction channels are excluded.');
+    const scale=Math.max(1e-8,...points.map(point=>point.cost));
+    const span=Math.max(1,denseLinks);
+    const chart=chartBase(el,points.map(point=>({x:point.links,cost:point.cost})),['cost'],'Cumulative cost','Remote prediction links',150,{xDomain:[-span*.08,span*1.08],yDomain:[-scale*.08,scale*1.18]});
+    updateAxis(chart.svg.select('.x-axis'),d3.axisBottom(chart.x).tickValues([...new Set(points.map(point=>point.links))].sort((a,b)=>a-b)).tickSize(4).tickFormat(d3.format('d')));
+    // Sparse designs retain their exact common x coordinate. A ring keeps ties visible.
+    const order=points.filter(point=>point.key!=='online').concat(points.filter(point=>point.key==='online'));
+    const marks=chart.marks.selectAll('circle.codesign-point').data(order,point=>point.key).join(enter=>{const circle=enter.append('circle').attr('class','codesign-point');circle.append('title');return circle;}).order()
+      .attr('data-key',point=>point.key).attr('data-links',point=>point.links).attr('data-cost',point=>point.cost)
+      .attr('cx',point=>chart.x(point.links)).attr('cy',point=>chart.y(point.cost))
+      .attr('r',point=>point.key==='scalar'?8:point.key==='online'?4.5:5)
+      .attr('fill',point=>point.key==='scalar'?'var(--background)':point.color)
+      .attr('stroke',point=>point.color).attr('stroke-width',point=>point.key==='scalar'?2:1.5);
+    marks.select('title').text(point=>point.label+' · '+point.links+' remote links · Cost '+d3.format('.6~g')(point.cost));
+    const key=$('codesign-key');key.replaceChildren();
+    for(const point of points) {
+      const label=document.createElement('span'),swatch=document.createElement('span');swatch.className='pr-swatch '+point.key;
+      label.append(swatch,document.createTextNode(point.label+' · '+point.links));key.append(label);
+    }
   }
   function plottedSeries() { return activeSeries().filter(s=>visible.has(s.key)); }
   function sameSparseSupport() {
@@ -3445,7 +3555,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       const dense=comparativeCost(c.online,c.static),budget=predictionBudget();
       if(comparison==='Pending'||dense==='Pending') return 'Fresh trial · '+budget.remote+' remote links for each sparse controller · '+budget.dense+' for dense';
       const describe=(value,name)=>value==='Equal'||value==='Nearly equal'?value.toLowerCase()+' to '+name:value+' than '+name;
-      return (sameSparseSupport()?'Same selected links · ':'')+'Learned cost is '+describe(comparison,'fixed sparse')+' · '+describe(dense,'dense prediction');
+      return (sameSparseSupport()?'Same selected links · ':codesignMetrics().sameBudget?'Same link budget · ':'Different link budgets · ')+'Learned cost is '+describe(comparison,'fixed sparse')+' · '+describe(dense,'dense prediction');
     }
     const support=snapshot.phase==='deployment' && sameSparseSupport() ? 'Same links · Weights adapt independently. ' : '';
     return support+(comparison==='Pending'?'Run to compare all four controllers':comparison==='Equal' || comparison==='Nearly equal'
@@ -3543,7 +3653,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   }
   function render() {
     $('tooltip').style.display='none'; pin=null;
-    renderControls(); drawNetwork(); drawMatrix(); drawCost(); drawStage(); drawVoltage(); drawConvergence();highlightTopology();
+    renderControls(); drawNetwork(); drawMatrix(); drawCodesign(); drawCost(); drawStage(); drawVoltage(); drawConvergence();highlightTopology();
   }
   announce('Ready');
   hydrate(window.openai?.widgetState);
