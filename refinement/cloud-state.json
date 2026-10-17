@@ -346,7 +346,14 @@
       "direct_live_inspection": "unverified, previously denied browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-17T09:00:00+08:00",
+    "started_at": "2026-10-17T09:00:22+08:00",
+    "lease_expires_at": "2026-10-17T09:40:22+08:00",
+    "branch": "cloud/refine/20261017-0900",
+    "base_main": "545c90a6a5071c6378c25c3e8679ff4f7d6b5f32",
+    "focus": "Observed rolling source error and actual sealed-preview issuance delay"
+  },
   "next_focus": "Make source reliability changes understandable over time with a rolling error summary from revealed forecast/forcing pairs and explicit sealed-preview issuance delay. Keep current reliability separate from past observed errors, distinguish unforecast physical changes, avoid future forcing reads and do not change controller parameters or frozen support.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
@@ -389,5 +396,12 @@
   },
   "cloud_runtime": "ChatGPT hosted automation with connected GitHub APIs and GitHub Actions ubuntu-latest, Node 22, Python 3.12, Playwright Chromium 141",
   "source_of_truth": "Cloud GitHub main is canonical while Mac is off. Later local work must refresh first.",
-  "workflow_note": "Create future candidate refs directly at the source commit after acquiring the metadata lease, avoiding an unnecessary initialization validation run."
+  "workflow_note": "Create future candidate refs directly at the source commit after acquiring the metadata lease, avoiding an unnecessary initialization validation run.",
+  "recovery": {
+    "recovered_slot": "2026-10-17T08:00:00+08:00",
+    "metadata_commit": "545c90a6a5071c6378c25c3e8679ff4f7d6b5f32",
+    "candidate_run": 38985906338,
+    "validation": "success",
+    "note": "Recovered validated documentation-only completion after interruption. Counted slot once."
+  }
 }
