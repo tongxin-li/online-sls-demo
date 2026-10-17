@@ -783,13 +783,8 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-18T01:00:00+08:00",
-    "branch": "cloud/refine/20261018-0100",
-    "started_at": "2026-10-18T01:02:16+08:00",
-    "expires_at": "2026-10-18T01:42:16+08:00"
-  },
-  "next_focus": "Complete cloud validation and screenshot pixel review of the three measured forecast quality regimes. Keep substantial visual candidates unpublished if review is unavailable.",
+  "active_run": null,
+  "next_focus": "Make the existing source-to-receiver co-design diagnostics inspectable as one measured chain from observed forecast error and learned correction through same-budget support selection to resynthesized controller command. Preserve the compact regime overview, full recorded sweep, honest winners and every current live interaction. Review current screenshots before choosing the next focused visual change.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -889,12 +884,21 @@
       "scope": "Only refinement/cloud-state.json",
       "configured_at": "2026-10-17T16:08:20.808Z",
       "native_readback": "exact prompt, schedule, enabled state and timezone verified",
-      "status": "Metadata candidate 39048118960 passed validate and prepare-candidate, changed only cloud-state.json, and was guardedly promoted at the first renewed invocation. No invocation or improvement counted for configuration.",
+      "status": "Verified metadata candidate promoted without counting configuration as an invocation or improvement. Initial renewal main validation and Pages both succeeded.",
       "counts_as_invocation": false,
       "counts_as_improvement": false,
       "instruction": "Read actual branch and workflow state before recovery. Promote only validated metadata based on matching main. Do not increment either program count for configuration persistence.",
       "published_commit": "f1f64daf1d0bab3d6aa49282388106405265335d",
-      "candidate_run": 39048118960
+      "candidate_run": 39048118960,
+      "main_run": 39052070709,
+      "pages_run": 39052070867
+    },
+    "renewed_completion": {
+      "slot": "2026-10-18T01:00:00+08:00",
+      "branch": "cloud/refine/20261018-0100",
+      "product_ready_commit": "45b343518f52427efed17219edbe6799236f0b59",
+      "scope": "Completion record only, no product changes",
+      "instruction": "This slot is already counted once in renewed_program.completed_count. Read current branch/main workflow state when recovering metadata validation. Do not promote an older source over newer main or increment either count for this metadata record."
     }
   },
   "parent_handoffs": [
@@ -980,35 +984,52 @@
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
     "invocation_count": 1,
-    "completed_count": 0,
+    "completed_count": 1,
     "runs": [
       {
         "slot": "2026-10-18T01:00:00+08:00",
         "started_at": "2026-10-18T01:02:16+08:00",
-        "status": "validating_candidate",
+        "status": "completed",
         "candidate_branch": "cloud/refine/20261018-0100",
         "base_commit": "f1f64daf1d0bab3d6aa49282388106405265335d",
-        "counted_completed": false,
+        "counted_completed": true,
         "changes": [
           "Replace the recorded study's diffuse text with three compact measured cost-ratio regimes naming the actual winner, retaining all four controllers on one bar scale.",
           "Keep all error levels and paired uncertainty in the existing nested disclosure. No physical model, controller, objective, limits, forecasts, interaction semantics or recorded results change.",
           "Add data/winner/uncertainty validation, desktop/mobile layout and state invariance assertions, plus authorized cloud screenshot previews for pixel review."
         ],
         "tests": {
-          "status": "pending"
+          "suites": 7,
+          "total": 204,
+          "failed": 0,
+          "build": "passed",
+          "main_consistency": "passed",
+          "reference_artifact": "Generated fragment matches archived raw report; all four methods, four beta levels, separate five-trial counterexample, actual mean winners, common bar scale and unreported interval remain explicit. Mean evidence mutations are rejected.",
+          "browser": "Full desktop/phone suite passed including playback, repeated/continuous attacks, forecast toggles, automatic comparison, thirty live cost button switches, four curves, exact replay and responsive layout. New overview values, actual bar proportions, 12 px minimum method labels, no label/bar overlap, nested full sweep availability and live-state invariance verified.",
+          "benchmarks": "Not rerun. Recorded scientific results and all model/controller/scenario parameters unchanged."
         },
         "screenshots": {
-          "pixel_review": "pending authorized GitHub Actions screenshot preview"
+          "artifact_id": 12108696046,
+          "artifact_digest": "sha256:6da2c874b74781dedc93b5d9a37a0779f9a402dc259ae20e81125481f8405c39",
+          "captures": [
+            "reference-study-1440.png",
+            "reference-study-390.png",
+            "reference-overview-1440.jpg",
+            "reference-overview-390.jpg"
+          ],
+          "pixel_review": "Verified actual overview screenshot pixels at desktop viewport 1440 and phone viewport 390 through authorized Actions job log JPEG previews. Labels, values, method rows and interval text are readable with no clipping or overlap. This is artifact review, not direct live browser inspection."
         },
-        "publication": "unpublished"
+        "publication": "Expected-main guarded fast-forward after successful candidate and generated-only child verification. Main passed all 204 checks, build consistency and full browser suite. Pages succeeded for the exact tested ready commit.",
+        "completed_at": "2026-10-17T17:25:00.405Z",
+        "source_commit": "3abac83d9599830f6e43e4cae1a5f17fa49a6a16",
+        "published_commit": "45b343518f52427efed17219edbe6799236f0b59",
+        "candidate_run": 39052290763,
+        "main_run": 39052987454,
+        "pages_run": 39052987042,
+        "direct_live_inspection": "Unverified. Previously denied live browser access was not retried or bypassed. Public HTTP bytes were not independently fetched in this pass."
       }
     ],
-    "active_run": {
-      "slot": "2026-10-18T01:00:00+08:00",
-      "branch": "cloud/refine/20261018-0100",
-      "started_at": "2026-10-18T01:02:16+08:00",
-      "expires_at": "2026-10-18T01:42:16+08:00"
-    },
+    "active_run": null,
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
@@ -1026,5 +1047,7 @@
       "counts_as_improvement": false
     },
     "baseline_main": "2a9ff26b59565ecac1eb5274fbea4d813a18f24f"
-  }
+  },
+  "completed_count_scope": "Original bounded program, retained at 15. Renewed counts are tracked independently in renewed_program.",
+  "total_completed_count": 16
 }
