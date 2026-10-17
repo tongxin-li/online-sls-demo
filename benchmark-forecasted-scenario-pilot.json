@@ -1,0 +1,1378 @@
+{
+  "purpose": "Exploratory grid retained in full before held out validation",
+  "baseRevision": "b76837cfdec8193d10520c236949ffbafea09d1d",
+  "seeds": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "betas": [
+    1,
+    2,
+    4
+  ],
+  "physicalScales": [
+    0,
+    1,
+    2
+  ],
+  "discoverySamples": 180,
+  "comparisonSamples": 180,
+  "profileFormula": {
+    "theta": "2*pi*t/60",
+    "phase": "2*pi*(bus modulo 6)/6",
+    "homesKw": "scale*35*sin(theta+phase)",
+    "solarLostGenerationKw": "scale*30*(1-cos(theta))/2",
+    "batteryKw": "scale*15*sin(theta+phase)",
+    "realization": "Add the scheduled pu power to the unchanged seeded random power deviation before existing physical bounds; calculate actual voltage forcing and issued forecasts from the same bounded future power."
+  },
+  "forecast": "All15Homes sources use the noisy multiplier 4. All 8 inverter sources use quiet multiplier 0.05. Beta scales both. Same standard normal draws are retained across candidates. Quality labels are not inputs to the learner.",
+  "candidateExecution": "Exploratory in memory source copy added the declared scheduledPower helper and changed only the generated base power expression. faultBuses used the existing constructor option. Production validation uses the unmodified public engine with the locked scale 1 profile.",
+  "selection": "Moderate scale 1 retained to create bounded forecastable activity. Beta 4 represents requested strong remote forecast corruption. All beta 0,1,2,4 are tested on previously unused heldout seeds 21 through 40, with original default seed 20261013 separately. No gain, objective, actuator bound or baseline changed.",
+  "cost": "Executed stage costs plus terminal Riccati penalty. Archived exploratory rows retain total costs; selected scale 1 rows are rerun using the public engine with separate stage and terminal components.",
+  "results": [
+    {
+      "scale": 0,
+      "beta": 1,
+      "faults": [
+        2,
+        3,
+        4,
+        6,
+        9,
+        10,
+        11,
+        13,
+        15,
+        16,
+        17,
+        19,
+        20,
+        22,
+        23
+      ],
+      "means": {
+        "online": 0.012389413520712841,
+        "scalar": 0.015382835966162528,
+        "static": 0.017015199028301134,
+        "causal": 0.015039862403936977
+      },
+      "savings": {
+        "scalar": 19.45949662360236,
+        "static": 27.18619688135467,
+        "causal": 17.62282667247228
+      },
+      "wins": {
+        "scalar": 5,
+        "static": 5,
+        "causal": 5
+      },
+      "rows": [
+        {
+          "seed": 1,
+          "costs": {
+            "online": 0.013192940984256074,
+            "scalar": 0.015934499864204473,
+            "static": 0.018284287660625457,
+            "causal": 0.015977548823928017
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9866080551300961,
+            "scalar": 0.986602673629374,
+            "static": 0.9864243666594689,
+            "causal": 0.9864937141918013
+          },
+          "changed": 38
+        },
+        {
+          "seed": 2,
+          "costs": {
+            "online": 0.009935953002142176,
+            "scalar": 0.012815782816101589,
+            "static": 0.014637025372216656,
+            "causal": 0.011997670737344696
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.986550456489601,
+            "scalar": 0.9865017416218427,
+            "static": 0.9865774736103412,
+            "causal": 0.9864053870216565
+          },
+          "changed": 38
+        },
+        {
+          "seed": 3,
+          "costs": {
+            "online": 0.011927524462507211,
+            "scalar": 0.014901672811816218,
+            "static": 0.016800253768204276,
+            "causal": 0.014491406660493998
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9864681945761744,
+            "scalar": 0.9863299670216181,
+            "static": 0.9864731833472021,
+            "causal": 0.9863051754940341
+          },
+          "changed": 38
+        },
+        {
+          "seed": 4,
+          "costs": {
+            "online": 0.013986629255389148,
+            "scalar": 0.017431603600326948,
+            "static": 0.019228154960335836,
+            "causal": 0.016995610978671097
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9861942361811228,
+            "scalar": 0.986094491865116,
+            "static": 0.9864027176034034,
+            "causal": 0.9859906862338753
+          },
+          "changed": 38
+        },
+        {
+          "seed": 5,
+          "costs": {
+            "online": 0.0129040198992696,
+            "scalar": 0.015830620738363416,
+            "static": 0.01612627338012344,
+            "causal": 0.01573707481924707
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.986377254065634,
+            "scalar": 0.9862524507429673,
+            "static": 0.9863716124439735,
+            "causal": 0.9861924067540585
+          },
+          "changed": 38
+        }
+      ]
+    },
+    {
+      "scale": 0,
+      "beta": 2,
+      "faults": [
+        2,
+        3,
+        4,
+        6,
+        9,
+        10,
+        11,
+        13,
+        15,
+        16,
+        17,
+        19,
+        20,
+        22,
+        23
+      ],
+      "means": {
+        "online": 0.012390564688837192,
+        "scalar": 0.022715969424411658,
+        "static": 0.03545186702278028,
+        "causal": 0.015039862403936977
+      },
+      "savings": {
+        "scalar": 45.45438736362401,
+        "static": 65.04961309689165,
+        "causal": 17.615172559067293
+      },
+      "wins": {
+        "scalar": 5,
+        "static": 5,
+        "causal": 5
+      },
+      "rows": [
+        {
+          "seed": 1,
+          "costs": {
+            "online": 0.013208303184792169,
+            "scalar": 0.022643060518953102,
+            "static": 0.0383467368460693,
+            "causal": 0.015977548823928017
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9866053029206805,
+            "scalar": 0.9865487860663945,
+            "static": 0.9860061686024271,
+            "causal": 0.9864937141918013
+          },
+          "changed": 38
+        },
+        {
+          "seed": 2,
+          "costs": {
+            "online": 0.009934150975667721,
+            "scalar": 0.01970043438011829,
+            "static": 0.032288672712965955,
+            "causal": 0.011997670737344696
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9865507940618249,
+            "scalar": 0.9865085199104432,
+            "static": 0.9860554533418772,
+            "causal": 0.9864053870216565
+          },
+          "changed": 38
+        },
+        {
+          "seed": 3,
+          "costs": {
+            "online": 0.01192807395341913,
+            "scalar": 0.022715149306119193,
+            "static": 0.0358530586226537,
+            "causal": 0.014491406660493998
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9864685023264415,
+            "scalar": 0.9862310389412385,
+            "static": 0.9861811413212422,
+            "causal": 0.9863051754940341
+          },
+          "changed": 38
+        },
+        {
+          "seed": 4,
+          "costs": {
+            "online": 0.013977118835449677,
+            "scalar": 0.025717593368570258,
+            "static": 0.04008626909098135,
+            "causal": 0.016995610978671097
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 1,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9861955426355473,
+            "scalar": 0.986089789740746,
+            "static": 0.9859858756737484,
+            "causal": 0.9859906862338753
+          },
+          "changed": 38
+        },
+        {
+          "seed": 5,
+          "costs": {
+            "online": 0.012905176494857258,
+            "scalar": 0.02280360954829745,
+            "static": 0.030684597841231127,
+            "causal": 0.01573707481924707
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9863803531478561,
+            "scalar": 0.986164201181311,
+            "static": 0.9860846724505162,
+            "causal": 0.9861924067540585
+          },
+          "changed": 38
+        }
+      ]
+    },
+    {
+      "scale": 0,
+      "beta": 4,
+      "faults": [
+        2,
+        3,
+        4,
+        6,
+        9,
+        10,
+        11,
+        13,
+        15,
+        16,
+        17,
+        19,
+        20,
+        22,
+        23
+      ],
+      "means": {
+        "online": 0.012397136051563496,
+        "scalar": 0.051756515986314935,
+        "static": 0.1023700127827138,
+        "causal": 0.015039862403936977
+      },
+      "savings": {
+        "scalar": 76.04719750680002,
+        "static": 87.88987544831403,
+        "causal": 17.571479588016015
+      },
+      "wins": {
+        "scalar": 5,
+        "static": 5,
+        "causal": 5
+      },
+      "rows": [
+        {
+          "seed": 1,
+          "costs": {
+            "online": 0.013243551630579897,
+            "scalar": 0.049280831160072494,
+            "static": 0.10882108044339882,
+            "causal": 0.015977548823928017
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 1,
+            "static": 24,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9865997985018494,
+            "scalar": 0.9863099962422487,
+            "static": 0.9852112773453435,
+            "causal": 0.9864937141918013
+          },
+          "changed": 38
+        },
+        {
+          "seed": 2,
+          "costs": {
+            "online": 0.009934667359018164,
+            "scalar": 0.04724177852968952,
+            "static": 0.09771223328332733,
+            "causal": 0.011997670737344696
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 20,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9865514692062726,
+            "scalar": 0.9861202503438241,
+            "static": 0.9850237557563708,
+            "causal": 0.9864053870216565
+          },
+          "changed": 38
+        },
+        {
+          "seed": 3,
+          "costs": {
+            "online": 0.011933179856435662,
+            "scalar": 0.0533804952457201,
+            "static": 0.10691625017956002,
+            "causal": 0.014491406660493998
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 5,
+            "static": 29,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9864691178269756,
+            "scalar": 0.9860331830292588,
+            "static": 0.9853353086608403,
+            "causal": 0.9863051754940341
+          },
+          "changed": 38
+        },
+        {
+          "seed": 4,
+          "costs": {
+            "online": 0.01396279901188479,
+            "scalar": 0.05841997679719021,
+            "static": 0.11381766488931909,
+            "causal": 0.016995610978671097
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 5,
+            "static": 39,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9861981555443963,
+            "scalar": 0.9860800731615915,
+            "static": 0.9849717098529688,
+            "causal": 0.9859906862338753
+          },
+          "changed": 38
+        },
+        {
+          "seed": 5,
+          "costs": {
+            "online": 0.01291148239989896,
+            "scalar": 0.05045949819890236,
+            "static": 0.08458283511796374,
+            "causal": 0.01573707481924707
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 4,
+            "static": 15,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9863865513123005,
+            "scalar": 0.9859877021101537,
+            "static": 0.9855107924636016,
+            "causal": 0.9861924067540585
+          },
+          "changed": 38
+        }
+      ]
+    },
+    {
+      "scale": 1,
+      "beta": 1,
+      "faults": [
+        2,
+        3,
+        4,
+        6,
+        9,
+        10,
+        11,
+        13,
+        15,
+        16,
+        17,
+        19,
+        20,
+        22,
+        23
+      ],
+      "means": {
+        "online": 0.07755903101800718,
+        "scalar": 0.08753729458427335,
+        "static": 0.07573867092681154,
+        "causal": 0.09119556798728849
+      },
+      "savings": {
+        "scalar": 11.39887131953794,
+        "static": -2.403475092604553,
+        "causal": 14.953069836882943
+      },
+      "wins": {
+        "scalar": 5,
+        "static": 1,
+        "causal": 5
+      },
+      "rows": [
+        {
+          "seed": 1,
+          "costs": {
+            "online": 0.0653835738683652,
+            "scalar": 0.07327543194346121,
+            "static": 0.06568682093751135,
+            "causal": 0.07642592404726171
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9856282294097565,
+            "scalar": 0.9853695892661192,
+            "static": 0.98603634686246,
+            "causal": 0.9853112436691688
+          },
+          "changed": 38
+        },
+        {
+          "seed": 2,
+          "costs": {
+            "online": 0.08036728382735847,
+            "scalar": 0.09102316300724654,
+            "static": 0.07808844239775203,
+            "causal": 0.09438339398771875
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9853929749863182,
+            "scalar": 0.9851647441629688,
+            "static": 0.9858686808655692,
+            "causal": 0.9850223921477601
+          },
+          "changed": 38
+        },
+        {
+          "seed": 3,
+          "costs": {
+            "online": 0.07654138091026293,
+            "scalar": 0.08622858636429764,
+            "static": 0.07500908534197295,
+            "causal": 0.0900459357689538
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9856585930885468,
+            "scalar": 0.9854766904563784,
+            "static": 0.9858867919996926,
+            "causal": 0.9853728026965953
+          },
+          "changed": 38
+        },
+        {
+          "seed": 4,
+          "costs": {
+            "online": 0.07891409510370456,
+            "scalar": 0.08906851411841661,
+            "static": 0.07747483098668041,
+            "causal": 0.09301757006554805
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 1,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9851816808531395,
+            "scalar": 0.9849298838611215,
+            "static": 0.9857011699851478,
+            "causal": 0.9847847957565944
+          },
+          "changed": 38
+        },
+        {
+          "seed": 5,
+          "costs": {
+            "online": 0.08658882138034474,
+            "scalar": 0.09809077748794476,
+            "static": 0.08243417497014095,
+            "causal": 0.10210501606696014
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9851741439458662,
+            "scalar": 0.984893254067186,
+            "static": 0.985850418858897,
+            "causal": 0.9847602278335752
+          },
+          "changed": 38
+        }
+      ]
+    },
+    {
+      "scale": 1,
+      "beta": 2,
+      "faults": [
+        2,
+        3,
+        4,
+        6,
+        9,
+        10,
+        11,
+        13,
+        15,
+        16,
+        17,
+        19,
+        20,
+        22,
+        23
+      ],
+      "means": {
+        "online": 0.07756163878649619,
+        "scalar": 0.09482317474510296,
+        "static": 0.09369956148226052,
+        "causal": 0.09119556798728849
+      },
+      "savings": {
+        "scalar": 18.20392114586759,
+        "static": 17.223050396900323,
+        "causal": 14.950210302646177
+      },
+      "wins": {
+        "scalar": 5,
+        "static": 5,
+        "causal": 5
+      },
+      "rows": [
+        {
+          "seed": 1,
+          "costs": {
+            "online": 0.06540703248796627,
+            "scalar": 0.07990493630617498,
+            "static": 0.08473863357519204,
+            "causal": 0.07642592404726171
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 6,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9856262001292576,
+            "scalar": 0.9853266136255414,
+            "static": 0.9858268672022947,
+            "causal": 0.9853112436691688
+          },
+          "changed": 38
+        },
+        {
+          "seed": 2,
+          "costs": {
+            "online": 0.08036476063098547,
+            "scalar": 0.09805998085369627,
+            "static": 0.09522535103453585,
+            "causal": 0.09438339398771875
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 6,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.985393312558542,
+            "scalar": 0.9851167977192081,
+            "static": 0.9855729214371131,
+            "causal": 0.9850223921477601
+          },
+          "changed": 38
+        },
+        {
+          "seed": 3,
+          "costs": {
+            "online": 0.0765386869437972,
+            "scalar": 0.09373569286636693,
+            "static": 0.09403825508873069,
+            "causal": 0.0900459357689538
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 0,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9856583442961422,
+            "scalar": 0.9854676245586446,
+            "static": 0.9855420545298035,
+            "causal": 0.9853728026965953
+          },
+          "changed": 38
+        },
+        {
+          "seed": 4,
+          "costs": {
+            "online": 0.0789136509822213,
+            "scalar": 0.09699778885463987,
+            "static": 0.09756204520028397,
+            "causal": 0.09301757006554805
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 5,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.985182987307564,
+            "scalar": 0.9849251817367515,
+            "static": 0.9855863684767148,
+            "causal": 0.9847847957565944
+          },
+          "changed": 38
+        },
+        {
+          "seed": 5,
+          "costs": {
+            "online": 0.08658406288751068,
+            "scalar": 0.10541747484463675,
+            "static": 0.09693352251256003,
+            "causal": 0.10210501606696014
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 3,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9851772430280884,
+            "scalar": 0.9848648570948786,
+            "static": 0.9856915682118603,
+            "causal": 0.9847602278335752
+          },
+          "changed": 38
+        }
+      ]
+    },
+    {
+      "scale": 1,
+      "beta": 4,
+      "faults": [
+        2,
+        3,
+        4,
+        6,
+        9,
+        10,
+        11,
+        13,
+        15,
+        16,
+        17,
+        19,
+        20,
+        22,
+        23
+      ],
+      "means": {
+        "online": 0.07757112334995178,
+        "scalar": 0.123699543688453,
+        "static": 0.15790735624637792,
+        "causal": 0.09119556798728849
+      },
+      "savings": {
+        "scalar": 37.290695634803036,
+        "static": 50.87554804671672,
+        "causal": 14.939810056598128
+      },
+      "wins": {
+        "scalar": 5,
+        "static": 5,
+        "causal": 5
+      },
+      "rows": [
+        {
+          "seed": 1,
+          "costs": {
+            "online": 0.06545847377188392,
+            "scalar": 0.1062681333217807,
+            "static": 0.1524532635277775,
+            "causal": 0.07642592404726171
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 4,
+            "static": 36,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9856221415682598,
+            "scalar": 0.9852246503775726,
+            "static": 0.9848616300424868,
+            "causal": 0.9853112436691688
+          },
+          "changed": 38
+        },
+        {
+          "seed": 2,
+          "costs": {
+            "online": 0.08036383467453867,
+            "scalar": 0.12560372178513943,
+            "static": 0.15711116564078043,
+            "causal": 0.09438339398771875
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 6,
+            "static": 38,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9853939877029897,
+            "scalar": 0.9847285281525892,
+            "static": 0.9849236324961728,
+            "causal": 0.9850223921477601
+          },
+          "changed": 38
+        },
+        {
+          "seed": 3,
+          "costs": {
+            "online": 0.07653730593205861,
+            "scalar": 0.1239278867944474,
+            "static": 0.16392079971084053,
+            "causal": 0.0900459357689538
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 6,
+            "static": 40,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9856578467113329,
+            "scalar": 0.9854305796239562,
+            "static": 0.9846530225408381,
+            "causal": 0.9853728026965953
+          },
+          "changed": 38
+        },
+        {
+          "seed": 4,
+          "costs": {
+            "online": 0.07891746375556889,
+            "scalar": 0.12887539245631707,
+            "static": 0.16626134539566964,
+            "causal": 0.09301757006554805
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 8,
+            "static": 51,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9851856002164131,
+            "scalar": 0.984914683783389,
+            "static": 0.985108470629045,
+            "causal": 0.9847847957565944
+          },
+          "changed": 38
+        },
+        {
+          "seed": 5,
+          "costs": {
+            "online": 0.08657853861570887,
+            "scalar": 0.1338225840845804,
+            "static": 0.14979020695682144,
+            "causal": 0.10210501606696014
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 6,
+            "static": 22,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9851834411925326,
+            "scalar": 0.9848080631805776,
+            "static": 0.9849653175977846,
+            "causal": 0.9847602278335752
+          },
+          "changed": 38
+        }
+      ]
+    },
+    {
+      "scale": 2,
+      "beta": 1,
+      "faults": [
+        2,
+        3,
+        4,
+        6,
+        9,
+        10,
+        11,
+        13,
+        15,
+        16,
+        17,
+        19,
+        20,
+        22,
+        23
+      ],
+      "means": {
+        "online": 0.2652547680701382,
+        "scalar": 0.29528954704677784,
+        "static": 0.24482209769477356,
+        "causal": 0.31033180516395
+      },
+      "savings": {
+        "scalar": 10.171297723546486,
+        "static": -8.345925701869696,
+        "causal": 14.525432567247607
+      },
+      "wins": {
+        "scalar": 5,
+        "static": 0,
+        "causal": 5
+      },
+      "rows": [
+        {
+          "seed": 1,
+          "costs": {
+            "online": 0.24066096642115112,
+            "scalar": 0.2668485031806731,
+            "static": 0.22380983672349472,
+            "causal": 0.28054648087028994
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 15,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9844646279779946,
+            "scalar": 0.984024347709543,
+            "static": 0.9852252182460636,
+            "causal": 0.9839258597656629
+          },
+          "changed": 38
+        },
+        {
+          "seed": 2,
+          "costs": {
+            "online": 0.2730618437277349,
+            "scalar": 0.30448232246135604,
+            "static": 0.2516617694433981,
+            "causal": 0.3194292321167704
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 13,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9842356860125429,
+            "scalar": 0.9838279627007119,
+            "static": 0.9850117793082968,
+            "causal": 0.9836396095133837
+          },
+          "changed": 38
+        },
+        {
+          "seed": 3,
+          "costs": {
+            "online": 0.26349755948910925,
+            "scalar": 0.29291600088735703,
+            "static": 0.2436046253055273,
+            "causal": 0.30834904551947473
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 7,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9845031555189877,
+            "scalar": 0.9841077213219316,
+            "static": 0.9852509896815905,
+            "causal": 0.983958012412673
+          },
+          "changed": 38
+        },
+        {
+          "seed": 4,
+          "costs": {
+            "online": 0.2665906634146447,
+            "scalar": 0.2966191338868824,
+            "static": 0.24622851858195127,
+            "causal": 0.31225398745476063
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 16,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.984029432398991,
+            "scalar": 0.9837656521382048,
+            "static": 0.9849478608638552,
+            "causal": 0.9834351444829611
+          },
+          "changed": 38
+        },
+        {
+          "seed": 5,
+          "costs": {
+            "online": 0.28246280729805107,
+            "scalar": 0.31558177481762056,
+            "static": 0.2588057384194965,
+            "causal": 0.3310802798584545
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 29,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.983985292094866,
+            "scalar": 0.9835211927929829,
+            "static": 0.9848343938118067,
+            "causal": 0.9833445067673687
+          },
+          "changed": 38
+        }
+      ]
+    },
+    {
+      "scale": 2,
+      "beta": 2,
+      "faults": [
+        2,
+        3,
+        4,
+        6,
+        9,
+        10,
+        11,
+        13,
+        15,
+        16,
+        17,
+        19,
+        20,
+        22,
+        23
+      ],
+      "means": {
+        "online": 0.26525881208596785,
+        "scalar": 0.3025331577193408,
+        "static": 0.26143087101503243,
+        "causal": 0.31033180516395
+      },
+      "savings": {
+        "scalar": 12.320747224657028,
+        "static": -1.4642268742299056,
+        "causal": 14.524129440799603
+      },
+      "wins": {
+        "scalar": 5,
+        "static": 1,
+        "causal": 5
+      },
+      "rows": [
+        {
+          "seed": 1,
+          "costs": {
+            "online": 0.24069225874043287,
+            "scalar": 0.2734035595800765,
+            "static": 0.24071653756305691,
+            "causal": 0.28054648087028994
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 1,
+            "static": 34,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9844625986974957,
+            "scalar": 0.9839878281453067,
+            "static": 0.9851167481754974,
+            "causal": 0.9839258597656629
+          },
+          "changed": 38
+        },
+        {
+          "seed": 2,
+          "costs": {
+            "online": 0.27305873428331473,
+            "scalar": 0.3116686394407592,
+            "static": 0.26781063952827927,
+            "causal": 0.3194292321167704
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 28,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9842360235847667,
+            "scalar": 0.9837251055869679,
+            "static": 0.9847013409253521,
+            "causal": 0.9836396095133837
+          },
+          "changed": 38
+        },
+        {
+          "seed": 3,
+          "costs": {
+            "online": 0.2634912475050896,
+            "scalar": 0.300105368663157,
+            "static": 0.2615274203828304,
+            "causal": 0.30834904551947473
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 35,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9845045236897801,
+            "scalar": 0.9840986554241977,
+            "static": 0.9849062542726128,
+            "causal": 0.983958012412673
+          },
+          "changed": 38
+        },
+        {
+          "seed": 4,
+          "costs": {
+            "online": 0.26659983732606457,
+            "scalar": 0.3042326017931445,
+            "static": 0.26490691495843416,
+            "causal": 0.31225398745476063
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 1,
+            "static": 39,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9840274413666582,
+            "scalar": 0.98376078364593,
+            "static": 0.984834314903679,
+            "causal": 0.9834351444829611
+          },
+          "changed": 38
+        },
+        {
+          "seed": 5,
+          "costs": {
+            "online": 0.2824519825749375,
+            "scalar": 0.32325561911956713,
+            "static": 0.2721928426425612,
+            "causal": 0.3310802798584545
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 0,
+            "static": 43,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9839883911770881,
+            "scalar": 0.9834927958206754,
+            "static": 0.9848119413163858,
+            "causal": 0.9833445067673687
+          },
+          "changed": 38
+        }
+      ]
+    },
+    {
+      "scale": 2,
+      "beta": 4,
+      "faults": [
+        2,
+        3,
+        4,
+        6,
+        9,
+        10,
+        11,
+        13,
+        15,
+        16,
+        17,
+        19,
+        20,
+        22,
+        23
+      ],
+      "means": {
+        "online": 0.2652711691441045,
+        "scalar": 0.3313545528606581,
+        "static": 0.31920737075332983,
+        "causal": 0.31033180516395
+      },
+      "savings": {
+        "scalar": 19.943405981913024,
+        "static": 16.896916096246727,
+        "causal": 14.52014755498223
+      },
+      "wins": {
+        "scalar": 5,
+        "static": 5,
+        "causal": 5
+      },
+      "rows": [
+        {
+          "seed": 1,
+          "costs": {
+            "online": 0.2407593674237121,
+            "scalar": 0.29959988496858647,
+            "static": 0.30226212584896667,
+            "causal": 0.28054648087028994
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 12,
+            "static": 83,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9844585401364979,
+            "scalar": 0.9839147815172294,
+            "static": 0.9843513207607147,
+            "causal": 0.9839258597656629
+          },
+          "changed": 38
+        },
+        {
+          "seed": 2,
+          "costs": {
+            "online": 0.27305663583077344,
+            "scalar": 0.33935712173747856,
+            "static": 0.3232125448154917,
+            "causal": 0.3194292321167704
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 11,
+            "static": 96,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9842366987292144,
+            "scalar": 0.9833364585202748,
+            "static": 0.9840770465216235,
+            "causal": 0.9836396095133837
+          },
+          "changed": 38
+        },
+        {
+          "seed": 3,
+          "costs": {
+            "online": 0.2634826304582425,
+            "scalar": 0.32968312736795746,
+            "static": 0.3231326843506576,
+            "causal": 0.30834904551947473
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 12,
+            "static": 102,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9845072600313649,
+            "scalar": 0.9840805236385972,
+            "static": 0.9840608940847193,
+            "causal": 0.983958012412673
+          },
+          "changed": 38
+        },
+        {
+          "seed": 4,
+          "costs": {
+            "online": 0.2666228861652179,
+            "scalar": 0.33571360759525826,
+            "static": 0.3244495392551552,
+            "causal": 0.31225398745476063
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 19,
+            "static": 122,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9840234593019929,
+            "scalar": 0.9837497709595481,
+            "static": 0.9843267049657662,
+            "causal": 0.9834351444829611
+          },
+          "changed": 38
+        },
+        {
+          "seed": 5,
+          "costs": {
+            "online": 0.2824343258425765,
+            "scalar": 0.35241902263400987,
+            "static": 0.322979959496378,
+            "causal": 0.3310802798584545
+          },
+          "limits": {
+            "online": 0,
+            "scalar": 9,
+            "static": 79,
+            "causal": 0
+          },
+          "mins": {
+            "online": 0.9839945893415324,
+            "scalar": 0.9834360019271179,
+            "static": 0.9841848929053133,
+            "causal": 0.9833445067673687
+          },
+          "changed": 38
+        }
+      ]
+    }
+  ]
+}

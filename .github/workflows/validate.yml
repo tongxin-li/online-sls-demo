@@ -31,6 +31,7 @@ jobs:
           node src/test-forecast-calibration.cjs
           node src/test-simulation.cjs
           node src/test-communication.cjs
+          node src/test-forecasted-scenario.cjs
           node src/test-interactions.cjs
           node src/test-topology-timeline.cjs
       - name: Build the deployable page

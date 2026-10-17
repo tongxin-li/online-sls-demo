@@ -10,11 +10,13 @@
     return;
   }
   const d3 = window.d3;
+  const DEFAULT_SCENARIO='forecasted-demand';
+  const COMPARISON_SAMPLES=180;
   const communicationNoiseLevels=[...PowerDemo.constants.communicationBetas,...(PowerDemo.constants.communicationStressBetas || [])];
   function optionsFromControls() {
     const experiment=$('experiment').value==='prediction'?'prediction':'communication';
     const beta=Number($('noise').value);
-    return {experiment,powerScenario:$('power-scenario').value || 'reference',beta:communicationNoiseLevels.includes(beta)?beta:1,preset:experiment==='communication'?'mixed':$('preset').value,
+    return {experiment,powerScenario:$('power-scenario').value || DEFAULT_SCENARIO,beta:communicationNoiseLevels.includes(beta)?beta:1,preset:experiment==='communication'?'mixed':$('preset').value,
       ...(experiment==='communication'?{horizon:180}:{})};
   }
   let simulation = new PowerDemo.Simulation(optionsFromControls());
@@ -36,6 +38,8 @@
     return series;
   }
   function gapReference() { return communicationComparison()?'fixed sparse':'scalar adaptation'; }
+  function guidedScenario() { return snapshot.experiment==='communication'&&snapshot.powerScenario===DEFAULT_SCENARIO; }
+  function comparisonComplete() { return guidedScenario()&&snapshot.phase==='deployment'&&snapshot.t>=COMPARISON_SAMPLES&&!comparisonContinued; }
   function forecastMode() { return $('intervention').value==='forecast'; }
   function forecastNoiseEnabled() { return snapshot.experiment!=='communication'||snapshot.beta>0; }
   function forecastNoisy(bus) { return forecastNoiseEnabled()&&snapshot.faults.includes(bus); }
@@ -81,6 +85,8 @@
   let journal = [];
   let fitSteps = 0;
   let restored = false;
+  let restoredTrial = false;
+  let comparisonContinued = false;
   let pin = null;
   let matrixReference = null;
   let inspectedSource = null;
@@ -391,6 +397,7 @@
     render(); save();
   }
   function resumePlant() {
+    if(comparisonComplete()) comparisonContinued=true;
     if (isFit()) {
       simulation.resume();
       journal.push({t:snapshot.t,type:'fit',count:fitSteps});
@@ -405,7 +412,7 @@
     const events=snapshot.eventLog || [];
     const state = {
       modelContent: { scenario:'24 bus LinDistFlow voltage regulation', variant:snapshot.experiment==='communication'?'Communication topology comparison':'Shared prediction adaptation and sparse deployment', phase:snapshot.phase, step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
-      privateContent: { version:13, intervention:$('intervention').value, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, automaticComparison:automaticComparison(), view:$('view').value, costMetric:$('cost-metric').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, inspectedSource, speed:$('speed').value, allLinks:$('all-links').checked }
+      privateContent: { version:13, comparisonContinued, intervention:$('intervention').value, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, automaticComparison:automaticComparison(), view:$('view').value, costMetric:$('cost-metric').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, inspectedSource, speed:$('speed').value, allLinks:$('all-links').checked }
     };
     window.openai.setWidgetState(state).catch(() => {});
   }
@@ -437,7 +444,8 @@
   function hydrate(saved) {
     const data=saved?.privateContent;
     if(restored||!data||data.version!==13) return;
-    restored=true;
+    restored=true;restoredTrial=true;
+    comparisonContinued=!!data.comparisonContinued || (data.phase==='deployment'&&data.t>COMPARISON_SAMPLES);
     $('auto-compare').checked=data.automaticComparison!==false;
     selectedBus=Math.max(1,Math.min(24,Math.floor(Number(data.selectedBus)||7)));
     $('bus').value=String(selectedBus);
@@ -453,7 +461,7 @@
     $('experiment').value=savedOptions?.experiment==='prediction'?'prediction':'communication';
     $('noise').value=String(communicationNoiseLevels.includes(savedOptions?.beta)?savedOptions.beta:1);
     $('preset').value=preset;
-    $('power-scenario').value=savedOptions?.powerScenario==='solar-outage'?'solar-outage':'reference';
+    $('power-scenario').value=['reference','solar-outage',DEFAULT_SCENARIO].includes(savedOptions?.powerScenario)?savedOptions.powerScenario:'reference';
     if(data.phase==='deployment' && data.discoveryRecord) {
       simulation=new PowerDemo.Simulation(data.discoveryRecord.options || optionsFromControls());
       topology.reset(simulation.snapshot());
@@ -513,7 +521,7 @@
     if(!simulation.deployTopology()) return false;
     snapshot=simulation.snapshot();
     topology.observe(snapshot);historyIndex=null;visualTopologyEvent=null;
-    journal=[];fitSteps=0;pin=null;lastPulse=null;
+    journal=[];fitSteps=0;pin=null;lastPulse=null;comparisonContinued=false;
     if(preserveAttack) {
       for(const attack of activeAttacks()) {
         if(!requests.some(p=>p.bus===attack.bus)) requests.push({bus:attack.bus,strength:Number($('strength').value)});
@@ -537,6 +545,7 @@
     return enterComparison(true);
   }
   function advanceLiveSample() {
+    if(comparisonComplete()) return false;
     // Replayed records never call this function. Their historical phase is retained.
     let transitioned=startAutomaticComparison();
     if(simulation.mode==='completed') simulation.extend();
@@ -545,7 +554,10 @@
     }
     advanceSample();snapshot=simulation.snapshot();
     transitioned=startAutomaticComparison() || transitioned;
-    if(transitioned) save();
+    if(comparisonComplete()) {
+      stop();announce('Comparison complete · All costs retained · Continue to explore');
+    }
+    if(transitioned || comparisonComplete()) save();
     return transitioned;
   }
   function tick() {
@@ -556,13 +568,14 @@
       const state=attackState(lastPulse.bus);
       announce((state==='continuous'||state==='held'?'Adding attacks':state==='fading'?'Disturbance fading':state==='paused'?'Paused':'Disturbance ended')+' · Bus '+lastPulse.bus+' · t = '+snapshot.t+' s');
     }
-    if (snapshot.mode === 'completed' && !playing) announce('Run or Step to continue');
+    if(comparisonComplete()) announce('Comparison complete · All costs retained · Continue to explore');
+    else if (snapshot.mode === 'completed' && !playing) announce('Run or Step to continue');
     if (snapshot.mode === 'converged') { stop(); announce('Fit converged · Return to simulation'); }
     render();
     if (snapshot.t % 30 === 0 || !playing) save();
   }
   function resetExperiment() {
-    stop(); simulation.reset();
+    stop(); simulation.reset();comparisonContinued=false;restoredTrial=false;
     snapshot = simulation.snapshot(); journal = []; fitSteps = 0; pin = null; lastPulse = null;
     if(snapshot.phase==='discovery') topology.reset(snapshot);
     else topology.observe(snapshot);
@@ -575,6 +588,7 @@
     if (comparing) return;
     if (playing) { stop(); announce('Paused'); save(); }
     else {
+      if(comparisonComplete()) comparisonContinued=true;
       if (snapshot.mode === 'completed') { simulation.extend(); snapshot=simulation.snapshot(); }
       if (snapshot.mode === 'converged') resumePlant();
       playing = true;
@@ -605,6 +619,12 @@
     visible.clear();series.forEach(item=>visible.add(item.key));
     announce((snapshot.experiment==='communication'?'Communication topology':snapshot.presetLabel)+' · New learning trial'); render(); save();
   }
+  $('new-scenario').addEventListener('click',()=>{
+    if(comparing) return;
+    $('experiment').value='communication';$('power-scenario').value=DEFAULT_SCENARIO;
+    $('noise').value='4';$('preset').value='mixed';$('auto-compare').checked=true;
+    startSelectedExperiment();toggleRun();
+  });
   $('preset').addEventListener('change',startSelectedExperiment);
   $('experiment').addEventListener('change',startSelectedExperiment);
   $('noise').addEventListener('change',startSelectedExperiment);
@@ -614,23 +634,24 @@
     stop(true); resumePlant(); comparing=true; $('view').value='cost';
     const startingPhase=snapshot.phase;
     try {
-      for (let done=0; done<180; done+=12) {
+      let done=0;
+      while(done<180 && !comparisonComplete()) {
         // Yield between batches so progress and controls remain responsive.
         renderControls();
         await new Promise(resolve=>setTimeout(resolve,0));
-        for (let k=0;k<12;k++) advanceLiveSample();
+        for(let k=0;k<12 && done<180 && !comparisonComplete();k++,done++) advanceLiveSample();
         snapshot=simulation.snapshot();
-        announce('Advancing '+(done+12)+' / 180 samples');
-        if ((done+12)%36===0) render();
+        announce(comparisonComplete()?'Comparison complete · All costs retained':'Advancing '+done+' / 180 samples');
+        if(done%36===0) render();
       }
-      announce(startingPhase!==snapshot.phase?'Discovery complete · Fresh comparison trial · t = '+snapshot.t+' s':'180 samples added · t = '+snapshot.t+' s');
+      announce(comparisonComplete()?'Comparison complete · All costs retained · Continue to explore':startingPhase!==snapshot.phase?'Discovery complete · Fresh comparison trial · t = '+snapshot.t+' s':done+' samples added · t = '+snapshot.t+' s');
     } finally {
       comparing=false;
       if(activeAttacks().length && !playing) {playing=true;nextTickAt=0;schedule();}
       render(); save();
     }
   });
-  $('step').addEventListener('click', () => { stop(); if(snapshot.mode==='completed'){simulation.extend();snapshot=simulation.snapshot();} tick(); save(); });
+  $('step').addEventListener('click', () => { if(comparisonComplete())comparisonContinued=true;stop(); if(snapshot.mode==='completed'){simulation.extend();snapshot=simulation.snapshot();} tick(); save(); });
   $('restart').addEventListener('click', () => {
     resetExperiment(); announce('Ready'); render(); save();
   });
@@ -845,7 +866,7 @@
     const receipt=deployed?'Offline selection and synthesis complete · '+status.discoverySamples+' discovery samples · Fresh comparison · '
       +(status.predictionWeights==='fixed'?'Links and prediction weights fixed':'Links fixed · Prediction correction adapts')
       :'Dense discovery · Candidate sparse links · Offline selection and synthesis at comparison';
-    phase.textContent=deployed?'Comparison trial':automaticComparison()
+    phase.textContent=deployed?(comparisonComplete()?'Comparison complete':'Comparison trial'):automaticComparison()
       ?'Discovery '+snapshot.t+' / '+DISCOVERY_SAMPLES+' s':'Discovery '+snapshot.t+' s';
     for(const [key,value] of Object.entries(status))phase.dataset[key]=value===null?'':String(value);
     phase.title=receipt+' · No joint online topology adaptation is claimed.';
@@ -856,13 +877,39 @@
     $('matrix-title').textContent=status.view==='saved-discovery'?'Discovery links at '+status.historyAt+' s'
       :deployed?'Deployed prediction links':'Candidate prediction links';
   }
+  function scheduledApplications() {
+    return snapshot.powerScenario===DEFAULT_SCENARIO ? (snapshot.lastScenarioApplications || []) : [];
+  }
+  function renderScenario() {
+    const scheduled=snapshot.powerScenario===DEFAULT_SCENARIO,scenario=snapshot.scenario || {};
+    const powers=(snapshot.eventLog || []).filter(event=>event.type==='pulse').length;
+    const allNoisy=scheduled && snapshot.beta>0 && Array.from({length:PowerDemo.constants.N-1},(_,i)=>i+2).every(bus=>snapshot.faults.includes(bus));
+    $('scenario-name').textContent=scheduled?'Demand and solar cycle':snapshot.powerScenario==='solar-outage'?'Solar outage trial':'Reference trial';
+    $('scenario-description').textContent=scheduled
+      ?'Forecasts arrive up to 4 s ahead · Forecast stress β '+snapshot.beta
+      :(restoredTrial?'Restored run · ':'')+'Forecast stress β '+snapshot.beta+' · Previous samples and costs retained';
+    $('new-scenario').hidden=scheduled && !powers && !allNoisy;
+    $('new-scenario').disabled=comparing;
+    $('new-scenario').textContent=scheduled?'Start fresh scenario':'Start new scenario';
+    $('new-scenario').title='Start a new demand and solar scenario with forecast stress β 4. The new trial starts learning and clears previous trial costs.';
+    const status=$('scheduled-power'),applied=Number(scenario.appliedKw)||0;
+    status.hidden=!scheduled;
+    status.dataset.appliedKw=String(applied);status.dataset.action=String(scenario.action ?? '');
+    status.textContent=scheduled?(scenario.phaseLabel || 'Scheduled demand and solar')+' · '+d3.format('+.0f')(applied)+' kW net change · Teal rings show scheduled power':'';
+    const context=$('trial-context');
+    context.hidden=!powers && !allNoisy && snapshot.powerScenario!=='solar-outage';
+    context.dataset.powerRequests=String(powers);context.dataset.allSourcesNoisy=String(allNoisy);
+    const physical=powers?'Mixed trial · '+powers+' unforecast power request'+(powers===1?'':'s')+' · All recovery costs included'
+      :snapshot.powerScenario==='solar-outage'?'Includes an unforecast solar outage · All recovery costs included':'';
+    context.textContent=[physical,allNoisy?'All forecast sources are noisy · No reliable alternative to select':''].filter(Boolean).join(' · ');
+  }
   function renderControls() {
     renderInspectedSource();
     const frozen=isFit();
     const deployed=snapshot.phase==='deployment',communication=snapshot.experiment==='communication';
     const completedRows=snapshot.learning?.completedRows || 0;
     const preparing=!deployed && automaticComparison();
-    renderProtocol();
+    renderProtocol();renderScenario();
     if($('deploy')) { $('deploy').hidden=preparing; $('deploy').disabled=comparing || (!deployed && !snapshot.canDeploy); $('deploy').textContent=deployed?'Learn again':'Compare controllers'; $('deploy').title=deployed?'Start a new discovery trial with these forecast settings':snapshot.canDeploy?'Start four controllers on the same fresh disturbance sequence':'Collecting observed samples for comparison'; }
 
     $('noise-control').hidden=!communication; $('noise-caption').hidden=!communication; $('preset-control').hidden=communication;
@@ -890,13 +937,13 @@
 
     $('clock').textContent=(deployed?'Comparison t = ':'Discovery t = ')+snapshot.t+' s';
     $('learning').textContent=frozen?'Plant held · '+snapshot.mode:deployed?'Prediction links fixed':completedRows+' completed responses';
-    $('run').textContent=playing?'Pause':frozen && snapshot.mode!=='converged'?'Fit':'Run';
+    $('run').textContent=playing?'Pause':comparisonComplete()?'Continue':frozen && snapshot.mode!=='converged'?'Fit':'Run';
     $('run').disabled=comparing;
     $('compare').disabled=comparing;
     $('compare').textContent=comparing ? 'Running…' : 'Advance 180';
     $('preset').disabled=comparing;
     $('restart').disabled=comparing;
-    $('run').setAttribute('aria-label',playing?'Pause simulation':frozen?'Run frozen fit':'Run simulation');
+    $('run').setAttribute('aria-label',playing?'Pause simulation':comparisonComplete()?'Continue simulation':frozen?'Run frozen fit':'Run simulation');
     $('run').setAttribute('aria-pressed',String(playing));
     const forecast=forecastMode();root.dataset.interaction=forecast?'forecast':'power';
     $('attack-mode').hidden=forecast;$('strength').hidden=forecast;
@@ -991,6 +1038,7 @@
     const nodes = svg.select('.nodes').selectAll('g.bus-node').data(d3.range(1,25),bus => bus).join(enter => {
       const g=enter.append('g').attr('class','bus-node').attr('role','button').attr('tabindex',0)
         .style('cursor','pointer').style('user-select','none');
+      g.append('circle').attr('class','pr-scheduled-ring').attr('r',18).attr('fill','none').attr('pointer-events','none');
       g.append('circle').attr('class','pr-inspection-ring').attr('r',21).attr('fill','none').attr('pointer-events','none');
       g.append('text').attr('class','bus-number').attr('pointer-events','none');
       g.append('text').attr('class','fault-mark').attr('pointer-events','none');
@@ -1034,6 +1082,12 @@
       const badgeWidth=Number(badge.select('rect').attr('width')) || 60;
       badge.attr('transform','translate('+(point(bus)[0]>width-95 ? -badgeWidth-10 : 13)+' -16)');
     });
+    const scheduledByBus=new Map(scheduledApplications().map(item=>[item.bus,item.appliedKw]));
+    const scheduleScale=Math.max(1,snapshot.scenario?.maxScheduledKw || 35);
+    nodes.attr('data-scheduled-kw',bus=>String(scheduledByBus.get(bus) || 0));
+    animate(nodes.select('.pr-scheduled-ring')).attr('r',bus=>17+3*Math.min(1,Math.abs(scheduledByBus.get(bus) || 0)/scheduleScale))
+      .attr('stroke-opacity',bus=>Math.min(.85,Math.abs(scheduledByBus.get(bus) || 0)/scheduleScale))
+      .attr('stroke-dasharray',bus=>(scheduledByBus.get(bus) || 0)<0?'3 2':null);
     nodes.select('.bus-number').attr('text-anchor','middle').attr('x',0).attr('y',27)
       .style('fill','var(--muted-foreground)').style('font-size','9px').text(bus=>bus);
     nodes.select('.pr-inspection-ring')
@@ -1309,15 +1363,16 @@
       group.forecasts=group.items.filter(item=>item.type==='forecast').length;
       group.scenarios=group.items.filter(item=>item.type==='scenario').length;
       const kinds=[group.attacks,group.forecasts,group.scenarios].filter(Boolean).length;
-      group.label=kinds>1?'Events ×'+group.items.length:group.scenarios?'Solar event'
+      const scheduled=group.items.some(item=>item.type==='scenario'&&item.forecasted);
+      group.label=kinds>1?'Events ×'+group.items.length:group.scenarios?(scheduled?'Scheduled cycle':'Solar event')
         :group.attacks?'Power'+(group.attacks>1?' ×'+group.attacks:'')
         :group.forecasts>1?'Forecast ×'+group.forecasts:typeof first.faulty==='boolean'?(first.faulty?'Marked noisy':'Marked quiet'):'Forecast changed';
       group.summary=[group.attacks?group.attacks+' power request'+(group.attacks===1?'':'s'):'',group.forecasts?group.forecasts+' forecast setting change'+(group.forecasts===1?'':'s'):'',
-        group.scenarios?group.scenarios+' solar event'+(group.scenarios===1?'':'s'):''].filter(Boolean).join(' · ');
+        group.scenarios?group.scenarios+' '+(scheduled?'scheduled cycle':'solar event')+(group.scenarios===1?'':'s'):''].filter(Boolean).join(' · ');
       group.details=group.items.slice(-8).map(item=>{
         if(item.type==='pulse')return pulseMagnitude(item.strength || 100)+' requested at bus '+item.bus
           +' · Action '+item.t+' s · First state '+item.at+' s · Applied power is bounded';
-        if(item.type==='scenario')return item.message+' · Action '+item.t+' s · First state '+item.at+' s · Absent from forecasts';
+        if(item.type==='scenario')return item.message+' · Action '+item.t+' s · First state '+item.at+' s · '+(item.forecasted?'Included in issued forecasts':'Absent from forecasts');
         const issuedAt=Math.max(1,item.t),target=issuedAt+PowerDemo.constants.preview-1;
         return 'Bus '+item.bus+(typeof item.faulty==='boolean'?(item.faulty?' marked noisy':' marked quiet'):' forecast setting changed')
           +' at '+item.t+' s · First eligible issue '+issuedAt+' s · Target '+target+' s · Pair '+(target+1)+' s'
@@ -1505,5 +1560,5 @@
   new ResizeObserver(()=>render()).observe(root);
   render();
   // A read only inspection hook supports deterministic browser verification.
-  root.powerDemo = { getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,inspectedSource,playing,activeAttackBuses:activeAttacks().map(attack=>attack.bus),intervention:$('intervention').value,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null,topology:topology.export(),historyIndex}) };
+  root.powerDemo = { getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,inspectedSource,playing,activeAttackBuses:activeAttacks().map(attack=>attack.bus),intervention:$('intervention').value,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null,topology:topology.export(),historyIndex,comparisonComplete:comparisonComplete(),comparisonContinued}) };
 })();

@@ -102,10 +102,14 @@ function harness(saved,experiment='prediction',reducedMotion=true) {
     const selected=options.find(option=>/\bselected\b/.test(option[1]))||options[0];
     if(selected)nodes.get(select[1]).value=selected[1].match(/\bvalue="([^"]*)"/)[1];
   }
-  // Existing interaction cases exercise Prediction; dedicated cases below cover
-  // the new Communication default and its saved experiment controls.
-  nodes.get('pr-experiment').value=experiment;
-  nodes.get('pr-view').value=experiment==='communication'?'learning':'cost';
+  // Legacy cases explicitly keep the reference physics and beta. Passing null
+  // exercises the actual shipped HTML defaults, including the new scenario.
+  if(experiment!==null) {
+    nodes.get('pr-experiment').value=experiment;
+    nodes.get('pr-power-scenario').value='reference';
+    nodes.get('pr-noise').value='1';
+    nodes.get('pr-view').value=experiment==='communication'?'learning':'cost';
+  }
   const seriesButtons=new Map();
   for(const match of html.matchAll(/<button\b[^>]*\bdata-series="([^"]+)"[^>]*>/g)){
     const button=element('BUTTON');button.dataset.series=match[1];
@@ -1721,4 +1725,92 @@ test('comparison resets marker history while retaining source reliability and ex
   h.inspectLink(5,7);h.click('source-fault');
   assert.deepEqual(h.interventionEvents().map(e=>[e.at,e.faulty]),[[0,false]]);
   const restored=harness(h.saved());assert.deepEqual(restored.interventionEvents(),h.interventionEvents());
+});
+
+
+test('the shipped default runs demand and solar discovery then pauses the complete comparison',async()=>{
+  const h=harness(undefined,null);
+  assert.equal(h.snapshot().experiment,'communication');
+  assert.equal(h.snapshot().powerScenario,'forecasted-demand');assert.equal(h.snapshot().beta,4);
+  assert.equal(h.node('auto-compare').checked,true);assert.equal(h.node('new-scenario').hidden,true);
+  assert.match(h.node('scenario-description').textContent,/Forecast stress β 4/);
+  h.click('run');await h.clock.until(()=>h.snapshot().phase==='deployment');
+  assert.equal(h.snapshot().t,0);assert.equal(h.state().playing,true);
+  await h.clock.until(()=>h.state().comparisonComplete);
+  assert.equal(h.snapshot().t,180);assert.equal(h.state().playing,false);assert.equal(h.node('run').textContent,'Continue');
+  assert.equal(h.node('phase').textContent,'Comparison complete');
+  assert.deepEqual(h.comparison().plotted,['online','scalar','static','causal']);
+  const finished=h.snapshot();await h.samples(30);assert.deepEqual(h.snapshot(),finished,'Finished result remains still');
+  const restored=harness(h.saved());assert.equal(restored.snapshot().powerScenario,'forecasted-demand');assert.equal(restored.snapshot().beta,4);
+  assert.equal(restored.state().comparisonComplete,true);assert.deepEqual(restored.snapshot().cumulative,finished.cumulative);
+  h.click('run');assert.equal(h.snapshot().t,181);assert.equal(h.state().playing,true);assert.equal(h.state().comparisonContinued,true);
+  await h.samples(3);h.click('run');assert.ok(h.snapshot().t>181);assert.equal(h.state().comparisonComplete,false);
+  for(const key of ['online','scalar','static','causal'])assert.ok(h.snapshot().cumulative[key]>=finished.cumulative[key]);
+  const continued=harness(h.saved());assert.equal(continued.state().comparisonContinued,true);assert.equal(continued.state().comparisonComplete,false);
+});
+
+test('the new scenario action preserves a restored trial until an explicit fresh start',async()=>{
+  const old=harness(undefined,'communication');old.change('intervention','power');pointerClick(old,old.bus(23));
+  await old.samples(8);old.click('run');const saved=old.saved(),restored=harness(saved);
+  assert.equal(restored.snapshot().powerScenario,'reference');assert.equal(restored.node('new-scenario').hidden,false);
+  assert.match(restored.node('scenario-description').textContent,/Restored run/);
+  assert.match(restored.node('trial-context').textContent,/unforecast power requests/);
+  assert.deepEqual(restored.snapshot().cumulative,old.snapshot().cumulative);
+  restored.change('intervention','forecast');assert.deepEqual(restored.snapshot().cumulative,old.snapshot().cumulative,'Mode selection never silently removes old costs');
+  restored.click('new-scenario');assert.equal(restored.snapshot().powerScenario,'forecasted-demand');assert.equal(restored.snapshot().beta,4);
+  assert.equal(restored.snapshot().phase,'discovery');assert.equal(restored.state().playing,true);assert.equal(restored.state().intervention,'forecast');
+  assert.deepEqual(restored.state().activeAttackBuses,[]);assert.equal(restored.snapshot().eventLog.some(event=>event.type==='pulse'),false);
+  assert.ok(restored.snapshot().t<=1,'Explicit action starts only the new trial');
+  assert.equal(restored.node('trial-context').hidden,true);
+});
+
+test('new scenario attacks cross handoff and stop honestly at the reviewed endpoint',async()=>{
+  const h=harness(undefined,null);h.change('intervention','power');
+  for(const bus of [20,22,23])pointerClick(h,h.bus(bus));
+  await h.clock.until(()=>h.snapshot().phase==='deployment');
+  assert.deepEqual(h.state().activeAttackBuses,[20,22,23]);
+  await h.clock.until(()=>h.state().comparisonComplete);
+  assert.equal(h.snapshot().t,180);assert.equal(h.state().playing,false);assert.deepEqual(h.state().activeAttackBuses,[]);
+  const count=pulses(h).length;await h.samples(5);assert.equal(pulses(h).length,count);
+  assert.ok(h.snapshot().activePulses.length>0,'Pausing preserves the residual physical disturbance');
+  assert.equal(h.node('new-scenario').hidden,false);assert.match(h.node('trial-context').textContent,/unforecast power requests/);
+  h.click('step');assert.equal(h.snapshot().t,181);assert.equal(h.state().playing,false);assert.equal(h.state().comparisonComplete,false);
+  pointerClick(h,h.bus(23));assert.equal(h.state().playing,true);await h.samples(2);assert.ok(pulses(h).length>count);
+});
+
+test('scheduled cycle markers distinguish forecasted power from surprise attacks',async()=>{
+  const h=harness(undefined,null);h.click('step');
+  const scheduled=h.interventionGroups(h.snapshot()).filter(group=>group.items.some(event=>event.type==='scenario'));
+  assert.ok(scheduled.length>0);assert.match(scheduled[0].label,/Scheduled cycle/);
+  assert.match(scheduled[0].description,/Included in issued forecasts/);
+  assert.doesNotMatch(scheduled[0].description,/Absent from forecasts/);
+  const sum=h.snapshot().lastScenarioApplications.reduce((total,item)=>total+item.appliedKw,0);
+  assert.ok(Math.abs(Number(h.node('scheduled-power').dataset.appliedKw)-sum)<1e-8);
+});
+
+
+test('corrupting every scenario source reports the missing reliable alternatives and offers a fresh start',()=>{
+  const h=harness(undefined,null);
+  for(let bus=2;bus<=24;bus++)if(!h.snapshot().faults.includes(bus)) {h.change('bus',bus);h.click('fault');}
+  assert.equal(h.snapshot().faults.length,23);assert.equal(h.snapshot().t,0);
+  assert.equal(h.node('trial-context').hidden,false);assert.equal(h.node('trial-context').dataset.allSourcesNoisy,'true');
+  assert.match(h.node('trial-context').textContent,/All forecast sources are noisy.*No reliable alternative to select/);
+  assert.equal(h.node('new-scenario').hidden,false);
+  h.click('new-scenario');assert.equal(h.snapshot().powerScenario,'forecasted-demand');assert.equal(h.snapshot().beta,4);
+  assert.equal(h.snapshot().faults.length,15);assert.equal(h.node('trial-context').hidden,true);
+  assert.deepEqual(h.snapshot().faults,PowerDemo.constants.busProfiles.filter(profile=>profile.role==='Homes').map(profile=>profile.bus));
+  assert.equal(h.snapshot().eventLog.some(event=>event.type==='forecast'||event.type==='pulse'),false);
+});
+
+
+test('Advance 180 reports an early comparison endpoint honestly and can explicitly continue it',async()=>{
+  const h=harness(undefined,null);await compare(h);
+  assert.equal(h.snapshot().phase,'deployment');assert.equal(h.snapshot().t,0);
+  for(let i=0;i<100;i++)h.click('step');
+  await compare(h);assert.equal(h.snapshot().t,180);assert.equal(h.state().comparisonComplete,true);
+  assert.match(h.node('event').textContent,/Comparison complete/);assert.doesNotMatch(h.node('event').textContent,/180 samples added/);
+  const finished=h.snapshot().cumulative;await compare(h);
+  assert.equal(h.snapshot().t,360);assert.equal(h.state().comparisonContinued,true);
+  assert.match(h.node('event').textContent,/180 samples added/);
+  for(const key of ['online','scalar','static','causal'])assert.ok(h.snapshot().cumulative[key]>finished[key]);
 });

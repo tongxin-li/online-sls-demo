@@ -43,6 +43,17 @@
       baseDemandKw:battery?50:70,baseGenerationKw:solar?80:0,
       activePowerLimitKw:solar||battery?90:null,reactiveRatio:solar||battery?0:PF_RATIO};
   });
+  const FORECASTED_DEMAND={id:'forecasted-demand',label:'Forecastable demand and solar',periodSeconds:60,
+    homeAmplitudeKw:35,solarLossMaxKw:30,batteryAmplitudeKw:15,maxScheduledKw:35,
+    phaseRule:'2 pi times bus modulo 6 divided by 6',previewSamples:PREVIEW,leadSteps:PREVIEW-1,
+    noisySources:BUS_PROFILES.filter(profile=>profile.role==='Homes').map(profile=>profile.bus)};
+  function scheduledPower(bus,t){
+    const profile=BUS_PROFILES[bus-1],phase=2*Math.PI*(bus%6)/6;
+    if(profile.role==='Solar')return .030*(1-Math.cos(2*Math.PI*t/60))/2;
+    if(profile.role==='Battery')return .015*Math.sin(2*Math.PI*t/60+phase);
+    if(profile.role==='Homes')return .035*Math.sin(2*Math.PI*t/60+phase);
+    return 0;
+  }
   function zeros(n = N, m = n) { return Array.from({length:n}, () => Array(m).fill(0)); }
   function eye(n = N) { const a = zeros(n); for (let i=0;i<n;i++) a[i][i]=1; return a; }
   function copy(a) { return a.map(row => row.slice()); }
@@ -289,11 +300,11 @@
       const preset=FORECAST_PRESETS.find(p=>p.id===id);
       if(!preset)throw new RangeError('Forecast preset must be reliable, uniform, or mixed');
       const powerScenario=options.powerScenario || 'reference';
-      if(!['reference','solar-outage'].includes(powerScenario))throw new RangeError('Unknown power scenario');
+      if(!['reference','solar-outage','forecasted-demand'].includes(powerScenario))throw new RangeError('Unknown power scenario');
       this.preset=preset;
       this.initialOptions={experiment,beta,powerScenario,seed:options.seed===undefined?20261013:options.seed,
         horizon:options.horizon===undefined?480:options.horizon,preset:id,
-        faultBuses:options.faultBuses===undefined?preset.faultBuses.slice():options.faultBuses.slice()};
+        faultBuses:options.faultBuses===undefined?(powerScenario==='forecasted-demand'&&id==='mixed'?FORECASTED_DEMAND.noisySources:preset.faultBuses).slice():options.faultBuses.slice()};
       if(!Number.isInteger(this.initialOptions.horizon)||this.initialOptions.horizon<1)throw new Error('Invalid horizon');
       this.phase='discovery';this.discoveryRecord=null;this.deployedSupport=null;this.reset();
     }
@@ -352,7 +363,9 @@
       while(this.forecasts.length<this.t+PREVIEW){
         const s=this.forecasts.length,rho=.72,innovation=Math.sqrt(1-rho*rho);
         this.latent=this.latent.map(v=>rho*v+innovation*this.random.normal());
-        const base=Array.from({length:N},(_,i)=>i===0?0:boundedPowerDeviation(i+1,AMPLITUDE*(.35*this.latent[0]+.65*this.latent[i+1])));
+        const scheduled=this.options.powerScenario==='forecasted-demand'?Array.from({length:N},(_,i)=>scheduledPower(i+1,s)):null;
+        const randomBase=Array.from({length:N},(_,i)=>i===0?0:AMPLITUDE*(.35*this.latent[0]+.65*this.latent[i+1]));
+        const base=randomBase.map((value,i)=>i===0?0:boundedPowerDeviation(i+1,scheduled?scheduled[i]+value:value));
         const previous=s?this.forecasts[s-1].base:Array(N).fill(0);
         const baseW=matvec(model.powerToVoltage,base.map((v,i)=>v-LAG*previous[i]));
         const forecast=baseW.map((v,i)=>{
@@ -362,7 +375,9 @@
           return i===0?0:(faulty?this.preset.faultyGain:this.preset.gain)*v
             +scale*(faulty?this.preset.faultyNoise:this.preset.noise)*noise;
         });
-        this.forecasts.push(deepFreeze({t:s,issuedAt:Math.max(0,s-PREVIEW+1),base,forecast,units:'pu voltage forcing'}));
+        const scheduledMetadata=scheduled?{scheduledPowerKw:scheduled.map(value=>value*POWER_BASE_KW),
+          scheduledAppliedKw:base.map((value,i)=>(value-boundedPowerDeviation(i+1,randomBase[i]))*POWER_BASE_KW)}:{};
+        this.forecasts.push(deepFreeze({t:s,issuedAt:Math.max(0,s-PREVIEW+1),base,forecast,units:'pu voltage forcing',...scheduledMetadata}));
       }
     }
     toggleFault(bus){
@@ -502,7 +517,11 @@
       const outage=this.phase==='deployment'&&this.options.powerScenario==='solar-outage'&&time>=30&&time<50;
       const scenarioRequest=background.map((v,i)=>outage&&SOLAR_BUSES.includes(i+1)?Math.max(0,BUS_PROFILES[i].baseGenerationKw-v*1000):0);
       const scenarioBase=background.map((v,i)=>boundedPowerDeviation(i+1,v+scenarioRequest[i]/1000));
-      this.lastScenarioApplications=scenarioRequest.flatMap((requestedKw,i)=>requestedKw>0?[{bus:i+1,requestedKw,appliedKw:(scenarioBase[i]-background[i])*1000}]:[]);
+      this.lastScenarioApplications=issued.scheduledPowerKw
+        ?issued.scheduledPowerKw.flatMap((requestedKw,i)=>i>0?[{bus:i+1,requestedKw,appliedKw:issued.scheduledAppliedKw[i],forecasted:true,role:BUS_PROFILES[i].role}]:[])
+        :scenarioRequest.flatMap((requestedKw,i)=>requestedKw>0?[{bus:i+1,requestedKw,appliedKw:(scenarioBase[i]-background[i])*1000}]:[]);
+      if(this.options.powerScenario==='forecasted-demand'&&time%FORECASTED_DEMAND.periodSeconds===0)
+        this.eventLog.push(deepFreeze({t:time,type:'scenario',kind:'demand',forecasted:true,message:'Scheduled demand and solar cycle'}));
       if(this.phase==='deployment'&&this.options.powerScenario==='solar-outage'&&(time===30||time===50))
         this.eventLog.push(deepFreeze({t:time,type:'scenario',action:time===30?'start':'restore',buses:SOLAR_BUSES.slice(),message:time===30?'Solar outage begins':'Solar generation restored'}));
       for(const event of this.pulses){event.requestedKw=event.strength*Math.exp(-event.age/event.decay);requested[event.bus-1]+=event.requestedKw;}
@@ -535,7 +554,8 @@
       }
       const sample=deepFreeze({t:time,forecast:issued.forecast,disturbance:recovered.online,
         voltageDisturbance:recovered.online,disturbances:recovered,base:background,powerDeviation:nextPower,
-        pulse,scenarioApplications:this.lastScenarioApplications.map(p=>({...p})),pulseApplications:this.lastPulseApplications.map(p=>({...p})),units:'pu voltage forcing',pulseUnits:'kW'});
+        pulse,scenarioApplications:this.lastScenarioApplications.map(p=>({...p})),pulseApplications:this.lastPulseApplications.map(p=>({...p})),units:'pu voltage forcing',pulseUnits:'kW',
+        ...(issued.scheduledPowerKw?{scheduledPowerKw:issued.scheduledPowerKw,scheduledAppliedKw:issued.scheduledAppliedKw}:{})});
       this.powerDeviation=nextPower.slice();this.power=physicalPower(nextPower);this.lastInputs=deepFreeze(inputs);this.lastSample=sample;this.samples.push(sample);
       this.learning.rawRms=Math.sqrt(squared(sample.forecast.map((v,i)=>v-sample.disturbance[i]))/(N-1));
       if(this.phase==='discovery'&&time>=PREVIEW){
@@ -603,6 +623,14 @@
       const flows=Object.fromEntries(CONTROLLERS.map(key=>[key,branchFlows(this.power.loadP,this.power.loadQ,this.q[key])]));
       const terminalCost=Object.fromEntries(CONTROLLERS.map(key=>{
         const x=this.states[key].slice(1).map((v,i)=>v-model.baseDrop[i+1]),px=matvec(model.P,x);return[key,x.reduce((sum,v,i)=>sum+v*px[i],0)];}));
+      const scheduled=this.options.powerScenario==='forecasted-demand';
+      const sumScheduled=role=>this.lastScenarioApplications.filter(item=>!role||item.role===role).reduce((sum,item)=>sum+item.appliedKw,0);
+      const scenario=scheduled?{...FORECASTED_DEMAND,forecasted:true,phaseLabel:'Demand and solar cycle',
+        action:this.lastSample?.t ?? null,active:this.t>0,
+        requestedKw:this.lastScenarioApplications.reduce((sum,item)=>sum+item.requestedKw,0),appliedKw:sumScheduled(),
+        demandChangeKw:sumScheduled('Homes'),solarLossKw:sumScheduled('Solar'),batteryChangeKw:sumScheduled('Battery'),
+        absoluteAppliedKw:this.lastScenarioApplications.reduce((sum,item)=>sum+Math.abs(item.appliedKw),0)}
+        :{id:this.options.powerScenario,start:30,end:50,active:this.phase==='deployment'&&this.t>30&&this.t<=50,requestedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.requestedKw,0),appliedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.appliedKw,0)};
       return{t:this.t,costTime:this.lastSample?this.lastSample.t:null,stateTime:this.t,horizon:this.options.horizon,
         initialOptions:{...this.initialOptions,faultBuses:this.initialOptions.faultBuses.slice()},
         phase:this.phase,experiment:this.options.experiment,beta:this.options.beta,canDeploy:this.phase==='discovery'&&this.samples.length>=WARMUP&&(this.options.experiment!=='communication'||this.communicationScoreSamples>0),
@@ -614,7 +642,8 @@
         saturation:Object.fromEntries(CONTROLLERS.map(key=>[key,this.saturation[key].map(Boolean)])),
         ...Object.fromEntries(Object.entries(this.power).map(([key,value])=>[key,value.slice()])),powerDeviation:this.powerDeviation.slice(),
         edgeData:model.edgeData.map((edge,i)=>({...edge,pKw:flows.online[i].pKw,qKvar:Object.fromEntries(CONTROLLERS.map(key=>[key,flows[key][i].qKvar]))})),
-        powerScenario:this.options.powerScenario,scenario:{id:this.options.powerScenario,start:30,end:50,active:this.phase==='deployment'&&this.t>30&&this.t<=50,requestedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.requestedKw,0),appliedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.appliedKw,0)},
+        powerScenario:this.options.powerScenario,scenario,
+        ...(scheduled?{scheduledPowerKw:this.lastSample?.scheduledPowerKw.slice() || Array(N).fill(0)}:{}),
         lastScenarioApplications:this.lastScenarioApplications.map(p=>({...p})),lastPulseApplications:this.lastPulseApplications.map(p=>({...p})),costStates:Object.fromEntries(CONTROLLERS.map(key=>[key,this.costStates[key].slice()])),
         learning:{...this.learning},calibration:{...this.calibration,matrix:copy(this.calibration.matrix)},predictionDiagnostics:this.predictionDiagnostics,lastPreview:this.lastPreview.slice(),
         pendingPulses:this.pulses.filter(e=>e.age===0).map(e=>({...e})),activePulses:this.pulses.filter(e=>e.age>0).map(e=>({...e})),
@@ -659,9 +688,9 @@
   return{Simulation,model,voltageMetrics,constants:deepFreeze({N,M,edges:EDGES,edgeData:model.edgeData,inverterBuses:INVERTER_BUSES,
     amplitude:AMPLITUDE,ridge:RIDGE,rawRidge:RAW_RIDGE,remoteBudget:REMOTE_BUDGET,preview:PREVIEW,window:WINDOW,warmup:WARMUP,
     busProfiles:BUS_PROFILES,controllers:CONTROLLERS,forecastPresets:FORECAST_PRESETS,communicationBetas:COMMUNICATION_BETAS,
-    communicationStressBetas:COMMUNICATION_STRESS_BETAS,tolerance:TOLERANCE,horizon:480,
+    communicationStressBetas:COMMUNICATION_STRESS_BETAS,forecastedDemand:FORECASTED_DEMAND,tolerance:TOLERANCE,horizon:480,
     pulseDefault:PULSE_DEFAULT,pulseMin:PULSE_MIN,pulseMax:PULSE_MAX,pulseUnits:'kW',powerBaseKw:POWER_BASE_KW,
     baseKv:BASE_KV,baseMva:BASE_MVA,sampleSeconds:SAMPLE_SECONDS,tauSeconds:TAU_SECONDS,inverterKvar:70}),
     math:{zeros,eye,transpose,multiply,matvec,combine,frobenius,normInf,solveSPD,getDesign,Response,calibratedScores,
-      recommendations,physicalPower,voltageFrom,branchFlows,radialAC,padInput}};
+      recommendations,physicalPower,voltageFrom,branchFlows,radialAC,padInput,scheduledPower}};
 });

@@ -310,3 +310,16 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 .pr-voltage-table { margin-top:8px; }
 .pr-voltage-table th,.pr-voltage-table td { padding:3px 2px; }
 #pr-voltage-metrics-note { margin:4px 0 10px; font-size:10px; line-height:1.5; }
+
+.pr-scenario-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px; }
+.pr-scenario-heading strong { font-size:15px; font-weight:550; letter-spacing:-.2px; }
+.pr-scenario-heading p { margin-top:3px; }
+.pr-scheduled-power { margin:5px 0 2px; color:#467b72; }
+#pr-network .pr-scheduled-ring { stroke:#399b8b; stroke-width:2; }
+.pr-trial-context { margin:8px 0; padding:7px 9px; background:#fff7ed; border-radius:7px; color:#93601f; font-size:11px; }
+.pr-adaptation .pr-experiment-bar { padding-top:8px; }
+@media(max-width:650px) {
+  .pr-scenario-heading { align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
+  .pr-scenario-heading .btn { min-height:44px; }
+  .pr-scheduled-power { font-size:10px; line-height:1.5; }
+}

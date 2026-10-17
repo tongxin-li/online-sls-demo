@@ -2,11 +2,11 @@
 
 [Open the experiment](https://tongxin.me/online-sls-demo/) · [Experimental environment](environment.html)
 
-Communication topology is the default experiment. It measures whether learned prediction links improve control at a fixed message budget. Prediction adaptation remains available as a separate experiment. Both use the same LinDistFlow feeder, physical units, feedback controller, objective and equipment limits.
+The default experience is a forecasted demand and solar cycle on the LinDistFlow feeder. It tests whether learned prediction links retain useful advance information while avoiding corrupted sources. All four controllers share the plant, physical power, raw forecasts, feedback, objective and limits. Earlier reference scenarios remain available in Experiment settings for reproducibility.
 
 ## Interaction
 
-Press Run to collect 180 physical samples, then enter an independent comparison automatically. Comparison states and costs start afresh. Discovery topology history remains available. Ongoing attacks and unapplied requests continue across the transition, while decaying disturbances from the old plant do not transfer.
+Press Run to collect 180 physical samples, then enter an independent comparison automatically. Comparison states and costs start afresh. The default scenario pauses after 180 comparison samples and offers Continue. Discovery topology history remains available. Ongoing attacks and unapplied requests continue across the transition, while decaying disturbances from the old plant do not transfer. Existing saved trials are restored exactly. Start new scenario explicitly replaces an old or mixed trial with the default environment and starts playback.
 
 The phase badge distinguishes dense discovery from comparison. On comparison it reports the actual discovery sample count and confirms offline link selection and sparse controller synthesis. Automatic discovery uses 180 samples; manual comparison reports its actual episode length, which can differ from 180. Communication comparison fixes links and prediction coefficients. Prediction adaptation fixes links but continues correcting predictions. No joint online topology adaptation is implied. Reviewing topology history changes only the link view, not playback, the live plant, costs or deployed support. The header explicitly labels saved discovery links, and current source quality labels are suppressed there rather than attributed to the past. Latest or a matrix view change restores current links and source controls immediately, without stepping the plant.
 
@@ -38,9 +38,38 @@ Experiment settings retains Reference and adds a 20 second solar outage in held 
 
 See [environment](environment.html) and the [paired audit](benchmark-stress.json) for physical bounds, all predefined seeds, reference/outage outcomes and matched-reference recovery. This preset does not claim a universal prediction advantage.
 
-## Communication experiment
+## Forecasted demand and solar
 
-Forecast noise follows the manuscript communication experiment's prescribed levels β in 0, 0.25, 0.5, 1 and 2. The default is β = 1. The feeder and background power generator are unchanged.
+The default scenario is `forecasted-demand` at β 4 with the unchanged demonstration seed 20261013. It adds known 60 second operating envelopes to the original stochastic background with a 6 kW scale. Household demand varies by ±35 kW, solar generation loss varies from 0 to 30 kW, and battery power varies by ±15 kW. Household and battery phase is `2π (bus mod 6) / 6`. Solar loss is `15 (1 − cos(2π t / 60))` kW. Existing equipment bounds remain in force. These constructed profiles represent aggregate load schedules, a passing cloud and charging schedules rather than measured utility traces.
+
+The physical schedule enters the base power before voltage forcing and forecast noise are formed. Its five sample preview includes the current action. A target action t is issued at max(0, t − 4) and observed at state t + 1. The same sealed forecast and physical base drive every controller. Manual power attacks remain unforecast additions, and their costs are never removed from a trial.
+
+The scenario declares low error for the eight inverter forecast sources and high error for the fifteen household estimates. Source messages estimate feeder voltage forcing, not simply the source bus's own power. Quality classes are synthetic assumptions and are not supplied to the learner. Quiet and noisy errors retain the original multipliers 0.05β and 4β on the fixed background forcing scale. At the default β 4, this is a substantial corruption test. Mandatory local inverter sources initially remain useful, while remote household forecasts can be rejected through learned communication. Corrupting every source removes that useful information and need not help any predictive controller.
+
+Controller synthesis, objective, feedback, actuator bounds, learning rules and link budgets are unchanged. Learned and fixed sparse controllers are resynthesized under their respective supports before comparison, and then use fixed coefficients. No favorable seed is selected. The original topology protocol is transferred to a different physical environment and information model, so its paper percentages are not reproduction targets.
+
+The [complete forecasted scenario audit](benchmark-forecasted-scenario.json) distinguishes exploratory seeds 1 through 5 from held aside seeds 21 through 40. It retains every outcome at β 0, 1, 2 and 4, the unchanged demonstration seed, all four full costs, selected links, voltage ranges, saturation, paired uncertainty intervals and the case with every source corrupted. Low noise can favor dense prediction. Full physical costs remain included in every case.
+
+## Forecasted scenario results
+
+The table reports mean total cost over the twenty held aside seeds 21 through 40, including the terminal penalty once. Live curves display accumulated stage costs and do not add that terminal penalty. The physical profile and default corruption setting were chosen from the exploratory grid before examining the held aside results. The archived exploratory grid contains all 45 cases over seeds 1 through 5, physical scales 0, 1 and 2, and β 1, 2 and 4. The final engine independently reproduces every selected scale 1 pilot case and unchanged reference checks. The published generator evaluates the final engine directly, without source substitution.
+
+| Forecast error β | Learned sparse | Fixed sparse | Dense prediction | Feedback only |
+| --- | --- | --- | --- | --- |
+| 0 | 0.082269 | 0.082269 | 0.067451 | 0.088166 |
+| 1 | 0.075081 | 0.084760 | 0.073087 | 0.088166 |
+| 2 | 0.075084 | 0.092241 | 0.089919 | 0.088166 |
+| 4 | 0.075095 | 0.121627 | 0.150164 | 0.088166 |
+
+At the default β 4, learned sparse reduces mean cost by 38.26 percent against fixed sparse, 49.99 percent against dense prediction and 14.83 percent against feedback only. The corresponding paired bootstrap 95 percent intervals are 37.50 to 39.05, 48.42 to 51.79 and 14.71 to 14.93 percent. It wins all twenty paired comparisons against each baseline and replaces nineteen of the twenty four remote links. Its commands never saturate in these trials. Its lowest absolute bus voltage is 0.98507 pu. The control objective tracks the declared nominal feeder profile rather than a flat 1 pu target.
+
+The advantage is conditional. Dense prediction wins every seed at β 0 and nineteen of twenty at β 1. When all sources are corrupted, feedback only wins all five declared ablation seeds and learned sparse costs 29.86 percent more on average. Adding unexpected physical overload can still dominate accumulated cost. Every outcome remains in the audit.
+
+The unchanged demonstration seed also benefits beyond startup. Over comparison actions 30 through 179 and the terminal penalty, learned cost remains 14.76 percent below feedback. The audit verifies that changing or removing reliability labels and schedule metadata from completed samples does not change the calibration result. The learner uses only forecast and revealed forcing pairs.
+
+## Reference communication experiment
+
+The background only reference retains β in 0, 0.25, 0.5, 1 and 2 and its original β 1 benchmark. Its feeder, background power generator and source map are unchanged. These settings describe the reference rather than the new default operating cycle.
 
 ```text
 forecast[t,j] = trueForcing[t,j] + beta * forcingScale[j] * a[j] * epsilon[t,j]
@@ -88,7 +117,7 @@ At β = 1, learned sparse costs 5.79 percent less than fixed sparse and 7.60 per
 
 ## Extended forecast stress
 
-The same selector also offers β 4, 8 and 16 as additional feeder stress tests. The reference grid, default β 1 and its benchmark remain unchanged. Only the synthetic Gaussian forecast error amplitude changes. Noisy sources retain 80 times the standard deviation of quiet sources, with the same standardized draws and the same physical disturbance stream. These additional levels are outside the manuscript reference grid and are not a reproduction of its reported percentages.
+The same selector also offers β 4, 8 and 16 as additional feeder stress tests. The reference grid and its β 1 benchmark remain unchanged. The new default operating cycle is documented separately above. Only the synthetic Gaussian forecast error amplitude changes. Noisy sources retain 80 times the standard deviation of quiet sources, with the same standardized draws and the same physical disturbance stream. These additional levels are outside the manuscript reference grid and are not a reproduction of its reported percentages.
 
 The caption gives the selected source's configured noise standard deviation in mpu of voltage forcing. It is not an actual bus voltage deviation. For example, corrupting bus 7 at β 8 changes its noise SD from 0.106 to 8.52 mpu. The forecasts are still immutable once issued. Changing β starts a fresh discovery and comparison, clearing previous physical attacks and accumulated costs. Within a trial all physical costs remain included.
 
@@ -150,9 +179,11 @@ python3 build.py
 node src/test-forecast-calibration.cjs
 node src/test-simulation.cjs
 node src/test-communication.cjs
+node src/test-forecasted-scenario.cjs
 node src/test-interactions.cjs
 node src/test-topology-timeline.cjs
 node src/benchmark-communication.cjs --json
+node src/benchmark-forecasted-scenario.cjs --json
 node src/benchmark-forecast-stress.cjs --json
 node src/benchmark.cjs --json
 node src/benchmark.cjs --attacks --json
@@ -161,7 +192,7 @@ python3 -m http.server 8000
 
 ## Cloud validation
 
-Every branch push and pull request runs the five existing numerical and interaction test suites, builds the page and checks the real browser interactions. Browser checks cover ordinary playback, repeated forecast clicks, continuous power attacks through automatic comparison, thirty live cost view switches and a narrow touch layout. The workflow saves desktop and mobile screenshots as evidence. These smoke checks do not replace visual review or scientific benchmarks.
+Every branch push and pull request runs the six numerical and interaction test suites, builds the page and checks the real browser interactions. Browser checks cover ordinary playback, repeated forecast clicks, continuous power attacks through automatic comparison, thirty live cost view switches and a narrow touch layout. The workflow saves desktop and mobile screenshots as evidence. These smoke checks do not replace visual review or scientific benchmarks.
 
 Cloud changes use a new branch beginning with `cloud/refine/`. Push source edits to that branch without editing the generated page by hand. After validation succeeds, a separate job with write access commits only the tested `index.html` to the same candidate branch. It checks that the remote branch still equals the tested source commit and uses a lease when pushing. It never updates `main`. Main and pull request runs require the checked in page to match the build.
 
