@@ -1232,7 +1232,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       }
     }
     toggleFault(bus){
-      this.checkBus(bus);if(bus===1||this.mode!=='running')return false;
+      this.checkBus(bus);if(bus===1||!['running','completed'].includes(this.mode))return false;
       if(this.faults.has(bus))this.faults.delete(bus);else this.faults.add(bus);
       this.eventLog.push(deepFreeze({t:this.t,type:'forecast',bus,faulty:this.faults.has(bus),
         message:'Future voltage-forcing forecasts '+(this.faults.has(bus)?'corrupted':'repaired')}));return this.faults.has(bus);
@@ -2581,8 +2581,12 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   function fault(bus=selectedBus,{startPlayback=false,preserveSelection=false}={}) {
     if (!canAttack(bus)) return;
     if(!preserveSelection) {selectedBus=bus;$('bus').value=String(bus);}
-    resumePlant();
+    // Paused source settings do not continue a reviewed comparison. If the
+    // action starts playback, set reliability before issuing an extended preview.
+    const reviewedComparison=comparisonComplete();
+    if(!reviewedComparison) resumePlant();
     simulation.toggleFault(bus); journal.push({t:snapshot.t,type:'fault',bus});
+    if(reviewedComparison && startPlayback) resumePlant();
     snapshot=simulation.snapshot();
     const message='Bus '+bus+' forecast '+(snapshot.faults.includes(bus)?'marked noisy':'marked quiet')
       +(!forecastNoiseEnabled()?' · No noise at β 0':snapshot.phase==='deployment'?' · Links remain fixed':' · New forecasts use this setting');
@@ -2878,7 +2882,11 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     const links = svg.select('.recommended').selectAll('path').data(edges,e => e.from+'_'+e.to).join(
       enter => enter.append('path').attr('d',arc).attr('opacity',0),
       update => update,
-      exit => { if (reducedMotion) exit.remove(); else exit.interrupt('update').transition('update').duration(240).attr('opacity',0).remove(); }
+      exit => {
+        // A departing link may fade, but must stop claiming the active inspection immediately.
+        exit.attr('data-inspected','false').attr('stroke-width',1.5);
+        if (reducedMotion) exit.remove(); else exit.interrupt('update').transition('update').duration(240).attr('opacity',0).remove();
+      }
     ).attr('fill','none').attr('data-from',e => e.from).attr('data-to',e => e.to).attr('data-change',e => e.change)
       .attr('data-inspected',e=>String(!!inspection && inspection.connected && !inspection.local && e.change!=='removed' && e.from===inspection.source && e.to===inspection.receiver))
       .attr('stroke-dasharray',e => e.change === 'removed' ? '3 4' : null)
