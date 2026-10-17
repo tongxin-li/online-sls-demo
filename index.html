@@ -493,10 +493,11 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         <details id="pr-command-inspector" class="pr-command-inspector" hidden>
           <summary id="pr-command-title">Command breakdown</summary>
           <p class="pr-caption">kvar · Source and other messages before limiting · Includes the full issued preview, not just the revealed pair · Highlighted links belong to the learned or matrix controller</p>
-          <div class="pr-command-scroll"><table aria-label="Latest receiver command decomposition in kvar">
-            <thead><tr><th>Controller</th><th>Source</th><th>Other</th><th>Feedback</th><th>Request</th><th>Command</th></tr></thead>
+          <div class="pr-command-scroll" tabindex="0" role="region" aria-label="Receiver command table" aria-describedby="pr-command-gain-note" data-command-scroll><table aria-label="Latest receiver command decomposition in kvar" aria-describedby="pr-command-gain-note">
+            <thead><tr><th>Controller</th><th>Source</th><th>Other</th><th>Feedback</th><th>Request</th><th>Command</th><th id="pr-command-gain-heading" scope="col">Gain norm</th></tr></thead>
             <tbody id="pr-command-rows"></tbody>
           </table></div>
+          <p id="pr-command-gain-note" class="pr-caption">Gain norm · pu command / pu forcing · Across the issued preview, independent of message amplitude</p>
           <p class="pr-caption">Request = Source + Other + Feedback · Command is bounded to ±70 kvar · Source is not a causal share after limiting</p>
         </details>
       </div>
@@ -2063,6 +2064,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       for(const key of ['sourceKvar','otherKvar','feedbackKvar','requestedKvar','commandKvar']) {
         const cell=document.createElement('td');cell.textContent=format(item[key]);row.append(cell);
       }
+      const gain=document.createElement('td');gain.className='source-gain';gain.textContent=item.gainNorm.toPrecision(4);row.append(gain);
       body.append(row);
     }
   }
@@ -2576,7 +2578,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     const key = e.key.toLowerCase();
     if (key === 'd') { e.preventDefault(); if(forecastMode()) activateAttack(selectedBus,null); else beginAttack(); }
     else if (key === 'e') { e.preventDefault(); fault(); }
-    else if (key === ' ' && !e.target.closest('button, [role=button], summary, a[href]')) { e.preventDefault(); toggleRun(); }
+    else if (key === ' ' && !e.target.closest('button, [role=button], summary, a[href], [data-command-scroll]')) { e.preventDefault(); toggleRun(); }
   });
   root.querySelectorAll('[data-series]').forEach(button => {
     button.addEventListener('click', () => {
