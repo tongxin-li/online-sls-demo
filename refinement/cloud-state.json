@@ -783,8 +783,13 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
-  "next_focus": "Inspect the current four-panel experience and tighten the connection between actual frozen support selection and controller synthesis using the existing measured receipt. Keep the recorded regime overview and all four methods prominent, preserve score-versus-executed-gain and source-versus-total-command distinctions, and use authorized cloud screenshot pixel review before any substantial visual change. No new numerical study until the primary visual story is clear.",
+  "active_run": {
+    "slot": "2026-10-18T03:00:00+08:00",
+    "branch": "cloud/refine/20261018-0300",
+    "started_at": "2026-10-18T03:00:37+08:00",
+    "expires_at": "2026-10-18T03:40:37+08:00"
+  },
+  "next_focus": "Validate actual costs and winner handling in the compact communication ledger, inspect desktop and mobile screenshot pixels, then publish only after all checks and expected main guard.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -901,11 +906,11 @@
       "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and branch workflow results when recovering metadata. Never increment either program count for metadata validation or promote an older branch over newer main."
     },
     "previous_renewed_metadata_verification": {
-      "commit": "bdeda6ea0f127d22491aa38bc39f6ac64ed35aec",
-      "candidate_run": 39053673692,
-      "main_run": 39054228361,
-      "pages_run": 39054226502,
-      "result": "success independently verified after the previous slot"
+      "commit": "93e438707604f359e1cbb6b758bfa62547a81d91",
+      "candidate_run": 39057857692,
+      "main_run": 39058620445,
+      "pages_run": 39058620016,
+      "result": "success independently read before this slot"
     },
     "renewed_completion_history": [
       {
@@ -999,7 +1004,7 @@
     "hard_deadline": "2026-10-19T01:00:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 2,
+    "invocation_count": 3,
     "completed_count": 2,
     "runs": [
       {
@@ -1085,9 +1090,34 @@
         "main_run": 39057314519,
         "pages_run": 39057314327,
         "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed, and public HTTP bytes were not independently fetched in this pass."
+      },
+      {
+        "slot": "2026-10-18T03:00:00+08:00",
+        "started_at": "2026-10-18T03:00:37+08:00",
+        "status": "validating_candidate",
+        "candidate_branch": "cloud/refine/20261018-0300",
+        "base_commit": "93e438707604f359e1cbb6b758bfa62547a81d91",
+        "counted_completed": false,
+        "changes": [
+          "Replace the communication plot hover-only key with a compact four-method ledger of actual deployed remote links and cumulative stage cost. Lowest follows actual winners and ties, not a preferred policy; pending zero costs declare no winner.",
+          "Raise scoped plot text to 12 px and retain exact plot coordinates, coincident markers, all four policies, closed recorded study, stable cost controls and every scientific setting.",
+          "Add read-only pending/value/replay/winner regressions, desktop/mobile data and layout checks, and authorized screenshot pixel previews. No broad benchmark rerun."
+        ],
+        "tests": {
+          "status": "pending"
+        },
+        "screenshots": {
+          "pixel_review": "pending authorized Actions preview"
+        },
+        "publication": "unpublished"
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "slot": "2026-10-18T03:00:00+08:00",
+      "branch": "cloud/refine/20261018-0300",
+      "started_at": "2026-10-18T03:00:37+08:00",
+      "expires_at": "2026-10-18T03:40:37+08:00"
+    },
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",

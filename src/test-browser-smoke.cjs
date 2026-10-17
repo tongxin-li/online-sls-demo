@@ -345,6 +345,10 @@ async function main() {
         return {phase:snapshot.phase,experiment:snapshot.experiment,costs:snapshot.cumulative,support:snapshot.deployedSupport,
           hidden:section.hidden,summary:document.querySelector('#pr-codesign-summary').textContent,
           label:chart.getAttribute('aria-label'),
+          ledger:Array.from(document.querySelectorAll('#pr-codesign-key tr')).map(row=>({key:row.dataset.key,links:Number(row.dataset.links),cost:Number(row.dataset.cost),winner:row.dataset.winner,
+            name:row.querySelector('th').textContent,shown:Array.from(row.querySelectorAll('td')).map(cell=>cell.textContent),
+            expected:d3.format('.6~g')(snapshot.cumulative[row.dataset.key]),
+            boxes:Array.from(row.querySelectorAll('th,td')).map(cell=>({font:parseFloat(getComputedStyle(cell).fontSize),...cell.getBoundingClientRect().toJSON()}))})),
           points:Array.from(chart.querySelectorAll('circle.codesign-point')).map(node=>({key:node.dataset.key,links:Number(node.dataset.links),
             cost:Number(node.dataset.cost),x:Number(node.getAttribute('cx')),y:Number(node.getAttribute('cy')),r:Number(node.getAttribute('r'))}))};
       });
@@ -360,6 +364,16 @@ async function main() {
         assert.ok(Number.isFinite(point.x)&&Number.isFinite(point.y),'Measured points stay finite');
         assert.ok(point.r>0,'Every design has a visible marker');
       }
+      assert.deepEqual(reading.ledger.map(row=>row.key),['online','scalar','static','causal'],'All four cost and communication rows remain visible');
+      const minimum=Math.min(...Object.values(reading.costs)),pending=Object.values(reading.costs).every(value=>value<=1e-12);
+      for(const row of reading.ledger){
+        assert.equal(row.links,expected[row.key]);assert.equal(row.cost,reading.costs[row.key]);
+        assert.deepEqual(row.shown,[String(expected[row.key]),row.expected],'No hover is required to read real link counts and costs');
+        assert.equal(row.winner,String(!pending&&Math.abs(row.cost-minimum)<=1e-12),'Any actual winner or tie is retained');
+        assert.equal(row.name.includes('Lowest'),row.winner==='true');
+        for(const box of row.boxes){assert.ok(box.font>=12);assert.ok(box.left>=-1&&box.right<=surface.viewportSize().width+1,'Ledger cells fit the viewport');}
+        assert.ok(row.boxes.every((box,index)=>!index||box.left>=row.boxes[index-1].right-1),'Ledger columns do not overlap');
+      }
       const point=key=>reading.points.find(item=>item.key===key);
       assert.equal(point('online').x,point('scalar').x,'Equal remote budgets have the same horizontal coordinate');
       assert.ok(point('causal').x<point('online').x&&point('online').x<point('static').x,'Zero, sparse and dense use an honest quantitative axis');
@@ -369,6 +383,12 @@ async function main() {
       return reading;
     };
 
+    const captureCodesign = async surface => {
+      const section=surface.locator('#pr-codesign'),width=surface.viewportSize().width;
+      await section.screenshot({path:path.join(output,'communication-ledger-'+width+'.png')});
+      const preview=await section.screenshot({path:path.join(output,'communication-ledger-'+width+'.jpg'),type:'jpeg',quality:85});
+      console.log('CLOUD_DESIGN_PREVIEW_'+width+' '+preview.toString('base64'));
+    };
     const inspectReferenceStudy = async surface => {
       assert.equal(await surface.locator('#pr-reference-study').getAttribute('open'),null);
       const before=await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
@@ -574,6 +594,7 @@ async function main() {
     assert.ok((await page.locator('.intervention-badge title').allTextContents()).filter(text=>text.includes('Scheduled demand')).every(text=>text.includes('Included in issued forecasts')));
     await page.screenshot({path:path.join(output,'default-scenario-complete.png'),fullPage:true});
     await page.locator('#pr-codesign').screenshot({path:path.join(output,'codesign-desktop.png')});
+    await captureCodesign(page);
     await page.locator('.pr-learning-panel').screenshot({path:path.join(output,'default-scenario-costs.png')});
     await fs.writeFile(path.join(output,'default-scenario.json'),JSON.stringify(reviewed,null,2));
     // Completed results stay reviewed while source settings are edited in place.
@@ -1199,6 +1220,7 @@ async function main() {
     await inspectLinkEvidence(phone);
     assert.ok(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'The live design chart fits the mobile page');
     await phone.locator('.pr-learning-panel').screenshot({path:path.join(output,'codesign-mobile.png')});
+    await captureCodesign(phone);
     await phone.screenshot({ path: path.join(output, 'mobile.png'), fullPage: true });
     await selectSetting(phone,'noise','8');
     assert.match(await phone.locator('#pr-noise-caption').textContent(),/(?=.*Stress)(?=.*mpu)/i);

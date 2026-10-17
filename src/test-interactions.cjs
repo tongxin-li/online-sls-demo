@@ -25,6 +25,7 @@ const source=withoutCards.replace(anchor,
   '  root.bindTestBus=(element,bus)=>bindAttackTarget(element,()=>bus);\n'+
   '  root.testSummary=()=>comparisonSummary();\n'+
   '  root.testCodesign=()=>codesignMetrics();\n'+
+  '  root.testRenderCodesign=()=>renderCodesignKey(codesignMetrics());\n'+
   '  root.testInspectPredictionLink=(receiver,source)=>inspectPredictionLink(receiver,source);\n'+
   '  root.testInspection=()=>predictionInspection();\n'+
   '  root.testProtocol=()=>protocolStatus();\n'+
@@ -131,7 +132,7 @@ function harness(saved,experiment='prediction',reducedMotion=true) {
   const node=id=>nodes.get('pr-'+id);
   return {clock,document,window,node,drawSeries:(...args)=>root.testDrawSeries(...args),pin:value=>root.testPin(value),
     interventionEvents:(view=root.powerDemo.getSnapshot())=>plain(root.testInterventionEvents(view)),interventionGroups:(view,domain=[0,20],scale=10)=>plain(root.testInterventionGroups(view,domain,v=>v*scale,{x:0,w:600})),
-    comparison:()=>plain(root.testComparison()),summary:()=>root.testSummary(),codesign:()=>plain(root.testCodesign()),powerContext:()=>root.testPowerContext(),shownReference:()=>plain(root.testShownReference()),seriesButton:key=>seriesButtons.get(key),
+    comparison:()=>plain(root.testComparison()),summary:()=>root.testSummary(),codesign:()=>plain(root.testCodesign()),renderCodesign:()=>root.testRenderCodesign(),powerContext:()=>root.testPowerContext(),shownReference:()=>plain(root.testShownReference()),seriesButton:key=>seriesButtons.get(key),
     samples:count=>clock.advance(count*1000/Number(node('speed').value)),
     bus:bus=>{const svg=element('g');svg.dataset.bus=String(bus);root.bindTestBus(svg,bus);return svg;},
     pointer(type,underPointer,detail={}){
@@ -1078,6 +1079,8 @@ test('communication design acknowledges identical supports and a winning feedbac
   const view=allNoisy.codesign(),minimum=Math.min(...view.points.map(point=>point.cost));
   assert.equal(view.points.find(point=>point.key==='causal').cost,minimum,'The declared all noisy fixture makes feedback cheapest');
   assert.deepEqual(view.winnerKeys,['causal']);assert.match(view.status,/Feedback only/i);
+  allNoisy.renderCodesign();assert.deepEqual(allNoisy.node('codesign-key').children.filter(row=>row.dataset.winner==='true').map(row=>row.dataset.key),['causal']);
+  equal.renderCodesign();assert.deepEqual(equal.node('codesign-key').children.filter(row=>row.dataset.winner==='true').map(row=>row.dataset.key),ties.winnerKeys);
   assert.doesNotMatch(view.status,/learned.*(?:wins|best|optimal)|guaranteed|always better/i);
   const prediction=harness();assert.equal(prediction.codesign(),null);await compare(prediction);
   assert.equal(prediction.codesign(),null,'Prediction adaptation is not the isolated communication experiment');
@@ -2132,4 +2135,30 @@ test('link receipt distinguishes pending execution and saved history and preserv
   assert.equal(h.node('link-receipt-rows').children.length,0,'Historical view hides current executed values');
   h.click('history-live');assert.deepEqual(h.linkEvidence(),evidence);
   h.change('experiment','prediction');assert.equal(h.linkEvidence(),null,'Adaptive prediction is not a fixed sparse deployment comparison');
+});
+
+test('communication cost ledger keeps actual values, pending results and every winner without changing the run',async()=>{
+  const h=harness(undefined,'communication');await compare(h);
+  const inspect=()=>{
+    const before=plain(h.snapshot()),metrics=h.codesign();h.renderCodesign();
+    const rows=h.node('codesign-key').children;
+    assert.deepEqual(rows.map(row=>row.dataset.key),['online','scalar','static','causal']);
+    for(const [i,row] of rows.entries()){
+      const point=metrics.points[i];
+      assert.equal(Number(row.dataset.links),point.links);assert.equal(Number(row.dataset.cost),point.cost);
+      assert.equal(row.dataset.winner,String(metrics.winnerKeys.includes(point.key)));
+      assert.equal(row.children[0].scope,'row');
+      assert.equal(row.children[1].textContent,String(point.links));
+      assert.equal(row.children[2].textContent,d3.format('.6~g')(point.cost));
+      assert.equal(row.children[0].children.length,metrics.winnerKeys.includes(point.key)?2:1);
+    }
+    assert.deepEqual(plain(h.snapshot()),before,'Rendering the ledger does not advance time or modify a controller');
+    return metrics;
+  };
+  assert.deepEqual(inspect().winnerKeys,[],'Fresh zero costs do not declare a winner');
+  h.click('step');inspect();
+  for(const key of ['online','scalar','static'])h.seriesButton(key).dispatch('click');
+  h.click('cost-gap');inspect();
+  const restored=harness(h.saved());restored.renderCodesign();
+  assert.deepEqual(restored.node('codesign-key').children.map(row=>row.dataset),h.node('codesign-key').children.map(row=>row.dataset));
 });

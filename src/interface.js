@@ -100,10 +100,22 @@
       .attr('fill',point=>point.key==='scalar'?'var(--background)':point.color)
       .attr('stroke',point=>point.color).attr('stroke-width',point=>point.key==='scalar'?2:1.5);
     marks.select('title').text(point=>point.label+' · '+point.links+' remote links · Cost '+d3.format('.6~g')(point.cost));
+    renderCodesignKey(metrics);
+  }
+  function renderCodesignKey(metrics) {
     const key=$('codesign-key');key.replaceChildren();
-    for(const point of points) {
-      const label=document.createElement('span'),swatch=document.createElement('span');swatch.className='pr-swatch '+point.key;
-      label.append(swatch,document.createTextNode(point.label+' · '+point.links));key.append(label);
+    if(!metrics)return;
+    for(const point of metrics.points) {
+      const winner=metrics.winnerKeys.includes(point.key);
+      const row=document.createElement('tr'),method=document.createElement('th'),label=document.createElement('span'),swatch=document.createElement('span');
+      row.dataset.key=point.key;row.dataset.links=String(point.links);row.dataset.cost=String(point.cost);row.dataset.winner=String(winner);
+      method.setAttribute('scope','row');label.className='pr-design-method';swatch.className='pr-swatch '+point.key;
+      label.append(swatch,document.createTextNode(point.label));method.append(label);
+      if(winner){const badge=document.createElement('span');badge.className='pr-design-lowest';badge.textContent='Lowest';method.append(badge);}
+      const links=document.createElement('td'),cost=document.createElement('td');
+      links.textContent=String(point.links);cost.textContent=d3.format('.6~g')(point.cost);
+      cost.title='Actual cumulative stage cost. No terminal penalty is added to the live trial.';
+      row.append(method,links,cost);key.append(row);
     }
   }
   function plottedSeries() { return activeSeries().filter(s=>visible.has(s.key)); }
