@@ -56,7 +56,7 @@
     24
   ],
   "physical": "Actions 30 through 49 request 100 kW at each bus 2 through 24 every sample. Existing pulse decay, accumulation, solar and battery caps and 70 kvar inverter limits are unchanged. Homes demand has no added cap. This intentionally severe simultaneous load test is a dilution diagnostic, not a realistic feeder operating recommendation.",
-  "model": "Same LinDistFlow dynamics, common feedback, prediction gains, objective, control limits and disturbance seeds at every level. Topology is selected from 180 discovery samples, then frozen for 180 fresh comparison samples. Power requests are never included in immutable issued forecasts.",
+  "model": "Same LinDistFlow dynamics, common feedback, controller synthesis rules, objective, control limits and disturbance seeds at every level. Topology is selected from 180 discovery samples, then frozen for 180 fresh comparison samples. Power requests are never included in immutable issued forecasts.",
   "cost": "Every executed stage cost plus terminal Riccati penalty. No shared physical cost removed. Four policies retained, including feedback only. Savings are ratios of paired mean total costs. Positive means learned costs less.",
   "units": {
     "forecastForcing": "mpu voltage forcing",
