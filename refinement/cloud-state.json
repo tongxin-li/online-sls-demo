@@ -8,7 +8,7 @@
   "hard_deadline": "2026-10-18T01:45:00+08:00",
   "max_scheduled_runs": 24,
   "max_minutes_per_run": 40,
-  "completed_count": 8,
+  "completed_count": 9,
   "runs": [
     {
       "slot": "2026-10-17T02:00:00+08:00",
@@ -417,23 +417,43 @@
         "test": "protocol receipt follows automatic discovery selection synthesis and fixed comparison with retained source settings",
         "error": "Expected comparison time 0, observed 1. New fixture waited 180 timers after Run already executed one sample. Corrected wait to 179, preserving exact zero-time and zero-cost assertions. No engine change."
       }
+    },
+    {
+      "slot": "2026-10-17T11:00:00+08:00",
+      "started_at": "2026-10-17T10:59:50+08:00",
+      "completed_at": "2026-10-17 03:23:39 UTC",
+      "status": "completed",
+      "changes": [
+        "Expose the actual temporal raw source gain norm for all four controllers as a visible command-table column, without hover or additional controls.",
+        "Verify keyboard matrix navigation, single tab stop, native Space disclosure and touch access to the gain column without changing experiment state.",
+        "Make the narrow command table a labeled keyboard focus target. Space retains native scrolling rather than toggling playback, including descendant targets."
+      ],
+      "source_commit": "3eef8c83950c6e6882cc2ab405db74dbc5f14b5e",
+      "published_commit": "d86485b49da7a38eb03ba10bbe76fc2cda25720a",
+      "candidate_run": 38997402270,
+      "main_run": 38998043798,
+      "pages_run": 38998043455,
+      "tests": {
+        "suites": 5,
+        "total": 161,
+        "failed": 0,
+        "build": "passed",
+        "main_consistency": "passed",
+        "diagnostics": "Actual temporal source gain norms visible for all four controllers with unchanged values through paused reliability actions, saved history and exact replay. Synthetic raw-source mixing verifies zero message contribution can coexist with nonzero gain.",
+        "browser": "Keyboard Enter, Space, arrows, Home and End inspect real matrix cells with one tab stop, exact link highlighting and no experiment mutation. Native command disclosure preserves playback. Mobile table ArrowRight scrolls, Space does not start playback, all four gains are reachable without hover. Repeated forecast/power attacks, automatic comparison, thirty metric switches, all baseline curves, source errors and responsive layout passed.",
+        "benchmarks": "Not rerun. Simulation engine, controllers, gains, objectives, physical scenarios and scientific parameters unchanged."
+      },
+      "screenshots": {
+        "artifact_id": 12088250744,
+        "additional_capture": "source-gains-mobile.png",
+        "pixel_review": "unverified"
+      },
+      "deployment": "GitHub Pages success",
+      "direct_live_inspection": "unverified, previously denied browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-17T11:00:00+08:00",
-    "started_at": "2026-10-17T10:59:50+08:00",
-    "lease_expires_at": "2026-10-17T11:39:50+08:00",
-    "branch": "cloud/refine/20261017-1100",
-    "base_main": "89206ed1c704b397dfe5d3560540df57fb600053",
-    "focus": "Expose actual temporal source gain norms without hover and verify keyboard/touch link inspection",
-    "status": "candidate validation",
-    "changes": [
-      "Expose the actual temporal raw source gain norm for all four controllers as a visible command-table column, without hover or additional controls.",
-      "Verify keyboard matrix navigation, single tab stop, native Space disclosure and touch access to the gain column without changing experiment state.",
-      "Make the narrow command table a labeled keyboard focus target. Space retains native scrolling rather than toggling playback, including descendant targets."
-    ]
-  },
-  "next_focus": "Audit source and receiver inspection across keyboard and touch, including controller gain details currently available through hover titles. Preserve exact actual support, current phase and saved history distinctions. Keep scientific parameters unchanged unless a specific causal gap warrants a separate all-seed experiment.",
+  "active_run": null,
+  "next_focus": "Audit repeated paused source toggles and power start/stop event markers against the actual event log and issued-message timing. Preserve costs and all four curves and fix only demonstrated discrepancies. Avoid adding more exposition or controls without a verified interaction need.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
