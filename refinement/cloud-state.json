@@ -426,7 +426,11 @@
     "branch": "cloud/refine/20261017-1100",
     "base_main": "89206ed1c704b397dfe5d3560540df57fb600053",
     "focus": "Expose actual temporal source gain norms without hover and verify keyboard/touch link inspection",
-    "status": "preparing candidate"
+    "status": "candidate validation",
+    "changes": [
+      "Expose the actual temporal raw source gain norm for all four controllers as a visible command-table column, without hover or additional controls.",
+      "Verify keyboard matrix navigation, single tab stop, native Space disclosure and touch access to the gain column without changing experiment state."
+    ]
   },
   "next_focus": "Audit source and receiver inspection across keyboard and touch, including controller gain details currently available through hover titles. Preserve exact actual support, current phase and saved history distinctions. Keep scientific parameters unchanged unless a specific causal gap warrants a separate all-seed experiment.",
   "priorities": [

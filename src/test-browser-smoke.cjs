@@ -149,7 +149,8 @@ async function main() {
         assert.ok(Number.isFinite(Number(data.gainNorm)));
         assert.match(row.title,/Temporal source gain norm/);
         const format=value=>(Math.abs(value)<.0005?0:value).toFixed(3);
-        assert.deepEqual(row.shown,[source,other,feedback,request,command].map(format));
+        assert.deepEqual(row.shown,[...[source,other,feedback,request,command].map(format),Number(data.gainNorm).toPrecision(4)]);
+        assert.ok(row.shown[5].length>0,'Temporal source gain is visible without hover');
         if(key==='causal'){assert.equal(source,0);assert.equal(other,0);assert.equal(Number(data.gainNorm),0);}
       }
     };
@@ -187,6 +188,34 @@ async function main() {
         assert.ok(paths.every(value => value && !/NaN|Infinity/.test(value)), `${chart} has finite measured paths`);
         assert.ok(await page.locator(`#${chart} .y-axis .tick`).count() < 12, `${chart} does not accumulate axis labels`);
       }
+    };
+
+
+    const checkKeyboardInspection = async () => {
+      const before=await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
+      let receiver=5,source=7;
+      const current=()=>page.locator('#pr-matrix .matrix-cell[data-receiver="'+receiver+'"][data-source="'+source+'"]');
+      await current().focus();
+      for(const [key,nextReceiver,nextSource] of [['Enter',5,7],['ArrowRight',5,8],['ArrowDown',7,8],['Home',7,2],['End',7,24],['ArrowUp',5,24],[' ',5,24]]) {
+        await current().press(key===' '?'Space':key);receiver=nextReceiver;source=nextSource;
+        const reading=await page.evaluate(()=>{
+          const root=document.querySelector('#power-response-demo');
+          return {state:root.powerDemo.getState(),snapshot:JSON.stringify(root.powerDemo.getSnapshot()),
+            focused:{source:document.activeElement.dataset.source,receiver:document.activeElement.dataset.receiver}};
+        });
+        assert.equal(reading.state.selectedBus,receiver);assert.equal(reading.state.inspectedSource,source);
+        assert.equal(reading.state.playing,false);assert.equal(reading.snapshot,before,'Keyboard inspection cannot change the experiment');
+        assert.equal(reading.focused.source,String(source));assert.equal(reading.focused.receiver,String(receiver));
+        const connected=await current().getAttribute('data-connected')==='true';
+        assert.equal(await page.locator('#pr-network .recommended path[data-inspected="true"]').count(),connected&&receiver!==source?1:0);
+        assert.equal(await page.locator('#pr-matrix .matrix-cell[tabindex="0"]').count(),1,'Exactly one matrix cell is in the tab sequence');
+      }
+      // Native disclosure activation must not trigger the global playback shortcut.
+      const title=page.locator('#pr-command-title'),open=await page.locator('#pr-command-inspector').getAttribute('open');
+      await title.focus();await title.press('Space');
+      assert.equal(await page.locator('#pr-command-inspector').getAttribute('open'),open===null?'':null);
+      assert.equal(await page.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getState().playing),false);
+      await title.press('Space');await checkCommandInspection(page);
     };
 
     const inspectLinks = async () => {
@@ -246,6 +275,7 @@ async function main() {
       }
       assert.deepEqual((await sourceState()).faults,initial.faults,'Second action repairs or corrupts back to initial state');
     };
+    await checkKeyboardInspection();
     await inspectLinks();
     await checkVoltageMetrics(page);
     await checkProtocol(page);
@@ -278,6 +308,7 @@ async function main() {
     await page.locator('#pr-adaptation > summary').click();
     assert.equal(await page.locator('#pr-cost-detail tr').count(), 4);
     await checkPlots();
+    await checkKeyboardInspection();
     await inspectLinks();
 
     // Archived discovery connectivity is not a change to the deployed controller.
@@ -406,6 +437,12 @@ async function main() {
     assert.equal(mobileBefore.state.playing,false);
     await phone.locator('#pr-command-title').tap();
     await checkCommandInspection(phone);
+    assert.equal(await phone.locator('#pr-command-gain-heading').textContent(),'Gain norm');
+    assert.equal(await phone.locator('#pr-command-rows .source-gain').count(),4);
+    await phone.locator('.pr-command-scroll').evaluate(el=>{el.scrollLeft=el.scrollWidth;});
+    const gainBox=await phone.locator('#pr-command-rows .source-gain').first().boundingBox();
+    assert.ok(gainBox.x>=0&&gainBox.x+gainBox.width<=390+1,'Gain is reachable inside the mobile table scroller');
+    await phone.screenshot({path:path.join(output,'source-gains-mobile.png'),fullPage:true});
     for(const action of ['Corrupt','Repair']) {
       await phone.getByRole('button',{name:action+' forecast source at bus 7',exact:true}).tap();
       const mobileAfter=await phone.evaluate(()=>{

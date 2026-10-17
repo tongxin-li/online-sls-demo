@@ -267,6 +267,7 @@
       for(const key of ['sourceKvar','otherKvar','feedbackKvar','requestedKvar','commandKvar']) {
         const cell=document.createElement('td');cell.textContent=format(item[key]);row.append(cell);
       }
+      const gain=document.createElement('td');gain.className='source-gain';gain.textContent=item.gainNorm.toPrecision(4);row.append(gain);
       body.append(row);
     }
   }

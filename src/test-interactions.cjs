@@ -1553,3 +1553,22 @@ test('leaving saved discovery through matrix mode restores live source controls 
   assert.match(h.node('matrix-title').textContent,/Deployed prediction links/);
   assert.deepEqual(plain(h.snapshot()),before);
 });
+
+test('temporal source gain norms are visible for every controller without hover and remain read only',()=>{
+  const h=harness(undefined,'communication');h.inspectLink(5,7);h.click('step');
+  const before=plain(h.snapshot()),reading=h.commandInspection(),rows=h.node('command-rows').children;
+  assert.equal(rows.length,4);
+  for(let i=0;i<4;i++){
+    assert.equal(rows[i].children.length,7,'Controller plus five kvar terms and source gain');
+    const cell=rows[i].children.at(-1);
+    assert.equal(cell.className,'source-gain');assert.equal(cell.textContent,reading.rows[i].gainNorm.toPrecision(4));
+  }
+  assert.equal(rows[3].children.at(-1).textContent,'0.000','Feedback has no forecast source gain');
+  assert.deepEqual(plain(h.snapshot()),before);
+  h.click('source-fault');
+  assert.deepEqual(h.commandInspection(),reading,'Paused reliability toggle cannot rewrite executed source gains');
+  h.event('topology-history','input');assert.equal(h.node('command-rows').children.length,0);
+  h.click('history-live');assert.equal(h.node('command-rows').children.length,4);
+  const restored=harness(h.saved());
+  assert.deepEqual(restored.commandInspection(),h.commandInspection(),'Replay preserves the same executed gains');
+});
