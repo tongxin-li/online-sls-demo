@@ -783,13 +783,8 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-18T02:00:00+08:00",
-    "branch": "cloud/refine/20261018-0200",
-    "started_at": "2026-10-18T01:57:44+08:00",
-    "expires_at": "2026-10-18T02:37:44+08:00"
-  },
-  "next_focus": "Complete actual link evidence validation and desktop/phone screenshot pixel review before publication. Do not treat frozen discovery score or controller output differences as a causal effect of one source.",
+  "active_run": null,
+  "next_focus": "Inspect the current four-panel experience and tighten the connection between actual frozen support selection and controller synthesis using the existing measured receipt. Keep the recorded regime overview and all four methods prominent, preserve score-versus-executed-gain and source-versus-total-command distinctions, and use authorized cloud screenshot pixel review before any substantial visual change. No new numerical study until the primary visual story is clear.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -831,7 +826,7 @@
   },
   "cloud_runtime": "ChatGPT hosted automation with connected GitHub APIs and GitHub Actions ubuntu-latest, Node 22, Python 3.12, Playwright Chromium 141",
   "source_of_truth": "Cloud GitHub main is canonical while Mac is off. Later local work must refresh first.",
-  "workflow_note": "Create future candidate refs directly at the source commit after acquiring the metadata lease, avoiding an unnecessary initialization validation run.",
+  "workflow_note": "Create future candidate refs directly at the source commit after acquiring the metadata lease, avoiding an unnecessary initialization validation run. Before editing a scheduled slot absent from main, inspect its predictable cloud/refine candidate progress for an active lease or pending publication. Preserve an existing candidate and recover it rather than creating over it.",
   "recovery": {
     "recovered_slot": "2026-10-17T08:00:00+08:00",
     "metadata_commit": "545c90a6a5071c6378c25c3e8679ff4f7d6b5f32",
@@ -899,11 +894,11 @@
       "pages_run": 39052070867
     },
     "renewed_completion": {
-      "slot": "2026-10-18T01:00:00+08:00",
-      "branch": "cloud/refine/20261018-0100",
-      "product_ready_commit": "45b343518f52427efed17219edbe6799236f0b59",
+      "slot": "2026-10-18T02:00:00+08:00",
+      "branch": "cloud/refine/20261018-0200",
+      "product_ready_commit": "2aacbf0abbb7b8ec32cb9a6bba70068e9ae009e3",
       "scope": "Completion record only, no product changes",
-      "instruction": "This slot is already counted once in renewed_program.completed_count. Read current branch/main workflow state when recovering metadata validation. Do not promote an older source over newer main or increment either count for this metadata record."
+      "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and branch workflow results when recovering metadata. Never increment either program count for metadata validation or promote an older branch over newer main."
     },
     "previous_renewed_metadata_verification": {
       "commit": "bdeda6ea0f127d22491aa38bc39f6ac64ed35aec",
@@ -911,7 +906,16 @@
       "main_run": 39054228361,
       "pages_run": 39054226502,
       "result": "success independently verified after the previous slot"
-    }
+    },
+    "renewed_completion_history": [
+      {
+        "slot": "2026-10-18T01:00:00+08:00",
+        "branch": "cloud/refine/20261018-0100",
+        "product_ready_commit": "45b343518f52427efed17219edbe6799236f0b59",
+        "scope": "Completion record only, no product changes",
+        "instruction": "This slot is already counted once in renewed_program.completed_count. Read current branch/main workflow state when recovering metadata validation. Do not promote an older source over newer main or increment either count for this metadata record."
+      }
+    ]
   },
   "parent_handoffs": [
     {
@@ -996,7 +1000,7 @@
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
     "invocation_count": 2,
-    "completed_count": 1,
+    "completed_count": 2,
     "runs": [
       {
         "slot": "2026-10-18T01:00:00+08:00",
@@ -1043,30 +1047,47 @@
       {
         "slot": "2026-10-18T02:00:00+08:00",
         "started_at": "2026-10-18T01:57:44+08:00",
-        "status": "validating_candidate",
+        "status": "completed",
         "candidate_branch": "cloud/refine/20261018-0200",
         "base_commit": "bdeda6ea0f127d22491aa38bc39f6ac64ed35aec",
-        "counted_completed": false,
+        "counted_completed": true,
         "changes": [
           "Add contextual, read only fixed-versus-learned link evidence beneath the existing selected source observation. Compare actual remote budgets, stored discovery energy, actual resynthesized gain and executed source/receiver commands.",
           "Keep selection scores distinct from executed temporal gains, local channels distinct from remote budget, and full commands distinct from causal attribution to one source. Hide current execution in saved history or adaptive prediction mode and show pending values honestly.",
           "Preserve the scientific engine, all four full command rows and curves, recorded regimes, replay, attack semantics and stable cost controls. Add all-cell support/score/execution invariance and replay regressions plus actual desktop/phone data and layout checks."
         ],
         "tests": {
-          "status": "pending"
+          "suites": 7,
+          "total": 206,
+          "failed": 0,
+          "build": "passed",
+          "main_consistency": "passed",
+          "interaction": "All 184 source/receiver cells match actual fixed/learned remote support, frozen discovery energy and executed resynthesized source gain/commands. Pending execution, history hiding, paused source toggles, exact version 13 replay and experiment guards remain read only.",
+          "browser": "Full desktop/mobile suite passed with actual matrix clicks/taps for selected, excluded and local channels. New rows match frozen scores, actual budgets and commandQ; values and 12 px labels fit the viewport. Existing playback, forecast toggles, multi bus continuous attacks, automatic comparison, thirty live cost button switches, four curves, saved trials and native keyboard controls remain covered.",
+          "benchmarks": "Not rerun. No simulation engine, controller synthesis, learning, gain, noise, objective, limit, scenario/default or recorded result changes."
         },
         "screenshots": {
-          "pixel_review": "pending authorized Actions screenshot previews"
+          "artifact_id": 12110185778,
+          "artifact_digest": "sha256:e9aa4d40e86b3333ce460dfcb3b5b13c8c8e49797664b501d5f5b27db270d103",
+          "captures": [
+            "link-evidence-1440.png",
+            "link-evidence-390.png",
+            "link-evidence-1440.jpg",
+            "link-evidence-390.jpg"
+          ],
+          "pixel_review": "Verified actual desktop 1440 and phone 390 source observation and comparison receipt screenshots through authorized Actions JPEG previews. Header budgets, selected/excluded labels, score/gain/source/command rows, times and qualification text are readable without clipping or overlap. Actual near-zero excluded gains and zero rounded source terms are retained."
         },
-        "publication": "unpublished"
+        "publication": "Candidate and main validation passed. Generated-only child has exactly the tested source as parent and only index.html changed. Promoted with expected current main SHA and force false. Pages succeeded for that exact tested ready commit.",
+        "completed_at": "2026-10-17T18:23:01.225Z",
+        "source_commit": "43a88a4b8ba494c35de1c766fb3133cccc9f447f",
+        "published_commit": "2aacbf0abbb7b8ec32cb9a6bba70068e9ae009e3",
+        "candidate_run": 39056546683,
+        "main_run": 39057314519,
+        "pages_run": 39057314327,
+        "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed, and public HTTP bytes were not independently fetched in this pass."
       }
     ],
-    "active_run": {
-      "slot": "2026-10-18T02:00:00+08:00",
-      "branch": "cloud/refine/20261018-0200",
-      "started_at": "2026-10-18T01:57:44+08:00",
-      "expires_at": "2026-10-18T02:37:44+08:00"
-    },
+    "active_run": null,
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
@@ -1086,5 +1107,5 @@
     "baseline_main": "2a9ff26b59565ecac1eb5274fbea4d813a18f24f"
   },
   "completed_count_scope": "Original bounded program, retained at 15. Renewed counts are tracked independently in renewed_program.",
-  "total_completed_count": 16
+  "total_completed_count": 17
 }
