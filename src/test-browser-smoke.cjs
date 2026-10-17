@@ -571,6 +571,68 @@ async function main() {
     await audit.close();
     await mark('independent sixty two pair error audit');
 
+    // Request expiry does not erase power already applied in the displayed sample.
+    const pulseTail=await browser.newPage({viewport:{width:1440,height:1000}});
+    pulseTail.on('pageerror',error=>errors.push(error.message));
+    await pulseTail.goto(address,{waitUntil:'networkidle'});
+    await useReference(pulseTail);
+    await pulseTail.locator('#pr-intervention').selectOption('power');
+    await pulseTail.locator('#pr-attack-mode').selectOption('pulse');
+    const finalPulseEvidence=[];
+    for(const [bus,steps,width] of [[23,12,1440],[7,24,1440],[8,8,1440],[8,8,390]]){
+      await pulseTail.setViewportSize({width,height:1000});
+      await selectSetting(pulseTail,'bus',String(bus));
+      const result=await pulseTail.evaluate(({bus,steps,width})=>{
+        document.querySelector('#pr-restart').click();
+        document.querySelector('#pr-pulse').click();
+        document.querySelector('#pr-run').click();
+        if(width===390){
+          const selection=document.querySelector('#pr-bus');selection.value='23';selection.dispatchEvent(new Event('change'));
+          document.querySelector('#pr-pulse').click();document.querySelector('#pr-run').click();
+          selection.value=String(bus);selection.dispatchEvent(new Event('change'));
+        }
+        for(let i=0;i<steps;i++)document.querySelector('#pr-step').click();
+        const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot();
+        const node=document.querySelector('#pr-network [data-bus="'+bus+'"]'),badge=node.querySelector('.pe-attack-badge');
+        return {bus,t:snapshot.t,requests:snapshot.activePulses.filter(item=>item.bus===bus).length,applied:snapshot.lastPulseApplications.find(item=>item.bus===bus),
+          visibleBadges:Array.from(document.querySelectorAll('#pr-network .pe-attack-badge')).filter(node=>getComputedStyle(node).display!=='none').map(node=>Number(node.closest('[data-bus]').dataset.bus)),
+          visible:getComputedStyle(badge).display!=='none'&&badge.getAttribute('display')!=='none',
+          badgePower:Number(badge.dataset.appliedPowerKw),text:badge.querySelector('.pe-attack-power').textContent,
+          status:badge.dataset.attackState,toolbar:document.querySelector('#pr-pulse').dataset.attackState,
+          costs:snapshot.cumulative,states:snapshot.states,events:snapshot.eventLog};
+      },{bus,steps,width});
+      assert.equal(result.t,steps);assert.equal(result.requests,0,'The request expires after its final sample');
+      assert.ok(result.applied.appliedKw>0);assert.equal(result.visible,true,'Keep actual final applied power visible');
+      assert.deepEqual(result.visibleBadges,[bus],'Current applications keep one selected full badge even if another bus still has an unexpired request');
+      assert.ok(Math.abs(result.badgePower-result.applied.appliedKw)<1e-9,'Badge is the actual bounded current application');
+      assert.match(result.text,new RegExp(Math.round(result.applied.appliedKw)+' kW'));
+      assert.equal(result.status,'paused');assert.equal(result.toolbar,'paused');
+      await pulseTail.locator('#pr-intervention').selectOption('forecast');
+      await pulseTail.locator('#pr-intervention').selectOption('power');
+      await pulseTail.reload({waitUntil:'networkidle'});
+      const replay=await pulseTail.evaluate(bus=>{
+        const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot();
+        const badge=document.querySelector('#pr-network [data-bus="'+bus+'"] .pe-attack-badge');
+        return {t:snapshot.t,costs:snapshot.cumulative,states:snapshot.states,events:snapshot.eventLog,
+          applied:snapshot.lastPulseApplications.find(item=>item.bus===bus),badgePower:Number(badge.dataset.appliedPowerKw),
+          status:badge.dataset.attackState,toolbar:document.querySelector('#pr-pulse').dataset.attackState};
+      },bus);
+      for(const key of ['t','costs','states','events','applied','badgePower','status','toolbar'])assert.deepEqual(replay[key],result[key],'Final applied sample replay '+key);
+      if(bus===8)await pulseTail.screenshot({path:path.join(output,width===390?'final-applied-power-mobile.png':'final-applied-power.png'),fullPage:true});
+      await pulseTail.locator('#pr-step').click();
+      const cleared=await pulseTail.evaluate(bus=>{
+        const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot();
+        const badge=document.querySelector('#pr-network [data-bus="'+bus+'"] .pe-attack-badge');
+        return {applications:snapshot.lastPulseApplications.filter(item=>item.bus===bus),toolbar:document.querySelector('#pr-pulse').dataset.attackState,
+          display:badge.getAttribute('display'),events:snapshot.eventLog.filter(event=>event.type==='pulse').length};
+      },bus);
+      assert.deepEqual(cleared.applications,[]);assert.equal(cleared.toolbar,'idle');assert.equal(cleared.display,'none');assert.equal(cleared.events,width===390?2:1);
+      finalPulseEvidence.push({last:result,replay,cleared});
+    }
+    await fs.writeFile(path.join(output,'final-applied-power.json'),JSON.stringify(finalPulseEvidence,null,2));
+    await pulseTail.close();
+    await mark('final applied power sample and exact replay');
+
     // Forecast stress is a fresh experiment, with no power attacks carried over.
     const stress=await browser.newPage({viewport:{width:1440,height:1000}});
     stress.on('pageerror',error=>errors.push(error.message));
@@ -820,7 +882,7 @@ async function main() {
     await phone.screenshot({path:path.join(output,'environment.png'),fullPage:true});
     await mark('mobile inspection and responsive evidence');
     assert.deepEqual(errors, [], 'No browser runtime errors');
-    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), timings, touchEvents, checks: ['paused completed source settings preserve Continue and exact replay', 'restored mixed trial preserves old costs until explicit new scenario', 'all noisy sources notice and fresh reliable inverter map', 'shipped demand and solar default completes and pauses after 180 comparison samples', 'actual scheduled power visual metadata and forecasted event labels', 'completed default restores and explicitly continues', 'extended forecast stress clears previous power attacks and costs', 'all four measured forecast stress curves and actual prediction commands', 'extended stress saved trial replay and reference return', 'forecast stress desktop and mobile layout', 'actual forecast setting timestamps and typed mixed event markers', 'keyboard matrix inspection and native command table scrolling', 'visible temporal source gain without hover', 'playback', 'repeated forecast bus clicks', 'three simultaneous continuous power attacks and independent stop', 'all attack sources survive automatic handoff', 'actual protocol receipt and archived discovery view', 'matrix mode exit restores live source controls without advancing plant', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'three simultaneous mobile power attacks and independent stop', 'mobile touch and layout'], errors }, null, 2));
+    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), timings, touchEvents, checks: ['final applied power remains visible after request expiry with exact replay', 'paused completed source settings preserve Continue and exact replay', 'restored mixed trial preserves old costs until explicit new scenario', 'all noisy sources notice and fresh reliable inverter map', 'shipped demand and solar default completes and pauses after 180 comparison samples', 'actual scheduled power visual metadata and forecasted event labels', 'completed default restores and explicitly continues', 'extended forecast stress clears previous power attacks and costs', 'all four measured forecast stress curves and actual prediction commands', 'extended stress saved trial replay and reference return', 'forecast stress desktop and mobile layout', 'actual forecast setting timestamps and typed mixed event markers', 'keyboard matrix inspection and native command table scrolling', 'visible temporal source gain without hover', 'playback', 'repeated forecast bus clicks', 'three simultaneous continuous power attacks and independent stop', 'all attack sources survive automatic handoff', 'actual protocol receipt and archived discovery view', 'matrix mode exit restores live source controls without advancing plant', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'three simultaneous mobile power attacks and independent stop', 'mobile touch and layout'], errors }, null, 2));
     console.log('Browser smoke passed');
   } finally {
     if (browser) await browser.close();

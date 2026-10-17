@@ -600,7 +600,18 @@
     "expires_at": "2026-10-17T17:39:38+08:00",
     "base_commit": "712cf4f520663d20bef06e5db7f093396933d4ad",
     "branch": "cloud/refine/20261017-1700",
-    "focus": "Audit real attack usability and applied power with unchanged scientific parameters"
+    "focus": "Audit real attack usability and applied power with unchanged scientific parameters",
+    "diagnosed_issue": "The final applied pulse is removed from the display when its request expires before the snapshot, even though current lastPulseApplications still contains its actual bounded power.",
+    "expected_regression_failure": {
+      "source": "af188450b346cc7cec2bb59f0d6a358751afc93c",
+      "run": 39019571012,
+      "job": 117358501364,
+      "step": "Test controllers and interactions",
+      "test": "the final applied pulse sample stays visible after its request expires and replays exactly",
+      "expected": "paused",
+      "actual": "idle",
+      "published": false
+    }
   },
   "next_focus": "Audit actual attack usability and selected-bus applied power through selection, mode switches and saved trials. Make a coherent correction only for a demonstrated behavioral or causality issue. Preserve the forecasted-demand default beta 4 and seed, finite comparison, all controllers, held-out conditional results and scientific parameters. Avoid new explanatory controls or cosmetic releases without an interaction need.",
   "priorities": [

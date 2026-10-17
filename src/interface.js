@@ -685,7 +685,9 @@
     const queued=(snapshot.pendingPulses || []).filter(item=>item.bus===bus).length;
     const applied=journal.filter(item=>item.type==='pulse' && item.bus===bus && item.t<snapshot.t);
     const latest=applied.at(-1);
-    return {queued,active:events.some(item=>item.age>0),activeCount:events.length,
+    // A request can expire immediately after its final application. The displayed
+    // state still contains that applied power until the next physical sample.
+    return {queued,active:events.some(item=>item.age>0)||appliedPulse(bus)!==null,activeCount:events.length,
       id:latest ? latest.t+'_'+applied.length : null};
   }
   function attackState(bus=selectedBus) {
@@ -1076,7 +1078,7 @@
       .on('blur',function() { showBusDetail(selectedBus); });
     // Dense disturbances keep their orange equipment halos. Show one power
     // label at a time so adjacent buses cannot obscure the selected reading.
-    const disturbedBuses=new Set([...activeAttacks(),...(snapshot.pendingPulses || []),...(snapshot.activePulses || [])].map(item=>item.bus));
+    const disturbedBuses=new Set([...activeAttacks(),...(snapshot.pendingPulses || []),...(snapshot.activePulses || []),...(snapshot.lastPulseApplications || [])].map(item=>item.bus));
     nodes.each(function(bus){
       if (!window.PowerEquipment) return;
       const status=pulseStatus(bus);
