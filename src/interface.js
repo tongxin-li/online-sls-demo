@@ -214,6 +214,62 @@
       : 'No links have changed yet. Learning weights may still change.';
     $('topology-note').title=snapshot.phase==='deployment' ? (communicationComparison()?'Discovery history. Deployed links and prediction weights stay fixed.':'Discovery history. Deployed links stay fixed while prediction weights continue adapting.') : 'History displays observed connectivity only. Reviewing an update does not change the controller.';
   }
+  // Reconstruct the last executed command from the exact issued preview and
+  // calibration retained for that action. No future realized forcing is read.
+  function commandContributions(view,segments,forecasts,source,receiver) {
+    if(!view.lastSample) return null;
+    const action=view.lastSample.t,row=PowerDemo.constants.inverterBuses.indexOf(receiver),column=source-2;
+    const segment=segments.find(item=>action>=item.start&&action<item.end);
+    if(row<0 || column<0 || column>=23 || !segment) return null;
+    const fixed=view.phase==='deployment'&&view.experiment==='communication';
+    const rows=['online','scalar','static','causal'].map(key=>{
+      const state=view.costStates[key].slice(1).map((value,i)=>value-PowerDemo.model.baseDrop[i+1]);
+      const feedback=PowerDemo.model.K[row].reduce((sum,value,i)=>sum+value*state[i],0);
+      let prediction=0,sourcePart=0,gainSquared=0;
+      if(key!=='causal') for(const block of segment.designs[key].rows[action-segment.start]) {
+        const forecast=forecasts[segment.start+block.k-1].forecast.slice(1),gain=block.L[row];
+        const correction=!fixed&&key==='online'?view.calibration.matrix:null;
+        const corrected=correction?PowerDemo.math.matvec(correction,forecast)
+          :!fixed&&key==='scalar'?forecast.map(value=>value*view.calibration.scalar):forecast;
+        prediction+=gain.reduce((sum,value,j)=>sum+value*corrected[j],0);
+        const sourceGain=correction?gain.reduce((sum,value,j)=>sum+value*correction[j][column],0)
+          :gain[column]*(!fixed&&key==='scalar'?view.calibration.scalar:1);
+        sourcePart+=sourceGain*forecast[column];gainSquared+=sourceGain**2;
+      }
+      return {key,sourceKvar:1000*sourcePart,otherKvar:1000*(prediction-sourcePart),
+        feedbackKvar:1000*feedback,requestedKvar:1000*(feedback+prediction),
+        commandKvar:view.commandQ[key][receiver-1],gainNorm:Math.sqrt(gainSquared),
+        limited:view.saturation[key][receiver-1]};
+    });
+    return {source,receiver,action,rows};
+  }
+  function inspectedCommand() {
+    const inspection=predictionInspection();
+    return !inspection || historyIndex!==null ? null
+      : commandContributions(snapshot,simulation.segments,simulation.forecasts,inspection.source,inspection.receiver);
+  }
+  function renderCommandInspection(inspection) {
+    const reading=inspectedCommand(),panel=$('command-inspector');
+    panel.hidden=!inspection;
+    $('command-title').textContent=reading ? 'Command at inverter '+reading.receiver+' · Action '+reading.action+' s'
+      : 'Command breakdown · '+(historyIndex!==null?'Show Latest':'Step to reveal');
+    const body=$('command-rows');body.replaceChildren();
+    if(!reading) return;
+    const names=Object.fromEntries(activeSeries().map(item=>[item.key,item.label]));
+    const format=value=>(Math.abs(value)<.0005?0:value).toFixed(3);
+    for(const item of reading.rows) {
+      const row=document.createElement('tr');row.dataset.controller=item.key;
+      row.dataset.source=reading.source;row.dataset.receiver=reading.receiver;row.dataset.action=reading.action;
+      for(const key of ['sourceKvar','otherKvar','feedbackKvar','requestedKvar','commandKvar','gainNorm','limited'])row.dataset[key]=String(item[key]);
+      row.title='Temporal source gain norm '+item.gainNorm.toPrecision(4)+' pu command / pu forcing'
+        +(item.limited?' · Request limited to ±70 kvar':' · Request not limited');
+      const label=document.createElement('th');label.scope='row';label.textContent=names[item.key];row.append(label);
+      for(const key of ['sourceKvar','otherKvar','feedbackKvar','requestedKvar','commandKvar']) {
+        const cell=document.createElement('td');cell.textContent=format(item[key]);row.append(cell);
+      }
+      body.append(row);
+    }
+  }
   // Read only the last revealed pair. Never read a future forcing or forecast base.
   function inspectedForecastObservation() {
     const inspection=predictionInspection(),sample=snapshot.lastSample;
@@ -244,6 +300,7 @@
   function renderInspectedSource() {
     const inspection=predictionInspection(),control=$('source-fault');
     renderForecastObservation(inspection);
+    renderCommandInspection(inspection);
     $('source-controls').hidden=!inspection;
     const bus=inspection?.source;
     const noisy=!!inspection && snapshot.faults.includes(bus);

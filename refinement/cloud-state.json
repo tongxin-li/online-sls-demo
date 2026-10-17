@@ -315,7 +315,13 @@
     "lease_expires_at": "2026-10-17T08:40:17+08:00",
     "branch": "cloud/refine/20261017-0800",
     "base_main": "3c0fc734c0f9ba9285e5cdaefc11d94bfa905d07",
-    "focus": "Read only latest receiver command decomposition by actual issued source messages"
+    "focus": "Read only latest receiver command decomposition by actual issued source messages",
+    "status": "candidate validation",
+    "changes": [
+      "Added a read only latest command disclosure for the inspected physical source and receiver across all four controllers.",
+      "Reconstruct actual raw source gain L C and all issued preview blocks, other messages, feedback, request and bounded command in kvar.",
+      "Preserve pending/history guards, sealed forecasts, frozen support and exact saved replay. Controller engine and scientific parameters unchanged."
+    ]
   },
   "next_focus": "Audit the inspected source’s actual contribution to the latest receiver command using only issued forecasts and executed coefficients. Distinguish permitted support from a nonzero gain, including dense discovery and frozen comparison. Avoid fabricated links or future observations. Preserve both audited power scenarios and all baseline curves.",
   "priorities": [

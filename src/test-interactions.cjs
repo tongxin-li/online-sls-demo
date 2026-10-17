@@ -27,6 +27,8 @@ const source=withoutCards.replace(anchor,
   '  root.testInspectPredictionLink=(receiver,source)=>inspectPredictionLink(receiver,source);\n'+
   '  root.testInspection=()=>predictionInspection();\n'+
   '  root.testForecastObservation=()=>inspectedForecastObservation();\n'+
+  '  root.testInspectedCommand=()=>inspectedCommand();\n'+
+  '  root.testDecompose=commandContributions;\n'+
   '  root.testIssuedForecasts=()=>simulation.forecasts;\n'+
   '  root.testDrawSeries=drawSeries;\n'+
   '  root.testPin=(value)=>{if(value!==undefined)pin=value;return pin;};\n'+
@@ -125,7 +127,7 @@ function harness(saved,experiment='prediction',reducedMotion=true) {
       if(type==='pointerup'||type==='pointercancel')recipient.releasePointerCapture(id);
       return result;
     },
-    inspectLink:(receiver,source)=>root.testInspectPredictionLink(receiver,source),inspection:()=>plain(root.testInspection()),forecastObservation:()=>plain(root.testForecastObservation()),issuedForecasts:()=>plain(root.testIssuedForecasts()),
+    inspectLink:(receiver,source)=>root.testInspectPredictionLink(receiver,source),inspection:()=>plain(root.testInspection()),forecastObservation:()=>plain(root.testForecastObservation()),commandInspection:()=>plain(root.testInspectedCommand()),decompose:(...args)=>plain(root.testDecompose(...args)),issuedForecasts:()=>plain(root.testIssuedForecasts()),
     snapshot:()=>root.powerDemo.getSnapshot(),state:()=>plain(root.powerDemo.getState()),
     saved:()=>savedStates.at(-1),
     event:(id,type,detail)=>node(id).dispatch(type,detail),
@@ -1326,4 +1328,86 @@ test('source observation distinguishes dense discovery from frozen deployed supp
   h.inspectLink(edge.to,absent);assert.match(h.node('forecast-support').textContent,/Excluded from deployed support/);
   assert.equal(h.forecastObservation().forecast,snapshot.lastSample.forecast[absent-1],'Excluded source can be audited, not sent on a fabricated link');
   assert.deepEqual(plain(h.snapshot()),snapshot);
+});
+
+
+test('command inspection attributes matrix mixed raw sources before limiting without changing the executed command',()=>{
+  const h=harness(undefined,'communication'),keys=['online','scalar','static','causal'];
+  const matrix=PowerDemo.math.eye(23);matrix[0][5]=2;
+  const L=Array.from({length:8},()=>Array(23).fill(0));L[0][0]=3;
+  const block={k:1,L},forecast=Array(24).fill(0);forecast[6]=.02;
+  const view={lastSample:{t:0},phase:'discovery',experiment:'communication',calibration:{matrix,scalar:1},
+    costStates:Object.fromEntries(keys.map(key=>[key,PowerDemo.model.baseDrop.slice()])),
+    commandQ:Object.fromEntries(keys.map(key=>[key,Array(24).fill(0)])),
+    saturation:Object.fromEntries(keys.map(key=>[key,Array(24).fill(false)]))};
+  view.commandQ.online[4]=70;view.saturation.online[4]=true;
+  const segments=[{start:0,end:5,designs:Object.fromEntries(keys.filter(key=>key!=='causal').map(key=>[key,{rows:[[block]]}]))}];
+  const messages=[{forecast}],before=JSON.stringify({view,segments,messages});
+  const reading=h.decompose(view,segments,messages,7,5),online=reading.rows[0];
+  assert.equal(online.gainNorm,6,'Attribute L C to the raw source, not an intermediate corrected channel');
+  assert.equal(online.sourceKvar,120);assert.equal(online.otherKvar,0);assert.equal(online.feedbackKvar,0);
+  assert.equal(online.requestedKvar,120);assert.equal(online.commandKvar,70);assert.equal(online.limited,true);
+  assert.equal(reading.rows[3].sourceKvar,0);assert.equal(reading.rows[3].gainNorm,0);
+  assert.equal(JSON.stringify({view,segments,messages}),before,'Inspection is pure');
+});
+
+test('command decomposition reconstructs actual requests and bounded commands for all twenty seeds',()=>{
+  const h=harness(undefined,'communication'),near=(a,b,message)=>assert.ok(Math.abs(a-b)<1e-8,message+' '+a+' '+b);
+  const verify=sim=>{
+    const snapshot=sim.snapshot(),receiver=PowerDemo.constants.inverterBuses[(snapshot.seed>>>0)%8];
+    const reading=h.decompose(snapshot,sim.segments,sim.forecasts,7,receiver);
+    assert.ok(reading);assert.equal(reading.action,snapshot.lastSample.t);
+    const rowIndex=PowerDemo.constants.inverterBuses.indexOf(receiver),source=5;
+    for(const item of reading.rows){
+      near(item.sourceKvar+item.otherKvar+item.feedbackKvar,item.requestedKvar,'Parts sum before limiting');
+      near(Math.max(-70,Math.min(70,item.requestedKvar)),snapshot.commandQ[item.key][receiver-1],'Reconstruct actual command');
+      assert.equal(item.commandKvar,snapshot.commandQ[item.key][receiver-1]);
+      assert.equal(item.limited,snapshot.saturation[item.key][receiver-1]);
+      if(item.key==='causal'){assert.equal(item.gainNorm,0);assert.equal(item.sourceKvar,0);assert.equal(item.otherKvar,0);}
+      if(snapshot.phase==='deployment'&&['online','scalar'].includes(item.key)){
+        const support=item.key==='online'?snapshot.deployedSupport.learned:snapshot.deployedSupport.fixed;
+        if(!support[rowIndex][source])assert.ok(item.gainNorm<1e-8,'Forbidden actual source gain remains zero');
+      }
+    }
+    if(snapshot.phase==='deployment'){
+      const sourceTotals=Object.fromEntries(reading.rows.map(item=>[item.key,0]));
+      for(let sourceBus=2;sourceBus<=24;sourceBus++)
+        for(const item of h.decompose(snapshot,sim.segments,sim.forecasts,sourceBus,receiver).rows)sourceTotals[item.key]+=item.sourceKvar;
+      for(const item of reading.rows)near(sourceTotals[item.key],item.sourceKvar+item.otherKvar,'Every raw source accounts for full prediction');
+    }
+  };
+  for(let seed=1;seed<=20;seed++){
+    const sim=new PowerDemo.Simulation({experiment:'communication',beta:1,seed,horizon:180});
+    for(let i=0;i<180;i++){sim.step();if([0,30,179].includes(i))verify(sim);}
+    assert.equal(sim.deployTopology().phase,'deployment');
+    for(let i=0;i<5;i++)sim.step();verify(sim);
+  }
+});
+
+test('inspected command remains exact through reliability actions, saved replay and history review',async()=>{
+  const h=harness(undefined,'communication');h.inspectLink(5,7);
+  assert.equal(h.commandInspection(),null);assert.equal(h.node('command-rows').children.length,0);
+  for(let i=0;i<35;i++)h.click('step');
+  const snapshot=plain(h.snapshot()),reading=h.commandInspection();assert.equal(reading.rows.length,4);
+  assert.equal(h.node('command-rows').children.length,4);
+  h.click('source-fault');assert.deepEqual(h.commandInspection(),reading,'Paused action cannot rewrite prior executed coefficients or preview');
+  assert.deepEqual(plain(h.snapshot().states),snapshot.states);assert.deepEqual(plain(h.snapshot().cumulative),snapshot.cumulative);
+  const restored=harness(h.saved());assert.deepEqual(restored.commandInspection(),reading,'Replay retains exact decomposition');
+  h.event('topology-history','input');assert.equal(h.commandInspection(),null);
+  assert.equal(h.node('command-rows').children.length,0,'History clears stale current command rows');
+  h.click('history-live');assert.deepEqual(h.commandInspection(),reading);
+  h.check('auto-compare',false);await compare(h);h.click('deploy');h.click('run');
+  h.inspectLink(5,7);assert.equal(h.commandInspection(),null,'Fresh comparison cannot reuse discovery commands');
+  h.click('step');assert.equal(h.commandInspection().action,0);assert.equal(h.state().playing,false);
+});
+
+test('prediction adaptation and segment extension keep command inspection tied to the executed row',()=>{
+  const h=harness(),sim=new PowerDemo.Simulation({experiment:'prediction',seed:3,horizon:40});
+  for(let i=0;i<38;i++)sim.step();
+  const verify=()=>{
+    const snapshot=sim.snapshot(),reading=h.decompose(snapshot,sim.segments,sim.forecasts,12,8);
+    for(const item of reading.rows)assert.ok(Math.abs(Math.max(-70,Math.min(70,item.requestedKvar))-item.commandKvar)<1e-8);
+  };
+  verify();sim.extend(12);for(let i=0;i<8;i++)sim.step();verify();
+  sim.deployTopology();for(let i=0;i<35;i++)sim.step();verify();
 });

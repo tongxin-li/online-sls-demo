@@ -101,9 +101,36 @@ async function main() {
         assert.match(reading.context,reading.phase==='discovery'?/Discovery uses dense messages/:/deployed support.*Links fixed/);
       }else assert.equal(reading.data.forecast,'','Unavailable observations clear stale numeric metadata');
     };
+    const checkCommandInspection = async surface => {
+      const result=await surface.evaluate(()=>{
+        const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),state=root.powerDemo.getState();
+        return {snapshot,state,rows:Array.from(document.querySelectorAll('#pr-command-rows tr')).map(row=>({
+          data:{...row.dataset},shown:Array.from(row.querySelectorAll('td')).map(cell=>cell.textContent),title:row.title
+        }))};
+      });
+      const {snapshot,state,rows}=result,active=state.inspectedSource!==null&&[5,7,8,12,14,18,21,24].includes(state.selectedBus)&&state.historyIndex===null&&snapshot.lastSample;
+      assert.equal(rows.length,active?4:0,'No pending or historical commands presented as current');
+      if(!active)return;
+      assert.deepEqual(rows.map(row=>row.data.controller),['online','scalar','static','causal']);
+      for(const row of rows){
+        const data=row.data,key=data.controller,source=Number(data.sourceKvar),other=Number(data.otherKvar),feedback=Number(data.feedbackKvar),request=Number(data.requestedKvar),command=Number(data.commandKvar);
+        assert.equal(Number(data.source),state.inspectedSource);assert.equal(Number(data.receiver),state.selectedBus);
+        assert.equal(Number(data.action),snapshot.lastSample.t);
+        assert.ok(Math.abs(source+other+feedback-request)<1e-8,'Parts reconstruct the request');
+        assert.equal(command,snapshot.commandQ[key][state.selectedBus-1]);
+        assert.ok(Math.abs(command-Math.max(-70,Math.min(70,request)))<1e-8,'Limiter matches actual executed command');
+        assert.equal(data.limited,String(snapshot.saturation[key][state.selectedBus-1]));
+        assert.ok(Number.isFinite(Number(data.gainNorm)));
+        assert.match(row.title,/Temporal source gain norm/);
+        const format=value=>(Math.abs(value)<.0005?0:value).toFixed(3);
+        assert.deepEqual(row.shown,[source,other,feedback,request,command].map(format));
+        if(key==='causal'){assert.equal(source,0);assert.equal(other,0);assert.equal(Number(data.gainNorm),0);}
+      }
+    };
     const checkPlots = async () => {
       await checkVoltageMetrics(page);
       await checkForecastObservation(page);
+      await checkCommandInspection(page);
       for (const chart of ['pr-cost', 'pr-stage', 'pr-voltage']) {
         const paths = await page.locator(`#${chart} path.data-series`).evaluateAll(elements => elements.map(element => element.getAttribute('d')));
         assert.equal(paths.length, 4, `${chart} retains all four controller curves`);
@@ -125,6 +152,7 @@ async function main() {
           return {state:root.powerDemo.getState(),snapshot:JSON.stringify(root.powerDemo.getSnapshot())};
         });
         await checkForecastObservation(page);
+      await checkCommandInspection(page);
         assert.equal(reading.snapshot,before,'Inspection changes no physical, forecast or control state');
         assert.equal(reading.state.selectedBus,edge.receiver);
         assert.equal(reading.state.inspectedSource,source);
@@ -158,6 +186,7 @@ async function main() {
         await page.locator('#pr-source-fault').click();
         const after=await sourceState();
         await checkForecastObservation(page);
+      await checkCommandInspection(page);
         assert.equal(after.faults.includes(edge.source),!wasNoisy,'Each explicit action toggles once');
         assert.deepEqual(after.faults.filter(bus=>bus!==edge.source),initial.faults.filter(bus=>bus!==edge.source),'Only inspected source changes');
         assert.deepEqual(after.state,initial.state,'Receiver, source selection and pause state remain unchanged');
@@ -167,6 +196,8 @@ async function main() {
     };
     await inspectLinks();
     await checkVoltageMetrics(page);
+    await page.locator('#pr-command-title').click();
+    assert.equal(await page.locator('#pr-command-inspector').getAttribute('open'),'');
 
     // Ordinary playback and repeated forecast toggles use the actual bus targets.
     await page.locator('#pr-run').click();
@@ -222,6 +253,7 @@ async function main() {
     for(const bus of [5,7,14,21])assert.ok(Math.abs(outage.generationP[bus-1])<1e-8);
     await page.locator('#pr-matrix .matrix-cell[data-receiver="5"][data-source="7"]').click();
     await checkForecastObservation(page);
+      await checkCommandInspection(page);
     await page.screenshot({path:path.join(output,'solar-outage.png'),fullPage:true});
     await page.locator('#pr-run').click();
     await page.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t>=51);
@@ -283,12 +315,15 @@ async function main() {
       const root=document.querySelector('#power-response-demo');return {state:root.powerDemo.getState(),snapshot:root.powerDemo.getSnapshot()};
     });
     assert.equal(mobileBefore.state.playing,false);
+    await phone.locator('#pr-command-title').tap();
+    await checkCommandInspection(phone);
     for(const action of ['Corrupt','Repair']) {
       await phone.getByRole('button',{name:action+' forecast source at bus 7',exact:true}).tap();
       const mobileAfter=await phone.evaluate(()=>{
         const root=document.querySelector('#power-response-demo');return {state:root.powerDemo.getState(),snapshot:root.powerDemo.getSnapshot()};
       });
       await checkForecastObservation(phone);
+      await checkCommandInspection(phone);
       assert.equal(mobileAfter.snapshot.faults.includes(7),action==='Corrupt');
       assert.equal(mobileAfter.state.selectedBus,5);assert.equal(mobileAfter.state.inspectedSource,7);
       assert.equal(mobileAfter.state.playing,false);
@@ -309,7 +344,7 @@ async function main() {
     assert.ok(reportLayout.page<=reportLayout.viewport+1,'Scientific report stays within the mobile page');
     await phone.screenshot({path:path.join(output,'environment.png'),fullPage:true});
     assert.deepEqual(errors, [], 'No browser runtime errors');
-    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), touchEvents, checks: ['playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'continuous mobile power attack', 'mobile touch and layout'], errors }, null, 2));
+    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), touchEvents, checks: ['playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'actual receiver command decomposition and limiter on desktop and mobile', 'continuous mobile power attack', 'mobile touch and layout'], errors }, null, 2));
     console.log('Browser smoke passed');
   } finally {
     if (browser) await browser.close();
