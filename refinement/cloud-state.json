@@ -8,7 +8,7 @@
   "hard_deadline": "2026-10-18T01:45:00+08:00",
   "max_scheduled_runs": 24,
   "max_minutes_per_run": 40,
-  "completed_count": 5,
+  "completed_count": 6,
   "runs": [
     {
       "slot": "2026-10-17T02:00:00+08:00",
@@ -307,23 +307,47 @@
         "conclusion": "cancelled",
         "reason": "Superseded candidate branch initialization at lease metadata, before source push. Future candidates should create the ref at the source commit directly."
       }
+    },
+    {
+      "slot": "2026-10-17T08:00:00+08:00",
+      "started_at": "2026-10-17T08:00:17+08:00",
+      "completed_at": "2026-10-17 00:20:02 UTC",
+      "status": "completed",
+      "changes": [
+        "Added a read only latest command disclosure for the inspected physical source and receiver across all four controllers.",
+        "Reconstruct actual raw source gain L C and all issued preview blocks, other messages, feedback, request and bounded command in kvar.",
+        "Preserve pending/history guards, sealed forecasts, frozen support and exact saved replay. Controller engine and scientific parameters unchanged.",
+        "Controller-specific deployed support label prevents treating the learned support as common to all baseline policies.",
+        "Optional command disclosure retains four panels and shows source, other prediction, feedback, request and command. Norm on row inspection distinguishes support from executed gain."
+      ],
+      "implementation_source_commit": "378be16282015d092b1acbb4577aae08903ebbb6",
+      "implementation_generated_commit": "eb546717c12588c35f3c9883d690a56d3ab29368",
+      "implementation_candidate_run": 38984634641,
+      "source_commit": "0627eba91b6f5d3171c2b74ad2eba42a7eda0cce",
+      "published_commit": "ebc5d8b97a953743284037822ec1d5e970d460f6",
+      "candidate_run": 38985079454,
+      "main_run": 38985504970,
+      "pages_run": 38985504360,
+      "tests": {
+        "suites": 5,
+        "total": 153,
+        "failed": 0,
+        "build": "passed",
+        "main_consistency": "passed",
+        "diagnostics": "Pure synthetic off-diagonal raw source attribution and clipped command; all predefined seeds 1 through 20 with 180 discovery samples and 5 held out samples; exact request reconstruction, sum across raw sources and forbidden sparse gains; prediction adaptation, segment extension, paused reliability, historical guards and exact replay",
+        "browser": "Expanded command disclosure on desktop and mobile, all four controller rows agree with actual commands and limiter, source/receiver/action identity, additive parts, finite gain norm. Existing repeated attacks, automatic handoff, thirty chart switches, four curves, outage markers and responsive layout retained.",
+        "benchmarks": "Not rerun. Simulation engine, controllers, objective, gains, scenarios and scientific parameters unchanged."
+      },
+      "screenshots": {
+        "artifact_id": 12082494489,
+        "pixel_review": "unverified"
+      },
+      "deployment": "GitHub Pages success",
+      "direct_live_inspection": "unverified, previously denied browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-17T08:00:00+08:00",
-    "started_at": "2026-10-17T08:00:17+08:00",
-    "lease_expires_at": "2026-10-17T08:40:17+08:00",
-    "branch": "cloud/refine/20261017-0800",
-    "base_main": "3c0fc734c0f9ba9285e5cdaefc11d94bfa905d07",
-    "focus": "Read only latest receiver command decomposition by actual issued source messages",
-    "status": "candidate validation",
-    "changes": [
-      "Added a read only latest command disclosure for the inspected physical source and receiver across all four controllers.",
-      "Reconstruct actual raw source gain L C and all issued preview blocks, other messages, feedback, request and bounded command in kvar.",
-      "Preserve pending/history guards, sealed forecasts, frozen support and exact saved replay. Controller engine and scientific parameters unchanged."
-    ]
-  },
-  "next_focus": "Audit the inspected source’s actual contribution to the latest receiver command using only issued forecasts and executed coefficients. Distinguish permitted support from a nonzero gain, including dense discovery and frozen comparison. Avoid fabricated links or future observations. Preserve both audited power scenarios and all baseline curves.",
+  "active_run": null,
+  "next_focus": "Make source reliability changes understandable over time with a rolling error summary from revealed forecast/forcing pairs and explicit sealed-preview issuance delay. Keep current reliability separate from past observed errors, distinguish unforecast physical changes, avoid future forcing reads and do not change controller parameters or frozen support.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
