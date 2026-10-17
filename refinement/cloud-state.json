@@ -538,8 +538,13 @@
     "lease_expires_at": "2026-10-17T15:39:17+08:00",
     "branch": "cloud/refine/20261017-1500",
     "base_main": "b76837cfdec8193d10520c236949ffbafea09d1d",
-    "status": "claimed",
-    "focus": "Scientific protocol audit of bounded PV ramps with declared advance information, no production model changes"
+    "status": "paired cloud audit and candidate validation",
+    "focus": "Scientific protocol audit of bounded PV ramps with declared advance information, no production model changes",
+    "changes": [
+      "Preregister a bounded PV cloud-ramp information audit with all original beta values and seeds 1 through 20.",
+      "Use unchanged production engine and controllers through an audit-only issuance adapter. Pair advance and withheld-profile information with identical physical streams, noise, discovery, frozen supports and coefficients.",
+      "Retain all four full costs, limits, actual prediction command checks and feedback-only outcomes. Do not add a live preset or claim advantage before results."
+    ]
   },
   "next_focus": "Audit physical power requests versus actual applied and residual power at equipment limits and across handoff. Check continuous stop and repeated pulse causality using existing forecasts and all four controllers. Add only a demonstrated behavioral or numerical correction, not explanatory controls or unsupported visual redesign. Keep the bounded reference and outage audit unchanged unless scientific changes justify all predefined seeds.",
   "priorities": [

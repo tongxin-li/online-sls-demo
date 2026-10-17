@@ -1,0 +1,30 @@
+name: Audit PV advance information
+on:
+  push:
+    branches: [main, 'cloud/refine/**']
+    paths:
+      - 'src/benchmark-protocol-information.cjs'
+      - '.github/workflows/audit-protocol-information.yml'
+      - 'refinement/protocol-information-design.md'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit every predefined paired seed and original noise level
+        run: node src/benchmark-protocol-information.cjs
+      - name: Save complete audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: protocol-information-audit
+          path: protocol-audit.json
+          if-no-files-found: ignore
