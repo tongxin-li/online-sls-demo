@@ -649,7 +649,14 @@
       "direct_live_inspection": "unverified, prior denied browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-17T18:00:00+08:00",
+    "started_at": "2026-10-17T18:04:15+08:00",
+    "expires_at": "2026-10-17T18:44:15+08:00",
+    "base_commit": "37aa669ed2239ada293c4fcd86db066478c01ba2",
+    "branch": "cloud/refine/20261017-1800",
+    "focus": "Audit pending source settings at finite segment boundaries, preserving all scientific parameters and exact replay"
+  },
   "next_focus": "Audit interaction correctness at discovery/comparison boundaries and pending forecast setting issuance. Make another product change only for a demonstrated behavior or causality issue. Preserve the forecasted-demand beta 4 default and seed, all four controllers and full costs, frozen deployed supports, exact replay and conditional scientific results. Do not retune for an advantage or add cosmetic controls.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
@@ -706,10 +713,10 @@
       "job": 117310942294
     },
     "last_metadata_verification": {
-      "commit": "712cf4f520663d20bef06e5db7f093396933d4ad",
-      "candidate_run": 39016686005,
-      "main_run": 39017082540,
-      "pages_run": 39017082617,
+      "commit": "37aa669ed2239ada293c4fcd86db066478c01ba2",
+      "candidate_run": 39020936035,
+      "main_run": 39021334717,
+      "pages_run": 39021334639,
       "result": "success"
     },
     "interrupted_invocation": {
@@ -727,12 +734,6 @@
       "parent_solar_run": 39014465950,
       "verified": "success",
       "recovery_branch": "cloud/refine/recover-20261017-1500"
-    },
-    "latest_completion_candidate": {
-      "slot": "2026-10-17T17:00:00+08:00",
-      "branch": "cloud/refine/20261017-1700",
-      "expected_main": "5431056691c19511f72b835925019fb91f7f9356",
-      "instruction": "Metadata-only completion candidate. Validate normally and promote only with matching current main. Count 17:00 once. Do not promote the superseded 15:00 audit."
     }
   },
   "parent_handoffs": [
