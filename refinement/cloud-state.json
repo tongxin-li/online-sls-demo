@@ -8,7 +8,7 @@
   "hard_deadline": "2026-10-18T01:45:00+08:00",
   "max_scheduled_runs": 24,
   "max_minutes_per_run": 40,
-  "completed_count": 11,
+  "completed_count": 12,
   "runs": [
     {
       "slot": "2026-10-17T02:00:00+08:00",
@@ -548,31 +548,54 @@
       "published_commit": null,
       "superseded_by": "8451eea2732c6d045f9bcd1dfbe2f0a6b48f04ae",
       "counted_completed": false
+    },
+    {
+      "slot": "2026-10-17T16:00:00+08:00",
+      "started_at": "2026-10-17T15:55:43+08:00",
+      "completed_at": "2026-10-17T08:15:21.653Z",
+      "status": "completed",
+      "changes": [
+        "Keep a paused inspected source setting from implicitly continuing or extending a completed finite comparison.",
+        "Allow completed engine trials to record pending source settings without advancing samples or rewriting sealed forecasts. Explicit click-to-play sets reliability before the extended preview is issued.",
+        "Regress paused repeated settings, all four retained results, frozen support, exact version 13 replay and first new message timing in engine, UI and real browser checks.",
+        "Clear active inspection metadata and emphasis immediately from departing network links, while retaining their existing fade, so a rapid fresh-trial switch cannot leave an old source highlighted."
+      ],
+      "source_commit": "0adca3289aca193469ad71aa66b08040a582b2ba",
+      "published_commit": "78d6b4c804f405218c3ececb58e76009aa686c88",
+      "candidate_run": 39016012341,
+      "main_run": 39016436789,
+      "pages_run": 39016436617,
+      "candidate_solar_run": 39015758206,
+      "main_solar_run": 39016436794,
+      "tests": {
+        "suites": 6,
+        "total": 187,
+        "failed": 0,
+        "build": "passed",
+        "main_consistency": "passed",
+        "causality": "Completed-state source settings preserve time, horizon, segments, all four states/costs, frozen support and sealed previews. Exact version 13 replay; first extended issue uses the setting before click-to-play or Continue, including zero-noise case.",
+        "browser": "Repeated paused source settings at comparison t180 preserve Continue and pending issuance, exact reload and explicit step. Existing keyboard inspection, three simultaneous attacks, handoff, thirty metric switches, all four curves, stress resets and mobile layout passed.",
+        "scientific_audit": "All 20 existing seeds at beta 0,1,2, 60 paired reference/outage trials. Candidate and main report exactly match checked-in benchmark-stress.json, with all frozen support and unchanged forecast checks.",
+        "benchmarks": "No extra forecasted-demand or style benchmarks rerun. Production controller equations, scientific parameters, default beta/seed, objective, limits and scenario remain unchanged."
+      },
+      "superseded_candidate": {
+        "source": "75b1606e72d5e79b46b423d138d8ac6e51c5c279",
+        "run": 39015758183,
+        "job": 117347415643,
+        "step": "Check browser interactions and responsive layout",
+        "error": "New completed-source checks passed. Subsequent keyboard inspection after fresh reference trial found one highlighted network link where current matrix support expected none. Departing links retained old inspection attributes during fade. Clear departing inspection immediately and retain diagnostics without relaxing assertions."
+      },
+      "screenshots": {
+        "artifact_id": 12094817566,
+        "additional_capture": "completed-source-settings.png",
+        "pixel_review": "unverified"
+      },
+      "deployment": "GitHub Pages success",
+      "direct_live_inspection": "unverified, prior denied browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-17T16:00:00+08:00",
-    "started_at": "2026-10-17T15:55:43+08:00",
-    "lease_expires_at": "2026-10-17T16:35:43+08:00",
-    "branch": "cloud/refine/20261017-1600",
-    "base_main": "83b211821aaa8a13dc594cbf0857a19e6d08acbb",
-    "status": "candidate validation",
-    "focus": "Preserve reviewed finite comparison while changing paused source reliability, with exact replay and first new issue causality",
-    "changes": [
-      "Keep a paused inspected source setting from implicitly continuing or extending a completed finite comparison.",
-      "Allow completed engine trials to record pending source settings without advancing samples or rewriting sealed forecasts. Explicit click-to-play sets reliability before the extended preview is issued.",
-      "Regress paused repeated settings, all four retained results, frozen support, exact version 13 replay and first new message timing in engine, UI and real browser checks.",
-      "Clear active inspection metadata and emphasis immediately from departing network links, while retaining their existing fade, so a rapid fresh-trial switch cannot leave an old source highlighted."
-    ],
-    "superseded_candidate": {
-      "source": "75b1606e72d5e79b46b423d138d8ac6e51c5c279",
-      "run": 39015758183,
-      "job": 117347415643,
-      "step": "Check browser interactions and responsive layout",
-      "error": "New completed-source checks passed. Subsequent keyboard inspection after fresh reference trial found one highlighted network link where current matrix support expected none. Departing links retained old inspection attributes during fade. Clear departing inspection immediately and retain diagnostics without relaxing assertions."
-    }
-  },
-  "next_focus": "Keep paused source setting changes separate from explicitly continuing a completed comparison. Preserve all existing controller results, baseline curves, default scenario and scientific parameters.",
+  "active_run": null,
+  "next_focus": "Audit actual attack usability and selected-bus applied power through selection, mode switches and saved trials. Make a coherent correction only for a demonstrated behavioral or causality issue. Preserve the forecasted-demand default beta 4 and seed, finite comparison, all controllers, held-out conditional results and scientific parameters. Avoid new explanatory controls or cosmetic releases without an interaction need.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -649,6 +672,12 @@
       "parent_solar_run": 39014465950,
       "verified": "success",
       "recovery_branch": "cloud/refine/recover-20261017-1500"
+    },
+    "latest_completion_candidate": {
+      "slot": "2026-10-17T16:00:00+08:00",
+      "branch": "cloud/refine/20261017-1600",
+      "expected_main": "78d6b4c804f405218c3ececb58e76009aa686c88",
+      "instruction": "Documentation-only completion candidate. Validate normally, then promote only with matching main. Count the 16:00 invocation once. The 15:00 audit is superseded and uncounted. Do not promote that old audit."
     }
   },
   "parent_handoffs": [
