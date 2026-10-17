@@ -493,6 +493,8 @@ async function main() {
     await page.locator('#pr-adaptation > summary').click();
     await page.getByRole('button',{name:'Stop attack at bus 22',exact:true}).click();
     const stoppedBus=await readPowerAttacks(page);
+    // Inspect an active bus. The stopped bus can finish fading during CI playback.
+    await page.locator('#pr-bus').selectOption('23');
     await waitSamples(3);
     const attacksAfterStop=await checkPowerAttacks(page,[20,23]);
     assert.equal(attacksAfterStop.counts[22],stoppedBus.counts[22],'Stopping bus 22 adds no further attacks there');
@@ -888,6 +890,7 @@ async function main() {
       await phone.screenshot({path:path.join(output,'concurrent-attacks-mobile.png'),fullPage:true});
       await phone.getByRole('button',{name:'Stop attack at bus 22',exact:true}).tap();
       const mobileStopped=await readPowerAttacks(phone);
+      await selectSetting(phone,'bus','23');
       await phone.waitForFunction(target=>Number(document.querySelector('#pr-clock').textContent.match(/(\d+) s/)[1])>=target,mobileStopped.t+3);
       const mobileContinuing=await checkPowerAttacks(phone,[20,23]);
       assert.equal(mobileContinuing.counts[22],mobileStopped.counts[22],'A touch stops only its bus');
