@@ -447,8 +447,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 <main id="power-response-demo">
   <div class="pr-experiment-bar" aria-label="Experiment selection">
     <label class="pr-experiment-choice" for="pr-experiment">Experiment <select id="pr-experiment" aria-label="Experiment"><option value="communication" selected>Communication topology</option><option value="prediction">Prediction adaptation</option></select></label>
-    <label class="pr-noise-control" id="pr-noise-control" for="pr-noise">Forecast noise <select id="pr-noise" aria-label="Forecast noise level"><option value="0">None · β 0</option><option value="0.25">Low · β 0.25</option><option value="0.5">Moderate · β 0.5</option><option value="1" selected>High · β 1</option><option value="2">Severe · β 2</option></select></label>
-    <span id="pr-noise-caption" class="pr-caption">Noisy buses 4× reference scale · Quiet buses 0.05×</span>
+    <label class="pr-noise-control" id="pr-noise-control" for="pr-noise">Forecast error <select id="pr-noise" aria-label="Forecast noise level" title="Starts a fresh learning and comparison trial. Previous power attack costs are cleared"><optgroup label="Reference range"><option value="0">None · β 0</option><option value="0.25">Reference · β 0.25</option><option value="0.5">Reference · β 0.5</option><option value="1" selected>Reference · β 1</option><option value="2">Reference · β 2</option></optgroup><optgroup label="Extended feeder stress"><option value="4">Stress · β 4</option><option value="8">Stress · β 8</option><option value="16">Stress · β 16</option></optgroup></select></label>
+    <span id="pr-noise-caption" class="pr-caption">Selected source forecast error in mpu</span>
   </div>
   <div class="pr-controlbar" aria-label="Simulation controls">
     <div class="pr-toolbar">
@@ -849,6 +849,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   const PULSE_DEFAULT=100,PULSE_MIN=10,PULSE_MAX=150;
   const CONTROLLERS=['online','scalar','static','causal'];
   const COMMUNICATION_BETAS=[0,.25,.5,1,2];
+  const COMMUNICATION_STRESS_BETAS=[4,8,16];
   const INVERTER_BUSES=[5,7,8,12,14,18,21,24];
   const SOLAR_BUSES=[5,7,14,21],BATTERY_BUSES=[8,12,18,24];
   const PF_RATIO=Math.tan(Math.acos(.95));
@@ -1115,7 +1116,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       const experiment=options.experiment===undefined?'prediction':options.experiment;
       if(!['prediction','communication'].includes(experiment))throw new RangeError('Unknown experiment');
       const beta=options.beta===undefined?1:options.beta;
-      if(!COMMUNICATION_BETAS.includes(beta))throw new RangeError('Invalid communication noise level');
+      if(!COMMUNICATION_BETAS.includes(beta)&&!COMMUNICATION_STRESS_BETAS.includes(beta))throw new RangeError('Invalid communication noise level');
       const id=options.preset===undefined?'mixed':options.preset;
       const preset=FORECAST_PRESETS.find(p=>p.id===id);
       if(!preset)throw new RangeError('Forecast preset must be reliable, uniform, or mixed');
@@ -1489,7 +1490,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   }
   return{Simulation,model,voltageMetrics,constants:deepFreeze({N,M,edges:EDGES,edgeData:model.edgeData,inverterBuses:INVERTER_BUSES,
     amplitude:AMPLITUDE,ridge:RIDGE,rawRidge:RAW_RIDGE,remoteBudget:REMOTE_BUDGET,preview:PREVIEW,window:WINDOW,warmup:WARMUP,
-    busProfiles:BUS_PROFILES,controllers:CONTROLLERS,forecastPresets:FORECAST_PRESETS,communicationBetas:COMMUNICATION_BETAS,tolerance:TOLERANCE,horizon:480,
+    busProfiles:BUS_PROFILES,controllers:CONTROLLERS,forecastPresets:FORECAST_PRESETS,communicationBetas:COMMUNICATION_BETAS,
+    communicationStressBetas:COMMUNICATION_STRESS_BETAS,tolerance:TOLERANCE,horizon:480,
     pulseDefault:PULSE_DEFAULT,pulseMin:PULSE_MIN,pulseMax:PULSE_MAX,pulseUnits:'kW',powerBaseKw:POWER_BASE_KW,
     baseKv:BASE_KV,baseMva:BASE_MVA,sampleSeconds:SAMPLE_SECONDS,tauSeconds:TAU_SECONDS,inverterKvar:70}),
     math:{zeros,eye,transpose,multiply,matvec,combine,frobenius,normInf,solveSPD,getDesign,Response,calibratedScores,
@@ -1812,10 +1814,11 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     return;
   }
   const d3 = window.d3;
+  const communicationNoiseLevels=[...PowerDemo.constants.communicationBetas,...(PowerDemo.constants.communicationStressBetas || [])];
   function optionsFromControls() {
     const experiment=$('experiment').value==='prediction'?'prediction':'communication';
     const beta=Number($('noise').value);
-    return {experiment,powerScenario:$('power-scenario').value || 'reference',beta:[0,.25,.5,1,2].includes(beta)?beta:1,preset:experiment==='communication'?'mixed':$('preset').value,
+    return {experiment,powerScenario:$('power-scenario').value || 'reference',beta:communicationNoiseLevels.includes(beta)?beta:1,preset:experiment==='communication'?'mixed':$('preset').value,
       ...(experiment==='communication'?{horizon:180}:{})};
   }
   let simulation = new PowerDemo.Simulation(optionsFromControls());
@@ -2252,7 +2255,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     const preset=['reliable','uniform','mixed'].includes(data.preset)?data.preset:'mixed';
     const savedOptions=data.phase==='deployment'&&data.discoveryRecord?data.discoveryRecord.options:data.initialOptions;
     $('experiment').value=savedOptions?.experiment==='prediction'?'prediction':'communication';
-    $('noise').value=String([0,.25,.5,1,2].includes(savedOptions?.beta)?savedOptions.beta:1);
+    $('noise').value=String(communicationNoiseLevels.includes(savedOptions?.beta)?savedOptions.beta:1);
     $('preset').value=preset;
     $('power-scenario').value=savedOptions?.powerScenario==='solar-outage'?'solar-outage':'reference';
     if(data.phase==='deployment' && data.discoveryRecord) {
@@ -2668,8 +2671,9 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 
     $('noise-control').hidden=!communication; $('noise-caption').hidden=!communication; $('preset-control').hidden=communication;
     const beta=snapshot.beta || 0;
-    $('noise-caption').textContent=beta===0?'No forecast noise':'Noise SD · Noisy buses '+d3.format('.3~g')(4*beta)+'× reference scale · Quiet buses '+d3.format('.3~g')(.05*beta)+'×';
-    $('noise-caption').title='Forecast error standard deviation in pu uses the declared physical voltage forcing reference scale for each source. This scale is set by the feeder and disturbance generator, not estimated from the current run. β multiplies all source noise levels.';
+    const noiseMpu=1000*PowerDemo.model.forecastForcingScales[selectedBus-1]*beta*(snapshot.faults.includes(selectedBus)?4:.05);
+    $('noise-caption').textContent=beta===0?'No forecast noise':'Bus '+selectedBus+' · '+(snapshot.faults.includes(selectedBus)?'Noisy':'Quiet')+' · Noise SD '+d3.format('.3~g')(noiseMpu)+' mpu'+(beta>2?' · Extended stress':'');
+    $('noise-caption').title='Configured additive error in newly issued voltage forcing forecasts, not actual bus voltage. 1 mpu = 0.001 pu. Noisy sources have 80 times the noise SD of quiet sources. β 4, 8 and 16 are additional feeder stress tests outside the reference grid. Changing β starts a fresh trial.';
     $('experiment').disabled=comparing; $('noise').disabled=comparing; $('power-scenario').disabled=comparing;
     const scenario=snapshot.scenario;
     $('scenario-status').hidden=scenario?.id!=='solar-outage';
