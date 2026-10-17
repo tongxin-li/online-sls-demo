@@ -143,8 +143,8 @@ function harness(saved,experiment='prediction',reducedMotion=true) {
 }
 const pulses=h=>h.snapshot().eventLog.filter(event=>event.type==='pulse');
 
-test('Space preserves native summary and link activation, including descendant targets',()=>{
-  for(const selector of ['summary','a[href]'])for(const descendant of [false,true])for(const playing of [false,true]){
+test('Space preserves native summary link and command scroller behavior including descendants',()=>{
+  for(const selector of ['summary','a[href]','[data-command-scroll]'])for(const descendant of [false,true])for(const playing of [false,true]){
     const h=harness();if(playing)h.click('run');
     const initialTime=h.snapshot().t;
     const control=target(selector==='summary'?'SUMMARY':'A');

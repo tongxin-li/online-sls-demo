@@ -781,7 +781,7 @@
     const key = e.key.toLowerCase();
     if (key === 'd') { e.preventDefault(); if(forecastMode()) activateAttack(selectedBus,null); else beginAttack(); }
     else if (key === 'e') { e.preventDefault(); fault(); }
-    else if (key === ' ' && !e.target.closest('button, [role=button], summary, a[href]')) { e.preventDefault(); toggleRun(); }
+    else if (key === ' ' && !e.target.closest('button, [role=button], summary, a[href], [data-command-scroll]')) { e.preventDefault(); toggleRun(); }
   });
   root.querySelectorAll('[data-series]').forEach(button => {
     button.addEventListener('click', () => {

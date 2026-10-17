@@ -439,7 +439,15 @@ async function main() {
     await checkCommandInspection(phone);
     assert.equal(await phone.locator('#pr-command-gain-heading').textContent(),'Gain norm');
     assert.equal(await phone.locator('#pr-command-rows .source-gain').count(),4);
-    await phone.locator('.pr-command-scroll').evaluate(el=>{el.scrollLeft=el.scrollWidth;});
+    const scroller=phone.getByRole('region',{name:'Receiver command table',exact:true});
+    await scroller.focus();
+    for(let i=0;i<12;i++)await scroller.press('ArrowRight');
+    await phone.waitForFunction(()=>document.querySelector('.pr-command-scroll').scrollLeft>0);
+    const keyboardBefore=await phone.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
+    await scroller.press('Space');
+    assert.equal(await phone.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getState().playing),false,'Space in the command scroller must not start playback');
+    assert.equal(await phone.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),keyboardBefore);
+    await scroller.evaluate(el=>{el.scrollLeft=el.scrollWidth;});
     const gainBox=await phone.locator('#pr-command-rows .source-gain').first().boundingBox();
     assert.ok(gainBox.x>=0&&gainBox.x+gainBox.width<=390+1,'Gain is reachable inside the mobile table scroller');
     await phone.screenshot({path:path.join(output,'source-gains-mobile.png'),fullPage:true});
