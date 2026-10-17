@@ -469,6 +469,9 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 .pr-link-receipt #pr-link-receipt-action { color:var(--foreground); font-size:12px; }
 .pr-forecast-values dt { color:var(--muted-foreground); }
 
+/* Current configuration replaces generic heading copy without another panel. */
+.pr-scenario-heading p[data-forecast-settings='true'] { color:#53535a; font-weight:500; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+
 /* Artwork stays decorative. The enclosing bus handles hit area and badge input. */
 .pe-host { -webkit-user-select:none; user-select:none; touch-action:manipulation; }
 .pe-hit { fill:transparent; pointer-events:all; }
@@ -595,7 +598,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 
 <main id="power-response-demo">
   <div class="pr-scenario-heading">
-    <div><strong id="pr-scenario-name">Forecasted demand</strong><p id="pr-scenario-description" class="pr-caption">Learn from changing demand, then compare four controllers</p></div>
+    <div><strong id="pr-scenario-name">Forecasted demand</strong><p id="pr-scenario-description" class="pr-caption">Forecast settings · β 4 · 8 quiet / 15 noisy</p></div>
   </div>
   <div class="pr-controlbar" aria-label="Simulation controls">
     <div class="pr-toolbar">
@@ -3135,14 +3138,28 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   function scheduledApplications() {
     return snapshot.powerScenario===DEFAULT_SCENARIO ? (snapshot.lastScenarioApplications || []) : [];
   }
+  function forecastSettings() {
+    if(snapshot.experiment!=='communication')return null;
+    const sources=snapshot.predictionDiagnostics?.sourceBuses || Array.from({length:PowerDemo.constants.N-1},(_,i)=>i+2);
+    const faults=new Set(snapshot.faults || []),noisy=sources.filter(bus=>faults.has(bus)).length;
+    return {beta:snapshot.beta,sourceCount:sources.length,quiet:sources.length-noisy,noisy,noiseEnabled:snapshot.beta>0};
+  }
   function renderScenario() {
     const scheduled=snapshot.powerScenario===DEFAULT_SCENARIO,scenario=snapshot.scenario || {};
     const powers=(snapshot.eventLog || []).filter(event=>event.type==='pulse').length;
     const allNoisy=scheduled && snapshot.beta>0 && Array.from({length:PowerDemo.constants.N-1},(_,i)=>i+2).every(bus=>snapshot.faults.includes(bus));
     $('scenario-name').textContent=scheduled?'Demand and solar cycle':snapshot.powerScenario==='solar-outage'?'Solar outage trial':'Reference trial';
-    $('scenario-description').textContent=scheduled
-      ?(automaticComparison()?'Run to learn the links, then compare four controllers automatically':'Manual comparison enabled in Experiment settings')
-      :(restoredTrial?'Restored run · ':'')+'Forecast stress β '+snapshot.beta+' · Previous samples and costs retained';
+    const description=$('scenario-description'),settings=forecastSettings();
+    const guidance=scheduled?(snapshot.phase==='deployment'?(snapshot.experiment==='communication'?'Fresh comparison · Deployed links and prediction correction stay fixed':'Fresh comparison · Links fixed · Prediction correction adapts')
+      :automaticComparison()?'Run to learn the links, then compare four controllers automatically':'Manual comparison enabled in Experiment settings')
+      :(restoredTrial?'Restored run · ':'')+'Previous samples and costs retained';
+    description.dataset.forecastSettings=String(!!settings);
+    for(const key of ['beta','sourceCount','quiet','noisy','noiseEnabled'])description.dataset[key]=settings?String(settings[key]):'';
+    description.textContent=settings?(restoredTrial&&!scheduled?'Restored run · ':'')+'Forecast settings · β '+settings.beta+' · '
+      +(settings.noiseEnabled?settings.quiet+' quiet / '+settings.noisy+' noisy':'Noise disabled')
+      :scheduled?guidance:(restoredTrial?'Restored run · ':'')+'Forecast stress β '+snapshot.beta+' · Previous samples and costs retained';
+    description.title=settings?guidance+'. Current configuration for newly issued forecasts, not observed accuracy or bus voltage. Quiet and noisy are synthetic source labels, not inputs to the learner. Already issued messages stay unchanged. Noise disabled does not forecast unannounced power attacks.':guidance;
+    description.setAttribute('aria-description',description.title);
     $('new-scenario').hidden=scheduled && !powers && !allNoisy;
     $('new-scenario').disabled=comparing;
     $('new-scenario').textContent='Restore default scenario';
