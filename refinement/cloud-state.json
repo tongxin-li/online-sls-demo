@@ -1260,7 +1260,15 @@
         },
         "screenshots": {
           "pixel_review": "pending"
-        }
+        },
+        "candidate_revisions": [
+          {
+            "source_commit": "51eeb18c3fdd647447aeabe312cbd76aa18ec94e",
+            "candidate_run": 39073389537,
+            "status": "superseded",
+            "reason": "Before browser execution, align the new curve visibility fixture with the actual visible voltage and stage charts during discovery; the cost view is intentionally hidden then. Preserve all existing assertions and also check native controls after deployment."
+          }
+        ]
       }
     ],
     "active_run": {

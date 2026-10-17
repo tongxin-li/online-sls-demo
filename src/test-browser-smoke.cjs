@@ -184,12 +184,15 @@ async function main() {
       for(const key of ['online','scalar','static']){
         const button=hidden.buttons.find(button=>button.key===key);assert.equal(button.pressed,'false');assert.equal(button.opacity,1,'Hidden curves retain readable labels');
       }
-      assert.equal(await surface.locator('#pr-cost path.data-series').count(),1);
+      for(const chart of ['pr-stage','pr-voltage'])assert.equal(await surface.locator('#'+chart+' path.data-series').count(),1);
       await activate('causal',0);
       assert.equal(await surface.locator('#pr-controller-key [data-series="causal"]').getAttribute('aria-pressed'),'true','Last curve cannot be hidden');
       for(const [index,key] of ['online','scalar','static'].entries())await activate(key,index);
-      assert.equal(await surface.locator('#pr-cost path.data-series').count(),4);
-      assert.equal(await surface.locator('#pr-cost-detail tr').count(),4);
+      for(const chart of ['pr-stage','pr-voltage'])assert.equal(await surface.locator('#'+chart+' path.data-series').count(),4);
+      if(await surface.locator('#pr-cost').isVisible()){
+        assert.equal(await surface.locator('#pr-cost path.data-series').count(),4);
+        assert.equal(await surface.locator('#pr-cost-detail tr').count(),4);
+      }
       assert.equal(await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),before,'Key operation preserves every measured sample and cost');
       assert.equal(await surface.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getState().playing),false,'Native key activation cannot trigger playback');
     };
@@ -684,6 +687,7 @@ async function main() {
     for(const chart of ['pr-cost','pr-stage','pr-voltage'])assert.equal(await page.locator('#'+chart+' path.data-series').count(),4);
     await checkEventMarkers(page);await checkVoltageMetrics(page);
     await checkCodesign(page);
+    await checkControllerKey(page,true);
     const designsBefore=await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
     for(const key of ['online','scalar','static'])await page.locator('[data-series="'+key+'"]').click();
     await checkCodesign(page);
