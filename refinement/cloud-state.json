@@ -459,14 +459,19 @@
     "branch": "cloud/refine/20261017-1200",
     "base_main": "a9a6743245c7d612b145473e9c5ea73df6228a86",
     "focus": "Truthful forecast setting time and typed mixed event markers from immutable simulation log",
-    "status": "candidate validation",
+    "status": "awaiting main browser verification retry",
     "changes": [
       "Use immutable simulation events for live and restored chart markers. Show forecast setting changes immediately at their actual toggle time, not the next physical sample.",
       "Report marked noisy or quiet and first eligible issuance/target/reveal times without rewriting sealed messages. Keep physical request markers at the first affected state and label requested rather than guaranteed applied power.",
       "Separate forecast, power request and solar counts in mixed groups. Regress paused toggles, domain/scale changes, exact replay and comparison resets."
-    ]
+    ],
+    "source_commit": "86b1e2e2a93bfb04be2a82bd0b5e223a7d2d8d1f",
+    "published_commit": "28ed612ec17b2ce0c8894362897ab4168094e496",
+    "candidate_run": 39001443587,
+    "main_run": 39002417277,
+    "pages_run": 39002417026
   },
-  "next_focus": "Audit repeated paused source toggles and power start/stop event markers against the actual event log and issued-message timing. Preserve costs and all four curves and fix only demonstrated discrepancies. Avoid adding more exposition or controls without a verified interaction need.",
+  "next_focus": "First recover the 12:00 slot without double counting. Main browser validation attempt 1 was cancelled after about 15 minutes despite candidate success. A retry was requested. Inspect retry jobs and logs, then optimize browser evidence transport and add milestone timing if still slow, preserving all assertions. Distinguish CI overhead from actual application rendering before changes. No numerical benchmarks for test-only work.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -525,6 +530,52 @@
       "main_run": 38999123698,
       "pages_run": 38999123148,
       "result": "success"
+    },
+    "pending_publication": {
+      "slot": "2026-10-17T12:00:00+08:00",
+      "started_at": "2026-10-17T12:04:50+08:00",
+      "recorded_at": "2026-10-17 04:40:37 UTC",
+      "status": "published, main browser verification pending retry",
+      "changes": [
+        "Use immutable simulation events for live and restored chart markers. Show forecast setting changes immediately at their actual toggle time, not the next physical sample.",
+        "Report marked noisy or quiet and first eligible issuance/target/reveal times without rewriting sealed messages. Keep physical request markers at the first affected state and label requested rather than guaranteed applied power.",
+        "Separate forecast, power request and solar counts in mixed groups. Regress paused toggles, domain/scale changes, exact replay and comparison resets."
+      ],
+      "source_commit": "86b1e2e2a93bfb04be2a82bd0b5e223a7d2d8d1f",
+      "published_commit": "28ed612ec17b2ce0c8894362897ab4168094e496",
+      "candidate_run": 39001443587,
+      "main_run": 39002417277,
+      "pages_run": 39002417026,
+      "tests": {
+        "suites": 5,
+        "total": 164,
+        "failed": 0,
+        "candidate_browser": "passed",
+        "candidate_prepare": "passed, generated child changes only index.html",
+        "main_consistency": "passed",
+        "main_browser": "attempt 1 cancelled during browser step, retry requested",
+        "benchmarks": "Not rerun. Read only markers and assertions; simulation engine and scientific parameters unchanged."
+      },
+      "main_cancellation": {
+        "job": 117307953333,
+        "step": "Check browser interactions and responsive layout",
+        "log": "2026-10-17T04:39:16.7738004Z ##[error]The operation was canceled.",
+        "created_at": "2026-10-17T04:24:00Z",
+        "conclusion": "cancelled",
+        "note": "Elapsed roughly 15 minutes, matching the job budget. No browser assertion failure is present in completed job logs. Cause not independently proven; candidate browser completed in 11m20.7s. Retry accepted by GitHub."
+      },
+      "screenshots": {
+        "artifact_id": 12089731122,
+        "pixel_review": "unverified"
+      },
+      "deployment": "GitHub Pages success",
+      "direct_live_inspection": "unverified, prior denied browser access not retried"
+    },
+    "latest_completion_candidate": {
+      "slot": "2026-10-17T12:00:00+08:00",
+      "branch": "cloud/refine/20261017-1200",
+      "expected_main": "28ed612ec17b2ce0c8894362897ab4168094e496",
+      "instruction": "This documentation-only candidate records pending verification, not completion. Validate candidate normally. Inspect main validation retry. On success mark slot completed exactly once and increment completed_count from 9 to 10, acquire a fresh lease before any next improvement. Never count metadata validation as an additional refinement. Guard main at published commit before promoting metadata."
     }
   }
 }
