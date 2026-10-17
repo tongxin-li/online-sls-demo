@@ -530,18 +530,28 @@
       },
       "deployment": "GitHub Pages success",
       "direct_live_inspection": "unverified, prior denied browser access not retried"
+    },
+    {
+      "slot": "2026-10-17T15:00:00+08:00",
+      "started_at": "2026-10-17T14:59:17+08:00",
+      "resolved_at": "2026-10-17T07:47:21.232Z",
+      "status": "superseded",
+      "changes": [
+        "Preregistered an audit-only bounded PV advance-information adapter and ran all 100 paired cases, 200 engine runs, on original beta levels and seeds 1 through 20.",
+        "Repository writes stopped on parent ownership hold. No candidate application code or generated page was published.",
+        "Parent published the integrated forecasted-demand scenario separately. Preserve that newer release; archive the older audit for separate review only."
+      ],
+      "source_commit": "9062b10a14aa2cd4adc163a942e560a403457c84",
+      "candidate_run": 39012196428,
+      "audit_run": 39012196442,
+      "audit_status": "success, 100 paired cases, unpublished",
+      "published_commit": null,
+      "superseded_by": "8451eea2732c6d045f9bcd1dfbe2f0a6b48f04ae",
+      "counted_completed": false
     }
   ],
-  "active_run": {
-    "slot": "2026-10-17T15:00:00+08:00",
-    "started_at": "2026-10-17T14:59:17+08:00",
-    "lease_expires_at": "2026-10-17T15:39:17+08:00",
-    "branch": "cloud/refine/20261017-1500",
-    "base_main": "b76837cfdec8193d10520c236949ffbafea09d1d",
-    "status": "claimed",
-    "focus": "Scientific protocol audit of bounded PV ramps with declared advance information, no production model changes"
-  },
-  "next_focus": "Audit physical power requests versus actual applied and residual power at equipment limits and across handoff. Check continuous stop and repeated pulse causality using existing forecasts and all four controllers. Add only a demonstrated behavioral or numerical correction, not explanatory controls or unsupported visual redesign. Keep the bounded reference and outage audit unchanged unless scientific changes justify all predefined seeds.",
+  "active_run": null,
+  "next_focus": "Improve clear visual causality and attack usability in the current forecasted-demand default. Read current README and environment first. Preserve beta 4, seed 20261013, 180-sample discovery and finite fresh comparison, Continue, old-trial replay and explicit fresh scenario, all-noisy warning, every baseline and full physical costs. Do not retune the environment to force an advantage. Keep conditional and unfavorable outcomes. Any useful older audit needs a fresh rebase and independent review.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -601,11 +611,21 @@
       "candidate_run": 39003470969,
       "result": "success"
     },
-    "latest_completion_candidate": {
-      "slot": "2026-10-17T13:00:00+08:00",
-      "branch": "cloud/refine/20261017-1300",
-      "expected_main": "36cc541077eb15a6ec6b45126b6562e8b5c9dc13",
-      "instruction": "This documentation-only candidate completes the 13:00 test infrastructure pass and recovers 12:00 exactly once. Validate normally, then promote only with matching main head. Metadata validation is not an extra refinement."
+    "interrupted_invocation": {
+      "slot": "2026-10-17T15:00:00+08:00",
+      "lease_commit": "4d5daa8a1dd1a4e484e0fed76d8d14d5d4120e16",
+      "lease_expired_at": "2026-10-17T15:39:17+08:00",
+      "older_candidate_branch": "cloud/refine/20261017-1500",
+      "older_candidate_commit": "9062b10a14aa2cd4adc163a942e560a403457c84",
+      "candidate_validation": "success",
+      "scientific_audit": "success, 200 engine runs",
+      "disposition": "Superseded by parent integrated scenario. Do not promote old candidate. Rebase and review any useful audit independently. No completion increment.",
+      "parent_release": "8451eea2732c6d045f9bcd1dfbe2f0a6b48f04ae",
+      "parent_main_run": 39014465869,
+      "parent_pages_run": 39014465726,
+      "parent_solar_run": 39014465950,
+      "verified": "success",
+      "recovery_branch": "cloud/refine/recover-20261017-1500"
     }
   },
   "parent_handoffs": [
@@ -625,6 +645,18 @@
       "pages_run": 39010837319,
       "audit_run": 39010837650,
       "tests": 172
+    },
+    {
+      "commit": "8451eea2732c6d045f9bcd1dfbe2f0a6b48f04ae",
+      "description": "Forecasted demand and solar default with explicit source reliability, finite comparison and complete conditional audit",
+      "candidate_run": 39014102705,
+      "main_run": 39014465869,
+      "pages_run": 39014465726,
+      "audit_run": 39014465950,
+      "tests": 185,
+      "suites": 6,
+      "verified": "success",
+      "counts_as_scheduled_refinement": false
     }
   ]
 }
