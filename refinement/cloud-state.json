@@ -594,7 +594,14 @@
       "direct_live_inspection": "unverified, prior denied browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-17T17:00:00+08:00",
+    "started_at": "2026-10-17T16:59:38+08:00",
+    "expires_at": "2026-10-17T17:39:38+08:00",
+    "base_commit": "712cf4f520663d20bef06e5db7f093396933d4ad",
+    "branch": "cloud/refine/20261017-1700",
+    "focus": "Audit real attack usability and applied power with unchanged scientific parameters"
+  },
   "next_focus": "Audit actual attack usability and selected-bus applied power through selection, mode switches and saved trials. Make a coherent correction only for a demonstrated behavioral or causality issue. Preserve the forecasted-demand default beta 4 and seed, finite comparison, all controllers, held-out conditional results and scientific parameters. Avoid new explanatory controls or cosmetic releases without an interaction need.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
@@ -651,10 +658,10 @@
       "job": 117310942294
     },
     "last_metadata_verification": {
-      "commit": "83b211821aaa8a13dc594cbf0857a19e6d08acbb",
-      "candidate_run": 39014960306,
-      "main_run": 39015341497,
-      "pages_run": 39015341446,
+      "commit": "712cf4f520663d20bef06e5db7f093396933d4ad",
+      "candidate_run": 39016686005,
+      "main_run": 39017082540,
+      "pages_run": 39017082617,
       "result": "success"
     },
     "interrupted_invocation": {
@@ -672,12 +679,6 @@
       "parent_solar_run": 39014465950,
       "verified": "success",
       "recovery_branch": "cloud/refine/recover-20261017-1500"
-    },
-    "latest_completion_candidate": {
-      "slot": "2026-10-17T16:00:00+08:00",
-      "branch": "cloud/refine/20261017-1600",
-      "expected_main": "78d6b4c804f405218c3ececb58e76009aa686c88",
-      "instruction": "Documentation-only completion candidate. Validate normally, then promote only with matching main. Count the 16:00 invocation once. The 15:00 audit is superseded and uncounted. Do not promote that old audit."
     }
   },
   "parent_handoffs": [
