@@ -452,7 +452,15 @@
       "direct_live_inspection": "unverified, previously denied browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-17T12:00:00+08:00",
+    "started_at": "2026-10-17T12:04:50+08:00",
+    "lease_expires_at": "2026-10-17T12:44:50+08:00",
+    "branch": "cloud/refine/20261017-1200",
+    "base_main": "a9a6743245c7d612b145473e9c5ea73df6228a86",
+    "focus": "Truthful forecast setting time and typed mixed event markers from immutable simulation log",
+    "status": "preparing candidate"
+  },
   "next_focus": "Audit repeated paused source toggles and power start/stop event markers against the actual event log and issued-message timing. Preserve costs and all four curves and fix only demonstrated discrepancies. Avoid adding more exposition or controls without a verified interaction need.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
@@ -508,9 +516,9 @@
       "note": "Current main validation includes the recovered prior completion and current improvement. Prior completed slot counted once."
     },
     "last_metadata_verification": {
-      "commit": "89206ed1c704b397dfe5d3560540df57fb600053",
-      "main_run": 38995149121,
-      "pages_run": 38995148790,
+      "commit": "a9a6743245c7d612b145473e9c5ea73df6228a86",
+      "main_run": 38999123698,
+      "pages_run": 38999123148,
       "result": "success"
     }
   }
