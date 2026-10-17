@@ -307,7 +307,7 @@
     $('command-title').textContent=reading ? 'Command at inverter '+reading.receiver+' · Action '+reading.action+' s'
       : 'Command breakdown · '+(historyIndex!==null?'Show Latest':'Step to reveal');
     const body=$('command-rows');body.replaceChildren();
-    if(!reading) return;
+    if(!reading) return null;
     const names=Object.fromEntries(activeSeries().map(item=>[item.key,item.label]));
     const format=value=>(Math.abs(value)<.0005?0:value).toFixed(3);
     for(const item of reading.rows) {
@@ -321,6 +321,52 @@
         const cell=document.createElement('td');cell.textContent=format(item[key]);row.append(cell);
       }
       const gain=document.createElement('td');gain.className='source-gain';gain.textContent=item.gainNorm.toPrecision(4);row.append(gain);
+      body.append(row);
+    }
+    return reading;
+  }
+  // Keep selection energy distinct from the gain of a resynthesized executed row.
+  // Both are read only evidence. Neither source quality labels nor future forcing enter.
+  function inspectedLinkEvidence(command=inspectedCommand()) {
+    const inspection=predictionInspection(),support=snapshot.deployedSupport;
+    if(!inspection || historyIndex!==null || !communicationComparison() || !support) return null;
+    const row=PowerDemo.constants.inverterBuses.indexOf(inspection.receiver),column=inspection.source-2;
+    const diagnostics=support.discoveryDiagnostics;
+    if(row<0 || column<0 || !diagnostics) return null;
+    const rows=[['scalar','Fixed sparse',support.fixedLinks,diagnostics.baselineScores],['online','Learned sparse',support.links,diagnostics.learnedScores]].map(([key,label,links,scores])=>{
+      const executed=command?.rows.find(item=>item.key===key);
+      return {key,label,budget:links.filter(link=>link.from!==link.to).length,
+        selection:inspection.local?'Local':links.some(link=>link.from===inspection.source&&link.to===inspection.receiver)?'Selected':'Excluded',
+        score:scores[row][column],gainNorm:executed?.gainNorm??null,sourceKvar:executed?.sourceKvar??null,
+        commandKvar:executed?.commandKvar??null,limited:executed?.limited??null};
+    });
+    return {source:inspection.source,receiver:inspection.receiver,discoverySamples:support.discoveryTime,
+      scoreSamples:support.scoreSamples,action:command?.action??null,rows};
+  }
+  function renderLinkEvidence(reading) {
+    const panel=$('link-receipt'),body=$('link-receipt-rows');
+    panel.hidden=!reading;body.replaceChildren();
+    panel.dataset.available=String(!!reading);
+    for(const key of ['source','receiver','discoverySamples','scoreSamples','action'])
+      panel.dataset[key]=reading&&reading[key]!==null?String(reading[key]):'';
+    if(!reading) return;
+    $('link-receipt-title').textContent='Source '+reading.source+' → inverter '+reading.receiver;
+    $('link-receipt-time').textContent=reading.discoverySamples+' discovery samples · '+reading.scoreSamples+' scored actions · Links and scores fixed';
+    $('link-receipt-action').textContent=reading.action===null?'Step to reveal executed gains and commands':'Executed action '+reading.action+' s · Full issued preview';
+    for(const item of reading.rows) {
+      const header=$('link-receipt-'+item.key);header.textContent=item.label+'\n'+item.budget+' remote';
+      header.dataset.budget=String(item.budget);
+    }
+    for(const [key,label] of [['selection','Prediction link'],['score','Score (gain²)'],['gainNorm','Gain norm'],['sourceKvar','Source (kvar)'],['commandKvar','Command (kvar)']]) {
+      const row=document.createElement('tr'),labelCell=document.createElement('th');labelCell.scope='row';labelCell.textContent=label;row.append(labelCell);row.dataset.measure=key;
+      for(const item of reading.rows) {
+        const cell=document.createElement('td');cell.dataset.controller=item.key;cell.dataset.measure=key;
+        cell.dataset.value=item[key]===null?'':String(item[key]);cell.dataset.limited=String(item.limited);
+        cell.textContent=item[key]===null?'—':key==='selection'?item[key]:key==='sourceKvar'||key==='commandKvar'?(Math.abs(item[key])<.0005?0:item[key]).toFixed(3):d3.format('.3~g')(item[key]);
+        if(key==='selection')cell.className='pr-link-choice '+item.selection.toLowerCase();
+        if(key==='commandKvar')cell.title=item.limited?'Actual command limited to ±70 kvar':'Actual bounded command, not a causal share of this source';
+        row.append(cell);
+      }
       body.append(row);
     }
   }
@@ -402,7 +448,8 @@
   function renderInspectedSource() {
     const inspection=predictionInspection(),control=$('source-fault');
     renderForecastObservation(inspection);
-    renderCommandInspection(inspection);
+    const command=renderCommandInspection(inspection);
+    renderLinkEvidence(inspectedLinkEvidence(command));
     $('source-controls').hidden=!inspection;
     const bus=inspection?.source;
     const noisy=!!inspection && snapshot.faults.includes(bus);
@@ -1630,5 +1677,5 @@
   new ResizeObserver(()=>render()).observe(root);
   render();
   // A read only inspection hook supports deterministic browser verification.
-  root.powerDemo = { getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,inspectedSource,playing,activeAttackBuses:activeAttacks().map(attack=>attack.bus),intervention:$('intervention').value,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null,topology:topology.export(),historyIndex,comparisonComplete:comparisonComplete(),comparisonContinued}) };
+  root.powerDemo = { getLinkEvidence:() => inspectedLinkEvidence(), getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,inspectedSource,playing,activeAttackBuses:activeAttacks().map(attack=>attack.bus),intervention:$('intervention').value,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null,topology:topology.export(),historyIndex,comparisonComplete:comparisonComplete(),comparisonContinued}) };
 })();

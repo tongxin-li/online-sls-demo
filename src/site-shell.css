@@ -433,3 +433,16 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 .pr-codesign-key > span { display:flex; align-items:center; gap:6px; }
 .pr-codesign .pr-caption { line-height:1.5; }
 .pr-codesign .pr-plot-label { font-size:10px; }
+
+/* Contextual evidence ties one actual inspected link to selection and execution. */
+.pr-link-receipt { margin:12px 0 8px; padding:12px 0 4px; border-top:1px solid var(--border); color:var(--foreground); }
+.pr-link-receipt h3 { margin:0 0 4px; font-size:14px; font-weight:600; line-height:1.4; }
+.pr-link-receipt table { width:100%; table-layout:fixed; border-collapse:collapse; font-size:12px; line-height:1.5; font-variant-numeric:tabular-nums; margin:8px 0; }
+.pr-link-receipt th,.pr-link-receipt td { padding:7px 4px; border-bottom:1px solid var(--border); text-align:right; overflow-wrap:anywhere; }
+.pr-link-receipt th:first-child { width:34%; text-align:left; font-weight:500; }
+.pr-link-receipt thead th { white-space:pre-line; vertical-align:bottom; font-weight:600; }
+.pr-link-receipt td { color:var(--foreground); }
+.pr-link-receipt .pr-link-choice.selected { color:var(--primary); font-weight:600; }
+.pr-link-receipt .pr-link-choice.excluded { color:var(--muted-foreground); }
+.pr-link-receipt #pr-link-receipt-action { color:var(--foreground); font-size:12px; }
+.pr-forecast-values dt { color:var(--muted-foreground); }

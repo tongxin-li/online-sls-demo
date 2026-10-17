@@ -182,6 +182,61 @@ async function main() {
         if(key==='causal'){assert.equal(source,0);assert.equal(other,0);assert.equal(Number(data.gainNorm),0);}
       }
     };
+    const inspectLinkEvidence = async surface => {
+      const initial=await surface.evaluate(()=>{const root=document.querySelector('#power-response-demo');return {snapshot:JSON.stringify(root.powerDemo.getSnapshot()),state:root.powerDemo.getState(),support:root.powerDemo.getSnapshot().deployedSupport};});
+      assert.ok(initial.support,'The receipt fixture uses an actual deployed controller');
+      assert.equal(initial.state.playing,false);
+      const has=(links,edge)=>links.some(link=>link.from===edge.from&&link.to===edge.to);
+      const selected=initial.support.links.find(edge=>edge.from!==edge.to&&!has(initial.support.fixedLinks,edge))||initial.support.links.find(edge=>edge.from!==edge.to);
+      const excluded=initial.support.fixedLinks.find(edge=>edge.from!==edge.to&&!has(initial.support.links,edge))||
+        {to:selected.to,from:Array.from({length:23},(_,i)=>i+2).find(from=>from!==selected.to&&!has(initial.support.links,{from,to:selected.to}))};
+      const local={from:selected.to,to:selected.to};
+      for(const [index,edge] of [selected,excluded,local].entries()){
+        const cell=surface.locator('#pr-matrix .matrix-cell[data-receiver="'+edge.to+'"][data-source="'+edge.from+'"]');
+        if(surface.viewportSize().width<500)await cell.tap();else await cell.click();
+        await checkCommandInspection(surface);
+        const reading=await surface.evaluate(()=>{
+          const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),state=root.powerDemo.getState(),panel=document.querySelector('#pr-link-receipt');
+          return {snapshot,state,evidence:root.powerDemo.getLinkEvidence(),hidden:panel.hidden,data:{...panel.dataset},
+            headers:['scalar','online'].map(key=>({key,budget:Number(document.querySelector('#pr-link-receipt-'+key).dataset.budget)})),
+            cells:Array.from(panel.querySelectorAll('td')).map(cell=>({key:cell.dataset.controller,measure:cell.dataset.measure,value:cell.dataset.value,text:cell.textContent,
+              font:Number.parseFloat(getComputedStyle(cell).fontSize),box:cell.getBoundingClientRect().toJSON()})),
+            title:document.querySelector('#pr-link-receipt-title').textContent,
+            timing:document.querySelector('#pr-link-receipt-action').textContent,
+            command:Array.from(document.querySelectorAll('#pr-command-rows tr')).map(row=>({...row.dataset}))};
+        });
+        assert.equal(reading.hidden,false);assert.equal(reading.evidence.source,edge.from);assert.equal(reading.evidence.receiver,edge.to);
+        assert.equal(reading.title,'Source '+edge.from+' → inverter '+edge.to);
+        assert.equal(Number(reading.data.action),reading.snapshot.lastSample.t);
+        assert.match(reading.timing,/Executed action.*Full issued preview/);
+        const receiver=[5,7,8,12,14,18,21,24].indexOf(edge.to),column=edge.from-2;
+        for(const row of reading.evidence.rows){
+          const support=reading.snapshot.deployedSupport,links=row.key==='scalar'?support.fixedLinks:support.links;
+          const scores=row.key==='scalar'?support.discoveryDiagnostics.baselineScores:support.discoveryDiagnostics.learnedScores;
+          assert.equal(row.selection,edge.from===edge.to?'Local':has(links,edge)?'Selected':'Excluded');
+          assert.equal(row.score,scores[receiver][column]);assert.equal(row.budget,24);
+          const command=reading.command.find(command=>command.controller===row.key);
+          assert.equal(row.gainNorm,Number(command.gainNorm));assert.equal(row.sourceKvar,Number(command.sourceKvar));
+          assert.equal(row.commandKvar,reading.snapshot.commandQ[row.key][edge.to-1]);
+          for(const measure of ['selection','score','gainNorm','sourceKvar','commandKvar']){
+            const cell=reading.cells.find(cell=>cell.key===row.key&&cell.measure===measure);
+            assert.equal(cell.value,String(row[measure]));assert.ok(cell.font>=12);
+            assert.ok(cell.box.x>=0&&cell.box.right<=surface.viewportSize().width+1,'Receipt stays in viewport');
+            assert.notEqual(cell.text,'—');
+          }
+        }
+        assert.deepEqual(reading.headers.map(header=>header.budget),[24,24]);
+        assert.equal(JSON.stringify(reading.snapshot),initial.snapshot,'Inspection does not change the physical trial, costs, forecasts or support');
+        if(index===0){
+          await surface.locator('#pr-forecast-observation').screenshot({path:path.join(output,'link-evidence-'+surface.viewportSize().width+'.png')});
+          const preview=await surface.locator('#pr-forecast-observation').screenshot({type:'jpeg',quality:85,path:path.join(output,'link-evidence-'+surface.viewportSize().width+'.jpg')});
+          console.log('CLOUD_LINK_PREVIEW_'+surface.viewportSize().width+' '+preview.toString('base64'));
+        }
+      }
+      if(initial.state.inspectedSource!==null)await surface.locator('#pr-matrix .matrix-cell[data-receiver="'+initial.state.selectedBus+'"][data-source="'+initial.state.inspectedSource+'"]').click();
+      else {await selectSetting(surface,'bus','2');await selectSetting(surface,'bus',String(initial.state.selectedBus));}
+      assert.equal(await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),initial.snapshot);
+    };
     const checkProtocol = async surface => {
       const reading=await surface.evaluate(()=>{
         const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),state=root.powerDemo.getState();
@@ -515,6 +570,7 @@ async function main() {
     for(const key of ['online','scalar','static'])await page.locator('[data-series="'+key+'"]').click();
     assert.equal(await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),designsBefore,'Comparative design inspection cannot alter the run');
     await inspectReferenceStudy(page);
+    await inspectLinkEvidence(page);
     assert.ok((await page.locator('.intervention-badge title').allTextContents()).filter(text=>text.includes('Scheduled demand')).every(text=>text.includes('Included in issued forecasts')));
     await page.screenshot({path:path.join(output,'default-scenario-complete.png'),fullPage:true});
     await page.locator('#pr-codesign').screenshot({path:path.join(output,'codesign-desktop.png')});
@@ -1140,6 +1196,7 @@ async function main() {
     await withinSettings(phone,()=>phone.locator('#pr-compare').click());
     await phone.waitForFunction(()=>!document.querySelector('#pr-compare').disabled);
     await checkCodesign(phone);
+    await inspectLinkEvidence(phone);
     assert.ok(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'The live design chart fits the mobile page');
     await phone.locator('.pr-learning-panel').screenshot({path:path.join(output,'codesign-mobile.png')});
     await phone.screenshot({ path: path.join(output, 'mobile.png'), fullPage: true });

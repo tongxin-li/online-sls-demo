@@ -52,6 +52,16 @@
         <p id="pr-forecast-window" class="pr-caption"></p>
         <p id="pr-forecast-change" class="pr-caption"></p>
         <p id="pr-forecast-support" class="pr-caption"></p>
+        <section id="pr-link-receipt" class="pr-link-receipt" aria-labelledby="pr-link-receipt-title" hidden>
+          <h3 id="pr-link-receipt-title">Selection and synthesis</h3>
+          <p id="pr-link-receipt-time" class="pr-caption"></p>
+          <table aria-label="Measured selection and resynthesized controller comparison" aria-describedby="pr-link-receipt-note">
+            <thead><tr><th scope="col">Measured link</th><th id="pr-link-receipt-scalar" scope="col">Fixed sparse</th><th id="pr-link-receipt-online" scope="col">Learned sparse</th></tr></thead>
+            <tbody id="pr-link-receipt-rows"></tbody>
+          </table>
+          <p id="pr-link-receipt-action" class="pr-caption"></p>
+          <p id="pr-link-receipt-note" class="pr-caption">Score averages discovery gain². Gain norm uses the resynthesized row. Source is before limiting; command includes all messages and each controller’s feedback.</p>
+        </section>
         <details id="pr-command-inspector" class="pr-command-inspector" hidden>
           <summary id="pr-command-title">Command breakdown</summary>
           <p class="pr-caption">kvar · Source and other messages before limiting · Includes the full issued preview, not just the revealed pair · Highlighted links belong to the learned or matrix controller</p>

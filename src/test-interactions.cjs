@@ -141,7 +141,7 @@ function harness(saved,experiment='prediction',reducedMotion=true) {
       return result;
     },
     inspectLink:(receiver,source)=>root.testInspectPredictionLink(receiver,source),inspection:()=>plain(root.testInspection()),protocol:()=>plain(root.testProtocol()),forecastObservation:()=>plain(root.testForecastObservation()),sourceHistory:()=>plain(root.testSourceHistory()),errorWindow:(...args)=>plain(root.testErrorWindow(...args)),commandInspection:()=>plain(root.testInspectedCommand()),decompose:(...args)=>plain(root.testDecompose(...args)),issuedForecasts:()=>plain(root.testIssuedForecasts()),
-    snapshot:()=>root.powerDemo.getSnapshot(),state:()=>plain(root.powerDemo.getState()),
+    linkEvidence:()=>plain(root.powerDemo.getLinkEvidence()),snapshot:()=>root.powerDemo.getSnapshot(),state:()=>plain(root.powerDemo.getState()),
     saved:()=>savedStates.at(-1),
     event:(id,type,detail)=>node(id).dispatch(type,detail),
     click:(id,detail=0)=>node(id).dispatch('click',{detail}),
@@ -2086,4 +2086,50 @@ test('untagged version 13 continuous histories keep their original stacked physi
   for(const key of ['states','cumulative','history','eventLog','lastPulseApplications','activePulses'])assert.deepEqual(restored.snapshot()[key],before[key],'Legacy untagged replay '+key);
   assert.ok(before.lastPulseApplications.find(p=>p.bus===23).requestedKw>100);
   assert.equal(restored.state().playing,false);assert.deepEqual(restored.state().activeAttackBuses,[]);
+});
+
+function linkEvidenceFixture(){
+  const h=harness(undefined,'communication');h.check('auto-compare',false);
+  for(let i=0;i<35;i++)h.click('step');
+  h.inspectLink(5,7);h.click('deploy');h.click('run');
+  assert.equal(h.snapshot().phase,'deployment');assert.equal(h.state().playing,false);return h;
+}
+test('link receipt compares actual same-budget supports and discovery scores with resynthesized commands for every cell',()=>{
+  const h=linkEvidenceFixture();h.click('step');const snapshot=plain(h.snapshot()),support=snapshot.deployedSupport;
+  for(const receiver of PowerDemo.constants.inverterBuses)for(let source=2;source<=24;source++){
+    h.inspectLink(receiver,source);const reading=h.linkEvidence(),command=h.commandInspection();
+    const row=PowerDemo.constants.inverterBuses.indexOf(receiver),column=source-2;
+    assert.equal(reading.source,source);assert.equal(reading.receiver,receiver);
+    assert.equal(reading.discoverySamples,35);assert.equal(reading.scoreSamples,support.scoreSamples);
+    assert.equal(reading.action,snapshot.lastSample.t);
+    assert.equal(h.node('link-receipt').hidden,false);
+    for(const item of reading.rows){
+      const links=item.key==='scalar'?support.fixedLinks:support.links;
+      const scores=item.key==='scalar'?support.discoveryDiagnostics.baselineScores:support.discoveryDiagnostics.learnedScores;
+      const actual=command.rows.find(actual=>actual.key===item.key);
+      assert.equal(item.budget,links.filter(link=>link.from!==link.to).length);assert.equal(item.budget,24);
+      assert.equal(item.selection,source===receiver?'Local':links.some(link=>link.from===source&&link.to===receiver)?'Selected':'Excluded');
+      assert.equal(item.score,scores[row][column]);
+      for(const key of ['gainNorm','sourceKvar','commandKvar','limited'])assert.equal(item[key],actual[key]);
+      assert.equal(item.commandKvar,snapshot.commandQ[item.key][receiver-1]);
+      if(item.selection==='Excluded'){assert.ok(Math.abs(item.gainNorm)<1e-8);assert.ok(Math.abs(item.sourceKvar)<1e-8);}
+    }
+    assert.equal(h.node('link-receipt-rows').children.length,5);
+  }
+  assert.deepEqual(plain(h.snapshot()),snapshot,'Every receipt is read only');
+});
+test('link receipt distinguishes pending execution and saved history and preserves frozen evidence across reliability and replay',()=>{
+  const initial=harness(undefined,'communication');initial.inspectLink(5,7);
+  assert.equal(initial.linkEvidence(),null);assert.equal(initial.node('link-receipt').hidden,true);
+  const h=linkEvidenceFixture(),pending=h.linkEvidence();
+  assert.equal(pending.action,null);for(const row of pending.rows)for(const key of ['gainNorm','sourceKvar','commandKvar'])assert.equal(row[key],null);
+  assert.match(h.node('link-receipt-action').textContent,/Step to reveal/);
+  h.click('step');const evidence=h.linkEvidence(),before=plain(h.snapshot());
+  h.click('source-fault');assert.deepEqual(h.linkEvidence(),evidence,'A paused source setting cannot change past execution or frozen selection');
+  assert.deepEqual(plain(h.snapshot().states),before.states);assert.deepEqual(plain(h.snapshot().cumulative),before.cumulative);
+  const restored=harness(h.saved());assert.deepEqual(restored.linkEvidence(),evidence,'Version 13 replay recovers actual evidence');
+  h.event('topology-history','input');assert.equal(h.linkEvidence(),null);assert.equal(h.node('link-receipt').hidden,true);
+  assert.equal(h.node('link-receipt-rows').children.length,0,'Historical view hides current executed values');
+  h.click('history-live');assert.deepEqual(h.linkEvidence(),evidence);
+  h.change('experiment','prediction');assert.equal(h.linkEvidence(),null,'Adaptive prediction is not a fixed sparse deployment comparison');
 });
