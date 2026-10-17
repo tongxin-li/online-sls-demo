@@ -424,3 +424,12 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 @media(max-width:650px),(pointer:coarse) {
   .pr-cost-switch button { min-height:44px; padding:8px 14px; font-size:12px; }
 }
+
+/* The selected support and its measured control cost share one panel. */
+.pr-codesign { margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
+.pr-codesign h3 { margin:0; font-size:13px; font-weight:600; letter-spacing:-.015em; }
+.pr-codesign-flow { margin:7px 0 10px; color:var(--muted-foreground); font-size:11px; }
+.pr-codesign-key { display:grid; grid-template-columns:1fr 1fr; gap:5px 10px; margin:6px 0; font-size:11px; color:var(--muted-foreground); }
+.pr-codesign-key > span { display:flex; align-items:center; gap:6px; }
+.pr-codesign .pr-caption { line-height:1.5; }
+.pr-codesign .pr-plot-label { font-size:10px; }

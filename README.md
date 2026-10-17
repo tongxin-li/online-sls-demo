@@ -162,6 +162,14 @@ The [prediction benchmark](benchmark-results.json) remains unchanged. It uses th
 
 Under mixed reliability, matrix adaptation costs 10.75 percent less than scalar adaptation. The [prespecified attack benchmark](benchmark-attacks.json) gives 2.95 percent. Unexpected physical attacks are absent from forecasts and primarily test the shared feedback. Their additional cost can dilute the relative benefit of forecast learning. Dense fixed prediction remains cheaper in these three presets and receives more messages.
 
+## Cost and communication
+
+The live design plot pairs each controller’s actual cumulative stage cost with its deployed remote prediction link count. Learned and fixed sparse controllers use the same 24 link budget. Dense uses 176 and feedback uses no prediction links. Shared state feedback and local prediction channels are excluded. The plot shows four evaluated designs and does not infer an optimal frontier or assign a monetary cost to communication. Coincident sparse results retain their exact coordinates, with a larger fixed ring behind the learned marker. The summary names whichever design actually has the lowest measured cost.
+
+The displayed sequence connects completed gain learning, support selection and controller resynthesis. Comparison links and coefficients remain fixed. This is response guided offline communication design following discovery, not joint online topology optimization.
+
+Across forecast quality contains the recorded twenty seed sweep at every published error level and a separate five seed case with every source corrupted. All four methods and all recorded settings remain visible. These study costs include the terminal penalty, unlike live cumulative stage costs. The generated fragment can be checked with `node src/build-reference-study.cjs --check` and `node src/test-reference-study.cjs`. It does not reset, alter or substitute for the current live experiment.
+
 ## Implementation scope
 
 The shared correction follows the explicit archived experimental mean moment equations, with a declared physical scale transfer and sparse restriction. It is not a literal implementation of Algorithm 1. No completed prefix convergence theorem is claimed for the executed adaptive controller.

@@ -20,10 +20,11 @@ const cardEnd="    $('topology-events').hidden=total===0;";
 assert.equal(original.split(cardStart).length,2,'Topology cards anchor must be unique');
 const withoutCards=original.slice(0,original.indexOf(cardStart))+original.slice(original.indexOf(cardEnd));
 const source=withoutCards.replace(anchor,
-  '  drawNetwork=drawCost=drawStage=drawVoltage=drawConvergence=highlightTopology=()=>{};\n'+
+  '  drawNetwork=drawCost=drawStage=drawVoltage=drawConvergence=drawCodesign=highlightTopology=()=>{};\n'+
   '  drawMatrix=drawTopologyHistory;\n'+
   '  root.bindTestBus=(element,bus)=>bindAttackTarget(element,()=>bus);\n'+
   '  root.testSummary=()=>comparisonSummary();\n'+
+  '  root.testCodesign=()=>codesignMetrics();\n'+
   '  root.testInspectPredictionLink=(receiver,source)=>inspectPredictionLink(receiver,source);\n'+
   '  root.testInspection=()=>predictionInspection();\n'+
   '  root.testProtocol=()=>protocolStatus();\n'+
@@ -130,7 +131,7 @@ function harness(saved,experiment='prediction',reducedMotion=true) {
   const node=id=>nodes.get('pr-'+id);
   return {clock,document,window,node,drawSeries:(...args)=>root.testDrawSeries(...args),pin:value=>root.testPin(value),
     interventionEvents:(view=root.powerDemo.getSnapshot())=>plain(root.testInterventionEvents(view)),interventionGroups:(view,domain=[0,20],scale=10)=>plain(root.testInterventionGroups(view,domain,v=>v*scale,{x:0,w:600})),
-    comparison:()=>plain(root.testComparison()),summary:()=>root.testSummary(),powerContext:()=>root.testPowerContext(),shownReference:()=>plain(root.testShownReference()),seriesButton:key=>seriesButtons.get(key),
+    comparison:()=>plain(root.testComparison()),summary:()=>root.testSummary(),codesign:()=>plain(root.testCodesign()),powerContext:()=>root.testPowerContext(),shownReference:()=>plain(root.testShownReference()),seriesButton:key=>seriesButtons.get(key),
     samples:count=>clock.advance(count*1000/Number(node('speed').value)),
     bus:bus=>{const svg=element('g');svg.dataset.bus=String(bus);root.bindTestBus(svg,bus);return svg;},
     pointer(type,underPointer,detail={}){
@@ -1037,6 +1038,49 @@ test('communication comparison keeps all policies and reports actual gains or lo
   assert.deepEqual(h.shownReference().sort(),h.snapshot().deployedSupport.fixedLinks.map(e=>e.to+','+e.from).sort());
   assert.equal(h.seriesButton('online').children.at(-1).textContent,'Learned sparse');
   assert.equal(h.seriesButton('scalar').children.at(-1).textContent,'Fixed sparse');
+});
+
+test('communication design shows actual cost and deployed prediction budgets independently of chart visibility',async()=>{
+  const h=harness(undefined,'communication');
+  assert.equal(h.codesign(),null,'Candidate links cannot be presented as a deployed cost tradeoff');
+  await compare(h);
+  assert.equal(h.snapshot().phase,'deployment');
+  assert.ok(h.codesign().points.every(point=>point.cost===0),'The fresh comparison must not borrow discovery costs');
+  h.click('run');await h.samples(20);h.click('run');
+  const before=plain(h.snapshot()),view=h.codesign(),keys=['online','scalar','static','causal'];
+  const learned=before.deployedSupport.links.filter(link=>link.from!==link.to).length;
+  const fixed=before.deployedSupport.fixedLinks.filter(link=>link.from!==link.to).length;
+  const dense=PowerDemo.constants.inverterBuses.reduce((sum,bus)=>sum+Array.from({length:23},(_,index)=>index+2).filter(source=>source!==bus).length,0);
+  assert.deepEqual(view.points.map(point=>point.key),keys);
+  assert.deepEqual(view.points.map(point=>point.links),[learned,fixed,dense,0]);
+  assert.deepEqual(view.points.map(point=>point.cost),keys.map(key=>before.cumulative[key]));
+  assert.equal(view.denseLinks,176);assert.equal(view.learnedLinks,24);assert.equal(view.fixedLinks,24);
+  assert.equal(view.savedPercent,100*(dense-learned)/dense);assert.equal(view.sameBudget,true);
+  assert.equal(view.sameSupport,JSON.stringify(before.deployedSupport.learned)===JSON.stringify(before.deployedSupport.fixed));
+  for(const key of ['online','scalar','static'])h.seriesButton(key).dispatch('click');
+  assert.deepEqual(h.comparison().plotted,['causal']);
+  assert.deepEqual(h.codesign(),view,'Hiding a time curve cannot hide a design or change its measured cost');
+  h.click('cost-gap');assert.deepEqual(h.codesign(),view,'The design chart always compares total stage cost');
+  assert.deepEqual(plain(h.snapshot()),before,'Read only design summaries cannot affect the experiment');
+  const restored=harness(h.saved());assert.deepEqual(restored.codesign(),view);assert.equal(restored.state().playing,false);
+  h.click('restart');assert.equal(h.codesign(),null);assert.equal(h.snapshot().t,0);
+});
+
+test('communication design acknowledges identical supports and a winning feedback controller',async()=>{
+  const equal=harness(undefined,'communication');equal.change('noise',0);
+  await compare(equal);await compare(equal);
+  const ties=equal.codesign();
+  assert.equal(ties.sameBudget,true);assert.equal(ties.sameSupport,true);
+  assert.equal(ties.points.find(point=>point.key==='online').cost,ties.points.find(point=>point.key==='scalar').cost);
+  const allNoisy=harness({privateContent:{version:13,phase:'discovery',t:0,events:[],automaticComparison:true,
+    initialOptions:{experiment:'communication',powerScenario:'forecasted-demand',seed:21,beta:16,horizon:180,faultBuses:Array.from({length:23},(_,i)=>i+2)}}},'communication');
+  await compare(allNoisy);await compare(allNoisy);
+  const view=allNoisy.codesign(),minimum=Math.min(...view.points.map(point=>point.cost));
+  assert.equal(view.points.find(point=>point.key==='causal').cost,minimum,'The declared all noisy fixture makes feedback cheapest');
+  assert.deepEqual(view.winnerKeys,['causal']);assert.match(view.status,/Feedback only/i);
+  assert.doesNotMatch(view.status,/learned.*(?:wins|best|optimal)|guaranteed|always better/i);
+  const prediction=harness();assert.equal(prediction.codesign(),null);await compare(prediction);
+  assert.equal(prediction.codesign(),null,'Prediction adaptation is not the isolated communication experiment');
 });
 
 test('forecast stress starts a clean trial and reports the configured source error in physical units',async()=>{

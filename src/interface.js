@@ -63,6 +63,49 @@
       replaced:links.filter(edge=>edge.from!==edge.to&&!fixedKeys.has(recommendationKey(edge))).length,
       noisy:noisyCount(links),fixedNoisy:noisyCount(fixed)};
   }
+  function codesignMetrics() {
+    if(!communicationComparison()) return null;
+    const budget=predictionBudget();
+    const fixedLinks=(snapshot.deployedSupport?.fixedLinks || []).filter(link=>link.from!==link.to).length;
+    const counts={online:budget.remote,scalar:fixedLinks,static:budget.dense,causal:0};
+    const points=activeSeries().map(item=>({...item,links:counts[item.key],cost:snapshot.cumulative[item.key]}));
+    const minimum=Math.min(...points.map(point=>point.cost));
+    const pending=points.every(point=>point.cost<=1e-12);
+    const winners=pending?[]:points.filter(point=>Math.abs(point.cost-minimum)<=1e-12);
+    const status=pending?'Run to compare these four designs':winners.length===1?winners[0].label+' has the lowest cost in this run':winners.map(point=>point.label).join(' and ')+' share the lowest cost';
+    return {points,denseLinks:budget.dense,learnedLinks:budget.remote,fixedLinks,
+      savedPercent:budget.dense?100*(budget.dense-budget.remote)/budget.dense:0,
+      sameBudget:budget.remote===fixedLinks,sameSupport:sameSparseSupport(),winnerKeys:winners.map(point=>point.key),status};
+  }
+  function drawCodesign() {
+    const metrics=codesignMetrics();
+    $('codesign').hidden=!metrics;
+    if(!metrics) return;
+    const {points,denseLinks,learnedLinks,savedPercent,status}=metrics;
+    $('codesign-flow').textContent='Learn gains → Select '+learnedLinks+' links → Rebuild controller';
+    $('codesign-flow').title='Completed discovery selects the deployed support. The controller is synthesized under those links, then tested on a fresh disturbance sequence. Links and prediction coefficients stay fixed during this comparison.';
+    $('codesign-summary').textContent=d3.format('.1f')(savedPercent)+'% fewer remote prediction links than dense · '+status;
+    const el=$('codesign-chart');
+    el.setAttribute('aria-label','Four evaluated designs. Lower cost and fewer remote prediction links are favorable. '+points.map(point=>point.label+', '+point.links+' remote links, cost '+d3.format('.6~g')(point.cost)).join('. ')+'. Shared feedback and local prediction channels are excluded.');
+    const scale=Math.max(1e-8,...points.map(point=>point.cost));
+    const span=Math.max(1,denseLinks);
+    const chart=chartBase(el,points.map(point=>({x:point.links,cost:point.cost})),['cost'],'Cumulative cost','Remote prediction links',150,{xDomain:[-span*.08,span*1.08],yDomain:[-scale*.08,scale*1.18]});
+    updateAxis(chart.svg.select('.x-axis'),d3.axisBottom(chart.x).tickValues([...new Set(points.map(point=>point.links))].sort((a,b)=>a-b)).tickSize(4).tickFormat(d3.format('d')));
+    // Sparse designs retain their exact common x coordinate. A ring keeps ties visible.
+    const order=points.filter(point=>point.key!=='online').concat(points.filter(point=>point.key==='online'));
+    const marks=chart.marks.selectAll('circle.codesign-point').data(order,point=>point.key).join(enter=>{const circle=enter.append('circle').attr('class','codesign-point');circle.append('title');return circle;}).order()
+      .attr('data-key',point=>point.key).attr('data-links',point=>point.links).attr('data-cost',point=>point.cost)
+      .attr('cx',point=>chart.x(point.links)).attr('cy',point=>chart.y(point.cost))
+      .attr('r',point=>point.key==='scalar'?8:point.key==='online'?4.5:5)
+      .attr('fill',point=>point.key==='scalar'?'var(--background)':point.color)
+      .attr('stroke',point=>point.color).attr('stroke-width',point=>point.key==='scalar'?2:1.5);
+    marks.select('title').text(point=>point.label+' · '+point.links+' remote links · Cost '+d3.format('.6~g')(point.cost));
+    const key=$('codesign-key');key.replaceChildren();
+    for(const point of points) {
+      const label=document.createElement('span'),swatch=document.createElement('span');swatch.className='pr-swatch '+point.key;
+      label.append(swatch,document.createTextNode(point.label+' · '+point.links));key.append(label);
+    }
+  }
   function plottedSeries() { return activeSeries().filter(s=>visible.has(s.key)); }
   function sameSparseSupport() {
     const support=snapshot.deployedSupport;
@@ -1479,7 +1522,7 @@
       const dense=comparativeCost(c.online,c.static),budget=predictionBudget();
       if(comparison==='Pending'||dense==='Pending') return 'Fresh trial · '+budget.remote+' remote links for each sparse controller · '+budget.dense+' for dense';
       const describe=(value,name)=>value==='Equal'||value==='Nearly equal'?value.toLowerCase()+' to '+name:value+' than '+name;
-      return (sameSparseSupport()?'Same selected links · ':'')+'Learned cost is '+describe(comparison,'fixed sparse')+' · '+describe(dense,'dense prediction');
+      return (sameSparseSupport()?'Same selected links · ':codesignMetrics().sameBudget?'Same link budget · ':'Different link budgets · ')+'Learned cost is '+describe(comparison,'fixed sparse')+' · '+describe(dense,'dense prediction');
     }
     const support=snapshot.phase==='deployment' && sameSparseSupport() ? 'Same links · Weights adapt independently. ' : '';
     return support+(comparison==='Pending'?'Run to compare all four controllers':comparison==='Equal' || comparison==='Nearly equal'
@@ -1577,7 +1620,7 @@
   }
   function render() {
     $('tooltip').style.display='none'; pin=null;
-    renderControls(); drawNetwork(); drawMatrix(); drawCost(); drawStage(); drawVoltage(); drawConvergence();highlightTopology();
+    renderControls(); drawNetwork(); drawMatrix(); drawCodesign(); drawCost(); drawStage(); drawVoltage(); drawConvergence();highlightTopology();
   }
   announce('Ready');
   hydrate(window.openai?.widgetState);

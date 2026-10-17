@@ -9,6 +9,7 @@ def build(source_url):
     source = Path(__file__).resolve().parent / "src"
     document = (source / "page-template.html").read_text(encoding="utf-8")
     interface = (source / "interface.html").read_text(encoding="utf-8")
+    interface = interface.replace("__DEMO_REFERENCE_STUDY__", (source / "reference-study.html").read_text(encoding="utf-8"))
     # The exported template already loads the chart dependency after the footer.
     interface = re.sub(r'\s*<script src="https://cdn\.jsdelivr\.net/npm/d3@7\.9\.0/dist/d3\.min\.js"></script>\s*$', "", interface)
     interface = interface.replace('<div id="power-response-demo">', '<main id="power-response-demo">', 1)

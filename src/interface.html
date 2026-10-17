@@ -27,6 +27,14 @@
       <p id="pr-scheduled-power" class="pr-caption pr-scheduled-power" hidden></p>
       <svg class="pr-chart" id="pr-network" role="group" aria-label="24 bus radial power feeder. Click a load, solar, or battery bus to start a continuous disturbance. Click again to stop."></svg>
       <div class="pr-panel-foot"><span id="pr-bus-detail" class="tabular-nums"></span><span class="pr-live-stage">Cost <strong id="pr-live-cost" class="tabular-nums">0.0000</strong></span></div>
+      <div id="pr-codesign" class="pr-codesign" hidden>
+        <div class="pr-subhead"><h3>Cost and communication</h3><span class="pr-caption">Current trial</span></div>
+        <p id="pr-codesign-flow" class="pr-codesign-flow"></p>
+        <div class="pr-plot-label"><span>Cumulative cost</span><span>Lower and left is better</span></div>
+        <svg id="pr-codesign-chart" class="pr-chart" role="img" aria-label="Current controller costs and remote prediction link counts"></svg>
+        <div id="pr-codesign-key" class="pr-codesign-key" aria-label="Designs and remote link counts"></div>
+        <p id="pr-codesign-summary" class="pr-caption"></p>
+      </div>
     </section>
     <section class="pr-panel pr-matrix-panel" aria-labelledby="pr-matrix-title">
       <div class="pr-subhead"><h2 id="pr-matrix-title">Prediction links</h2></div>
@@ -55,7 +63,7 @@
           <p class="pr-caption">Request = Source + Other + Feedback · Command is bounded to ±70 kvar · Source is not a causal share after limiting</p>
         </details>
       </div>
-      <div class="pr-panel-foot pr-matrix-detail"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div><div class="pr-topology-status"><strong id="pr-topology-status">Connectivity unchanged</strong><span id="pr-topology-gain">Weights changed 0%</span></div><div id="pr-topology-events" class="pr-topology-events" aria-label="Recent topology changes" hidden></div><details id="pr-link-history-details" class="pr-panel-details"><summary>Link history</summary><div class="pr-topology-history"><label for="pr-topology-history" id="pr-history-count">0 link updates</label><input id="pr-topology-history" type="range" min="0" max="0" step="1" value="0" aria-label="Topology history" disabled><button type="button" id="pr-history-live" aria-pressed="true">Latest</button></div><p id="pr-topology-note" class="pr-caption" aria-live="polite"></p></details>
+      <div class="pr-panel-foot pr-matrix-detail"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div><details id="pr-link-history-details" class="pr-panel-details"><summary>Link history</summary><div class="pr-topology-status"><strong id="pr-topology-status">Connectivity unchanged</strong><span id="pr-topology-gain">Weights changed 0%</span></div><div id="pr-topology-events" class="pr-topology-events" aria-label="Recent topology changes" hidden></div><div class="pr-topology-history"><label for="pr-topology-history" id="pr-history-count">0 link updates</label><input id="pr-topology-history" type="range" min="0" max="0" step="1" value="0" aria-label="Topology history" disabled><button type="button" id="pr-history-live" aria-pressed="true">Latest</button></div><p id="pr-topology-note" class="pr-caption" aria-live="polite"></p></details>
     </section>
     <section class="pr-panel pr-stage-panel" aria-labelledby="pr-stage-title">
       <div class="pr-subhead"><h2 id="pr-stage-title">Voltage and cost</h2><strong id="pr-state-value" class="pr-state-value tabular-nums">1.000 pu</strong></div>
@@ -84,6 +92,7 @@
         <p id="pr-mode-note" class="pr-caption"></p>
       </div>
       <div id="pr-cost-content"><p id="pr-comparison-summary" class="pr-comparison-summary" aria-live="polite">Run to compare all four controllers</p><div class="pr-cost-tools"><input type="hidden" id="pr-cost-metric" value="total" hidden><div id="pr-cost-switch" class="pr-cost-switch" role="group" aria-label="Cost display"><button type="button" id="pr-cost-total" aria-pressed="true" aria-controls="pr-cost">Total cost</button><button type="button" id="pr-cost-gap" aria-pressed="false" aria-controls="pr-cost">Difference</button></div></div><svg class="pr-chart" id="pr-cost" role="img" aria-label="Cumulative cost of active controllers"></svg><table class="pr-cost-table tabular-nums" aria-label="Cumulative controller costs"><thead><tr><th scope="col">Method</th><th scope="col">Cumulative cost</th><th scope="col">vs feedback</th></tr></thead><tbody id="pr-cost-detail"></tbody></table><p id="pr-cost-note" class="pr-caption pr-comparison-note">Dense messages during learning · Adaptation starts at 30 s</p></div>
+      __DEMO_REFERENCE_STUDY__
     </section>
   </div>
   <div class="pr-bottomline">

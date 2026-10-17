@@ -60,6 +60,8 @@ async function main() {
     assert.equal(await page.locator('#pr-adaptation').getAttribute('open'),null,'Settings start closed');
     assert.equal(await page.locator('#pr-voltage-details').getAttribute('open'),null,'Voltage diagnostics start closed');
     assert.equal(await page.locator('#pr-link-history-details').getAttribute('open'),null,'Link archive starts closed');
+    assert.equal(await page.locator('#pr-reference-study').getAttribute('open'),null,'Published study starts closed');
+    assert.equal(await page.locator('#pr-codesign').isVisible(),false,'Discovery does not imply deployed cost results');
     assert.equal(await page.locator('#pr-restart').textContent(),'Restart demo');
     for(const id of ['step','speed','deploy','attack-mode','strength','view','matrix-view'])assert.equal(await page.locator('#pr-'+id).isVisible(),false,'Advanced '+id+' stays out of the primary flow');
     for(const id of ['network','matrix','voltage','convergence'])assert.equal(await page.locator('#pr-'+id).isVisible(),true,'Main panel '+id+' stays visible');
@@ -266,6 +268,7 @@ async function main() {
     };
 
     const checkPlots = async () => {
+      await checkCodesign(page);
       await checkEventMarkers(page);
       await checkVoltageMetrics(page);
       await checkProtocol(page);
@@ -278,6 +281,61 @@ async function main() {
         assert.ok(paths.every(value => value && !/NaN|Infinity/.test(value)), `${chart} has finite measured paths`);
         assert.ok(await page.locator(`#${chart} .y-axis .tick`).count() < 12, `${chart} does not accumulate axis labels`);
       }
+    };
+
+    const checkCodesign = async surface => {
+      const reading=await surface.evaluate(()=>{
+        const snapshot=document.querySelector('#power-response-demo').powerDemo.getSnapshot();
+        const section=document.querySelector('#pr-codesign'),chart=document.querySelector('#pr-codesign-chart');
+        return {phase:snapshot.phase,experiment:snapshot.experiment,costs:snapshot.cumulative,support:snapshot.deployedSupport,
+          hidden:section.hidden,summary:document.querySelector('#pr-codesign-summary').textContent,
+          label:chart.getAttribute('aria-label'),
+          points:Array.from(chart.querySelectorAll('circle.codesign-point')).map(node=>({key:node.dataset.key,links:Number(node.dataset.links),
+            cost:Number(node.dataset.cost),x:Number(node.getAttribute('cx')),y:Number(node.getAttribute('cy')),r:Number(node.getAttribute('r'))}))};
+      });
+      const deployed=reading.phase==='deployment'&&reading.experiment==='communication';
+      assert.equal(reading.hidden,!deployed,'The design tradeoff only describes deployed communication controllers');
+      if(!deployed)return reading;
+      assert.deepEqual(reading.points.map(point=>point.key).sort(),['causal','online','scalar','static']);
+      const expected={online:reading.support.links.filter(link=>link.from!==link.to).length,
+        scalar:reading.support.fixedLinks.filter(link=>link.from!==link.to).length,static:176,causal:0};
+      for(const point of reading.points){
+        assert.equal(point.links,expected[point.key],'The plotted budget is the actual deployed remote support');
+        assert.equal(point.cost,reading.costs[point.key],'The plotted value is exact current stage cost');
+        assert.ok(Number.isFinite(point.x)&&Number.isFinite(point.y),'Measured points stay finite');
+        assert.ok(point.r>0,'Every design has a visible marker');
+      }
+      const point=key=>reading.points.find(item=>item.key===key);
+      assert.equal(point('online').x,point('scalar').x,'Equal remote budgets have the same horizontal coordinate');
+      assert.ok(point('causal').x<point('online').x&&point('online').x<point('static').x,'Zero, sparse and dense use an honest quantitative axis');
+      assert.ok(Math.abs((point('online').x-point('causal').x)/(point('static').x-point('causal').x)-24/176)<1e-9,'The link axis is proportional rather than categorical');
+      assert.ok(point('scalar').r>point('online').r,'The fixed outer marker remains visible when sparse designs coincide');
+      assert.ok(reading.summary.length>0,'The tradeoff has a concise interpretation');
+      return reading;
+    };
+
+    const inspectReferenceStudy = async surface => {
+      assert.equal(await surface.locator('#pr-reference-study').getAttribute('open'),null);
+      const before=await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
+      await surface.locator('#pr-reference-study > summary').click();
+      assert.notEqual(await surface.locator('#pr-reference-study').getAttribute('open'),null);
+      assert.equal(await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),before,'Opening the published study cannot reset or advance the live experiment');
+      assert.ok(await surface.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Published study stays within the page');
+      const benchmark=JSON.parse(await fs.readFile(path.join(root,'benchmark-forecasted-scenario.json'),'utf8'));
+      const measured=await surface.locator('#pr-reference-study').evaluate(element=>({
+        methods:Array.from(element.querySelectorAll('[data-study-method]')).map(group=>({key:group.dataset.studyMethod,
+          points:Array.from(group.querySelectorAll('[data-beta][data-ratio]')).map(point=>({beta:Number(point.dataset.beta),ratio:Number(point.dataset.ratio)}))})),
+        ablation:Array.from(element.querySelectorAll('[data-ablation-method][data-ratio]')).map(point=>({key:point.dataset.ablationMethod,ratio:Number(point.dataset.ratio)}))}));
+      assert.deepEqual(measured.methods.map(item=>item.key).sort(),['causal','online','scalar','static']);
+      for(const method of measured.methods){
+        assert.deepEqual(method.points.map(point=>point.beta),[0,1,2,4]);
+        for(const point of method.points){const trial=benchmark.heldout.find(trial=>trial.beta===point.beta);assert.equal(point.ratio,trial.means[method.key]/trial.means.causal);}
+      }
+      assert.deepEqual(measured.ablation.map(item=>item.key).sort(),['causal','online','scalar','static']);
+      for(const point of measured.ablation)assert.equal(point.ratio,benchmark.allNoisyAblation.means[point.key]/benchmark.allNoisyAblation.means.causal);
+      await surface.locator('#pr-reference-study').screenshot({path:path.join(output,'reference-study-'+surface.viewportSize().width+'.png')});
+      await surface.locator('#pr-reference-study > summary').click();
+      assert.equal(await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),before,'Closing the study leaves the run intact');
     };
 
 
@@ -416,8 +474,17 @@ async function main() {
     assert.equal(await page.locator('#pr-cost-detail tr').count(),4);
     for(const chart of ['pr-cost','pr-stage','pr-voltage'])assert.equal(await page.locator('#'+chart+' path.data-series').count(),4);
     await checkEventMarkers(page);await checkVoltageMetrics(page);
+    await checkCodesign(page);
+    const designsBefore=await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
+    for(const key of ['online','scalar','static'])await page.locator('[data-series="'+key+'"]').click();
+    await checkCodesign(page);
+    assert.equal(await page.locator('#pr-cost path.data-series').count(),1,'Curve visibility is independent from the four design points');
+    for(const key of ['online','scalar','static'])await page.locator('[data-series="'+key+'"]').click();
+    assert.equal(await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),designsBefore,'Comparative design inspection cannot alter the run');
+    await inspectReferenceStudy(page);
     assert.ok((await page.locator('.intervention-badge title').allTextContents()).filter(text=>text.includes('Scheduled demand')).every(text=>text.includes('Included in issued forecasts')));
     await page.screenshot({path:path.join(output,'default-scenario-complete.png'),fullPage:true});
+    await page.locator('#pr-codesign').screenshot({path:path.join(output,'codesign-desktop.png')});
     await page.locator('.pr-learning-panel').screenshot({path:path.join(output,'default-scenario-costs.png')});
     await fs.writeFile(path.join(output,'default-scenario.json'),JSON.stringify(reviewed,null,2));
     // Completed results stay reviewed while source settings are edited in place.
@@ -471,6 +538,7 @@ async function main() {
     assert.equal(await page.locator('#pr-speed').inputValue(),'32');
     assert.equal(await page.locator('#pr-adaptation').getAttribute('open'),null);
     assert.equal(await page.locator('#pr-run').textContent(),'Run');
+    await checkCodesign(page);
     await page.screenshot({path:path.join(output,'concise-restarted-desktop.png'),fullPage:true});
     await useReference(page);
     await mark('default scenario completed restored and explicitly continued');
@@ -551,7 +619,9 @@ async function main() {
     // Archived discovery connectivity is not a change to the deployed controller.
     const liveBefore=await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
     assert.ok(Number(await page.locator('#pr-topology-history').getAttribute('max'))>0,'Discovery produced inspectable link changes');
+    assert.equal(await page.locator('#pr-topology-events').isVisible(),false,'Recent changes stay inside the closed link history');
     await page.locator('#pr-link-history-details > summary').click();
+    assert.equal(await page.locator('#pr-topology-events button').first().isVisible(),true,'Recorded change cards remain available when history is opened');
     await page.locator('#pr-topology-history').press('Home');
     await checkProtocol(page);
     assert.equal(await page.locator('#pr-matrix .matrix-columns text[data-noisy="true"]').count(),0,'Current quality is not painted onto historical links');
@@ -599,6 +669,7 @@ async function main() {
     const savedMetricSnapshot=await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
     await page.reload({waitUntil:'networkidle'});
     await checkCostSwitch(page,'gap','fixed sparse');
+    await checkCodesign(page);
     assert.equal(await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),savedMetricSnapshot,'Restored gap changes no measured state or cost');
     assert.equal(await page.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getState().playing),false,'Restored gap stays paused');
     await page.locator('#pr-cost-total').click();await checkCostSwitch(page,'total','fixed sparse');
@@ -914,6 +985,7 @@ async function main() {
     await stepSetting(phone);
     assert.ok(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Default scenario fits the narrow mobile page');
     await phone.screenshot({path:path.join(output,'default-scenario-mobile.png'),fullPage:true});
+    await checkCodesign(phone);await inspectReferenceStudy(phone);
     await useReference(phone);
     await selectSetting(phone,'speed','32');
     await selectSetting(phone,'view','cost');
@@ -1032,6 +1104,11 @@ async function main() {
     assert.ok(dimensions.page <= dimensions.viewport + 1, 'Mobile page does not overflow horizontally');
     const attackBounds = await phone.locator('#pr-pulse').boundingBox();
     assert.ok(attackBounds.width >= 44 && attackBounds.height >= 44, 'Primary touch target remains at least 44 pixels');
+    await withinSettings(phone,()=>phone.locator('#pr-compare').click());
+    await phone.waitForFunction(()=>!document.querySelector('#pr-compare').disabled);
+    await checkCodesign(phone);
+    assert.ok(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'The live design chart fits the mobile page');
+    await phone.locator('.pr-learning-panel').screenshot({path:path.join(output,'codesign-mobile.png')});
     await phone.screenshot({ path: path.join(output, 'mobile.png'), fullPage: true });
     await selectSetting(phone,'noise','8');
     assert.match(await phone.locator('#pr-noise-caption').textContent(),/(?=.*Stress)(?=.*mpu)/i);
@@ -1046,7 +1123,7 @@ async function main() {
     await phone.screenshot({path:path.join(output,'environment.png'),fullPage:true});
     await mark('mobile inspection and responsive evidence');
     assert.deepEqual(errors, [], 'No browser runtime errors');
-    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), timings, touchEvents, checks: ['primary controls and four panels stay visible while advanced settings start closed', 'restart returns to a fresh learning trial with selected options', 'pending source settings at every finite segment preserve exact replay and first new issuance', 'final applied power remains visible after request expiry with exact replay', 'paused completed source settings preserve Continue and exact replay', 'restored mixed trial preserves old costs until explicit new scenario', 'all noisy sources notice and fresh reliable inverter map', 'shipped demand and solar default completes and pauses after 180 comparison samples', 'actual scheduled power visual metadata and forecasted event labels', 'completed default restores and explicitly continues', 'extended forecast stress clears previous power attacks and costs', 'all four measured forecast stress curves and actual prediction commands', 'extended stress saved trial replay and reference return', 'forecast stress desktop and mobile layout', 'actual forecast setting timestamps and typed mixed event markers', 'keyboard matrix inspection and native command table scrolling', 'visible temporal source gain without hover', 'playback', 'repeated forecast bus clicks', 'three simultaneous continuous power attacks and independent stop', 'all attack sources survive automatic handoff', 'actual protocol receipt and archived discovery view', 'matrix mode exit restores live source controls without advancing plant', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'thirty real cost button clicks at 32x without pausing', 'stable cost button and focus across held pointer samples', 'native Enter and Space cost activation', 'zero baseline and all four curves in both quantities', 'saved gap state restoration', 'mobile cost button taps and target sizes', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'three simultaneous mobile power attacks and independent stop', 'mobile touch and layout'], errors }, null, 2));
+    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), timings, touchEvents, checks: ['actual cost versus remote prediction budget for all four designs', 'design tradeoff independent of curve visibility and cost display', 'same-budget sparse marker overlap remains visible', 'archived study retains every forecast regime and all-noisy counterexample', 'opening reference study preserves paused live state on desktop and mobile', 'primary controls and four panels stay visible while advanced settings start closed', 'restart returns to a fresh learning trial with selected options', 'pending source settings at every finite segment preserve exact replay and first new issuance', 'final applied power remains visible after request expiry with exact replay', 'paused completed source settings preserve Continue and exact replay', 'restored mixed trial preserves old costs until explicit new scenario', 'all noisy sources notice and fresh reliable inverter map', 'shipped demand and solar default completes and pauses after 180 comparison samples', 'actual scheduled power visual metadata and forecasted event labels', 'completed default restores and explicitly continues', 'extended forecast stress clears previous power attacks and costs', 'all four measured forecast stress curves and actual prediction commands', 'extended stress saved trial replay and reference return', 'forecast stress desktop and mobile layout', 'actual forecast setting timestamps and typed mixed event markers', 'keyboard matrix inspection and native command table scrolling', 'visible temporal source gain without hover', 'playback', 'repeated forecast bus clicks', 'three simultaneous continuous power attacks and independent stop', 'all attack sources survive automatic handoff', 'actual protocol receipt and archived discovery view', 'matrix mode exit restores live source controls without advancing plant', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'thirty real cost button clicks at 32x without pausing', 'stable cost button and focus across held pointer samples', 'native Enter and Space cost activation', 'zero baseline and all four curves in both quantities', 'saved gap state restoration', 'mobile cost button taps and target sizes', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'three simultaneous mobile power attacks and independent stop', 'mobile touch and layout'], errors }, null, 2));
     console.log('Browser smoke passed');
   } finally {
     if (browser) await browser.close();
