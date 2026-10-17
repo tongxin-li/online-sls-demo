@@ -1875,3 +1875,48 @@ test('the final applied pulse sample stays visible after its request expires and
     assert.equal(pulses(h).length,1,'No display operation adds physical requests');
   }
 });
+
+
+test('every completed segment defers source settings until explicit continuation without stale first issuance',async()=>{
+  for(const phase of ['discovery','deployment','continued-default']){
+    const h=harness(undefined,phase==='continued-default'?null:'communication');
+    h.check('auto-compare',false);
+    if(phase!=='discovery'){
+      for(let i=0;i<31;i++)h.click('step');
+      h.click('deploy');h.click('run');
+      for(let i=0;i<180;i++)h.click('step');
+      if(phase==='continued-default')h.click('step');
+    }
+    while(h.snapshot().t<h.snapshot().horizon)h.click('step');
+    assert.equal(h.snapshot().mode,'completed');
+    h.inspectLink(5,7);
+    const finished=plain(h.snapshot()),sealed=h.issuedForecasts(),wasNoisy=finished.faults.includes(7);
+    h.click('source-fault');
+    const pending=h.snapshot();
+    assert.equal(pending.faults.includes(7),!wasNoisy);
+    assert.equal(pending.mode,'completed',phase+' setting must not reopen the planning segment');
+    assert.equal(pending.horizon,finished.horizon,phase+' setting must not seal a new preview');
+    assert.equal(pending.t,finished.t);assert.equal(h.state().playing,false);
+    for(const key of ['segments','states','cumulative','deployedSupport'])assert.deepEqual(pending[key],finished[key],phase+' preserves '+key);
+    assert.deepEqual(h.issuedForecasts(),sealed,phase+' preserves every already issued message');
+    const saved=h.saved(),direct=harness(saved),bus=harness(saved),unchanged=harness(saved);
+    assert.deepEqual(direct.snapshot(),pending,phase+' pending setting replays exactly');
+    // Repair back to the original state only in the paired unchanged branch.
+    unchanged.click('source-fault');
+    direct.click('run');unchanged.click('run');
+    pointerClick(bus,bus.bus(7));assert.equal(bus.state().playing,true);
+    await bus.samples(1);
+    assert.deepEqual(bus.snapshot(),unchanged.snapshot(),phase+' explicit bus repair matches paused repair followed by Run');
+    assert.deepEqual(bus.issuedForecasts(),unchanged.issuedForecasts());
+    const changed=direct.issuedForecasts(),baseline=unchanged.issuedForecasts(),target=finished.t+4;
+    assert.deepEqual(changed.slice(0,sealed.length),sealed,'Issued history remains immutable');
+    assert.equal(changed[target].issuedAt,finished.t,'The extension issues at the boundary');
+    assert.equal(changed[target].faultBuses.includes(7),!wasNoisy,'The first new message uses the pending setting');
+    assert.equal(baseline[target].faultBuses.includes(7),wasNoisy);
+    assert.deepEqual(changed[target].base,baseline[target].base,'Paired physical realization is unchanged');
+    assert.notEqual(changed[target].forecast[6],baseline[target].forecast[6],'Positive noise changes the selected newly issued source');
+    for(let j=0;j<24;j++)if(j!==6)assert.equal(changed[target].forecast[j],baseline[target].forecast[j],'Other issued sources are identical');
+    direct.click('run');
+    assert.deepEqual(harness(direct.saved()).snapshot(),direct.snapshot(),phase+' continued replay stays exact');
+  }
+});
