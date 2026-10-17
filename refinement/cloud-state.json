@@ -783,16 +783,8 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-18T06:00:00+08:00",
-    "branch": "cloud/refine/20261018-0600",
-    "base_commit": "95fbe28dd9f9fc5fce56f289852a666b4d8f0df0",
-    "started_at": "2026-10-18T05:58:45+08:00",
-    "lease_expires_at": "2026-10-18T06:38:45+08:00",
-    "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
-    "scope": "Shared controller key clarity only"
-  },
-  "next_focus": "Inspect the full current four-panel desktop and phone experience through authorized Actions screenshot pixels before another material layout change. Consider consolidating repetitive captions rather than adding panels or controls. Keep the current forecast configuration distinct from observed error, the measured fixed-deployment receipt, real communication costs and winners, source/receiver inspection and every recorded reliability regime. No broad numerical study or parameter changes until the visual story is clear.",
+  "active_run": null,
+  "next_focus": "Use the reviewed actual desktop and phone panel screenshots to choose one focused layout correction. The phone stage annotation is cramped and the desktop uninspected matrix panel has substantial stretched empty space. Preserve four clear panels, the existing single method key, all four costs and honest winners, recorded reliability regimes, selected link evidence and fixed deployment stages. Do not add panels or controls, infer numerical improvement, or begin a broad numerical study for style work. Require actual screenshot pixels and responsive interaction assertions for material layout changes.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -902,9 +894,9 @@
       "pages_run": 39052070867
     },
     "renewed_completion": {
-      "slot": "2026-10-18T05:00:00+08:00",
-      "branch": "cloud/refine/20261018-0500",
-      "product_ready_commit": "a4669c1a11afff75e160b98b0accb027b4dd35a5",
+      "slot": "2026-10-18T06:00:00+08:00",
+      "branch": "cloud/refine/20261018-0600",
+      "product_ready_commit": "9414a828d0733f24c434b631674d31aeb41b8f0e",
       "scope": "Completion record only, no product changes",
       "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and candidate workflow results for metadata recovery. Do not count metadata validation as an invocation or improvement, or promote an older branch over newer main."
     },
@@ -915,36 +907,43 @@
       "pages_run": 39071756929,
       "result": "success independently verified before this slot"
     },
-    "renewed_completion_history": [
-      {
+    "renewed_completion_history": {
+      "0": {
         "slot": "2026-10-18T01:00:00+08:00",
         "branch": "cloud/refine/20261018-0100",
         "product_ready_commit": "45b343518f52427efed17219edbe6799236f0b59",
         "scope": "Completion record only, no product changes",
         "instruction": "This slot is already counted once in renewed_program.completed_count. Read current branch/main workflow state when recovering metadata validation. Do not promote an older source over newer main or increment either count for this metadata record."
       },
-      {
+      "1": {
         "slot": "2026-10-18T02:00:00+08:00",
         "branch": "cloud/refine/20261018-0200",
         "product_ready_commit": "2aacbf0abbb7b8ec32cb9a6bba70068e9ae009e3",
         "scope": "Completion record only, no product changes",
         "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and branch workflow results when recovering metadata. Never increment either program count for metadata validation or promote an older branch over newer main."
       },
-      {
+      "2": {
         "slot": "2026-10-18T03:00:00+08:00",
         "branch": "cloud/refine/20261018-0300",
         "product_ready_commit": "156d89bf616f6e5a7b368f775817c1a828bc1fb3",
         "scope": "Completion record only, no product changes",
         "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and candidate workflow results for metadata recovery. Never count metadata validation as a new invocation or improvement, or promote an older candidate over newer main."
       },
-      {
+      "3": {
         "slot": "2026-10-18T04:00:00+08:00",
         "branch": "cloud/refine/20261018-0400",
         "product_ready_commit": "bf669bf0c2b350cc7c18548be83dfc00479822d8",
         "scope": "Completion record only, no product changes",
         "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and candidate workflow results for metadata recovery. Do not count metadata validation as an invocation or improvement, or promote an older branch over newer main."
+      },
+      "4": {
+        "slot": "2026-10-18T05:00:00+08:00",
+        "branch": "cloud/refine/20261018-0500",
+        "product_ready_commit": "a4669c1a11afff75e160b98b0accb027b4dd35a5",
+        "scope": "Completion record only, no product changes",
+        "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and candidate workflow results for metadata recovery. Do not count metadata validation as an invocation or improvement, or promote an older branch over newer main."
       }
-    ]
+    }
   },
   "parent_handoffs": [
     {
@@ -1029,7 +1028,7 @@
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
     "invocation_count": 6,
-    "completed_count": 5,
+    "completed_count": 6,
     "runs": [
       {
         "slot": "2026-10-18T01:00:00+08:00",
@@ -1247,39 +1246,66 @@
       {
         "slot": "2026-10-18T06:00:00+08:00",
         "started_at": "2026-10-18T05:58:45+08:00",
-        "status": "in_progress",
+        "status": "completed",
         "candidate_branch": "cloud/refine/20261018-0600",
         "base_commit": "95fbe28dd9f9fc5fce56f289852a666b4d8f0df0",
-        "counted_completed": false,
+        "counted_completed": true,
         "changes": [
           "Move the existing single controller curve key before all four panels so method identities precede plots on phones. Improve labels and hidden-state contrast without adding controls.",
           "Validate native keyboard and touch curve toggles, unchanged physical snapshots and all four costs; capture every panel through authorized Actions JPEG previews before publication."
         ],
         "tests": {
-          "status": "pending"
+          "suites": 7,
+          "total": 211,
+          "failed": 0,
+          "candidate": "passed",
+          "main": "All 211 tests, build consistency and full desktop/mobile browser checks passed.",
+          "build": "passed",
+          "interaction": "One shared controller key before the panels; native visibility toggles retain at least one curve and preserve complete physical snapshot, forecasts, deployed support and all costs in both experiments.",
+          "browser": "Full desktop/mobile browser suite passed, including native Enter and Space, phone taps, unchanged paused snapshots, readable 12 px labels, nonoverlapping targets, 44 px phone height, playback, attacks, automatic handoff, stable cost buttons and four methods.",
+          "benchmarks": "Not rerun. No simulation, controller, learning, objective, gain, actuator limit, physical scenario/default, source reliability, forecast timing or recorded result changes.",
+          "main_consistency": "passed"
         },
         "screenshots": {
-          "pixel_review": "pending"
+          "artifact_id": 12116082005,
+          "artifact_digest": "sha256:6c7d95ad47d4bcbaa599896f6f43b8d781da7c2f7af7ed1932239b7ed35177e7",
+          "captures": [
+            "four-panels-1440.png",
+            "four-panels-390.png",
+            "panel-key-1440.jpg",
+            "panel-network-1440.jpg",
+            "panel-matrix-1440.jpg",
+            "panel-voltage-1440.jpg",
+            "panel-cost-1440.jpg",
+            "panel-key-390.jpg",
+            "panel-network-390.jpg",
+            "panel-matrix-390.jpg",
+            "panel-voltage-390.jpg",
+            "panel-cost-390.jpg"
+          ],
+          "pixel_review": "Actual desktop 1440 and phone 390 key and all four panel screenshot pixels reviewed through authorized Actions JPEG previews. All four existing method labels are readable; phone uses a compact two by two key without overlapping targets. Real costs and honest winners remain intact: learned sparse wins this desktop default, fixed sparse wins this phone reference. Matrix command table is intentionally horizontally scrolled by the existing reachability test. Whole-page PNGs are captured; review covers the emitted key and individual panel pixels, not direct live browser inspection.",
+          "remaining_visual_limitations": "Existing desktop matrix panel stretches to the taller network panel and leaves substantial empty space when no source is inspected. A long phone stage annotation remains cramped. These preexisting issues are not changed or claimed solved by moving the key."
         },
         "candidate_revisions": [
           {
             "source_commit": "51eeb18c3fdd647447aeabe312cbd76aa18ec94e",
             "candidate_run": 39073389537,
             "status": "superseded",
-            "reason": "Before browser execution, align the new curve visibility fixture with the actual visible voltage and stage charts during discovery; the cost view is intentionally hidden then. Preserve all existing assertions and also check native controls after deployment."
+            "reason": "Before browser execution, align the new curve visibility fixture with the actual visible voltage and stage charts during discovery; the cost view is intentionally hidden then. Preserve all existing assertions and also check native controls after deployment.",
+            "validation_conclusion": "cancelled by the workflow concurrency guard when the corrected fixture was pushed"
           }
-        ]
+        ],
+        "source_commit": "ea5f32c3ce38e87814c9bd70d143d522be664c26",
+        "published_commit": "9414a828d0733f24c434b631674d31aeb41b8f0e",
+        "candidate_run": 39073469626,
+        "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed. No public HTTP byte comparison performed this pass.",
+        "main_run": 39074189769,
+        "pages_run": 39074189222,
+        "publication": "Candidate and main validation succeeded. Ready child has tested source as its single parent and only index.html changed. Expected-main guarded promotion with force false succeeded. Pages succeeded for that exact ready version and deployment logs were read.",
+        "completed_at": "2026-10-17T22:22:56.997Z"
       }
     ],
-    "active_run": {
-      "slot": "2026-10-18T06:00:00+08:00",
-      "branch": "cloud/refine/20261018-0600",
-      "base_commit": "95fbe28dd9f9fc5fce56f289852a666b4d8f0df0",
-      "started_at": "2026-10-18T05:58:45+08:00",
-      "lease_expires_at": "2026-10-18T06:38:45+08:00",
-      "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
-      "scope": "Shared controller key clarity only"
-    },
+    "active_run": null,
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
@@ -1299,5 +1325,5 @@
     "baseline_main": "2a9ff26b59565ecac1eb5274fbea4d813a18f24f"
   },
   "completed_count_scope": "Original bounded program, retained at 15. Renewed counts are tracked independently in renewed_program.",
-  "total_completed_count": 20
+  "total_completed_count": 21
 }
