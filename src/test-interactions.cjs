@@ -147,7 +147,7 @@ test('Space preserves native summary link and command scroller behavior includin
   for(const selector of ['summary','a[href]','[data-command-scroll]'])for(const descendant of [false,true])for(const playing of [false,true]){
     const h=harness();if(playing)h.click('run');
     const initialTime=h.snapshot().t;
-    const control=target(selector==='summary'?'SUMMARY':'A');
+    const control=target(selector==='summary'?'SUMMARY':selector==='a[href]'?'A':'DIV');
     const origin=descendant?target('SPAN'):control;
     origin.closest=selectors=>selectors.split(',').some(value=>value.trim()===selector)?control:null;
     let prevented=false;
