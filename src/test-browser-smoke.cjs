@@ -129,7 +129,33 @@ async function main() {
         assert.match(reading.context,reading.phase==='discovery'?/Discovery uses dense messages/:/deployed support.*Links fixed/);
       }else assert.equal(reading.data.forecast,'','Unavailable observations clear stale numeric metadata');
     };
+    const checkForecastSettings = async surface => {
+      const reading=await surface.evaluate(()=>{
+        const snapshot=document.querySelector('#power-response-demo').powerDemo.getSnapshot(),node=document.querySelector('#pr-scenario-description');
+        return {experiment:snapshot.experiment,beta:snapshot.beta,faults:snapshot.faults,sources:snapshot.predictionDiagnostics?.sourceBuses || Array.from({length:23},(_,i)=>i+2),
+          data:{...node.dataset},text:node.textContent,title:node.title,description:node.getAttribute('aria-description'),font:parseFloat(getComputedStyle(node).fontSize),box:node.getBoundingClientRect().toJSON()};
+      });
+      assert.equal(reading.data.forecastSettings,String(reading.experiment==='communication'));
+      if(reading.experiment!=='communication')return;
+      const noisy=reading.sources.filter(bus=>reading.faults.includes(bus)).length;
+      assert.equal(Number(reading.data.noisy),noisy);assert.equal(Number(reading.data.quiet),reading.sources.length-noisy);
+      assert.equal(Number(reading.data.sourceCount),reading.sources.length);assert.equal(Number(reading.data.beta),reading.beta);
+      assert.equal(reading.data.noiseEnabled,String(reading.beta>0));
+      assert.match(reading.text,reading.beta>0?new RegExp((reading.sources.length-noisy)+' quiet / '+noisy+' noisy'):/Noise disabled/);
+      assert.match(reading.title,/newly issued forecasts, not observed accuracy or bus voltage/);assert.equal(reading.description,reading.title);
+      assert.ok(reading.font>=12);assert.ok(reading.box.left>=-1&&reading.box.right<=surface.viewportSize().width+1,'Forecast heading fits the viewport');
+    };
+    const captureForecastSettings = async surface => {
+      await checkForecastSettings(surface);
+      const before=await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
+      const width=surface.viewportSize().width,header=surface.locator('.pr-scenario-heading');
+      await header.screenshot({path:path.join(output,'forecast-settings-'+width+'.png')});
+      const preview=await surface.locator('.pr-scenario-heading > div').screenshot({path:path.join(output,'forecast-settings-'+width+'.jpg'),type:'jpeg',quality:90});
+      console.log('CLOUD_SETTINGS_PREVIEW_'+width+' '+preview.toString('base64'));
+      assert.equal(await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),before,'Heading review cannot alter the paused trial');
+    };
     const checkSourceHistory = async surface => {
+      await checkForecastSettings(surface);
       const reading=await surface.evaluate(()=>{
         const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),state=root.powerDemo.getState();
         const window=document.querySelector('#pr-forecast-window'),change=document.querySelector('#pr-forecast-change');
@@ -578,7 +604,8 @@ async function main() {
     });
     assert.deepEqual(initialDefault,{scenario:'forecasted-demand',beta:4,phase:'discovery',t:0});
     assert.equal(await page.locator('#pr-new-scenario').isVisible(),false);
-    assert.match(await page.locator('#pr-scenario-description').textContent(),/compare four controllers automatically/);
+    assert.match(await page.locator('#pr-scenario-description').getAttribute('title'),/compare four controllers automatically/);
+    await captureForecastSettings(page);
     await page.locator('#pr-run').click();
     await page.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getState().comparisonComplete,null,{timeout:45000});
     const reviewed=await page.evaluate(()=>{
@@ -1106,6 +1133,7 @@ async function main() {
     await phone.goto(address, { waitUntil: 'networkidle' });
     const mobileDefault=await phone.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().powerScenario);
     assert.equal(mobileDefault,'forecasted-demand');
+    await captureForecastSettings(phone);
     await stepSetting(phone);
     assert.ok(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Default scenario fits the narrow mobile page');
     await phone.screenshot({path:path.join(output,'default-scenario-mobile.png'),fullPage:true});

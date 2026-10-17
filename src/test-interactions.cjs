@@ -30,6 +30,7 @@ const source=withoutCards.replace(anchor,
   '  root.testInspectPredictionLink=(receiver,source)=>inspectPredictionLink(receiver,source);\n'+
   '  root.testInspection=()=>predictionInspection();\n'+
   '  root.testProtocol=()=>protocolStatus();\n'+
+  '  root.testForecastSettings=()=>forecastSettings();\n'+
   '  root.testForecastObservation=()=>inspectedForecastObservation();\n'+
   '  root.testSourceHistory=()=>inspectedSourceHistory();\n'+
   '  root.testErrorWindow=forecastErrorWindow;\n'+
@@ -142,7 +143,7 @@ function harness(saved,experiment='prediction',reducedMotion=true) {
       if(type==='pointerup'||type==='pointercancel')recipient.releasePointerCapture(id);
       return result;
     },
-    inspectLink:(receiver,source)=>root.testInspectPredictionLink(receiver,source),inspection:()=>plain(root.testInspection()),protocol:()=>plain(root.testProtocol()),forecastObservation:()=>plain(root.testForecastObservation()),sourceHistory:()=>plain(root.testSourceHistory()),errorWindow:(...args)=>plain(root.testErrorWindow(...args)),commandInspection:()=>plain(root.testInspectedCommand()),decompose:(...args)=>plain(root.testDecompose(...args)),issuedForecasts:()=>plain(root.testIssuedForecasts()),
+    inspectLink:(receiver,source)=>root.testInspectPredictionLink(receiver,source),inspection:()=>plain(root.testInspection()),protocol:()=>plain(root.testProtocol()),forecastSettings:()=>plain(root.testForecastSettings()),forecastObservation:()=>plain(root.testForecastObservation()),sourceHistory:()=>plain(root.testSourceHistory()),errorWindow:(...args)=>plain(root.testErrorWindow(...args)),commandInspection:()=>plain(root.testInspectedCommand()),decompose:(...args)=>plain(root.testDecompose(...args)),issuedForecasts:()=>plain(root.testIssuedForecasts()),
     linkEvidence:()=>plain(root.powerDemo.getLinkEvidence()),snapshot:()=>root.powerDemo.getSnapshot(),state:()=>plain(root.powerDemo.getState()),
     saved:()=>savedStates.at(-1),
     event:(id,type,detail)=>node(id).dispatch(type,detail),
@@ -1797,7 +1798,8 @@ test('the shipped default runs demand and solar discovery then pauses the comple
   assert.equal(h.snapshot().experiment,'communication');
   assert.equal(h.snapshot().powerScenario,'forecasted-demand');assert.equal(h.snapshot().beta,4);
   assert.equal(h.node('auto-compare').checked,true);assert.equal(h.node('new-scenario').hidden,true);
-  assert.match(h.node('scenario-description').textContent,/compare four controllers automatically/);
+  assert.match(h.node('scenario-description').title,/compare four controllers automatically/);
+  assert.equal(h.node('scenario-description').textContent,'Forecast settings · β 4 · 8 quiet / 15 noisy');
   h.click('run');await h.clock.until(()=>h.snapshot().phase==='deployment');
   assert.equal(h.snapshot().t,0);assert.equal(h.state().playing,true);
   await h.clock.until(()=>h.state().comparisonComplete);
@@ -2192,4 +2194,44 @@ test('deployment sequence uses actual short discovery, selection and fresh compa
   assert.equal(continued.discoverySamples,35);assert.equal(continued.remoteLinks,first.remoteLinks);assert.equal(continued.newLinks,first.newLinks);
   h.click('restart');assert.equal(h.deploymentReceipt(),null);h.renderDeploymentReceipt();assert.equal(h.node('codesign-flow').children.length,0);
   const prediction=harness();assert.equal(prediction.deploymentReceipt(),null,'Adaptive correction is not a fixed communication comparison');
+});
+
+test('forecast heading reports current synthetic source settings without rewriting sealed messages, discovery or replay',async()=>{
+  const h=harness(undefined,null);
+  const inspect=()=>{
+    const before=plain(h.snapshot()),settings=h.forecastSettings();
+    assert.equal(settings.sourceCount,23);assert.equal(settings.noisy,before.faults.filter(bus=>bus>=2&&bus<=24).length);
+    assert.equal(settings.quiet,23-settings.noisy);assert.equal(settings.beta,before.beta);
+    assert.equal(h.node('scenario-description').dataset.noisy,String(settings.noisy));
+    assert.equal(h.node('scenario-description').dataset.quiet,String(settings.quiet));
+    assert.match(h.node('scenario-description').title,/newly issued forecasts, not observed accuracy or bus voltage/);
+    assert.deepEqual(plain(h.snapshot()),before,'Reading settings is not an intervention');
+    return settings;
+  };
+  assert.equal(inspect().quiet,8);assert.equal(inspect().noisy,15);
+  h.check('auto-compare',false);assert.match(h.node('scenario-description').title,/Manual comparison enabled/);h.check('auto-compare',true);
+  h.inspectLink(5,7);const issued=h.issuedForecasts(),before=plain(h.snapshot());
+  h.click('source-fault');assert.equal(inspect().quiet,7);assert.equal(inspect().noisy,16);
+  assert.deepEqual(h.issuedForecasts(),issued,'A paused configuration label cannot rewrite sealed messages');
+  assert.deepEqual(plain(h.snapshot().states),before.states);assert.deepEqual(plain(h.snapshot().cumulative),before.cumulative);
+  h.click('source-fault');const current=inspect();
+  h.click('run');await h.clock.until(()=>h.snapshot().phase==='deployment');h.click('run');
+  assert.deepEqual(inspect(),current);assert.match(h.node('scenario-description').title,/Deployed links and prediction correction stay fixed/);
+  h.event('topology-history','input');assert.deepEqual(inspect(),current,'The heading stays current configuration rather than past discovery labels');
+  h.click('history-live');const restored=harness(h.saved());assert.deepEqual(restored.forecastSettings(),current);
+});
+test('forecast heading distinguishes noise disabled and all noisy settings from measured accuracy',async()=>{
+  const h=harness(undefined,null);h.change('noise',0);
+  assert.equal(h.forecastSettings().noiseEnabled,false);
+  assert.equal(h.node('scenario-description').textContent,'Forecast settings · β 0 · Noise disabled');
+  assert.match(h.node('scenario-description').title,/does not forecast unannounced power attacks/);
+  const all=harness({privateContent:{version:13,phase:'discovery',t:0,events:[],automaticComparison:true,
+    initialOptions:{experiment:'communication',powerScenario:'forecasted-demand',seed:20261013,beta:4,horizon:180,faultBuses:Array.from({length:23},(_,i)=>i+2)}}},'communication');
+  assert.equal(all.forecastSettings().quiet,0);assert.equal(all.forecastSettings().noisy,23);
+  assert.match(all.node('scenario-description').textContent,/0 quiet \/ 23 noisy/);
+  assert.match(all.node('trial-context').textContent,/No reliable alternative/);
+  h.change('experiment','prediction');assert.equal(h.forecastSettings(),null);
+  assert.equal(h.node('scenario-description').dataset.forecastSettings,'false');assert.equal(h.node('scenario-description').dataset.beta,'');
+  await compare(h);assert.equal(h.snapshot().phase,'deployment');
+  assert.match(h.node('scenario-description').title,/Prediction correction adapts/);
 });

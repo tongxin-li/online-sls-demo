@@ -1034,14 +1034,28 @@
   function scheduledApplications() {
     return snapshot.powerScenario===DEFAULT_SCENARIO ? (snapshot.lastScenarioApplications || []) : [];
   }
+  function forecastSettings() {
+    if(snapshot.experiment!=='communication')return null;
+    const sources=snapshot.predictionDiagnostics?.sourceBuses || Array.from({length:PowerDemo.constants.N-1},(_,i)=>i+2);
+    const faults=new Set(snapshot.faults || []),noisy=sources.filter(bus=>faults.has(bus)).length;
+    return {beta:snapshot.beta,sourceCount:sources.length,quiet:sources.length-noisy,noisy,noiseEnabled:snapshot.beta>0};
+  }
   function renderScenario() {
     const scheduled=snapshot.powerScenario===DEFAULT_SCENARIO,scenario=snapshot.scenario || {};
     const powers=(snapshot.eventLog || []).filter(event=>event.type==='pulse').length;
     const allNoisy=scheduled && snapshot.beta>0 && Array.from({length:PowerDemo.constants.N-1},(_,i)=>i+2).every(bus=>snapshot.faults.includes(bus));
     $('scenario-name').textContent=scheduled?'Demand and solar cycle':snapshot.powerScenario==='solar-outage'?'Solar outage trial':'Reference trial';
-    $('scenario-description').textContent=scheduled
-      ?(automaticComparison()?'Run to learn the links, then compare four controllers automatically':'Manual comparison enabled in Experiment settings')
-      :(restoredTrial?'Restored run · ':'')+'Forecast stress β '+snapshot.beta+' · Previous samples and costs retained';
+    const description=$('scenario-description'),settings=forecastSettings();
+    const guidance=scheduled?(snapshot.phase==='deployment'?(snapshot.experiment==='communication'?'Fresh comparison · Deployed links and prediction correction stay fixed':'Fresh comparison · Links fixed · Prediction correction adapts')
+      :automaticComparison()?'Run to learn the links, then compare four controllers automatically':'Manual comparison enabled in Experiment settings')
+      :(restoredTrial?'Restored run · ':'')+'Previous samples and costs retained';
+    description.dataset.forecastSettings=String(!!settings);
+    for(const key of ['beta','sourceCount','quiet','noisy','noiseEnabled'])description.dataset[key]=settings?String(settings[key]):'';
+    description.textContent=settings?(restoredTrial&&!scheduled?'Restored run · ':'')+'Forecast settings · β '+settings.beta+' · '
+      +(settings.noiseEnabled?settings.quiet+' quiet / '+settings.noisy+' noisy':'Noise disabled')
+      :scheduled?guidance:(restoredTrial?'Restored run · ':'')+'Forecast stress β '+snapshot.beta+' · Previous samples and costs retained';
+    description.title=settings?guidance+'. Current configuration for newly issued forecasts, not observed accuracy or bus voltage. Quiet and noisy are synthetic source labels, not inputs to the learner. Already issued messages stay unchanged. Noise disabled does not forecast unannounced power attacks.':guidance;
+    description.setAttribute('aria-description',description.title);
     $('new-scenario').hidden=scheduled && !powers && !allNoisy;
     $('new-scenario').disabled=comparing;
     $('new-scenario').textContent='Restore default scenario';

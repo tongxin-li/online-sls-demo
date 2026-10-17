@@ -783,8 +783,13 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
-  "next_focus": "Inspect current four-panel density and whether actual current forecast quality is clear in the existing trial heading, without adding controls or another always-visible diagnostic. Keep configured source error distinct from observed error and voltage excursion. Preserve the measured learning/selection/synthesis/fixed-comparison receipt, current communication costs and real winners, inspected source/receiver evidence, full recorded regimes and every unfavorable outcome. No broad new numerical study until the primary visual story is clear.",
+  "active_run": {
+    "slot": "2026-10-18T05:00:00+08:00",
+    "branch": "cloud/refine/20261018-0500",
+    "started_at": "2026-10-18T05:02:09+08:00",
+    "expires_at": "2026-10-18T05:42:09+08:00"
+  },
+  "next_focus": "Validate current forecast configuration labels against actual source settings, sealed messages, replay and mode boundaries. Inspect desktop/phone heading screenshot pixels before publication. No model or numerical study changes.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -901,10 +906,10 @@
       "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and candidate workflow results for metadata recovery. Do not count metadata validation as an invocation or improvement, or promote an older branch over newer main."
     },
     "previous_renewed_metadata_verification": {
-      "commit": "dac0e054c7f666b9b728850b6441d5d8a67b1cbb",
-      "candidate_run": 39062017405,
-      "main_run": 39062695623,
-      "pages_run": 39062695587,
+      "commit": "c1f36f979c73864342ea50ea13905bb28a5eb168",
+      "candidate_run": 39066426233,
+      "main_run": 39067000904,
+      "pages_run": 39067000951,
       "result": "success independently verified before this slot"
     },
     "renewed_completion_history": [
@@ -1013,7 +1018,7 @@
     "hard_deadline": "2026-10-19T01:00:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 4,
+    "invocation_count": 5,
     "completed_count": 4,
     "runs": [
       {
@@ -1185,9 +1190,34 @@
         "pages_run": 39065720886,
         "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed. No public HTTP byte comparison performed this pass.",
         "completed_at": "2026-10-17T20:21:48.639Z"
+      },
+      {
+        "slot": "2026-10-18T05:00:00+08:00",
+        "started_at": "2026-10-18T05:02:09+08:00",
+        "status": "validating_candidate",
+        "candidate_branch": "cloud/refine/20261018-0500",
+        "base_commit": "c1f36f979c73864342ea50ea13905bb28a5eb168",
+        "counted_completed": false,
+        "changes": [
+          "Replace generic trial heading copy with current communication forecast configuration using actual β and quiet/noisy source counts. Keep settings distinct from observed accuracy and actual voltage, and label β 0 as noise disabled rather than perfect physical foresight.",
+          "Preserve automatic/manual learning guidance in the heading title and assistive description, distinguish fixed communication deployment from continuing prediction adaptation, and retain restored run identity and all physical costs. No new control, panel or experiment setting.",
+          "Add read-only count, paused toggle, sealed issuance, automatic handoff, history, exact replay, zero noise, all noisy and adaptive mode regressions plus actual desktop/phone heading checks and pixel previews."
+        ],
+        "tests": {
+          "status": "pending"
+        },
+        "screenshots": {
+          "pixel_review": "pending authorized Actions preview"
+        },
+        "publication": "unpublished"
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "slot": "2026-10-18T05:00:00+08:00",
+      "branch": "cloud/refine/20261018-0500",
+      "started_at": "2026-10-18T05:02:09+08:00",
+      "expires_at": "2026-10-18T05:42:09+08:00"
+    },
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
