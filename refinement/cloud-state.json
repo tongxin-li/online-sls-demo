@@ -550,8 +550,16 @@
       "counted_completed": false
     }
   ],
-  "active_run": null,
-  "next_focus": "Improve clear visual causality and attack usability in the current forecasted-demand default. Read current README and environment first. Preserve beta 4, seed 20261013, 180-sample discovery and finite fresh comparison, Continue, old-trial replay and explicit fresh scenario, all-noisy warning, every baseline and full physical costs. Do not retune the environment to force an advantage. Keep conditional and unfavorable outcomes. Any useful older audit needs a fresh rebase and independent review.",
+  "active_run": {
+    "slot": "2026-10-17T16:00:00+08:00",
+    "started_at": "2026-10-17T15:55:43+08:00",
+    "lease_expires_at": "2026-10-17T16:35:43+08:00",
+    "branch": "cloud/refine/20261017-1600",
+    "base_main": "83b211821aaa8a13dc594cbf0857a19e6d08acbb",
+    "status": "claimed",
+    "focus": "Preserve reviewed finite comparison while changing paused source reliability, with exact replay and first new issue causality"
+  },
+  "next_focus": "Keep paused source setting changes separate from explicitly continuing a completed comparison. Preserve all existing controller results, baseline curves, default scenario and scientific parameters.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -607,8 +615,10 @@
       "job": 117310942294
     },
     "last_metadata_verification": {
-      "commit": "4ddc0eab38b8883f7c6c678c417e4c6da6cd78cf",
-      "candidate_run": 39003470969,
+      "commit": "83b211821aaa8a13dc594cbf0857a19e6d08acbb",
+      "candidate_run": 39014960306,
+      "main_run": 39015341497,
+      "pages_run": 39015341446,
       "result": "success"
     },
     "interrupted_invocation": {
