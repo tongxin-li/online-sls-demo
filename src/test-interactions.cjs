@@ -2235,3 +2235,21 @@ test('forecast heading distinguishes noise disabled and all noisy settings from 
   await compare(h);assert.equal(h.snapshot().phase,'deployment');
   assert.match(h.node('scenario-description').title,/Prediction correction adapts/);
 });
+
+test('shared controller key precedes every panel and toggles only visibility',()=>{
+  const group=html.match(/<div id="pr-controller-key"[^>]*>([\s\S]*?)<\/div>/);
+  assert.ok(group);assert.match(group[0],/role="group" aria-label="Controller curves"/);
+  assert.equal((html.match(/class="pr-legend/g)||[]).length,1,'Reuse one key rather than duplicate controls');
+  assert.ok(html.indexOf('id="pr-controller-key"')<html.indexOf('class="pr-dashboard"'),'Methods are identifiable before any panel on a phone');
+  assert.deepEqual(Array.from(group[1].matchAll(/data-series="([^"]+)"/g),match=>match[1]),['online','scalar','static','causal']);
+  for(const experiment of [null,'prediction']){
+    const h=harness(undefined,experiment),before=plain(h.snapshot());
+    for(const key of ['online','scalar','static'])h.seriesButton(key).dispatch('click');
+    assert.deepEqual(h.comparison().plotted,['causal']);
+    h.seriesButton('causal').dispatch('click');assert.equal(h.seriesButton('causal')['aria-pressed'],'true','At least one measured curve remains');
+    for(const key of ['online','scalar','static'])h.seriesButton(key).dispatch('click');
+    assert.deepEqual(h.comparison().plotted,['online','scalar','static','causal']);
+    assert.deepEqual(plain(h.snapshot()),before,'The shared key cannot change physics, forecasts, support or costs');
+    assert.equal(h.state().playing,false);
+  }
+});

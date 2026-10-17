@@ -145,6 +145,66 @@ async function main() {
       assert.match(reading.title,/newly issued forecasts, not observed accuracy or bus voltage/);assert.equal(reading.description,reading.title);
       assert.ok(reading.font>=12);assert.ok(reading.box.left>=-1&&reading.box.right<=surface.viewportSize().width+1,'Forecast heading fits the viewport');
     };
+
+    const checkControllerKey = async (surface,interact=false) => {
+      const read=()=>surface.evaluate(()=>{
+        const key=document.querySelector('#pr-controller-key'),dashboard=document.querySelector('.pr-dashboard');
+        return {role:key.getAttribute('role'),label:key.getAttribute('aria-label'),before:!!(key.compareDocumentPosition(dashboard)&Node.DOCUMENT_POSITION_FOLLOWING),
+          keyBox:key.getBoundingClientRect().toJSON(),dashboardBox:dashboard.getBoundingClientRect().toJSON(),
+          buttons:Array.from(key.querySelectorAll('button')).map(button=>({key:button.dataset.series,text:button.textContent,pressed:button.getAttribute('aria-pressed'),
+            hidden:button.hidden,font:parseFloat(getComputedStyle(button).fontSize),opacity:parseFloat(getComputedStyle(button).opacity),
+            color:getComputedStyle(button).color,box:button.getBoundingClientRect().toJSON()}))};
+      });
+      const reading=await read(),phone=surface.viewportSize().width<650;
+      assert.equal(reading.role,'group');assert.equal(reading.label,'Controller curves');
+      assert.equal(reading.before,true);assert.ok(reading.keyBox.bottom<=reading.dashboardBox.top,'Shared method key precedes all four plots');
+      assert.deepEqual(reading.buttons.map(button=>button.key),['online','scalar','static','causal']);
+      for(const button of reading.buttons){
+        assert.equal(button.hidden,false);assert.ok(button.text.trim().length>0);assert.ok(button.font>=12);
+        assert.ok(button.box.height>=(phone?44:32)-.01);
+        if(phone)assert.ok(button.box.width>=44);
+        assert.ok(button.box.left>=-1&&button.box.right<=surface.viewportSize().width+1);
+        const rgb=button.color.match(/[\d.]+/g).slice(0,3).map(Number).map(value=>{value/=255;return value<=.04045?value/12.92:Math.pow((value+.055)/1.055,2.4);});
+        const luminance=.2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2];
+        assert.ok(1.05/(luminance+.05)>=4.5,'Readable method text on the white surface');
+      }
+      for(let i=0;i<reading.buttons.length;i++)for(let j=i+1;j<reading.buttons.length;j++){
+        const a=reading.buttons[i].box,b=reading.buttons[j].box;
+        assert.ok(a.right<=b.left+.1||b.right<=a.left+.1||a.bottom<=b.top+.1||b.bottom<=a.top+.1,'Method targets do not overlap');
+      }
+      if(!interact)return;
+      const before=await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
+      assert.equal(await surface.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getState().playing),false);
+      const activate=async(key,index)=>{
+        const button=surface.locator('#pr-controller-key [data-series="'+key+'"]');
+        if(phone)await button.tap();else {await button.focus();await button.press(index%2?'Space':'Enter');}
+      };
+      for(const [index,key] of ['online','scalar','static'].entries())await activate(key,index);
+      let hidden=await read();
+      for(const key of ['online','scalar','static']){
+        const button=hidden.buttons.find(button=>button.key===key);assert.equal(button.pressed,'false');assert.equal(button.opacity,1,'Hidden curves retain readable labels');
+      }
+      assert.equal(await surface.locator('#pr-cost path.data-series').count(),1);
+      await activate('causal',0);
+      assert.equal(await surface.locator('#pr-controller-key [data-series="causal"]').getAttribute('aria-pressed'),'true','Last curve cannot be hidden');
+      for(const [index,key] of ['online','scalar','static'].entries())await activate(key,index);
+      assert.equal(await surface.locator('#pr-cost path.data-series').count(),4);
+      assert.equal(await surface.locator('#pr-cost-detail tr').count(),4);
+      assert.equal(await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),before,'Key operation preserves every measured sample and cost');
+      assert.equal(await surface.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getState().playing),false,'Native key activation cannot trigger playback');
+    };
+    const captureDashboard = async surface => {
+      await checkControllerKey(surface);
+      const before=await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),width=surface.viewportSize().width;
+      assert.equal(await surface.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getState().playing),false);
+      await surface.locator('#power-response-demo').screenshot({path:path.join(output,'four-panels-'+width+'.png')});
+      for(const [name,selector] of [['key','#pr-controller-key'],['network','.pr-network-panel'],['matrix','.pr-matrix-panel'],['voltage','.pr-stage-panel'],['cost','.pr-learning-panel']]){
+        const preview=await surface.locator(selector).screenshot({path:path.join(output,'panel-'+name+'-'+width+'.jpg'),type:'jpeg',quality:80});
+        console.log('CLOUD_PANEL_PREVIEW_'+width+'_'+name+' '+preview.toString('base64'));
+      }
+      assert.equal(await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),before,'Full panel review preserves the paused physical trial');
+    };
+
     const captureForecastSettings = async surface => {
       await checkForecastSettings(surface);
       const before=await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
@@ -606,6 +666,7 @@ async function main() {
     assert.equal(await page.locator('#pr-new-scenario').isVisible(),false);
     assert.match(await page.locator('#pr-scenario-description').getAttribute('title'),/compare four controllers automatically/);
     await captureForecastSettings(page);
+    await checkControllerKey(page,true);
     await page.locator('#pr-run').click();
     await page.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getState().comparisonComplete,null,{timeout:45000});
     const reviewed=await page.evaluate(()=>{
@@ -635,6 +696,7 @@ async function main() {
     await page.screenshot({path:path.join(output,'default-scenario-complete.png'),fullPage:true});
     await page.locator('#pr-codesign').screenshot({path:path.join(output,'codesign-desktop.png')});
     await captureCodesign(page);
+    await captureDashboard(page);
     await page.locator('.pr-learning-panel').screenshot({path:path.join(output,'default-scenario-costs.png')});
     await fs.writeFile(path.join(output,'default-scenario.json'),JSON.stringify(reviewed,null,2));
     // Completed results stay reviewed while source settings are edited in place.
@@ -1134,6 +1196,7 @@ async function main() {
     const mobileDefault=await phone.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().powerScenario);
     assert.equal(mobileDefault,'forecasted-demand');
     await captureForecastSettings(phone);
+    await checkControllerKey(phone,true);
     await stepSetting(phone);
     assert.ok(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Default scenario fits the narrow mobile page');
     await phone.screenshot({path:path.join(output,'default-scenario-mobile.png'),fullPage:true});
@@ -1263,6 +1326,7 @@ async function main() {
     assert.ok(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'The live design chart fits the mobile page');
     await phone.locator('.pr-learning-panel').screenshot({path:path.join(output,'codesign-mobile.png')});
     await captureCodesign(phone);
+    await captureDashboard(phone);
     await phone.screenshot({ path: path.join(output, 'mobile.png'), fullPage: true });
     await selectSetting(phone,'noise','8');
     assert.match(await phone.locator('#pr-noise-caption').textContent(),/(?=.*Stress)(?=.*mpu)/i);

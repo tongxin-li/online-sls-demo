@@ -783,7 +783,15 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-18T06:00:00+08:00",
+    "branch": "cloud/refine/20261018-0600",
+    "base_commit": "95fbe28dd9f9fc5fce56f289852a666b4d8f0df0",
+    "started_at": "2026-10-18T05:58:45+08:00",
+    "lease_expires_at": "2026-10-18T06:38:45+08:00",
+    "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
+    "scope": "Shared controller key clarity only"
+  },
   "next_focus": "Inspect the full current four-panel desktop and phone experience through authorized Actions screenshot pixels before another material layout change. Consider consolidating repetitive captions rather than adding panels or controls. Keep the current forecast configuration distinct from observed error, the measured fixed-deployment receipt, real communication costs and winners, source/receiver inspection and every recorded reliability regime. No broad numerical study or parameter changes until the visual story is clear.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
@@ -901,10 +909,10 @@
       "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and candidate workflow results for metadata recovery. Do not count metadata validation as an invocation or improvement, or promote an older branch over newer main."
     },
     "previous_renewed_metadata_verification": {
-      "commit": "c1f36f979c73864342ea50ea13905bb28a5eb168",
-      "candidate_run": 39066426233,
-      "main_run": 39067000904,
-      "pages_run": 39067000951,
+      "commit": "95fbe28dd9f9fc5fce56f289852a666b4d8f0df0",
+      "candidate_run": 39071063996,
+      "main_run": 39071757227,
+      "pages_run": 39071756929,
       "result": "success independently verified before this slot"
     },
     "renewed_completion_history": [
@@ -1020,7 +1028,7 @@
     "hard_deadline": "2026-10-19T01:00:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 5,
+    "invocation_count": 6,
     "completed_count": 5,
     "runs": [
       {
@@ -1235,9 +1243,35 @@
         "pages_run": 39070309311,
         "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed. No public HTTP byte comparison performed this pass.",
         "completed_at": "2026-10-17T21:27:46.667Z"
+      },
+      {
+        "slot": "2026-10-18T06:00:00+08:00",
+        "started_at": "2026-10-18T05:58:45+08:00",
+        "status": "in_progress",
+        "candidate_branch": "cloud/refine/20261018-0600",
+        "base_commit": "95fbe28dd9f9fc5fce56f289852a666b4d8f0df0",
+        "counted_completed": false,
+        "changes": [
+          "Move the existing single controller curve key before all four panels so method identities precede plots on phones. Improve labels and hidden-state contrast without adding controls.",
+          "Validate native keyboard and touch curve toggles, unchanged physical snapshots and all four costs; capture every panel through authorized Actions JPEG previews before publication."
+        ],
+        "tests": {
+          "status": "pending"
+        },
+        "screenshots": {
+          "pixel_review": "pending"
+        }
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "slot": "2026-10-18T06:00:00+08:00",
+      "branch": "cloud/refine/20261018-0600",
+      "base_commit": "95fbe28dd9f9fc5fce56f289852a666b4d8f0df0",
+      "started_at": "2026-10-18T05:58:45+08:00",
+      "lease_expires_at": "2026-10-18T06:38:45+08:00",
+      "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
+      "scope": "Shared controller key clarity only"
+    },
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",

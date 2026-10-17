@@ -21,6 +21,7 @@
     <span id="pr-voltage-range" class="tabular-nums"></span>
   </div>
   <p id="pr-scenario-status" class="pr-caption" role="status" hidden></p>
+  <div id="pr-controller-key" class="pr-legend pr-controller-key" role="group" aria-label="Controller curves"><button type="button" data-series="online" aria-pressed="true"><span class="pr-swatch online"></span>Matrix adaptation</button><button type="button" data-series="scalar" aria-pressed="true"><span class="pr-swatch scalar"></span>Scalar adaptation</button><button type="button" data-series="static" aria-pressed="true"><span class="pr-swatch static"></span>Fixed prediction</button><button type="button" data-series="causal" aria-pressed="true"><span class="pr-swatch causal"></span>Feedback only</button></div>
   <div class="pr-dashboard">
     <section class="pr-panel pr-network-panel" aria-labelledby="pr-network-title">
       <div class="pr-subhead"><h2 id="pr-network-title">Power network</h2><span id="pr-action-note" class="pr-caption" aria-live="polite">Click a bus to start · Click again to stop</span></div>
@@ -106,7 +107,6 @@
     </section>
   </div>
   <div class="pr-bottomline">
-    <div class="pr-legend" aria-label="Controller curves"><button type="button" data-series="online" aria-pressed="true"><span class="pr-swatch online"></span>Matrix adaptation</button><button type="button" data-series="scalar" aria-pressed="true"><span class="pr-swatch scalar"></span>Scalar adaptation</button><button type="button" data-series="static" aria-pressed="true"><span class="pr-swatch static"></span>Fixed prediction</button><button type="button" data-series="causal" aria-pressed="true"><span class="pr-swatch causal"></span>Feedback only</button></div>
     <span id="pr-event" role="status" aria-live="polite">Ready · Space to run</span>
   </div>
   <details class="pr-adaptation" id="pr-adaptation">
