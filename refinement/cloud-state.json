@@ -695,10 +695,38 @@
       },
       "deployment": "GitHub Pages success",
       "direct_live_inspection": "unverified, prior denied browser access not retried"
+    },
+    {
+      "slot": "2026-10-17T19:00:00+08:00",
+      "status": "configuration_only",
+      "counted_completed": false,
+      "changes": [
+        "Recorded explicit appearance scope in hosted instructions; no product publication."
+      ]
+    },
+    {
+      "slot": "2026-10-17T20:00:00+08:00",
+      "status": "superseded",
+      "counted_completed": false,
+      "source_commit": "2cdd7805610465a207cd25559b4c32c6304a5435",
+      "candidate_branch": "cloud/refine/20261017-2000",
+      "superseded_by": "b026719c4ce28a08d1d09876424b7e331ef4c759",
+      "changes": [
+        "Source metric contrast and responsive card candidate remained unpublished under parent ownership hold. Never promote it over the concise interface release."
+      ]
     }
   ],
-  "active_run": null,
-  "next_focus": "Audit actual source and receiver inspection through history and interaction mode changes, including keyboard focus and accessible fault actions. Make a product correction only for a demonstrated behavior or causality issue. Preserve the forecasted-demand beta 4 default and seed, all four curves and full costs, frozen deployed topology, exact saved replay and conditional scientific results. Avoid noise knobs, retuning or cosmetic releases to force an advantage.",
+  "active_run": {
+    "slot": "2026-10-17T21:00:00+08:00",
+    "started_at": "2026-10-17T21:00:30+08:00",
+    "expires_at": "2026-10-17T21:40:30+08:00",
+    "branch": "cloud/refine/20261017-2100",
+    "base_main": "8f900c9311a8d8c89dd2debe002cb78c936f5dc8",
+    "status": "candidate_validation",
+    "focus": "Bounded per-bus continuous kW target with explicit pulse and exact legacy replay preservation",
+    "lease_scope": "Durable candidate progress record; main publication requires matching original main and successful cloud checks."
+  },
+  "next_focus": "Finish and verify the bounded continuous attack intervention protocol. Preserve the concise interface, all four costs, old version 13 replay and physical bounds. Later investigate paired announced and unannounced physical events with identical physical realizations and feedback-only trajectories.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -754,10 +782,10 @@
       "job": 117310942294
     },
     "last_metadata_verification": {
-      "commit": "37aa669ed2239ada293c4fcd86db066478c01ba2",
-      "candidate_run": 39020936035,
-      "main_run": 39021334717,
-      "pages_run": 39021334639,
+      "commit": "d01631a3c1502df713be55eef87f8c01e4687678",
+      "candidate_run": 39024605710,
+      "main_run": 39025105567,
+      "pages_run": 39025105236,
       "result": "success"
     },
     "interrupted_invocation": {
@@ -775,12 +803,6 @@
       "parent_solar_run": 39014465950,
       "verified": "success",
       "recovery_branch": "cloud/refine/recover-20261017-1500"
-    },
-    "latest_completion_candidate": {
-      "slot": "2026-10-17T18:00:00+08:00",
-      "branch": "cloud/refine/20261017-1800",
-      "expected_main": "18f5271661d89b7e92c30c078275ed1396bb31d2",
-      "instruction": "Metadata-only completion candidate. Validate normally and promote only with matching current main. Count 18:00 once. Do not promote the superseded 15:00 audit."
     }
   },
   "parent_handoffs": [
@@ -810,6 +832,14 @@
       "audit_run": 39014465950,
       "tests": 185,
       "suites": 6,
+      "verified": "success",
+      "counts_as_scheduled_refinement": false
+    },
+    {
+      "commit": "8f900c9311a8d8c89dd2debe002cb78c936f5dc8",
+      "description": "Concise interface with closed advanced controls and corrected browser stopped-bus fixture",
+      "validation": 39033675718,
+      "pages": 39033676054,
       "verified": "success",
       "counts_as_scheduled_refinement": false
     }

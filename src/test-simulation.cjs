@@ -518,3 +518,57 @@ test('completed trials accept pending source settings without extending time or 
     assert.equal(JSON.stringify(changed.snapshot().deployedSupport),support);
   }
 });
+
+test('continuous targets replace only their own component and release into the existing decay',()=>{
+  const sim=new Simulation({horizon:30,seed:20261013}),bus=23;
+  sim.queuePulse(bus,50);
+  for(let t=0;t<5;t++){
+    sim.queuePulse(bus,150,'held-target-v1');
+    sim.queuePulse(bus,150,'held-target-v1');
+    const s=sim.step(),request=s.lastPulseApplications.find(p=>p.bus===bus);
+    assert.ok(Math.abs(request.requestedKw-(150+50*Math.exp(-t/constants.busProfiles[bus-1].decay)))<1e-10);
+    assert.equal(s.activePulses.filter(p=>p.protocol==='held-target-v1').length,1);
+    assert.equal(s.activePulses.filter(p=>!p.protocol).length,1);
+  }
+  sim.queuePulse(bus,50,'held-target-v1');const changed=sim.step();
+  assert.ok(Math.abs(changed.lastPulseApplications[0].requestedKw-(50+50*Math.exp(-5/constants.busProfiles[bus-1].decay)))<1e-10);
+  const released=sim.step();
+  assert.ok(Math.abs(released.lastPulseApplications[0].requestedKw-(50*Math.exp(-1/constants.busProfiles[bus-1].decay)+50*Math.exp(-6/constants.busProfiles[bus-1].decay)))<1e-10);
+  assert.equal(released.eventLog.filter(e=>e.protocol==='held-target-v1').length,11);
+});
+
+test('all predefined seeds retain bounded continuous requests, original forecasts and all four full costs',()=>{
+  const evidence=[];
+  for(const seed of [...Array.from({length:40},(_,i)=>i+1),20261013]){
+    const options={experiment:'communication',powerScenario:'forecasted-demand',beta:4,seed,horizon:90};
+    const target=new Simulation(options),legacy=new Simulation(options);
+    let peakTarget=0,peakLegacy=0,minTarget=1,minLegacy=1;
+    for(let t=0;t<90;t++){
+      if(t>=5&&t<65)for(let bus=2;bus<=24;bus++){
+        target.queuePulse(bus,150,'held-target-v1');legacy.queuePulse(bus,150);
+      }
+      const current=target.step(),previous=legacy.step();
+      assert.deepEqual(target.forecasts,legacy.forecasts,'Unexpected power never enters newly issued forecasts, seed '+seed);
+      assert.deepEqual(current.lastSample.base,previous.lastSample.base,'Protocol changes no base power draws');
+      if(t>=5&&t<65){
+        assert.equal(current.lastPulseApplications.length,23);
+        for(const item of current.lastPulseApplications){
+          assert.equal(item.requestedKw,150,'No overlap accumulation');
+          assert.ok(item.appliedKw>=-1e-9&&item.appliedKw<=150+1e-9,'Existing equipment limits bound the actual effect');
+          if(constants.busProfiles[item.bus-1].role==='Homes')assert.ok(Math.abs(item.appliedKw-150)<1e-8);
+        }
+        assert.equal(current.activePulses.length,23);
+      }
+      peakTarget=Math.max(peakTarget,current.lastPulseApplications.reduce((sum,p)=>sum+p.appliedKw,0));
+      peakLegacy=Math.max(peakLegacy,previous.lastPulseApplications.reduce((sum,p)=>sum+p.appliedKw,0));
+      minTarget=Math.min(minTarget,...Object.values(current.voltages).flat());
+      minLegacy=Math.min(minLegacy,...Object.values(previous.voltages).flat());
+    }
+    const a=target.snapshot(),b=legacy.snapshot();
+    assert.ok(peakTarget<=23*150+1e-8);assert.ok(peakLegacy>23*150,'Legacy stacking remains reproducible');
+    assert.deepEqual(Object.keys(a.cumulative),controllers);
+    evidence.push({seed,peakAppliedKw:peakTarget,legacyPeakAppliedKw:peakLegacy,minVoltage:minTarget,legacyMinVoltage:minLegacy,
+      stageCosts:a.cumulative,totalCosts:a.totalCost,legacyStageCosts:b.cumulative,legacyTotalCosts:b.totalCost});
+  }
+  console.log('Continuous target protocol audit '+JSON.stringify({seeds:evidence.length,settingKw:150,activeActions:[5,64],samples:90,phase:'discovery protocol regression, not held out algorithm ranking',results:evidence}));
+});

@@ -432,7 +432,7 @@
         if(item.type==='fit') { simulation.fitStep(Math.max(1,Math.floor(item.count || item.steps || 1))); continue; }
         if(item.type==='resume') { simulation.resume(); continue; }
         if(!Number.isInteger(item.bus)||item.bus<2||item.bus>24) continue;
-        if(item.type==='pulse') simulation.queuePulse(item.bus,[50,100,150].includes(item.strength)?item.strength:100);
+        if(item.type==='pulse') simulation.queuePulse(item.bus,[50,100,150].includes(item.strength)?item.strength:100,item.protocol==='held-target-v1'?item.protocol:null);
         else if(item.type==='forecast'||item.type==='fault') simulation.toggleFault(item.bus);
       }
       if(step<target) {
@@ -517,19 +517,19 @@
   }
   function enterComparison(preserveAttack=false) {
     // Transfer requests not yet applied, not decaying disturbances from the old plant.
-    const requests=preserveAttack ? simulation.snapshot().pendingPulses.map(p=>({bus:p.bus,strength:p.strength})) : [];
+    const requests=preserveAttack ? simulation.snapshot().pendingPulses.map(p=>({bus:p.bus,strength:p.strength,...(p.protocol?{protocol:p.protocol}:{})})) : [];
     if(!simulation.deployTopology()) return false;
     snapshot=simulation.snapshot();
     topology.observe(snapshot);historyIndex=null;visualTopologyEvent=null;
     journal=[];fitSteps=0;pin=null;lastPulse=null;comparisonContinued=false;
     if(preserveAttack) {
       for(const attack of activeAttacks()) {
-        if(!requests.some(p=>p.bus===attack.bus)) requests.push({bus:attack.bus,strength:Number($('strength').value)});
+        if(!requests.some(p=>p.bus===attack.bus)) requests.push({bus:attack.bus,strength:Number($('strength').value),...(attack.latched?{protocol:'held-target-v1'}:{})});
         attack.lastQueuedAt=0;
       }
     } else releaseAttack();
     for(const request of requests) {
-      simulation.queuePulse(request.bus,request.strength);
+      simulation.queuePulse(request.bus,request.strength,request.protocol || null);
       journal.push({t:0,type:'pulse',...request});
       lastPulse={...request,t:0,before:0};
     }
@@ -705,7 +705,7 @@
   }
   function attackFeedback(bus=selectedBus) {
     const state=attackState(bus);
-    return {state,hint:state==='continuous'?'Repeats until stopped':state==='held'?'Release to stop':state==='pending'?'Queued for next sample':state==='fading'?'Disturbance fading':state==='paused'?'Paused · Disturbance remains':continuousMode()?'Click to start or stop':'Click or hold'};
+    return {state,hint:state==='continuous'?'Maintained until stopped':state==='held'?'Release to stop':state==='pending'?'Queued for next sample':state==='fading'?'Disturbance fading':state==='paused'?'Paused · Disturbance remains':continuousMode()?'Click to start or stop':'Click or hold'};
   }
   function canAttack(bus=selectedBus) { return bus!==1; }
   function pulse(bus = selectedBus,{repeated=false}={}) {
@@ -716,9 +716,9 @@
     const strength = Number($('strength').value);
     const before = snapshot.stage.online;
     const pulseStep = simulation.t;
-    simulation.queuePulse(bus, strength);
-    journal.push({t:pulseStep,type:'pulse',bus,strength});
-    const attack=attackAt(bus);
+    const attack=attackAt(bus),protocol=attack?.latched?'held-target-v1':null;
+    simulation.queuePulse(bus,strength,protocol);
+    journal.push({t:pulseStep,type:'pulse',bus,strength,...(protocol?{protocol}:{})});
     if(attack) attack.lastQueuedAt=pulseStep;
     lastPulse={bus,strength,t:pulseStep,before};
     if(repeated) return;
@@ -977,7 +977,7 @@
       $('stop-attacks').title='Stop new requests at all '+attackCount+' active '+(attackCount===1?'bus':'buses')+'. Existing disturbances will decay.';
     }
     $('pulse').dataset.attackState=forecast?(forecastNoisy(selectedBus)?'noisy':'quiet'):feedback.state;
-    $('attack-hint').textContent=forecast?(snapshot.phase==='deployment'?'Links remain fixed':forecastNoiseEnabled()?'New forecasts only':'No noise at β 0'):Number($('strength').value)+' kW per pulse · '+feedback.hint;
+    $('attack-hint').textContent=forecast?(snapshot.phase==='deployment'?'Links remain fixed':forecastNoiseEnabled()?'New forecasts only':'No noise at β 0'):Number($('strength').value)+(continuousMode()&&!heldAttack?' kW target per bus · ':' kW per pulse · ')+feedback.hint;
     $('step').textContent=frozen?'100 fit steps':'Step';
     $('step').disabled=comparing || snapshot.mode==='converged';
     $('freeze').hidden=true;

@@ -343,13 +343,18 @@
       this.segments.push({start,end:start+length,length,dense,designs,offlineScores,fixed});
     }
     checkBus(bus){if(!Number.isInteger(bus)||bus<1||bus>N)throw new Error('Bus must be an integer from 1 through 24');return bus;}
-    queuePulse(bus,strength=PULSE_DEFAULT){
+    queuePulse(bus,strength=PULSE_DEFAULT,protocol=null){
       this.checkBus(bus);
       if(!Number.isFinite(strength)||strength<PULSE_MIN||strength>PULSE_MAX)throw new RangeError('Pulse strength must be from 10 through 150 kW');
       if(bus===1)return false;if(this.mode==='completed')this.extend();if(this.mode!=='running')return false;
-      const profile=BUS_PROFILES[bus-1];this.pulses.push({bus,strength,age:0,t:this.t,...profile,requestedKw:strength,appliedKw:null});
+      if(protocol!==null&&protocol!=='held-target-v1')throw new RangeError('Unknown power request protocol');
+      // Refresh only this bus's continuous component. Explicit and legacy pulses
+      // remain independent decaying requests, including in version 13 replay.
+      if(protocol==='held-target-v1')this.pulses=this.pulses.filter(event=>event.bus!==bus||event.protocol!==protocol);
+      const extra=protocol?{protocol}:{};
+      const profile=BUS_PROFILES[bus-1];this.pulses.push({bus,strength,age:0,t:this.t,...profile,...extra,requestedKw:strength,appliedKw:null});
       this.eventLog.push(deepFreeze({t:this.t,type:'pulse',bus,strength,units:'kW',role:profile.role,
-        eventName:profile.eventName,decay:profile.decay,steps:profile.steps,message:profile.eventName+' at bus '+bus}));return true;
+        eventName:profile.eventName,decay:profile.decay,steps:profile.steps,...extra,message:profile.eventName+' at bus '+bus}));return true;
     }
     extend(steps=480){
       if(!Number.isInteger(steps)||steps<1)throw new RangeError('Extension must be a positive number of steps');
