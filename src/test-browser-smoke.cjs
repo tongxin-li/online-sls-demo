@@ -498,7 +498,7 @@ async function main() {
     await page.locator('#pr-intervention').selectOption('power');
     await selectSetting(page,'strength','150');
     assert.equal(await page.locator('#pr-strength').isVisible(),false);
-    assert.match(await page.locator('#pr-attack-hint').textContent(),/^150 kW per pulse · /);
+    assert.match(await page.locator('#pr-attack-hint').textContent(),/^150 kW target per bus · /);
     for(const bus of [20,22,23])await page.getByRole('button',{name:'Toggle continuous attack at bus '+bus,exact:true}).click();
     await waitSamples(3);
     const attacksBefore=await checkPowerAttacks(page,[20,22,23]);
