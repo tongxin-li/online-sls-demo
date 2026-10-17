@@ -379,7 +379,14 @@
       "direct_live_inspection": "unverified, previously denied browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-17T10:00:00+08:00",
+    "started_at": "2026-10-17T09:55:25+08:00",
+    "lease_expires_at": "2026-10-17T10:35:25+08:00",
+    "branch": "cloud/refine/20261017-1000",
+    "base_main": "8db9309a98f94eea032b2b214168fe18c92a60fe",
+    "focus": "Truthful protocol phase receipt and saved discovery versus live comparison inspection"
+  },
   "next_focus": "Audit phase presentation against the actual protocol. Clearly distinguish dense discovery, offline link selection and synthesis, then a fresh held out comparison with frozen support and coefficients. Keep prediction adaptation separate and do not imply joint online topology adaptation. Prefer concise existing status areas over more controls or visual redesign. Add actual phase transition and source-map persistence assertions if gaps exist.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
