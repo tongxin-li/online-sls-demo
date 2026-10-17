@@ -561,8 +561,16 @@
     "changes": [
       "Keep a paused inspected source setting from implicitly continuing or extending a completed finite comparison.",
       "Allow completed engine trials to record pending source settings without advancing samples or rewriting sealed forecasts. Explicit click-to-play sets reliability before the extended preview is issued.",
-      "Regress paused repeated settings, all four retained results, frozen support, exact version 13 replay and first new message timing in engine, UI and real browser checks."
-    ]
+      "Regress paused repeated settings, all four retained results, frozen support, exact version 13 replay and first new message timing in engine, UI and real browser checks.",
+      "Clear active inspection metadata and emphasis immediately from departing network links, while retaining their existing fade, so a rapid fresh-trial switch cannot leave an old source highlighted."
+    ],
+    "superseded_candidate": {
+      "source": "75b1606e72d5e79b46b423d138d8ac6e51c5c279",
+      "run": 39015758183,
+      "job": 117347415643,
+      "step": "Check browser interactions and responsive layout",
+      "error": "New completed-source checks passed. Subsequent keyboard inspection after fresh reference trial found one highlighted network link where current matrix support expected none. Departing links retained old inspection attributes during fade. Clear departing inspection immediately and retain diagnostics without relaxing assertions."
+    }
   },
   "next_focus": "Keep paused source setting changes separate from explicitly continuing a completed comparison. Preserve all existing controller results, baseline curves, default scenario and scientific parameters.",
   "priorities": [

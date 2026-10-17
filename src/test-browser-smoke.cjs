@@ -287,7 +287,8 @@ async function main() {
         assert.equal(reading.state.playing,false);assert.equal(reading.snapshot,before,'Keyboard inspection cannot change the experiment');
         assert.equal(reading.focused.source,String(source));assert.equal(reading.focused.receiver,String(receiver));
         const connected=await current().getAttribute('data-connected')==='true';
-        assert.equal(await page.locator('#pr-network .recommended path[data-inspected="true"]').count(),connected&&receiver!==source?1:0);
+        const inspectedPaths=await page.locator('#pr-network .recommended path[data-inspected="true"]').evaluateAll(nodes=>nodes.map(node=>({from:node.dataset.from,to:node.dataset.to,change:node.dataset.change})));
+        assert.equal(inspectedPaths.length,connected&&receiver!==source?1:0,'Current keyboard inspection '+JSON.stringify({key,receiver,source,connected,inspectedPaths}));
         assert.equal(await page.locator('#pr-matrix .matrix-cell[tabindex="0"]').count(),1,'Exactly one matrix cell is in the tab sequence');
       }
       // Native disclosure activation must not trigger the global playback shortcut.

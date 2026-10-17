@@ -1030,7 +1030,11 @@
     const links = svg.select('.recommended').selectAll('path').data(edges,e => e.from+'_'+e.to).join(
       enter => enter.append('path').attr('d',arc).attr('opacity',0),
       update => update,
-      exit => { if (reducedMotion) exit.remove(); else exit.interrupt('update').transition('update').duration(240).attr('opacity',0).remove(); }
+      exit => {
+        // A departing link may fade, but must stop claiming the active inspection immediately.
+        exit.attr('data-inspected','false').attr('stroke-width',1.5);
+        if (reducedMotion) exit.remove(); else exit.interrupt('update').transition('update').duration(240).attr('opacity',0).remove();
+      }
     ).attr('fill','none').attr('data-from',e => e.from).attr('data-to',e => e.to).attr('data-change',e => e.change)
       .attr('data-inspected',e=>String(!!inspection && inspection.connected && !inspection.local && e.change!=='removed' && e.from===inspection.source && e.to===inspection.receiver))
       .attr('stroke-dasharray',e => e.change === 'removed' ? '3 4' : null)
