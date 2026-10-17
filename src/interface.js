@@ -82,8 +82,7 @@
     $('codesign').hidden=!metrics;
     if(!metrics) return;
     const {points,denseLinks,learnedLinks,savedPercent,status}=metrics;
-    $('codesign-flow').textContent='Learn gains → Select '+learnedLinks+' links → Rebuild controller';
-    $('codesign-flow').title='Completed discovery selects the deployed support. The controller is synthesized under those links, then tested on a fresh disturbance sequence. Links and prediction coefficients stay fixed during this comparison.';
+    renderDeploymentReceipt();
     $('codesign-summary').textContent=d3.format('.1f')(savedPercent)+'% fewer remote prediction links than dense · '+status;
     const el=$('codesign-chart');
     el.setAttribute('aria-label','Four evaluated designs. Lower cost and fewer remote prediction links are favorable. '+points.map(point=>point.label+', '+point.links+' remote links, cost '+d3.format('.6~g')(point.cost)).join('. ')+'. Shared feedback and local prediction channels are excluded.');
@@ -101,6 +100,36 @@
       .attr('stroke',point=>point.color).attr('stroke-width',point=>point.key==='scalar'?2:1.5);
     marks.select('title').text(point=>point.label+' · '+point.links+' remote links · Cost '+d3.format('.6~g')(point.cost));
     renderCodesignKey(metrics);
+  }
+  function deploymentReceipt() {
+    if(!communicationComparison()||!snapshot.deployedSupport)return null;
+    const support=snapshot.deployedSupport;
+    if(!Array.isArray(support.links)||!Array.isArray(support.fixedLinks))return null;
+    const budget=predictionBudget();
+    const fixedLinks=support.fixedLinks.filter(link=>link.from!==link.to).length;
+    const scoreSamples=Number.isInteger(support.scoreSamples)?support.scoreSamples:null;
+    return {discoverySamples:protocolStatus().discoverySamples,scoreSamples,remoteLinks:budget.remote,fixedLinks,
+      newLinks:budget.replaced,comparisonSamples:snapshot.t,
+      stages:[
+        {key:'discovery',label:'Learn',value:protocolStatus().discoverySamples+' samples',detail:scoreSamples===null?'Scores unrecorded':scoreSamples+' scored actions',status:'complete'},
+        {key:'selection',label:'Select',value:budget.remote+' remote links',detail:budget.replaced+(budget.remote===fixedLinks?' replaced':' new vs fixed'),status:'complete'},
+        {key:'synthesis',label:'Synthesize',value:'Complete',detail:'Support constrained',status:'complete'},
+        {key:'comparison',label:'Compare',value:snapshot.t+' samples',detail:'Fresh stream · Links fixed',status:'current'}
+      ]};
+  }
+  function renderDeploymentReceipt() {
+    const panel=$('codesign-flow'),receipt=deploymentReceipt();panel.replaceChildren();
+    if(!receipt)return;
+    panel.title='Actual discovery and offline support selection precede controller resynthesis. The comparison uses fresh plant states and costs. Remote counts exclude local prediction and common feedback. Selected support and prediction correction stay fixed; this is not joint online topology optimization.';
+    for(const stage of receipt.stages){
+      const item=document.createElement('li'),label=document.createElement('span'),value=document.createElement('strong'),detail=document.createElement('span');
+      item.dataset.stage=stage.key;item.dataset.status=stage.status;
+      if(stage.status==='current')item.setAttribute('aria-current','step');
+      label.className='pr-protocol-label';label.textContent=stage.label;value.textContent=stage.value;
+      detail.className='pr-protocol-detail';detail.textContent=stage.detail;
+      item.append(label,value,detail);panel.append(item);
+    }
+    for(const key of ['discoverySamples','scoreSamples','remoteLinks','fixedLinks','newLinks','comparisonSamples'])panel.dataset[key]=receipt[key]===null?'':String(receipt[key]);
   }
   function renderCodesignKey(metrics) {
     const key=$('codesign-key');key.replaceChildren();

@@ -26,6 +26,7 @@ const source=withoutCards.replace(anchor,
   '  root.testSummary=()=>comparisonSummary();\n'+
   '  root.testCodesign=()=>codesignMetrics();\n'+
   '  root.testRenderCodesign=()=>renderCodesignKey(codesignMetrics());\n'+
+  '  root.testDeploymentReceipt=()=>deploymentReceipt();root.testRenderDeploymentReceipt=renderDeploymentReceipt;\n'+
   '  root.testInspectPredictionLink=(receiver,source)=>inspectPredictionLink(receiver,source);\n'+
   '  root.testInspection=()=>predictionInspection();\n'+
   '  root.testProtocol=()=>protocolStatus();\n'+
@@ -132,7 +133,7 @@ function harness(saved,experiment='prediction',reducedMotion=true) {
   const node=id=>nodes.get('pr-'+id);
   return {clock,document,window,node,drawSeries:(...args)=>root.testDrawSeries(...args),pin:value=>root.testPin(value),
     interventionEvents:(view=root.powerDemo.getSnapshot())=>plain(root.testInterventionEvents(view)),interventionGroups:(view,domain=[0,20],scale=10)=>plain(root.testInterventionGroups(view,domain,v=>v*scale,{x:0,w:600})),
-    comparison:()=>plain(root.testComparison()),summary:()=>root.testSummary(),codesign:()=>plain(root.testCodesign()),renderCodesign:()=>root.testRenderCodesign(),powerContext:()=>root.testPowerContext(),shownReference:()=>plain(root.testShownReference()),seriesButton:key=>seriesButtons.get(key),
+    comparison:()=>plain(root.testComparison()),summary:()=>root.testSummary(),codesign:()=>plain(root.testCodesign()),renderCodesign:()=>root.testRenderCodesign(),deploymentReceipt:()=>plain(root.testDeploymentReceipt()),renderDeploymentReceipt:()=>root.testRenderDeploymentReceipt(),powerContext:()=>root.testPowerContext(),shownReference:()=>plain(root.testShownReference()),seriesButton:key=>seriesButtons.get(key),
     samples:count=>clock.advance(count*1000/Number(node('speed').value)),
     bus:bus=>{const svg=element('g');svg.dataset.bus=String(bus);root.bindTestBus(svg,bus);return svg;},
     pointer(type,underPointer,detail={}){
@@ -2161,4 +2162,34 @@ test('communication cost ledger keeps actual values, pending results and every w
   h.click('cost-gap');inspect();
   const restored=harness(h.saved());restored.renderCodesign();
   assert.deepEqual(restored.node('codesign-key').children.map(row=>row.dataset),h.node('codesign-key').children.map(row=>row.dataset));
+});
+
+test('deployment sequence uses actual short discovery, selection and fresh comparison without changing execution',async()=>{
+  const h=linkEvidenceFixture();
+  const inspect=()=>{
+    const before=plain(h.snapshot()),receipt=h.deploymentReceipt(),support=before.deployedSupport;
+    assert.equal(receipt.discoverySamples,before.discoveryRecord.t);
+    assert.equal(receipt.scoreSamples,support.scoreSamples);
+    assert.equal(receipt.remoteLinks,support.links.filter(link=>link.from!==link.to).length);
+    assert.equal(receipt.fixedLinks,support.fixedLinks.filter(link=>link.from!==link.to).length);
+    const fixed=new Set(support.fixedLinks.map(link=>link.from+'>'+link.to));
+    assert.equal(receipt.newLinks,support.links.filter(link=>link.from!==link.to&&!fixed.has(link.from+'>'+link.to)).length);
+    assert.equal(receipt.comparisonSamples,before.t);
+    assert.deepEqual(receipt.stages.map(stage=>stage.key),['discovery','selection','synthesis','comparison']);
+    assert.deepEqual(receipt.stages.map(stage=>stage.status),['complete','complete','complete','current']);
+    h.renderDeploymentReceipt();
+    assert.equal(h.node('codesign-flow').children.length,4);
+    assert.equal(h.node('codesign-flow').children[3]['aria-current'],'step');
+    assert.deepEqual(plain(h.snapshot()),before,'Reading and rendering the sequence cannot change the physical trial');
+    return receipt;
+  };
+  const initial=inspect();assert.equal(initial.discoverySamples,35);assert.equal(initial.comparisonSamples,0);
+  h.click('step');const first=inspect();assert.equal(first.comparisonSamples,1);
+  h.click('source-fault');assert.deepEqual(inspect(),first,'A source toggle cannot rewrite completed discovery or synthesis');
+  h.event('topology-history','input');assert.deepEqual(inspect(),first,'Reviewing discovery links does not replace current trial evidence');
+  h.click('history-live');const restored=harness(h.saved());assert.deepEqual(restored.deploymentReceipt(),first);
+  await compare(h);const continued=inspect();assert.ok(continued.comparisonSamples>180);
+  assert.equal(continued.discoverySamples,35);assert.equal(continued.remoteLinks,first.remoteLinks);assert.equal(continued.newLinks,first.newLinks);
+  h.click('restart');assert.equal(h.deploymentReceipt(),null);h.renderDeploymentReceipt();assert.equal(h.node('codesign-flow').children.length,0);
+  const prediction=harness();assert.equal(prediction.deploymentReceipt(),null,'Adaptive correction is not a fixed communication comparison');
 });

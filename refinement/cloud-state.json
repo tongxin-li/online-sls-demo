@@ -783,8 +783,13 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
-  "next_focus": "Review the existing phase badge and gain learning, support selection and controller synthesis explanation for a compact measured visual progression. Reuse current panels rather than adding another control or diagnostic block. Preserve the readable four-method communication ledger, actual inspected link receipt, recorded reliability regimes, fixed deployment labels and every unfavorable result. No broad numerical study until the primary visual story is clear.",
+  "active_run": {
+    "slot": "2026-10-18T04:00:00+08:00",
+    "branch": "cloud/refine/20261018-0400",
+    "started_at": "2026-10-18T04:01:15+08:00",
+    "expires_at": "2026-10-18T04:41:15+08:00"
+  },
+  "next_focus": "Validate measured deployment receipt against real short and automatic discovery, frozen selection and fresh comparison. Review desktop/phone screenshot pixels before publication; no numerical or controller change.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -901,11 +906,11 @@
       "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and candidate workflow results for metadata recovery. Never count metadata validation as a new invocation or improvement, or promote an older candidate over newer main."
     },
     "previous_renewed_metadata_verification": {
-      "commit": "93e438707604f359e1cbb6b758bfa62547a81d91",
-      "candidate_run": 39057857692,
-      "main_run": 39058620445,
-      "pages_run": 39058620016,
-      "result": "success independently read before this slot"
+      "commit": "dac0e054c7f666b9b728850b6441d5d8a67b1cbb",
+      "candidate_run": 39062017405,
+      "main_run": 39062695623,
+      "pages_run": 39062695587,
+      "result": "success independently verified before this slot"
     },
     "renewed_completion_history": [
       {
@@ -1006,7 +1011,7 @@
     "hard_deadline": "2026-10-19T01:00:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 3,
+    "invocation_count": 4,
     "completed_count": 3,
     "runs": [
       {
@@ -1135,9 +1140,34 @@
         "pages_run": 39061305579,
         "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed. No public HTTP byte comparison was performed this pass.",
         "completed_at": "2026-10-17T19:19:37.692Z"
+      },
+      {
+        "slot": "2026-10-18T04:00:00+08:00",
+        "started_at": "2026-10-18T04:01:15+08:00",
+        "status": "validating_candidate",
+        "candidate_branch": "cloud/refine/20261018-0400",
+        "base_commit": "dac0e054c7f666b9b728850b6441d5d8a67b1cbb",
+        "counted_completed": false,
+        "changes": [
+          "Replace the generic co-design sentence with a compact measured four stage receipt. It separates recorded discovery and scored actions, actual selected remote links and replacements, completed support-constrained synthesis, and fresh comparison samples with links fixed.",
+          "Read actual frozen discovery/support and current comparison data. Preserve short manual discovery, source toggles, saved link history, exact replay and continuation without fabricated activity or joint online topology optimization.",
+          "Preserve the engine, default scenario, all four costs and curves, communication ledger and recorded regimes. Add read-only stage/selection/replay/continuation assertions and desktop/phone layout and screenshot checks."
+        ],
+        "tests": {
+          "status": "pending"
+        },
+        "screenshots": {
+          "pixel_review": "pending authorized Actions preview"
+        },
+        "publication": "unpublished"
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "slot": "2026-10-18T04:00:00+08:00",
+      "branch": "cloud/refine/20261018-0400",
+      "started_at": "2026-10-18T04:01:15+08:00",
+      "expires_at": "2026-10-18T04:41:15+08:00"
+    },
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",

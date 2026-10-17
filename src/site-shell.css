@@ -428,7 +428,13 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 /* The selected support and its measured control cost share one panel. */
 .pr-codesign { margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
 .pr-codesign h3 { margin:0; font-size:13px; font-weight:600; letter-spacing:-.015em; }
-.pr-codesign-flow { margin:7px 0 10px; color:var(--muted-foreground); font-size:12px; line-height:1.5; }
+.pr-codesign-flow { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; padding:0; margin:10px 0 12px; list-style:none; font-size:12px; line-height:1.45; }
+.pr-codesign-flow li { min-width:0; padding:9px 8px; border-radius:8px; background:var(--muted); }
+.pr-codesign-flow li[aria-current='step'] { background:#eef5fc; }
+.pr-protocol-label,.pr-protocol-detail { display:block; color:var(--muted-foreground); }
+.pr-protocol-label { margin-bottom:5px; }
+.pr-codesign-flow strong { display:block; margin-bottom:4px; color:var(--foreground); font-size:14px; font-weight:600; }
+@media(max-width:600px) { .pr-codesign-flow { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 .pr-codesign-ledger { width:100%; border-collapse:collapse; margin:8px 0; font-size:12px; line-height:1.5; }
 .pr-codesign-ledger th,.pr-codesign-ledger td { padding:7px 5px; border-bottom:1px solid var(--border); text-align:right; white-space:nowrap; }
 .pr-codesign-ledger th:first-child { text-align:left; white-space:normal; }

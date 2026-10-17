@@ -345,6 +345,8 @@ async function main() {
         return {phase:snapshot.phase,experiment:snapshot.experiment,costs:snapshot.cumulative,support:snapshot.deployedSupport,
           hidden:section.hidden,summary:document.querySelector('#pr-codesign-summary').textContent,
           label:chart.getAttribute('aria-label'),
+          receipt:{data:{...document.querySelector('#pr-codesign-flow').dataset},items:Array.from(document.querySelectorAll('#pr-codesign-flow li')).map(item=>({stage:item.dataset.stage,status:item.dataset.status,current:item.getAttribute('aria-current'),text:item.textContent,boxes:Array.from(item.children).map(cell=>({font:parseFloat(getComputedStyle(cell).fontSize),...cell.getBoundingClientRect().toJSON()}))}))},
+          discoverySamples:snapshot.discoveryRecord?.t,t:snapshot.t,
           ledger:Array.from(document.querySelectorAll('#pr-codesign-key tr')).map(row=>({key:row.dataset.key,links:Number(row.dataset.links),cost:Number(row.dataset.cost),winner:row.dataset.winner,
             name:row.querySelector('th').textContent,shown:Array.from(row.querySelectorAll('td')).map(cell=>cell.textContent),
             expected:d3.format('.6~g')(snapshot.cumulative[row.dataset.key]),
@@ -364,6 +366,17 @@ async function main() {
         assert.ok(Number.isFinite(point.x)&&Number.isFinite(point.y),'Measured points stay finite');
         assert.ok(point.r>0,'Every design has a visible marker');
       }
+      const receipt=reading.receipt;
+      assert.equal(Number(receipt.data.discoverySamples),reading.discoverySamples);
+      assert.equal(Number(receipt.data.scoreSamples),reading.support.scoreSamples);
+      assert.equal(Number(receipt.data.remoteLinks),expected.online);assert.equal(Number(receipt.data.fixedLinks),expected.scalar);
+      const fixed=new Set(reading.support.fixedLinks.map(link=>link.from+'>'+link.to));
+      assert.equal(Number(receipt.data.newLinks),reading.support.links.filter(link=>link.from!==link.to&&!fixed.has(link.from+'>'+link.to)).length);
+      assert.equal(Number(receipt.data.comparisonSamples),reading.t);
+      assert.deepEqual(receipt.items.map(item=>item.stage),['discovery','selection','synthesis','comparison']);
+      assert.deepEqual(receipt.items.map(item=>item.status),['complete','complete','complete','current']);
+      assert.equal(receipt.items[3].current,'step');assert.match(receipt.items[3].text,/Fresh stream.*Links fixed/);
+      for(const item of receipt.items)for(const box of item.boxes){assert.ok(box.font>=12);assert.ok(box.left>=-1&&box.right<=surface.viewportSize().width+1,'Measured phase text fits the viewport');}
       assert.deepEqual(reading.ledger.map(row=>row.key),['online','scalar','static','causal'],'All four cost and communication rows remain visible');
       const minimum=Math.min(...Object.values(reading.costs)),pending=Object.values(reading.costs).every(value=>value<=1e-12);
       for(const row of reading.ledger){
@@ -635,6 +648,7 @@ async function main() {
     assert.deepEqual(completedRestored.costs,completedBefore.costs);
     assert.deepEqual(completedRestored.segments,completedBefore.segments);
     await stepSetting(page);assert.equal(await sample(),181);
+    await checkCodesign(page);
     await page.getByRole('button',{name:'Restart demo',exact:true}).click();
     const restarted=await page.evaluate(()=>{
       const root=document.querySelector('#power-response-demo');return {snapshot:root.powerDemo.getSnapshot(),state:root.powerDemo.getState()};
