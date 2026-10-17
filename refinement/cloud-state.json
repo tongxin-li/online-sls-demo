@@ -8,7 +8,7 @@
   "hard_deadline": "2026-10-18T01:45:00+08:00",
   "max_scheduled_runs": 24,
   "max_minutes_per_run": 40,
-  "completed_count": 13,
+  "completed_count": 14,
   "runs": [
     {
       "slot": "2026-10-17T02:00:00+08:00",
@@ -647,28 +647,58 @@
       },
       "deployment": "GitHub Pages success",
       "direct_live_inspection": "unverified, prior denied browser access not retried"
+    },
+    {
+      "slot": "2026-10-17T18:00:00+08:00",
+      "started_at": "2026-10-17T18:04:15+08:00",
+      "completed_at": "2026-10-17T10:21:32.560Z",
+      "status": "completed",
+      "changes": [
+        "Keep paused forecast source settings from implicitly extending any completed finite planning segment, including reference discovery, held out comparison and continued default trials.",
+        "Apply pending reliability before an explicit continuation seals the first new preview. Preserve all already issued messages, past costs and frozen deployed support.",
+        "Preserve the guided 180 sample review in restored trials with a wider engine horizon, including its paused state and Continue action.",
+        "Add paired issuance and physical stream regressions for all original and reserved seeds 1 through 40 plus the unchanged demonstration seed, full 180 and 660 boundary interactions, exact version 13 replay and real browser assertions. No scientific parameter or engine change."
+      ],
+      "source_commit": "7a78afed42623e42c4c2e149d169ec6175e6eec7",
+      "published_commit": "18f5271661d89b7e92c30c078275ed1396bb31d2",
+      "candidate_run": 39023903853,
+      "main_run": 39024296187,
+      "pages_run": 39024296411,
+      "tests": {
+        "suites": 6,
+        "total": 191,
+        "failed": 0,
+        "build": "passed",
+        "main_consistency": "passed",
+        "causality": "At completed discovery/deployment/continued-default segments, paused settings preserve horizon, mode, sealed forecasts, states, all four costs and support. Explicit bus activation matches paused repair then Run. First new selected source message changes while every other source and paired realized base power remain identical. All 41 original/reserved/demo seeds pass a short boundary-only fixture. Wide legacy guided horizon and exact replay remain verified.",
+        "browser": "Reference discovery t180 and continued default comparison t660 preserve pending settings without implicit extension. Reload matches exact pending state, controls, costs and events. Explicit stepping extends once and reveals the first new selected source forecast on the same physical stream. Existing repeated attacks, automatic comparison, thirty metric switches, four baseline curves and mobile checks pass.",
+        "benchmarks": "Not rerun. The six sample horizon is solely a regression fixture. Production engine, horizons, scenarios, default beta/seed, controllers, synthesis, objective, limits and all scientific parameters remain unchanged."
+      },
+      "regression_before_fix": {
+        "source": "332fac74481f91fdebb7387659be4d5f90fac932",
+        "run": 39023617080,
+        "job": 117370162617,
+        "step": "Test controllers and interactions",
+        "test": "every completed segment defers source settings until explicit continuation without stale first issuance",
+        "expected": "completed",
+        "actual": "running",
+        "published": false
+      },
+      "screenshots": {
+        "artifact_id": 12097477942,
+        "additional_captures": [
+          "source-segment-discovery.png",
+          "source-segment-continued-default.png"
+        ],
+        "machine_evidence": "source-segment-boundaries.json",
+        "pixel_review": "unverified"
+      },
+      "deployment": "GitHub Pages success",
+      "direct_live_inspection": "unverified, prior denied browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-17T18:00:00+08:00",
-    "started_at": "2026-10-17T18:04:15+08:00",
-    "expires_at": "2026-10-17T18:44:15+08:00",
-    "base_commit": "37aa669ed2239ada293c4fcd86db066478c01ba2",
-    "branch": "cloud/refine/20261017-1800",
-    "focus": "Audit pending source settings at finite segment boundaries, preserving all scientific parameters and exact replay",
-    "diagnosed_issue": "Paused source actions at an ordinary completed planning segment extend and seal the new preview before changing reliability. The existing guided comparison guard covered only the first reviewed default comparison.",
-    "regression_before_fix": {
-      "source": "332fac74481f91fdebb7387659be4d5f90fac932",
-      "run": 39023617080,
-      "job": 117370162617,
-      "step": "Test controllers and interactions",
-      "test": "every completed segment defers source settings until explicit continuation without stale first issuance",
-      "expected": "completed",
-      "actual": "running",
-      "published": false
-    }
-  },
-  "next_focus": "Audit interaction correctness at discovery/comparison boundaries and pending forecast setting issuance. Make another product change only for a demonstrated behavior or causality issue. Preserve the forecasted-demand beta 4 default and seed, all four controllers and full costs, frozen deployed supports, exact replay and conditional scientific results. Do not retune for an advantage or add cosmetic controls.",
+  "active_run": null,
+  "next_focus": "Audit actual source and receiver inspection through history and interaction mode changes, including keyboard focus and accessible fault actions. Make a product correction only for a demonstrated behavior or causality issue. Preserve the forecasted-demand beta 4 default and seed, all four curves and full costs, frozen deployed topology, exact saved replay and conditional scientific results. Avoid noise knobs, retuning or cosmetic releases to force an advantage.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -745,6 +775,12 @@
       "parent_solar_run": 39014465950,
       "verified": "success",
       "recovery_branch": "cloud/refine/recover-20261017-1500"
+    },
+    "latest_completion_candidate": {
+      "slot": "2026-10-17T18:00:00+08:00",
+      "branch": "cloud/refine/20261017-1800",
+      "expected_main": "18f5271661d89b7e92c30c078275ed1396bb31d2",
+      "instruction": "Metadata-only completion candidate. Validate normally and promote only with matching current main. Count 18:00 once. Do not promote the superseded 15:00 audit."
     }
   },
   "parent_handoffs": [
