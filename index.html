@@ -484,6 +484,16 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   .pr-controller-key button { min-height:44px; padding:8px 10px; }
 }
 
+/* Keep physical timing captions readable without competing with chart units. */
+.pr-stage-panel .pr-plot-label { flex-wrap:wrap; align-items:baseline; row-gap:2px; line-height:1.5; font-size:12px; }
+.pr-stage-panel .pr-plot-label>span { min-width:0; max-width:100%; overflow-wrap:anywhere; }
+.pr-stage-panel .pr-target-key { font-size:12px; }
+.pr-stage-panel #pr-pulse-summary { font-size:12px; color:#93551c; }
+.pr-stage-panel #pr-pulse-summary:empty { display:none; }
+@media(max-width:650px) {
+  .pr-stage-label #pr-pulse-summary:not(:empty) { flex-basis:100%; text-align:left; }
+}
+
 /* Artwork stays decorative. The enclosing bus handles hit area and badge input. */
 .pe-host { -webkit-user-select:none; user-select:none; touch-action:manipulation; }
 .pe-hit { fill:transparent; pointer-events:all; }
@@ -690,7 +700,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       <div class="pr-subhead"><h2 id="pr-stage-title">Voltage and cost</h2><strong id="pr-state-value" class="pr-state-value tabular-nums">1.000 pu</strong></div>
       <div class="pr-plot-label"><span id="pr-voltage-detail">Bus 7 voltage</span><span id="pr-voltage-reference" class="pr-target-key">Nominal voltage</span></div>
       <svg class="pr-chart" id="pr-voltage" role="img" aria-label="Selected bus voltage in per unit with its nominal reference profile"></svg>
-      <div class="pr-plot-label"><span>Normalized cost per second</span><span id="pr-pulse-summary" class="tabular-nums" aria-live="polite"></span></div>
+      <div class="pr-plot-label pr-stage-label"><span>Normalized cost per second</span><span id="pr-pulse-summary" class="tabular-nums" aria-live="polite"></span></div>
       <svg class="pr-chart" id="pr-stage" role="img" aria-label="Normalized voltage and reactive effort cost under identical power disturbances"></svg>
       <div id="pr-stage-detail" class="pr-panel-foot tabular-nums"></div>
       <details id="pr-voltage-details" class="pr-panel-details"><summary>Voltage details</summary>
