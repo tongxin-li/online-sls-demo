@@ -207,7 +207,7 @@
     }).attr('aria-pressed',e=>String(historyIndex===e.index || historyIndex===null && e.index===total))
       .attr('title',e=>'At '+e.t+' seconds. '+e.removed.map(x=>'Removed '+x.from+' → '+x.to).join('. ')+'. '+e.added.map(x=>'Added '+x.from+' → '+x.to).join('. '))
       .on('click',(_event,e)=>reviewTopology(e.index));
-    cards.select('span').text(e=>e.t+' s · '+(new Set(e.added.map(x=>x.to)).size===1?'Inverter '+e.added[0].to:e.added.length+' sources'));
+    cards.select('span').text(e=>e.t+' s · '+(new Set(e.added.map(x=>x.to)).size===1?'Inverter '+e.added[0].to:e.added.length+' links'));
     cards.select('strong').text(e=>e.added.length===1 && e.removed.length===1?'Source '+e.removed[0].from+' → '+e.added[0].from:e.added.length+' added · '+e.removed.length+' removed');
     $('topology-events').hidden=total===0;
     $('history-live').setAttribute('aria-pressed',String(historyIndex===null));
