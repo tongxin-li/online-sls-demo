@@ -500,8 +500,13 @@
     "lease_expires_at": "2026-10-17T13:39:56+08:00",
     "branch": "cloud/refine/20261017-1300",
     "base_main": "4ddc0eab38b8883f7c6c678c417e4c6da6cd78cf",
-    "status": "claimed",
-    "focus": "Browser smoke payload reduction and milestone evidence, preserving every interaction assertion"
+    "status": "candidate validation",
+    "focus": "Browser smoke payload reduction and milestone evidence, preserving every interaction assertion",
+    "changes": [
+      "Trim browser transport to the exact snapshot fields consumed by existing marker, source history, command and protocol assertions. Retain full snapshot invariance checks.",
+      "Persist browser section elapsed times throughout execution so interrupted checks leave useful timing evidence. Retain all 140 assertions, thirty live metric switches, sixty two independent revealed pairs, touch actions and screenshots.",
+      "No production code, controllers, physical parameters, workflow timeouts or benchmarks changed."
+    ]
   },
   "next_focus": "Reduce browser snapshot transport overhead and capture per-section timings without increasing CI timeouts or weakening any assertion. No application, model, numerical benchmark or layout changes.",
   "priorities": [

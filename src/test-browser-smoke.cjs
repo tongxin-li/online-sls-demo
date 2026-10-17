@@ -30,6 +30,13 @@ async function main() {
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   let browser;
   const errors = [];
+  const startedAt = performance.now(), timings = [];
+  const mark = async name => {
+    const elapsedSeconds = Number(((performance.now() - startedAt) / 1000).toFixed(3));
+    timings.push({ name, elapsedSeconds });
+    console.log('Browser milestone ' + name + ' ' + elapsedSeconds + 's');
+    await fs.writeFile(path.join(output, 'timings.json'), JSON.stringify({ timings }, null, 2));
+  };
   try {
     browser = await chromium.launch({ headless: true, ...(process.env.DEMO_SMOKE_CHANNEL ? { channel: process.env.DEMO_SMOKE_CHANNEL } : {}) });
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
@@ -105,7 +112,7 @@ async function main() {
       const reading=await surface.evaluate(()=>{
         const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),state=root.powerDemo.getState();
         const window=document.querySelector('#pr-forecast-window'),change=document.querySelector('#pr-forecast-change');
-        return {snapshot,state,window:{...window.dataset},change:{...change.dataset},text:window.textContent,timing:change.textContent};
+        return {snapshot:{t:snapshot.t,eventLog:snapshot.eventLog,lastSample:snapshot.lastSample?{forecast:snapshot.lastSample.forecast,disturbance:snapshot.lastSample.disturbance}:null},state,window:{...window.dataset},change:{...change.dataset},text:window.textContent,timing:change.textContent};
       });
       const {snapshot,state,window,change}=reading;
       const active=state.inspectedSource!==null&&[5,7,8,12,14,18,21,24].includes(state.selectedBus)&&state.historyIndex===null;
@@ -130,7 +137,7 @@ async function main() {
     const checkCommandInspection = async surface => {
       const result=await surface.evaluate(()=>{
         const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),state=root.powerDemo.getState();
-        return {snapshot,state,rows:Array.from(document.querySelectorAll('#pr-command-rows tr')).map(row=>({
+        return {snapshot:{lastSample:snapshot.lastSample?{t:snapshot.lastSample.t}:null,commandQ:snapshot.commandQ,saturation:snapshot.saturation},state,rows:Array.from(document.querySelectorAll('#pr-command-rows tr')).map(row=>({
           data:{...row.dataset},shown:Array.from(row.querySelectorAll('td')).map(cell=>cell.textContent),title:row.title
         }))};
       });
@@ -158,7 +165,7 @@ async function main() {
       const reading=await surface.evaluate(()=>{
         const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),state=root.powerDemo.getState();
         const phase=document.querySelector('#pr-phase');
-        return {snapshot,state,data:{...phase.dataset},badge:phase.textContent,note:document.querySelector('#pr-phase-note').textContent,
+        return {snapshot:{phase:snapshot.phase,experiment:snapshot.experiment,t:snapshot.t,discoveryRecord:snapshot.discoveryRecord?{t:snapshot.discoveryRecord.t}:null},state,data:{...phase.dataset},badge:phase.textContent,note:document.querySelector('#pr-phase-note').textContent,
           title:document.querySelector('#pr-matrix-title').textContent};
       });
       const {snapshot,state,data}=reading,deployed=snapshot.phase==='deployment',saved=state.historyIndex!==null;
@@ -180,7 +187,7 @@ async function main() {
     const checkEventMarkers = async surface => {
       const result=await surface.evaluate(()=>{
         const snapshot=document.querySelector('#power-response-demo').powerDemo.getSnapshot();
-        return {snapshot,charts:['pr-cost','pr-stage','pr-voltage'].map(id=>{
+        return {snapshot:{t:snapshot.t,eventLog:snapshot.eventLog},charts:['pr-cost','pr-stage','pr-voltage'].map(id=>{
           const svg=document.getElementById(id),frame=svg.querySelector('[data-chart-frame]');
           return {id,hidden:svg.hidden||svg.style.display==='none',frame:frame?{x:Number(frame.getAttribute('x')),w:Number(frame.getAttribute('width'))}:null,
             badges:Array.from(svg.querySelectorAll('.intervention-badge')).map(node=>({data:{...node.dataset},label:node.getAttribute('aria-label'),title:node.querySelector('title').textContent})),
@@ -312,8 +319,10 @@ async function main() {
       }
       assert.deepEqual((await sourceState()).faults,initial.faults,'Second action repairs or corrupts back to initial state');
     };
+    await mark('loaded');
     await checkKeyboardInspection();
     await inspectLinks();
+    await mark('discovery inspection');
     await checkVoltageMetrics(page);
     await checkProtocol(page);
     await page.locator('#pr-command-title').click();
@@ -348,6 +357,8 @@ async function main() {
     await checkKeyboardInspection();
     await inspectLinks();
 
+    await mark('comparison handoff and inspection');
+
     // Archived discovery connectivity is not a change to the deployed controller.
     const liveBefore=await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
     assert.ok(Number(await page.locator('#pr-topology-history').getAttribute('max'))>0,'Discovery produced inspectable link changes');
@@ -364,6 +375,8 @@ async function main() {
     assert.equal(await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),liveBefore);
     await page.locator('#pr-matrix-view').selectOption('links');
 
+    await mark('archived protocol inspection');
+
     // Metric changes during playback must retain finite curves and bounded labels.
     await page.locator('#pr-run').click();
     const switchingStart = await sample();
@@ -373,6 +386,7 @@ async function main() {
       assert.match(label, metric === 'gap' ? /difference from fixed sparse/ : /Cumulative cost of 4/);
       await checkPlots();
     }
+    await mark('thirty live metric switches');
     await waitSamples(2);
     assert.ok(await sample() > switchingStart, 'Playback continues during metric switching');
     await pause();
@@ -404,6 +418,8 @@ async function main() {
     await checkPlots();
     await page.screenshot({ path: path.join(output, 'desktop.png'), fullPage: true });
 
+    await mark('solar outage and desktop evidence');
+
     const audit=await browser.newPage({viewport:{width:1440,height:1000}});
     audit.on('pageerror',error=>errors.push(error.message));
     await audit.goto(address,{waitUntil:'networkidle'});
@@ -422,6 +438,7 @@ async function main() {
     }
     await audit.screenshot({path:path.join(output,'forecast-history.png'),fullPage:true});
     await audit.close();
+    await mark('independent sixty two pair error audit');
 
     // A narrow touch viewport keeps the controls usable and the page in bounds.
     const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
@@ -469,6 +486,7 @@ async function main() {
       await phone.screenshot({ path: path.join(output, 'mobile-failure.png'), fullPage: true });
       throw error;
     }
+    await mark('repeated mobile forecast and power taps');
     await phone.locator('#pr-run').tap();
     await phone.locator('#pr-matrix .matrix-cell[data-receiver="5"][data-source="7"]').tap();
     const mobileBefore=await phone.evaluate(()=>{
@@ -520,8 +538,9 @@ async function main() {
     const reportLayout=await phone.evaluate(()=>({page:document.documentElement.scrollWidth,viewport:innerWidth}));
     assert.ok(reportLayout.page<=reportLayout.viewport+1,'Scientific report stays within the mobile page');
     await phone.screenshot({path:path.join(output,'environment.png'),fullPage:true});
+    await mark('mobile inspection and responsive evidence');
     assert.deepEqual(errors, [], 'No browser runtime errors');
-    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), touchEvents, checks: ['actual forecast setting timestamps and typed mixed event markers', 'keyboard matrix inspection and native command table scrolling', 'visible temporal source gain without hover', 'playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'actual protocol receipt and archived discovery view', 'matrix mode exit restores live source controls without advancing plant', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'continuous mobile power attack', 'mobile touch and layout'], errors }, null, 2));
+    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), timings, touchEvents, checks: ['actual forecast setting timestamps and typed mixed event markers', 'keyboard matrix inspection and native command table scrolling', 'visible temporal source gain without hover', 'playback', 'repeated forecast bus clicks', 'continuous power attack', 'automatic handoff', 'actual protocol receipt and archived discovery view', 'matrix mode exit restores live source controls without advancing plant', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'live cost switching', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'continuous mobile power attack', 'mobile touch and layout'], errors }, null, 2));
     console.log('Browser smoke passed');
   } finally {
     if (browser) await browser.close();

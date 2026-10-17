@@ -151,3 +151,5 @@ Cloud changes use a new branch beginning with `cloud/refine/`. Push source edits
 Before promotion, read both successful jobs and the final candidate commit, confirm that the source changes are intended and that the branch still descends from the expected main commit. Update `main` to that candidate with an expected head check. Verify the subsequent main validation and GitHub Pages deployment before calling the update live. A failed or cancelled candidate stays unpublished. The build commit uses the repository Actions token and does not trigger another workflow run.
 
 The cloud browser dependency is pinned to Playwright 1.56.1 and installed only in the runner temporary directory. It does not add a production dependency.
+
+Browser evidence also includes `timings.json`, updated at interaction milestones even before the smoke suite finishes. Numerical and browser assertions are unchanged when test transport is reduced to the fields each assertion uses. Full saved-state invariance checks remain full comparisons. Timings describe cloud test execution, not browser interaction latency or a scientific benchmark.
