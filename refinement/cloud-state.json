@@ -783,13 +783,8 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-18T22:00:00+08:00",
-    "branch": "cloud/refine/20261018-2200",
-    "started_at": "2026-10-18T22:00:00+08:00",
-    "lease_expires_at": "2026-10-18T22:35:18+08:00"
-  },
-  "next_focus": "Validate compact existing command notes and inspect actual desktop and phone pixels before any promotion. Preserve all scientific qualifications and values.",
+  "active_run": null,
+  "next_focus": "Read final product main and completion metadata results first. Recover metadata without another completion increment. Review real remaining visual clarity gaps without duplicate panels, redundant copy or a broad new numerical study.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -899,16 +894,16 @@
       "pages_run": 39052070867
     },
     "renewed_completion": {
-      "slot": "2026-10-18T21:00:00+08:00",
-      "branch": "cloud/refine/20261018-2100",
-      "product_ready_commit": "b1513b4d7db153d1302684d6ea69fde5918dc0f4",
-      "source_commit": "2d99ca23f06224cca620be6719c80b2bd5231c87",
-      "candidate_run": 39129762927,
-      "main_run": 39130815409,
-      "pages_run": 39130815472,
-      "scope": "Completion record only. Product already validated and deployed.",
-      "status": "Metadata validation pending at creation. Historical completed 15, renewed invocation 20 and completed 19 yield total 34. Recovery and read only preflight did not increment completion.",
-      "instruction": "Read actual product main repeat before metadata promotion or further source changes. Validate metadata normally and promote only when current main matches b1513b4d7db153d1302684d6ea69fde5918dc0f4 with force false. On newer main inspect and reapply only verified metadata without overwriting concurrent changes or double counting. Read final metadata repeat at the next existing scheduled slot if still pending. Preserve the original stricter 21:35:32 deadline measured from 20:55:32 early dispatch. Do not extend it or start an extra pass for duplicates. This 21:00 product improvement is counted once only; recovery and metadata are not new improvements."
+      "slot": "2026-10-18T22:00:00+08:00",
+      "branch": "cloud/refine/20261018-2200",
+      "source_commit": "be6000cdda4fe45404aa4c3be99395ebbb199e90",
+      "product_ready_commit": "3eec702fe23e0c5af5dd4e181ff04e1d93d00474",
+      "candidate_run": 39134838015,
+      "main_run": 39135943487,
+      "pages_run": 39135943442,
+      "scope": "Completion metadata only. Actual product validated, pixel reviewed and exact Pages version verified. No additional improvement.",
+      "status": "Metadata validation pending at creation. Historical completed 15, renewed invocation 21 and completed 20 yield total 35. Corrected source is the same scheduled pass. Cancelled source, coordination, metadata and recovery do not create additional improvements.",
+      "instruction": "Keep metadata unpublished until normal validate and prepare succeed and actual product main repeat 39135943487 succeeds. Promote only with expected main 3eec702fe23e0c5af5dd4e181ff04e1d93d00474 and force false. Inspect concurrent changes and reapply only verified metadata without overwriting or double counting. If checks remain pending at 22:35:18 stop this pass and reconcile at the next existing scheduled slot. No extra immediate pass or deadline extension. Read final metadata main repeat before later source edits."
     },
     "previous_renewed_metadata_verification": {
       "commit": "e72156d27b731f00f88edee1ce3fe007ea3786f8",
@@ -1084,6 +1079,18 @@
         "scope": "Completion and recovery record only. Product already validated and deployed. No new source improvement.",
         "status": "19:00 product and 20:00 recovery metadata are already main at db596461f147c57f8e5ad61cbb7542a886a58067. Candidate and prepare, both main repeats and exact Pages versions succeeded. Final metadata main 39126592304 independently read with completed logs before this slot. No recovery invocation or completion increment.",
         "instruction": "Read actual product main repeat before metadata promotion or further source edits. Validate metadata normally and promote only when current main matches 6ac9de8994dadfcb0482971f13819461866b1dc4 with force false. On newer main inspect and reapply only verified metadata without overwriting concurrent changes or double counting. Preserve failed source attempts, recorded screenshot limitations and both original pass deadlines. Read final metadata repeat at the next existing scheduled slot. Do not treat recovery, metadata or duplicate dispatches as extra improvements."
+      },
+      "18": {
+        "slot": "2026-10-18T21:00:00+08:00",
+        "branch": "cloud/refine/20261018-2100",
+        "product_ready_commit": "b1513b4d7db153d1302684d6ea69fde5918dc0f4",
+        "source_commit": "2d99ca23f06224cca620be6719c80b2bd5231c87",
+        "candidate_run": 39129762927,
+        "main_run": 39130815409,
+        "pages_run": 39130815472,
+        "scope": "Completion record only. Product already validated and deployed.",
+        "status": "Metadata validation pending at creation. Historical completed 15, renewed invocation 20 and completed 19 yield total 34. Recovery and read only preflight did not increment completion.",
+        "instruction": "Read actual product main repeat before metadata promotion or further source changes. Validate metadata normally and promote only when current main matches b1513b4d7db153d1302684d6ea69fde5918dc0f4 with force false. On newer main inspect and reapply only verified metadata without overwriting concurrent changes or double counting. Read final metadata repeat at the next existing scheduled slot if still pending. Preserve the original stricter 21:35:32 deadline measured from 20:55:32 early dispatch. Do not extend it or start an extra pass for duplicates. This 21:00 product improvement is counted once only; recovery and metadata are not new improvements."
       }
     },
     "renewed_metadata_verification_history": [
@@ -1270,7 +1277,7 @@
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
     "invocation_count": 21,
-    "completed_count": 19,
+    "completed_count": 20,
     "runs": [
       {
         "slot": "2026-10-18T01:00:00+08:00",
@@ -2339,10 +2346,10 @@
         "started_at": "2026-10-18T22:00:00+08:00",
         "preflight_at": "2026-10-18T21:55:18+08:00",
         "lease_expires_at": "2026-10-18T22:35:18+08:00",
-        "status": "in_progress",
+        "status": "completed",
         "base_commit": "26915d0413bf1a9516402bdd68c22605982f3746",
         "counted_invocation": true,
-        "counted_completed": false,
+        "counted_completed": true,
         "slot_resolution": "Read only early preflight until 22:00. Source edits begin after scheduled start. Retain stricter 22:35:18 deadline from original dispatch. No extra refinement or extended deadline for duplicates.",
         "changes": [
           "Consolidate the original three command notes so preview scope, highlighted link ownership, gain norm units and amplitude independence remain explicit without repeating long explanations.",
@@ -2350,29 +2357,54 @@
           "Add desktop and phone assertions for exact scientific qualifications, 12 px type, viewport containment and compact wording. No new panels, controls or dependencies. No broad benchmark rerun."
         ],
         "tests": {
-          "status": "Candidate validation pending"
+          "suites": 8,
+          "total": 224,
+          "failed": 0,
+          "candidate": "Corrected source validate 117697222768 and prepare 117700129681 succeeded. Completed logs independently read.",
+          "build": "passed",
+          "reference_artifact": "Unchanged generator and all reference checks passed.",
+          "browser": "Full original desktop and phone suite plus both network suites passed without browser errors. New assertions preserve exact preview scope, highlighted link ownership, norm units and amplitude independence, additive request before limiting, bounded command and noncausal source qualification. The same three captions have at least 12 px text, fit both viewports and use 57 words rather than 69. All four methods and 24 numeric values, native panning, accurate visible term cues, keyboard reachability and full paused trial invariance remain checked. All playback, attacks, forecast toggles, automatic handoff, stable cost buttons, network switching and exact replay remain covered.",
+          "main": "Product main repeat 39135943487 is running at record creation. Read actual final result before metadata promotion or any next source edit. Do not cancel it with another main push.",
+          "benchmarks": "Not rerun. No scientific model, engine, controller, objective, limit, gain, noise, learning, timing, attack or numerical result change."
         },
         "screenshots": {
-          "status": "Candidate desktop and phone command pixels must be reviewed before promotion. Prior live screenshot pixels read during preflight."
+          "artifact_id": 12139489008,
+          "artifact_digest": "sha256:eb814cf4afc8c0c233aa95d7a4f2722709f1592b1744492cbca466d9ff697a48",
+          "captures": [
+            "command-navigation-1440-start.jpg",
+            "command-navigation-1440-middle.jpg",
+            "command-navigation-1440-end.jpg",
+            "command-navigation-390-start.jpg",
+            "command-navigation-390-middle.jpg",
+            "command-navigation-390-end.jpg"
+          ],
+          "pixel_review": "Six actual corrected candidate desktop 1440 and phone 390 command JPEG pixels reviewed through authorized Actions previews before promotion. Intro occupies fewer lines on both layouts without smaller type. Norm units, preview scope, amplitude independence, request before limiting, bounded command and noncausal source qualification are readable without clipping or overlap. Four method names remain pinned and all six terms remain reachable. Existing phone visible term and scroll direction cue remains accurate at start middle and end, while desktop fits all terms without the cue. Natural partial numeric boundary columns remain. No direct live browser inspection claimed."
         },
-        "direct_live_inspection": "Unverified. Previously denied live browser access not retried. Public HTTP bytes not independently fetched.",
+        "direct_live_inspection": "Unverified. Previously denied live browser access not retried or bypassed. No independent public HTTP byte comparison. Actual generated browser interactions and six screenshot pixels reviewed through authorized Actions evidence. Exact Pages build version independently verified.",
         "candidate_revisions": [
           {
             "source_commit": "4b522128e2091fbd0a9a351a472396f0afe9943a",
             "candidate_run": 39134092366,
             "status": "superseded_unpublished",
             "reason": "Review found new word count assertion matched a literal backslash rather than whitespace. Correct the test before any promotion, retain exact scientific and layout assertions and rerun full workflow. No scientific or page behavior change.",
-            "validation_conclusion": "In progress when corrected source is prepared. Workflow concurrency may cancel it. Preserve actual final result on next read."
+            "validation_conclusion": "Cancelled by workflow concurrency when the corrected test source was pushed. Completed logs independently read. All 224 cases and original browser smoke passed before network browser execution was interrupted. This superseded source was never fully validated or published."
           }
-        ]
+        ],
+        "completed_at": "2026-10-18T14:28:25.769Z",
+        "source_commit": "be6000cdda4fe45404aa4c3be99395ebbb199e90",
+        "published_commit": "3eec702fe23e0c5af5dd4e181ff04e1d93d00474",
+        "candidate_run": 39134838015,
+        "main_run": 39135943487,
+        "pages_run": 39135943442,
+        "publication": "Corrected validate and prepare succeeded. Ready 3eec702fe23e0c5af5dd4e181ff04e1d93d00474 has tested source be6000cdda4fe45404aa4c3be99395ebbb199e90 as its only parent and only index.html changed, with exactly the three intended caption replacements. Guarded main promotion at 2026-10-18T14:25:44.936Z matched expected 26915d0413bf1a9516402bdd68c22605982f3746 with force false. Completed Pages deploy 117700376994 logs independently confirm exact ready build version at 2026-10-18T14:26:51.557Z. Product main repeat pending at record creation. Do not promote completion metadata before both it and its own normal validation succeed.",
+        "remaining_visual_limitations": [
+          "Native pan boundaries still show partial numeric columns. The existing cue names only whole terms and every term remains reachable. This wording pass does not change table layout.",
+          "Pixel review covers declared Chrome desktop 1440 and phone 390 command layouts, not direct live browser or public byte inspection."
+        ],
+        "next_focus": "Read final product main and completion metadata results first. Recover metadata without another completion increment. Review real remaining visual clarity gaps without duplicate panels, redundant copy or a broad new numerical study."
       }
     ],
-    "active_run": {
-      "slot": "2026-10-18T22:00:00+08:00",
-      "branch": "cloud/refine/20261018-2200",
-      "started_at": "2026-10-18T22:00:00+08:00",
-      "lease_expires_at": "2026-10-18T22:35:18+08:00"
-    },
+    "active_run": null,
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
@@ -2392,5 +2424,5 @@
     "baseline_main": "2a9ff26b59565ecac1eb5274fbea4d813a18f24f"
   },
   "completed_count_scope": "Original bounded program, retained at 15. Renewed counts are tracked independently in renewed_program.",
-  "total_completed_count": 34
+  "total_completed_count": 35
 }
