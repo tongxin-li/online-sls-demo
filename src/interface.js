@@ -532,7 +532,7 @@
     const last=reading.points.at(-1);
     $('response-history-label').textContent='Executed signed gain · '+(reading.connected?'Source '+reading.source+' → inverter '+reading.receiver:'Excluded source · Zero gain')
       +(last?' · Action '+last.x+' s':' · Run to record');
-    el.hidden=!last;
+    if(last)el.removeAttribute('hidden');else el.setAttribute('hidden','');
     for(const [key,value]of Object.entries({source:reading.source,receiver:reading.receiver,count:reading.points.length,
       lastAction:last?.x??'',lastGain:last?.gain??'',lastCorrection:last?.correction??''}))el.dataset[key]=String(value);
     if(!last)return;

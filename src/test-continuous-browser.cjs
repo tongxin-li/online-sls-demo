@@ -39,6 +39,7 @@ async function main(){
    assert.equal((await read(page)).ui.inspectedSource,7,'Fresh default inspection follows the main forecast target');
    if(networkId!=='feeder24')await page.locator('#pr-network-scenario').selectOption(networkId);
    await setting(page,'speed','32');
+   assert.equal(await page.locator('#pr-response-history').getAttribute('hidden'),'','Executed gain SVG has a native hidden attribute until execution');
    assert.equal(await page.locator('#pr-response-history').isVisible(),false,'No executed gain plot before the first action');
    assert.equal((await read(page)).s.networkId,networkId);
    await settings(page,async()=>assert.equal(await page.locator('#pr-experiment').isVisible(),false,'No inapplicable legacy experiment selector'));

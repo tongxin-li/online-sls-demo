@@ -3461,6 +3461,15 @@
           "completed_logs_read": true,
           "reason": "New assertion read projected snapshot.networkId without including it in the read helper. Real network switching executed but the test value was undefined.",
           "full_validation": "in_progress_before_corrective_source"
+        },
+        "hidden_plot_attempt": {
+          "source_commit": "76426d2deb56c77f2a0354e575f9b6f25d6e5798",
+          "run_id": 39161304511,
+          "ongoing_browser_job": 117775162234,
+          "conclusion": "failure",
+          "completed_logs_read": true,
+          "reason": "The visibility regression still fails after the CSS selector. SVG hidden property assignment was not creating the hidden attribute. Set and remove the actual attribute and retain both native attribute and visibility assertions.",
+          "full_validation": "in_progress_at_followup"
         }
       },
       "next_focus": "Enable and validate fresh ongoing trials with explicit archived replay fixtures. Keep unpublished until every new trial migration and required acceptance gate is coherent.",
