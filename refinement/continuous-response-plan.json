@@ -1,0 +1,184 @@
+{
+  "protocol": "continuous-phi-v1",
+  "status": "predeclared_engineering_acceptance_not_a_completed_fix",
+  "source_main": "ad240dba37538d5ea0baf7d1354348fa32a9ad09",
+  "networks": [
+    "toy8",
+    "feeder24",
+    "feeder47"
+  ],
+  "physics_changes": [],
+  "default_seed": 20261013,
+  "seeds": [
+    20261013,
+    21
+  ],
+  "quality_cases": [
+    {
+      "id": "reliable",
+      "beta": 0,
+      "initialFaults": "none"
+    },
+    {
+      "id": "mixed",
+      "beta": 4,
+      "initialFaults": "existing forecasted demand home source map"
+    },
+    {
+      "id": "all_noisy",
+      "beta": 4,
+      "initialFaults": "all nonslack sources"
+    }
+  ],
+  "steps": 901,
+  "boundaries": [
+    179,
+    180,
+    181,
+    359,
+    360,
+    361,
+    479,
+    480,
+    481,
+    899,
+    900
+  ],
+  "forecast_switches": [
+    {
+      "action": 45,
+      "source": "first inverter",
+      "operation": "corrupt"
+    },
+    {
+      "action": 95,
+      "source": "first inverter",
+      "operation": "repair"
+    },
+    {
+      "action": 185,
+      "source": "last inverter",
+      "operation": "corrupt"
+    },
+    {
+      "action": 245,
+      "source": "last inverter",
+      "operation": "repair"
+    },
+    {
+      "action": 365,
+      "source": "first inverter",
+      "operation": "corrupt"
+    },
+    {
+      "action": 425,
+      "source": "first inverter",
+      "operation": "repair"
+    },
+    {
+      "action": 605,
+      "source": "last inverter",
+      "operation": "corrupt"
+    },
+    {
+      "action": 665,
+      "source": "last inverter",
+      "operation": "repair"
+    }
+  ],
+  "power_events": [
+    {
+      "actions": [
+        60,
+        61
+      ],
+      "buses": "last bus",
+      "protocol": "additive pulse",
+      "requestedKw": 100
+    },
+    {
+      "actions": {
+        "first": 110,
+        "last": 120
+      },
+      "buses": "first inverter",
+      "protocol": "held-target-v1",
+      "requestedKw": 100
+    },
+    {
+      "actions": {
+        "first": 270,
+        "last": 280
+      },
+      "buses": "first inverter and last bus",
+      "protocol": "held-target-v1",
+      "requestedKw": 100
+    },
+    {
+      "actions": [
+        355,
+        356,
+        500,
+        501
+      ],
+      "buses": "first inverter",
+      "protocol": "additive pulse",
+      "requestedKw": 50
+    }
+  ],
+  "causality_checks": [
+    "Only revealed target s at state s+1 may update the next action",
+    "Switch at time zero first target5 reveal6 and later switch at t first target t+4 reveal t+5",
+    "Separate the immediate effect of a newly issued raw preview from the later learned coefficient effect",
+    "Hold preaction state and issued preview fixed to independently compare commands using old and new weights",
+    "Perturb unrevealed truth and excluded raw sources without changing admitted sparse control or selector inputs"
+  ],
+  "feasibility_checks": [
+    "Independent diagonal normal equations against existing full matrix solver restricted to diagonal",
+    "Every predictive Xnext=A X+B U and L=U-K X at each frozen candidate and temporal boundary",
+    "Mandatory local mask and actual per network remote budget",
+    "Forbidden raw gain and receiver forecast read remain zero or rejected",
+    "Executed command reconstruction and actuator clipping",
+    "Shared realized physical inputs and recovered forcing across all baselines"
+  ],
+  "replay_checks": [
+    "Exact legacy version13 archived protocol",
+    "Explicit new protocol and deterministic entire event replay",
+    "No reset at old discovery comparison or planning boundaries"
+  ],
+  "browser": {
+    "widths": [
+      1440,
+      390
+    ],
+    "long_run_steps": 901,
+    "checks": [
+      "native playback and pause",
+      "forecast corruption and repair",
+      "same and multiple bus power attacks",
+      "stable Total cost and Difference switching",
+      "network switching and fresh explicit restarts",
+      "responsive full matrix and all source reachability",
+      "actual weight and command diagnostics",
+      "all four curves and full accumulated costs",
+      "reduced motion and keyboard controls"
+    ]
+  },
+  "long_history": {
+    "steps": 1801,
+    "required": "Evaluate render and replay growth. Preserve totals and event evidence; document any retention limits."
+  },
+  "performance_study": {
+    "status": "deferred until protocol correctness passes",
+    "seeds": [
+      21,
+      22,
+      23,
+      24,
+      25
+    ],
+    "cases": "all declared networks and reliability cases with every cost and unfavorable result retained",
+    "retuning": false
+  },
+  "publication_gate": "No integrated continuous protocol publication until causal access, feasibility, actual command adaptation, uninterrupted execution, new and old replay and desktop and phone behavior pass. No claim of manuscript equivalence or theoretical guarantees."
+}

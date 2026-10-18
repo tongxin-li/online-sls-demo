@@ -1,0 +1,78 @@
+# Continuous predictive response implementation map
+
+Audit of public main ad240dba37538d5ea0baf7d1354348fa32a9ad09 on 18 October 2026.
+
+This is ordinary demo engineering documentation. No private manuscript was used. The live default is still the archived frozen communication protocol. This map and a candidate numerical foundation are preparation for a new protocol, not a completed algorithm fix.
+
+## Executed public data path
+
+| Concern | Public implementation | Executed meaning and change required |
+| --- | --- | --- |
+| Trial construction | src/interface.js optionsFromControls and src/interface.html experiment default | The UI chooses communication, forecasted demand, beta 4 and horizon 180. Simulation alone defaults to prediction and horizon 480. Do not infer the shipped default from the engine constructor alone. |
+| Forecast issuance | Simulation.sealPreview in src/simulation.js | Target action s is issued once at max(0,s-4). Reset seals targets 0 through 4. Both entry and forecast vector are deeply frozen. Each action extends the sealed prefix before using its preview. |
+| Reliability switch | Simulation.toggleFault and sealPreview | A switch changes future issuance only. A switch at t greater than zero first affects target t+4, revealed at state t+5. A switch at zero first affects the message issued at 1 for target 5 and revealed at 6. A new raw message may enter the preview before its target is observed. This immediate message effect is different from a learned weight change. |
+| Physical input | Simulation.step and voltageFrom | One bounded power sequence drives all four policies. Each policy has its own state, inverter lag and clipped command. Forcing is recovered using the actual bounded command and shared physical model, then stored after execution. Current action truth cannot enter its own action correction. |
+| Revealed training pair | Simulation.samples and updateCalibration | At action t only samples with action at most t-1 are available. A pair is raw issued forcing forecast and recovered forcing, not voltage minus its nominal profile. Unforecast power contributes to the error. |
+| Shared experimental estimator | src/forecast-calibration.js fit and compatibleMask | Fit uses at most 60 revealed pairs and starts after 30. It minimizes mean squared forcing prediction error plus a Frobenius ridge around identity. The physical model scales lambda independently of seed, support and outcomes. Matrix and scalar restrictions are distinct. This is not literal manuscript Algorithm 1. |
+| Calibration stop | Simulation.updateCalibration | The early return for deployment plus communication stops all correction updates. The alternate prediction experiment continues fitting with the carried discovery window and a support compatibility mask. |
+| Actual prediction gain | Simulation.step | Before the freeze, online executes L times C and scalar executes scalar times L. Communication deployment instead supplies raw forecasts to each fixed L with C equal to identity. Removing a label or animating recommendations would not alter this branch. |
+| Response synthesis | src/response-controller.js Synthesizer.factor and column | The solver uses a nullspace to satisfy forbidden actual prediction gains. It constructs correction maps X=Bz, U=z_next-a z and L=U-KX. Finite horizon endpoints and the terminal Riccati penalty affect the response. Larger feeder component assembly is checked against the full quadratic. |
+| Candidate source scores | Simulation.refreshScores and calibratedScores | Discovery communication scores average squared executed L C row entries over actions 30 through the last discovery action. Recommendations select local plus the network remote budget. Discovery commands remain dense even when a candidate cell is absent. |
+| Actual deployed support | Simulation.deployTopology and addSegment | Deployment selects learned and fixed sparse masks, resynthesizes under them, and freezes their score evidence. A permitted edge can have zero effective gain. Recommendations are not an online support deployment mechanism. |
+| Reset boundary | Simulation.deployTopology | It archives discovery, changes the seed by xor, changes the phase and calls reset. Plant time, costs, states, samples and histories restart. Continuing calibration alone does not remove this reset. |
+| UI boundary | startAutomaticComparison, enterComparison and advanceLiveSample in src/interface.js | At 180 discovery samples automatic deployment creates the fresh comparison. comparisonComplete then stops default playback after 180 comparison samples. These are two separate boundaries and both are superseded for new continuous trials. |
+| Engine endpoint | Simulation.step and extend | The engine stops at options.horizon. extend appends a newly synthesized finite segment without resetting the current state or accumulated costs. A continuous protocol must handle planning automatically and expose any coefficient change due to planning separately from learning. |
+| Diagnostic update | addCompletedRow, advanceRows, updateResponses and fitStep | The delayed completed row beta updates and frozen prefix convergence diagnostic are retained legacy diagnostics. Their beta values do not enter the executed command loop. They cannot be renamed Phi and presented as the fix. |
+| Command inspector | commandContributions in src/interface.js | It reconstructs effective raw source gains from the last executed row, the actual correction and preaction costStates. It must use the exact parameter version used for that command, rather than a newly fitted parameter snapshot. Source and other prediction terms plus feedback sum before clipping. |
+| Gain and support display | predictionDiagnostics, directGain, topologyFrame and TopologyTimeline | directGain is the square root of score energy, not a signed current response coefficient. Communication deployment replaces diagnostics with frozen discovery evidence. A new display must distinguish signed deployed gains, norms, permissions and candidate scores. |
+| Replay | save, replayRecord and hydrate in src/interface.js | Version 13 saves initial options, discovery record, phase, event log, network and UI state. Replay reconstructs discovery and calls deployTopology before the second stream. New ongoing trials require an explicit new protocol identity and schema while preserving old replay. |
+| Long history | samples, history, eventLog, rows and snapshot | Arrays and historical state copies grow. Legacy response rows are repeatedly visited and many UI readers scan full history. Evaluate long run cost and memory explicitly. Keep cumulative totals and full event evidence honest if plot or estimator windows are bounded. |
+
+## Physical and scientific invariants
+
+The physical state model and units, Q, R, terminal P, common K, inverter lag, actuator limit of 70 kvar, power bounds and current attack protocols remain shared. Forecasts remain immutable. Realized physical input and recovered forcing must match across policies within numerical tolerance. Local source permission is mandatory. Remote budgets are 6 and 18 sparse and dense for toy8, 24 and 176 for feeder24, and 48 and 720 for feeder47. These exclude local prediction and common state feedback.
+
+The existing communication protocol compares frozen coefficients after a fresh test stream. Its published percentages and all archived seeds remain evidence for that protocol only. Existing prediction adaptation compares a shared matrix correction with a scalar correction and combines selection with correction. A new adaptive sparse versus fixed sparse experiment has a different question and must say so explicitly.
+
+## Feasible response meaning
+
+Let a denote the inverter lag, F=A+B K, and let X and U denote the predictive correction maps constructed by the public synthesizer. The nominal closed loop response supplies the identity disturbance term. The predictive correction has homogeneous dynamics.
+
+```text
+X_next = A X + B U
+L = U - K X
+X = B z
+U = z_next - a z
+L = z_next - (a I + K B) z
+```
+
+A common right correction D applied to every temporal X and U block preserves that homogeneous recursion and temporal endpoints. A diagonal D also preserves every forbidden raw source column of L. The total frozen candidate response is nominal feedback response plus X D and U D. Tests must verify the recursion, boundary rows, L relation and forbidden gains directly.
+
+D changing between actions yields adaptive preview feedforward with the same feedback law. The executed trajectory is not one fixed lifted response. Frozen candidate feasibility does not by itself prove stability under arbitrary adaptation or saturation. Validate the actual switched execution and actuator behavior independently and do not claim a theorem.
+
+## First implementation target
+
+Use an explicitly versioned continuous protocol and keep the archived protocol implementation for old saved trials and references. Keep one physical clock and accumulate costs from its first action. Do not call deployTopology to enter ongoing operation. Do not route an ongoing trial through comparisonComplete. Explicit Restart may still start a new trial.
+
+The first candidate will investigate continuous source local diagonal calibration as a transparent restriction of the public mean loss objective. This is a declared experimental protocol choice, not a claim that the existing matrix estimator or an unavailable manuscript has been implemented exactly. Each source fits only its own issued forecast and revealed forcing. Coefficients use the existing physical lambda, 30 observation warmup and 60 pair window. The source sends its coefficient with an admitted forecast message. A sparse receiver receives only its allowed source messages and coefficient metadata. Common full state feedback is already an explicit shared assumption and is distinct from remote prediction channels.
+
+```text
+c_j(t) = (mean revealed forecast_j * forcing_j + lambda)
+       / (mean revealed forecast_j^2 + lambda)
+D_t = diag(c_j(t))
+effective_prediction_gain[t,k] = L[t,k] D_t
+```
+
+Do not centrally expose excluded forecasts or their learned metadata to an adaptive selector. Start with a deterministic offline support that uses no future outcomes, keep that support fixed for the first release, and display changing weights honestly. Online adaptive sparse, fixed sparse, dense prediction and feedback must share the physical input. The frozen predictive baselines retain identity correction. Any stationary planning kernel needed to avoid finite episode end effects must be synthesized and checked under the same model, weights and support for all predictive methods, and its difference from the archived finite episode baseline must be explicit.
+
+A stationary kernel is a candidate planning choice rather than an already verified result. Extract an interior response only after checking temporal support, both ends of each full predictive column and the full quadratic reference. Document initialization with unavailable negative target messages and the maximum admitted preview. Otherwise retain explicitly labeled finite planning resynthesis with no physical reset and distinguish its coefficient changes from observed learning.
+
+This first target does not promise support reselection. A later reselection proposal must state its probing traffic, actual source information available, update schedule, fixed budget, resynthesis and feasible handoff. No offline score or a hidden all source calibration can be presented as free online topology learning.
+
+## Display and execution acceptance
+
+Store the exact action parameter version before control. Source error, coefficient, actual effective gain, allowed support, prediction contribution, bounded command and subsequent voltage or cost must refer to compatible action times. Show candidate scores only when they are explicitly candidates. A zero gain is different from a removed permission. Add a measured update count and history of actual deployed weights to the existing panels rather than another dashboard.
+
+New trials must run through actions 180, 360, 480 and beyond without automatic stopping or resetting. Old replay retains its original clocks and reset semantics. The first integrated candidate remains unpublished until numerical and browser evidence demonstrate actual ongoing commands, source access, replay, all three sizes and the single live workflow. A standalone estimator or a documentation publication is not a completed continuous adaptation fix.
+
+The predefined protocol and test streams are recorded in continuous-response-plan.json before implementation. A full performance study is deferred until the causal and feasibility contracts pass. Report every declared result when such a study runs. No numerical superiority claim follows from this map.

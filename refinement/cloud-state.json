@@ -1,11 +1,11 @@
 {
-  "program": "Hourly grid demo refinement",
+  "program": "Continuous predictive response adaptation",
   "timezone": "Asia/Shanghai",
   "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
   "status": "scheduled",
-  "first_run": "2026-10-18T01:00:00+08:00",
-  "last_scheduled_run": "2026-10-19T00:00:00+08:00",
-  "hard_deadline": "2026-10-19T01:00:00+08:00",
+  "first_run": "2026-10-18T23:45:00+08:00",
+  "last_scheduled_run": "2026-10-19T22:45:00+08:00",
+  "hard_deadline": "2026-10-19T23:45:00+08:00",
   "max_scheduled_runs": 24,
   "max_minutes_per_run": 40,
   "completed_count": 15,
@@ -783,20 +783,28 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
-  "next_focus": "At the final existing scheduled invocation read actual product main and completion metadata outcomes, reconcile without another improvement, perform final deployment audit and pause this same hosted automation. Do not create another automation, start a broad study or add an immediate pass. Report actual completed counts and unfinished limitations.",
+  "active_run": {
+    "program_id": "continuous-phi-20261018T234500",
+    "slot": "2026-10-18T23:45:00+08:00",
+    "branch": "cloud/refine/continuous-phi-20261018-2345",
+    "started_at": "2026-10-18T23:49:41+08:00",
+    "lease_expires_at": "2026-10-19T00:29:41+08:00"
+  },
+  "next_focus": "Implement and independently test the causal source local response scaling foundation, then integrate an explicitly versioned ongoing engine and UI in subsequent bounded passes. Keep partial algorithm candidates unpublished.",
   "priorities": [
-    "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
-    "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
-    "Define a bounded sustained physical load scenario, show requested and applied power and inverter saturation, and retain the reference scenario.",
-    "Audit forecast information and paired costs over predefined seeds, including ties and regimes where feedback wins."
+    "Actual continuous causal response adaptation and executed command evidence",
+    "Explicit forecast message access and support feasibility",
+    "Uninterrupted plant time full costs and deterministic replay",
+    "All networks and desktop and touch acceptance before publication",
+    "Visual clarity only after algorithm behavior is correct"
   ],
   "scientific_constraints": [
-    "Do not claim literal Algorithm 1 or a numerical reproduction of the manuscript.",
-    "Keep discovery, selection, synthesis and held out comparison distinct. Joint online topology adaptation is not established by this demo.",
-    "Preserve equal realized disturbances, raw forecasts, objective, feedback and actuator limits across baseline methods.",
-    "Never remove physical attack costs or weaken baselines to manufacture gains.",
-    "Any new stress scenario must state physical bounds and rationale and keep the reference available."
+    "Use only public and explicitly authorized sources. Private manuscript and research files are outside scope.",
+    "Preserve physical model units objective limits common feedback and fair realized baseline inputs.",
+    "Use only revealed observations and immutable issued forecasts. No free excluded prediction sources to a sparse controller or selector.",
+    "Keep old frozen protocols and benchmark claims archived. The new continuous protocol explicitly supersedes freeze reset and stopping constraints.",
+    "Preserve predictive feasibility local permissions and actual remote budgets. Label any dynamic topology selection an experimental extension with explicit probing and resynthesis.",
+    "Validate actual commands causal delay replay long runs and all network sizes independently before publishing an integrated fix."
   ],
   "setup": {
     "chart_fix": "Atomic chart paths and axes on cost metric changes, clear stale inspection and explain forecast event marker.",
@@ -1285,11 +1293,37 @@
       "history_location": "Existing top-level runs retained unchanged",
       "closed_by": "Directly authorized renewal configuration, not a scheduled invocation",
       "renewed_at": "2026-10-17T16:08:20.808Z"
+    },
+    {
+      "archived_at": "2026-10-18T16:02:01.989Z",
+      "reason": "User renewed the same hosted automation for continuous predictive response adaptation",
+      "program": "Hourly grid demo refinement",
+      "first_run": "2026-10-18T01:00:00+08:00",
+      "last_scheduled_run": "2026-10-19T00:00:00+08:00",
+      "hard_deadline": "2026-10-19T01:00:00+08:00",
+      "original_completed_count": 15,
+      "renewed_program_id": "20261018-visual-codesign",
+      "renewed_invocation_count": 22,
+      "renewed_completed_count": 21,
+      "total_completed_count": 36,
+      "priorities": [
+        "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
+        "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
+        "Define a bounded sustained physical load scenario, show requested and applied power and inverter saturation, and retain the reference scenario.",
+        "Audit forecast information and paired costs over predefined seeds, including ties and regimes where feedback wins."
+      ],
+      "scientific_constraints": [
+        "Do not claim literal Algorithm 1 or a numerical reproduction of the manuscript.",
+        "Keep discovery, selection, synthesis and held out comparison distinct. Joint online topology adaptation is not established by this demo.",
+        "Preserve equal realized disturbances, raw forecasts, objective, feedback and actuator limits across baseline methods.",
+        "Never remove physical attack costs or weaken baselines to manufacture gains.",
+        "Any new stress scenario must state physical bounds and rationale and keep the reference available."
+      ]
     }
   ],
   "renewed_program": {
     "id": "20261018-visual-codesign",
-    "status": "scheduled",
+    "status": "superseded_by_explicit_renewal",
     "timezone": "Asia/Shanghai",
     "first_run": "2026-10-18T01:00:00+08:00",
     "last_scheduled_run": "2026-10-19T00:00:00+08:00",
@@ -2461,7 +2495,7 @@
           "reference_artifact": "All unchanged reference artifact checks passed.",
           "interaction": "Existing scheduled event regression now checks pure group label compaction, actual timestamps, current window count, unchanged unforecast labels, original complete group descriptions and explicit latest eight detail cap for nine events. Input view, physical snapshot and UI state remain unchanged.",
           "browser": "Full original desktop and phone suite and both network suites passed without browser errors. Actual event records, types, counts, marker coordinates and spans are retained. Only repeated pure forecasted cycle glyphs hide; other event labels remain. Single visible cycle label reports actual compacted count and retains every original group description in its existing native title despite plot hover overlay. Original marker titles and semantic descriptions remain. Native tooltip content is DOM verified, not a claim of separate browser tooltip pixel inspection. Existing attacks, forecast toggles, automatic handoff, stable cost buttons, all four traces, network switching and exact replay pass. Same paused scheduled trial checks at desktop and phone preserve full snapshot through responsive reflow.",
-          "main": "Main repeat 39140578138 is running at record creation. Read final actual result before metadata promotion or any next source edit. Do not cancel it with another main push.",
+          "main": "Product main 39140578138 and completion metadata candidate 39140803186 with prepare succeeded. All 224 cases, build consistency and original plus network browser suites passed. Actual completed logs independently read before new program source work.",
           "benchmarks": "Not rerun. No physical engine, controller, objective, gain, actuator limit, noise, forecast timing, learning equation, attack or archived result changes."
         },
         "screenshots": {
@@ -2519,7 +2553,18 @@
           "Existing numeric table pan boundaries still show partial columns, with accurate whole term cues and full reachability. This plot annotation pass does not change that layout."
         ],
         "cloud_api_recovery": "One correction orchestration attempt produced no commit SHA and its following update was rejected for a missing sha argument. Readback confirmed branch unchanged. A guarded tree and commit retry succeeded. No main change or validation bypass occurred.",
-        "next_focus": "At the final existing scheduled invocation read actual product main and completion metadata outcomes, reconcile without another improvement, perform final deployment audit and pause this same hosted automation. Do not create another automation, start a broad study or add an immediate pass. Report actual completed counts and unfinished limitations."
+        "next_focus": "At the final existing scheduled invocation read actual product main and completion metadata outcomes, reconcile without another improvement, perform final deployment audit and pause this same hosted automation. Do not create another automation, start a broad study or add an immediate pass. Report actual completed counts and unfinished limitations.",
+        "duplicate_dispatches": [
+          {
+            "at": "2026-10-18T23:29:38+08:00",
+            "disposition": "skipped_duplicate_overlap",
+            "counted_invocation": false,
+            "counted_completed": false,
+            "source_edits": false,
+            "publication": false,
+            "note": "Read only checks while closing existing 23:00 release. Original 23:37:20 deadline retained. Reconciled during the next real program invocation without cancelling CI."
+          }
+        ]
       }
     ],
     "active_run": null,
@@ -2539,8 +2584,72 @@
       "counts_as_invocation": false,
       "counts_as_improvement": false
     },
-    "baseline_main": "2a9ff26b59565ecac1eb5274fbea4d813a18f24f"
+    "baseline_main": "2a9ff26b59565ecac1eb5274fbea4d813a18f24f",
+    "superseded_by": "continuous-phi-20261018T234500",
+    "superseded_at": "2026-10-18T23:43:08+08:00",
+    "completion_scope": "Retain 21 actual completed visual improvements. The final original 00:00 slot is replaced by the explicitly renewed schedule. No new completion for metadata recovery or renewal."
   },
-  "completed_count_scope": "Original bounded program, retained at 15. Renewed counts are tracked independently in renewed_program.",
-  "total_completed_count": 36
+  "completed_count_scope": "Historical original program completed_count remains 15; renewed_program retains its 21 completions. continuous_program starts with 0. Metadata recovery and audit are not algorithm improvements.",
+  "total_completed_count": 36,
+  "active_program_id": "continuous-phi-20261018T234500",
+  "continuous_program": {
+    "id": "continuous-phi-20261018T234500",
+    "status": "running",
+    "first_run": "2026-10-18T23:45:00+08:00",
+    "last_scheduled_run": "2026-10-19T22:45:00+08:00",
+    "hard_deadline": "2026-10-19T23:45:00+08:00",
+    "max_scheduled_runs": 24,
+    "max_minutes_per_run": 40,
+    "invocation_count": 1,
+    "completed_count": 0,
+    "runs": [
+      {
+        "slot": "2026-10-18T23:45:00+08:00",
+        "started_at": "2026-10-18T23:49:41+08:00",
+        "lease_expires_at": "2026-10-19T00:29:41+08:00",
+        "branch": "cloud/refine/continuous-phi-20261018-2345",
+        "base_commit": "ad240dba37538d5ea0baf7d1354348fa32a9ad09",
+        "reconciled_parent_commit": "715de5fb0dd046908c0dfd866e6b4f8db1082bae",
+        "status": "audit_and_foundation_in_progress",
+        "counted_invocation": true,
+        "counted_completed": false,
+        "changes": [
+          "Audit public engine, synthesis, calibration, reset and stopping boundaries, UI command inspection, message support and replay.",
+          "Write precise engineering implementation map and predefined acceptance streams before changing algorithm code.",
+          "Develop a source local scalar calibration foundation on the same candidate after the map is committed. It remains unpublished until integrated protocol acceptance."
+        ],
+        "implementation_map": "refinement/continuous-response-map.md",
+        "acceptance_plan": "refinement/continuous-response-plan.json",
+        "tests": {
+          "prior_product_main": 39140578138,
+          "prior_completion_candidate": 39140803186,
+          "prior_checks": "Actual successful completed logs read. New candidate validation pending."
+        },
+        "live_fix": false,
+        "remaining_gaps": [
+          "Default communication deployment still freezes actual coefficients and support and resets at 180.",
+          "Continuous engine protocol, causal receiver access, executed response history, replay schema and ongoing UI are not yet integrated.",
+          "A source calibration foundation alone is not a validated continuous controller."
+        ],
+        "next_focus": "Implement and independently test the causal source local response scaling foundation, then integrate an explicitly versioned ongoing engine and UI in subsequent bounded passes. Keep partial algorithm candidates unpublished."
+      }
+    ],
+    "active_run": {
+      "program_id": "continuous-phi-20261018T234500",
+      "slot": "2026-10-18T23:45:00+08:00",
+      "branch": "cloud/refine/continuous-phi-20261018-2345",
+      "started_at": "2026-10-18T23:49:41+08:00",
+      "lease_expires_at": "2026-10-19T00:29:41+08:00"
+    },
+    "configuration": {
+      "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
+      "is_enabled": true,
+      "timezone": "Asia/Shanghai",
+      "schedule": "BEGIN:VEVENT\nDTSTART;TZID=Asia/Shanghai:20261018T234500\nRRULE:FREQ=HOURLY;COUNT=24\nEND:VEVENT",
+      "objective": "Fix real continuous predictive response adaptation in the single interactive grid control demo in tongxin-li/online-sls-demo at https://tongxin.me/online-sls-demo/. Prioritize correct continuous learning and executed controller behavior before further cosmetic polish.\n\nThe user's request is “We need to keep updating Phi so the learning process never stops. But in the demo, learning begins and we do not see how Phi (topology and weights) changes, when we trigger attacks so it does not show anything adaptively. Use the automation to fix this severe issue by running it every hour, for in total 24 hours.”\n\nThis renewal replaces the previous program deadline and cosmetic only objective. It also supersedes previous requirements to preserve fixed C = I coefficients, frozen communication support after discovery, the abrupt reset from learning to comparison, and the automatic end at 180 comparison samples. Those old constraints must not block the new goal. Preserve prior program records and actual completed counts. The new goal is one understandable ongoing experiment where revealed observations keep updating the actual predictive response used in subsequent executed actions, attacks may occur at any time, and learning does not silently stop at the old 180 or 360 sample boundaries. Preserve plant time and accumulated physical costs through updates rather than resetting behind the display.\n\nRun only this existing hosted automation 6ad2628236888191b683d1e7ed2e5b93. The new program has exactly 24 hourly starts from 2026-10-18T23:45:00+08:00 through 2026-10-19T22:45:00+08:00 in Asia/Shanghai. The hard stop is 2026-10-19T23:45:00+08:00. Never begin or continue work after the hard stop. At the final scheduled invocation or hard stop, finish the bounded audit, disable this same automation and report the actual completed count, live result and unresolved issues. Do not create a replacement automation, catchup starts, another demo URL or a local fallback. Keep the old local automation paused. Keep unrelated automation and notification settings unchanged.\n\nTreat this as a distinct new program continuous-phi-20261018T234500 with separate invocation and completed counts initially zero. At the first real scheduled invocation, reconcile prior completion metadata and retain all historical programs, counts, failed and cancelled candidates, skipped overlaps and verification history before adding the new program record. Scheduling setup, configuration changes, metadata recovery and audits alone are not new implementation completions. Record each actual scheduled slot once. Prevent overlap with a durable lease and slot deduplication in refinement/cloud-state.json. Recover interrupted or expired leases without double counting. Early dispatch may perform read only preflight but cannot start an extra implementation pass before its scheduled slot. Each pass must be bounded to at most 40 minutes from its original dispatch, reserving time for tests, screenshot review and publication before the next hour. Duplicate dispatches cannot extend deadlines or create another invocation. A coherent algorithm change may span passes on one unpublished candidate branch rather than ship an incomplete or misleading protocol.\n\nWork entirely through connected GitHub APIs and existing GitHub Actions cloud compute. Do not depend on local files, the user's computer, a desktop app, paid infrastructure or secret inspection. Use only public repository implementation and documentation plus other explicitly authorized available sources. The private manuscript is outside this cloud task's inputs. Do not request, inspect, transfer, write or invent unpublished manuscript or research content. Do not claim exact manuscript Algorithm 1 equivalence, theoretical guarantees or numerical reproduction without verified authorized evidence.\n\nAt every invocation read latest main, its actual completed check results, README.md, environment.html, build.py, .github/workflows/validate.yml, the numerical and browser suites relevant to the change, and refinement/cloud-state.json. Preserve concurrent user changes. Known prior public release ad240dba37538d5ea0baf7d1354348fa32a9ad09 documents fixed deployment after 180 discovery samples. Verify current main rather than assuming that SHA is still current. Prior completion metadata 715de5fb0dd046908c0dfd866e6b4f8db1082bae on cloud/refine/20261018-2300 may need reconciliation. Its candidate validation is 39140803186, product main repeat is 39140578138 and product Pages is 39140577896. Independently read actual final results and ancestry before using any handoff. Reconcile the read only duplicate overlap at 2026-10-18T23:29:38+08:00 without extra counts. Retain later legitimate records. Do not alter main merely to record a handoff while its checks are running.\n\nFirst audit the public implementation and its documented algorithm and write a precise implementation map in ordinary demo engineering documentation before changing the algorithm. Map immutable forecast issuance and reveal timing, estimator state and updates, the implemented correction C, predictive response Phi or effective raw source gains, support constraints, synthesis and resynthesis, executed commands, common feedback, actuator clipping, baseline inputs, replay, displayed diagnostics and the old stopping and reset boundaries. Identify where displayed candidate recommendations differ from actual deployed support and effective nonzero weights. The public engine header describes shared rolling calibration as an experimental specialization rather than literal Algorithm 1. The README distinguishes continuous prediction adaptation from frozen communication selection. Preserve these distinctions honestly. Do not merely rename the current estimator, move a phase label or animate recommendations and call that continuous response adaptation.\n\nImplement and independently validate continuous causal response adaptation from only revealed observations and immutable issued forecasts. Actual updated predictive response weights must affect subsequent executed commands. Preserve predictive feasibility, mandatory local support, the common stabilizing feedback law and actuator limits. Show the actual deployed gain or effective response weight evolution and meaningful measured changes following source corruption and repair after the real causal observation delay. Track the distinction among raw source attribution, learned correction, constrained predictive response, clipped command and observed voltage or cost. An unchanged support with changing weights is legitimate and must be shown honestly.\n\nDynamic topology reselection is optional. If implemented, label it as an experimental extension and explicitly document its support budget, causal information available to selection, update timing, controller resynthesis and any probing communication. An excluded source cannot secretly provide free forecasts to the deployed sparse controller or its selector. Account for actual communication used by learning, probing and control rather than treating it as free. Maintain feasible control across real support changes and validate the transition. Distinguish candidate scores, allowed deployed support and effective nonzero gains. Do not manufacture topology motion when observations justify weight changes alone.\n\nUse a concise single live workflow with stable controls and clear status. Show the measured path from observed forecast error to learned weight, actual communication support, executed command and voltage or accumulated cost. Retain four main panels and one integrated controller comparison rather than adding duplicate dashboards, scatter plots, a second cost table or a version selector. The old two stage progress strip is no longer a scientific constraint and should be replaced or adapted only as needed to explain the truthful ongoing protocol. Prefer useful causal diagnostics and measured traces with restrained emphasis over more explanatory clutter. Do not animate activity that is not measured learning or deployment.\n\nPreserve readable network and matrix views for toy8, feeder24 and feeder47, desktop and touch interaction, keyboard controls, repeated and continuous attacks at arbitrary times, forecast corruption and repair, stable cost controls and honest full comparisons. Retain every source and actual per network inverter placement and remote budget. Preserve the constructed LinDistFlow plants, physical units, equipment limits, nominal voltage profiles, objective, physical power inputs and shared stabilizing feedback. The 24 bus reference arithmetic and the larger feeder's exact component synthesis against the full quadratic remain valuable verification references. Any scientifically necessary implementation change must be explicitly documented and independently checked rather than silently altering the physical experiment.\n\nKeep fair baseline inputs and preserve baseline definitions or explicitly document a scientifically necessary change. Every controller must face the same realized physical power sequence and comparable causal information assumptions. Preserve all physical attack and recovery costs, bounded continuous held-target-v1 requests, explicit additive pulses, persistent forecast corruption and repair, immutable issued messages and exact legacy replay where supported. New protocol replay must be deterministic and distinguish its actual algorithm version from archived frozen runs without a separate demo URL or version selection interface. Do not reset plant time, source history or accumulated costs during adaptation. Document any scientifically necessary protocol or schema change.\n\nKeep unfavorable outcomes, including reliable regimes where dense prediction wins and broadly corrupted regimes where feedback wins. Do not retune parameters, objective, noise, limits or seeds to manufacture superiority, weaken opponents, hide traces or physical costs, leak future clicks into forecasts, invent a communication price or claim a globally optimal frontier from a few designs. Existing frozen deployment benchmark percentages cannot be attributed to the new adaptive protocol. Retain and clearly label archived evidence, including original forecast quality regimes, full paired seeds, counterexamples, terminal penalty convention and benchmark-network-scenarios.json with all 60 trials. Keep archived 24 bus evidence scoped to its original network and protocol. Distinguish live accumulated stage costs from finite episode totals with terminal penalties. Predefine new tests and study conditions for the adaptive protocol and report all results and uncertainty where available. Do not cherry pick a successful attack, seed or reliability switch.\n\nRequired acceptance evidence must include runs well past both old 180 and 360 sample boundaries with continuous actual response updates and no hidden resets or automatic stopping; multiple corruption and repair switches; attacks on the same bus and multiple buses at arbitrary times; actual response and executed command changes after causal observation delay; support and predictive feasibility; meaningful support changes where implemented and justified by available data; no future data leakage; no free access to excluded forecasts by the sparse controller or selector; shared realized physical inputs across baselines; deterministic new and legacy replay as applicable; bounded actuator behavior; all three network sizes; desktop and phone interaction; smooth playback; responsive matrices and charts; and long runs with growing history. Validate the algorithm with independent numerical checks appropriate to the response equations and constraints, not just visual or DOM assertions. Evaluate the effects of bounded history or data retention explicitly if needed rather than silently losing accumulated costs or evidence.\n\nUse the established authenticated GitHub candidate branch, full validation, build and Pages publication route. Start from current main and preserve other user edits. Keep a coherent ongoing candidate on cloud/refine when work spans passes. Commit only intended demo source, tests, documentation and progress. Do not write manuscript or research files. Keep necessary source mirrors consistent when available through already authorized connected APIs without depending on the user's PC. Do not change hosting or account settings.\n\nRun the build and all suites required by the current validate.yml, preserving the existing 213 numerical and interaction cases, the 11 network numerical cases, original 44 browser checks and both new network desktop and phone suites as applicable. Add meaningful predefined regression and independent numerical checks for the changed scientific protocol. Update tests that legitimately encode superseded freeze, reset or stopping behavior with an explicit protocol rationale rather than deleting scientific or interaction protections. Do not weaken acceptance checks just to publish.\n\nUse real cloud browser interactions for ordinary playback, arbitrary repeated and continuous attacks, corruption and repair, long boundary crossing runs, stable cost switching, all four baseline traces, network switching, exact replay, desktop and mobile layouts. Capture useful screenshots and inspect their actual pixels through an authorized cloud artifact route before a substantial visual publication. DOM assertions alone are not visual review. Do not repeat or bypass previously denied direct live browser access. Record exact limitations and keep substantial unreviewed candidates unpublished when required pixel inspection is unavailable.\n\nRead actual validation results and completed logs. Verify the generated candidate child descends from the tested source and changes only expected generated files. Promote only after successful required checks and scientific acceptance appropriate to the change, using matching expected current main SHA and force false. On concurrent changes inspect, reapply and retest. Never force overwrite main. Verify Pages deployment for the exact tested revision and public behavior through an authorized available route. Keep failed, cancelled, partial or unverified candidates distinct from live releases and do not describe them as completed fixes. Keep the sole permanent user facing URL https://tongxin.me/online-sls-demo/.\n\nRecord every scheduled start once, implementation map and completed work, actual validations, pixel review status, source and published commits or clearly unverified candidate status, deployment evidence, completion time, scientific and visual limitations, remaining gaps and next focus. Preserve all old program records. Count a new completion only for a coherent validated live improvement, not configuration, recovery, an audit or a cosmetic label change presented as an algorithm fix. At the final invocation or hard stop disable this same hosted automation and report actual new program completed count, live algorithm behavior and unresolved issues. Notify only meaningful completed improvements, actionable failures, required decisions or final completion. Use concise precise main prose without colons or hyphens, retaining necessary syntax in code, paths and URLs.\n\nThis saved renewal is scheduling setup only and does not authorize an extra immediate implementation pass. The first real scheduled run performs the public implementation audit and precise implementation map before algorithm edits.",
+      "setup_counts_as_invocation": false,
+      "setup_counts_as_improvement": false
+    },
+    "candidate_branch": "cloud/refine/continuous-phi-20261018-2345"
+  }
 }
