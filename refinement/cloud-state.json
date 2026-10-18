@@ -2106,7 +2106,17 @@
         "screenshots": {
           "pixel_review": "Pending actual authorized cloud JPEG review before publication."
         },
-        "direct_live_inspection": "Unverified. Previously denied live browser access is not retried. Public HTTP bytes not fetched."
+        "direct_live_inspection": "Unverified. Previously denied live browser access is not retried. Public HTTP bytes not fetched.",
+        "candidate_attempts": [
+          {
+            "source_commit": "4999365697f86dc08768835e2ed4224d8688cb07",
+            "candidate_run": 39121911698,
+            "status": "failed_unpublished",
+            "validation_conclusion": "failure",
+            "prepare_conclusion": "skipped",
+            "reason": "17 interaction cases encountered the lightweight DOM harness missing Element.remove; 120 interaction cases passed. One dependent timer assertion was a consequence. No browser or later suites ran. Renderer cleanup changed to existing replaceChildren pattern without modifying or weakening the harness, assertions or scientific code."
+          }
+        ]
       }
     ],
     "active_run": {

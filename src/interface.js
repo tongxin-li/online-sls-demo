@@ -345,7 +345,7 @@
   function renderLinkEvidence(reading) {
     const panel=$('link-receipt'),body=$('link-receipt-rows'),execution=$('link-receipt-execution');
     panel.hidden=!reading;body.replaceChildren();
-    execution.querySelectorAll('tr[data-measure]').forEach(row=>row.remove());
+    execution.replaceChildren($('link-receipt-execution-time'));
     panel.dataset.available=String(!!reading);
     for(const key of ['source','receiver','discoverySamples','scoreSamples','action'])
       panel.dataset[key]=reading&&reading[key]!==null?String(reading[key]):'';
