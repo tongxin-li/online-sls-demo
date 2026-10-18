@@ -512,3 +512,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 @media(max-width:650px) {
   #pr-network .bus-number { fill:#53535a !important; paint-order:stroke; stroke:#fff; stroke-width:2px; stroke-linejoin:round; }
 }
+
+/* Keep every source and inverter number readable without removing matrix columns. */
+#pr-matrix .matrix-columns text,
+#pr-matrix .matrix-rows text,
+#pr-matrix .matrix-axis { font-size:12px; }

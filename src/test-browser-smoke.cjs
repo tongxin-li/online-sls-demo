@@ -179,6 +179,43 @@ async function main() {
       for(const span of reading.glyphs){assert.ok(span.font>=12);for(const rect of span.rects)assert.ok(rect.left>=reading.box.left-1&&rect.right<=reading.box.right+1&&rect.top>=reading.box.top-1&&rect.bottom<=reading.box.bottom+1,'Full role caption fits without clipping');}
       assert.ok(reading.inspectedColumnFont>=12&&reading.selectedRowFont>=12,'Selected source column and receiver row remain readable');
     };
+    const checkMatrixGeometry = async surface => {
+      const before=await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
+      assert.equal(await surface.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getState().playing),false,'Measure labels on a paused actual trial');
+      await surface.waitForFunction(()=>{const svg=document.querySelector('#pr-matrix');return Math.abs(svg.viewBox.baseVal.width-svg.getBoundingClientRect().width)<1;});
+      await surface.locator('#pr-matrix').scrollIntoViewIfNeeded();
+      const result=await surface.evaluate(()=>{
+        const svg=document.querySelector('#pr-matrix');
+        const box=node=>{const r=node.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom};};
+        const text=node=>({label:node.firstChild?.nodeValue,box:box(node),font:parseFloat(getComputedStyle(node).fontSize)});
+        return {frame:box(svg),sources:Array.from(svg.querySelectorAll('.matrix-columns text')).map(node=>({...text(node),bus:node.__data__})),
+          rows:Array.from(svg.querySelectorAll('.matrix-rows g')).map(node=>{const point=svg.createSVGPoint(),centre=point.matrixTransform(node.getScreenCTM());return {...text(node.querySelector('text')),bus:node.__data__,centreY:centre.y};}),
+          titles:Array.from(svg.querySelectorAll('.matrix-axis')).map(text),
+          cells:Array.from(svg.querySelectorAll('.matrix-cell')).map(node=>{const r=node.getBoundingClientRect(),hit=document.elementFromPoint((r.left+r.right)/2,(r.top+r.bottom)/2)?.closest('.matrix-cell');return {source:Number(node.dataset.source),receiver:Number(node.dataset.receiver),connected:node.dataset.connected,box:box(node),hitSource:Number(hit?.dataset.source),hitReceiver:Number(hit?.dataset.receiver)};}),
+          page:document.documentElement.scrollWidth,viewport:innerWidth};
+      });
+      assert.deepEqual(result.sources.map(x=>x.bus),Array.from({length:23},(_,i)=>i+2),'All 23 source columns remain in order');
+      assert.deepEqual(result.rows.map(x=>x.bus),[5,7,8,12,14,18,21,24],'All eight inverter rows remain in order');
+      assert.equal(result.cells.length,184,'Every actual inspection cell remains available');
+      assert.deepEqual(result.titles.map(x=>x.label),['Source bus','Inverter']);
+      const labels=[...result.sources,...result.rows,...result.titles];
+      const overlap=(a,b)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>.5&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>.5;
+      for(let i=0;i<labels.length;i++){
+        const a=labels[i];assert.ok(a.font>=12,'Every matrix number and axis title is at least 12 px');
+        assert.ok(a.box.left>=result.frame.left-.5&&a.box.right<=result.frame.right+.5&&a.box.top>=result.frame.top-.5&&a.box.bottom<=result.frame.bottom+.5,'Every label fits inside the matrix drawing '+a.label);
+        for(let k=i+1;k<labels.length;k++)assert.ok(!overlap(a.box,labels[k].box),'Matrix labels do not overlap '+a.label+' and '+labels[k].label);
+      }
+      for(const cell of result.cells){
+        assert.equal(cell.hitSource,cell.source);assert.equal(cell.hitReceiver,cell.receiver,'Every actual cell centre targets its own receiver');
+        const column=result.sources.find(x=>x.bus===cell.source),row=result.rows.find(x=>x.bus===cell.receiver),centreX=(cell.box.left+cell.box.right)/2;
+        assert.ok(Math.abs((column.box.left+column.box.right)/2-centreX)<.6,'Source number stays aligned with its actual column');
+        assert.ok(column.box.bottom<cell.box.top,'Source labels stay above the support cells');
+        assert.ok(Math.abs(row.centreY-(cell.box.top+cell.box.bottom)/2)<.6,'Inverter number stays aligned with its actual row');
+      }
+      assert.ok(result.page<=result.viewport+1,'Larger matrix labels never widen the page');
+      assert.equal(await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),before,'Label measurement changes no plant, forecasts, support or cost');
+    };
+
     const checkNetworkGeometry = async surface => {
       const before=await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
       await surface.waitForFunction(()=>Number(document.querySelector('#pr-network').getAttribute('height'))===(innerWidth<=650?360:220));
@@ -350,6 +387,7 @@ async function main() {
       const before=await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
       const viewport=surface.viewportSize(),original=await checkDashboardLayout(surface);
       const networkPositions=await checkNetworkGeometry(surface);
+      await checkMatrixGeometry(surface);
       if(viewport.width>650){
         assert.ok(original.boxes[1].height<original.boxes[0].height-150,'Uninspected links no longer stretch into a large empty card');
         assert.ok(original.boxes[3].y<original.boxes[0].bottom-100,'Comparison moves above the old stretched row boundary');
@@ -362,9 +400,15 @@ async function main() {
         for(const width of [390,768,1440,650,651,viewport.width]){
           await surface.setViewportSize({width,height:1000});
           await checkDashboardLayout(surface);
+          await checkMatrixGeometry(surface);
           const positions=await checkNetworkGeometry(surface);
           for(let i=0;i<positions.length;i++)for(const key of ['normalX','normalY'])assert.ok(Math.abs(positions[i][key]-networkPositions[i][key])<1e-6,'Responsive spacing does not change the normalized bus layout');
         }
+        await surface.setViewportSize({width:320,height:1000});
+        await checkDashboardLayout(surface);await checkMatrixGeometry(surface);
+        const matrixPreview=await surface.locator('#pr-matrix').screenshot({path:path.join(output,'matrix-labels-320.jpg'),type:'jpeg',quality:90});
+        console.log('CLOUD_MATRIX_LABEL_PREVIEW_320 '+matrixPreview.toString('base64'));
+        await surface.setViewportSize(viewport);await checkDashboardLayout(surface);
         await surface.locator('#pr-voltage-details > summary').click();
         await checkDashboardLayout(surface);
         await surface.locator('#pr-voltage-details > summary').click();
@@ -378,7 +422,7 @@ async function main() {
     };
 
     const captureDashboard = async surface => {
-      await checkDashboardLayout(surface);
+      await checkDashboardLayout(surface);await checkMatrixGeometry(surface);
       await checkControllerKey(surface);
       const before=await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),width=surface.viewportSize().width;
       assert.equal(await surface.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getState().playing),false);
@@ -544,7 +588,7 @@ async function main() {
     };
 
     const captureLinkOwner = async (surface,label) => {
-      await checkProtocol(surface);
+      await checkProtocol(surface);await checkMatrixGeometry(surface);
       const before=await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
       const preview=await surface.locator('.pr-matrix-panel').screenshot({path:path.join(output,'link-owner-'+label+'.jpg'),type:'jpeg',quality:85});
       console.log('CLOUD_OWNER_PREVIEW_'+label+' '+preview.toString('base64'));

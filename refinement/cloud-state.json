@@ -783,7 +783,16 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-18T12:00:00+08:00",
+    "started_at": "2026-10-18T12:00:00+08:00",
+    "preflight_at": "2026-10-18T11:56:04+08:00",
+    "expires_at": "2026-10-18T12:36:04+08:00",
+    "candidate_branch": "cloud/refine/20261018-1200",
+    "base_commit": "e72156d27b731f00f88edee1ce3fe007ea3786f8",
+    "owner": "6ad2628236888191b683d1e7ed2e5b93",
+    "program": "20261018-visual-codesign"
+  },
   "next_focus": "Audit remaining chart and matrix axis readability using actual desktop and phone screenshots. Prioritize source and inverter labels and measured interpretation without adding controls or panels, hiding any of the 23 sources/eight receivers/four methods, or implying live graph adaptation. Preserve explicit controller ownership, candidate/deployed/history context, readable phone feeder, honest recorded regimes, fixed comparison, all physical costs and exact replay. No scientific retuning or broad numerical study for visual work.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
@@ -902,11 +911,11 @@
       "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and metadata candidate workflow results before recovery. Promote only after normal validation with expected main 0399672ad9d64229b449ec9f035778dd6fcbeb67 and force false if still matching. On newer main, reapply only verified completion metadata and validate normally. Do not count metadata recovery or a duplicate dispatch as another invocation or improvement. Preserve original 11:40:15 pass deadline."
     },
     "previous_renewed_metadata_verification": {
-      "commit": "6d6a48b5d2abf11f3c4428402a6b7eafd956c60e",
-      "candidate_run": 39089722135,
-      "main_run": 39090335905,
-      "pages_run": 39090336026,
-      "result": "success independently verified before this slot; all 212 tests, build consistency and full browser checks. Exact metadata Pages version verified in deployment logs."
+      "commit": "e72156d27b731f00f88edee1ce3fe007ea3786f8",
+      "candidate_run": 39093197399,
+      "main_run": 39093793943,
+      "pages_run": 39093793463,
+      "result": "success independently verified before this slot; all 213 tests, build consistency and full desktop/phone browser checks. Exact metadata Pages version independently verified in the prior completion."
     },
     "renewed_completion_history": {
       "0": {
@@ -984,6 +993,16 @@
         "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and metadata candidate workflow results before recovery. Promote only after normal validation with expected main 5bb463c9d9f40e04440755a59275c918e92a6c2b and force false if still matching. On newer main reapply only verified completion metadata and validate normally. Do not count metadata recovery, previous recovery or a duplicate dispatch as another invocation or improvement. Preserve the original 10:37:54 pass deadline.",
         "main_run": 39090335905,
         "pages_run": 39090336026
+      },
+      "10": {
+        "slot": "2026-10-18T11:00:00+08:00",
+        "branch": "cloud/refine/20261018-1100",
+        "product_ready_commit": "0399672ad9d64229b449ec9f035778dd6fcbeb67",
+        "scope": "Completion record only, no product changes",
+        "status": "Completion metadata published at e72156d27b731f00f88edee1ce3fe007ea3786f8. Final main repeat and Pages succeeded. Counted 11:00 once.",
+        "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and metadata candidate workflow results before recovery. Promote only after normal validation with expected main 0399672ad9d64229b449ec9f035778dd6fcbeb67 and force false if still matching. On newer main, reapply only verified completion metadata and validate normally. Do not count metadata recovery or a duplicate dispatch as another invocation or improvement. Preserve original 11:40:15 pass deadline.",
+        "main_run": 39093793943,
+        "pages_run": 39093793463
       }
     },
     "renewed_metadata_verification_history": [
@@ -1000,6 +1019,13 @@
         "main_run": 39088429417,
         "pages_run": 39088429153,
         "result": "success independently verified during this slot; recovered metadata only with no invocation or completion increment"
+      },
+      {
+        "commit": "6d6a48b5d2abf11f3c4428402a6b7eafd956c60e",
+        "candidate_run": 39089722135,
+        "main_run": 39090335905,
+        "pages_run": 39090336026,
+        "result": "success independently verified before this slot; all 212 tests, build consistency and full browser checks. Exact metadata Pages version verified in deployment logs."
       }
     ]
   },
@@ -1085,7 +1111,7 @@
     "hard_deadline": "2026-10-19T01:00:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 11,
+    "invocation_count": 12,
     "completed_count": 11,
     "runs": [
       {
@@ -1609,9 +1635,41 @@
         "pages_run": 39092797637,
         "completed_at": "2026-10-18T03:19:00.399Z",
         "publication": "Successful candidate and main validation. Ready child has tested source as its single parent and only index.html changed. Promoted with expected current main and force false. Exact ready Pages version confirmed successful in deployment logs."
+      },
+      {
+        "slot": "2026-10-18T12:00:00+08:00",
+        "started_at": "2026-10-18T12:00:00+08:00",
+        "preflight_at": "2026-10-18T11:56:04+08:00",
+        "status": "validating",
+        "candidate_branch": "cloud/refine/20261018-1200",
+        "base_commit": "e72156d27b731f00f88edee1ce3fe007ea3786f8",
+        "counted_completed": false,
+        "slot_resolution": "Early dispatch used read-only preflight before 12:00. Candidate publication begins after the scheduled start. Count this 12:00 slot once; retain the stricter 12:36:04 deadline from the original dispatch.",
+        "changes": [
+          "Enlarge every matrix source/inverter number and axis title to 12 px. Increase only the header spacing and narrow-view stagger separation, keeping all 23 sources, eight receivers and 184 actual cells.",
+          "Preserve controller ownership, actual support, weights, historical context, source errors and commands, keyboard/touch inspection, every physical cost and exact replay. No new panel, control, dependency or scientific change.",
+          "Add real browser checks for label font size, glyph containment and pairwise nonoverlap, source/receiver cell alignment, every cell centre hit target, responsive page fit and full paused-trial invariance, including a 320 px matrix capture."
+        ],
+        "tests": {
+          "status": "Pending full current cloud validation",
+          "benchmarks": "Not rerun. Matrix typography and header spacing only. Physical model, controllers, learning, defaults, source errors, objective, limits, costs and recorded results unchanged."
+        },
+        "screenshots": {
+          "pixel_review": "Pending candidate pixels. Actual current desktop/phone matrix and voltage panel pixels reviewed to choose a focused matrix readability improvement."
+        },
+        "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed."
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "slot": "2026-10-18T12:00:00+08:00",
+      "started_at": "2026-10-18T12:00:00+08:00",
+      "preflight_at": "2026-10-18T11:56:04+08:00",
+      "expires_at": "2026-10-18T12:36:04+08:00",
+      "candidate_branch": "cloud/refine/20261018-1200",
+      "base_commit": "e72156d27b731f00f88edee1ce3fe007ea3786f8",
+      "owner": "6ad2628236888191b683d1e7ed2e5b93",
+      "program": "20261018-visual-codesign"
+    },
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",

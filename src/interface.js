@@ -1343,7 +1343,7 @@
     const changing=$('matrix-view').value==='change', deployed=snapshot.phase==='deployment';
     const width=Math.max(240,el.getBoundingClientRect().width);
     const left=40,cellWidth=(width-left-8)/sources.length,cellHeight=17;
-    const staggered=cellWidth<18,top=staggered?48:35,height=top+153;
+    const staggered=cellWidth<18,top=staggered?64:42,height=top+153;
     const frame=topologyFrame(),recommendations=frame.links || [],current=new Set(recommendations.map(recommendationKey));
 
     const added=[...current].filter(key=>!frame.reference.has(key)),removed=[...frame.reference].filter(key=>!current.has(key));
@@ -1391,9 +1391,9 @@
       svg.append('g').attr('class','matrix-rows');
     }
     svg.select('title').text(changing?'Signed change in learned gain energy divided by each receiver’s offline energy. Outline shows selected sources.':'Rows are inverter receivers. Columns are prediction sources.');
-    svg.select('.matrix-source-title').attr('x',left+(width-left)/2).attr('y',10).attr('text-anchor','middle').text('Source bus');
-    svg.select('.matrix-receiver-title').attr('transform','translate(9,'+(top+cellHeight*4)+') rotate(-90)').attr('text-anchor','middle').text('Inverter');
-    const labelY=(_,i)=>top-8-(staggered&&i%2===0?14:0);
+    svg.select('.matrix-source-title').attr('x',left+(width-left)/2).attr('y',14).attr('text-anchor','middle').text('Source bus');
+    svg.select('.matrix-receiver-title').attr('transform','translate(12,'+(top+cellHeight*4)+') rotate(-90)').attr('text-anchor','middle').text('Inverter');
+    const labelY=(_,i)=>top-8-(staggered&&i%2===0?16:0);
     svg.select('.matrix-columns').selectAll('line').data(staggered?sources:[]).join('line')
       .attr('x1',(_,i)=>left+(i+.5)*cellWidth).attr('x2',(_,i)=>left+(i+.5)*cellWidth)
       .attr('y1',(bus,i)=>labelY(bus,i)+3).attr('y2',top-3).attr('stroke','#d9d9df');
