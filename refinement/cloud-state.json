@@ -1421,7 +1421,7 @@
         "counted_completed": false,
         "changes": [
           "Add a contextual caption under the existing feeder that identifies the inspected source and inverter using its actual connection, local channel and candidate/deployed/saved context. No arrow is displayed for an absent remote link.",
-          "Raise only the inspected physical bus numbers and selected matrix axis labels to 12 px with a white label halo, retaining all unselected buses, actual rings and link geometry. No new controls or always visible diagnostic.",
+          "Raise inspected physical bus numbers and selected matrix axis labels to 12 px. Place only the inspected numbers inside their own existing bus marks with a noninteractive white backdrop, preserving actual bus centres, outside fault/power badges and all unselected equipment. No new controls or always visible diagnostic.",
           "Add all-cell read-only caption and exact replay regressions plus desktop/phone actual-label, role, containment and screenshot checks. Scientific model, controllers, costs and intervention behavior stay unchanged."
         ],
         "superseded_candidates": [
@@ -1429,7 +1429,22 @@
             "source_commit": "29bcc566fe1009e03c18034548881e48242744bb",
             "candidate_run": 39085325688,
             "status": "failure",
-            "reason": "Static review found caption refresh inserted in an early event handler instead of the network redraw. Move it into drawNetwork and exercise the real caption renderer in the Node harness, including direct history and matrix view redraws. No failed check is removed."
+            "reason": "Static review found caption refresh inserted in an early event handler instead of the network redraw. Move it into drawNetwork and exercise the real caption renderer in the Node harness, including direct history and matrix view redraws. No failed check is removed.",
+            "job": 117550532938,
+            "step": "Test controllers and interactions",
+            "passed": 135,
+            "failed": 1,
+            "suite_total": 136,
+            "assertion": "No persistent diagnostic before inspection. Expected hidden true but got false at src/test-interactions.cjs line 2259. The initial source did not run the new renderer at startup or ordinary inspection. Corrected by invoking it from drawNetwork and exercising that same renderer in the lightweight harness. No assertions were removed.",
+            "browser": "Not reached",
+            "publication": "Unpublished"
+          },
+          {
+            "source_commit": "99f0447ff465ad5202ea0a4463f47bc653ccaddb",
+            "candidate_run": 39085708249,
+            "status": "in progress when superseded",
+            "reason": "Geometry review found below-node enlarged labels could overlap a neighbour's equipment. Keep the same bus centres and use inspection-only in-node number backdrops while preserving outside forecast and power badges. No controller or scientific change. Full checks rerun; no assertions removed.",
+            "publication": "Unpublished"
           }
         ]
       }

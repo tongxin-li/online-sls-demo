@@ -154,15 +154,15 @@ async function main() {
           status:document.querySelector('#pr-network-inspection-status').textContent,description:network.getAttribute('aria-description'),
           roles:Array.from(network.querySelectorAll('.bus-node')).filter(node=>node.dataset.inspectionRole!=='none').map(node=>{
             const text=node.querySelector('.bus-number'),rect=text.getBoundingClientRect();
-            return {bus:Number(node.dataset.bus),role:node.dataset.inspectionRole,text:text.textContent,font:parseFloat(getComputedStyle(text).fontSize),
+            return {bus:Number(node.dataset.bus),role:node.dataset.inspectionRole,numberY:text.getAttribute('y'),backdrop:node.querySelector('.pr-inspection-number-bg')?.getAttribute('r'),text:text.textContent,font:parseFloat(getComputedStyle(text).fontSize),
               left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom};}),
-          box:{left:box.left,right:box.right,top:box.top,bottom:box.bottom},svg:{left:svg.left,right:svg.right,top:svg.top,bottom:svg.bottom},
+          backdrops:network.querySelectorAll('.pr-inspection-number-bg').length,box:{left:box.left,right:box.right,top:box.top,bottom:box.bottom},svg:{left:svg.left,right:svg.right,top:svg.top,bottom:svg.bottom},
           inspectedColumnFont:parseFloat(getComputedStyle(document.querySelector('#pr-matrix .matrix-columns text[data-inspected="true"]')||caption).fontSize),
           selectedRowFont:parseFloat(getComputedStyle(document.querySelector('#pr-matrix .matrix-rows g[aria-pressed="true"] text')||caption).fontSize)};
       });
       const {state}=reading,active=state.inspectedSource!==null&&[5,7,8,12,14,18,21,24].includes(state.selectedBus);
       assert.equal(reading.hidden,!active,'Role caption is contextual, not another always visible diagnostic');
-      if(!active){assert.equal(reading.source,'');assert.equal(reading.roles.length,0);return;}
+      if(!active){assert.equal(reading.source,'');assert.equal(reading.roles.length,0);assert.equal(reading.backdrops,0,'Inspection-only number backdrops clear immediately');return;}
       const local=state.inspectedSource===state.selectedBus,connected=local||!reading.description.includes('No link');
       assert.equal(reading.data.source,String(state.inspectedSource));assert.equal(reading.data.receiver,String(state.selectedBus));
       assert.equal(reading.data.local,String(local));assert.equal(reading.data.connected,String(connected));
@@ -171,9 +171,9 @@ async function main() {
       assert.equal(reading.receiver,local?'':'Inverter '+state.selectedBus);assert.equal(reading.receiverHidden,local);
       assert.equal(reading.join,local?'':connected?'→':'·','Never imply a connection for an absent link');
       assert.equal(reading.status,reading.description.split(' · ').slice(1).join(' · '));
-      assert.equal(reading.roles.length,local?1:2);
+      assert.equal(reading.roles.length,local?1:2);assert.equal(reading.backdrops,local?1:2);
       for(const mark of reading.roles){
-        assert.equal(mark.text,String(mark.bus));assert.ok(mark.font>=12,'Inspected bus number is readable');
+        assert.equal(mark.text,String(mark.bus));assert.equal(mark.numberY,'4');assert.equal(mark.backdrop,'11');assert.ok(mark.font>=12,'Inspected bus number is readable');
         assert.ok(mark.left>=reading.svg.left-1&&mark.right<=reading.svg.right+1&&mark.top>=reading.svg.top-1&&mark.bottom<=reading.svg.bottom+1,'Role number stays inside the actual feeder');
       }
       for(const span of reading.glyphs){assert.ok(span.font>=12);for(const rect of span.rects)assert.ok(rect.left>=reading.box.left-1&&rect.right<=reading.box.right+1&&rect.top>=reading.box.top-1&&rect.bottom<=reading.box.bottom+1,'Full role caption fits without clipping');}

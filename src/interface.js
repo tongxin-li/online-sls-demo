@@ -1276,7 +1276,15 @@
     animate(nodes.select('.pr-scheduled-ring')).attr('r',bus=>17+3*Math.min(1,Math.abs(scheduledByBus.get(bus) || 0)/scheduleScale))
       .attr('stroke-opacity',bus=>Math.min(.85,Math.abs(scheduledByBus.get(bus) || 0)/scheduleScale))
       .attr('stroke-dasharray',bus=>(scheduledByBus.get(bus) || 0)<0?'3 2':null);
-    nodes.select('.bus-number').attr('text-anchor','middle').attr('x',0).attr('y',27)
+    // Number the two inspected buses inside their own marks, not on a neighbour's icon.
+    // Forecast and power badges remain outside this small, noninteractive backdrop.
+    nodes.each(function(bus){
+      d3.select(this).selectAll('circle.pr-inspection-number-bg')
+        .data(inspection&&(bus===inspection.source||bus===inspection.receiver)?[bus]:[]).join('circle')
+        .attr('class','pr-inspection-number-bg').attr('r',11).attr('fill','#fff').attr('pointer-events','none').raise();
+    });
+    nodes.select('.bus-number').raise().attr('text-anchor','middle').attr('x',0)
+      .attr('y',bus=>inspection&&(bus===inspection.source||bus===inspection.receiver)?4:27)
       .style('fill','var(--muted-foreground)').style('font-size',bus=>inspection&&(bus===inspection.source||bus===inspection.receiver)?'12px':'9px').text(bus=>bus);
     nodes.select('.pr-inspection-ring')
       .attr('display',bus=>inspection && (bus===inspection.source || bus===inspection.receiver)?null:'none')
