@@ -783,8 +783,14 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
-  "next_focus": "Verify final repeated checks and completion metadata. Then review source label clipping at large matrix pan boundaries while preserving the pinned receiver axis, exact visible ranges, every source and keyboard reachability. Keep the existing concise inspector, single cost table, two stage strip and stable headings. Do not add panels or broaden numerical studies.",
+  "active_run": {
+    "slot": "2026-10-18T18:00:00+08:00",
+    "branch": "cloud/refine/20261018-1800",
+    "started_at": "2026-10-18T18:00:00+08:00",
+    "preflight_at": "2026-10-18T17:55:26+08:00",
+    "lease_expires_at": "2026-10-18T18:35:26+08:00"
+  },
+  "next_focus": "Validate complete edge source labels and their actual column guides without moving source cells or hiding sources. Preserve existing linked inspection and evidence.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -902,7 +908,7 @@
       "main_run": 39114876692,
       "pages_run": 39114876840,
       "scope": "Completion record only. Product already validated and deployed.",
-      "status": "Metadata validation pending at record creation. Historical completed 15, renewed invocation 16 and completed 16 yield total 31. Previous metadata verification did not increment either count.",
+      "status": "17:00 completion metadata is already main at a7e8046aeacd638a20ed43a69e08b89d719c45eb. Its candidate and prepare plus main repeat succeeded, as did the product repeat and exact Pages deployments. No recovery invocation or completion increment.",
       "instruction": "Read actual product main repeat before further source edits and metadata validation before promotion. This 17:00 completion is counted once in this candidate. Promote metadata only after normal successful validation with matching current main 13eb5e384f1aad5b1c66fa2aae3b9e76bc101b54 and force false. On newer main reapply only verified metadata without overwriting concurrent product changes or double counting. Recovery, coordination, preflight and duplicate dispatches are not refinements. Preserve the original 17:41:35 pass deadline."
     },
     "previous_renewed_metadata_verification": {
@@ -1194,7 +1200,7 @@
     "hard_deadline": "2026-10-19T01:00:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 16,
+    "invocation_count": 17,
     "completed_count": 16,
     "runs": [
       {
@@ -1967,7 +1973,7 @@
           "candidate": "Full validation and prepare passed on first candidate.",
           "build": "passed",
           "reference_artifact": "Passed unchanged reference generator and artifact checks.",
-          "main": "Repeat validation 39114876692 is running at completion record creation. Read actual final status before further source edits.",
+          "main": "Product main repeat 39114876692 and completion metadata main repeat 39115755135 both succeeded. Latest completed metadata main logs independently read before this source edit, all 224 cases and full original plus network browser suites passed. Metadata recovery did not increment counts.",
           "browser": "Full original desktop and phone browser suite and both network suites passed without runtime errors. Existing playback, repeated and continuous attacks, forecast toggles, automatic fresh comparison, stable cost view switching, all four traces, model switching and exact replay remain covered. New checks require the exact issue target reveal text from actual revealed samples, unchanged displayed forecast forcing and signed errors, assistive unit description, at least 12 px labels and 16 px values, readable signed error emphasis and in-column text wrapping. Actual toy8 and feeder47 source selections at desktop and phone sizes verify chronological timestamps, preserved values and invariant full snapshots before and after inspection and pixel capture.",
           "benchmarks": "Not rerun. No engine, control, objective, learning, forecast timing, noise, limits, attack, numerical output or recorded result changes."
         },
@@ -1996,9 +2002,41 @@
           "Larger observation notes use slightly more vertical space on a phone. No values, timing, current support or existing selection and synthesis evidence were removed.",
           "Existing command numeric text and matrix source glyphs still partially clip at horizontal pan boundaries, with every term and source reachable. Only declared Chrome desktop and phone layouts have pixel review. No direct live browser inspection is claimed."
         ]
+      },
+      {
+        "slot": "2026-10-18T18:00:00+08:00",
+        "branch": "cloud/refine/20261018-1800",
+        "started_at": "2026-10-18T18:00:00+08:00",
+        "preflight_at": "2026-10-18T17:55:26+08:00",
+        "lease_expires_at": "2026-10-18T18:35:26+08:00",
+        "status": "validating",
+        "candidate_branch": "cloud/refine/20261018-1800",
+        "base_commit": "a7e8046aeacd638a20ed43a69e08b89d719c45eb",
+        "counted_invocation": true,
+        "counted_completed": false,
+        "slot_resolution": "Read only early preflight before 18:00. Source edits and publication begin after the scheduled start. Preserve the stricter 18:35:26 deadline measured from the original early dispatch. Count this slot once.",
+        "changes": [
+          "Keep whole source numbers readable for every partly visible large matrix column, by clamping only edge labels inside the source viewport. Reuse each existing guide to point to the unchanged actual column.",
+          "Keep all 46 source headers, every actual source cell, noisy and selected styling, pinned inverter axis, truthful visible range, native scrolling and keyboard inspection. No new panel, control or source filter.",
+          "Add actual desktop and phone checks at eight pan positions for complete exposed source labels, no overlap or hidden sources, exact guide endpoints and full paused trial invariance. Preserve existing all source reachability and pointer hit tests. No scientific or numerical result changes."
+        ],
+        "tests": {
+          "status": "Pending normal cloud validation",
+          "benchmarks": "Not rerun for this presentation change."
+        },
+        "screenshots": {
+          "pixel_review": "Pending actual Actions desktop and phone JPEG previews. Before choosing work reviewed the current phone middle pan from completed main Actions evidence, including a truncated source digit at the right edge."
+        },
+        "direct_live_inspection": "Unverified. Previously denied direct live browser access will not be retried or bypassed."
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "slot": "2026-10-18T18:00:00+08:00",
+      "branch": "cloud/refine/20261018-1800",
+      "started_at": "2026-10-18T18:00:00+08:00",
+      "preflight_at": "2026-10-18T17:55:26+08:00",
+      "lease_expires_at": "2026-10-18T18:35:26+08:00"
+    },
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",

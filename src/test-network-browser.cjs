@@ -121,7 +121,7 @@ async function main() {
       const position=fraction===0?'start':fraction===1?'end':'middle';
       await surface.waitForFunction(position=>document.querySelector('#pr-matrix-scroll-hint').dataset.position===position,position);
       const measured=await scroller.evaluate(node=>{
-        const bounds=node.getBoundingClientRect(),columns=Array.from(node.querySelectorAll('.matrix-columns text'));
+        const bounds=node.getBoundingClientRect(),columns=Array.from(node.querySelectorAll('.matrix-columns text')),svg=node.querySelector('svg').getBoundingClientRect();
         const axis=node.querySelector('.matrix-receiver-background').getBoundingClientRect(),sourceTitle=node.querySelector('.matrix-source-title').getBoundingClientRect();
         const visible=columns.filter(label=>{const box=label.getBoundingClientRect();return box.left>=axis.right-.5&&box.right<=bounds.right+.5;}).map(label=>Number(label.firstChild.nodeValue));
         const receivers=Array.from(node.querySelectorAll('.matrix-rows g')).map(row=>{
@@ -132,8 +132,16 @@ async function main() {
         const hits=Array.from(node.querySelectorAll('.matrix-cell')).filter(cell=>{const box=cell.getBoundingClientRect();return box.left>=axis.right&&box.right<=bounds.right;}).map(cell=>{
           const box=cell.getBoundingClientRect();return document.elementFromPoint((box.left+box.right)/2,(box.top+box.bottom)/2)?.closest('.matrix-cell')===cell;
         });
+        const edgeLabels=columns.map((label,i)=>{
+          const box=label.getBoundingClientRect(),centre=Number(label.dataset.columnX),width=Number(label.dataset.columnWidth);
+          const guide=node.querySelectorAll('.matrix-columns line')[i],x=Number(label.getAttribute('x'));
+          return {source:Number(label.firstChild.nodeValue),exposed:svg.left+centre+width/2>axis.right&&svg.left+centre-width/2<bounds.right,
+            left:box.left,right:box.right,top:box.top,bottom:box.bottom,centre,x,
+            guideStart:guide?Number(guide.getAttribute('x1')):null,guideEnd:guide?Number(guide.getAttribute('x2')):null,
+            display:getComputedStyle(label).display,visibility:getComputedStyle(label).visibility};
+        });
         const hint=document.querySelector('#pr-matrix-scroll-hint');
-        return {visible,axis:{left:axis.left,right:axis.right},bounds:{left:bounds.left,right:bounds.right},sourceTitle:{left:sourceTitle.left,right:sourceTitle.right},receivers,hits,text:hint.textContent,hidden:hint.hidden,data:{...hint.dataset},sources:columns.map(label=>Number(label.firstChild.nodeValue)),
+        return {edgeLabels,visible,axis:{left:axis.left,right:axis.right},bounds:{left:bounds.left,right:bounds.right},sourceTitle:{left:sourceTitle.left,right:sourceTitle.right},receivers,hits,text:hint.textContent,hidden:hint.hidden,data:{...hint.dataset},sources:columns.map(label=>Number(label.firstChild.nodeValue)),
           cells:node.querySelectorAll('.matrix-cell').length,left:node.scrollLeft,maximum:node.scrollWidth-node.clientWidth,font:parseFloat(getComputedStyle(hint).fontSize)};
       });
       assert.equal(measured.hidden,false);assert.ok(measured.font>=12);
@@ -142,6 +150,15 @@ async function main() {
       for(const row of measured.receivers){assert.ok(row.left>=measured.bounds.left&&row.right<measured.axis.right,'Every inverter number remains fully visible');assert.ok(Math.abs(row.centre-row.rowCentre)<3,'Receiver numbers stay aligned with their row');assert.equal(row.hit,true,'Every pinned receiver remains an actual pointer target');}
       assert.ok(measured.sourceTitle.left>=measured.axis.right&&measured.sourceTitle.right<=measured.bounds.right,'Source title stays over visible columns');
       assert.ok(measured.hits.length>0&&measured.hits.every(Boolean),'Uncovered source cells retain their real hit targets');
+      const exposed=measured.edgeLabels.filter(label=>label.exposed);
+      for(const label of exposed){
+        assert.ok(label.left>=measured.axis.right-.5&&label.right<=measured.bounds.right+.5,'Every exposed column has a whole source number, not a clipped digit '+label.source);
+        assert.notEqual(label.display,'none');assert.equal(label.visibility,'visible','Sources are never hidden to repair clipping');
+        assert.equal(label.guideStart,label.x,'The existing guide follows the label');
+        assert.equal(label.guideEnd,label.centre,'The guide still points to the actual source column');
+      }
+      const overlap=(a,b)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>.5&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>.5;
+      for(let i=0;i<exposed.length;i++)for(let k=i+1;k<exposed.length;k++)assert.ok(!overlap(exposed[i],exposed[k]),'Whole edge numbers do not overlap '+exposed[i].source+' and '+exposed[k].source);
       measured.visible.forEach(source=>seen.add(source));
       assert.deepEqual(measured.sources,Array.from({length:46},(_,i)=>i+2),'Scrolling retains every source header in order');
       assert.equal(measured.cells,736,'Scrolling retains all 16 by 46 actual cells');
@@ -150,7 +167,7 @@ async function main() {
       if(fraction===0){assert.equal(measured.visible[0],2);assert.ok(measured.text.endsWith('Scroll right →'));assert.ok(!measured.text.startsWith('←'));}
       else if(fraction===1){assert.equal(measured.visible.at(-1),47);assert.ok(measured.text.startsWith('← Scroll left'));assert.ok(!measured.text.endsWith('→'));}
       else {assert.ok(measured.text.startsWith('←'));assert.ok(measured.text.endsWith('→'));}
-      if(capture){
+      if(capture&&[0,.5,1].includes(fraction)){
         const width=surface.viewportSize().width,preview=await surface.locator('.pr-matrix-panel').screenshot({path:path.join(output,'matrix-navigation-'+width+'-'+position+'.jpg'),type:'jpeg',quality:85});
         console.log('CLOUD_MATRIX_NAV_'+width+'_'+position+' '+preview.toString('base64'));
       }
@@ -166,7 +183,7 @@ async function main() {
         if(now-quietSince>=250)resolve();else requestAnimationFrame(settled);};
       requestAnimationFrame(settled);
     }));
-    for(const fraction of [0,.5,1])await move(fraction);
+    for(const fraction of [0,.037,.123,.371,.5,.713,.937,1])await move(fraction);
     assert.deepEqual([...seen].sort((a,b)=>a-b),Array.from({length:46},(_,i)=>i+2),'Scrolling exposes every source beyond the fixed receiver labels');
     await scroller.evaluate((node,left)=>{node.scrollLeft=left;},initial);
     const after=await read(surface);
