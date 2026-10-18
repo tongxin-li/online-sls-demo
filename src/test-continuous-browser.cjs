@@ -73,7 +73,7 @@ async function main(){
    nativeSwitches.push(await nativeReceipt());
    assert.deepEqual(nativeSwitches.map(row=>row.corrupted),[false,true,false,true,false],'All predefined native corruption and repair switches execute');
    assert.ok(nativeSwitches.slice(1).some((row,i)=>Math.abs(row.gain-nativeSwitches[i].gain)>1e-10),'Actual received effective response weights change during native Run');
-   for(const row of nativeSwitches){assert.ok(row.trainedThrough<row.action);assert.ok(Math.abs(row.bounded)<=70+1e-8);}
+   for(const row of nativeSwitches){assert.ok(row.trainedThrough<row.action);assert.ok(Math.abs(row.bounded)<=.07+1e-11,'Receipt command uses per unit and must stay within 70 kvar on the 1 MVA base');}
    assert.equal((await read(page)).ui.playing,true,'Native Run must not stop at old finite boundaries');
    await pause(page);
    const native=await read(page),nativeMetrics=await page.evaluate(()=>{

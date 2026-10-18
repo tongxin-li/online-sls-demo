@@ -1,0 +1,687 @@
+{
+  "schema": "native-ongoing-playback-evidence-v1",
+  "protocol": "continuous-phi-v1",
+  "status": "unpublished_candidate_functional_acceptance_performance_gap_open",
+  "source_commit": "b015d39cbb7d8658d87a69b6cd9ecf1776b31214",
+  "workflow_run": 39165255997,
+  "ongoing_browser_job": 117786942923,
+  "review_job": 117788711536,
+  "conditions": {
+    "networks": [
+      "toy8",
+      "feeder24",
+      "feeder47"
+    ],
+    "surfaces": [
+      {
+        "name": "desktop",
+        "width": 1440,
+        "height": 1000
+      },
+      {
+        "name": "phone",
+        "width": 390,
+        "height": 844,
+        "touch": true
+      }
+    ],
+    "seed": 20261013,
+    "beta": 4,
+    "power_scenario": "forecasted-demand",
+    "requested_speed": 32,
+    "native_run_target_samples": 901,
+    "source": 7,
+    "corruption_repair_targets_displayed_samples": [
+      90,
+      220,
+      430,
+      650
+    ],
+    "native_before_batches": true,
+    "additional_checks": "Existing later source corruption and repair, repeated multiple bus attacks, yielding 180 action advances, all four traces and costs, traffic, retained history and exact version 14 replay."
+  },
+  "interpretation": [
+    "Every condition is included. These are engineering acceptance runs, not a performance superiority study or a confidence interval. Existing archived results remain separate.",
+    "Native timing includes Playwright control and readout overhead in this specific cloud Chromium environment. It is not a device independent frame rate benchmark.",
+    "Source checkpoint rows describe the last completed receipt before the next requested switch, except the final checkpoint after 901 samples. Displayed completed sample count is receipt action plus one. Actual click handling can occur later while Run continues. Exact events are retained by the tested version 14 replay record.",
+    "The admitted correction and effective gain changed after causal observation delays. A between-time command difference also reflects changing state and forecasts, so it alone is not attribution to learning. Independent causal numerical tests remain required.",
+    "All full accumulated stage costs and source histories are retained. Equal initial and final optional heap API readings do not establish flat memory usage or an indefinite bound.",
+    "Functional assertions passed. The 47 bus trials did not sustain the requested 32 samples per second and recorded frame gaps up to 200 ms. Smooth high speed playback remains an unresolved release gate."
+  ],
+  "results": [
+    {
+      "networkId": "toy8",
+      "mobile": false,
+      "frames": 1686,
+      "maxFrameGapMs": 50,
+      "over50ms": 0,
+      "over100ms": 0,
+      "initialDomNodes": 1261,
+      "finalDomNodes": 1424,
+      "initialHeapBytes": 26000000,
+      "finalHeapBytes": 26000000,
+      "elapsedMs": 28707,
+      "actions": 910,
+      "sourceSwitches": [
+        {
+          "action": 89,
+          "trainedThrough": 88,
+          "coefficient": 0.9928060644044876,
+          "gain": -2.7601162466644658,
+          "raw": 0.005706265316004476,
+          "bounded": 0.005706265316004476,
+          "corrupted": false
+        },
+        {
+          "action": 220,
+          "trainedThrough": 219,
+          "coefficient": 0.017792197929587656,
+          "gain": -0.04946437811979061,
+          "raw": 0.005103554537199878,
+          "bounded": 0.005103554537199878,
+          "corrupted": true
+        },
+        {
+          "action": 430,
+          "trainedThrough": 429,
+          "coefficient": 0.9573044070354575,
+          "gain": -2.6614175130436637,
+          "raw": 0.0007441943823570457,
+          "bounded": 0.0007441943823570457,
+          "corrupted": false
+        },
+        {
+          "action": 652,
+          "trainedThrough": 651,
+          "coefficient": 0.023945040371707926,
+          "gain": -0.06656999521515901,
+          "raw": 0.004176957155189595,
+          "bounded": 0.004176957155189595,
+          "corrupted": true
+        },
+        {
+          "action": 903,
+          "trainedThrough": 902,
+          "coefficient": 1.0278974073092368,
+          "gain": -2.8576742583862913,
+          "raw": -0.0017320053880794076,
+          "bounded": -0.0017320053880794076,
+          "corrupted": false
+        }
+      ],
+      "costs": {
+        "online": 0.050661324480981006,
+        "scalar": 0.06931751372716377,
+        "static": 0.08047487169334999,
+        "causal": 0.05228398407738481
+      },
+      "sourceUpdates": 880,
+      "observedActionsPerSecond": 31.699585466959277,
+      "finalActions": 1853,
+      "functionalChecks": "passed",
+      "historyRetained": true,
+      "exactReplay": "passed"
+    },
+    {
+      "networkId": "feeder24",
+      "mobile": false,
+      "frames": 1318,
+      "maxFrameGapMs": 100,
+      "over50ms": 124,
+      "over100ms": 0,
+      "initialDomNodes": 2239,
+      "finalDomNodes": 2378,
+      "initialHeapBytes": 33100000,
+      "finalHeapBytes": 33100000,
+      "elapsedMs": 45011,
+      "actions": 912,
+      "sourceSwitches": [
+        {
+          "action": 90,
+          "trainedThrough": 89,
+          "coefficient": 0.9936280934601275,
+          "gain": -1.8288769506480127,
+          "raw": 0.011671670908788291,
+          "bounded": 0.011671670908788291,
+          "corrupted": false
+        },
+        {
+          "action": 220,
+          "trainedThrough": 219,
+          "coefficient": -0.006938614164606063,
+          "gain": 0.012771248718318437,
+          "raw": 0.008564305647607576,
+          "bounded": 0.008564305647607576,
+          "corrupted": true
+        },
+        {
+          "action": 430,
+          "trainedThrough": 429,
+          "coefficient": 0.9927158854087788,
+          "gain": -1.8271979358432908,
+          "raw": -0.0016186738699941494,
+          "bounded": -0.0016186738699941494,
+          "corrupted": false
+        },
+        {
+          "action": 649,
+          "trainedThrough": 648,
+          "coefficient": 0.021442708963977406,
+          "gain": -0.039467559785984936,
+          "raw": -0.0006587127179968581,
+          "bounded": -0.0006587127179968581,
+          "corrupted": true
+        },
+        {
+          "action": 901,
+          "trainedThrough": 900,
+          "coefficient": 0.979396160890066,
+          "gain": -1.8026815827715643,
+          "raw": -0.006829835469360502,
+          "bounded": -0.006829835469360502,
+          "corrupted": false
+        }
+      ],
+      "costs": {
+        "online": 0.42256428574517785,
+        "scalar": 0.595807243940893,
+        "static": 0.751766657466456,
+        "causal": 0.43090263628214714
+      },
+      "sourceUpdates": 882,
+      "observedActionsPerSecond": 20.261713803292526,
+      "finalActions": 1856,
+      "functionalChecks": "passed",
+      "historyRetained": true,
+      "exactReplay": "passed"
+    },
+    {
+      "networkId": "feeder47",
+      "mobile": false,
+      "frames": 1346,
+      "maxFrameGapMs": 200,
+      "over50ms": 889,
+      "over100ms": 276,
+      "initialDomNodes": 4326,
+      "finalDomNodes": 4477,
+      "initialHeapBytes": 35100000,
+      "finalHeapBytes": 35100000,
+      "elapsedMs": 93685,
+      "actions": 911,
+      "sourceSwitches": [
+        {
+          "action": 90,
+          "trainedThrough": 89,
+          "coefficient": 1.0064280605469436,
+          "gain": -1.8524366355323356,
+          "raw": 0.010465204977635001,
+          "bounded": 0.010465204977635001,
+          "corrupted": false
+        },
+        {
+          "action": 219,
+          "trainedThrough": 218,
+          "coefficient": 0.004945961957365257,
+          "gain": -0.009103562874422924,
+          "raw": 0.00932185102595253,
+          "bounded": 0.00932185102595253,
+          "corrupted": true
+        },
+        {
+          "action": 430,
+          "trainedThrough": 429,
+          "coefficient": 0.9995973243240479,
+          "gain": -1.8398639475052618,
+          "raw": -0.005223996691716795,
+          "bounded": -0.005223996691716795,
+          "corrupted": false
+        },
+        {
+          "action": 651,
+          "trainedThrough": 650,
+          "coefficient": 0.009013691637618977,
+          "gain": -0.016590646927951015,
+          "raw": -0.0008526628389039653,
+          "bounded": -0.0008526628389039653,
+          "corrupted": true
+        },
+        {
+          "action": 901,
+          "trainedThrough": 900,
+          "coefficient": 0.9883335185400688,
+          "gain": -1.8191317289715054,
+          "raw": -0.006868106905175752,
+          "bounded": -0.006868106905175752,
+          "corrupted": false
+        }
+      ],
+      "costs": {
+        "online": 0.8703544497872325,
+        "scalar": 1.2261836166958595,
+        "static": 1.5810862994664263,
+        "causal": 0.8858626454156182
+      },
+      "sourceUpdates": 881,
+      "observedActionsPerSecond": 9.724075358915515,
+      "finalActions": 1851,
+      "functionalChecks": "passed",
+      "historyRetained": true,
+      "exactReplay": "passed"
+    },
+    {
+      "networkId": "toy8",
+      "mobile": true,
+      "frames": 1687,
+      "maxFrameGapMs": 33.400000000001455,
+      "over50ms": 0,
+      "over100ms": 0,
+      "initialDomNodes": 1261,
+      "finalDomNodes": 1424,
+      "initialHeapBytes": 27600000,
+      "finalHeapBytes": 27600000,
+      "elapsedMs": 28457,
+      "actions": 906,
+      "sourceSwitches": [
+        {
+          "action": 90,
+          "trainedThrough": 89,
+          "coefficient": 0.9988286314942323,
+          "gain": -2.7768596831391434,
+          "raw": 0.0069188657890316314,
+          "bounded": 0.0069188657890316314,
+          "corrupted": false
+        },
+        {
+          "action": 222,
+          "trainedThrough": 221,
+          "coefficient": 0.016845647995383874,
+          "gain": -0.046832859291143905,
+          "raw": 0.0021508072693413507,
+          "bounded": 0.0021508072693413507,
+          "corrupted": true
+        },
+        {
+          "action": 431,
+          "trainedThrough": 430,
+          "coefficient": 0.9576340598203813,
+          "gain": -2.662333986099227,
+          "raw": 0.0012708220955707991,
+          "bounded": 0.0012708220955707991,
+          "corrupted": false
+        },
+        {
+          "action": 652,
+          "trainedThrough": 651,
+          "coefficient": 0.023945040371707926,
+          "gain": -0.06656999521515901,
+          "raw": 0.004176957155189595,
+          "bounded": 0.004176957155189595,
+          "corrupted": true
+        },
+        {
+          "action": 902,
+          "trainedThrough": 901,
+          "coefficient": 1.0279365007948762,
+          "gain": -2.8577829428199593,
+          "raw": -0.002287712768364679,
+          "bounded": -0.002287712768364679,
+          "corrupted": false
+        }
+      ],
+      "costs": {
+        "online": 0.05053150291982242,
+        "scalar": 0.0690615741884785,
+        "static": 0.08013124057656806,
+        "causal": 0.05225723046258641
+      },
+      "sourceUpdates": 876,
+      "observedActionsPerSecond": 31.837509224443895,
+      "finalActions": 1840,
+      "functionalChecks": "passed",
+      "historyRetained": true,
+      "exactReplay": "passed"
+    },
+    {
+      "networkId": "feeder24",
+      "mobile": true,
+      "frames": 1295,
+      "maxFrameGapMs": 116.70000000000073,
+      "over50ms": 102,
+      "over100ms": 2,
+      "initialDomNodes": 2262,
+      "finalDomNodes": 2401,
+      "initialHeapBytes": 18200000,
+      "finalHeapBytes": 18200000,
+      "elapsedMs": 43956,
+      "actions": 910,
+      "sourceSwitches": [
+        {
+          "action": 90,
+          "trainedThrough": 89,
+          "coefficient": 0.9936280934601275,
+          "gain": -1.8288769506480127,
+          "raw": 0.011671670908788291,
+          "bounded": 0.011671670908788291,
+          "corrupted": false
+        },
+        {
+          "action": 221,
+          "trainedThrough": 220,
+          "coefficient": -0.005061400702689206,
+          "gain": 0.009316040019467705,
+          "raw": 0.010369395079606193,
+          "bounded": 0.010369395079606193,
+          "corrupted": true
+        },
+        {
+          "action": 431,
+          "trainedThrough": 430,
+          "coefficient": 0.9917916419008043,
+          "gain": -1.8254967685155492,
+          "raw": -0.001093497081370629,
+          "bounded": -0.001093497081370629,
+          "corrupted": false
+        },
+        {
+          "action": 651,
+          "trainedThrough": 650,
+          "coefficient": 0.0210575674387055,
+          "gain": -0.038758666324796305,
+          "raw": -0.002114961379586775,
+          "bounded": -0.002114961379586775,
+          "corrupted": true
+        },
+        {
+          "action": 900,
+          "trainedThrough": 899,
+          "coefficient": 0.9819988803505062,
+          "gain": -1.807472161521835,
+          "raw": -0.006490080814441436,
+          "bounded": -0.006490080814441436,
+          "corrupted": false
+        }
+      ],
+      "costs": {
+        "online": 0.4221940933124574,
+        "scalar": 0.5953276661278233,
+        "static": 0.7511059127303319,
+        "causal": 0.4305227310370643
+      },
+      "sourceUpdates": 880,
+      "observedActionsPerSecond": 20.7025207025207,
+      "finalActions": 1859,
+      "functionalChecks": "passed",
+      "historyRetained": true,
+      "exactReplay": "passed"
+    },
+    {
+      "networkId": "feeder47",
+      "mobile": true,
+      "frames": 1420,
+      "maxFrameGapMs": 200,
+      "over50ms": 851,
+      "over100ms": 198,
+      "initialDomNodes": 4326,
+      "finalDomNodes": 4477,
+      "initialHeapBytes": 56800000,
+      "finalHeapBytes": 56800000,
+      "elapsedMs": 89619,
+      "actions": 911,
+      "sourceSwitches": [
+        {
+          "action": 91,
+          "trainedThrough": 90,
+          "coefficient": 1.0041584666697092,
+          "gain": -1.8482592094342556,
+          "raw": 0.009433101581380405,
+          "bounded": 0.009433101581380405,
+          "corrupted": false
+        },
+        {
+          "action": 220,
+          "trainedThrough": 219,
+          "coefficient": -0.004537095655493933,
+          "gain": 0.00835100146808708,
+          "raw": 0.010629323983343248,
+          "bounded": 0.010629323983343248,
+          "corrupted": true
+        },
+        {
+          "action": 431,
+          "trainedThrough": 430,
+          "coefficient": 0.9995477549758082,
+          "gain": -1.8397727099093737,
+          "raw": -0.0043047735439139265,
+          "bounded": -0.0043047735439139265,
+          "corrupted": false
+        },
+        {
+          "action": 651,
+          "trainedThrough": 650,
+          "coefficient": 0.009013691637618977,
+          "gain": -0.016590646927951015,
+          "raw": -0.0008526628389039653,
+          "bounded": -0.0008526628389039653,
+          "corrupted": true
+        },
+        {
+          "action": 901,
+          "trainedThrough": 900,
+          "coefficient": 0.9883335185400688,
+          "gain": -1.8191317289715054,
+          "raw": -0.006868106905175752,
+          "bounded": -0.006868106905175752,
+          "corrupted": false
+        }
+      ],
+      "costs": {
+        "online": 0.8703546358427654,
+        "scalar": 1.22615996309075,
+        "static": 1.5809811760756005,
+        "causal": 0.8858626454156182
+      },
+      "sourceUpdates": 881,
+      "observedActionsPerSecond": 10.165255135629721,
+      "finalActions": 1856,
+      "functionalChecks": "passed",
+      "historyRetained": true,
+      "exactReplay": "passed"
+    }
+  ],
+  "pixel_review": {
+    "source_commit": "b015d39cbb7d8658d87a69b6cd9ecf1776b31214",
+    "status": "actual_pixels_reviewed_candidate_unpublished",
+    "route": "Authenticated GitHub base64 text wrappers of cloud captured PNG bytes emitted as actual images. No local files and no direct live browser.",
+    "reviewed": [
+      "toy8-phone-start.png",
+      "feeder24-phone-start.png",
+      "feeder47-phone-start.png",
+      "toy8-desktop-start.png",
+      "feeder24-desktop-start.png",
+      "feeder47-desktop-start.png",
+      "feeder24-desktop-native-long.png",
+      "feeder47-phone-native-long.png"
+    ],
+    "artifacts": [
+      {
+        "file": "feeder24-desktop-inspection.png",
+        "sha": "63908b38a093a58a44ee7c45bf612a0b85361651",
+        "base64_text_sha": "ab024af035c8c4a28a39bb34c0903d8f2dd8b617",
+        "bytes": 136047
+      },
+      {
+        "file": "feeder24-desktop-native-long.png",
+        "sha": "779f7d2df5ca7a83048fadedf2ada431dc13bddd",
+        "base64_text_sha": "1dde84acfc44108875781791baf5da309fd33eab",
+        "bytes": 421322
+      },
+      {
+        "file": "feeder24-desktop-start.png",
+        "sha": "d586d479dc5a014583e8c7aec1210887de51d48a",
+        "base64_text_sha": "18bd42767337cb43a40410fa1962212e4aac7993",
+        "bytes": 334670
+      },
+      {
+        "file": "feeder24-desktop.png",
+        "sha": "1234ae7c52401baa8579df71dc4e74b3b68d430a",
+        "base64_text_sha": "259a8bfeecd8e2c15b33be0da88d7af4ed005d71",
+        "bytes": 441917
+      },
+      {
+        "file": "feeder24-phone-inspection.png",
+        "sha": "565e76eb998eb8213964d17bf19e8a94cf97d8a3",
+        "base64_text_sha": "09f91491c83cf05cfb4ca621261c1fb857249d4a",
+        "bytes": 129515
+      },
+      {
+        "file": "feeder24-phone-native-long.png",
+        "sha": "47197f05b21ffd9582855f71ad5b3617019293ce",
+        "base64_text_sha": "97a8b4beef35b2cfd58788e38a4d402903c0ca24",
+        "bytes": 382924
+      },
+      {
+        "file": "feeder24-phone-start.png",
+        "sha": "5f575342e2ac55b84466a289254b67a644d04fee",
+        "base64_text_sha": "7b09473f171d39c3354ab3040f8c9e06185d6420",
+        "bytes": 299459
+      },
+      {
+        "file": "feeder24-phone.png",
+        "sha": "f63a5686818e061c99b469f28dc8f9d6aaf08dba",
+        "base64_text_sha": "fa06a12fba85f5a387e361c6bb8e8c3848955c22",
+        "bytes": 392754
+      },
+      {
+        "file": "feeder47-desktop-inspection.png",
+        "sha": "56cb8dd254a0da2dec8ecb32b5a90020e058307e",
+        "base64_text_sha": "0d974f0f6eb65537c1383f51a8a997a67156173b",
+        "bytes": 140281
+      },
+      {
+        "file": "feeder47-desktop-native-long.png",
+        "sha": "e8d374b97546b1c9a27dca7bceb4d9c0a2657f50",
+        "base64_text_sha": "078c40461375b59782f42b01164afed181500d24",
+        "bytes": 520767
+      },
+      {
+        "file": "feeder47-desktop-start.png",
+        "sha": "0f75126f2c25621033e2a7880fced553faec75e0",
+        "base64_text_sha": "525ae61c5bcbe15c8ece3dde8b370f1d5ba1e1a5",
+        "bytes": 405020
+      },
+      {
+        "file": "feeder47-desktop.png",
+        "sha": "87f5aae8976caf685a348734cc0d91df6fa41534",
+        "base64_text_sha": "8eef9d483463e95cf6681b19892f83db44c67b03",
+        "bytes": 531946
+      },
+      {
+        "file": "feeder47-phone-inspection.png",
+        "sha": "e88cecc720ad26da554d17222e1a46c3536614c2",
+        "base64_text_sha": "d83b1eab0b6ed115d355c0b0f06f66b3278543ee",
+        "bytes": 117859
+      },
+      {
+        "file": "feeder47-phone-native-long.png",
+        "sha": "4ac47c8aff812500db2ef7ce6646b9226560be20",
+        "base64_text_sha": "9d54f109f33f59382bea6b1658205b9b170f6c6f",
+        "bytes": 344977
+      },
+      {
+        "file": "feeder47-phone-start.png",
+        "sha": "dc707397a18e4d4699e9aa8a049c4041aa31392e",
+        "base64_text_sha": "2779317c95fced6a258de41f3f5352319d8cc61f",
+        "bytes": 268747
+      },
+      {
+        "file": "feeder47-phone.png",
+        "sha": "6b48d91729e53833736500d15ee96ebb9ea0c4f7",
+        "base64_text_sha": "60ca2532b560372543a7fcd8bc751dcd0656803d",
+        "bytes": 358039
+      },
+      {
+        "file": "toy8-desktop-inspection.png",
+        "sha": "39b104f9b9deb552e3ab457d7f5c09f01e01fac0",
+        "base64_text_sha": "da04128ac68d77ea7e31f9e6be515fea9b71ed02",
+        "bytes": 125620
+      },
+      {
+        "file": "toy8-desktop-native-long.png",
+        "sha": "d93228818ee1e39d084261cd99a5377f2f032be3",
+        "base64_text_sha": "082e7a6c67b5f06afc71b86369aa074286c1d88e",
+        "bytes": 346867
+      },
+      {
+        "file": "toy8-desktop-start.png",
+        "sha": "1c38a38bd129d492a373a5b639e704c2d7c281d1",
+        "base64_text_sha": "5a88537387fe091ad6cf441e49d49a4caa913dce",
+        "bytes": 281455
+      },
+      {
+        "file": "toy8-desktop.png",
+        "sha": "5f0bb9a3a894f2d69d091ed262d5f506378d63c4",
+        "base64_text_sha": "27ef37543d7828f562cfa6106f5a007b68432232",
+        "bytes": 373952
+      },
+      {
+        "file": "toy8-phone-inspection.png",
+        "sha": "a73946e54371d7c121d41e4577a41188ea1458e6",
+        "base64_text_sha": "04f8d8c921d682aa19a98a71da1c8d44acc58714",
+        "bytes": 118859
+      },
+      {
+        "file": "toy8-phone-native-long.png",
+        "sha": "b812d1302a7991eb67fa65204ae4703797c61287",
+        "base64_text_sha": "f17989e4f25143d7deb2eb1ede59254dc491b514",
+        "bytes": 312968
+      },
+      {
+        "file": "toy8-phone-start.png",
+        "sha": "73f8827af4f0ca666b28d9ad08dcd7a7dd336762",
+        "base64_text_sha": "f5585a35a22d64befdd32e82b6a08b6df24229d8",
+        "bytes": 249706
+      },
+      {
+        "file": "toy8-phone.png",
+        "sha": "a0752bfaac6b3879d25e6ce910f56a8f7b0d54a8",
+        "base64_text_sha": "a38549a742959b1b294ca3710d8b00755579606d",
+        "bytes": 328870
+      }
+    ],
+    "findings": [
+      "All six startup pages show the ongoing status, truthful pending gains and zero costs, with the gain SVG hidden rather than a blank plot.",
+      "Phone layouts retain native 47 bus scrolling and actual per network support budgets. Archived reference evidence remains specific to 24 buses.",
+      "Reviewed native long desktop 24 bus and phone 47 bus outputs show actual signed gain evolution through all four corruption and repair switches, admitted correction, raw source error, command and full cost comparison.",
+      "These screenshots do not resolve archived new trial migration, large network high speed responsiveness, indefinite history memory growth or final documentation and publication gates."
+    ]
+  },
+  "units": {
+    "coefficient": "dimensionless",
+    "gain": "per unit reactive command per per unit forcing",
+    "raw": "per unit reactive command on 1 MVA base",
+    "bounded": "per unit reactive command on 1 MVA base",
+    "actuator_bound_pu": 0.07,
+    "actuator_bound_kvar": 70,
+    "ui_conversion_kvar": 1000
+  },
+  "captured_receipt_bound_check": {
+    "checks": 30,
+    "limit_pu": 0.07,
+    "passed": true
+  },
+  "validation": {
+    "workflow_run": 39165255997,
+    "all_jobs": "success",
+    "completed_logs_read": true,
+    "numerical_and_interaction_cases": 253,
+    "original_browser_checks": 44,
+    "archived_network_suites": "passed",
+    "build": "passed",
+    "source_and_ready": "b015d39cbb7d8658d87a69b6cd9ecf1776b31214"
+  },
+  "followup": {
+    "test_only": "Tighten native per unit receipt assertion to 0.07 while preserving 70 kvar converted commandQ checks.",
+    "captured_receipts_passed": 30,
+    "ci_repeat": "Pending for the commit containing this evidence. No publication."
+  }
+}
