@@ -783,17 +783,8 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-18T09:00:00+08:00",
-    "started_at": "2026-10-18T09:03:32+08:00",
-    "expires_at": "2026-10-18T09:43:32+08:00",
-    "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
-    "candidate_branch": "cloud/refine/20261018-0900",
-    "base_commit": "e5c4359617dcd084368f476a0ef86bdacdfa290f",
-    "status": "validating",
-    "scope": "Contextual physical source and inverter role caption with readable inspected labels"
-  },
-  "next_focus": "Review small physical bus/source labels and selected source-to-inverter path on phone artifacts. Improve the existing network/matrix inspection hierarchy without extra panels or controls, preserve honest absent links, sealed forecast timing, measured commands, all four costs and fixed deployment. Keep the compact desktop columns and original phone reading order, recorded regimes, readable timing captions and stable cost buttons. No parameter retuning or broad benchmark study for visual work.",
+  "active_run": null,
+  "next_focus": "Review remaining dense phone feeder geometry and 9 px unselected bus numbers from actual cloud screenshots. Consider a modest responsive network height or clearer existing selection hierarchy only after measured overlap/touch checks and pixel review, without new panels or controls. Preserve contextual source/receiver marks and caption, all four costs and recorded regimes, compact desktop columns and phone order. No scientific retuning or broad benchmark study for visual work.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -903,11 +894,12 @@
       "pages_run": 39052070867
     },
     "renewed_completion": {
-      "slot": "2026-10-18T08:00:00+08:00",
-      "branch": "cloud/refine/20261018-0800",
-      "product_ready_commit": "f48d5db46d796fa7bf7fad46e537a26c4acc2a6a",
+      "slot": "2026-10-18T09:00:00+08:00",
+      "branch": "cloud/refine/20261018-0900",
+      "product_ready_commit": "78f803f6cc8de784a14b60cdedc4cb19a1ab2faa",
       "scope": "Completion record only, no product changes",
-      "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and candidate workflow results for metadata recovery. Do not count metadata validation as a new invocation or improvement, or promote an older branch over newer main."
+      "status": "Metadata candidate validation pending at record creation. Product source and ready build are independently verified on candidate and main, and Pages succeeded.",
+      "instruction": "The 09:00 slot is counted once in this candidate's renewed_program.completed_count. At the next existing slot read actual metadata candidate workflow result and branch head. Promote only after normal validation with expected current main 78f803f6cc8de784a14b60cdedc4cb19a1ab2faa and force false if still matching. If main changed, reapply only the verified completion metadata onto latest main and validate normally. Do not overwrite newer source, count metadata recovery as another improvement, or count this slot twice. Original 40 minute pass deadline remains 09:43:32. Do not extend it or start an additional refinement from a duplicate dispatch."
     },
     "previous_renewed_metadata_verification": {
       "commit": "e5c4359617dcd084368f476a0ef86bdacdfa290f",
@@ -963,6 +955,13 @@
         "slot": "2026-10-18T07:00:00+08:00",
         "branch": "cloud/refine/20261018-0700",
         "product_ready_commit": "e0258d02c77089c0b6346f7bb546db9aef59dfa5",
+        "scope": "Completion record only, no product changes",
+        "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and candidate workflow results for metadata recovery. Do not count metadata validation as a new invocation or improvement, or promote an older branch over newer main."
+      },
+      "7": {
+        "slot": "2026-10-18T08:00:00+08:00",
+        "branch": "cloud/refine/20261018-0800",
+        "product_ready_commit": "f48d5db46d796fa7bf7fad46e537a26c4acc2a6a",
         "scope": "Completion record only, no product changes",
         "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and candidate workflow results for metadata recovery. Do not count metadata validation as a new invocation or improvement, or promote an older branch over newer main."
       }
@@ -1051,7 +1050,7 @@
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
     "invocation_count": 9,
-    "completed_count": 8,
+    "completed_count": 9,
     "runs": [
       {
         "slot": "2026-10-18T01:00:00+08:00",
@@ -1415,10 +1414,10 @@
       {
         "slot": "2026-10-18T09:00:00+08:00",
         "started_at": "2026-10-18T09:03:32+08:00",
-        "status": "validating",
+        "status": "completed",
         "candidate_branch": "cloud/refine/20261018-0900",
         "base_commit": "e5c4359617dcd084368f476a0ef86bdacdfa290f",
-        "counted_completed": false,
+        "counted_completed": true,
         "changes": [
           "Add a contextual caption under the existing feeder that identifies the inspected source and inverter using its actual connection, local channel and candidate/deployed/saved context. No arrow is displayed for an absent remote link.",
           "Raise inspected physical bus numbers and selected matrix axis labels to 12 px. Place only the inspected numbers inside their own existing bus marks with a noninteractive white backdrop, preserving actual bus centres, outside fault/power badges and all unselected equipment. No new controls or always visible diagnostic.",
@@ -1442,23 +1441,44 @@
           {
             "source_commit": "99f0447ff465ad5202ea0a4463f47bc653ccaddb",
             "candidate_run": 39085708249,
-            "status": "in progress when superseded",
+            "status": "cancelled",
             "reason": "Geometry review found below-node enlarged labels could overlap a neighbour's equipment. Keep the same bus centres and use inspection-only in-node number backdrops while preserving outside forecast and power badges. No controller or scientific change. Full checks rerun; no assertions removed.",
-            "publication": "Unpublished"
+            "publication": "Unpublished",
+            "job": 117551702337
           }
-        ]
+        ],
+        "source_commit": "437fc49ff6d7e25d6eec1f5e79ff99968b11502d",
+        "published_commit": "78f803f6cc8de784a14b60cdedc4cb19a1ab2faa",
+        "candidate_run": 39085958809,
+        "main_run": 39086641507,
+        "pages_run": 39086641298,
+        "tests": {
+          "suites": 7,
+          "total": 212,
+          "failed": 0,
+          "candidate": "passed",
+          "main": "All 212 tests, build consistency and full desktop/phone browser checks passed.",
+          "build": "passed",
+          "browser": "Full desktop and phone browser suite passed, including contextual local/remote/absent/history roles, actual selected bus number placement and matrix axis label sizes, glyph containment, four curves, exact old replay, playback, native cost buttons, forecast toggles and repeated/continuous power attacks with automatic comparison.",
+          "benchmarks": "Not rerun. No engine, physical model, controller, learning, objective, gains, limits, scenario/default, source errors, forecasts or archived numerical results changed.",
+          "main_consistency": "passed"
+        },
+        "screenshots": {
+          "artifact_id": 12121306168,
+          "artifact_digest": "sha256:648da02e0fdfb2af507128773116363468e3ae9906884fbf06312515ff1edf39",
+          "captures": [
+            "network-inspection-1440-discovery.jpg",
+            "network-inspection-1440-deployment.jpg",
+            "network-inspection-390-deployment.jpg"
+          ],
+          "pixel_review": "Actual source candidate JPEG pixels reviewed through authorized Actions logs for desktop 1440 discovery and deployment, and phone 390 deployment. The source and inverter numbers are distinct, readable inside their own existing bus marks, with matching dashed/solid contextual caption and no clipping. Unselected equipment and outside forecast markers remain visible. Actual feedback-only lowest cost on the stressed desktop trial and fixed-sparse lowest on the phone trial remain honest and visible. All four costs and exact coincident coordinates are retained. General unselected bus numbers remain 9 px and dense phone geometry is not claimed fully redesigned. This is artifact pixel review, not direct live browser inspection."
+        },
+        "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed. No public HTTP byte comparison performed this pass.",
+        "completed_at": "2026-10-18T01:39:09.315Z",
+        "publication": "Candidate and main validation succeeded. Generated ready child has tested source as its single parent and only index.html changed. Promoted with expected current main SHA and force false. Pages succeeded for that exact ready version; deployment logs verified."
       }
     ],
-    "active_run": {
-      "slot": "2026-10-18T09:00:00+08:00",
-      "started_at": "2026-10-18T09:03:32+08:00",
-      "expires_at": "2026-10-18T09:43:32+08:00",
-      "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
-      "candidate_branch": "cloud/refine/20261018-0900",
-      "base_commit": "e5c4359617dcd084368f476a0ef86bdacdfa290f",
-      "status": "validating",
-      "scope": "Contextual physical source and inverter role caption with readable inspected labels"
-    },
+    "active_run": null,
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
@@ -1478,5 +1498,5 @@
     "baseline_main": "2a9ff26b59565ecac1eb5274fbea4d813a18f24f"
   },
   "completed_count_scope": "Original bounded program, retained at 15. Renewed counts are tracked independently in renewed_program.",
-  "total_completed_count": 23
+  "total_completed_count": 24
 }
