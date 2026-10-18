@@ -536,7 +536,7 @@
     if(!last)return;
     el.setAttribute('aria-label','Actual executed signed current target gain from source '+reading.source+' to inverter '+reading.receiver
       +' over '+reading.points.length+' actions. Units pu command per pu forcing. Includes the startup response. No future observations.');
-    const chart=chartBase(el,reading.points,['gain'],'Signed current gain','Action (s)',115);
+    const chart=chartBase(el,reading.points,['gain'],'Signed current gain','Action (s)',125);
     drawSeries(chart,reading.points,[{key:'gain',label:'Executed gain',color:'var(--viz-series-1)',dash:null}]);
     hover(chart,reading.points,[{key:'gain',label:'Executed gain',color:'var(--viz-series-1)'}],'Executed action');
   }
@@ -1663,7 +1663,8 @@
   }
   function chartBase(el, observations, keys, yTitle, xTitle, height, options={}) {
     const width = Math.max(240,el.getBoundingClientRect().width);
-    const margin = {left:52,right:12,top:25,bottom:26};
+    // Keep numeric tick labels and the axis caption on separate lines, including touch layouts.
+    const margin = {left:52,right:12,top:25,bottom:36};
     const frame={x:margin.left,y:margin.top,w:width-margin.left-margin.right,h:height-margin.top-margin.bottom};
     const svg=d3.select(el).attr('viewBox','0 0 '+width+' '+height).attr('height',height);
     const clip='pr-clip-'+el.id;

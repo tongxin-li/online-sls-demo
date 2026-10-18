@@ -90,6 +90,12 @@ async function main(){
    assert.equal(Number(inspected.plotted.lastGain),inspected.history.points.at(-1).gain);
    assert.ok(inspected.statusWidth>120,'Ongoing text uses the full column');
    assert.ok(inspected.statusHeight<180,'No obsolete stage column expands the strip');
+   const axisSpacing=await page.evaluate(()=>Array.from(document.querySelectorAll('svg')).filter(svg=>svg.getBoundingClientRect().height>0&&svg.querySelector('[data-axis=x]')?.textContent).map(svg=>{
+     const title=svg.querySelector('[data-axis=x]').getBoundingClientRect(),ticks=Array.from(svg.querySelectorAll('.x-axis .tick text')).map(el=>el.getBoundingClientRect());
+     return {id:svg.id,gap:title.top-Math.max(...ticks.map(rect=>rect.bottom))};
+   }));
+   assert.ok(axisSpacing.some(axis=>axis.id==='pr-response-history'));
+   for(const axis of axisSpacing)assert.ok(axis.gap>=2,'Axis caption separated from numeric ticks '+JSON.stringify(axis));
    for(const row of inspected.traffic){
     assert.equal(Number(row.payload.forecasts),row.expected.remoteForecastMessages);
     assert.equal(Number(row.payload.corrections),row.expected.remoteCorrectionScalars);

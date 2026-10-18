@@ -800,7 +800,8 @@
       "Keep the phone attack target geometry fixed when Stop all appears, preserving the existing capture, cancellation and keyboard logic. Add a real touch bounding box regression.",
       "Repair ongoing status strip grid after hiding stage numbers and remove finite progress tracks from the ongoing protocol.",
       "Add an actual executed signed gain trace inside the existing source inspector, derived only from admitted per action receipts. Preserve every source, controller and history sample.",
-      "Show cumulative remote forecast and correction payload values in the existing comparison, and explicitly label the archived frozen study. No physical, estimator, baseline or synthesis parameter is changed."
+      "Show cumulative remote forecast and correction payload values in the existing comparison, and explicitly label the archived frozen study. No physical, estimator, baseline or synthesis parameter is changed.",
+      "Separate axis captions from numeric ticks in actual phone and desktop charts. Add rendered glyph separation assertions without changing plotted samples."
     ],
     "tests": {
       "main": {
@@ -808,17 +809,34 @@
         "validate_job": 117724923758,
         "conclusion": "success",
         "completed_logs_read": true
+      },
+      "first_source": {
+        "source_commit": "7b6cbd904084aafdd4c08514ad57a816e2c74243",
+        "run_id": 39155796893,
+        "ongoing_browser_job": 117758805646,
+        "ongoing_browser": "success",
+        "review_job": 117759201425,
+        "review": "success",
+        "full_validation": "in_progress_at_followup",
+        "logs_read": [
+          "ongoing-browser",
+          "review-ongoing"
+        ]
       }
     },
     "remaining_gaps": [],
     "next_focus": "Read full validation and actual ongoing phone and desktop outcomes. Inspect new cloud screenshot pixels before any release. Default remains gated until complete acceptance.",
     "pixel_review": {
-      "source_commit": "f7609eb59b415afc7ee6364df1c984d93bfa5a5e",
-      "status": "prior_candidate_actual_pixels_reviewed_new_edits_pending",
+      "source_commit": "7b6cbd904084aafdd4c08514ad57a816e2c74243",
+      "status": "actual_pixels_reviewed_followup_spacing_pending",
+      "reviewed": [
+        "feeder24-phone.png",
+        "feeder24-desktop.png",
+        "feeder47-phone-inspection.png"
+      ],
       "findings": [
-        "Hidden number column makes ongoing strip narrow and tall.",
-        "Phone control failure occurs after tap, with one held request and no remaining latch. Stabilizing geometry is a candidate fix, not yet validated.",
-        "Signed gains and correction values are visible and consistent with receipts. Add full measured evolution trace."
+        "Touch geometry stable and ongoing status readable. Executed signed gain evolution, actual traffic and archived labels visible.",
+        "Horizontal axis captions overlap numeric ticks on phone. Correct spacing and repeat cloud browser review."
       ]
     }
   },
@@ -3102,7 +3120,8 @@
           "Keep the phone attack target geometry fixed when Stop all appears, preserving the existing capture, cancellation and keyboard logic. Add a real touch bounding box regression.",
           "Repair ongoing status strip grid after hiding stage numbers and remove finite progress tracks from the ongoing protocol.",
           "Add an actual executed signed gain trace inside the existing source inspector, derived only from admitted per action receipts. Preserve every source, controller and history sample.",
-          "Show cumulative remote forecast and correction payload values in the existing comparison, and explicitly label the archived frozen study. No physical, estimator, baseline or synthesis parameter is changed."
+          "Show cumulative remote forecast and correction payload values in the existing comparison, and explicitly label the archived frozen study. No physical, estimator, baseline or synthesis parameter is changed.",
+          "Separate axis captions from numeric ticks in actual phone and desktop charts. Add rendered glyph separation assertions without changing plotted samples."
         ],
         "tests": {
           "main": {
@@ -3110,17 +3129,34 @@
             "validate_job": 117724923758,
             "conclusion": "success",
             "completed_logs_read": true
+          },
+          "first_source": {
+            "source_commit": "7b6cbd904084aafdd4c08514ad57a816e2c74243",
+            "run_id": 39155796893,
+            "ongoing_browser_job": 117758805646,
+            "ongoing_browser": "success",
+            "review_job": 117759201425,
+            "review": "success",
+            "full_validation": "in_progress_at_followup",
+            "logs_read": [
+              "ongoing-browser",
+              "review-ongoing"
+            ]
           }
         },
         "remaining_gaps": [],
         "next_focus": "Read full validation and actual ongoing phone and desktop outcomes. Inspect new cloud screenshot pixels before any release. Default remains gated until complete acceptance.",
         "pixel_review": {
-          "source_commit": "f7609eb59b415afc7ee6364df1c984d93bfa5a5e",
-          "status": "prior_candidate_actual_pixels_reviewed_new_edits_pending",
+          "source_commit": "7b6cbd904084aafdd4c08514ad57a816e2c74243",
+          "status": "actual_pixels_reviewed_followup_spacing_pending",
+          "reviewed": [
+            "feeder24-phone.png",
+            "feeder24-desktop.png",
+            "feeder47-phone-inspection.png"
+          ],
           "findings": [
-            "Hidden number column makes ongoing strip narrow and tall.",
-            "Phone control failure occurs after tap, with one held request and no remaining latch. Stabilizing geometry is a candidate fix, not yet validated.",
-            "Signed gains and correction values are visible and consistent with receipts. Add full measured evolution trace."
+            "Touch geometry stable and ongoing status readable. Executed signed gain evolution, actual traffic and archived labels visible.",
+            "Horizontal axis captions overlap numeric ticks on phone. Correct spacing and repeat cloud browser review."
           ]
         }
       }
@@ -3142,7 +3178,8 @@
         "Keep the phone attack target geometry fixed when Stop all appears, preserving the existing capture, cancellation and keyboard logic. Add a real touch bounding box regression.",
         "Repair ongoing status strip grid after hiding stage numbers and remove finite progress tracks from the ongoing protocol.",
         "Add an actual executed signed gain trace inside the existing source inspector, derived only from admitted per action receipts. Preserve every source, controller and history sample.",
-        "Show cumulative remote forecast and correction payload values in the existing comparison, and explicitly label the archived frozen study. No physical, estimator, baseline or synthesis parameter is changed."
+        "Show cumulative remote forecast and correction payload values in the existing comparison, and explicitly label the archived frozen study. No physical, estimator, baseline or synthesis parameter is changed.",
+        "Separate axis captions from numeric ticks in actual phone and desktop charts. Add rendered glyph separation assertions without changing plotted samples."
       ],
       "tests": {
         "main": {
@@ -3150,17 +3187,34 @@
           "validate_job": 117724923758,
           "conclusion": "success",
           "completed_logs_read": true
+        },
+        "first_source": {
+          "source_commit": "7b6cbd904084aafdd4c08514ad57a816e2c74243",
+          "run_id": 39155796893,
+          "ongoing_browser_job": 117758805646,
+          "ongoing_browser": "success",
+          "review_job": 117759201425,
+          "review": "success",
+          "full_validation": "in_progress_at_followup",
+          "logs_read": [
+            "ongoing-browser",
+            "review-ongoing"
+          ]
         }
       },
       "remaining_gaps": [],
       "next_focus": "Read full validation and actual ongoing phone and desktop outcomes. Inspect new cloud screenshot pixels before any release. Default remains gated until complete acceptance.",
       "pixel_review": {
-        "source_commit": "f7609eb59b415afc7ee6364df1c984d93bfa5a5e",
-        "status": "prior_candidate_actual_pixels_reviewed_new_edits_pending",
+        "source_commit": "7b6cbd904084aafdd4c08514ad57a816e2c74243",
+        "status": "actual_pixels_reviewed_followup_spacing_pending",
+        "reviewed": [
+          "feeder24-phone.png",
+          "feeder24-desktop.png",
+          "feeder47-phone-inspection.png"
+        ],
         "findings": [
-          "Hidden number column makes ongoing strip narrow and tall.",
-          "Phone control failure occurs after tap, with one held request and no remaining latch. Stabilizing geometry is a candidate fix, not yet validated.",
-          "Signed gains and correction values are visible and consistent with receipts. Add full measured evolution trace."
+          "Touch geometry stable and ongoing status readable. Executed signed gain evolution, actual traffic and archived labels visible.",
+          "Horizontal axis captions overlap numeric ticks on phone. Correct spacing and repeat cloud browser review."
         ]
       }
     },
