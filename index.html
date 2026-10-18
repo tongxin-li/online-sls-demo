@@ -475,7 +475,9 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 .pr-link-receipt td { color:var(--foreground); }
 .pr-link-receipt .pr-link-choice.selected { color:var(--primary); font-weight:600; }
 .pr-link-receipt .pr-link-choice.excluded { color:var(--muted-foreground); }
-.pr-link-receipt #pr-link-receipt-action { color:var(--foreground); font-size:12px; }
+.pr-link-receipt #pr-link-receipt-action { width:auto; padding-top:12px; text-align:left; color:var(--muted-foreground); font-size:12px; font-weight:500; }
+.pr-link-receipt tr[data-measure='commandKvar'] { font-weight:600; }
+.pr-link-receipt #pr-link-receipt-note { font-size:12px; }
 .pr-forecast-values dt { color:var(--muted-foreground); }
 
 /* Current configuration replaces generic heading copy without another panel. */
@@ -735,9 +737,11 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
           <p id="pr-link-receipt-time" class="pr-caption"></p>
           <table aria-label="Measured selection and resynthesized controller comparison" aria-describedby="pr-link-receipt-note">
             <thead><tr><th scope="col">Measured link</th><th id="pr-link-receipt-scalar" scope="col">Fixed sparse</th><th id="pr-link-receipt-online" scope="col">Learned sparse</th></tr></thead>
-            <tbody id="pr-link-receipt-rows"></tbody>
+            <tbody id="pr-link-receipt-rows" aria-label="Frozen discovery evidence"></tbody>
+            <tbody id="pr-link-receipt-execution" aria-label="Executed controller evidence">
+              <tr id="pr-link-receipt-execution-time"><th id="pr-link-receipt-action" scope="rowgroup" colspan="3"></th></tr>
+            </tbody>
           </table>
-          <p id="pr-link-receipt-action" class="pr-caption"></p>
           <p id="pr-link-receipt-note" class="pr-caption">Score averages discovery gain². Gain norm uses the resynthesized row. Source is before limiting; command includes all messages and each controller’s feedback.</p>
         </section>
         <details id="pr-command-inspector" class="pr-command-inspector" hidden>
@@ -2600,8 +2604,9 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       scoreSamples:support.scoreSamples,action:command?.action??null,rows};
   }
   function renderLinkEvidence(reading) {
-    const panel=$('link-receipt'),body=$('link-receipt-rows');
+    const panel=$('link-receipt'),body=$('link-receipt-rows'),execution=$('link-receipt-execution');
     panel.hidden=!reading;body.replaceChildren();
+    execution.replaceChildren($('link-receipt-execution-time'));
     panel.dataset.available=String(!!reading);
     for(const key of ['source','receiver','discoverySamples','scoreSamples','action'])
       panel.dataset[key]=reading&&reading[key]!==null?String(reading[key]):'';
@@ -2613,7 +2618,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       const header=$('link-receipt-'+item.key);header.textContent=item.label+'\n'+item.budget+' remote';
       header.dataset.budget=String(item.budget);
     }
-    for(const [key,label] of [['selection','Prediction link'],['score','Score (gain²)'],['gainNorm','Gain norm'],['sourceKvar','Source (kvar)'],['commandKvar','Command (kvar)']]) {
+    for(const [key,label] of [['selection','Selected support'],['score','Discovery score'],['gainNorm','Deployed gain'],['sourceKvar','Source (kvar)'],['commandKvar','Command (kvar)']]) {
       const row=document.createElement('tr'),labelCell=document.createElement('th');labelCell.scope='row';labelCell.textContent=label;row.append(labelCell);row.dataset.measure=key;
       for(const item of reading.rows) {
         const cell=document.createElement('td');cell.dataset.controller=item.key;cell.dataset.measure=key;
@@ -2623,7 +2628,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         if(key==='commandKvar')cell.title=item.limited?'Actual command limited to ±70 kvar':'Actual bounded command, not a causal share of this source';
         row.append(cell);
       }
-      body.append(row);
+      (key==='selection'||key==='score'?body:execution).append(row);
     }
   }
   // Read only the last revealed pair. Never read a future forcing or forecast base.
