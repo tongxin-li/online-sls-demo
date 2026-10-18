@@ -2355,7 +2355,16 @@
         "screenshots": {
           "status": "Candidate desktop and phone command pixels must be reviewed before promotion. Prior live screenshot pixels read during preflight."
         },
-        "direct_live_inspection": "Unverified. Previously denied live browser access not retried. Public HTTP bytes not independently fetched."
+        "direct_live_inspection": "Unverified. Previously denied live browser access not retried. Public HTTP bytes not independently fetched.",
+        "candidate_revisions": [
+          {
+            "source_commit": "4b522128e2091fbd0a9a351a472396f0afe9943a",
+            "candidate_run": 39134092366,
+            "status": "superseded_unpublished",
+            "reason": "Review found new word count assertion matched a literal backslash rather than whitespace. Correct the test before any promotion, retain exact scientific and layout assertions and rerun full workflow. No scientific or page behavior change.",
+            "validation_conclusion": "In progress when corrected source is prepared. Workflow concurrency may cancel it. Preserve actual final result on next read."
+          }
+        ]
       }
     ],
     "active_run": {

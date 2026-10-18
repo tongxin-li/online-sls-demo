@@ -537,7 +537,7 @@ async function main() {
       ],'Concise command notes retain preview scope, link ownership, norm units, amplitude independence, additive terms and saturation qualification');
       assert.equal(notes.length,3,'Reuse the original notes without adding panels or controls');
       assert.ok(notes.every(note=>note.font>=12&&note.left>=0&&note.right<=note.viewport+1),'Command qualifications stay readable inside desktop and phone layouts');
-      assert.ok(notes.map(note=>note.text).join(' ').split(/\\s+/).length<=66,'Keep command notes concise without shrinking their text');
+      assert.ok(notes.map(note=>note.text).join(' ').split(/\s+/).length<=66,'Keep command notes concise without shrinking their text');
       const scroll=surface.getByRole('region',{name:'Receiver command table',exact:true});
       await scroll.scrollIntoViewIfNeeded();
       const initial=await scroll.evaluate(node=>node.scrollLeft),seen=new Set();
