@@ -17,6 +17,54 @@ async function main(){
  });await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  const address='http://127.0.0.1:'+server.address().port,errors=[],results=[];let browser;
  const read=page=>page.evaluate(()=>{const d=document.querySelector('#power-response-demo').powerDemo,s=d.getSnapshot();return {s:{networkId:s.networkId,protocol:s.protocol,phase:s.phase,t:s.t,mode:s.mode,historyLength:s.history.length,learning:s.learning,cumulative:s.cumulative,commandQ:s.commandQ,states:s.states,lastExecution:s.lastExecution,deployedSupport:s.deployedSupport,traffic:s.traffic},ui:d.getState(),evidence:d.getLinkEvidence()};});
+
+ // CDP observes actual native Run execution. It does not replace the plant,
+ // scheduler, controller, renderer or issued observations.
+ const profileState=page=>page.evaluate(()=>{const d=document.querySelector('#power-response-demo').powerDemo,s=d.getSnapshot();return {
+  t:s.t,history:s.history.length,samples:s.sampleCount,sourceUpdates:s.learning.sourceUpdates,
+  costs:s.cumulative,domNodes:document.getElementsByTagName('*').length,playing:d.getState().playing};});
+ const startProfile=async(page,label)=>{
+  const session=await page.context().newCDPSession(page),before=await profileState(page);
+  const heapBefore=await session.send('Runtime.getHeapUsage');
+  await session.send('Profiler.enable');await session.send('Profiler.setSamplingInterval',{interval:1000});
+  await session.send('Profiler.start');return {session,label,before,heapBefore,started:Date.now()};
+ };
+ const finishProfile=async(page,record)=>{
+  const {profile}=await record.session.send('Profiler.stop'),elapsedMs=Date.now()-record.started;
+  const heapAfter=await record.session.send('Runtime.getHeapUsage'),after=await profileState(page);
+  await record.session.detach();
+  const nodes=new Map(profile.nodes.map(node=>[node.id,node])),parents=new Map();
+  for(const node of profile.nodes)for(const child of node.children||[])parents.set(child,node.id);
+  const stages={snapshot:'snapshot',step:'controller_and_plant',command:'controller_and_plant',begin:'controller_and_plant',
+   finish:'controller_and_plant',prepareContinuousAction:'controller_and_plant',refreshContinuousScores:'controller_and_plant',
+   diagnostics:'controller_and_plant',render:'render',renderControls:'render',drawNetwork:'network',
+   drawMatrix:'matrix',drawCost:'cost_chart',drawVoltage:'voltage_chart',voltageMetrics:'voltage_metrics',
+   drawResponseHistory:'response_history',inspectedResponseHistory:'response_history',save:'persistence'};
+  const self=new Map(),attribution={};let sampledUs=0;
+  for(let i=0;i<(profile.samples||[]).length;i++){
+   const id=profile.samples[i],duration=profile.timeDeltas?.[i]??1000,node=nodes.get(id),frame=node?.callFrame||{};
+   sampledUs+=duration;const key=[frame.functionName||'(anonymous)',frame.url||'',frame.lineNumber??-1].join('|');
+   const item=self.get(key)||{function:frame.functionName||'(anonymous)',url:frame.url||'',line:(frame.lineNumber??-1)+1,selfUs:0};
+   item.selfUs+=duration;self.set(key,item);
+   let current=id,stage=null;
+   while(current!==undefined){const name=nodes.get(current)?.callFrame.functionName;
+    if(stages[name]){stage=stages[name];break;}current=parents.get(current);
+   }
+   stage=stage||(frame.functionName==='(idle)'?'idle':frame.functionName==='(garbage collector)'?'garbage_collection':'other');
+   attribution[stage]=(attribution[stage]||0)+duration;
+  }
+  const summary={label:record.label,before:record.before,after,elapsedMs,heapBefore:record.heapBefore,heapAfter,
+   samples:profile.samples?.length||0,sampledUs,attributionUs:attribution,
+   hottestSelf:[...self.values()].sort((a,b)=>b.selfUs-a.selfUs).slice(0,40),
+   caveat:'Profiler and browser assertions add overhead. Heap usage is an actual finite observation, not a retained heap or indefinite bound. Stack attribution uses the nearest named application frame.'};
+  assert.ok(summary.samples>100,'Native CPU profile contains actual samples');
+  assert.equal(after.history,after.t);assert.equal(after.samples,after.t,'Profiling preserves every revealed sample');
+  assert.ok(after.sourceUpdates>record.before.sourceUpdates,'Causal learning continues during profiling');
+  for(const key of ['online','scalar','static','causal'])assert.ok(after.costs[key]>=record.before.costs[key]);
+  await fs.writeFile(path.join(output,record.label+'.cpuprofile'),JSON.stringify(profile));
+  await fs.writeFile(path.join(output,record.label+'-profile.json'),JSON.stringify(summary,null,2));
+  console.log('NATIVE_CPU_PROFILE '+JSON.stringify(summary));return summary;
+ };
  const settings=async(page,fn)=>{const box=page.locator('#pr-adaptation');const open=await box.getAttribute('open')!==null;if(!open)await box.locator('summary').first().click();await fn();if(!open)await box.locator('summary').first().click();};
  const setting=(page,id,value)=>settings(page,()=>page.locator('#pr-'+id).selectOption(value));
  const pause=async page=>{if((await read(page)).ui.playing)await page.locator('#pr-run').click();};
@@ -58,7 +106,7 @@ async function main(){
    await page.locator('#pr-run').click();await page.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t>=35);
    await page.locator('#pr-cost-gap').click();assert.equal((await read(page)).ui.playing,true);
    await page.locator('#pr-cost-total').click();
-   const nativeSwitches=[];
+   const nativeSwitches=[],profiles=[];let nativeProfile=null;
    const nativeReceipt=()=>page.evaluate(()=>{
     const root=document.querySelector('#power-response-demo'),s=root.powerDemo.getSnapshot(),receipt=s.lastExecution;
     const r=window.PowerDemo.forNetwork(root.dataset.network).constants.inverterBuses.indexOf(7),j=5;
@@ -68,6 +116,7 @@ async function main(){
    for(const target of [90,220,430,650]){
     await page.waitForFunction(target=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t>=target,target,{timeout:150000,polling:100});
     nativeSwitches.push(await nativeReceipt());
+    if(networkId==='feeder47'&&target===650)nativeProfile=await startProfile(page,label+'-near-900');
     await page.locator('#pr-pulse').click();
     assert.equal((await read(page)).ui.playing,true,'Source corruption or repair does not pause native Run');
    }
@@ -78,6 +127,7 @@ async function main(){
    for(const row of nativeSwitches){assert.ok(row.trainedThrough<row.action);assert.ok(Math.abs(row.bounded)<=.07+1e-11,'Receipt command uses per unit and must stay within 70 kvar on the 1 MVA base');}
    assert.equal((await read(page)).ui.playing,true,'Native Run must not stop at old finite boundaries');
    await pause(page);
+   if(nativeProfile)profiles.push(await finishProfile(page,nativeProfile));
    const native=await read(page),nativeMetrics=await page.evaluate(()=>{
     const m=window.__nativePlayback;m.stopped=true;
     return {frames:m.frames,maxFrameGapMs:m.maxFrameGapMs,over50ms:m.over50ms,over100ms:m.over100ms,
@@ -119,6 +169,13 @@ async function main(){
    await page.waitForFunction(target=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t>=target,attackStart+5);
    await page.locator('#pr-stop-attacks').click();await pause(page);
    for(let i=0;i<3;i++)await advance(page);
+   if(networkId==='feeder47'){
+    const lateBefore=await read(page);assert.ok(lateBefore.s.t>1800,'Late profile follows the full growing history');
+    const late=await startProfile(page,label+'-after-1800');
+    await page.locator('#pr-run').click();
+    await page.waitForFunction(target=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t>=target,lateBefore.s.t+100,{timeout:150000,polling:100});
+    await pause(page);profiles.push(await finishProfile(page,late));
+   }
    const final=await read(page);assert.ok(final.s.t>900);assert.equal(final.s.phase,'ongoing');assert.equal(final.ui.comparisonComplete,false);
    assert.equal(final.s.historyLength,final.s.t);assert.equal(final.s.mode,'running');
    assert.ok(final.s.learning.sourceUpdates>second.s.learning.sourceUpdates);
@@ -189,7 +246,7 @@ async function main(){
     handoffs.push({action,protocol:exact.s.protocol,t:exact.s.t,passed:true});
    }
    console.log('ARCHIVED_HANDOFF '+JSON.stringify({networkId,mobile,handoffs}));
-   results.push({networkId,mobile,actions:final.s.t,nativePlayback:nativeMetrics,handoffs,costs:final.s.cumulative,updates:final.s.learning.sourceUpdates,traffic:final.s.traffic,passed:true});
+   results.push({networkId,mobile,actions:final.s.t,nativePlayback:nativeMetrics,profiles,handoffs,costs:final.s.cumulative,updates:final.s.learning.sourceUpdates,traffic:final.s.traffic,passed:true});
    console.log('Ongoing UI passed '+networkId+' '+(mobile?'phone':'desktop')+' '+final.s.t+' actions');
    await context.close();
   }

@@ -783,41 +783,7 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "program_id": "continuous-phi-20261018T234500",
-    "slot": "2026-10-19T07:45:00+08:00",
-    "started_at": "2026-10-19T07:40:16+08:00",
-    "work_started_at": "2026-10-19T07:45:04+08:00",
-    "lease_expires_at": "2026-10-19T08:20:16+08:00",
-    "branch": "cloud/refine/continuous-phi-20261018-2345",
-    "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
-    "candidate_parent": "2ae31c21b4f3095d6d1da9bb56bcd5eefd1c89a3",
-    "status": "profiling_native_long_playback",
-    "counted_invocation": true,
-    "counted_completed": false,
-    "early_dispatch": "Read only preflight until the scheduled slot. Original dispatch deadline retained.",
-    "tests": {
-      "preflight": {
-        "main_run": 39144310544,
-        "main_conclusion": "success",
-        "candidate_repeat": 39171828317,
-        "candidate_conclusion": "success",
-        "jobs": [
-          117806318288,
-          117806318535,
-          117807771634,
-          117808808968
-        ],
-        "completed_logs_read": true,
-        "cases": 254,
-        "old_browser_checks": 44,
-        "ongoing_conditions": 6,
-        "handoffs": 18
-      }
-    },
-    "changes": [],
-    "next_focus": "Measure native 47 bus CPU attribution and retained history near 900 and beyond 1800 actions before optimizing."
-  },
+  "active_run": null,
   "next_focus": "Read latest main and this checkpoint repeat checks first. Profile 47 bus native execution and rendering with growing history at 901 and roughly 1850 samples. Separate actual controller step, immutable snapshot and chart work. Optimize the measured hotspot without retuning gains, objective, noise or limits and without dropping costs or evidence. If caching stationary response geometry, keep current causal correction weights and command receipts fresh at every action. Revalidate all suites and actual pixels before expected SHA nonforce publication.",
   "priorities": [
     "Actual continuous causal response adaptation and executed command evidence",
@@ -2628,7 +2594,7 @@
     "hard_deadline": "2026-10-19T23:45:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 8,
+    "invocation_count": 7,
     "completed_count": 0,
     "runs": [
       {
@@ -5096,13 +5062,13 @@
               "completed_cancelled_logs_read": true,
               "reason": "Normal navigation save overwrote a pre-navigation archive fixture. Fixed the actual next-document fixture route, keeping the application save behavior and all assertions."
             }
-          ]
+          ],
+          "profiling": "Pending full cloud validation. Diagnostic timing includes profiler overhead and cannot be claimed as improved speed."
         },
         "changes": [
-          "Explicit primary Restart, Restore default scenario and Network actions construct a fresh continuous-phi-v1 trial while archived replay, views, attacks and cost controls preserve the original protocol until an explicit new trial.",
-          "Label archived trial headings truthfully and keep archived advanced reproduction controls scoped. No new selector or dashboard.",
-          "Update superseded restart and network phase assertions with explicit ongoing protocol, support, costs, paused behavior and replay protections. Keep archived numerical and browser comparisons on actual version 13 production records.",
-          "Add actual desktop and phone handoff checks for all three primary actions on each network after the existing fresh long native playback suites."
+          "Add cloud CDP CPU profiling of real 47 bus desktop and phone Run at 650 through 901 actions and 100 additional native actions after the existing full long interaction sequence beyond 1800.",
+          "Keep all existing controller, immutable forecast, attack, support, accumulated cost, old boundary and exact replay assertions. Store full profiles and compact stack attribution plus actual finite heap observations.",
+          "No product engine, UI, physical parameter or numerical benchmark is changed by profiling."
         ],
         "remaining_gaps": [
           "Profile and address native large network playback and growing history while retaining all observed samples, causal updates, executed receipts, exact replay and accumulated physical costs. Prior declared native tests measured roughly 9.7 to 10.2 samples per wall second for 47 buses at requested 32 with frame gaps up to 200 ms. This handoff pass changes no controller or rendering algorithm and does not claim that gap solved.",
@@ -5367,78 +5333,9 @@
             "action": "Read only duplicate preflight while the already counted invocation finishes its checkpoint. No new lease, invocation, refinement or deadline extension."
           }
         ]
-      },
-      {
-        "program_id": "continuous-phi-20261018T234500",
-        "slot": "2026-10-19T07:45:00+08:00",
-        "started_at": "2026-10-19T07:40:16+08:00",
-        "work_started_at": "2026-10-19T07:45:04+08:00",
-        "lease_expires_at": "2026-10-19T08:20:16+08:00",
-        "branch": "cloud/refine/continuous-phi-20261018-2345",
-        "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
-        "candidate_parent": "2ae31c21b4f3095d6d1da9bb56bcd5eefd1c89a3",
-        "status": "profiling_native_long_playback",
-        "counted_invocation": true,
-        "counted_completed": false,
-        "early_dispatch": "Read only preflight until the scheduled slot. Original dispatch deadline retained.",
-        "tests": {
-          "preflight": {
-            "main_run": 39144310544,
-            "main_conclusion": "success",
-            "candidate_repeat": 39171828317,
-            "candidate_conclusion": "success",
-            "jobs": [
-              117806318288,
-              117806318535,
-              117807771634,
-              117808808968
-            ],
-            "completed_logs_read": true,
-            "cases": 254,
-            "old_browser_checks": 44,
-            "ongoing_conditions": 6,
-            "handoffs": 18
-          }
-        },
-        "changes": [],
-        "next_focus": "Measure native 47 bus CPU attribution and retained history near 900 and beyond 1800 actions before optimizing."
       }
     ],
-    "active_run": {
-      "program_id": "continuous-phi-20261018T234500",
-      "slot": "2026-10-19T07:45:00+08:00",
-      "started_at": "2026-10-19T07:40:16+08:00",
-      "work_started_at": "2026-10-19T07:45:04+08:00",
-      "lease_expires_at": "2026-10-19T08:20:16+08:00",
-      "branch": "cloud/refine/continuous-phi-20261018-2345",
-      "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
-      "candidate_parent": "2ae31c21b4f3095d6d1da9bb56bcd5eefd1c89a3",
-      "status": "profiling_native_long_playback",
-      "counted_invocation": true,
-      "counted_completed": false,
-      "early_dispatch": "Read only preflight until the scheduled slot. Original dispatch deadline retained.",
-      "tests": {
-        "preflight": {
-          "main_run": 39144310544,
-          "main_conclusion": "success",
-          "candidate_repeat": 39171828317,
-          "candidate_conclusion": "success",
-          "jobs": [
-            117806318288,
-            117806318535,
-            117807771634,
-            117808808968
-          ],
-          "completed_logs_read": true,
-          "cases": 254,
-          "old_browser_checks": 44,
-          "ongoing_conditions": 6,
-          "handoffs": 18
-        }
-      },
-      "changes": [],
-      "next_focus": "Measure native 47 bus CPU attribution and retained history near 900 and beyond 1800 actions before optimizing."
-    },
+    "active_run": null,
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
       "is_enabled": true,
@@ -5467,16 +5364,6 @@
         "at": "2026-10-19T06:18:28+08:00",
         "slot": "2026-10-19T05:45:00+08:00",
         "action": "Read only duplicate preflight while the already counted invocation finishes its checkpoint. No new lease, invocation, refinement or deadline extension."
-      }
-    ],
-    "read_only_preflights": [
-      {
-        "dispatch": "2026-10-19T06:40:24+08:00",
-        "status": "early_read_only_no_invocation",
-        "candidate_run": 39171828317,
-        "conclusion": "success",
-        "completed_logs_read": true,
-        "source_changed": false
       }
     ]
   }
