@@ -439,11 +439,11 @@ test('deployment preserves discovery history and primary restart clears the whol
   const restored=harness(h.saved());assert.deepEqual(restored.state().topology,frozen);
   assert.equal(restored.snapshot().phase,'deployment');
   h.node('topology-history').value='1';h.event('topology-history','input');
-  h.click('restart');assert.equal(h.snapshot().t,0);assert.equal(h.snapshot().phase,'discovery');
-  assert.equal(h.snapshot().deployedSupport,null);assert.equal(h.snapshot().discoveryRecord,null);
+  h.click('restart');assert.equal(h.snapshot().t,0);assert.equal(h.snapshot().phase,'ongoing');
+  assert.equal(h.snapshot().protocol,'continuous-phi-v1');assert.equal(h.snapshot().deployedSupport.links.filter(e=>e.from!==e.to).length,24);assert.equal(h.snapshot().discoveryRecord,null);
   assert.equal(h.state().historyIndex,null);
   assert.equal(h.state().topology.events.length,0);assert.equal(h.state().topology.lastT,0);
-  assert.equal(h.state().topology.phase,'discovery');assert.equal(h.state().historyIndex,null);
+  assert.equal(h.state().topology.phase,'ongoing');assert.equal(h.state().historyIndex,null);
 });
 
 test('Discovery reset discards old topology observations and starts from the new initial support',async()=>{
@@ -1040,8 +1040,8 @@ test('communication starts in learning and preserves the chosen noise across res
   h.change('noise',2);assert.equal(h.snapshot().beta,2);assert.equal(h.snapshot().t,0);
   await compare(h);assert.equal(h.snapshot().phase,'deployment');assert.equal(h.node('view').value,'cost');
   assert.equal(h.node('view').hidden,true);assert.equal(h.snapshot().calibration.updates,0);
-  h.click('restart');assert.equal(h.snapshot().phase,'discovery');assert.equal(h.snapshot().beta,2);
-  assert.equal(h.node('view').value,'learning');assert.equal(h.node('experiment').value,'communication');
+  h.click('restart');assert.equal(h.snapshot().phase,'ongoing');assert.equal(h.snapshot().protocol,'continuous-phi-v1');assert.equal(h.snapshot().beta,2);
+  assert.equal(h.node('view').value,'cost');assert.equal(h.node('experiment').value,'communication');
 });
 
 test('communication comparison keeps all policies and reports actual gains or losses against both references',async()=>{
@@ -1082,7 +1082,7 @@ test('communication design shows actual cost and deployed prediction budgets ind
   h.click('cost-gap');assert.deepEqual(h.codesign(),view,'Measured method budgets and total costs are independent of the selected chart metric');
   assert.deepEqual(plain(h.snapshot()),before,'Read only design summaries cannot affect the experiment');
   const restored=harness(h.saved());assert.deepEqual(restored.codesign(),view);assert.equal(restored.state().playing,false);
-  h.click('restart');assert.equal(h.codesign(),null);assert.equal(h.snapshot().t,0);
+  h.click('restart');assert.ok(h.codesign().points.every(point=>point.cost===0));assert.equal(h.snapshot().t,0);assert.equal(h.snapshot().protocol,'continuous-phi-v1');
 });
 
 test('communication design acknowledges identical supports and a winning feedback controller',async()=>{
@@ -1840,7 +1840,7 @@ test('the new scenario action preserves a restored trial until an explicit fresh
   assert.deepEqual(restored.snapshot().cumulative,old.snapshot().cumulative);
   restored.change('intervention','forecast');assert.deepEqual(restored.snapshot().cumulative,old.snapshot().cumulative,'Mode selection never silently removes old costs');
   restored.click('new-scenario');assert.equal(restored.snapshot().powerScenario,'forecasted-demand');assert.equal(restored.snapshot().beta,4);
-  assert.equal(restored.snapshot().phase,'discovery');assert.equal(restored.state().playing,true);assert.equal(restored.state().intervention,'forecast');
+  assert.equal(restored.snapshot().phase,'ongoing');assert.equal(restored.snapshot().protocol,'continuous-phi-v1');assert.equal(restored.state().playing,true);assert.equal(restored.state().intervention,'forecast');
   assert.deepEqual(restored.state().activeAttackBuses,[]);assert.equal(restored.snapshot().eventLog.some(event=>event.type==='pulse'),false);
   assert.ok(restored.snapshot().t<=1,'Explicit action starts only the new trial');
   assert.equal(restored.node('trial-context').hidden,true);
@@ -2075,23 +2075,23 @@ test('primary restart clears comparison, attacks and custom source changes while
   assert.ok(Object.values(h.snapshot().cumulative).some(value=>value>0));
   assert.ok(h.snapshot().eventLog.length>0);assert.ok(h.state().activeAttackBuses.length>0);
   h.click('restart');const restarted=h.snapshot();
-  assert.equal(restarted.phase,'discovery');assert.equal(restarted.t,0);assert.equal(restarted.deployedSupport,null);
+  assert.equal(restarted.phase,'ongoing');assert.equal(restarted.protocol,'continuous-phi-v1');assert.equal(restarted.t,0);assert.equal(restarted.deployedSupport.links.filter(e=>e.from!==e.to).length,24);
   assert.equal(restarted.discoveryRecord,null);assert.equal(restarted.experiment,'communication');
   assert.equal(restarted.beta,8);assert.equal(restarted.powerScenario,'solar-outage');
   assert.equal(h.node('speed').value,'32');assert.equal(h.node('attack-mode').value,'continuous');assert.equal(h.node('strength').value,'150');
-  assert.equal(h.node('auto-compare').checked,true);assert.equal(h.node('view').value,'learning');
-  assert.equal(h.node('matrix-view').value,'links');assert.equal(h.node('cost-metric').value,'total');
+  assert.equal(h.node('auto-compare').checked,true);assert.equal(h.node('view').value,'cost');
+  assert.equal(h.node('matrix-view').value,'change');assert.equal(h.node('cost-metric').value,'total');
   assert.equal(h.node('cost-total')['aria-pressed'],'true');assert.equal(h.node('cost-gap')['aria-pressed'],'false');
   assert.deepEqual(restarted.faults,new PowerDemo.Simulation({experiment:'communication',beta:8,powerScenario:'solar-outage'}).snapshot().faults);
   assert.ok(Object.values(restarted.cumulative).every(value=>value===0));
   assert.equal(restarted.eventLog.length,0);assert.equal(restarted.activePulses.length,0);assert.equal(restarted.pendingPulses.length,0);
   assert.deepEqual(h.state().activeAttackBuses,[]);assert.equal(h.state().playing,false);assert.equal(h.clock.tasks.size,0);
-  assert.equal(h.state().topology.events.length,0);assert.equal(h.state().historyIndex,null);assert.equal(h.state().inspectedSource,null);
+  assert.equal(h.state().topology.events.length,0);assert.equal(h.state().historyIndex,null);assert.equal(h.state().inspectedSource,7);
   assert.deepEqual(h.comparison().plotted,['online','scalar','static','causal']);
   await h.samples(3);assert.equal(h.snapshot().t,0,'Restart stays paused until the next explicit Run');
-  h.click('run');await h.clock.until(()=>h.snapshot().phase==='deployment');
-  assert.equal(h.snapshot().discoveryRecord.t,180);assert.equal(h.snapshot().t,0);
-  assert.ok(Object.values(h.snapshot().cumulative).every(value=>value===0),'Automatic comparison still starts fresh');
+  h.click('run');await h.samples(410);h.click('run');
+  assert.equal(h.snapshot().phase,'ongoing');assert.ok(h.snapshot().t>360);assert.equal(h.snapshot().discoveryRecord,null);
+  assert.ok(Object.values(h.snapshot().cumulative).every(value=>value>0),'Ongoing costs remain across both old boundaries');
 });
 
 
@@ -2231,8 +2231,8 @@ test('persistent experiment stages explain the automatic reset without stopping 
   assert.equal(restored.node('results-stage').textContent,'Controller comparison');
   assert.equal(restored.state().playing,false);
   h.click('restart');
-  assert.deepEqual(h.progress(),stageBefore);
-  assert.equal(h.node('progress-comparison').dataset.status,'pending');
+  assert.equal(h.snapshot().protocol,'continuous-phi-v1');assert.equal(h.progress().phase,'ongoing');
+  assert.equal(h.node('progress-comparison').dataset.status,'active');
 });
 
 test('persistent stages report short discovery honestly and ignore historical topology inspection',()=>{
@@ -2253,7 +2253,7 @@ test('persistent stages report short discovery honestly and ignore historical to
   h.event('topology-history','input');assert.deepEqual(inspect(),first,'Historical links do not rewind the live experiment stage');
   h.click('history-live');assert.deepEqual(harness(h.saved()).progress(),first);
   h.click('restart');assert.equal(h.node('progress-learning').dataset.status,'active');
-  assert.equal(h.node('progress-comparison').dataset.status,'pending');
+  assert.equal(h.node('progress-comparison').dataset.status,'active');assert.equal(h.snapshot().protocol,'continuous-phi-v1');
   const prediction=harness();
   assert.equal(prediction.node('experiment-progress').hidden,true,'The specialized communication explanation is not shown for adapting prediction coefficients');
   assert.equal(prediction.node('phase').hidden,false);
@@ -2372,7 +2372,7 @@ test('displayed link ownership follows the actual controller phase and saved dis
     const restored=harness(h.saved(),experiment);
     assert.deepEqual(plain(restored.snapshot()),before,'Version 13 replay remains exact');
     assert.equal(restored.node('matrix-title').dataset.controller,controller);
-    h.click('restart');check('Matrix adaptation','discovery');
+    h.click('restart');check('Adaptive sparse','ongoing');assert.equal(h.snapshot().protocol,'continuous-phi-v1');
   }
 });
 
@@ -2479,4 +2479,24 @@ test('fresh unsaved sessions execute the ongoing default with visible actual wei
   for(const field of ['t','states','cumulative','commandQ','lastExecution'])assert.deepEqual(plain(restored.snapshot()[field]),plain(before[field]));
   h.click('restart');assert.equal(h.snapshot().protocol,'continuous-phi-v1');assert.equal(h.snapshot().t,0);
   assert.equal(h.state().playing,false);
+});
+
+// Explicit new trial actions supersede the old freeze. Restore itself remains exact.
+test('archived new trial controls migrate only on explicit actions and save ongoing records',async()=>{
+ for(const action of ['restart','new-scenario','network-scenario'])for(const networkId of ['toy8','feeder24','feeder47']){
+  const api=PowerDemo.forNetwork(networkId),old=new api.Simulation({networkId,experiment:'communication',powerScenario:'reference',beta:4,seed:20261013,horizon:180});
+  for(let i=0;i<8;i++)old.step();
+  const state={privateContent:{version:13,networkId,phase:'discovery',t:old.t,events:old.eventLog,initialOptions:old.snapshot().initialOptions,selectedBus:7,speed:'32',intervention:'forecast'}};
+  const h=harness(state,'communication'),before=plain(h.snapshot());
+  assert.notEqual(h.snapshot().protocol,'continuous-phi-v1');assert.match(h.node('scenario-name').textContent,/Archived trial/);
+  h.change('cost-metric','gap');h.change('cost-metric','total');assert.deepEqual(plain(h.snapshot()),before);
+  if(action==='network-scenario')h.change(action,networkId==='toy8'?'feeder47':'toy8');else h.click(action);
+  assert.equal(h.snapshot().protocol,'continuous-phi-v1');assert.equal(h.snapshot().phase,'ongoing');
+  assert.ok(h.snapshot().t<2);assert.equal(h.saved().privateContent.version,14);
+  assert.equal(h.state().playing,action==='new-scenario');assert.deepEqual(h.state().activeAttackBuses,[]);
+  assert.equal(h.snapshot().discoveryRecord,null);assert.doesNotMatch(h.node('scenario-name').textContent,/Archived trial/);
+  if(action!=='new-scenario')assert.ok(Object.values(h.snapshot().cumulative).every(v=>v===0));
+  if(h.state().playing)h.click('run');const restored=harness(h.saved(),null);
+  for(const field of ['t','states','cumulative','commandQ','lastExecution'])assert.deepEqual(plain(restored.snapshot()[field]),plain(h.snapshot()[field]));
+ }
 });

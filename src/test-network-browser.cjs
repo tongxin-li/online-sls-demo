@@ -236,14 +236,23 @@ async function main() {
     assert.equal(snapshot.initialOptions.networkId, id);
     assert.equal(snapshot.states.online.length, networks[id].buses);
     assert.equal(snapshot.t, 0, 'Switch begins a fresh trial');
-    assert.equal(snapshot.phase, 'discovery');
+    assert.equal(snapshot.phase, 'ongoing');assert.equal(snapshot.protocol,'continuous-phi-v1');
     assert.equal(state.playing, false, 'Changing a model pauses playback');
     assert.deepEqual(state.activeAttackBuses, [], 'Attacks do not cross different plants');
     assert.ok(state.selectedBus >= 1 && state.selectedBus <= networks[id].buses);
     assert.deepEqual(Object.values(snapshot.cumulative), [0, 0, 0, 0]);
     assert.equal(state.historyIndex, null);
-    assert.equal(state.inspectedSource, null);
+    assert.equal(state.inspectedSource, 7, 'New ongoing trial selects the mandatory local source instead of stale inspection');
     await checkLayout(surface, id);
+    // Keep the original finite controller and reference arithmetic checks
+    // under their actual archived v13 protocol after testing the new handoff.
+    await surface.evaluate(id=>localStorage.setItem('online-sls-demo-v1',JSON.stringify({privateContent:{
+      version:13,networkId:id,phase:'discovery',t:0,events:[],selectedBus:7,speed:'16',view:'learning',matrixView:'links',intervention:'forecast',automaticComparison:true,
+      initialOptions:{networkId:id,experiment:'communication',powerScenario:'forecasted-demand',beta:4,preset:'mixed',seed:20261013,horizon:180}
+    }})),id);
+    await surface.reload({waitUntil:'networkidle'});
+    assert.equal((await read(surface)).snapshot.phase,'discovery');
+    assert.notEqual((await read(surface)).snapshot.protocol,'continuous-phi-v1');
     await setting(surface, 'power-scenario', 'solar-outage');
     assert.match(await surface.locator('#pr-scenario-status').textContent(), new RegExp('\\b' + networks[id].solar + ' sites\\b'), 'Solar scenario uses the active network site count');
     assert.equal((await read(surface)).snapshot.networkId, id, 'Scenario changes retain the selected physical model');

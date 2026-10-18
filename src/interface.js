@@ -830,20 +830,26 @@
     resetExperiment(); $('intervention').value=snapshot.experiment==='communication'?'forecast':'power';
     if(ongoing()) {inspectedSource=hasInverter(selectedBus)?selectedBus:null;$('matrix-view').value='change';}
     visible.clear();series.forEach(item=>visible.add(item.key));
-    announce((snapshot.experiment==='communication'?'Communication topology':snapshot.presetLabel)+' · New learning trial'); render(); save();
+    announce(ongoing()?'Ongoing causal learning · New trial':(snapshot.experiment==='communication'?'Communication topology':snapshot.presetLabel)+' · New learning trial'); render(); save();
+  }
+  function startOngoingTrial() {
+    // Only an explicit new trial migrates an archived replay. Its old costs
+    // and physical history are preserved until the user takes that action.
+    trialProtocol='continuous-phi-v1';$('experiment').value='communication';
+    startSelectedExperiment();
   }
   $('new-scenario').addEventListener('click',()=>{
     if(comparing) return;
     $('experiment').value='communication';$('power-scenario').value=DEFAULT_SCENARIO;
     $('noise').value='4';$('preset').value='mixed';$('auto-compare').checked=true;
-    startSelectedExperiment();toggleRun();
+    startOngoingTrial();toggleRun();
   });
   $('network-scenario').addEventListener('change',()=>{
     if(comparing) return;
     stop();selectedBus=7;inspectedSource=null;
     bindNetwork($('network-scenario').value);
-    startSelectedExperiment();
-    announce(PowerDemo.constants.networkLabel+' · New learning trial · Press Run');
+    startOngoingTrial();
+    announce(PowerDemo.constants.networkLabel+' · New ongoing trial · Press Run');
   });
   $('preset').addEventListener('change',startSelectedExperiment);
   $('experiment').addEventListener('change',startSelectedExperiment);
@@ -876,9 +882,8 @@
     if(comparing) return;
     // Restart is one complete new trial under the selected settings.
     // The optional link rebuild in settings preserves edited source reliability.
-    startSelectedExperiment();
-    $('matrix-view').value='links';
-    announce('Ready · Run to learn and compare'); render(); save();
+    startOngoingTrial();
+    announce('Ready · Ongoing learning · Press Run'); render(); save();
   });
   $('speed').addEventListener('change', () => { if (playing) { clearTimeout(timer); nextTickAt=0; schedule(); } save(); });
   $('auto-compare').addEventListener('change',()=>{render();save();});
@@ -1198,7 +1203,7 @@
     const scheduled=snapshot.powerScenario===DEFAULT_SCENARIO,scenario=snapshot.scenario || {};
     const powers=(snapshot.eventLog || []).filter(event=>event.type==='pulse').length;
     const allNoisy=scheduled && snapshot.beta>0 && Array.from({length:PowerDemo.constants.N-1},(_,i)=>i+2).every(bus=>snapshot.faults.includes(bus));
-    $('scenario-name').textContent=scheduled?'Demand and solar cycle':snapshot.powerScenario==='solar-outage'?'Solar outage trial':'Reference trial';
+    $('scenario-name').textContent=(ongoing()?'':'Archived trial · ')+(scheduled?'Demand and solar cycle':snapshot.powerScenario==='solar-outage'?'Solar outage trial':'Reference trial');
     const description=$('scenario-description'),settings=forecastSettings();
     const guidance=ongoing()?'Ongoing trial · No physical reset · Corrections learn from revealed source errors':scheduled?(snapshot.phase==='deployment'?(snapshot.experiment==='communication'?'Fresh comparison · Deployed links and prediction correction stay fixed':'Fresh comparison · Links fixed · Prediction correction adapts')
       :automaticComparison()?'Run to learn the links, then compare four controllers automatically':'Manual comparison enabled in Experiment settings')
@@ -1213,7 +1218,7 @@
     $('new-scenario').hidden=scheduled && !powers && !allNoisy;
     $('new-scenario').disabled=comparing;
     $('new-scenario').textContent='Restore default scenario';
-    $('new-scenario').title='Start a new demand and solar scenario with forecast stress β 4. The new trial starts learning and clears previous trial costs.';
+    $('new-scenario').title='Start a new ongoing demand and solar trial with forecast stress β 4. This explicit new trial clears previous trial costs. Archived replay is preserved until this action.';
     const status=$('scheduled-power'),applied=Number(scenario.appliedKw)||0;
     status.hidden=!scheduled;
     status.dataset.appliedKw=String(applied);status.dataset.action=String(scenario.action ?? '');

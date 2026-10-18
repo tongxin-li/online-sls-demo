@@ -2,7 +2,7 @@
 
 [Open the experiment](https://tongxin.me/online-sls-demo/) · [Experimental environment](environment.html)
 
-The default experience is a forecasted demand and solar cycle on the LinDistFlow feeder. It tests whether learned prediction links retain useful advance information while avoiding corrupted sources. All four controllers share the plant, physical power, raw forecasts, feedback, objective and limits. Earlier reference scenarios remain available in Experiment settings for reproducibility.
+The experiment uses a forecasted demand and solar cycle on the LinDistFlow feeder. The ongoing candidate tests continuous causal prediction correction under a fixed offline communication support. All four controllers share the plant, realized physical power, immutable raw forecasts, feedback, objective and actuator limits. Adaptive sparse receives only its admitted forecasts and correction metadata. The public release remains the archived protocol until the ongoing candidate passes every release gate.
 
 Unless another size is named, numerical values and archived studies below describe the original 24 bus reference. The Network menu selects 8, 24 or 47 buses.
 
@@ -14,11 +14,11 @@ The initial selected inverter inspects its mandatory local source. Response weig
 
 Support is chosen offline and stays fixed. Fixed sparse uses the same support with identity correction, dense prediction uses all allowed remote channels with identity correction, and feedback uses no prediction. All methods use the same stationary finite memory planning convention and physical input. This is an experimental source local specialization, not exact manuscript Algorithm 1 or a stability guarantee for the switched saturated trajectory. See the [implementation map](refinement/continuous-response-map.md) and [predefined engineering outcomes](refinement/continuous-response-acceptance.json).
 
-Actual version 13 saved trials restore their archived algorithm and costs exactly. The historical numerical and browser cases below now use explicit version 13 records through the production restore path. Fresh ongoing desktop and phone tests use no injected saved trial. Full migration of new trial actions from an archived context remains a publication gate. The candidate has not yet been promoted to the permanent public page.
+Actual version 13 saved trials restore their archived algorithm and costs exactly. The historical numerical and browser cases below now use explicit version 13 records through the production restore path. Fresh ongoing desktop and phone tests use no injected saved trial. Explicit Restart demo, Restore default scenario and Network selection now request a new ongoing trial. Restart and Network selection stay paused, while Restore default scenario starts playback. Only these explicit actions clear the old trial. Playback, attacks, inspection and cost switching preserve the archived record and its accumulated costs. The archived heading remains visible until a new trial is requested. Advanced controls in an archived trial retain their archived reproduction semantics. Handoff validation and large network playback performance remain publication gates. The candidate has not been promoted to the permanent public page.
 
 ## Archived interaction
 
-The detailed discovery, fresh comparison, finite stopping and shared matrix adaptation descriptions in this section describe archived version 13 trials. They do not describe the new ongoing candidate. Frozen benchmark percentages remain evidence for that archived protocol only.
+The detailed discovery, fresh comparison, finite stopping and shared matrix adaptation descriptions from this section through Implementation scope describe archived version 13 trials. They do not describe the new ongoing candidate. Frozen benchmark percentages remain evidence for that archived protocol only.
 
 
 On desktop the four panels use two independent content-height columns. The cost comparison follows Prediction links directly instead of waiting below the taller network card. Source inspection and disclosures reflow the same column. Phones retain the original network, links, voltage and cost reading order. Panel placement changes no sample, selection, controller or cost.
@@ -197,7 +197,7 @@ Its compact overview contrasts reliable forecasts, mixed source reliability and 
 
 ## Implementation scope
 
-The shared correction follows the explicit archived experimental mean moment equations, with a declared physical scale transfer and sparse restriction. It is not a literal implementation of Algorithm 1. No completed prefix convergence theorem is claimed for the executed adaptive controller.
+This section describes the archived protocol. The ongoing source local diagonal correction and stationary response are described above and in the implementation map. The shared archived correction follows the explicit experimental mean moment equations, with a declared physical scale transfer and sparse restriction. It is not a literal implementation of Algorithm 1. No completed prefix convergence theorem is claimed for the executed adaptive controller.
 
 A fixed common correction multiplying both predictive state and input maps preserves their homogeneous recursion and temporal support. Changing the correction between actions produces adaptive feedforward with common stabilizing feedback. The resulting trajectory is not one fixed lifted response. The separate completed response gradient diagnostic remains in source and tests but does not drive the displayed experiment.
 
@@ -207,7 +207,7 @@ The physical model, units, limits and objective are shared across both experimen
 
 ## Reproduction
 
-The checked in page and assets deploy directly to GitHub Pages. No external font is required. Saved trials from earlier algorithm versions are not replayed as the current experiment.
+The checked in page and assets deploy directly to GitHub Pages. No external font is required. Version 13 saved trials replay their exact archived algorithm, while version 14 records replay continuous-phi-v1. Unsupported older saves start a fresh ongoing trial. The numerical benchmark commands below reproduce archived studies and do not measure the ongoing protocol.
 
 ```sh
 python3 build.py
@@ -227,7 +227,7 @@ python3 -m http.server 8000
 
 ## Cloud validation
 
-Every branch push and pull request runs the six numerical and interaction test suites, builds the page and checks the real browser interactions. Browser checks cover ordinary playback, repeated forecast clicks, continuous power attacks through automatic comparison, thirty live cost view switches and a narrow touch layout. The workflow saves desktop and mobile screenshots as evidence. These smoke checks do not replace visual review or scientific benchmarks.
+Every branch push and pull request runs all numerical and interaction suites required by validate.yml, builds the page and checks the real browser interactions. The separate ongoing browser job uses empty storage for fresh defaults, native playback beyond 901 samples on every network and surface, corruption and repair, attacks, continued history and exact replay. Archived handoff cases use actual version 13 production records and visible primary controls. Browser checks cover ordinary playback, repeated forecast clicks, continuous power attacks through automatic comparison, thirty live cost view switches and a narrow touch layout. The workflow saves desktop and mobile screenshots as evidence. These smoke checks do not replace visual review or scientific benchmarks.
 
 Cloud changes use a new branch beginning with `cloud/refine/`. Push source edits to that branch without editing the generated page by hand. After validation succeeds, a separate job with write access commits only the tested `index.html` to the same candidate branch. It checks that the remote branch still equals the tested source commit and uses a lease when pushing. It never updates `main`. Main and pull request runs require the checked in page to match the build.
 
@@ -240,7 +240,7 @@ Browser evidence also includes `timings.json`, updated at interaction milestones
 
 ## Network scenarios
 
-The main Network menu selects an 8 bus toy, the original 24 bus feeder or a 47 bus feeder. Selection starts a fresh paused discovery and clears old attacks. Restart retains the selected network. Saved trials retain their network ID and replay on the corresponding model. Legacy saved trials without a network ID remain 24 bus trials.
+The main Network menu selects an 8 bus toy, the original 24 bus feeder or a 47 bus feeder. In the candidate, explicit selection starts a fresh paused ongoing trial and clears old attacks. Version 13 records restore their original archived network and finite lifecycle until an explicit new trial action. Restart retains the selected network. Saved trials retain their network ID and replay on the corresponding model. Legacy saved trials without a network ID remain 24 bus trials.
 
 The toy is the reference subtree on buses 1 through 8, with inverters 5, 7, 8 and two remote sources per inverter. Its sparse and dense remote budgets are 6 and 18. The larger feeder duplicates the 23 nonslack reference buses at a shared slack, mapping the second copy by j→j+23. It repeats line impedances, equipment roles and scheduled phases, with a shared background component and independent local innovations and forecast errors. Its 16 inverters retain three remote sources each, giving 48 sparse and 720 dense remote links. Per device ratings, cost weights, timing and learning rules stay unchanged. Each network gets its own state dimension, constrained synthesis, observed learning and measured comparison. Total costs sum over the current network and cannot be compared across sizes without accounting for that size.
 
@@ -267,4 +267,4 @@ Repeated forecasted cycle markers keep every actual timestamp, span and full eve
 
 The public release still uses the frozen communication deployment documented above. The candidate source now starts unsaved sessions in the ongoing protocol, while archived version 13 records retain exact replay. The [public implementation map](refinement/continuous-response-map.md) traces the actual estimator, executed gains, message permissions, reset boundaries and replay before algorithm changes. The [predefined acceptance plan](refinement/continuous-response-plan.json) specifies the new ongoing protocol checks. This engineering work does not attribute archived benchmark percentages to a new adaptive protocol or claim that the live freeze is already fixed.
 
-The ongoing engine candidate has explicit causal source messages, a stationary finite memory response and version 14 engine records. Its restored ongoing interface passed all six desktop and phone conditions and actual cloud pixel review. Fresh default and archived to new trial migration acceptance remain unfinished, so it stays unpublished. See the implementation map for the new baseline and communication conventions. The default at the public URL has not yet changed.
+The ongoing engine candidate has explicit causal source messages, a stationary finite memory response and version 14 engine records. True fresh native playback and continued exact replay passed all six desktop and phone conditions beyond 1800 samples, with actual startup and long run pixel review. The [native playback evidence](refinement/native-playback-acceptance.json) retains every condition and its costs. The 47 bus cloud runs were slower than requested at speed 32 and reached 200 ms frame gaps. Equal optional heap readings do not prove bounded memory. The explicit archived handoff is now implemented and requires complete validation. Playback performance and final release gates remain open, so the candidate stays unpublished. See the implementation map for the new baseline and communication conventions. The default at the public URL has not yet changed.

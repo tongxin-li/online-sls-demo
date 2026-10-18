@@ -159,7 +159,34 @@ async function main(){
    await page.locator('.pr-matrix-panel').screenshot({path:path.join(output,networkId+(mobile?'-phone':'-desktop')+'-inspection.png')});
    const next=networkId==='toy8'?'feeder47':'toy8';await page.locator('#pr-network-scenario').selectOption(next);
    const switched=await read(page);assert.equal(switched.s.t,0);assert.equal(switched.ui.playing,false);assert.equal(switched.s.protocol,'continuous-phi-v1');
-   results.push({networkId,mobile,actions:final.s.t,nativePlayback:nativeMetrics,costs:final.s.cumulative,updates:final.s.learning.sourceUpdates,traffic:final.s.traffic,passed:true});
+   const handoffs=[];
+   for(const action of ['restart','new-scenario','network-scenario']){
+    await pause(page);
+    await page.evaluate(networkId=>localStorage.setItem('online-sls-demo-v1',JSON.stringify({privateContent:{
+      version:13,networkId,phase:'discovery',t:8,events:[],selectedBus:7,speed:'32',view:'learning',matrixView:'links',intervention:'forecast',automaticComparison:false,
+      initialOptions:{networkId,experiment:'communication',powerScenario:'reference',beta:4,preset:'mixed',seed:20261013,horizon:180}
+    }})),networkId);
+    await page.reload({waitUntil:'networkidle'});
+    const archived=await read(page);assert.equal(archived.s.t,8);assert.notEqual(archived.s.protocol,'continuous-phi-v1');
+    assert.equal(archived.ui.playing,false);assert.match(await page.locator('#pr-scenario-name').textContent(),/Archived trial/);
+    await page.locator('#pr-cost-gap').click();await page.locator('#pr-cost-total').click();
+    assert.deepEqual((await read(page)).s,archived.s,'Read only cost controls preserve the actual archived replay');
+    if(action==='restart')await page.screenshot({path:path.join(output,label+'-archived-before-handoff.png'),fullPage:true});
+    if(action==='network-scenario')await page.locator('#pr-network-scenario').selectOption(networkId==='toy8'?'feeder47':'toy8');
+    else if(action==='new-scenario')await settings(page,()=>page.locator('#pr-new-scenario').click());
+    else await page.locator('#pr-restart').click();
+    const fresh=await read(page);assert.equal(fresh.s.protocol,'continuous-phi-v1');assert.equal(fresh.s.phase,'ongoing');
+    assert.equal(fresh.s.historyLength,fresh.s.t);assert.equal(fresh.ui.playing,action==='new-scenario');
+    assert.deepEqual(fresh.ui.activeAttackBuses,[]);assert.doesNotMatch(await page.locator('#pr-scenario-name').textContent(),/Archived trial/);
+    if(action!=='new-scenario'){assert.equal(fresh.s.t,0);assert.ok(Object.values(fresh.s.cumulative).every(v=>v===0));}
+    if(action==='restart')await page.screenshot({path:path.join(output,label+'-handoff-restart.png'),fullPage:true});
+    await pause(page);const exact=await read(page);assert.equal((await page.evaluate(()=>window.openai.widgetState)).privateContent.version,14);
+    await page.reload({waitUntil:'networkidle'});
+    for(const field of ['t','cumulative','states','commandQ','lastExecution'])assert.deepEqual((await read(page)).s[field],exact.s[field],'Handoff exact replay '+action+' '+field);
+    handoffs.push({action,protocol:exact.s.protocol,t:exact.s.t,passed:true});
+   }
+   console.log('ARCHIVED_HANDOFF '+JSON.stringify({networkId,mobile,handoffs}));
+   results.push({networkId,mobile,actions:final.s.t,nativePlayback:nativeMetrics,handoffs,costs:final.s.cumulative,updates:final.s.learning.sourceUpdates,traffic:final.s.traffic,passed:true});
    console.log('Ongoing UI passed '+networkId+' '+(mobile?'phone':'desktop')+' '+final.s.t+' actions');
    await context.close();
   }

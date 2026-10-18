@@ -67,6 +67,18 @@ async function main() {
     const selectSetting=(surface,id,value)=>withinSettings(surface,()=>surface.locator('#pr-'+id).selectOption(value));
     const stepSetting=surface=>withinSettings(surface,()=>surface.locator('#pr-step').click());
     const useReference=async surface=>{
+      // Historical controller checks load an actual v13 record after a new
+      // trial action has legitimately migrated the visible interface to v14.
+      const current=await surface.evaluate(()=>{const d=document.querySelector('#power-response-demo').powerDemo,s=d.getSnapshot();return {protocol:s.protocol,networkId:s.networkId,playing:d.getState().playing,speed:document.querySelector('#pr-speed').value};});
+      if(current.protocol==='continuous-phi-v1'){
+        if(current.playing)await surface.locator('#pr-run').click();
+        await surface.evaluate(({networkId,speed})=>localStorage.setItem('online-sls-demo-v1',JSON.stringify({privateContent:{
+          version:13,networkId,phase:'discovery',t:0,events:[],selectedBus:7,speed,view:'learning',matrixView:'links',intervention:'forecast',automaticComparison:true,
+          initialOptions:{networkId,experiment:'communication',powerScenario:'reference',beta:1,preset:'mixed',seed:20261013,horizon:180}
+        }})),current);
+        await surface.reload({waitUntil:'networkidle'});
+        assert.notEqual(await surface.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().protocol),'continuous-phi-v1','Historical checks explicitly restore their archived production protocol');
+      }
       await selectSetting(surface,'power-scenario','reference');
       await selectSetting(surface,'noise','1');
     };
@@ -1181,16 +1193,17 @@ async function main() {
     const restarted=await page.evaluate(()=>{
       const root=document.querySelector('#power-response-demo');return {snapshot:root.powerDemo.getSnapshot(),state:root.powerDemo.getState()};
     });
-    assert.equal(restarted.snapshot.phase,'discovery');assert.equal(restarted.snapshot.t,0);
+    assert.equal(restarted.snapshot.phase,'ongoing');assert.equal(restarted.snapshot.protocol,'continuous-phi-v1');assert.equal(restarted.snapshot.t,0);
     assert.equal(restarted.snapshot.powerScenario,'forecasted-demand');assert.equal(restarted.snapshot.beta,4);
-    assert.equal(restarted.snapshot.deployedSupport,null);assert.equal(restarted.snapshot.discoveryRecord,null);
+    assert.equal(restarted.snapshot.deployedSupport.links.filter(e=>e.from!==e.to).length,24);assert.equal(restarted.snapshot.discoveryRecord,null);
     assert.ok(Object.values(restarted.snapshot.cumulative).every(value=>value===0));
     assert.equal(restarted.snapshot.eventLog.length,0);assert.equal(restarted.state.playing,false);
     assert.deepEqual(restarted.state.activeAttackBuses,[]);assert.equal(restarted.state.historyIndex,null);
     assert.equal(await page.locator('#pr-speed').inputValue(),'32');
     assert.equal(await page.locator('#pr-adaptation').getAttribute('open'),null);
     assert.equal(await page.locator('#pr-run').textContent(),'Run');
-    await checkExperimentProgress(page);
+    assert.match(await page.locator('#pr-transition-note').textContent(),/No reset or stop/);
+    assert.equal(await page.locator('#pr-progress-comparison').getAttribute('data-status'),'active');
     await page.screenshot({path:path.join(output,'concise-restarted-desktop.png'),fullPage:true});
     await useReference(page);
     await mark('default scenario completed restored and explicitly continued');
@@ -1845,7 +1858,7 @@ async function main() {
     await phone.screenshot({path:path.join(output,'environment.png'),fullPage:true});
     await mark('mobile inspection and responsive evidence');
     assert.deepEqual(errors, [], 'No browser runtime errors');
-    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), timings, touchEvents, checks: ['actual cost versus remote prediction budget for all four designs', 'design tradeoff independent of curve visibility and cost display', 'same-budget sparse marker overlap remains visible', 'archived study retains every forecast regime and all-noisy counterexample', 'opening reference study preserves paused live state on desktop and mobile', 'primary controls and four panels stay visible while advanced settings start closed', 'restart returns to a fresh learning trial with selected options', 'pending source settings at every finite segment preserve exact replay and first new issuance', 'final applied power remains visible after request expiry with exact replay', 'paused completed source settings preserve Continue and exact replay', 'restored mixed trial preserves old costs until explicit new scenario', 'all noisy sources notice and fresh reliable inverter map', 'shipped demand and solar default completes and pauses after 180 comparison samples', 'actual scheduled power visual metadata and forecasted event labels', 'completed default restores and explicitly continues', 'extended forecast stress clears previous power attacks and costs', 'all four measured forecast stress curves and actual prediction commands', 'extended stress saved trial replay and reference return', 'forecast stress desktop and mobile layout', 'actual forecast setting timestamps and typed mixed event markers', 'keyboard matrix inspection and native command table scrolling', 'visible temporal source gain without hover', 'playback', 'repeated forecast bus clicks', 'three simultaneous continuous power attacks and independent stop', 'all attack sources survive automatic handoff', 'actual protocol receipt and archived discovery view', 'matrix mode exit restores live source controls without advancing plant', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'thirty real cost button clicks at 32x without pausing', 'stable cost button and focus across held pointer samples', 'native Enter and Space cost activation', 'zero baseline and all four curves in both quantities', 'saved gap state restoration', 'mobile cost button taps and target sizes', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'three simultaneous mobile power attacks and independent stop', 'mobile touch and layout'], errors }, null, 2));
+    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), timings, touchEvents, checks: ['actual cost versus remote prediction budget for all four designs', 'design tradeoff independent of curve visibility and cost display', 'same-budget sparse marker overlap remains visible', 'archived study retains every forecast regime and all-noisy counterexample', 'opening reference study preserves paused live state on desktop and mobile', 'primary controls and four panels stay visible while advanced settings start closed', 'explicit restart migrates archived replay to a fresh ongoing trial with selected physical options', 'pending source settings at every finite segment preserve exact replay and first new issuance', 'final applied power remains visible after request expiry with exact replay', 'paused completed source settings preserve Continue and exact replay', 'restored mixed trial preserves old costs until explicit new scenario', 'all noisy sources notice and fresh reliable inverter map', 'shipped demand and solar default completes and pauses after 180 comparison samples', 'actual scheduled power visual metadata and forecasted event labels', 'completed default restores and explicitly continues', 'extended forecast stress clears previous power attacks and costs', 'all four measured forecast stress curves and actual prediction commands', 'extended stress saved trial replay and reference return', 'forecast stress desktop and mobile layout', 'actual forecast setting timestamps and typed mixed event markers', 'keyboard matrix inspection and native command table scrolling', 'visible temporal source gain without hover', 'playback', 'repeated forecast bus clicks', 'three simultaneous continuous power attacks and independent stop', 'all attack sources survive automatic handoff', 'actual protocol receipt and archived discovery view', 'matrix mode exit restores live source controls without advancing plant', 'four controller curves', 'nominal voltage diagnostics for all four controllers', 'thirty real cost button clicks at 32x without pausing', 'stable cost button and focus across held pointer samples', 'native Enter and Space cost activation', 'zero baseline and all four curves in both quantities', 'saved gap state restoration', 'mobile cost button taps and target sizes', 'repeated mobile forecast taps', 'explicit inspected source actions on desktop and mobile', 'raw revealed source forecast errors and issue times', 'rolling sixty-pair error and pending issuance timing', 'independent paused browser source error stream', 'actual receiver command decomposition and limiter on desktop and mobile', 'three simultaneous mobile power attacks and independent stop', 'mobile touch and layout'], errors }, null, 2));
     console.log('Browser smoke passed');
   } finally {
     if (browser) await browser.close();
