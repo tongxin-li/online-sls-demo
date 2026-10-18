@@ -304,6 +304,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 .pr-command-inspector {margin-top:8px;border-top:1px solid var(--border,#e5e5e7);padding-top:7px}
 .pr-command-inspector summary {cursor:pointer;font-size:12px;font-weight:600;min-height:44px;display:list-item}
 .pr-command-scroll {max-width:100%;overflow-x:auto}
+#pr-command-scroll-hint {display:block;color:var(--foreground,#1d1d1f);font-weight:500}
+#pr-command-scroll-hint[hidden] {display:none}
 .pr-command-scroll table {width:100%;min-width:520px;border-collapse:collapse;font-size:12px;line-height:1.5;font-variant-numeric:tabular-nums}
 .pr-command-scroll th,.pr-command-scroll td {padding:7px 7px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--border,#e5e5e7)}
 .pr-command-scroll th:first-child {text-align:left;position:sticky;left:0;z-index:1;width:130px;min-width:130px;background:var(--surface-subtle,#f5f5f7);box-shadow:1px 0 0 var(--border,#e5e5e7)}
@@ -746,8 +748,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         </section>
         <details id="pr-command-inspector" class="pr-command-inspector" hidden>
           <summary id="pr-command-title">Command breakdown</summary>
-          <p class="pr-caption">kvar · Source and other messages before limiting · Includes the full issued preview, not just the revealed pair · Highlighted links belong to the learned or matrix controller</p>
-          <div class="pr-command-scroll" tabindex="0" role="region" aria-label="Receiver command table" aria-describedby="pr-command-gain-note" data-command-scroll><table aria-label="Latest receiver command decomposition in kvar" aria-describedby="pr-command-gain-note">
+          <p class="pr-caption">kvar · Source and other messages before limiting · Includes the full issued preview, not just the revealed pair · Highlighted links belong to the learned or matrix controller<span id="pr-command-scroll-hint" hidden></span></p>
+          <div id="pr-command-scroll" class="pr-command-scroll" tabindex="0" role="region" aria-label="Receiver command table" aria-describedby="pr-command-gain-note pr-command-scroll-hint" data-command-scroll><table aria-label="Latest receiver command decomposition in kvar" aria-describedby="pr-command-gain-note">
             <thead><tr><th>Controller</th><th>Source</th><th>Other</th><th>Feedback</th><th>Request</th><th>Command</th><th id="pr-command-gain-heading" scope="col">Gain norm</th></tr></thead>
             <tbody id="pr-command-rows"></tbody>
           </table></div>
@@ -2561,13 +2563,30 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     return !inspection || historyIndex!==null ? null
       : commandContributions(snapshot,simulation.segments,simulation.forecasts,inspection.source,inspection.receiver);
   }
+  function updateCommandScrollHint() {
+    const scroller=$('command-scroll'),hint=$('command-scroll-hint');
+    hint.hidden=true;hint.textContent='';
+    for(const key of ['visible','left','right','offset'])hint.dataset[key]='';
+    const headers=Array.from(scroller.querySelectorAll('thead th'));
+    if(!scroller.clientWidth || !headers.length || !$('command-rows').children.length) return;
+    const bounds=scroller.getBoundingClientRect(),edge=headers[0].getBoundingClientRect().right;
+    const visible=headers.slice(1).filter(cell=>{
+      const box=cell.getBoundingClientRect();return box.left>=edge-.5&&box.right<=bounds.right+.5;
+    }).map(cell=>cell.textContent);
+    const maximum=Math.max(0,scroller.scrollWidth-scroller.clientWidth);
+    const left=scroller.scrollLeft>1,right=scroller.scrollLeft<maximum-1;
+    hint.dataset.visible=visible.join('|');hint.dataset.left=String(left);hint.dataset.right=String(right);
+    hint.dataset.offset=String(scroller.scrollLeft);hint.hidden=maximum<=1;
+    if(!hint.hidden)hint.textContent=(visible.length?'Visible '+visible.join(', ')+' · ':'')
+      +(left&&right?'Scroll both ways':left?'Scroll left':'Scroll right');
+  }
   function renderCommandInspection(inspection) {
     const reading=inspectedCommand(),panel=$('command-inspector');
     panel.hidden=!inspection;
     $('command-title').textContent=reading ? 'Command at inverter '+reading.receiver+' · Action '+reading.action+' s'
       : 'Command breakdown · '+(historyIndex!==null?'Show Latest':'Step to reveal');
     const body=$('command-rows');body.replaceChildren();
-    if(!reading) return null;
+    if(!reading){updateCommandScrollHint();return null;}
     const names=Object.fromEntries(activeSeries().map(item=>[item.key,item.label]));
     const format=value=>(Math.abs(value)<.0005?0:value).toFixed(3);
     for(const item of reading.rows) {
@@ -2583,6 +2602,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       const gain=document.createElement('td');gain.className='source-gain';gain.textContent=item.gainNorm.toPrecision(4);row.append(gain);
       body.append(row);
     }
+    updateCommandScrollHint();
     return reading;
   }
   // Keep selection energy distinct from the gain of a resynthesized executed row.
@@ -3064,6 +3084,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     render();save();
   });
   $('matrix')?.parentElement?.addEventListener('scroll',updateMatrixScrollHint,{passive:true});
+  $('command-scroll').addEventListener('scroll',updateCommandScrollHint,{passive:true});
+  $('command-inspector').addEventListener('toggle',updateCommandScrollHint);
   if ($('matrix-view')) $('matrix-view').addEventListener('change',()=>{historyIndex=null;renderProtocol();renderInspectedSource();drawNetwork();drawMatrix();save();});
   $('topology-history').addEventListener('input',()=>reviewTopology(Number($('topology-history').value)));
   $('history-live').addEventListener('click',()=>reviewTopology(null));
