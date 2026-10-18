@@ -783,7 +783,28 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "program_id": "continuous-phi-20261018T234500",
+    "slot": "2026-10-19T01:45:00+08:00",
+    "started_at": "2026-10-19T01:47:02+08:00",
+    "lease_expires_at": "2026-10-19T02:27:02+08:00",
+    "branch": "cloud/refine/continuous-phi-20261018-2345",
+    "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+    "candidate_parent": "1c21862596f32da12435a7bc20b12fc4ae0dd156",
+    "status": "in_progress",
+    "counted_invocation": true,
+    "counted_completed": false,
+    "changes": [],
+    "tests": {
+      "metadata_repeat": {
+        "run_id": 39149170485,
+        "conclusion": "success",
+        "completed_logs_read": true
+      }
+    },
+    "remaining_gaps": [],
+    "next_focus": "Integrate actual execution receipts and ongoing UI replay before enabling the new live protocol."
+  },
   "next_focus": "Continue this same validated candidate into the single ongoing UI and new replay. Read metadata repeat and current main checks first. Use actual execution receipts and source pair counts, not legacy completed row diagnostics. Preserve all archived data and full regression suites. Keep unpublished until ongoing browser and pixel acceptance.",
   "priorities": [
     "Actual continuous causal response adaptation and executed command evidence",
@@ -2594,7 +2615,7 @@
     "hard_deadline": "2026-10-19T23:45:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 2,
+    "invocation_count": 3,
     "completed_count": 0,
     "runs": [
       {
@@ -2817,9 +2838,52 @@
         },
         "checkpoint_validation": "Pending metadata only repeat. The successful scientific and browser evidence above refers to exact source bf9201227ef102aa77f60f5bdbbb07580ffe3115 and its generated child. This checkpoint changes only progress and the saved acceptance outcomes.",
         "bounded_work_completed_at": "2026-10-18T17:20:48.362Z"
+      },
+      {
+        "program_id": "continuous-phi-20261018T234500",
+        "slot": "2026-10-19T01:45:00+08:00",
+        "started_at": "2026-10-19T01:47:02+08:00",
+        "lease_expires_at": "2026-10-19T02:27:02+08:00",
+        "branch": "cloud/refine/continuous-phi-20261018-2345",
+        "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+        "candidate_parent": "1c21862596f32da12435a7bc20b12fc4ae0dd156",
+        "status": "in_progress",
+        "counted_invocation": true,
+        "counted_completed": false,
+        "changes": [],
+        "tests": {
+          "metadata_repeat": {
+            "run_id": 39149170485,
+            "conclusion": "success",
+            "completed_logs_read": true
+          }
+        },
+        "remaining_gaps": [],
+        "next_focus": "Integrate actual execution receipts and ongoing UI replay before enabling the new live protocol."
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "program_id": "continuous-phi-20261018T234500",
+      "slot": "2026-10-19T01:45:00+08:00",
+      "started_at": "2026-10-19T01:47:02+08:00",
+      "lease_expires_at": "2026-10-19T02:27:02+08:00",
+      "branch": "cloud/refine/continuous-phi-20261018-2345",
+      "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+      "candidate_parent": "1c21862596f32da12435a7bc20b12fc4ae0dd156",
+      "status": "in_progress",
+      "counted_invocation": true,
+      "counted_completed": false,
+      "changes": [],
+      "tests": {
+        "metadata_repeat": {
+          "run_id": 39149170485,
+          "conclusion": "success",
+          "completed_logs_read": true
+        }
+      },
+      "remaining_gaps": [],
+      "next_focus": "Integrate actual execution receipts and ongoing UI replay before enabling the new live protocol."
+    },
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
       "is_enabled": true,
