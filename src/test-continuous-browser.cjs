@@ -28,7 +28,7 @@ async function main(){
    await context.addInitScript(({networkId})=>{
     window.__attackPointerEvents=[];
     for(const type of ['pointerdown','pointerup','pointercancel','lostpointercapture','click'])document.addEventListener(type,event=>{
-      if(event.target.closest?.('#pr-pulse'))window.__attackPointerEvents.push({type,pointerType:event.pointerType??null,button:event.button,detail:event.detail,touch:event.sourceCapabilities?.firesTouchEvents??null});
+      if(event.target.closest?.('#pr-pulse, #pr-stop-attacks'))window.__attackPointerEvents.push({type,target:event.target.closest('#pr-pulse, #pr-stop-attacks').id,pointerType:event.pointerType??null,button:event.button,detail:event.detail,touch:event.sourceCapabilities?.firesTouchEvents??null});
     },true);
     window.addEventListener('blur',()=>window.__attackPointerEvents.push({type:'window-blur'}));
     const state={privateContent:{version:14,networkId,phase:'ongoing',t:0,selectedBus:7,speed:'32',view:'cost',matrixView:'change',intervention:'forecast',
@@ -53,7 +53,13 @@ async function main(){
    await advance(page);const second=await read(page);assert.ok(second.s.t>360);assert.equal(second.s.historyLength,second.s.t);
    assert.ok(second.s.cumulative.online>=first.s.cumulative.online);
    await page.locator('#pr-intervention').selectOption('power');
-   await setting(page,'bus','7');if(mobile)await page.locator('#pr-pulse').tap();else await page.locator('#pr-pulse').click();
+   await setting(page,'bus','7');await page.locator('#pr-pulse').scrollIntoViewIfNeeded();
+   const attackBox=await page.locator('#pr-pulse').boundingBox();
+   if(mobile)await page.locator('#pr-pulse').tap();else await page.locator('#pr-pulse').click();
+   if(mobile){
+     const after=await page.locator('#pr-pulse').boundingBox();
+     for(const dimension of ['x','y','width','height'])assert.ok(Math.abs(after[dimension]-attackBox[dimension])<1,'Touch attack geometry remains stable at activation '+dimension);
+   }
    console.log('ATTACK_DIAGNOSTIC '+JSON.stringify(await page.evaluate(()=>{const d=document.querySelector('#power-response-demo').powerDemo,u=d.getState();return {mobile:matchMedia('(pointer:coarse)').matches,playing:u.playing,attacks:u.activeAttackBuses,intervention:u.intervention,selectedBus:u.selectedBus,attackMode:document.querySelector('#pr-attack-mode').value,pointerEvents:window.__attackPointerEvents,events:u.journal.slice(-3),button:document.querySelector('#pr-pulse').outerHTML};})));
    await page.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getState().activeAttackBuses.includes(7));
    await setting(page,'bus','5');if(mobile)await page.locator('#pr-pulse').tap();else await page.locator('#pr-pulse').click();
@@ -72,10 +78,29 @@ async function main(){
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
    assert.match(await page.locator('#pr-transition-note').textContent(),/No reset or stop/);
    assert.equal(await page.locator('#pr-cost path.data-series').count(),4);
+   const inspected=await page.evaluate(()=>{
+     const d=document.querySelector('#power-response-demo').powerDemo,s=d.getSnapshot(),r=d.getResponseHistory(),el=document.querySelector('#pr-response-history');
+     return {history:r,plotted:el.dataset,traffic:Array.from(document.querySelectorAll('#pr-cost-detail tr')).map(row=>({key:row.dataset.method,payload:row.querySelector('.pr-method-traffic')?.dataset,expected:s.traffic[row.dataset.method]})),
+       statusWidth:document.querySelector('#pr-progress-learning-label').getBoundingClientRect().width,
+       statusHeight:document.querySelector('#pr-experiment-progress').getBoundingClientRect().height,
+       archive:document.querySelector('#pr-reference-study summary')?.textContent};
+   });
+   assert.equal(inspected.history.points.length,final.s.t);
+   assert.equal(Number(inspected.plotted.lastAction),final.s.lastExecution.action);
+   assert.equal(Number(inspected.plotted.lastGain),inspected.history.points.at(-1).gain);
+   assert.ok(inspected.statusWidth>120,'Ongoing text uses the full column');
+   assert.ok(inspected.statusHeight<180,'No obsolete stage column expands the strip');
+   for(const row of inspected.traffic){
+    assert.equal(Number(row.payload.forecasts),row.expected.remoteForecastMessages);
+    assert.equal(Number(row.payload.corrections),row.expected.remoteCorrectionScalars);
+    assert.equal(Number(row.payload.probes),0);
+   }
+   if(networkId==='feeder24')assert.match(inspected.archive,/Archived frozen protocol/);
    const saved=await page.evaluate(()=>window.openai.widgetState);assert.equal(saved.privateContent.version,14);
    await page.reload({waitUntil:'networkidle'});const restored=await read(page);
    for(const field of ['t','cumulative','states','commandQ','lastExecution'])assert.deepEqual(restored.s[field],final.s[field],field+' exact UI replay');
    await page.screenshot({path:path.join(output,networkId+(mobile?'-phone':'-desktop')+'.png'),fullPage:true});
+   await page.locator('.pr-matrix-panel').screenshot({path:path.join(output,networkId+(mobile?'-phone':'-desktop')+'-inspection.png')});
    const next=networkId==='toy8'?'feeder47':'toy8';await page.locator('#pr-network-scenario').selectOption(next);
    const switched=await read(page);assert.equal(switched.s.t,0);assert.equal(switched.ui.playing,false);assert.equal(switched.s.protocol,'continuous-phi-v1');
    results.push({networkId,mobile,actions:final.s.t,costs:final.s.cumulative,updates:final.s.learning.sourceUpdates,traffic:final.s.traffic,passed:true});

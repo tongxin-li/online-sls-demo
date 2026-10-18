@@ -796,7 +796,12 @@
     "status": "in_progress",
     "counted_invocation": true,
     "counted_completed": false,
-    "changes": [],
+    "changes": [
+      "Keep the phone attack target geometry fixed when Stop all appears, preserving the existing capture, cancellation and keyboard logic. Add a real touch bounding box regression.",
+      "Repair ongoing status strip grid after hiding stage numbers and remove finite progress tracks from the ongoing protocol.",
+      "Add an actual executed signed gain trace inside the existing source inspector, derived only from admitted per action receipts. Preserve every source, controller and history sample.",
+      "Show cumulative remote forecast and correction payload values in the existing comparison, and explicitly label the archived frozen study. No physical, estimator, baseline or synthesis parameter is changed."
+    ],
     "tests": {
       "main": {
         "run_id": 39144310544,
@@ -806,7 +811,16 @@
       }
     },
     "remaining_gaps": [],
-    "next_focus": "Stabilize real phone attack geometry, repair ongoing strip layout and complete actual response inspection."
+    "next_focus": "Read full validation and actual ongoing phone and desktop outcomes. Inspect new cloud screenshot pixels before any release. Default remains gated until complete acceptance.",
+    "pixel_review": {
+      "source_commit": "f7609eb59b415afc7ee6364df1c984d93bfa5a5e",
+      "status": "prior_candidate_actual_pixels_reviewed_new_edits_pending",
+      "findings": [
+        "Hidden number column makes ongoing strip narrow and tall.",
+        "Phone control failure occurs after tap, with one held request and no remaining latch. Stabilizing geometry is a candidate fix, not yet validated.",
+        "Signed gains and correction values are visible and consistent with receipts. Add full measured evolution trace."
+      ]
+    }
   },
   "next_focus": "Trace and fix actual phone header pointer cancellation or duplicate activation first, using ATTACK_DIAGNOSTIC pointerEvents. Inspect base64 wrapped actual screenshots. Then finish traffic and archived labels and enable a fully validated ongoing default without resetting plant time or costs.",
   "priorities": [
@@ -3084,7 +3098,12 @@
         "status": "in_progress",
         "counted_invocation": true,
         "counted_completed": false,
-        "changes": [],
+        "changes": [
+          "Keep the phone attack target geometry fixed when Stop all appears, preserving the existing capture, cancellation and keyboard logic. Add a real touch bounding box regression.",
+          "Repair ongoing status strip grid after hiding stage numbers and remove finite progress tracks from the ongoing protocol.",
+          "Add an actual executed signed gain trace inside the existing source inspector, derived only from admitted per action receipts. Preserve every source, controller and history sample.",
+          "Show cumulative remote forecast and correction payload values in the existing comparison, and explicitly label the archived frozen study. No physical, estimator, baseline or synthesis parameter is changed."
+        ],
         "tests": {
           "main": {
             "run_id": 39144310544,
@@ -3094,7 +3113,16 @@
           }
         },
         "remaining_gaps": [],
-        "next_focus": "Stabilize real phone attack geometry, repair ongoing strip layout and complete actual response inspection."
+        "next_focus": "Read full validation and actual ongoing phone and desktop outcomes. Inspect new cloud screenshot pixels before any release. Default remains gated until complete acceptance.",
+        "pixel_review": {
+          "source_commit": "f7609eb59b415afc7ee6364df1c984d93bfa5a5e",
+          "status": "prior_candidate_actual_pixels_reviewed_new_edits_pending",
+          "findings": [
+            "Hidden number column makes ongoing strip narrow and tall.",
+            "Phone control failure occurs after tap, with one held request and no remaining latch. Stabilizing geometry is a candidate fix, not yet validated.",
+            "Signed gains and correction values are visible and consistent with receipts. Add full measured evolution trace."
+          ]
+        }
       }
     ],
     "active_run": {
@@ -3110,7 +3138,12 @@
       "status": "in_progress",
       "counted_invocation": true,
       "counted_completed": false,
-      "changes": [],
+      "changes": [
+        "Keep the phone attack target geometry fixed when Stop all appears, preserving the existing capture, cancellation and keyboard logic. Add a real touch bounding box regression.",
+        "Repair ongoing status strip grid after hiding stage numbers and remove finite progress tracks from the ongoing protocol.",
+        "Add an actual executed signed gain trace inside the existing source inspector, derived only from admitted per action receipts. Preserve every source, controller and history sample.",
+        "Show cumulative remote forecast and correction payload values in the existing comparison, and explicitly label the archived frozen study. No physical, estimator, baseline or synthesis parameter is changed."
+      ],
       "tests": {
         "main": {
           "run_id": 39144310544,
@@ -3120,7 +3153,16 @@
         }
       },
       "remaining_gaps": [],
-      "next_focus": "Stabilize real phone attack geometry, repair ongoing strip layout and complete actual response inspection."
+      "next_focus": "Read full validation and actual ongoing phone and desktop outcomes. Inspect new cloud screenshot pixels before any release. Default remains gated until complete acceptance.",
+      "pixel_review": {
+        "source_commit": "f7609eb59b415afc7ee6364df1c984d93bfa5a5e",
+        "status": "prior_candidate_actual_pixels_reviewed_new_edits_pending",
+        "findings": [
+          "Hidden number column makes ongoing strip narrow and tall.",
+          "Phone control failure occurs after tap, with one held request and no remaining latch. Stabilizing geometry is a candidate fix, not yet validated.",
+          "Signed gains and correction values are visible and consistent with receipts. Add full measured evolution trace."
+        ]
+      }
     },
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",

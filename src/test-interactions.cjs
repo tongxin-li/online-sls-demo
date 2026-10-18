@@ -21,7 +21,7 @@ assert.equal(original.split(cardStart).length,2,'Topology cards anchor must be u
 const withoutCards=original.slice(0,original.indexOf(cardStart))+original.slice(original.indexOf(cardEnd));
 const source=withoutCards.replace(anchor,
   '  drawNetwork=renderNetworkInspection;drawCost=drawStage=drawVoltage=drawConvergence=highlightTopology=()=>{};\n'+
-  '  drawMatrix=drawTopologyHistory;\n'+
+  '  drawMatrix=drawTopologyHistory;drawResponseHistory=()=>{};\n'+
   '  root.bindTestBus=(element,bus)=>bindAttackTarget(element,()=>bus);\n'+
   '  root.testSummary=()=>comparisonSummary();\n'+
   '  root.testCodesign=()=>codesignMetrics();\n'+
@@ -147,7 +147,7 @@ function harness(saved,experiment='prediction',reducedMotion=true) {
       return result;
     },
     inspectLink:(receiver,source)=>root.testInspectPredictionLink(receiver,source),inspection:()=>plain(root.testInspection()),protocol:()=>plain(root.testProtocol()),forecastSettings:()=>plain(root.testForecastSettings()),forecastObservation:()=>plain(root.testForecastObservation()),sourceHistory:()=>plain(root.testSourceHistory()),errorWindow:(...args)=>plain(root.testErrorWindow(...args)),commandInspection:()=>plain(root.testInspectedCommand()),decompose:(...args)=>plain(root.testDecompose(...args)),issuedForecasts:()=>plain(root.testIssuedForecasts()),
-    linkEvidence:()=>plain(root.powerDemo.getLinkEvidence()),snapshot:()=>root.powerDemo.getSnapshot(),state:()=>plain(root.powerDemo.getState()),
+    responseHistory:()=>plain(root.powerDemo.getResponseHistory()),linkEvidence:()=>plain(root.powerDemo.getLinkEvidence()),snapshot:()=>root.powerDemo.getSnapshot(),state:()=>plain(root.powerDemo.getState()),
     saved:()=>savedStates.at(-1),
     event:(id,type,detail)=>node(id).dispatch(type,detail),
     click:(id,detail=0)=>node(id).dispatch('click',{detail}),
@@ -2427,3 +2427,24 @@ test('ongoing UI keeps arbitrary multi bus held attacks and fresh paused network
     assert.equal(h.snapshot().deployedSupport.links.filter(e=>e.from!==e.to).length,{toy8:6,feeder24:24,feeder47:48}[id]);
   }
 });
+
+
+ test('ongoing inspector response history uses every actual admitted execution and exact replay',async()=>{
+  const h=harness(ongoingSaved('toy8',95,[{t:45,type:'forecast',bus:7,faulty:true}]),null);
+  const snapshot=h.snapshot(),edge=snapshot.deployedSupport.links.find(e=>e.from!==e.to);
+  h.inspectLink(edge.to,edge.from);
+  const history=h.responseHistory(),row=PowerDemo.forNetwork('toy8').constants.inverterBuses.indexOf(edge.to),column=edge.from-2;
+  assert.equal(history.points.length,snapshot.history.length);
+  for(let i=0;i<history.points.length;i++){
+    const actual=snapshot.history[i].execution.policies.online,p=history.points[i];
+    assert.equal(p.x,snapshot.history[i].execution.action);
+    assert.equal(p.gain,actual.currentGains[row][column]);assert.equal(p.correction,actual.receivedCoefficients[row][column]);
+    assert.equal(p.sourceKvar,1000*actual.sourceContributions[row][column]);assert.equal(p.commandKvar,1000*actual.bounded[row]);
+    assert.ok(p.trainedThrough===null||p.trainedThrough<p.x);
+  }
+  const absent=Array.from({length:7},(_,i)=>i+2).find(source=>source!==edge.to&&!snapshot.deployedSupport.links.some(e=>e.to===edge.to&&e.from===source));
+  h.inspectLink(edge.to,absent);
+  for(const p of h.responseHistory().points){assert.equal(p.gain,0);assert.equal(p.correction,null);assert.equal(p.sourceKvar,0);}
+  h.inspectLink(edge.to,edge.from);h.change('speed','32');
+  const restored=harness(h.saved(),null);assert.deepEqual(restored.responseHistory(),history);
+ });

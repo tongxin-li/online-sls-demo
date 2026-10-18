@@ -544,3 +544,17 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 
 /* The existing matrix cue reports the columns actually visible while scrolling. */
 #pr-matrix-scroll-hint { font-size:12px; }
+
+/* Ongoing observation and execution are parallel, without finite stage tracks. */
+#pr-experiment-progress[data-phase="ongoing"] .pr-progress-steps li { grid-template-columns:minmax(0,1fr); grid-template-rows:auto; gap:2px; }
+#pr-experiment-progress[data-phase="ongoing"] .pr-step-number,
+#pr-experiment-progress[data-phase="ongoing"] .pr-progress-track { display:none; }
+#pr-response-history-panel { margin-top:12px; padding-top:10px; border-top:1px solid var(--border); }
+#pr-response-history { display:block; width:100%; }
+#pr-response-history-panel[hidden] { display:none; }
+.pr-method-traffic { display:block; color:var(--muted-foreground); font-size:12px; line-height:1.5; font-weight:400; }
+@media(max-width:650px) {
+  /* A newly visible stop control must not take the tapped button's hit area. */
+  .pr-actions .btn-stop-attacks { flex:0 0 100%; width:100%; margin-left:0; }
+}
+#pr-response-history text { font-size:12px; }

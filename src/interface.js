@@ -476,7 +476,7 @@
     window.dataset.available=String(!!stats);
     for(const key of ['count','firstAction','lastAction','firstObservedAt','lastObservedAt','rmse','bias'])
       window.dataset[key]=stats ? String(stats[key]) : '';
-    window.textContent=stats ? 'Last '+stats.count+' revealed pairs · RMSE '+(1000*stats.rmse).toFixed(3)+' mpu · Bias '+(1000*stats.bias).toFixed(3)+' mpu'
+    window.textContent=stats ? (ongoing()?'Source local window · ':'Last ')+stats.count+' revealed pairs · RMSE '+(1000*stats.rmse).toFixed(3)+' mpu · Bias '+(1000*stats.bias).toFixed(3)+' mpu'
       : 'No revealed pairs yet';
     window.title=stats ? 'Observed '+stats.firstObservedAt+' to '+stats.lastObservedAt+' s in this phase. RMSE is root mean square raw forecast minus forcing error. Bias is its signed mean. Past settings and unforecast power may contribute.'
       : 'Only revealed observations enter this summary. The window holds at most 60 pairs.';
@@ -508,11 +508,44 @@
       : snapshot.phase==='discovery' ? 'Discovery uses dense messages · Displayed links are candidates'
       : (inspection.connected ? 'Permitted by deployed support' : 'Excluded from deployed support')+' at inverter '+inspection.receiver+' · '+(ongoing()?'Adaptive sparse':snapshot.experiment==='communication'?'Learned sparse':'Matrix adaptation')+' · Links fixed';
   }
+  // Full executed history only. No candidate score or source local coefficient
+  // substitutes for an admitted coefficient used by this receiver.
+  function inspectedResponseHistory() {
+    const inspection=predictionInspection();
+    if(!ongoing()||!inspection||historyIndex!==null)return null;
+    const row=PowerDemo.constants.inverterBuses.indexOf(inspection.receiver),column=inspection.source-2;
+    const points=snapshot.history.flatMap(entry=>{
+      const receipt=entry.execution,policy=receipt?.policies.online;
+      if(!policy)return [];
+      return [{x:receipt.action,gain:policy.currentGains[row][column],
+        correction:policy.receivedCoefficients[row][column],sourceKvar:1000*policy.sourceContributions[row][column],
+        commandKvar:1000*policy.bounded[row],trainedThrough:receipt.trainedThrough}];
+    });
+    return {source:inspection.source,receiver:inspection.receiver,connected:inspection.connected,points};
+  }
+  function drawResponseHistory() {
+    const reading=inspectedResponseHistory(),panel=$('response-history-panel'),el=$('response-history');
+    panel.hidden=!reading;
+    if(!reading)return;
+    const last=reading.points.at(-1);
+    $('response-history-label').textContent='Executed signed gain · '+(reading.connected?'Source '+reading.source+' → inverter '+reading.receiver:'Excluded source · Zero gain')
+      +(last?' · Action '+last.x+' s':' · Run to record');
+    el.hidden=!last;
+    for(const [key,value]of Object.entries({source:reading.source,receiver:reading.receiver,count:reading.points.length,
+      lastAction:last?.x??'',lastGain:last?.gain??'',lastCorrection:last?.correction??''}))el.dataset[key]=String(value);
+    if(!last)return;
+    el.setAttribute('aria-label','Actual executed signed current target gain from source '+reading.source+' to inverter '+reading.receiver
+      +' over '+reading.points.length+' actions. Units pu command per pu forcing. Includes the startup response. No future observations.');
+    const chart=chartBase(el,reading.points,['gain'],'Signed current gain','Action (s)',115);
+    drawSeries(chart,reading.points,[{key:'gain',label:'Executed gain',color:'var(--viz-series-1)',dash:null}]);
+    hover(chart,reading.points,[{key:'gain',label:'Executed gain',color:'var(--viz-series-1)'}],'Executed action');
+  }
   function renderInspectedSource() {
     const inspection=predictionInspection(),control=$('source-fault');
     renderForecastObservation(inspection);
     const command=renderCommandInspection(inspection);
     renderLinkEvidence(inspectedLinkEvidence(command));
+    drawResponseHistory();
     $('source-controls').hidden=!inspection;
     const bus=inspection?.source;
     const noisy=!!inspection && snapshot.faults.includes(bus);
@@ -1196,6 +1229,12 @@
     const completedRows=snapshot.learning?.completedRows || 0;
     const preparing=!deployed && automaticComparison();
     renderProtocol();renderScenario();
+    const study=$('reference-study');
+    if(study&&ongoing()) {
+      const summary=study.querySelector('summary'),intro=study.querySelector('.pr-caption');
+      if(summary)summary.textContent='Archived frozen protocol · Across forecast quality';
+      if(intro)intro.textContent='Archived 24 bus frozen deployment study · Separate from the ongoing adaptive protocol · Finite totals include terminal penalty';
+    }
     if($('deploy')) { $('deploy').hidden=preparing||ongoing(); $('deploy').disabled=comparing || (!deployed && !snapshot.canDeploy); $('deploy').textContent=deployed?'Rebuild prediction links':'Compare now'; $('deploy').title=deployed?'Discard this trial and learn new links from the current forecast source settings':snapshot.canDeploy?'Start four controllers on the same fresh disturbance sequence':'Collecting observed samples for comparison'; }
 
     $('noise-control').hidden=!communication; $('noise-caption').hidden=!communication; $('preset-control').hidden=communication;
@@ -1830,6 +1869,15 @@
         links.textContent=count+' remote links';
         links.title='Remote prediction links only. Local prediction channels and shared state feedback are excluded.';
         label.append(links);
+        if(ongoing()) {
+          const traffic=snapshot.traffic[item.key],payload=document.createElement('span');
+          payload.className='pr-method-traffic';payload.dataset.forecasts=String(traffic.remoteForecastMessages);
+          payload.dataset.corrections=String(traffic.remoteCorrectionScalars);payload.dataset.probes=String(traffic.probingMessages);
+          payload.textContent=d3.format(',')(traffic.remoteForecastMessages)+' forecasts'
+            +(item.key==='online'?' + '+d3.format(',')(traffic.remoteCorrectionScalars)+' corrections':'');
+          payload.title='Cumulative remote numeric payload values, including startup preview. Adaptive corrections add one scalar and causal version metadata to each admitted forecast. Fixed and dense identity correction is preknown. No probing. Local forecasts, common state feedback and operator diagnostics are excluded. This is not a wire byte count.';
+          label.append(payload);
+        }
       }
       value.textContent=costFormat(c[item.key]);value.title=d3.format('.10~g')(c[item.key]);
       value.dataset.cost=String(c[item.key]);
@@ -1988,5 +2036,5 @@
   render();
   observeDashboardLayout();
   // A read only inspection hook supports deterministic browser verification.
-  root.powerDemo = { getLinkEvidence:() => inspectedLinkEvidence(), getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,inspectedSource,playing,activeAttackBuses:activeAttacks().map(attack=>attack.bus),intervention:$('intervention').value,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null,topology:topology.export(),historyIndex,comparisonComplete:comparisonComplete(),comparisonContinued}) };
+  root.powerDemo = { getLinkEvidence:() => inspectedLinkEvidence(), getResponseHistory:() => inspectedResponseHistory(), getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,inspectedSource,playing,activeAttackBuses:activeAttacks().map(attack=>attack.bus),intervention:$('intervention').value,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null,topology:topology.export(),historyIndex,comparisonComplete:comparisonComplete(),comparisonContinued}) };
 })();
