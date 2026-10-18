@@ -2,7 +2,7 @@
   "program": "Continuous predictive response adaptation",
   "timezone": "Asia/Shanghai",
   "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
-  "status": "scheduled",
+  "status": "ongoing_candidate_unpublished",
   "first_run": "2026-10-18T23:45:00+08:00",
   "last_scheduled_run": "2026-10-19T22:45:00+08:00",
   "hard_deadline": "2026-10-19T23:45:00+08:00",
@@ -783,35 +783,8 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "program_id": "continuous-phi-20261018T234500",
-    "slot": "2026-10-19T03:45:00+08:00",
-    "started_at": "2026-10-19T03:48:48+08:00",
-    "lease_expires_at": "2026-10-19T04:28:48+08:00",
-    "branch": "cloud/refine/continuous-phi-20261018-2345",
-    "candidate_parent": "46b2d12363941b546b58cd9a84893bc95de58ed1",
-    "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
-    "status": "in_progress",
-    "counted_invocation": true,
-    "counted_completed": false,
-    "changes": [
-      "Fresh unsaved sessions construct the actual continuous-phi-v1 engine, show measured response weights and initial source gain inspection, and hide the inapplicable legacy experiment selector.",
-      "Original lifecycle checks use explicit actual version 13 production restore records. No controller hook or hidden action replaces playback. Fresh ongoing desktop and phone tests no longer inject protocol 14 records.",
-      "Add a fresh unsaved interaction regression crossing 360 actions, exact replay, read only matrix views and fresh ongoing restart. Document current archived migration publication gates."
-    ],
-    "tests": {
-      "preflight": {
-        "main_run": 39144310544,
-        "main": "success",
-        "candidate_run": 39157829651,
-        "candidate": "success",
-        "completed_logs_read": true,
-        "generated_child_only_index": true
-      }
-    },
-    "next_focus": "Enable and validate fresh ongoing trials with explicit archived replay fixtures. Keep unpublished until every new trial migration and required acceptance gate is coherent."
-  },
-  "next_focus": "First read latest candidate checks, including the visible settings Step test repair, and reconcile interrupted or metadata repeat checks. Then make fresh unsaved sessions and explicit new trials use continuous-phi-v1, preserve exact archived version 13 replay through declared fixtures, expose actual measured weight evolution by default, remove inapplicable legacy controls and update README and environment. Run every required suite and inspect actual fresh desktop and phone pixels before main promotion. Evaluate longer ordinary playback and memory growth explicitly.",
+  "active_run": null,
+  "next_focus": "Read completed current candidate checks first. Complete explicit new trial handoff from archived version 13 records to continuous-phi-v1, using real compatibility fixtures and preserving every physical, replay and browser protection. Add true ordinary long playback and action zero screenshot capture. Resolve actual failures, inspect pixels, then use expected main SHA and force false for the validated Pages route. Keep partial candidates unpublished and count no completion until live verification.",
   "priorities": [
     "Actual continuous causal response adaptation and executed command evidence",
     "Explicit forecast message access and support feasibility",
@@ -3409,10 +3382,18 @@
         "branch": "cloud/refine/continuous-phi-20261018-2345",
         "candidate_parent": "46b2d12363941b546b58cd9a84893bc95de58ed1",
         "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
-        "status": "in_progress",
+        "status": "validated_fresh_ongoing_candidate_unpublished_legacy_handoff_pending",
         "counted_invocation": true,
         "counted_completed": false,
-        "changes": [],
+        "changes": [
+          "Fresh unsaved sessions construct the actual continuous-phi-v1 engine, show measured response weights and initial source gain inspection, and hide the inapplicable legacy experiment selector.",
+          "Original lifecycle checks use explicit actual version 13 production restore records. No controller hook or hidden action replaces playback. Fresh ongoing desktop and phone tests no longer inject protocol 14 records.",
+          "Add a fresh unsaved interaction regression crossing 360 actions, exact replay, read only matrix views and fresh ongoing restart. Document current archived migration publication gates.",
+          "Include network identity in fresh browser readout. Run the unchanged required interaction suite first for faster failure feedback; no suite or assertion is removed.",
+          "Honor the actual hidden state of the executed gain SVG at startup, removing an empty plot before any action. Add a real visibility assertion.",
+          "Set and remove the actual SVG hidden attribute, rather than assigning a nonreflecting property. Keep the native attribute and real visibility assertions.",
+          "Normalize fresh ongoing construction to communication baselines even when an incompatible old save or hidden legacy input requests prediction. Preserve the engine guard and test all incompatible save versions."
+        ],
         "tests": {
           "preflight": {
             "main_run": 39144310544,
@@ -3421,87 +3402,268 @@
             "candidate": "success",
             "completed_logs_read": true,
             "generated_child_only_index": true
+          },
+          "first_fresh_candidate": {
+            "source_commit": "c5653d2bba6bca67e713de8c684960511d7eaa5b",
+            "run_id": 39160995429,
+            "ongoing_browser_job": 117774205877,
+            "ongoing_browser": "failure",
+            "completed_logs_read": true,
+            "reason": "New assertion read projected snapshot.networkId without including it in the read helper. Real network switching executed but the test value was undefined.",
+            "full_validation": "in_progress_before_corrective_source"
+          },
+          "hidden_plot_attempt": {
+            "source_commit": "76426d2deb56c77f2a0354e575f9b6f25d6e5798",
+            "run_id": 39161304511,
+            "ongoing_browser_job": 117775162234,
+            "conclusion": "failure",
+            "completed_logs_read": true,
+            "reason": "The visibility regression still fails after the CSS selector. SVG hidden property assignment was not creating the hidden attribute. Set and remove the actual attribute and retain both native attribute and visibility assertions.",
+            "full_validation": "in_progress_at_followup"
+          },
+          "archived_fixture_interactions": {
+            "source_commit": "76426d2deb56c77f2a0354e575f9b6f25d6e5798",
+            "run_id": 39161304511,
+            "job_id": 117775162475,
+            "conclusion": "failure",
+            "completed_logs_read": true,
+            "cases": 142,
+            "passed": 141,
+            "failed": 1,
+            "reason": "Incompatible old saves correctly chose the fresh protocol but the options still read an old prediction experiment input. The continuous engine correctly rejected incompatible baselines.",
+            "repair": "Choose communication baselines explicitly whenever the ongoing protocol is constructed and normalize the hidden control. Retain engine rejection and all migration assertions."
+          },
+          "fresh_ongoing_browser": {
+            "source_commit": "b144f4168e2d0885ad6a7dbcc922a852f0ae6de3",
+            "run_id": 39161682193,
+            "job_id": 117776214843,
+            "conclusion": "success",
+            "completed_logs_read": true,
+            "boot": "Empty browser storage and production Network menu. No version 14 saved fixture or alternate controller path.",
+            "conditions": [
+              {
+                "network": "toy8",
+                "desktop": 970,
+                "phone": 967
+              },
+              {
+                "network": "feeder24",
+                "desktop": 994,
+                "phone": 995
+              },
+              {
+                "network": "feeder47",
+                "desktop": 990,
+                "phone": 995
+              }
+            ],
+            "checks": [
+              "True fresh ongoing construction, selected initial local source, hidden pending SVG, inapplicable experiment selector hidden.",
+              "Actual ordinary playback, corruption and repair, arbitrary multi bus attacks, no reset or stop across old boundaries.",
+              "Cost switching, all four methods, actual payload and full receipt history, glyph spacing, exact saved replay and fresh network changes."
+            ],
+            "long_run_scope": "Real playback plus existing yielding Advance 180 batches. These are not an indefinite frame latency or memory benchmark."
+          },
+          "scope": {
+            "base": "46b2d12363941b546b58cd9a84893bc95de58ed1",
+            "source": "b144f4168e2d0885ad6a7dbcc922a852f0ae6de3",
+            "behind_by": 0,
+            "files": [
+              ".github/workflows/validate.yml",
+              "README.md",
+              "environment.html",
+              "refinement/cloud-state.json",
+              "refinement/continuous-response-map.md",
+              "src/interface.js",
+              "src/site-shell.css",
+              "src/test-browser-smoke.cjs",
+              "src/test-continuous-browser.cjs",
+              "src/test-interactions.cjs",
+              "src/test-network-browser.cjs"
+            ],
+            "scientific_engine_files_changed": false,
+            "workflow_command_set_unchanged": true,
+            "original_smoke_assertion_lines_unchanged": true,
+            "original_network_browser_assertion_lines_unchanged": true
+          },
+          "final": {
+            "source": "b144f4168e2d0885ad6a7dbcc922a852f0ae6de3",
+            "run_id": 39161682193,
+            "conclusion": "success",
+            "completed_logs_read": true,
+            "numerical_and_interaction_cases": 253,
+            "original_browser_checks": 44,
+            "network_desktop_and_phone": "success",
+            "fresh_ongoing_network_surfaces": 6,
+            "jobs": {
+              "validate": 117776215010,
+              "ongoing_browser": 117776214843,
+              "review": 117776780359,
+              "prepare": 117779409331
+            },
+            "generated_child": {
+              "sha": "6173d0bb6dea6cb250f27a333ed8bd07846f7d44",
+              "parent": "b144f4168e2d0885ad6a7dbcc922a852f0ae6de3",
+              "only_changed_files": [
+                "index.html"
+              ],
+              "ancestry_verified": true
+            },
+            "artifact": {
+              "id": 12149457501,
+              "sha256": "53d1bf3b7d8e373852a5c6d044e66059c98f1249498bb6bba59fdc3ce5d2e3d7"
+            }
+          },
+          "superseded_runs": [
+            {
+              "id": 39160742621,
+              "source": "c0908cc8208fc87c9f0c0b3438af12c9ac9ff859",
+              "status": "cancelled"
+            },
+            {
+              "id": 39160995429,
+              "source": "c5653d2bba6bca67e713de8c684960511d7eaa5b",
+              "status": "failed_browser_readout_then_superseded"
+            },
+            {
+              "id": 39161156462,
+              "source": "9fd260f5da330f8954a558d68a48f022ad7ced6e",
+              "status": "cancelled"
+            },
+            {
+              "id": 39161304511,
+              "source": "76426d2deb56c77f2a0354e575f9b6f25d6e5798",
+              "status": "failure",
+              "logs_read": true
+            },
+            {
+              "id": 39161592351,
+              "source": "ebd729f291920a2c0d9b86c6c57d8852bbdc1252",
+              "status": "cancelled"
+            }
+          ]
+        },
+        "next_focus": "Read completed current candidate checks first. Complete explicit new trial handoff from archived version 13 records to continuous-phi-v1, using real compatibility fixtures and preserving every physical, replay and browser protection. Add true ordinary long playback and action zero screenshot capture. Resolve actual failures, inspect pixels, then use expected main SHA and force false for the validated Pages route. Keep partial candidates unpublished and count no completion until live verification.",
+        "pixel_review": {
+          "source_commit": "b144f4168e2d0885ad6a7dbcc922a852f0ae6de3",
+          "status": "actual_fresh_run_pixels_reviewed_unpublished_candidate",
+          "review_job": 117776780359,
+          "reviewed": [
+            "feeder24-phone.png",
+            "feeder47-desktop.png",
+            "toy8-phone-inspection.png"
+          ],
+          "artifacts": [
+            {
+              "file": "feeder24-desktop-inspection.png",
+              "sha": "910b7ef5b67944cef98075d2104f704de2331b35",
+              "base64_text_sha": "fa494eed7d375614ded136180b3507c5db3d47c7",
+              "bytes": 136284
+            },
+            {
+              "file": "feeder24-desktop.png",
+              "sha": "6feb69eae2be78c1840a9b19b9dded79dd48184b",
+              "base64_text_sha": "f680cb6064dd8f030634ed67fee642af10b767b9",
+              "bytes": 445491
+            },
+            {
+              "file": "feeder24-phone-inspection.png",
+              "sha": "502ce61d790ef397be5afd590dbed03337d8f33e",
+              "base64_text_sha": "21895fa86189926f388fba86cd2b64a9ed4be7fa",
+              "bytes": 128072
+            },
+            {
+              "file": "feeder24-phone.png",
+              "sha": "41badf5d5975eca900c9e39f62ac129753ea0111",
+              "base64_text_sha": "56b574124611853ae4a5c21472ca81a65f2f3f52",
+              "bytes": 395025
+            },
+            {
+              "file": "feeder47-desktop-inspection.png",
+              "sha": "e3484b3cc625b87fff208a0c62f75ddd29f95169",
+              "base64_text_sha": "19b47da8ab58a0f5a7eea366833ff19c7131837a",
+              "bytes": 140333
+            },
+            {
+              "file": "feeder47-desktop.png",
+              "sha": "a22021b55ddd7b1e7660238e7b80ffffdadf98e8",
+              "base64_text_sha": "2144102ad2640824900af462592c94b17eea565e",
+              "bytes": 538535
+            },
+            {
+              "file": "feeder47-phone-inspection.png",
+              "sha": "271811fa442e058fb4cc5329789e4d02cad40b34",
+              "base64_text_sha": "3f525d58276ae7c27d7a07bcd5070757fb5be799",
+              "bytes": 115912
+            },
+            {
+              "file": "feeder47-phone.png",
+              "sha": "9246021e13781acd54db8ba8e5d27cfddbd13594",
+              "base64_text_sha": "8cb5a28c57c1fafae5f463adafb36b808258ec96",
+              "bytes": 355199
+            },
+            {
+              "file": "toy8-desktop-inspection.png",
+              "sha": "491afe951ccbbcfb42eb646f5c003e81cdc0b3bb",
+              "base64_text_sha": "5cc7b56d5d5f79d940bb45af055c80db5de771dc",
+              "bytes": 125966
+            },
+            {
+              "file": "toy8-desktop.png",
+              "sha": "7dbc47832e580dcf7713dd39493274b11eb12fe4",
+              "base64_text_sha": "c5dee09472f87b6c55f949d932181998d170c7ec",
+              "bytes": 374128
+            },
+            {
+              "file": "toy8-phone-inspection.png",
+              "sha": "df460dac726e4c3cfc5d2f40a7cfeac63f3d01a1",
+              "base64_text_sha": "bc7e9ad1d6a2efe227a38d6ea2b877b79c83afbf",
+              "bytes": 118014
+            },
+            {
+              "file": "toy8-phone.png",
+              "sha": "3809dab518af86a54a17c9e234eeb6e3ab4bc6fa",
+              "base64_text_sha": "1d363296ebb4455cf28442fb000f7c807e3b6938",
+              "bytes": 328002
+            }
+          ],
+          "route": "Authenticated GitHub ASCII base64 wrappers of the actual cloud Playwright PNG bytes, emitted directly as images. No local files or direct live browser.",
+          "findings": [
+            "The reviewed fresh run screenshots retain four panels, actual source and receiver inspection, clear ongoing status and all four cost traces.",
+            "Measured signed gains change through the corruption and repair stream while support stays fixed. Received corrections, temporal norms, source contributions and bounded commands remain separate.",
+            "Actual traffic and archived frozen study labels remain visible. Axis captions are separate from numeric ticks.",
+            "All six fresh boot checks prove no executed plot is visible before the first action. Dedicated passing fresh action zero phone screenshots are not yet captured. Current reviewed screenshots are after roughly 1000 actions and exact UI replay.",
+            "Legacy to new trial action migration and longer ordinary playback memory performance remain publication gates."
+          ]
+        },
+        "remaining_gaps": [
+          "Fresh unsaved sessions now execute ongoing response adaptation. Explicit new trial actions from an archived version 13 context still retain that archived protocol. Complete and test the header Restart, restore scenario and Network handoff before publication.",
+          "Make archived replay context clear without another protocol selector. Preserve exact archived states and costs until an explicit new trial. Keep any reproduction controls honestly scoped.",
+          "Capture passing action zero screenshots on phone and desktop after the native SVG hidden fix. Current screenshots are actual fresh trial outputs after roughly 1000 actions and exact replay.",
+          "Extend real ordinary playback beyond the old boundaries, preferably 901 native Run actions on every network and surface before the existing 180 action batches. Report render and history growth evidence. Current numerical retention is 1801 actions; indefinite high speed performance is not established.",
+          "Finish the README and environment scope audit when the explicit archived handoff is implemented. Frozen benchmark percentages and terminal penalties must stay archival.",
+          "No continuous protocol release has been promoted or publicly verified yet. Source, full checks, generated child, expected main lease, Pages revision and canonical public behavior remain release gates."
+        ],
+        "completed_at": "2026-10-19T04:24:40+08:00",
+        "source_commit": "b144f4168e2d0885ad6a7dbcc922a852f0ae6de3",
+        "ready_commit": "6173d0bb6dea6cb250f27a333ed8bd07846f7d44",
+        "published_commit": null,
+        "deployment": {
+          "attempted": false,
+          "main": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+          "reason": "Coherent archived new trial handoff, longer ordinary playback and startup pixel review remain release gates. No partial protocol published."
+        },
+        "end_reason": "Bounded candidate checkpoint. No new live implementation completion. Continue this same candidate without extra invocation.",
+        "duplicate_dispatches": [
+          {
+            "at": "2026-10-19T04:20:58+08:00",
+            "slot": "2026-10-19T03:45:00+08:00",
+            "action": "Read only preflight while current counted invocation finishes. No extra lease, invocation, source change or deadline extension."
           }
-        },
-        "next_focus": "Enable and validate fresh ongoing trials with explicit archived replay fixtures. Keep unpublished until every new trial migration and required acceptance gate is coherent."
-      }
-    ],
-    "active_run": {
-      "program_id": "continuous-phi-20261018T234500",
-      "slot": "2026-10-19T03:45:00+08:00",
-      "started_at": "2026-10-19T03:48:48+08:00",
-      "lease_expires_at": "2026-10-19T04:28:48+08:00",
-      "branch": "cloud/refine/continuous-phi-20261018-2345",
-      "candidate_parent": "46b2d12363941b546b58cd9a84893bc95de58ed1",
-      "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
-      "status": "in_progress",
-      "counted_invocation": true,
-      "counted_completed": false,
-      "changes": [
-        "Fresh unsaved sessions construct the actual continuous-phi-v1 engine, show measured response weights and initial source gain inspection, and hide the inapplicable legacy experiment selector.",
-        "Original lifecycle checks use explicit actual version 13 production restore records. No controller hook or hidden action replaces playback. Fresh ongoing desktop and phone tests no longer inject protocol 14 records.",
-        "Add a fresh unsaved interaction regression crossing 360 actions, exact replay, read only matrix views and fresh ongoing restart. Document current archived migration publication gates.",
-        "Include network identity in fresh browser readout. Run the unchanged required interaction suite first for faster failure feedback; no suite or assertion is removed.",
-        "Honor the actual hidden state of the executed gain SVG at startup, removing an empty plot before any action. Add a real visibility assertion."
-      ],
-      "tests": {
-        "preflight": {
-          "main_run": 39144310544,
-          "main": "success",
-          "candidate_run": 39157829651,
-          "candidate": "success",
-          "completed_logs_read": true,
-          "generated_child_only_index": true
-        },
-        "first_fresh_candidate": {
-          "source_commit": "c5653d2bba6bca67e713de8c684960511d7eaa5b",
-          "run_id": 39160995429,
-          "ongoing_browser_job": 117774205877,
-          "ongoing_browser": "failure",
-          "completed_logs_read": true,
-          "reason": "New assertion read projected snapshot.networkId without including it in the read helper. Real network switching executed but the test value was undefined.",
-          "full_validation": "in_progress_before_corrective_source"
-        },
-        "hidden_plot_attempt": {
-          "source_commit": "76426d2deb56c77f2a0354e575f9b6f25d6e5798",
-          "run_id": 39161304511,
-          "ongoing_browser_job": 117775162234,
-          "conclusion": "failure",
-          "completed_logs_read": true,
-          "reason": "The visibility regression still fails after the CSS selector. SVG hidden property assignment was not creating the hidden attribute. Set and remove the actual attribute and retain both native attribute and visibility assertions.",
-          "full_validation": "in_progress_at_followup"
-        },
-        "archived_fixture_interactions": {
-          "source_commit": "76426d2deb56c77f2a0354e575f9b6f25d6e5798",
-          "run_id": 39161304511,
-          "job_id": 117775162475,
-          "conclusion": "failure",
-          "completed_logs_read": true,
-          "cases": 142,
-          "passed": 141,
-          "failed": 1,
-          "reason": "Incompatible old saves correctly chose the fresh protocol but the options still read an old prediction experiment input. The continuous engine correctly rejected incompatible baselines.",
-          "repair": "Choose communication baselines explicitly whenever the ongoing protocol is constructed and normalize the hidden control. Retain engine rejection and all migration assertions."
-        }
-      },
-      "next_focus": "Enable and validate fresh ongoing trials with explicit archived replay fixtures. Keep unpublished until every new trial migration and required acceptance gate is coherent.",
-      "pixel_review": {
-        "source_commit": "c5653d2bba6bca67e713de8c684960511d7eaa5b",
-        "status": "actual_initial_toy8_desktop_pixels_reviewed_corrective_edit_pending",
-        "review_job": 117774337567,
-        "artifact": {
-          "file": "failure-0.png",
-          "sha": "645b768ae07d6763fa854cd5a6807a1a7735b6ba",
-          "base64_text_sha": "e8a533bcce9ff20f6848262dd92dd8eab743399d",
-          "bytes": 282393
-        },
-        "findings": [
-          "Fresh ongoing status, selected local source and pending command quantities are visible and truthful at action zero.",
-          "The gain SVG hidden attribute was overridden by its explicit display style, leaving an empty plot area before execution. Add a precise hidden style and require actual browser invisibility before the first action.",
-          "The failed test screenshot was taken after network switching. It is not a completed fresh desktop and phone visual approval."
         ]
       }
-    },
+    ],
+    "active_run": null,
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
       "is_enabled": true,
@@ -3512,7 +3674,7 @@
       "setup_counts_as_improvement": false
     },
     "candidate_branch": "cloud/refine/continuous-phi-20261018-2345",
-    "next_focus": "First read latest candidate checks, including the visible settings Step test repair, and reconcile interrupted or metadata repeat checks. Then make fresh unsaved sessions and explicit new trials use continuous-phi-v1, preserve exact archived version 13 replay through declared fixtures, expose actual measured weight evolution by default, remove inapplicable legacy controls and update README and environment. Run every required suite and inspect actual fresh desktop and phone pixels before main promotion. Evaluate longer ordinary playback and memory growth explicitly.",
+    "next_focus": "Read completed current candidate checks first. Complete explicit new trial handoff from archived version 13 records to continuous-phi-v1, using real compatibility fixtures and preserving every physical, replay and browser protection. Add true ordinary long playback and action zero screenshot capture. Resolve actual failures, inspect pixels, then use expected main SHA and force false for the validated Pages route. Keep partial candidates unpublished and count no completion until live verification.",
     "skipped_duplicate_dispatches": [
       {
         "dispatch": "2026-10-19T03:13:56+08:00",
@@ -3520,6 +3682,11 @@
         "status": "read_only_duplicate_preflight",
         "counted": false,
         "details": "Already recorded scheduled slot. No extra invocation, implementation, lease or completion."
+      },
+      {
+        "at": "2026-10-19T04:20:58+08:00",
+        "slot": "2026-10-19T03:45:00+08:00",
+        "action": "Read only preflight while current counted invocation finishes. No extra lease, invocation, source change or deadline extension."
       }
     ]
   }
