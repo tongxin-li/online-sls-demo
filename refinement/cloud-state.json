@@ -783,16 +783,8 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-18T11:00:00+08:00",
-    "started_at": "2026-10-18T11:00:15+08:00",
-    "expires_at": "2026-10-18T11:40:15+08:00",
-    "candidate_branch": "cloud/refine/20261018-1100",
-    "base_commit": "6d6a48b5d2abf11f3c4428402a6b7eafd956c60e",
-    "owner": "6ad2628236888191b683d1e7ed2e5b93",
-    "program": "20261018-visual-codesign"
-  },
-  "next_focus": "Inspect whether the controller represented by the network and matrix links is unmistakable in existing headings and current/history labels. Reuse actual protocol and support information, including Learned sparse versus Matrix adaptation, without adding panels or controls or implying all four designs use the displayed links. Preserve actual scores, commands, fixed deployment, all four costs and honest recorded regimes. Keep the readable phone feeder and contextual source/receiver marks. No scientific retuning or broad benchmark study for visual work.",
+  "active_run": null,
+  "next_focus": "Audit remaining chart and matrix axis readability using actual desktop and phone screenshots. Prioritize source and inverter labels and measured interpretation without adding controls or panels, hiding any of the 23 sources/eight receivers/four methods, or implying live graph adaptation. Preserve explicit controller ownership, candidate/deployed/history context, readable phone feeder, honest recorded regimes, fixed comparison, all physical costs and exact replay. No scientific retuning or broad numerical study for visual work.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -902,12 +894,12 @@
       "pages_run": 39052070867
     },
     "renewed_completion": {
-      "slot": "2026-10-18T10:00:00+08:00",
-      "branch": "cloud/refine/20261018-1000",
-      "product_ready_commit": "5bb463c9d9f40e04440755a59275c918e92a6c2b",
+      "slot": "2026-10-18T11:00:00+08:00",
+      "branch": "cloud/refine/20261018-1100",
+      "product_ready_commit": "0399672ad9d64229b449ec9f035778dd6fcbeb67",
       "scope": "Completion record only, no product changes",
-      "status": "Metadata candidate validation pending at record creation. Product candidate, main, build consistency, full browser checks and exact ready Pages deployment succeeded.",
-      "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and metadata candidate workflow results before recovery. Promote only after normal validation with expected main 5bb463c9d9f40e04440755a59275c918e92a6c2b and force false if still matching. On newer main reapply only verified completion metadata and validate normally. Do not count metadata recovery, previous recovery or a duplicate dispatch as another invocation or improvement. Preserve the original 10:37:54 pass deadline."
+      "status": "Metadata candidate validation pending at record creation. Product candidate and main passed all 213 tests, build consistency and full browser checks. Exact ready Pages deployment succeeded.",
+      "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and metadata candidate workflow results before recovery. Promote only after normal validation with expected main 0399672ad9d64229b449ec9f035778dd6fcbeb67 and force false if still matching. On newer main, reapply only verified completion metadata and validate normally. Do not count metadata recovery or a duplicate dispatch as another invocation or improvement. Preserve original 11:40:15 pass deadline."
     },
     "previous_renewed_metadata_verification": {
       "commit": "6d6a48b5d2abf11f3c4428402a6b7eafd956c60e",
@@ -1094,7 +1086,7 @@
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
     "invocation_count": 11,
-    "completed_count": 10,
+    "completed_count": 11,
     "runs": [
       {
         "slot": "2026-10-18T01:00:00+08:00",
@@ -1566,41 +1558,60 @@
       {
         "slot": "2026-10-18T11:00:00+08:00",
         "started_at": "2026-10-18T11:00:15+08:00",
-        "status": "validating",
+        "status": "completed",
         "candidate_branch": "cloud/refine/20261018-1100",
         "base_commit": "6d6a48b5d2abf11f3c4428402a6b7eafd956c60e",
-        "counted_completed": false,
+        "counted_completed": true,
         "changes": [
           "Name the actual displayed link controller in the existing matrix heading and contextual feeder inspection caption. Matrix adaptation owns discovery and saved discovery candidates; Learned sparse owns current communication deployment; Matrix adaptation owns prediction deployment.",
           "Retain visible candidate, deployed and exact saved-time context in the existing budget line and accessible descriptions. Other policies explicitly keep their own prediction sources. No extra panel, control, scientific change or numerical study.",
           "Add controller ownership, current/history restoration and exact paused-trial/replay regressions across both experiments, plus desktop/phone browser ownership and screenshot evidence."
         ],
         "tests": {
-          "status": "pending cloud validation",
-          "benchmarks": "Not rerun. Engine, physical parameters, controller gains, learning, defaults, forecast timing, source errors, limits, costs and all recorded studies unchanged."
+          "suites": 7,
+          "total": 213,
+          "failed": 0,
+          "candidate": "passed",
+          "main": "All 213 tests, build consistency and full desktop/phone browser checks passed.",
+          "build": "passed",
+          "main_consistency": "passed",
+          "browser": "Full desktop/phone browser suite passed. Controller ownership checked against actual experiment, phase and history state. Candidate, deployed and exact saved-time labels verified; current/history mode exit restores current owner without a plant step. Added phone prediction experiment checks and screenshot captures. Existing actual playback, repeated and continuous attacks, forecast corruption/repair, automatic comparison, stable live cost switches, four measured traces, geometry and exact old replay checks retained.",
+          "benchmarks": "Not rerun. Only view labels and accessible descriptions changed. Engine, physical parameters, controller gains, learning, defaults, forecast timing, source errors, limits, costs and all recorded studies unchanged."
         },
         "screenshots": {
-          "pixel_review": "Pending candidate cloud screenshots. Prior published matrix desktop and phone pixels reviewed to identify ambiguous ownership before this edit."
+          "artifact_id": 12122698764,
+          "artifact_digest": "sha256:b8e73bfe41a239ff5db06565c342baf52d8655e48757cdb3a91ee3edcb31b4cd",
+          "captures": [
+            "link-owner-1440-discovery.jpg",
+            "link-owner-1440-history.jpg",
+            "panel-matrix-1440.jpg",
+            "panel-matrix-390.jpg",
+            "network-inspection-390-deployment.jpg",
+            "link-owner-390-prediction-discovery.jpg",
+            "link-owner-390-prediction-deployment.jpg"
+          ],
+          "pixel_review": "Actual desktop 1440 and phone 390 JPEG pixels reviewed through authorized Actions logs. Matrix heading names Matrix adaptation in discovery and saved history, Learned sparse in current communication deployment, and Matrix adaptation in both phases of prediction adaptation. Candidate, deployed and saved-at-time text stays visible and fits existing cards. Phone feeder caption reads selected link, deployed and Learned sparse while retaining source/receiver roles. Existing full four-method stage cost ledger and unfavorable fixed-sparse winner remain visible. No clipped ownership text or new panels or controls observed. This is artifact pixel review, not direct live browser access."
         },
         "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed.",
         "superseded_candidates": [
           {
             "source_commit": "b97eea983793beff5715e78d7446c4e5d92a396c",
             "candidate_run": 39092280279,
-            "reason": "Read-only review found one existing exact inspection label fixture needed the newly explicit controller suffix. Preserve the full exact label assertion with its actual phase-specific controller name. Superseded before publication."
+            "reason": "Read-only review found one existing exact inspection label fixture needed the newly explicit controller suffix. Preserve the full exact label assertion with its actual phase-specific controller name. Superseded before publication.",
+            "conclusion": "cancelled",
+            "disposition": "Unpublished. Exact assertion retained and updated before successful validation."
           }
-        ]
+        ],
+        "source_commit": "e807995486e75d00ba4aa0169c449fd1e3eb6440",
+        "published_commit": "0399672ad9d64229b449ec9f035778dd6fcbeb67",
+        "candidate_run": 39092319947,
+        "main_run": 39092797487,
+        "pages_run": 39092797637,
+        "completed_at": "2026-10-18T03:19:00.399Z",
+        "publication": "Successful candidate and main validation. Ready child has tested source as its single parent and only index.html changed. Promoted with expected current main and force false. Exact ready Pages version confirmed successful in deployment logs."
       }
     ],
-    "active_run": {
-      "slot": "2026-10-18T11:00:00+08:00",
-      "started_at": "2026-10-18T11:00:15+08:00",
-      "expires_at": "2026-10-18T11:40:15+08:00",
-      "candidate_branch": "cloud/refine/20261018-1100",
-      "base_commit": "6d6a48b5d2abf11f3c4428402a6b7eafd956c60e",
-      "owner": "6ad2628236888191b683d1e7ed2e5b93",
-      "program": "20261018-visual-codesign"
-    },
+    "active_run": null,
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
@@ -1620,5 +1631,5 @@
     "baseline_main": "2a9ff26b59565ecac1eb5274fbea4d813a18f24f"
   },
   "completed_count_scope": "Original bounded program, retained at 15. Renewed counts are tracked independently in renewed_program.",
-  "total_completed_count": 25
+  "total_completed_count": 26
 }
