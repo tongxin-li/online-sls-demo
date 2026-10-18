@@ -801,6 +801,7 @@
     announce((stopped?'Power attack stopped · ':'')+(forecastMode()?'Click a bus to change forecast reliability':'Click a bus to disturb physical power'));
     render();save();
   });
+  $('matrix')?.parentElement?.addEventListener('scroll',updateMatrixScrollHint,{passive:true});
   if ($('matrix-view')) $('matrix-view').addEventListener('change',()=>{historyIndex=null;renderProtocol();renderInspectedSource();drawNetwork();drawMatrix();save();});
   $('topology-history').addEventListener('input',()=>reviewTopology(Number($('topology-history').value)));
   $('history-live').addEventListener('click',()=>reviewTopology(null));
@@ -1342,6 +1343,22 @@
       +(status.queued?' · '+status.queued+' queued':hovered && canAttack(bus)?(forecastMode()?' · Click to '+(snapshot.faults.includes(bus)?'repair':'corrupt'):continuousMode()?' · Click to toggle attack':' · Hold to keep attacking'):'');
   }
 
+  function updateMatrixScrollHint() {
+    const el=$('matrix'),hint=$('matrix-scroll-hint'),scroller=el?.parentElement;
+    if(!scroller||!hint)return;
+    const maximum=Math.max(0,scroller.scrollWidth-scroller.clientWidth),overflow=maximum>1;
+    hint.hidden=!overflow;
+    const bounds=scroller.getBoundingClientRect();
+    const shown=Array.from(el.querySelectorAll('.matrix-columns text')).filter(node=>{
+      const box=node.getBoundingClientRect();return box.left>=bounds.left-.5&&box.right<=bounds.right+.5;
+    }).map(node=>Number(node.__data__));
+    const left=overflow&&scroller.scrollLeft>1,right=overflow&&scroller.scrollLeft<maximum-1;
+    hint.dataset.first=overflow&&shown.length?String(shown[0]):'';
+    hint.dataset.last=overflow&&shown.length?String(shown.at(-1)):'';
+    hint.dataset.position=!overflow?'all':left?(right?'middle':'end'):'start';
+    const range=shown.length?'Sources '+shown[0]+' to '+shown.at(-1):'Prediction sources';
+    hint.textContent=!overflow?'':left?(right?'← '+range+' →':'← Scroll left · '+range):range+' · Scroll right →';
+  }
   function drawMatrix() {
     const el=$('matrix'); if(!el) return;
     renderProtocol();
@@ -1470,6 +1487,7 @@
       });
     rows.select('rect').attr('fill',bus=>bus===selectedBus?'var(--primary)':'transparent');
     rows.select('text').style('fill',bus=>bus===selectedBus?'#fff':'var(--muted-foreground)').text(bus=>bus);
+    updateMatrixScrollHint();
   }
   function chartBase(el, observations, keys, yTitle, xTitle, height, options={}) {
     const width = Math.max(240,el.getBoundingClientRect().width);

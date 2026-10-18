@@ -109,6 +109,48 @@ async function main() {
     }
     checks.push(id + ' geometry and evidence scope at ' + measured.viewport);
   };
+  const inspectMatrixNavigation = async (surface, capture=false) => {
+    await pause(surface);
+    const before=await read(surface),scroller=surface.locator('.pr-matrix-scroll'),hint=surface.locator('#pr-matrix-scroll-hint');
+    assert.equal(before.snapshot.networkId,'feeder47');
+    assert.equal(await scroller.getAttribute('aria-describedby'),'pr-matrix-scroll-hint');
+    const initial=await scroller.evaluate(node=>node.scrollLeft);
+    const move=async fraction=>{
+      await scroller.evaluate((node,fraction)=>{node.scrollLeft=fraction*(node.scrollWidth-node.clientWidth);},fraction);
+      const position=fraction===0?'start':fraction===1?'end':'middle';
+      await surface.waitForFunction(position=>document.querySelector('#pr-matrix-scroll-hint').dataset.position===position,position);
+      const measured=await scroller.evaluate(node=>{
+        const bounds=node.getBoundingClientRect(),columns=Array.from(node.querySelectorAll('.matrix-columns text'));
+        const visible=columns.filter(label=>{const box=label.getBoundingClientRect();return box.left>=bounds.left-.5&&box.right<=bounds.right+.5;}).map(label=>Number(label.firstChild.nodeValue));
+        const hint=document.querySelector('#pr-matrix-scroll-hint');
+        return {visible,text:hint.textContent,hidden:hint.hidden,data:{...hint.dataset},sources:columns.map(label=>Number(label.firstChild.nodeValue)),
+          cells:node.querySelectorAll('.matrix-cell').length,left:node.scrollLeft,maximum:node.scrollWidth-node.clientWidth,font:parseFloat(getComputedStyle(hint).fontSize)};
+      });
+      assert.equal(measured.hidden,false);assert.ok(measured.font>=12);
+      assert.deepEqual(measured.sources,Array.from({length:46},(_,i)=>i+2),'Scrolling retains every source header in order');
+      assert.equal(measured.cells,736,'Scrolling retains all 16 by 46 actual cells');
+      assert.equal(Number(measured.data.first),measured.visible[0]);assert.equal(Number(measured.data.last),measured.visible.at(-1));
+      assert.ok(measured.text.includes('Sources '+measured.visible[0]+' to '+measured.visible.at(-1)),'Cue names the source numbers actually readable in the viewport');
+      if(fraction===0){assert.equal(measured.visible[0],2);assert.ok(measured.text.endsWith('Scroll right →'));assert.ok(!measured.text.startsWith('←'));}
+      else if(fraction===1){assert.equal(measured.visible.at(-1),47);assert.ok(measured.text.startsWith('← Scroll left'));assert.ok(!measured.text.endsWith('→'));}
+      else {assert.ok(measured.text.startsWith('←'));assert.ok(measured.text.endsWith('→'));}
+      if(capture){
+        const width=surface.viewportSize().width,preview=await surface.locator('.pr-matrix-panel').screenshot({path:path.join(output,'matrix-navigation-'+width+'-'+position+'.jpg'),type:'jpeg',quality:85});
+        console.log('CLOUD_MATRIX_NAV_'+width+'_'+position+' '+preview.toString('base64'));
+      }
+    };
+    await move(0);await scroller.focus();
+    for(let i=0;i<6;i++)await scroller.press('ArrowRight');
+    await surface.waitForFunction(()=>document.querySelector('.pr-matrix-scroll').scrollLeft>0);
+    assert.ok((await hint.textContent()).includes('Sources'),'Native keyboard scrolling keeps the cue available');
+    for(const fraction of [0,.5,1])await move(fraction);
+    await scroller.evaluate((node,left)=>{node.scrollLeft=left;},initial);
+    const after=await read(surface);
+    assert.deepEqual(after.snapshot,before.snapshot,'Navigating the viewport changes no forecasts, state, support, event or cost');
+    assert.equal(after.state.inspectedSource,before.state.inspectedSource);assert.equal(after.state.selectedBus,before.state.selectedBus);
+    assert.equal(after.state.playing,false);
+    checks.push('Actual visible source ranges, both end directions, native keyboard scrolling and full trial invariance at '+surface.viewportSize().width);
+  };
   const switchNetwork = async (surface, id) => {
     await surface.locator('#pr-network-scenario').selectOption(id);
     await surface.waitForFunction(id => document.querySelector('#power-response-demo').powerDemo.getSnapshot().networkId === id, id);
@@ -200,6 +242,7 @@ async function main() {
     await page.screenshot({ path: path.join(output, 'toy8-desktop.png'), fullPage: true });
 
     await switchNetwork(page, 'feeder47');
+    await inspectMatrixNavigation(page,true);
     await page.locator('#pr-intervention').selectOption('power');
     await setting(page, 'speed', '32');
     const lastBus = page.locator('#pr-network [data-bus="47"] .pe-hit');
@@ -215,6 +258,7 @@ async function main() {
     assert.ok((await read(page)).state.activeAttackBuses.includes(47), 'The same far bus can be attacked repeatedly');
     await compare(page, 'feeder47', true);
     await roundTrip(page, 'feeder47');
+    await inspectMatrixNavigation(page);
     await page.screenshot({ path: path.join(output, 'feeder47-desktop.png'), fullPage: true });
     await page.locator('.pr-network-panel').screenshot({ path: path.join(output, 'feeder47-network-desktop.png') });
     await page.locator('.pr-matrix-panel').screenshot({ path: path.join(output, 'feeder47-matrix-desktop.png') });
@@ -229,6 +273,7 @@ async function main() {
 
     const phone = await open({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
     await switchNetwork(phone, 'feeder47');
+    await inspectMatrixNavigation(phone,true);
     await phone.locator('#pr-intervention').selectOption('power');
     await setting(phone, 'speed', '32');
     const phoneBus = phone.locator('#pr-network [data-bus="47"] .pe-hit');
@@ -246,6 +291,7 @@ async function main() {
     await checkLayout(phone, 'feeder47');
     await compare(phone, 'feeder47');
     await roundTrip(phone, 'feeder47');
+    await inspectMatrixNavigation(phone);
     await phone.screenshot({ path: path.join(output, 'feeder47-mobile.png'), fullPage: true });
     await phone.locator('.pr-network-panel').screenshot({ path: path.join(output, 'feeder47-network-mobile.png') });
     await phone.locator('.pr-matrix-panel').screenshot({ path: path.join(output, 'feeder47-matrix-mobile.png') });

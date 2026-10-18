@@ -783,8 +783,13 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
-  "next_focus": "Audit voltage, stage-cost and cumulative-cost tick labels and time axes using the current desktop/phone screenshots. Improve readability with explicit units and measured event timing while preserving four traces, zero/difference references, actual extrema and immutable event markers. Keep compact four-panel hierarchy and stable live cost controls. Retain the 12 px matrix labels, all 23 sources/eight receivers, actual link ownership and current/history context. No scientific retuning, invented thresholds or broad numerical study for visual work.",
+  "active_run": {
+    "slot": "2026-10-18T14:00:00+08:00",
+    "branch": "cloud/refine/20261018-1400",
+    "started_at": "2026-10-18T14:00:49+08:00",
+    "lease_expires_at": "2026-10-18T14:40:49+08:00"
+  },
+  "next_focus": "Validate truthful visible source ranges and scrolling on the existing larger matrix without hiding sources or changing scientific results.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -898,7 +903,7 @@
       "branch": "cloud/refine/20261018-1200",
       "product_ready_commit": "d1051473ebf998551a18189f60e622aaf7f2106d",
       "scope": "Completion record only, no product changes",
-      "status": "Metadata candidate validation pending at record creation. Product candidate and main passed all 213 tests, build consistency and full browser checks; exact ready Pages deployment succeeded.",
+      "status": "12:00 completion metadata already published at eeedabbc72f755389a50bfcf17eab8a2490befa3 and retained by parent releases. Main repeat success independently read. Count remains unchanged.",
       "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and metadata candidate workflow results before recovery. Promote only after normal validation with expected main d1051473ebf998551a18189f60e622aaf7f2106d and force false if still matching. On newer main reapply only verified completion metadata and validate normally. Do not count metadata recovery, preflight or duplicate dispatches as another invocation or improvement. Preserve the stricter original 12:36:04 pass deadline."
     },
     "previous_renewed_metadata_verification": {
@@ -1017,6 +1022,13 @@
         "main_run": 39090335905,
         "pages_run": 39090336026,
         "result": "success independently verified before this slot; all 212 tests, build consistency and full browser checks. Exact metadata Pages version verified in deployment logs."
+      },
+      {
+        "commit": "eeedabbc72f755389a50bfcf17eab8a2490befa3",
+        "candidate_run": 39096552197,
+        "main_run": 39097144012,
+        "pages_run": 39097143798,
+        "result": "Main validation final success independently read. Commit is already an ancestor of current parent release. No recovery or completion increment."
       }
     ]
   },
@@ -1070,6 +1082,28 @@
       "reference_dependency": "src/reference-study.html",
       "reference_generator": "src/build-reference-study.cjs",
       "reference_tests": "src/test-reference-study.cjs"
+    },
+    {
+      "commit": "7c2a8e831e59da28c7ab5d44a4c2256c8c106dd6",
+      "source_commit": "ca8d4e5bb8af2a3ed943a9150c0e3798513eb2b5",
+      "description": "Parent simplified the single integrated cost table and added persistent two stage progress and stable results heading. Duplicate cost panels and separate four stage receipt removed.",
+      "candidate_run": 39098002718,
+      "main_run": 39098427311,
+      "pages_run": 39098427018,
+      "verification": "Parent reports all 213 cases and 44 browser checks, screenshot pixels and exact public bytes passed. Superseded by independently verified network release.",
+      "counts_as_scheduled_refinement": false
+    },
+    {
+      "commit": "02231469c16b43f03c33460e76d86145373b7c2d",
+      "source_commit": "459e8743a475b1f5a2fb2fcc09ad3461c674e9c6",
+      "description": "Parent network scenario release toy8 feeder24 feeder47 with network scoped replay and actual inverter positions and budgets. Original 24 bus arithmetic and reference evidence preserved.",
+      "candidate_run": 39099739974,
+      "candidate_audit": 39099739900,
+      "main_run": 39100612536,
+      "main_audit": 39100612526,
+      "pages_run": 39100612505,
+      "verification": "Main validation and audit final success independently read with completed logs before source edits. All 224 numerical and interaction cases and original plus network browser suites passed. Pages final success independently read. Parent reports exact public page environment and network audit bytes and public Chrome playback.",
+      "counts_as_scheduled_refinement": false
     }
   ],
   "appearance_preference": {
@@ -1102,7 +1136,7 @@
     "hard_deadline": "2026-10-19T01:00:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 12,
+    "invocation_count": 13,
     "completed_count": 12,
     "runs": [
       {
@@ -1670,9 +1704,47 @@
         "pages_run": 39096115724,
         "completed_at": "2026-10-18T04:16:47.516Z",
         "publication": "Candidate and main validation succeeded. Generated ready child has tested source as its single parent and only index.html changed. Promoted with expected current main SHA and force false. Pages deployment logs confirmed success for the exact tested ready version."
+      },
+      {
+        "slot": "2026-10-18T13:00:00+08:00",
+        "started_at": "2026-10-18T12:55:06+08:00",
+        "status": "skipped_overlap",
+        "reason": "Explicit parent source and publication hold for network scenario implementation. Read only preflight stopped without a candidate or edits. Hold lifted by parent handoff at 13:31.",
+        "counted_invocation": false,
+        "counted_completed": false,
+        "source_commit": null,
+        "published_commit": null
+      },
+      {
+        "slot": "2026-10-18T14:00:00+08:00",
+        "started_at": "2026-10-18T14:00:49+08:00",
+        "status": "validating",
+        "candidate_branch": "cloud/refine/20261018-1400",
+        "base_commit": "02231469c16b43f03c33460e76d86145373b7c2d",
+        "counted_invocation": true,
+        "counted_completed": false,
+        "lease_expires_at": "2026-10-18T14:40:49+08:00",
+        "changes": [
+          "Update the existing scroll cue with fully visible source bus numbers and actual remaining directions. Retain every source and cell with native keyboard and touch scrolling.",
+          "Add geometry, end direction, keyboard and full paused trial invariance browser checks on desktop and phone, before and after replay. Log actual matrix screenshots for authorized pixel review.",
+          "No model, controller, objective, limits, learning, forecast, attack, replay, baseline or recorded numerical changes. No duplicate panel or control."
+        ],
+        "tests": {
+          "status": "Pending cloud validation",
+          "benchmarks": "Not rerun for this interface-only change."
+        },
+        "screenshots": {
+          "pixel_review": "Pending authorized cloud JPEG previews"
+        },
+        "direct_live_inspection": "Unverified. Previously denied direct live browser access will not be retried or bypassed."
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "slot": "2026-10-18T14:00:00+08:00",
+      "branch": "cloud/refine/20261018-1400",
+      "started_at": "2026-10-18T14:00:49+08:00",
+      "lease_expires_at": "2026-10-18T14:40:49+08:00"
+    },
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",

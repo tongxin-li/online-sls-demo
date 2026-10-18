@@ -532,3 +532,6 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 [data-network="feeder47"] .pr-chart .matrix-columns text,[data-network="feeder47"] .pr-chart .matrix-rows text { font-size:12px; }
 
 .pr-scroll-hint { margin:4px 0 8px; color:var(--muted-foreground); font-size:11px; text-align:right; }
+
+/* The existing matrix cue reports the columns actually visible while scrolling. */
+#pr-matrix-scroll-hint { font-size:12px; }
