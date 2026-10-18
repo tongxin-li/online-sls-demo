@@ -783,54 +783,8 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "program_id": "continuous-phi-20261018T234500",
-    "slot": "2026-10-19T05:45:00+08:00",
-    "started_at": "2026-10-19T05:46:04+08:00",
-    "lease_expires_at": "2026-10-19T06:26:04+08:00",
-    "branch": "cloud/refine/continuous-phi-20261018-2345",
-    "candidate_parent": "150631d2709e213f4ce455b2cba73188286b69b2",
-    "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
-    "status": "in_progress",
-    "counted_invocation": true,
-    "counted_completed": false,
-    "tests": {
-      "preflight": {
-        "main_run": 39144310544,
-        "main": "success",
-        "candidate_run": 39166609756,
-        "candidate": "success",
-        "all_completed_logs_read": true,
-        "strict_native_receipt_bound": "passed",
-        "candidate_ready_same_source": true
-      },
-      "handoff_first_attempt": {
-        "source": "a2ace42bc3678b2242666fd7d77fd2c951d7737e",
-        "run": 39169852556,
-        "ongoing_job": 117800550592,
-        "ongoing_conclusion": "failure",
-        "completed_logs_read": true,
-        "reason": "A fixture written to localStorage before reload was overwritten by the normal visibility save of the current ongoing trial. The test restored t0 of that current trial instead of the declared archived t8 record.",
-        "repair": "Use a one-navigation session marker that copies the actual v13 record to production localStorage before the next document bridge reads it. Clear the marker immediately. Fresh tests still start from empty storage and exact v14 replay uses no marker."
-      }
-    },
-    "changes": [
-      "Explicit primary Restart, Restore default scenario and Network actions construct a fresh continuous-phi-v1 trial while archived replay, views, attacks and cost controls preserve the original protocol until an explicit new trial.",
-      "Label archived trial headings truthfully and keep archived advanced reproduction controls scoped. No new selector or dashboard.",
-      "Update superseded restart and network phase assertions with explicit ongoing protocol, support, costs, paused behavior and replay protections. Keep archived numerical and browser comparisons on actual version 13 production records.",
-      "Add actual desktop and phone handoff checks for all three primary actions on each network after the existing fresh long native playback suites."
-    ],
-    "remaining_gaps": [
-      "Explicit new trial actions from an archived version 13 context still retain the archived protocol. Implement and test the Restart, Restore default scenario and Network handoff to a fresh continuous-phi-v1 trial, preserving archived history and costs until that explicit action. No version selector.",
-      "Read the full automatic validation repeat for this checkpoint first. The only test behavior followup tightens native receipt units to 0.07 per unit. The 30 captured actual values satisfy that bound, but the new source assertion has not yet completed CI.",
-      "Profile and address native large network playback and growing history without dropping observed samples, executed receipts or physical costs. At requested speed 32 the measured 47 bus throughput is about 9.7 to 10.2 samples per wall second and frame gaps reach 200 ms. Functional continuation is not smooth high speed acceptance. The 24 bus run also falls below requested speed.",
-      "Finish the README and environment scope audit with the archived new trial handoff. Existing frozen percentages and finite terminal penalties must remain explicitly archival. Baseline inputs and changed stationary planning conventions remain documented.",
-      "Memory evidence is finite through 1840 to 1859 browser samples. Equal optional heap readings do not establish a flat or indefinite memory bound. Preserve full accumulated costs and exact replay when evaluating display retention or profiling.",
-      "No ongoing protocol release is live. Keep this candidate unpublished until coherent migration, scientific acceptance, responsive long playback, full checks, expected main SHA promotion, exact Pages revision and canonical public behavior verification are complete."
-    ],
-    "next_focus": "Implement explicit archived new trial handoff with exact prior replay, then validate all protections and keep unpublished until high speed playback and publication gates are resolved."
-  },
-  "next_focus": "Read this checkpoint full validation repeat before source edits. Complete explicit archived new trial handoff and scoped documentation while retaining exact archived replay and all original protections. Profile large network native rendering and history at requested 32 speed without changing controller equations or dropping costs. Revalidate and inspect pixels before any expected SHA nonforce publication.",
+  "active_run": null,
+  "next_focus": "Read latest main and this checkpoint repeat checks first. Profile 47 bus native execution and rendering with growing history at 901 and roughly 1850 samples. Separate actual controller step, immutable snapshot and chart work. Optimize the measured hotspot without retuning gains, objective, noise or limits and without dropping costs or evidence. If caching stationary response geometry, keep current causal correction weights and command receipts fresh at every action. Revalidate all suites and actual pixels before expected SHA nonforce publication.",
   "priorities": [
     "Actual continuous causal response adaptation and executed command evidence",
     "Explicit forecast message access and support feasibility",
@@ -4416,7 +4370,15 @@
           "public_main": "b28a1db1595ed812002e5401e0825f0da12f6e36",
           "public_behavior": "Archived frozen communication protocol remains live. No continuous adaptation fix has been published."
         },
-        "end_reason": "Coherent bounded acceptance checkpoint. Continuous protocol correctness and actual weight evolution are evidenced, but migration and high speed performance remain open. No completed live improvement counted."
+        "end_reason": "Coherent bounded acceptance checkpoint. Continuous protocol correctness and actual weight evolution are evidenced, but migration and high speed performance remain open. No completed live improvement counted.",
+        "verification_followup": {
+          "source": "150631d2709e213f4ce455b2cba73188286b69b2",
+          "run": 39166609756,
+          "status": "success",
+          "all_completed_logs_read": true,
+          "strict_native_per_unit_receipt_check": "passed",
+          "recovery_counted_as_completion": false
+        }
       },
       {
         "program_id": "continuous-phi-20261018T234500",
@@ -4426,7 +4388,7 @@
         "branch": "cloud/refine/continuous-phi-20261018-2345",
         "candidate_parent": "150631d2709e213f4ce455b2cba73188286b69b2",
         "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
-        "status": "in_progress",
+        "status": "validated_archived_handoff_candidate_unpublished_performance_pending",
         "counted_invocation": true,
         "counted_completed": false,
         "tests": {
@@ -4447,7 +4409,660 @@
             "completed_logs_read": true,
             "reason": "A fixture written to localStorage before reload was overwritten by the normal visibility save of the current ongoing trial. The test restored t0 of that current trial instead of the declared archived t8 record.",
             "repair": "Use a one-navigation session marker that copies the actual v13 record to production localStorage before the next document bridge reads it. Clear the marker immediately. Fresh tests still start from empty storage and exact v14 replay uses no marker."
-          }
+          },
+          "final": {
+            "source": "9c36a5ea09a19493e54257894cca47b88403daa1",
+            "run_id": 39170293891,
+            "conclusion": "success",
+            "completed_logs_read": true,
+            "numerical_and_interaction_cases": 254,
+            "interaction_cases": 143,
+            "original_browser_checks": 44,
+            "archived_network_suites": "success",
+            "ongoing_desktop_and_phone_conditions": 6,
+            "explicit_archived_handoff_conditions": 18,
+            "jobs": {
+              "validate": 117801952704,
+              "ongoing_browser": 117801952974,
+              "review": 117804014173,
+              "prepare": 117805197258
+            },
+            "generated_child": {
+              "sha": "37fd0f319786fa449c6ffe2e8ec88f9312c825cc",
+              "parent": "9c36a5ea09a19493e54257894cca47b88403daa1",
+              "changed_files": [
+                "index.html"
+              ],
+              "ancestry_verified": true,
+              "only_expected_generated_changes": true
+            },
+            "validated_page": {
+              "artifact_id": 12152254312,
+              "zip_sha256": "8972867d49382ec65f5202d85e6fab4b525d4d581ee7882e0f1a34998e44e944"
+            }
+          },
+          "handoffs": [
+            {
+              "networkId": "toy8",
+              "mobile": false,
+              "handoffs": [
+                {
+                  "action": "restart",
+                  "protocol": "continuous-phi-v1",
+                  "t": 0,
+                  "passed": true
+                },
+                {
+                  "action": "new-scenario",
+                  "protocol": "continuous-phi-v1",
+                  "t": 7,
+                  "passed": true
+                },
+                {
+                  "action": "network-scenario",
+                  "protocol": "continuous-phi-v1",
+                  "t": 0,
+                  "passed": true
+                }
+              ]
+            },
+            {
+              "networkId": "feeder24",
+              "mobile": false,
+              "handoffs": [
+                {
+                  "action": "restart",
+                  "protocol": "continuous-phi-v1",
+                  "t": 0,
+                  "passed": true
+                },
+                {
+                  "action": "new-scenario",
+                  "protocol": "continuous-phi-v1",
+                  "t": 16,
+                  "passed": true
+                },
+                {
+                  "action": "network-scenario",
+                  "protocol": "continuous-phi-v1",
+                  "t": 0,
+                  "passed": true
+                }
+              ]
+            },
+            {
+              "networkId": "feeder47",
+              "mobile": false,
+              "handoffs": [
+                {
+                  "action": "restart",
+                  "protocol": "continuous-phi-v1",
+                  "t": 0,
+                  "passed": true
+                },
+                {
+                  "action": "new-scenario",
+                  "protocol": "continuous-phi-v1",
+                  "t": 16,
+                  "passed": true
+                },
+                {
+                  "action": "network-scenario",
+                  "protocol": "continuous-phi-v1",
+                  "t": 0,
+                  "passed": true
+                }
+              ]
+            },
+            {
+              "networkId": "toy8",
+              "mobile": true,
+              "handoffs": [
+                {
+                  "action": "restart",
+                  "protocol": "continuous-phi-v1",
+                  "t": 0,
+                  "passed": true
+                },
+                {
+                  "action": "new-scenario",
+                  "protocol": "continuous-phi-v1",
+                  "t": 5,
+                  "passed": true
+                },
+                {
+                  "action": "network-scenario",
+                  "protocol": "continuous-phi-v1",
+                  "t": 0,
+                  "passed": true
+                }
+              ]
+            },
+            {
+              "networkId": "feeder24",
+              "mobile": true,
+              "handoffs": [
+                {
+                  "action": "restart",
+                  "protocol": "continuous-phi-v1",
+                  "t": 0,
+                  "passed": true
+                },
+                {
+                  "action": "new-scenario",
+                  "protocol": "continuous-phi-v1",
+                  "t": 19,
+                  "passed": true
+                },
+                {
+                  "action": "network-scenario",
+                  "protocol": "continuous-phi-v1",
+                  "t": 0,
+                  "passed": true
+                }
+              ]
+            },
+            {
+              "networkId": "feeder47",
+              "mobile": true,
+              "handoffs": [
+                {
+                  "action": "restart",
+                  "protocol": "continuous-phi-v1",
+                  "t": 0,
+                  "passed": true
+                },
+                {
+                  "action": "new-scenario",
+                  "protocol": "continuous-phi-v1",
+                  "t": 16,
+                  "passed": true
+                },
+                {
+                  "action": "network-scenario",
+                  "protocol": "continuous-phi-v1",
+                  "t": 0,
+                  "passed": true
+                }
+              ]
+            }
+          ],
+          "native_run": {
+            "boot": "Empty storage and production controls. The one-use archived fixture marker is absent during fresh default and exact v14 replay.",
+            "results": [
+              {
+                "networkId": "toy8",
+                "mobile": false,
+                "frames": 1680,
+                "maxFrameGapMs": 33.400000000001455,
+                "over50ms": 0,
+                "over100ms": 0,
+                "initialDomNodes": 1261,
+                "finalDomNodes": 1424,
+                "initialHeapBytes": 27600000,
+                "finalHeapBytes": 27600000,
+                "elapsedMs": 28608,
+                "actions": 907,
+                "sourceSwitches": [
+                  {
+                    "action": 90,
+                    "trainedThrough": 89,
+                    "coefficient": 0.9988286314942323,
+                    "gain": -2.7768596831391434,
+                    "raw": 0.0069188657890316314,
+                    "bounded": 0.0069188657890316314,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 221,
+                    "trainedThrough": 220,
+                    "coefficient": 0.017186296536405316,
+                    "gain": -0.047779901826626205,
+                    "raw": 0.0040042604412074065,
+                    "bounded": 0.0040042604412074065,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 429,
+                    "trainedThrough": 428,
+                    "coefficient": 0.959939073895291,
+                    "gain": -2.6687421931248,
+                    "raw": 0.0009110457154142743,
+                    "bounded": 0.0009110457154142743,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 650,
+                    "trainedThrough": 649,
+                    "coefficient": 0.023401050101000496,
+                    "gain": -0.06505763903801619,
+                    "raw": 0.002768065180412392,
+                    "bounded": 0.002768065180412392,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 900,
+                    "trainedThrough": 899,
+                    "coefficient": 1.026745409715456,
+                    "gain": -2.854471571186128,
+                    "raw": -0.0013965328844452237,
+                    "bounded": -0.0013965328844452237,
+                    "corrupted": false
+                  }
+                ],
+                "costs": {
+                  "online": 0.05055407302870461,
+                  "scalar": 0.06915352552190038,
+                  "static": 0.08019088816211539,
+                  "causal": 0.05226740232001181
+                },
+                "sourceUpdates": 877
+              },
+              {
+                "networkId": "feeder24",
+                "mobile": false,
+                "frames": 1366,
+                "maxFrameGapMs": 100,
+                "over50ms": 67,
+                "over100ms": 0,
+                "initialDomNodes": 2239,
+                "finalDomNodes": 2378,
+                "initialHeapBytes": 31200000,
+                "finalHeapBytes": 31200000,
+                "elapsedMs": 41204,
+                "actions": 910,
+                "sourceSwitches": [
+                  {
+                    "action": 92,
+                    "trainedThrough": 91,
+                    "coefficient": 0.9882779119712795,
+                    "gain": -1.8190293792365966,
+                    "raw": 0.012035618142023592,
+                    "bounded": 0.012035618142023592,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 221,
+                    "trainedThrough": 220,
+                    "coefficient": -0.005061400702689204,
+                    "gain": 0.009316040019467701,
+                    "raw": 0.010369395079606193,
+                    "bounded": 0.010369395079606193,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 432,
+                    "trainedThrough": 431,
+                    "coefficient": 0.9914936542137855,
+                    "gain": -1.82494829085479,
+                    "raw": -0.0005046259559560967,
+                    "bounded": -0.0005046259559560967,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 652,
+                    "trainedThrough": 651,
+                    "coefficient": 0.020955009014667448,
+                    "gain": -0.038569896764985644,
+                    "raw": -0.001797981169944756,
+                    "bounded": -0.001797981169944756,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 901,
+                    "trainedThrough": 900,
+                    "coefficient": 0.979396160890066,
+                    "gain": -1.8026815827715643,
+                    "raw": -0.006829835469360502,
+                    "bounded": -0.006829835469360502,
+                    "corrupted": false
+                  }
+                ],
+                "costs": {
+                  "online": 0.4221843546656424,
+                  "scalar": 0.5953413437247481,
+                  "static": 0.7511822485515325,
+                  "causal": 0.4305227310370643
+                },
+                "sourceUpdates": 880
+              },
+              {
+                "networkId": "feeder47",
+                "mobile": false,
+                "frames": 1352,
+                "maxFrameGapMs": 200,
+                "over50ms": 864,
+                "over100ms": 137,
+                "initialDomNodes": 4326,
+                "finalDomNodes": 4477,
+                "initialHeapBytes": 35100000,
+                "finalHeapBytes": 35100000,
+                "elapsedMs": 83797,
+                "actions": 912,
+                "sourceSwitches": [
+                  {
+                    "action": 90,
+                    "trainedThrough": 89,
+                    "coefficient": 1.0064280605469436,
+                    "gain": -1.8524366355323356,
+                    "raw": 0.010465204977635001,
+                    "bounded": 0.010465204977635001,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 221,
+                    "trainedThrough": 220,
+                    "coefficient": -0.004380336128050815,
+                    "gain": 0.008062469080142175,
+                    "raw": 0.007830786623061583,
+                    "bounded": 0.007830786623061583,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 431,
+                    "trainedThrough": 430,
+                    "coefficient": 0.9995477549758082,
+                    "gain": -1.8397727099093737,
+                    "raw": -0.0043047735439139265,
+                    "bounded": -0.0043047735439139265,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 651,
+                    "trainedThrough": 650,
+                    "coefficient": 0.009013691637618977,
+                    "gain": -0.016590646927951015,
+                    "raw": -0.0008526628389039653,
+                    "bounded": -0.0008526628389039653,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 902,
+                    "trainedThrough": 901,
+                    "coefficient": 0.9832151187501043,
+                    "gain": -1.8097107761404818,
+                    "raw": -0.008893476178642038,
+                    "bounded": -0.008893476178642038,
+                    "corrupted": false
+                  }
+                ],
+                "costs": {
+                  "online": 0.8707194112570822,
+                  "scalar": 1.2270315929844269,
+                  "static": 1.5834653821112539,
+                  "causal": 0.886241406951127
+                },
+                "sourceUpdates": 882
+              },
+              {
+                "networkId": "toy8",
+                "mobile": true,
+                "frames": 1694,
+                "maxFrameGapMs": 33.400000000001455,
+                "over50ms": 0,
+                "over100ms": 0,
+                "initialDomNodes": 1261,
+                "finalDomNodes": 1424,
+                "initialHeapBytes": 44700000,
+                "finalHeapBytes": 44700000,
+                "elapsedMs": 28426,
+                "actions": 905,
+                "sourceSwitches": [
+                  {
+                    "action": 90,
+                    "trainedThrough": 89,
+                    "coefficient": 0.9988286314942323,
+                    "gain": -2.7768596831391434,
+                    "raw": 0.0069188657890316314,
+                    "bounded": 0.0069188657890316314,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 221,
+                    "trainedThrough": 220,
+                    "coefficient": 0.017186296536405334,
+                    "gain": -0.04777990182662625,
+                    "raw": 0.0040042604412074065,
+                    "bounded": 0.0040042604412074065,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 429,
+                    "trainedThrough": 428,
+                    "coefficient": 0.959939073895291,
+                    "gain": -2.6687421931248,
+                    "raw": 0.0009110457154142743,
+                    "bounded": 0.0009110457154142743,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 650,
+                    "trainedThrough": 649,
+                    "coefficient": 0.023401050101000496,
+                    "gain": -0.06505763903801619,
+                    "raw": 0.002768065180412392,
+                    "bounded": 0.002768065180412392,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 901,
+                    "trainedThrough": 900,
+                    "coefficient": 1.025371448911144,
+                    "gain": -2.8506518004632966,
+                    "raw": -0.0014033026520986107,
+                    "bounded": -0.0014033026520986107,
+                    "corrupted": false
+                  }
+                ],
+                "costs": {
+                  "online": 0.05054936564705085,
+                  "scalar": 0.06917475192118866,
+                  "static": 0.08029950280469154,
+                  "causal": 0.05225583986380973
+                },
+                "sourceUpdates": 875
+              },
+              {
+                "networkId": "feeder24",
+                "mobile": true,
+                "frames": 1308,
+                "maxFrameGapMs": 100,
+                "over50ms": 68,
+                "over100ms": 0,
+                "initialDomNodes": 2262,
+                "finalDomNodes": 2401,
+                "initialHeapBytes": 19300000,
+                "finalHeapBytes": 19300000,
+                "elapsedMs": 39964,
+                "actions": 910,
+                "sourceSwitches": [
+                  {
+                    "action": 91,
+                    "trainedThrough": 90,
+                    "coefficient": 0.9851739770733684,
+                    "gain": -1.813316260788694,
+                    "raw": 0.012209050500328396,
+                    "bounded": 0.012209050500328396,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 219,
+                    "trainedThrough": 218,
+                    "coefficient": -0.007111599550003733,
+                    "gain": 0.013089646503400243,
+                    "raw": 0.00836101863696167,
+                    "bounded": 0.00836101863696167,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 432,
+                    "trainedThrough": 431,
+                    "coefficient": 0.9914936542137855,
+                    "gain": -1.82494829085479,
+                    "raw": -0.0005046259559560967,
+                    "bounded": -0.0005046259559560967,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 650,
+                    "trainedThrough": 649,
+                    "coefficient": 0.02116441235344082,
+                    "gain": -0.03895532562130725,
+                    "raw": -0.0015233499359176476,
+                    "bounded": -0.0015233499359176476,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 901,
+                    "trainedThrough": 900,
+                    "coefficient": 0.979396160890066,
+                    "gain": -1.8026815827715643,
+                    "raw": -0.006829835469360502,
+                    "bounded": -0.006829835469360502,
+                    "corrupted": false
+                  }
+                ],
+                "costs": {
+                  "online": 0.42217968715348897,
+                  "scalar": 0.5953721015326734,
+                  "static": 0.7513640209376178,
+                  "causal": 0.4305227310370643
+                },
+                "sourceUpdates": 880
+              },
+              {
+                "networkId": "feeder47",
+                "mobile": true,
+                "frames": 1401,
+                "maxFrameGapMs": 216.8000000000029,
+                "over50ms": 786,
+                "over100ms": 93,
+                "initialDomNodes": 4326,
+                "finalDomNodes": 4477,
+                "initialHeapBytes": 35100000,
+                "finalHeapBytes": 35100000,
+                "elapsedMs": 79623,
+                "actions": 911,
+                "sourceSwitches": [
+                  {
+                    "action": 90,
+                    "trainedThrough": 89,
+                    "coefficient": 1.0064280605469436,
+                    "gain": -1.8524366355323356,
+                    "raw": 0.010465204977635001,
+                    "bounded": 0.010465204977635001,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 221,
+                    "trainedThrough": 220,
+                    "coefficient": -0.004380336128050829,
+                    "gain": 0.008062469080142201,
+                    "raw": 0.007830786623061583,
+                    "bounded": 0.007830786623061583,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 430,
+                    "trainedThrough": 429,
+                    "coefficient": 0.9995973243240479,
+                    "gain": -1.8398639475052618,
+                    "raw": -0.005223996691716795,
+                    "bounded": -0.005223996691716795,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 650,
+                    "trainedThrough": 649,
+                    "coefficient": 0.008858922017510814,
+                    "gain": -0.01630577717362404,
+                    "raw": -0.001749125254399532,
+                    "bounded": -0.001749125254399532,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 901,
+                    "trainedThrough": 900,
+                    "coefficient": 0.9883335185400688,
+                    "gain": -1.8191317289715054,
+                    "raw": -0.006868106905175752,
+                    "bounded": -0.006868106905175752,
+                    "corrupted": false
+                  }
+                ],
+                "costs": {
+                  "online": 0.8703425322645113,
+                  "scalar": 1.2261500874608438,
+                  "static": 1.5812215582271723,
+                  "causal": 0.8858626454156182
+                },
+                "sourceUpdates": 881
+              }
+            ],
+            "continued_actions": [
+              1844,
+              1850,
+              1854,
+              1840,
+              1858,
+              1856
+            ],
+            "exact_replay": "success",
+            "support": "Fixed offline support with actual causal weights. No topology reselection or probing."
+          },
+          "scope": {
+            "base": "150631d2709e213f4ce455b2cba73188286b69b2",
+            "source": "9c36a5ea09a19493e54257894cca47b88403daa1",
+            "behind_by": 0,
+            "files": [
+              "README.md",
+              "environment.html",
+              "refinement/cloud-state.json",
+              "refinement/continuous-response-map.md",
+              "src/interface.js",
+              "src/test-browser-smoke.cjs",
+              "src/test-continuous-browser.cjs",
+              "src/test-interactions.cjs",
+              "src/test-network-browser.cjs"
+            ],
+            "controller_engine_files_changed": false,
+            "physical_parameters_changed": false,
+            "workflow_commands_changed": false,
+            "phase_assertion_rationale": "New explicit trials now use the ongoing protocol instead of superseded frozen discovery. Attack clearing, source settings, per network supports, zero fresh costs, paused startup, exact legacy and new replay, and original physical comparisons remain checked."
+          },
+          "superseded": [
+            {
+              "source": "c36c79b5247936e0c98151a11c990e8432acbd12",
+              "run": 39169391032,
+              "status": "cancelled",
+              "reason": "Lease and plan superseded by intended source."
+            },
+            {
+              "source": "6d5bfd54f090f3bb9295709c823e9a1fa3469e60",
+              "run": 39169730927,
+              "status": "cancelled",
+              "reason": "Retain controller ownership tooltip before full acceptance."
+            },
+            {
+              "source": "2d0ff593fe5b63514361742996fe794e53258858",
+              "run": 39169799203,
+              "status": "cancelled",
+              "reason": "Use visible cost view for archived assertions."
+            },
+            {
+              "source": "a2ace42bc3678b2242666fd7d77fd2c951d7737e",
+              "run": 39169852556,
+              "status": "cancelled_after_ongoing_fixture_failure",
+              "ongoing_job": 117800550592,
+              "ongoing_conclusion": "failure",
+              "completed_failure_logs_read": true,
+              "interaction_cases": 143,
+              "interaction_conclusion": "success",
+              "cancelled_validation_job": 117800550712,
+              "completed_cancelled_logs_read": true,
+              "reason": "Normal navigation save overwrote a pre-navigation archive fixture. Fixed the actual next-document fixture route, keeping the application save behavior and all assertions."
+            }
+          ]
         },
         "changes": [
           "Explicit primary Restart, Restore default scenario and Network actions construct a fresh continuous-phi-v1 trial while archived replay, views, attacks and cost controls preserve the original protocol until an explicit new trial.",
@@ -4456,63 +5071,271 @@
           "Add actual desktop and phone handoff checks for all three primary actions on each network after the existing fresh long native playback suites."
         ],
         "remaining_gaps": [
-          "Explicit new trial actions from an archived version 13 context still retain the archived protocol. Implement and test the Restart, Restore default scenario and Network handoff to a fresh continuous-phi-v1 trial, preserving archived history and costs until that explicit action. No version selector.",
-          "Read the full automatic validation repeat for this checkpoint first. The only test behavior followup tightens native receipt units to 0.07 per unit. The 30 captured actual values satisfy that bound, but the new source assertion has not yet completed CI.",
-          "Profile and address native large network playback and growing history without dropping observed samples, executed receipts or physical costs. At requested speed 32 the measured 47 bus throughput is about 9.7 to 10.2 samples per wall second and frame gaps reach 200 ms. Functional continuation is not smooth high speed acceptance. The 24 bus run also falls below requested speed.",
-          "Finish the README and environment scope audit with the archived new trial handoff. Existing frozen percentages and finite terminal penalties must remain explicitly archival. Baseline inputs and changed stationary planning conventions remain documented.",
-          "Memory evidence is finite through 1840 to 1859 browser samples. Equal optional heap readings do not establish a flat or indefinite memory bound. Preserve full accumulated costs and exact replay when evaluating display retention or profiling.",
-          "No ongoing protocol release is live. Keep this candidate unpublished until coherent migration, scientific acceptance, responsive long playback, full checks, expected main SHA promotion, exact Pages revision and canonical public behavior verification are complete."
+          "Profile and address native large network playback and growing history while retaining all observed samples, causal updates, executed receipts, exact replay and accumulated physical costs. Prior declared native tests measured roughly 9.7 to 10.2 samples per wall second for 47 buses at requested 32 with frame gaps up to 200 ms. This handoff pass changes no controller or rendering algorithm and does not claim that gap solved.",
+          "Memory evidence remains finite through roughly 1800 to 1900 browser samples. Equal optional heap API readings do not establish constant or indefinite memory usage. Measure actual retained evidence and render overhead before changing display retention.",
+          "Keep fixed support honest. Dynamic topology reselection is not implemented, and excluded sources cannot provide free receiver or selector forecasts. Preserve the source local specialization and feasibility versus saturated trajectory caveats.",
+          "This checkpoint follows the fully tested generated child with documentation scope clarification and progress only. Read its automatic full validation repeat at the next invocation before source edits. UI and engine bytes are unchanged from the tested ready child.",
+          "No continuous protocol release is live. Keep the candidate unpublished until responsive long playback and remaining acceptance are resolved, then use exact expected main SHA and force false, verify generated ancestry and Pages for the tested revision and canonical public behavior."
         ],
-        "next_focus": "Implement explicit archived new trial handoff with exact prior replay, then validate all protections and keep unpublished until high speed playback and publication gates are resolved."
+        "next_focus": "Read latest main and this checkpoint repeat checks first. Profile 47 bus native execution and rendering with growing history at 901 and roughly 1850 samples. Separate actual controller step, immutable snapshot and chart work. Optimize the measured hotspot without retuning gains, objective, noise or limits and without dropping costs or evidence. If caching stationary response geometry, keep current causal correction weights and command receipts fresh at every action. Revalidate all suites and actual pixels before expected SHA nonforce publication.",
+        "finished_at": "2026-10-19T06:17:49+08:00",
+        "source_commit": "9c36a5ea09a19493e54257894cca47b88403daa1",
+        "ready_commit": "37fd0f319786fa449c6ffe2e8ec88f9312c825cc",
+        "published_commit": null,
+        "pixel_review": {
+          "source": "9c36a5ea09a19493e54257894cca47b88403daa1",
+          "status": "actual_archived_and_fresh_handoff_pixels_reviewed_candidate_unpublished",
+          "job": 117804014173,
+          "route": "Authenticated GitHub base64 text wrappers of actual cloud Playwright PNG bytes emitted directly as images. No local files or direct live browser.",
+          "reviewed": [
+            "feeder24-phone-archived-before-handoff.png",
+            "feeder24-phone-handoff-restart.png",
+            "feeder47-desktop-archived-before-handoff.png",
+            "feeder47-desktop-handoff-restart.png",
+            "toy8-phone-handoff-restart.png"
+          ],
+          "artifacts": [
+            {
+              "file": "feeder24-desktop-archived-before-handoff.png",
+              "sha": "37eb38c27b38092d4c31b80bb8d3379effc80238",
+              "base64_text_sha": "de9f851c5ffc26f1d59227f6d375a7998a8047f6",
+              "bytes": 236449
+            },
+            {
+              "file": "feeder24-desktop-handoff-restart.png",
+              "sha": "0974b8ac9747329fdc9547be1fcd9a756fb0b2fb",
+              "base64_text_sha": "4c9bb846983cce478436310c028b5c922e98144c",
+              "bytes": 313158
+            },
+            {
+              "file": "feeder24-desktop-inspection.png",
+              "sha": "f5848429fc395edff10b700638e419c0621602bc",
+              "base64_text_sha": "bc67974c2ef15a7d44ec05984df2808b4cce5073",
+              "bytes": 137154
+            },
+            {
+              "file": "feeder24-desktop-native-long.png",
+              "sha": "3d18d45d799eb4c3fb7579cc1474c79406086ca2",
+              "base64_text_sha": "4f6bacaca324a5c202e60eb39b6ce8117605f43b",
+              "bytes": 420575
+            },
+            {
+              "file": "feeder24-desktop-start.png",
+              "sha": "2a8f900f56ba9b338b2eab82c5d15b3e5c5414cc",
+              "base64_text_sha": "f0592cd6bab23c7983b6cec239c6d3e503c6d101",
+              "bytes": 334776
+            },
+            {
+              "file": "feeder24-desktop.png",
+              "sha": "822e6d389819d1284c3efd0c71e030e9cd35e8fa",
+              "base64_text_sha": "cadb5a029d284a72cef1e648d5c6e80f88ef7e69",
+              "bytes": 444125
+            },
+            {
+              "file": "feeder24-phone-archived-before-handoff.png",
+              "sha": "3b02fab9cde68c6475dec3762bad5a8ca788b4b7",
+              "base64_text_sha": "90765ee7149445f4fafededeb62daea0f8b4f875",
+              "bytes": 207570
+            },
+            {
+              "file": "feeder24-phone-handoff-restart.png",
+              "sha": "d9862dcccf0877312fa59c0b5961e7fddc71f1ab",
+              "base64_text_sha": "076de354218f75e9f08be2131bd037659d4c73d4",
+              "bytes": 289104
+            },
+            {
+              "file": "feeder24-phone-inspection.png",
+              "sha": "d6502a78961c8c1cf3f892dbc3b077b1fb2ced6c",
+              "base64_text_sha": "77b4ecd22f44b28ea66b0e3b25bf030b3d5504fc",
+              "bytes": 129384
+            },
+            {
+              "file": "feeder24-phone-native-long.png",
+              "sha": "38777f00180c93cea0908b8d9a2b8a9af3deadf9",
+              "base64_text_sha": "51005cdb15d3c02c8151a36c4cf15c4d37c7d7ef",
+              "bytes": 382986
+            },
+            {
+              "file": "feeder24-phone-start.png",
+              "sha": "d898e562c422e1712400ddb9786c30e5be60b043",
+              "base64_text_sha": "b5f69dc8463ba1043126697f8f5dcc2b45cbd259",
+              "bytes": 299439
+            },
+            {
+              "file": "feeder24-phone.png",
+              "sha": "8adfa68673790e814e00a6c7709c45c4c130e9e0",
+              "base64_text_sha": "1c8a898ece13ac93958bf021ac80d909da8fb10d",
+              "bytes": 392999
+            },
+            {
+              "file": "feeder47-desktop-archived-before-handoff.png",
+              "sha": "8de5813d85b11a75594ff50048c9b38df35610c2",
+              "base64_text_sha": "1e0ff136b1de8b4f5cd4ace792434dcf65250bd4",
+              "bytes": 298235
+            },
+            {
+              "file": "feeder47-desktop-handoff-restart.png",
+              "sha": "545c282e43d5a5ef6d9f55072384b700d2eafee3",
+              "base64_text_sha": "46536735b8dc73c2e37288db65a26bcd299a707f",
+              "bytes": 372652
+            },
+            {
+              "file": "feeder47-desktop-inspection.png",
+              "sha": "aa04ec281da94d8bde14bfa75538dafbe40c3df2",
+              "base64_text_sha": "f906374f46fd000f99db74442097971e3144db69",
+              "bytes": 140671
+            },
+            {
+              "file": "feeder47-desktop-native-long.png",
+              "sha": "77426e029df50161e19756251c841dad72b0dda7",
+              "base64_text_sha": "f45cbeff128b15e7fedf1c43a830ce1ff61a9782",
+              "bytes": 512262
+            },
+            {
+              "file": "feeder47-desktop-start.png",
+              "sha": "ea69d8fdc67f48950f72698d7bf997d7346d7352",
+              "base64_text_sha": "14c7ca49696f4e86b9f267f3ea6f74fb9fc123ab",
+              "bytes": 405066
+            },
+            {
+              "file": "feeder47-desktop.png",
+              "sha": "51ff6b3fe3f226f12431867830868c890d9633d5",
+              "base64_text_sha": "54b77bbee585439d9b7e078d5b2f6583d66998ef",
+              "bytes": 536356
+            },
+            {
+              "file": "feeder47-phone-archived-before-handoff.png",
+              "sha": "c80b1be8e4d873679867e4c9be02b0c35b150586",
+              "base64_text_sha": "dc6fc328ad087c786ad9b3dfda5e72e844ad01d9",
+              "bytes": 191015
+            },
+            {
+              "file": "feeder47-phone-handoff-restart.png",
+              "sha": "3c09ac432b9c13070318fc7cec1b609d89f95611",
+              "base64_text_sha": "583a42d1c28b18389d92c8feb8fc9df3a88ab6dc",
+              "bytes": 261100
+            },
+            {
+              "file": "feeder47-phone-inspection.png",
+              "sha": "b27890cd29d5b4e89a2a7dbb72798875cb91a3f0",
+              "base64_text_sha": "18291b511e5b8b29cd7096d7760d039dd97c9f6f",
+              "bytes": 117854
+            },
+            {
+              "file": "feeder47-phone-native-long.png",
+              "sha": "398747dfb7cbdcd9231429740f97adb8bc263931",
+              "base64_text_sha": "f48e0cea1840ab48a90a8740bb2a41619a6f1c73",
+              "bytes": 344152
+            },
+            {
+              "file": "feeder47-phone-start.png",
+              "sha": "977fb05c841ef2c5eb6f798442f42efa404f09c8",
+              "base64_text_sha": "43ffc33f02466c0f49877f14191a7f07be3224ac",
+              "bytes": 268803
+            },
+            {
+              "file": "feeder47-phone.png",
+              "sha": "6681f80e80148dfe4b723c9167d0c6888bfbae53",
+              "base64_text_sha": "95c0407f50e09100f11e687f13b96ce95c6d25cb",
+              "bytes": 358093
+            },
+            {
+              "file": "toy8-desktop-archived-before-handoff.png",
+              "sha": "cb7e0e525dd0b75d785bf482078efc3f9de32239",
+              "base64_text_sha": "c138c2d19caa57609805fa9298b16f0f124b29e5",
+              "bytes": 187398
+            },
+            {
+              "file": "toy8-desktop-handoff-restart.png",
+              "sha": "0aeba1d156793ee48116db82daeec1a19e404404",
+              "base64_text_sha": "2004da4ecbb5a49cc1d3482d58b696f37b7496d9",
+              "bytes": 259933
+            },
+            {
+              "file": "toy8-desktop-inspection.png",
+              "sha": "c2c7b998219df2d22a6dbdc4264526ef76afa307",
+              "base64_text_sha": "4e3704d293de3112053bb917c2d92e5290d06288",
+              "bytes": 125110
+            },
+            {
+              "file": "toy8-desktop-native-long.png",
+              "sha": "abc5028d491ba795c523388a4491d2bb7304a764",
+              "base64_text_sha": "9a126eb222b6c46b98a60fbdf6e3458b2f42451d",
+              "bytes": 346729
+            },
+            {
+              "file": "toy8-desktop-start.png",
+              "sha": "88740d0ab822515ddc5c8f52141b63f64a2d8eb4",
+              "base64_text_sha": "18b69c4cedfb46181dfe325222565c800788cff4",
+              "bytes": 280428
+            },
+            {
+              "file": "toy8-desktop.png",
+              "sha": "93f8fa5e3d3a74b67203e054d07f801c0e9a58a1",
+              "base64_text_sha": "118e4484cd5a66ff6704a7c011bbb7a6c223c4d5",
+              "bytes": 372845
+            },
+            {
+              "file": "toy8-phone-archived-before-handoff.png",
+              "sha": "d124e7fa761d8da8749329bc928a7011289dead5",
+              "base64_text_sha": "d306ef9eff391906ba423468bcf8cc215428df99",
+              "bytes": 160183
+            },
+            {
+              "file": "toy8-phone-handoff-restart.png",
+              "sha": "d116786cc7064dde629b5e3aee91d308c7590248",
+              "base64_text_sha": "d9d7987ca57133d0b56578650ca4c6e5bb7e4ab3",
+              "bytes": 240202
+            },
+            {
+              "file": "toy8-phone-inspection.png",
+              "sha": "69321ef87d6f55c1e90435bb85ff2d7f82f6c0a6",
+              "base64_text_sha": "df7bce12c604831ad5ba291a0932b1a65fa63c78",
+              "bytes": 119004
+            },
+            {
+              "file": "toy8-phone-native-long.png",
+              "sha": "4662baed6592df5609101d3242fcf774af96e4ac",
+              "base64_text_sha": "d4e4d445cd0234de37dc93ab403b5591ec18c0b7",
+              "bytes": 312810
+            },
+            {
+              "file": "toy8-phone-start.png",
+              "sha": "32996f6ae1a303bbd1ed2539ec80010e18b82184",
+              "base64_text_sha": "73af9f9f36953fe99f2e7b0d22bfdee4fde9c7c3",
+              "bytes": 250019
+            },
+            {
+              "file": "toy8-phone.png",
+              "sha": "c3cb25fec98567372d9b29d7a6b8981809481d52",
+              "base64_text_sha": "7e6aea40a53cab326a69c405d55fd6f20d319e94",
+              "bytes": 328936
+            }
+          ],
+          "findings": [
+            "Archived 24 bus phone and 47 bus desktop pages visibly retain the archived heading, old sample count and positive old costs.",
+            "Explicit Restart produces a fresh paused ongoing protocol with zero costs, truthful pending gains, actual network budgets and no stale comparison rows.",
+            "The reviewed toy8 phone, feeder24 phone and feeder47 desktop handoff outputs retain four panels, one comparison, stable controls and clear support and weight scope.",
+            "The 24 bus archived study remains scoped to that network. No version selector or extra results panel is added.",
+            "These pixels approve the handoff scope only. High speed native performance and indefinite history memory remain open."
+          ]
+        },
+        "deployment": {
+          "attempted": false,
+          "public_main": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+          "public_behavior": "Archived frozen communication protocol remains live. No continuous protocol release claimed."
+        },
+        "end_reason": "Bounded coherent archived handoff checkpoint with complete checks and actual pixel review. High speed performance remains open, so no new live completion is counted.",
+        "duplicate_dispatches": [
+          {
+            "at": "2026-10-19T06:18:28+08:00",
+            "slot": "2026-10-19T05:45:00+08:00",
+            "action": "Read only duplicate preflight while the already counted invocation finishes its checkpoint. No new lease, invocation, refinement or deadline extension."
+          }
+        ]
       }
     ],
-    "active_run": {
-      "program_id": "continuous-phi-20261018T234500",
-      "slot": "2026-10-19T05:45:00+08:00",
-      "started_at": "2026-10-19T05:46:04+08:00",
-      "lease_expires_at": "2026-10-19T06:26:04+08:00",
-      "branch": "cloud/refine/continuous-phi-20261018-2345",
-      "candidate_parent": "150631d2709e213f4ce455b2cba73188286b69b2",
-      "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
-      "status": "in_progress",
-      "counted_invocation": true,
-      "counted_completed": false,
-      "tests": {
-        "preflight": {
-          "main_run": 39144310544,
-          "main": "success",
-          "candidate_run": 39166609756,
-          "candidate": "success",
-          "all_completed_logs_read": true,
-          "strict_native_receipt_bound": "passed",
-          "candidate_ready_same_source": true
-        },
-        "handoff_first_attempt": {
-          "source": "a2ace42bc3678b2242666fd7d77fd2c951d7737e",
-          "run": 39169852556,
-          "ongoing_job": 117800550592,
-          "ongoing_conclusion": "failure",
-          "completed_logs_read": true,
-          "reason": "A fixture written to localStorage before reload was overwritten by the normal visibility save of the current ongoing trial. The test restored t0 of that current trial instead of the declared archived t8 record.",
-          "repair": "Use a one-navigation session marker that copies the actual v13 record to production localStorage before the next document bridge reads it. Clear the marker immediately. Fresh tests still start from empty storage and exact v14 replay uses no marker."
-        }
-      },
-      "changes": [
-        "Explicit primary Restart, Restore default scenario and Network actions construct a fresh continuous-phi-v1 trial while archived replay, views, attacks and cost controls preserve the original protocol until an explicit new trial.",
-        "Label archived trial headings truthfully and keep archived advanced reproduction controls scoped. No new selector or dashboard.",
-        "Update superseded restart and network phase assertions with explicit ongoing protocol, support, costs, paused behavior and replay protections. Keep archived numerical and browser comparisons on actual version 13 production records.",
-        "Add actual desktop and phone handoff checks for all three primary actions on each network after the existing fresh long native playback suites."
-      ],
-      "remaining_gaps": [
-        "Explicit new trial actions from an archived version 13 context still retain the archived protocol. Implement and test the Restart, Restore default scenario and Network handoff to a fresh continuous-phi-v1 trial, preserving archived history and costs until that explicit action. No version selector.",
-        "Read the full automatic validation repeat for this checkpoint first. The only test behavior followup tightens native receipt units to 0.07 per unit. The 30 captured actual values satisfy that bound, but the new source assertion has not yet completed CI.",
-        "Profile and address native large network playback and growing history without dropping observed samples, executed receipts or physical costs. At requested speed 32 the measured 47 bus throughput is about 9.7 to 10.2 samples per wall second and frame gaps reach 200 ms. Functional continuation is not smooth high speed acceptance. The 24 bus run also falls below requested speed.",
-        "Finish the README and environment scope audit with the archived new trial handoff. Existing frozen percentages and finite terminal penalties must remain explicitly archival. Baseline inputs and changed stationary planning conventions remain documented.",
-        "Memory evidence is finite through 1840 to 1859 browser samples. Equal optional heap readings do not establish a flat or indefinite memory bound. Preserve full accumulated costs and exact replay when evaluating display retention or profiling.",
-        "No ongoing protocol release is live. Keep this candidate unpublished until coherent migration, scientific acceptance, responsive long playback, full checks, expected main SHA promotion, exact Pages revision and canonical public behavior verification are complete."
-      ],
-      "next_focus": "Implement explicit archived new trial handoff with exact prior replay, then validate all protections and keep unpublished until high speed playback and publication gates are resolved."
-    },
+    "active_run": null,
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
       "is_enabled": true,
@@ -4523,7 +5346,7 @@
       "setup_counts_as_improvement": false
     },
     "candidate_branch": "cloud/refine/continuous-phi-20261018-2345",
-    "next_focus": "Read this checkpoint full validation repeat before source edits. Complete explicit archived new trial handoff and scoped documentation while retaining exact archived replay and all original protections. Profile large network native rendering and history at requested 32 speed without changing controller equations or dropping costs. Revalidate and inspect pixels before any expected SHA nonforce publication.",
+    "next_focus": "Read latest main and this checkpoint repeat checks first. Profile 47 bus native execution and rendering with growing history at 901 and roughly 1850 samples. Separate actual controller step, immutable snapshot and chart work. Optimize the measured hotspot without retuning gains, objective, noise or limits and without dropping costs or evidence. If caching stationary response geometry, keep current causal correction weights and command receipts fresh at every action. Revalidate all suites and actual pixels before expected SHA nonforce publication.",
     "skipped_duplicate_dispatches": [
       {
         "dispatch": "2026-10-19T03:13:56+08:00",
@@ -4536,6 +5359,11 @@
         "at": "2026-10-19T04:20:58+08:00",
         "slot": "2026-10-19T03:45:00+08:00",
         "action": "Read only preflight while current counted invocation finishes. No extra lease, invocation, source change or deadline extension."
+      },
+      {
+        "at": "2026-10-19T06:18:28+08:00",
+        "slot": "2026-10-19T05:45:00+08:00",
+        "action": "Read only duplicate preflight while the already counted invocation finishes its checkpoint. No new lease, invocation, refinement or deadline extension."
       }
     ]
   }
