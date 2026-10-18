@@ -2027,7 +2027,15 @@
         "screenshots": {
           "pixel_review": "Pending actual Actions desktop and phone JPEG previews. Before choosing work reviewed the current phone middle pan from completed main Actions evidence, including a truncated source digit at the right edge."
         },
-        "direct_live_inspection": "Unverified. Previously denied direct live browser access will not be retried or bypassed."
+        "direct_live_inspection": "Unverified. Previously denied direct live browser access will not be retried or bypassed.",
+        "candidate_attempts": [
+          {
+            "source_commit": "6c227c4892ac7e6bdfa2a84e85aeceb381de3248",
+            "candidate_run": 39117608692,
+            "status": "superseded_before_publication",
+            "reason": "Test synchronization waits for native scroll dispatch and paint between consecutive middle positions. Product implementation and scientific controls unchanged. No failed outcome erased."
+          }
+        ]
       }
     ],
     "active_run": {

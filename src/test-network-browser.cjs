@@ -118,6 +118,9 @@ async function main() {
     const seen=new Set(),initial=await scroller.evaluate(node=>node.scrollLeft);
     const move=async fraction=>{
       await scroller.evaluate((node,fraction)=>{node.scrollLeft=fraction*(node.scrollWidth-node.clientWidth);},fraction);
+      // Consecutive middle positions share the same direction text. Wait for
+      // native scroll dispatch and paint, not just that unchanged text.
+      await scroller.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
       const position=fraction===0?'start':fraction===1?'end':'middle';
       await surface.waitForFunction(position=>document.querySelector('#pr-matrix-scroll-hint').dataset.position===position,position);
       const measured=await scroller.evaluate(node=>{
