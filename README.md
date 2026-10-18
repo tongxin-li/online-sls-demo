@@ -6,7 +6,20 @@ The default experience is a forecasted demand and solar cycle on the LinDistFlow
 
 Unless another size is named, numerical values and archived studies below describe the original 24 bus reference. The Network menu selects 8, 24 or 47 buses.
 
-## Interaction
+## Ongoing candidate and archived trials
+
+The candidate interface starts fresh unsaved sessions directly in `continuous-phi-v1`. One physical clock and every accumulated stage cost continue through 180 and 360 samples. Source local calibration uses immutable issued forecasts and revealed forcing with the existing ridge, a 30 pair warmup and a 60 pair window. Actual received correction weights change the predictive response used for later commands. The shared feedback and actuator limits remain unchanged.
+
+The initial selected inverter inspects its mandatory local source. Response weights is the initial matrix view and the inspector plots the actual executed signed gain. This deterministic initial choice keeps the main source action and the visible weight trace on the same bus. Every source and remote support entry remains inspectable. View changes do not affect control. Adaptive sparse sends an extra correction scalar with each admitted forecast. The existing comparison reports that payload separately from remote link permission.
+
+Support is chosen offline and stays fixed. Fixed sparse uses the same support with identity correction, dense prediction uses all allowed remote channels with identity correction, and feedback uses no prediction. All methods use the same stationary finite memory planning convention and physical input. This is an experimental source local specialization, not exact manuscript Algorithm 1 or a stability guarantee for the switched saturated trajectory. See the [implementation map](refinement/continuous-response-map.md) and [predefined engineering outcomes](refinement/continuous-response-acceptance.json).
+
+Actual version 13 saved trials restore their archived algorithm and costs exactly. The historical numerical and browser cases below now use explicit version 13 records through the production restore path. Fresh ongoing desktop and phone tests use no injected saved trial. Full migration of new trial actions from an archived context remains a publication gate. The candidate has not yet been promoted to the permanent public page.
+
+## Archived interaction
+
+The detailed discovery, fresh comparison, finite stopping and shared matrix adaptation descriptions in this section describe archived version 13 trials. They do not describe the new ongoing candidate. Frozen benchmark percentages remain evidence for that archived protocol only.
+
 
 On desktop the four panels use two independent content-height columns. The cost comparison follows Prediction links directly instead of waiting below the taller network card. Source inspection and disclosures reflow the same column. Phones retain the original network, links, voltage and cost reading order. Panel placement changes no sample, selection, controller or cost.
 
@@ -252,6 +265,6 @@ Repeated forecasted cycle markers keep every actual timestamp, span and full eve
 
 ## Continuous response implementation work
 
-The current default still uses the frozen communication deployment documented above. The [public implementation map](refinement/continuous-response-map.md) traces the actual estimator, executed gains, message permissions, reset boundaries and replay before algorithm changes. The [predefined acceptance plan](refinement/continuous-response-plan.json) specifies the new ongoing protocol checks. This engineering work does not attribute archived benchmark percentages to a new adaptive protocol or claim that the live freeze is already fixed.
+The public release still uses the frozen communication deployment documented above. The candidate source now starts unsaved sessions in the ongoing protocol, while archived version 13 records retain exact replay. The [public implementation map](refinement/continuous-response-map.md) traces the actual estimator, executed gains, message permissions, reset boundaries and replay before algorithm changes. The [predefined acceptance plan](refinement/continuous-response-plan.json) specifies the new ongoing protocol checks. This engineering work does not attribute archived benchmark percentages to a new adaptive protocol or claim that the live freeze is already fixed.
 
-The ongoing engine candidate now has explicit causal source messages, a stationary finite memory response and version 14 engine records. It remains unpublished while continuous UI and replay integration and browser acceptance are unfinished. See the implementation map for the new baseline and communication conventions. The default at the public URL has not yet changed.
+The ongoing engine candidate has explicit causal source messages, a stationary finite memory response and version 14 engine records. Its restored ongoing interface passed all six desktop and phone conditions and actual cloud pixel review. Fresh default and archived to new trial migration acceptance remain unfinished, so it stays unpublished. See the implementation map for the new baseline and communication conventions. The default at the public URL has not yet changed.

@@ -1,3 +1,4 @@
+// Archived lifecycle coverage uses explicit production v13 records. Fresh ongoing coverage is in test-continuous-browser.cjs.
 'use strict';
 
 // Network switching is tested through visible controls and real playback.
@@ -13,6 +14,20 @@ const networks = {
   feeder24: { buses: 24, receivers: 8, solar: 4, sparse: 24, dense: 176 },
   feeder47: { buses: 47, receivers: 16, solar: 8, sparse: 48, dense: 720 }
 };
+
+
+async function archivedPage(owner,options){
+ const page=await owner.newPage(options);
+ await page.addInitScript(()=>{
+  // Explicit archived v13 production record, preserving superseded lifecycle tests.
+  if(!localStorage.getItem('online-sls-demo-v1'))localStorage.setItem('online-sls-demo-v1',JSON.stringify({privateContent:{
+   version:13,networkId:'feeder24',phase:'discovery',t:0,events:[],selectedBus:7,speed:'16',
+   view:'learning',matrixView:'links',intervention:'forecast',automaticComparison:true,
+   initialOptions:{networkId:'feeder24',experiment:'communication',powerScenario:'forecasted-demand',beta:4,preset:'mixed',seed:20261013,horizon:180}
+  }}));
+ });
+ return page;
+}
 
 async function main() {
   let root = path.resolve(__dirname, '..');
@@ -309,7 +324,7 @@ async function main() {
   try {
     browser = await chromium.launch({ headless: true, ...(process.env.DEMO_SMOKE_CHANNEL ? { channel: process.env.DEMO_SMOKE_CHANNEL } : {}) });
     const open = async options => {
-      const page = await browser.newPage(options);
+      const page = await archivedPage(browser,options);
       page.setDefaultTimeout(30000);
       page.on('pageerror', error => errors.push(error.message));
       await page.goto(address, { waitUntil: 'networkidle' });

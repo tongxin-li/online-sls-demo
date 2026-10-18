@@ -14,8 +14,10 @@
   let PowerDemo = networkCatalog;
   const DEFAULT_SCENARIO='forecasted-demand';
   const COMPARISON_SAMPLES=180;
-  // Legacy is retained until ongoing UI acceptance and pixel review are complete.
-  let trialProtocol=null;
+  // Fresh trials execute continuous causal response adaptation. Actual v13 saves
+  // retain their archived protocol until an explicit new protocol handoff.
+  const initialSaved=window.openai?.widgetState?.privateContent;
+  let trialProtocol=initialSaved?.version===13?null:'continuous-phi-v1';
   const ongoing=()=>snapshot.protocol==='continuous-phi-v1';
   const communicationNoiseLevels=[...PowerDemo.constants.communicationBetas,...(PowerDemo.constants.communicationStressBetas || [])];
   function optionsFromControls() {
@@ -108,7 +110,7 @@
   let comparisonContinued = false;
   let pin = null;
   let matrixReference = null;
-  let inspectedSource = null;
+  let inspectedSource = trialProtocol==='continuous-phi-v1'?selectedBus:null;
   let lastPulse = null;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const duration = () => reducedMotion ? 0 : 1000 / Number($('speed').value || 16);
@@ -826,6 +828,7 @@
   function startSelectedExperiment() {
     stop(); simulation=new PowerDemo.Simulation(optionsFromControls());
     resetExperiment(); $('intervention').value=snapshot.experiment==='communication'?'forecast':'power';
+    if(ongoing()) {inspectedSource=hasInverter(selectedBus)?selectedBus:null;$('matrix-view').value='change';}
     visible.clear();series.forEach(item=>visible.add(item.key));
     announce((snapshot.experiment==='communication'?'Communication topology':snapshot.presetLabel)+' · New learning trial'); render(); save();
   }
@@ -1242,7 +1245,8 @@
     const noiseMpu=1000*PowerDemo.model.forecastForcingScales[selectedBus-1]*beta*(snapshot.faults.includes(selectedBus)?4:.05);
     $('noise-caption').textContent=beta===0?'No forecast noise':'Bus '+selectedBus+' · '+(snapshot.faults.includes(selectedBus)?'Noisy':'Quiet')+' · Noise SD '+d3.format('.3~g')(noiseMpu)+' mpu'+(beta>2?' · Extended stress':'');
     $('noise-caption').title='Configured additive error in newly issued voltage forcing forecasts, not actual bus voltage. 1 mpu = 0.001 pu. Noisy sources have 80 times the noise SD of quiet sources. β 4, 8 and 16 are additional feeder stress tests outside the reference grid. Changing β starts a fresh trial.';
-    $('network-scenario').disabled=comparing; $('experiment').disabled=comparing; $('noise').disabled=comparing; $('power-scenario').disabled=comparing;
+    $('network-scenario').disabled=comparing; $('experiment').disabled=comparing||ongoing(); $('noise').disabled=comparing; $('power-scenario').disabled=comparing;
+    if($('experiment').parentElement)$('experiment').parentElement.hidden=ongoing();
     const scenario=snapshot.scenario;
     $('scenario-status').hidden=scenario?.id!=='solar-outage';
     $('scenario-status').textContent=snapshot.phase!=='deployment'&&!ongoing()?'Solar outage reserved for comparison · '+PowerDemo.constants.busProfiles.filter(profile=>profile.role==='Solar').length+' sites · 30 to 50 s':snapshot.t<=30?'Solar outage starts at comparison 30 s':scenario.active?'Solar outage · '+scenario.requestedKw.toFixed(1)+' kW requested · '+scenario.appliedKw.toFixed(1)+' kW applied':'Solar restored · Background power continues';
@@ -2030,6 +2034,7 @@
   }
   announce('Ready');
   hydrate(window.openai?.widgetState);
+  if(!restored&&ongoing()) {$('view').value='cost';$('matrix-view').value='change';inspectedSource=hasInverter(selectedBus)?selectedBus:null;}
   if (!matrixReference) captureMatrixReference();
   actionNote(snapshot.pendingPulses?.length ? 'Pulse queued · Run or Step' : attackInstruction());
   window.addEventListener('openai:set_globals',e=>{if(!playing&&!restored&&!journal.length){hydrate(e.detail?.globals?.widgetState);render();}});

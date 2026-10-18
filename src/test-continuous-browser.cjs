@@ -1,6 +1,6 @@
 'use strict';
-// Real ongoing UI interactions through saved protocol 14. The public default
-// remains legacy until this route and pixel review pass; no controller test hook.
+// Real fresh ongoing defaults, production controls and exact protocol 14 replay.
+// No injected saved trial or alternative controller test hook.
 const assert=require('node:assert/strict');
 const fs=require('node:fs/promises');
 const path=require('node:path');
@@ -31,13 +31,16 @@ async function main(){
       if(event.target.closest?.('#pr-pulse, #pr-stop-attacks'))window.__attackPointerEvents.push({type,target:event.target.closest('#pr-pulse, #pr-stop-attacks').id,pointerType:event.pointerType??null,button:event.button,detail:event.detail,touch:event.sourceCapabilities?.firesTouchEvents??null});
     },true);
     window.addEventListener('blur',()=>window.__attackPointerEvents.push({type:'window-blur'}));
-    const state={privateContent:{version:14,networkId,phase:'ongoing',t:0,selectedBus:7,speed:'32',view:'cost',matrixView:'change',intervention:'forecast',
-     continuousRecord:{version:14,protocol:'continuous-phi-v1',networkId,options:{networkId,protocol:'continuous-phi-v1',experiment:'communication',powerScenario:'forecasted-demand',beta:4,preset:'mixed',seed:20261013},steps:0,events:[]}}};
-    if(!localStorage.getItem('online-sls-demo-v1'))localStorage.setItem('online-sls-demo-v1',JSON.stringify(state));
    },{networkId});
    const page=await context.newPage();page.setDefaultTimeout(30000);page.on('pageerror',e=>errors.push(e.message));
    await page.goto(address,{waitUntil:'networkidle'});
    assert.equal((await read(page)).s.protocol,'continuous-phi-v1');
+   assert.equal((await read(page)).s.t,0);assert.equal((await read(page)).ui.playing,false);
+   assert.equal((await read(page)).ui.inspectedSource,7,'Fresh default inspection follows the main forecast target');
+   if(networkId!=='feeder24')await page.locator('#pr-network-scenario').selectOption(networkId);
+   await setting(page,'speed','32');
+   assert.equal((await read(page)).s.networkId,networkId);
+   await settings(page,async()=>assert.equal(await page.locator('#pr-experiment').isVisible(),false,'No inapplicable legacy experiment selector'));
    await page.locator('#pr-run').click();await page.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t>=35);
    await page.locator('#pr-cost-gap').click();assert.equal((await read(page)).ui.playing,true);
    await page.locator('#pr-cost-total').click();await pause(page);

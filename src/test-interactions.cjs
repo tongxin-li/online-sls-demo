@@ -87,7 +87,7 @@ function target(tagName='DIV') {
   };
 }
 
-function harness(saved,experiment='prediction',reducedMotion=true) {
+function harness(saved,experiment='prediction',reducedMotion=true,fresh=false) {
   const clock=new Clock(),nodes=new Map(),savedStates=[],captures=new Map();
   function element(tagName='DIV') {
     const node=target(tagName);
@@ -119,6 +119,18 @@ function harness(saved,experiment='prediction',reducedMotion=true) {
     nodes.get('pr-power-scenario').value='reference';
     nodes.get('pr-noise').value='1';
     nodes.get('pr-view').value=experiment==='communication'?'learning':'cost';
+  }
+  // These original cases explicitly restore the archived v13 protocol through
+  // the production restore route. Fresh ongoing defaults are tested separately.
+  if(saved===undefined&&!fresh) {
+    const initialOptions={networkId:'feeder24',experiment:nodes.get('pr-experiment').value,
+      powerScenario:nodes.get('pr-power-scenario').value,beta:Number(nodes.get('pr-noise').value),
+      preset:'mixed',seed:20261013};
+    if(initialOptions.experiment==='communication')initialOptions.horizon=180;
+    saved={privateContent:{version:13,networkId:'feeder24',phase:'discovery',t:0,events:[],
+      initialOptions,selectedBus:7,speed:'16',view:nodes.get('pr-view').value,
+      matrixView:'links',intervention:initialOptions.experiment==='communication'?'forecast':'power',
+      automaticComparison:true}};
   }
   const seriesButtons=new Map();
   for(const match of html.matchAll(/<button\b[^>]*\bdata-series="([^"]+)"[^>]*>/g)){
@@ -367,11 +379,11 @@ test('old algorithm saves start a clean paused trial instead of replaying incomp
   for(const version of [7,8,9,10,11,12]){
     const old=plain(h.saved());old.privateContent.version=version;
     const restored=harness(old);
-    assert.equal(restored.snapshot().t,0);assert.equal(restored.snapshot().phase,'discovery');
+    assert.equal(restored.snapshot().t,0);assert.equal(restored.snapshot().phase,'ongoing');
     assert.ok(Object.values(restored.snapshot().cumulative).every(value=>value===0));
     assert.equal(restored.snapshot().eventLog.length,0);assert.equal(restored.state().playing,false);
     assert.equal(restored.node('attack-mode').value,'continuous');assert.equal(restored.node('view').value,'cost');
-    restored.quickClick();assert.equal(restored.saved().privateContent.version,13);
+    restored.quickClick();assert.equal(restored.saved().privateContent.version,14);
   }
 });
 
@@ -1796,7 +1808,7 @@ test('comparison resets marker history while retaining source reliability and ex
 });
 
 
-test('the shipped default runs demand and solar discovery then pauses the complete comparison',async()=>{
+test('the archived v13 default runs demand and solar discovery then pauses the complete comparison',async()=>{
   const h=harness(undefined,null);
   assert.equal(h.snapshot().experiment,'communication');
   assert.equal(h.snapshot().powerScenario,'forecasted-demand');assert.equal(h.snapshot().beta,4);
@@ -2448,3 +2460,22 @@ test('ongoing UI keeps arbitrary multi bus held attacks and fresh paused network
   h.inspectLink(edge.to,edge.from);h.change('speed','32');
   const restored=harness(h.saved(),null);assert.deepEqual(restored.responseHistory(),history);
  });
+
+test('fresh unsaved sessions execute the ongoing default with visible actual weight inspection',async()=>{
+  const h=harness(undefined,null,true,true);
+  assert.equal(h.snapshot().protocol,'continuous-phi-v1');assert.equal(h.snapshot().phase,'ongoing');
+  assert.equal(h.snapshot().powerScenario,'forecasted-demand');assert.equal(h.snapshot().beta,4);
+  assert.equal(h.node('view').value,'cost');assert.equal(h.node('matrix-view').value,'change');
+  assert.equal(h.state().inspectedSource,h.state().selectedBus);assert.equal(h.state().playing,false);
+  assert.equal(h.node('deploy').hidden,true);assert.equal(h.node('auto-compare').disabled,true);
+  const initial=h.snapshot();h.change('matrix-view','links');h.change('matrix-view','change');
+  assert.deepEqual(plain(h.snapshot()),plain(initial),'Views cannot change control or physics');
+  h.click('run');await h.samples(410);h.click('run');
+  const before=h.snapshot();assert.ok(before.t>360);assert.equal(before.history.length,before.t);
+  assert.equal(h.state().comparisonComplete,false);assert.ok(before.learning.sourceUpdates>0);
+  assert.equal(h.saved().privateContent.version,14);
+  const restored=harness(h.saved(),null);
+  for(const field of ['t','states','cumulative','commandQ','lastExecution'])assert.deepEqual(plain(restored.snapshot()[field]),plain(before[field]));
+  h.click('restart');assert.equal(h.snapshot().protocol,'continuous-phi-v1');assert.equal(h.snapshot().t,0);
+  assert.equal(h.state().playing,false);
+});

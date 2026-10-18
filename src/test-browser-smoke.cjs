@@ -1,3 +1,4 @@
+// Archived lifecycle coverage uses explicit production v13 records. Fresh ongoing coverage is in test-continuous-browser.cjs.
 'use strict';
 
 // Cloud browser validation only. Playwright is installed outside the repository.
@@ -6,6 +7,20 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const http = require('node:http');
 const { chromium } = require('playwright');
+
+
+async function archivedPage(owner,options){
+ const page=await owner.newPage(options);
+ await page.addInitScript(()=>{
+  // Explicit archived v13 production record, preserving superseded lifecycle tests.
+  if(!localStorage.getItem('online-sls-demo-v1'))localStorage.setItem('online-sls-demo-v1',JSON.stringify({privateContent:{
+   version:13,networkId:'feeder24',phase:'discovery',t:0,events:[],selectedBus:7,speed:'16',
+   view:'learning',matrixView:'links',intervention:'forecast',automaticComparison:true,
+   initialOptions:{networkId:'feeder24',experiment:'communication',powerScenario:'forecasted-demand',beta:4,preset:'mixed',seed:20261013,horizon:180}
+  }}));
+ });
+ return page;
+}
 
 async function main() {
   let root = path.resolve(__dirname, '..');
@@ -39,7 +54,7 @@ async function main() {
   };
   try {
     browser = await chromium.launch({ headless: true, ...(process.env.DEMO_SMOKE_CHANNEL ? { channel: process.env.DEMO_SMOKE_CHANNEL } : {}) });
-    const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+    const page = await archivedPage(browser,{ viewport: { width: 1440, height: 1000 } });
     page.setDefaultTimeout(20000);
     page.on('pageerror', error => errors.push(error.message));
     const address = `http://127.0.0.1:${server.address().port}`;
@@ -1343,7 +1358,7 @@ async function main() {
 
     await mark('solar outage and desktop evidence');
 
-    const audit=await browser.newPage({viewport:{width:1440,height:1000}});
+    const audit=await archivedPage(browser,{viewport:{width:1440,height:1000}});
     audit.on('pageerror',error=>errors.push(error.message));
     await audit.goto(address,{waitUntil:'networkidle'});
     await useReference(audit);
@@ -1365,7 +1380,7 @@ async function main() {
     await mark('independent sixty two pair error audit');
 
     // Request expiry does not erase power already applied in the displayed sample.
-    const pulseTail=await browser.newPage({viewport:{width:1440,height:1000}});
+    const pulseTail=await archivedPage(browser,{viewport:{width:1440,height:1000}});
     pulseTail.on('pageerror',error=>errors.push(error.message));
     await pulseTail.goto(address,{waitUntil:'networkidle'});
     await useReference(pulseTail);
@@ -1430,7 +1445,7 @@ async function main() {
     // Actual paused pulse states distinguish request, voltage effect and charged cost.
     for(const width of [1440,390,320]){
       const context=await browser.newContext({viewport:{width,height:1000},isMobile:width<=650,hasTouch:width<=650});
-      const surface=await context.newPage();surface.on('pageerror',error=>errors.push(error.message));
+      const surface=await archivedPage(context);surface.on('pageerror',error=>errors.push(error.message));
       await surface.goto(address,{waitUntil:'networkidle'});
       await surface.locator('#pr-intervention').selectOption('power');
       await selectSetting(surface,'attack-mode','pulse');
@@ -1473,7 +1488,7 @@ async function main() {
     // A later segment must use a pending source setting before issuing its preview.
     const segmentEvidence=[];
     for(const phase of ['discovery','continued-default']){
-      const segmentPage=await browser.newPage({viewport:{width:1440,height:1000}});
+      const segmentPage=await archivedPage(browser,{viewport:{width:1440,height:1000}});
       segmentPage.on('pageerror',error=>errors.push(error.message));
       await segmentPage.goto(address,{waitUntil:'networkidle'});
       if(phase==='discovery')await useReference(segmentPage);
@@ -1516,7 +1531,7 @@ async function main() {
       await segmentPage.reload({waitUntil:'networkidle'});
       const restored=await readSegment(segmentPage);
       for(const key of ['t','horizon','mode','segments','states','costs','support','sample','events','faults'])assert.deepEqual(restored[key],pending[key],'Pending boundary replay '+key);
-      const baseline=await browser.newPage({viewport:{width:1440,height:1000}});
+      const baseline=await archivedPage(browser,{viewport:{width:1440,height:1000}});
       baseline.on('pageerror',error=>errors.push(error.message));
       await baseline.addInitScript(saved=>localStorage.setItem('online-sls-demo-v1',JSON.stringify(saved)),before.saved);
       await baseline.goto(address,{waitUntil:'networkidle'});
@@ -1538,7 +1553,7 @@ async function main() {
     await mark('source settings at ordinary and continued segment boundaries');
 
     // Forecast stress is a fresh experiment, with no power attacks carried over.
-    const stress=await browser.newPage({viewport:{width:1440,height:1000}});
+    const stress=await archivedPage(browser,{viewport:{width:1440,height:1000}});
     stress.on('pageerror',error=>errors.push(error.message));
     await stress.goto(address,{waitUntil:'networkidle'});
     await useReference(stress);
@@ -1549,7 +1564,7 @@ async function main() {
     assert.deepEqual((await readPowerAttacks(stress)).active,[20,23]);
     // A saved mixed reference run stays intact until the new scenario is chosen.
     const legacySaved=await stress.evaluate(()=>window.openai.widgetState);
-    const migration=await browser.newPage({viewport:{width:1440,height:1000}});
+    const migration=await archivedPage(browser,{viewport:{width:1440,height:1000}});
     migration.on('pageerror',error=>errors.push(error.message));
     await migration.addInitScript(saved=>{localStorage.setItem('online-sls-demo-v1',JSON.stringify(saved));},legacySaved);
     await migration.goto(address,{waitUntil:'networkidle'});
@@ -1639,7 +1654,7 @@ async function main() {
     const savedStress=await stress.evaluate(()=>({saved:window.openai.widgetState,
       snapshot:((snapshot)=>({beta:snapshot.beta,t:snapshot.t,states:snapshot.states,cumulative:snapshot.cumulative}))(document.querySelector('#power-response-demo').powerDemo.getSnapshot())}));
     assert.equal(savedStress.saved.privateContent.initialOptions.beta,16);
-    const restoredStress=await browser.newPage({viewport:{width:1440,height:1000}});
+    const restoredStress=await archivedPage(browser,{viewport:{width:1440,height:1000}});
     restoredStress.on('pageerror',error=>errors.push(error.message));
     await restoredStress.addInitScript(saved=>{localStorage.setItem('online-sls-demo-v1',JSON.stringify(saved));},savedStress.saved);
     await restoredStress.goto(address,{waitUntil:'networkidle'});
@@ -1659,7 +1674,7 @@ async function main() {
 
     // A narrow touch viewport keeps the controls usable and the page in bounds.
     const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
-    const phone = await mobile.newPage();
+    const phone = await archivedPage(mobile);
     phone.on('pageerror', error => errors.push(error.message));
     await phone.goto(address, { waitUntil: 'networkidle' });
     const mobileDefault=await phone.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().powerScenario);

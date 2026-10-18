@@ -794,7 +794,11 @@
     "status": "in_progress",
     "counted_invocation": true,
     "counted_completed": false,
-    "changes": [],
+    "changes": [
+      "Fresh unsaved sessions construct the actual continuous-phi-v1 engine, show measured response weights and initial source gain inspection, and hide the inapplicable legacy experiment selector.",
+      "Original lifecycle checks use explicit actual version 13 production restore records. No controller hook or hidden action replaces playback. Fresh ongoing desktop and phone tests no longer inject protocol 14 records.",
+      "Add a fresh unsaved interaction regression crossing 360 actions, exact replay, read only matrix views and fresh ongoing restart. Document current archived migration publication gates."
+    ],
     "tests": {
       "preflight": {
         "main_run": 39144310544,
@@ -3433,7 +3437,11 @@
       "status": "in_progress",
       "counted_invocation": true,
       "counted_completed": false,
-      "changes": [],
+      "changes": [
+        "Fresh unsaved sessions construct the actual continuous-phi-v1 engine, show measured response weights and initial source gain inspection, and hide the inapplicable legacy experiment selector.",
+        "Original lifecycle checks use explicit actual version 13 production restore records. No controller hook or hidden action replaces playback. Fresh ongoing desktop and phone tests no longer inject protocol 14 records.",
+        "Add a fresh unsaved interaction regression crossing 360 actions, exact replay, read only matrix views and fresh ongoing restart. Document current archived migration publication gates."
+      ],
       "tests": {
         "preflight": {
           "main_run": 39144310544,
