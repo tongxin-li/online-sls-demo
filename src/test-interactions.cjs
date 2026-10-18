@@ -1865,8 +1865,13 @@ test('scheduled cycle markers distinguish forecasted power from surprise attacks
   assert.deepEqual(groups.map(group=>group.labelVisible),[true,false,false,true,true],'Only repeated pure forecasted cycle labels are compacted');
   assert.deepEqual(groups.flatMap(group=>group.items.map(item=>item.at)),[1,61,121,180,241],'Every actual event and timestamp remains');
   assert.ok(groups.every(group=>group.description&&group.accessible),'Every marker retains full event details');
+  assert.equal(groups[0].label,'Scheduled ×3');
+  for(const group of groups.slice(0,3))assert.ok(groups[0].badgeDescription.includes(group.description),'The single visible cycle badge retains every original cycle detail');
+  assert.ok(groups.slice(3).every(group=>group.badgeDescription===group.description),'Other event tooltips are unchanged');
   const windowed=h.interventionGroups(view,[60,180],3);
   assert.deepEqual(windowed.map(group=>group.labelVisible),[true,false,true],'The first cycle in the current visible window is labeled');
+  assert.equal(windowed[0].label,'Scheduled ×2');
+  assert.ok(windowed.slice(0,2).every(group=>windowed[0].badgeDescription.includes(group.description)));
   const solar=h.interventionGroups({...view,eventLog:[{type:'scenario',t:0,forecasted:false,message:'Unforecast outage'},{type:'scenario',t:60,forecasted:false,message:'Unforecast recovery'}]},[0,180],3);
   assert.deepEqual(solar.map(group=>group.labelVisible),[true,true],'Unforecast outages and recovery keep every label');
   assert.equal(JSON.stringify(view),before);assert.equal(JSON.stringify(h.snapshot()),trial);assert.deepEqual(h.state(),state);

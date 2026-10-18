@@ -2442,7 +2442,7 @@
         "slot_resolution": "Read only early preflight until 23:00. Preserve stricter original dispatch deadline 23:37:20. Recover 22:00 completion once without another improvement or invocation. No extra immediate pass for duplicates.",
         "changes": [
           "Reduce repeated scheduled cycle badges to one visible label per chart window while retaining every measured marker, timestamp, span and original event detail.",
-          "Only pure forecasted cycle groups are compacted. Power requests, forecast setting changes, mixed groups and unforecast solar events keep their labels. Add complete native titles to retained markers.",
+          "Only pure forecasted cycle groups are compacted. Their single visible badge reports actual cycle count and retains every cycle detail in its existing tooltip. Other events keep their own labels and tooltips. Actual marker geometry and event records remain unchanged.",
           "Extend existing read only grouping regression and actual browser geometry, visibility and full marker detail checks. No event, physical model, controller, scale, trajectory or cost changes. No broad benchmark rerun."
         ],
         "tests": {
@@ -2465,6 +2465,13 @@
             "status": "superseded_unpublished",
             "reason": "Add targeted phone and desktop scheduled cycle plot pixel captures and actual marker checks during the existing paused responsive reflow fixture. Ordinary phone fixture uses the reference scenario and cannot demonstrate repeated scheduled cycle labels. No further product change.",
             "validation_conclusion": "In progress at correction. Read actual final result before completion."
+          },
+          {
+            "source_commit": "e9bbf5e60e6def46da86836e4170d5b0eedce38c",
+            "candidate_run": 39138983285,
+            "status": "superseded_unpublished",
+            "reason": "Source review confirmed cross-series hover overlay covers marker bands. Preserve mouse access to every compacted cycle detail through the existing first visible badge tooltip, with its actual cycle count, while retaining all original marker details and geometry. No new controls or numerical changes.",
+            "validation_conclusion": "In progress at correction. Read actual final result."
           }
         ]
       }

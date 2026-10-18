@@ -724,7 +724,7 @@ async function main() {
           const svg=document.getElementById(id),frame=svg.querySelector('[data-chart-frame]');
           return {id,hidden:svg.hidden||svg.style.display==='none',frame:frame?{x:Number(frame.getAttribute('x')),w:Number(frame.getAttribute('width'))}:null,
             badges:Array.from(svg.querySelectorAll('.intervention-badge')).map(node=>({data:{...node.dataset},label:node.getAttribute('aria-label'),title:node.querySelector('title').textContent,
-              hiddenFromAT:node.getAttribute('aria-hidden'),visible:!Array.from(node.querySelectorAll('rect,path,text')).some(child=>getComputedStyle(child).display==='none')})),
+              text:node.querySelector('text').textContent,hiddenFromAT:node.getAttribute('aria-hidden'),visible:!Array.from(node.querySelectorAll('rect,path,text')).some(child=>getComputedStyle(child).display==='none')})),
             markerDetails:Array.from(svg.querySelectorAll('.intervention-markers rect')).map(node=>({role:node.getAttribute('role'),label:node.getAttribute('aria-label'),title:node.querySelector('title')?.textContent})),
             lines:Array.from(svg.querySelectorAll('.intervention-markers line')).map(node=>({x1:Number(node.getAttribute('x1')),x2:Number(node.getAttribute('x2'))}))};
         })};
@@ -748,10 +748,17 @@ async function main() {
           const events=expected.slice(eventOffset,eventOffset+Number(data.eventCount));eventOffset+=Number(data.eventCount);
           const scheduledOnly=events.every(event=>event.type==='scenario'&&event.forecasted),visible=!scheduledOnly||!scheduledLabelShown;
           if(scheduledOnly)scheduledLabelShown=true;
+          assert.equal(data.scheduledOnly,String(scheduledOnly),'Only groups of forecasted scheduled events qualify for label compaction');
           assert.equal(data.labelVisible,String(visible),'Only repeated pure scheduled cycle labels are suppressed');
           assert.equal(chart.badges[i].visible,visible,'Actual SVG glyph visibility follows the measured event group');
           assert.equal(chart.badges[i].hiddenFromAT,'true','Decorative badges do not duplicate the marker event description');assert.equal(chart.markerDetails[i].role,'img');
-          assert.equal(chart.markerDetails[i].label,chart.badges[i].label);assert.equal(chart.markerDetails[i].title,chart.badges[i].title,'Every retained marker exposes the original complete event details');
+          assert.equal(chart.markerDetails[i].label,chart.badges[i].label);assert.ok(chart.badges[i].title.includes(chart.markerDetails[i].title),'Every retained marker keeps its original complete detail in its badge tooltip');
+          if(scheduledOnly&&visible){
+            const scheduled=chart.badges.map((badge,index)=>({badge,index})).filter(({badge})=>badge.data.scheduledOnly==='true');
+            const count=scheduled.reduce((total,{badge})=>total+Number(badge.data.scenarioCount),0);
+            assert.equal(chart.badges[i].text,count>1?'Scheduled ×'+count:'Scheduled cycle','The single label reports actual scheduled cycles, not plot activity');
+            for(const {index} of scheduled)assert.ok(chart.badges[i].title.includes(chart.markerDetails[index].title),'Visible cycle badge tooltip retains every measured cycle detail despite the chart hover layer');
+          }
           assert.equal(Number(data.disturbanceCount),kinds.filter(type=>type==='pulse').length);
           assert.equal(Number(data.forecastCount),kinds.filter(type=>type==='forecast').length);
           assert.equal(Number(data.scenarioCount),kinds.filter(type=>type==='scenario').length);
