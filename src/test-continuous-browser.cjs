@@ -28,7 +28,8 @@ async function main(){
    await context.addInitScript(({networkId})=>{
     const state={privateContent:{version:14,networkId,phase:'ongoing',t:0,selectedBus:7,speed:'32',view:'cost',matrixView:'change',intervention:'forecast',
      continuousRecord:{version:14,protocol:'continuous-phi-v1',networkId,options:{networkId,protocol:'continuous-phi-v1',experiment:'communication',powerScenario:'forecasted-demand',beta:4,preset:'mixed',seed:20261013},steps:0,events:[]}}};
-    window.openai={widgetState:state,setWidgetState:async value=>{window.__savedTrial=value;}};
+    const restored=localStorage.getItem('ongoing-replay');
+    window.openai={widgetState:restored?JSON.parse(restored):state,setWidgetState:async value=>{window.__savedTrial=value;}};
    },{networkId});
    const page=await context.newPage();page.setDefaultTimeout(30000);page.on('pageerror',e=>errors.push(e.message));
    await page.goto(address,{waitUntil:'networkidle'});
@@ -65,7 +66,7 @@ async function main(){
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
    assert.match(await page.locator('#pr-transition-note').textContent(),/No reset or stop/);
    const saved=await page.evaluate(()=>window.__savedTrial);assert.equal(saved.privateContent.version,14);
-   await context.addInitScript(saved=>{window.openai.widgetState=saved;},saved);
+   await page.evaluate(saved=>localStorage.setItem('ongoing-replay',JSON.stringify(saved)),saved);
    await page.reload({waitUntil:'networkidle'});const restored=await read(page);
    for(const field of ['t','cumulative','states','commandQ','lastExecution'])assert.deepEqual(restored.s[field],final.s[field],field+' exact UI replay');
    await page.screenshot({path:path.join(output,networkId+(mobile?'-phone':'-desktop')+'.png'),fullPage:true});

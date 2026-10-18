@@ -2859,7 +2859,8 @@
         "counted_completed": false,
         "changes": [
           "Integrate version 14 ongoing saved trials into live UI state, source and command inspection, stable cost comparison, protocol status and network scoped restart. Keep the public default unchanged pending ongoing browser and pixel acceptance.",
-          "Add predefined ongoing interaction and real desktop and phone browser suites for exact replay, old boundary crossing, arbitrary multi bus held attacks, admitted weights and commands."
+          "Add predefined ongoing interaction and real desktop and phone browser suites for exact replay, old boundary crossing, arbitrary multi bus held attacks, admitted weights and commands.",
+          "Add a cloud Actions screenshot blob archive using existing candidate job permission, without a branch or hosting change, so actual captured pixels can be inspected through the authenticated GitHub API."
         ],
         "tests": {
           "metadata_repeat": {
@@ -2873,7 +2874,16 @@
         "pixel_review": {
           "status": "pending_cloud_capture_and_actual_pixel_review",
           "publication": false
-        }
+        },
+        "candidate_revisions": [
+          {
+            "source_commit": "440cc5bced95fdb62ef50d114629abf5321fd79a",
+            "validation_run": 39151736395,
+            "status": "pending_when_superseded",
+            "publication": false,
+            "reason": "Keep legacy inspector labels exact, make ongoing group labels accurate, deterministic browser restoration and authenticated cloud screenshot review path."
+          }
+        ]
       }
     ],
     "active_run": {

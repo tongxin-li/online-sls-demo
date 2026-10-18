@@ -85,6 +85,15 @@ jobs:
         with:
           name: validated-page
           path: ${{ runner.temp }}/validated-page
+      - uses: actions/download-artifact@v4
+        with:
+          name: browser-evidence
+          path: ${{ runner.temp }}/browser-evidence
+      - name: Make captured ongoing pixels available for authenticated review
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REVIEW_ROOT: ${{ runner.temp }}/browser-evidence/ongoing
+        run: python3 src/archive-browser-review.py
       - name: Save only the validated page on the tested candidate
         env:
           CANDIDATE_BRANCH: ${{ github.ref_name }}

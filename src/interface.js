@@ -411,6 +411,8 @@
     for(const key of ['source','receiver','discoverySamples','scoreSamples','action'])
       panel.dataset[key]=reading&&reading[key]!==null?String(reading[key]):'';
     if(!reading) return;
+    body.setAttribute('aria-label',reading.ongoing?'Deployed support and received correction':'Frozen discovery evidence');
+    $('link-receipt-note').textContent=reading.ongoing?'Correction is received only on admitted channels. Signed current gain applies to the current target. Temporal norm spans all issued targets. Source contributions add before limiting; the bounded command includes feedback and every admitted message.':'Score averages discovery gain². Gain norm uses the resynthesized row. Source is before limiting; command includes all messages and each controller’s feedback.';
     $('link-receipt-title').textContent='Source '+reading.source+' → inverter '+reading.receiver;
     $('link-receipt-time').textContent=reading.ongoing?(reading.trainedThrough===null?'Calibration warmup':'Weights use observations through '+reading.trainedThrough+' s')+' · Support fixed · Excluded sources send no messages':reading.discoverySamples+' discovery samples · '+reading.scoreSamples+' scored actions · Links and scores fixed';
     $('link-receipt-action').textContent=reading.action===null?'Step to reveal executed gains and commands':'Executed action '+reading.action+' s · Full issued preview';
@@ -418,7 +420,7 @@
       const header=$('link-receipt-'+item.key);header.textContent=item.label+'\n'+item.budget+' remote';
       header.dataset.budget=String(item.budget);
     }
-    for(const [key,label] of [['selection','Selected support'],['score',reading.ongoing?'Received correction':'Discovery score'],...(reading.ongoing?[['currentGain','Signed current gain']]:[]),['gainNorm','Temporal gain norm'],['sourceKvar','Source (kvar)'],['commandKvar','Command (kvar)']]) {
+    for(const [key,label] of [['selection','Selected support'],['score',reading.ongoing?'Received correction':'Discovery score'],...(reading.ongoing?[['currentGain','Signed current gain']]:[]),['gainNorm',reading.ongoing?'Temporal gain norm':'Deployed gain'],['sourceKvar','Source (kvar)'],['commandKvar','Command (kvar)']]) {
       const row=document.createElement('tr'),labelCell=document.createElement('th');labelCell.scope='row';labelCell.textContent=label;row.append(labelCell);row.dataset.measure=key;
       for(const item of reading.rows) {
         const cell=document.createElement('td');cell.dataset.controller=item.key;cell.dataset.measure=key;
@@ -504,7 +506,7 @@
       $('observed-'+key).textContent=observation ? (1000*observation[key]).toFixed(3) : '—';
     $('forecast-support').textContent=!inspection ? '' : historyIndex!==null ? 'Current sample hidden while reviewing saved links'
       : snapshot.phase==='discovery' ? 'Discovery uses dense messages · Displayed links are candidates'
-      : (inspection.connected ? 'Permitted by deployed support' : 'Excluded from deployed support')+' at inverter '+inspection.receiver+' · '+(snapshot.experiment==='communication'?'Learned sparse':'Matrix adaptation')+' · Links fixed';
+      : (inspection.connected ? 'Permitted by deployed support' : 'Excluded from deployed support')+' at inverter '+inspection.receiver+' · '+(ongoing()?'Adaptive sparse':snapshot.experiment==='communication'?'Learned sparse':'Matrix adaptation')+' · Links fixed';
   }
   function renderInspectedSource() {
     const inspection=predictionInspection(),control=$('source-fault');
