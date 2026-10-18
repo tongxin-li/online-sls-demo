@@ -494,6 +494,13 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   .pr-stage-label #pr-pulse-summary:not(:empty) { flex-basis:100%; text-align:left; }
 }
 
+/* Compact desktop columns with the original network, links, voltage, cost DOM order.
+   Intrinsic heights are measured by observeDashboardLayout; ordinary grid is fallback. */
+@media(min-width:651px) {
+  .pr-dashboard[data-layout="columns"] { grid-auto-rows:1px; row-gap:0; align-items:start; }
+  .pr-dashboard[data-layout="columns"]>.pr-panel { align-self:start; }
+}
+
 /* Artwork stays decorative. The enclosing bus handles hit area and badge input. */
 .pe-host { -webkit-user-select:none; user-select:none; touch-action:manipulation; }
 .pe-hit { fill:transparent; pointer-events:all; }
@@ -3846,6 +3853,36 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     const chart=chartBase(el,observations,items.map(item=>item.key),'Forecast error (pu)','Time (s)',140);
     drawInterventions(chart);drawSeries(chart,observations,items);hover(chart,observations,items,'Time (s)');
   }
+  // Independent desktop columns preserve the logical four-panel DOM order.
+  // Intrinsic panel heights never depend on their assigned one-pixel grid spans.
+  function observeDashboardLayout() {
+    const dashboard=root.querySelector('.pr-dashboard');
+    if(!dashboard) return;
+    const panels=['.pr-network-panel','.pr-matrix-panel','.pr-stage-panel','.pr-learning-panel'].map(selector=>dashboard.querySelector(selector));
+    if(panels.some(panel=>!panel)) return;
+    let queued=false;
+    const layout=()=>{
+      queued=false;
+      if(window.innerWidth<=650) {
+        dashboard.removeAttribute('data-layout');
+        panels.forEach(panel=>{panel.style.removeProperty('grid-row');panel.style.removeProperty('grid-column');});
+        return;
+      }
+      dashboard.setAttribute('data-layout','columns');
+      const heights=panels.map(panel=>Math.ceil(panel.getBoundingClientRect().height));
+      panels.forEach((panel,index)=>{
+        const column=String(index%2+1),start=index<2?1:heights[index-2]+13;
+        const row=start+' / span '+heights[index];
+        if(panel.style.gridColumn!==column) panel.style.gridColumn=column;
+        if(panel.style.gridRow!==row) panel.style.gridRow=row;
+      });
+    };
+    const schedule=()=>{if(!queued){queued=true;window.requestAnimationFrame(layout);}};
+    const observer=new ResizeObserver(schedule);
+    panels.forEach(panel=>observer.observe(panel));
+    window.addEventListener('resize',schedule);
+    layout();
+  }
   function render() {
     $('tooltip').style.display='none'; pin=null;
     renderControls(); drawNetwork(); drawMatrix(); drawCodesign(); drawCost(); drawStage(); drawVoltage(); drawConvergence();highlightTopology();
@@ -3857,6 +3894,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   window.addEventListener('openai:set_globals',e=>{if(!playing&&!restored&&!journal.length){hydrate(e.detail?.globals?.widgetState);render();}});
   new ResizeObserver(()=>render()).observe(root);
   render();
+  observeDashboardLayout();
   // A read only inspection hook supports deterministic browser verification.
   root.powerDemo = { getLinkEvidence:() => inspectedLinkEvidence(), getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,inspectedSource,playing,activeAttackBuses:activeAttacks().map(attack=>attack.bus),intervention:$('intervention').value,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null,topology:topology.export(),historyIndex,comparisonComplete:comparisonComplete(),comparisonContinued}) };
 })();
