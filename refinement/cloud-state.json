@@ -783,17 +783,8 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-18T08:00:00+08:00",
-    "started_at": "2026-10-18T08:01:34+08:00",
-    "expires_at": "2026-10-18T08:41:34+08:00",
-    "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
-    "candidate_branch": "cloud/refine/20261018-0800",
-    "base_commit": "a52fef1690a0cb9a2299669f7137eae09ba13552",
-    "status": "validating",
-    "scope": "Compact independent desktop columns with unchanged logical/mobile order"
-  },
-  "next_focus": "Use actual desktop and phone panel screenshot evidence to evaluate the substantial empty space in the uninspected desktop matrix panel. Keep the four main panels, meaningful reading order and synchronized source/receiver inspection without adding always visible diagnostics, panels or controls. Preserve the now readable physical timing captions, single method key, honest live costs/winners, recorded regimes and fixed-deployment receipt. Require measured responsive geometry and screenshot pixel review before a material layout correction. No scientific retuning or broad numerical study for style work.",
+  "active_run": null,
+  "next_focus": "Review small physical bus/source labels and selected source-to-inverter path on phone artifacts. Improve the existing network/matrix inspection hierarchy without extra panels or controls, preserve honest absent links, sealed forecast timing, measured commands, all four costs and fixed deployment. Keep the compact desktop columns and original phone reading order, recorded regimes, readable timing captions and stable cost buttons. No parameter retuning or broad benchmark study for visual work.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -903,9 +894,9 @@
       "pages_run": 39052070867
     },
     "renewed_completion": {
-      "slot": "2026-10-18T07:00:00+08:00",
-      "branch": "cloud/refine/20261018-0700",
-      "product_ready_commit": "e0258d02c77089c0b6346f7bb546db9aef59dfa5",
+      "slot": "2026-10-18T08:00:00+08:00",
+      "branch": "cloud/refine/20261018-0800",
+      "product_ready_commit": "f48d5db46d796fa7bf7fad46e537a26c4acc2a6a",
       "scope": "Completion record only, no product changes",
       "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and candidate workflow results for metadata recovery. Do not count metadata validation as a new invocation or improvement, or promote an older branch over newer main."
     },
@@ -958,6 +949,13 @@
         "product_ready_commit": "9414a828d0733f24c434b631674d31aeb41b8f0e",
         "scope": "Completion record only, no product changes",
         "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and candidate workflow results for metadata recovery. Do not count metadata validation as an invocation or improvement, or promote an older branch over newer main."
+      },
+      "6": {
+        "slot": "2026-10-18T07:00:00+08:00",
+        "branch": "cloud/refine/20261018-0700",
+        "product_ready_commit": "e0258d02c77089c0b6346f7bb546db9aef59dfa5",
+        "scope": "Completion record only, no product changes",
+        "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and candidate workflow results for metadata recovery. Do not count metadata validation as a new invocation or improvement, or promote an older branch over newer main."
       }
     }
   },
@@ -1044,7 +1042,7 @@
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
     "invocation_count": 8,
-    "completed_count": 7,
+    "completed_count": 8,
     "runs": [
       {
         "slot": "2026-10-18T01:00:00+08:00",
@@ -1366,26 +1364,47 @@
       {
         "slot": "2026-10-18T08:00:00+08:00",
         "started_at": "2026-10-18T08:01:34+08:00",
-        "status": "validating",
+        "status": "completed",
         "candidate_branch": "cloud/refine/20261018-0800",
         "base_commit": "a52fef1690a0cb9a2299669f7137eae09ba13552",
-        "counted_completed": false,
+        "counted_completed": true,
         "changes": [
           "Use intrinsic content heights in two independent desktop columns so cost comparison follows the compact links card instead of waiting under a stretched row. Preserve all four original panels and logical DOM/phone reading order.",
           "Resize actual content and disclosures without overlap. Preserve exact replay, every scientific setting, attack behavior, cost control and recorded study. Add measured geometry, breakpoint/disclosure/state invariance regressions and actual cloud screenshot review."
-        ]
+        ],
+        "source_commit": "68ab1eca49c1d56756bf8466f6418396968b9922",
+        "published_commit": "f48d5db46d796fa7bf7fad46e537a26c4acc2a6a",
+        "candidate_run": 39081574378,
+        "main_run": 39081962956,
+        "pages_run": 39081962950,
+        "tests": {
+          "suites": 7,
+          "total": 211,
+          "failed": 0,
+          "candidate": "passed",
+          "main": "All 211 tests, build consistency and the full desktop/phone browser suite passed.",
+          "build": "passed",
+          "browser": "Full desktop and phone suite passed. New intrinsic geometry checks verify each column follows its actual content with a 12 px gap, unchanged four-panel DOM/phone order, viewport containment, comparison above the former stretched row boundary, source/history/voltage disclosure expansion, 390/650/651/768/1440 breakpoint transitions and full saved-snapshot invariance. Existing playback, repeated and held power attacks, persistent source toggles, automatic comparison, stable native cost buttons, four curves and exact old replay remain covered.",
+          "benchmarks": "Not rerun. No scientific engine, model, controller, objective, gain, limit, forecast timing, default scenario, source errors or recorded result changes.",
+          "main_consistency": "passed"
+        },
+        "screenshots": {
+          "artifact_id": 12119341671,
+          "artifact_digest": "sha256:f16845b45d1adaaa3a00f2390a6529e97c6f635d07daec9cb5bf8a28bb45bf8e",
+          "captures": [
+            "dashboard-columns-1440.jpg",
+            "dashboard-columns-390.jpg",
+            "panel-matrix-390.jpg",
+            "panel-cost-390.jpg"
+          ],
+          "pixel_review": "Actual desktop 1440 dashboard composite and phone 390 composite plus full-size links and comparison panel JPEG pixels reviewed via authorized Actions logs. Desktop comparison starts immediately below the intrinsic-height links card instead of below the network card. No overlapping cards, clipped labels or stretched blank matrix card. Phone retains network, links, voltage and comparison order, readable costs and full source receipt. The existing command table is intentionally horizontally scrolled by its keyboard test; no claim of changing that behavior. Overall page height still follows the longer desktop column. No direct live browser review."
+        },
+        "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed. No public HTTP byte comparison performed this pass.",
+        "completed_at": "2026-10-18T00:19:45.317Z",
+        "publication": "Candidate and main validation succeeded. Generated child has the tested source as its single parent and only index.html changed. Promoted with expected current main SHA and force false. Pages succeeded for the exact tested ready version and deployment logs were read."
       }
     ],
-    "active_run": {
-      "slot": "2026-10-18T08:00:00+08:00",
-      "started_at": "2026-10-18T08:01:34+08:00",
-      "expires_at": "2026-10-18T08:41:34+08:00",
-      "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
-      "candidate_branch": "cloud/refine/20261018-0800",
-      "base_commit": "a52fef1690a0cb9a2299669f7137eae09ba13552",
-      "status": "validating",
-      "scope": "Compact independent desktop columns with unchanged logical/mobile order"
-    },
+    "active_run": null,
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
@@ -1405,5 +1424,5 @@
     "baseline_main": "2a9ff26b59565ecac1eb5274fbea4d813a18f24f"
   },
   "completed_count_scope": "Original bounded program, retained at 15. Renewed counts are tracked independently in renewed_program.",
-  "total_completed_count": 22
+  "total_completed_count": 23
 }
