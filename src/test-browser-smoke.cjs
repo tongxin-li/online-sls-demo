@@ -1748,7 +1748,10 @@ async function main() {
     // Require a real executed action rather than treating pending rows as commands.
     if(!mobileBefore.snapshot.lastSample){
       assert.equal(mobileBefore.snapshot.phase,'deployment');assert.equal(mobileBefore.snapshot.t,0);
-      await phone.locator('#pr-step').tap();
+      await withinSettings(phone,async()=>{
+        assert.equal(await phone.locator('#pr-step').isVisible(),true,'Pending mobile command uses the visible Step control');
+        await phone.locator('#pr-step').tap();
+      });
       mobileBefore=await phone.evaluate(()=>{const root=document.querySelector('#power-response-demo');return {state:root.powerDemo.getState(),snapshot:root.powerDemo.getSnapshot()};});
       assert.equal(mobileBefore.snapshot.t,1);assert.equal(mobileBefore.snapshot.lastSample.t,0);assert.equal(mobileBefore.state.playing,false);
     }
