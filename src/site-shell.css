@@ -425,27 +425,31 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   .pr-cost-switch button { min-height:44px; padding:8px 14px; font-size:12px; }
 }
 
-/* The selected support and its measured control cost share one panel. */
-.pr-codesign { margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
-.pr-codesign h3 { margin:0; font-size:13px; font-weight:600; letter-spacing:-.015em; }
-.pr-codesign-flow { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; padding:0; margin:10px 0 12px; list-style:none; font-size:12px; line-height:1.45; }
-.pr-codesign-flow li { min-width:0; padding:9px 8px; border-radius:8px; background:var(--muted); }
-.pr-codesign-flow li[aria-current='step'] { background:#eef5fc; }
-.pr-protocol-label,.pr-protocol-detail { display:block; color:var(--muted-foreground); }
-.pr-protocol-label { margin-bottom:5px; }
-.pr-codesign-flow strong { display:block; margin-bottom:4px; color:var(--foreground); font-size:14px; font-weight:600; }
-@media(max-width:600px) { .pr-codesign-flow { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-.pr-codesign-ledger { width:100%; border-collapse:collapse; margin:8px 0; font-size:12px; line-height:1.5; }
-.pr-codesign-ledger th,.pr-codesign-ledger td { padding:7px 5px; border-bottom:1px solid var(--border); text-align:right; white-space:nowrap; }
-.pr-codesign-ledger th:first-child { text-align:left; white-space:normal; }
-.pr-codesign-ledger thead th { font-size:12px; font-weight:500; color:var(--muted-foreground); }
-.pr-codesign-ledger tbody th { font-weight:500; }
-.pr-codesign-ledger tbody tr[data-winner='true'] { background:var(--muted); }
-.pr-design-method { display:inline-flex; align-items:center; gap:6px; }
-.pr-design-method .pr-swatch { flex-shrink:0; }
-.pr-design-lowest { display:block; padding-left:18px; font-size:12px; color:var(--muted-foreground); font-weight:400; }
-.pr-codesign .pr-caption { line-height:1.5; font-size:12px; }
-.pr-codesign .pr-plot-label { font-size:12px; }
+/* Keep the learning and comparison stages visible throughout one run. */
+.pr-experiment-progress { margin:0 0 14px; padding:14px 18px 12px; border:1px solid var(--border); border-radius:14px; background:var(--background); }
+.pr-progress-steps { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; list-style:none; margin:0; padding:0; }
+.pr-progress-steps li { display:grid; grid-template-columns:26px minmax(0,1fr); grid-template-rows:1fr 3px; align-items:start; gap:8px; min-width:0; }
+.pr-step-number { display:grid; place-items:center; width:26px; height:26px; border-radius:50%; background:var(--muted); color:var(--muted-foreground); font-size:12px; font-weight:600; }
+.pr-progress-steps strong { display:block; font-size:13px; font-weight:600; line-height:1.5; }
+.pr-progress-steps .tabular-nums { display:block; color:var(--muted-foreground); font-size:12px; line-height:1.5; }
+.pr-progress-steps [aria-current='step'] .pr-step-number { background:var(--primary); color:#fff; }
+.pr-progress-steps [data-status='complete'] .pr-step-number { background:#e8f3ef; color:#18745a; }
+.pr-progress-track { grid-column:2; height:3px; border-radius:2px; background:var(--muted); overflow:hidden; }
+.pr-progress-track>span { display:block; width:0; height:100%; background:var(--primary); transition:width 180ms linear; }
+.pr-progress-steps [data-status='complete'] .pr-progress-track>span { background:#258666; }
+#pr-transition-note { margin:10px 0 0; font-size:12px; line-height:1.5; color:var(--muted-foreground); }
+.pr-learning-panel .pr-cost-table,.pr-learning-panel .pr-cost-table thead th { font-size:12px; }
+.pr-method-links { display:block; margin:2px 0 4px 25px; color:var(--muted-foreground); font-size:12px; font-weight:400; line-height:1.4; }
+@media(max-width:650px) {
+  .pr-experiment-progress { padding:12px; border-radius:12px; }
+  .pr-progress-steps { gap:14px; }
+  .pr-progress-steps li { grid-template-columns:22px minmax(0,1fr); gap:6px; }
+  .pr-step-number { width:22px; height:22px; }
+  .pr-progress-steps strong { font-size:12px; }
+  .pr-progress-track { grid-column:1 / -1; }
+  #pr-results-stage { font-size:12px; }
+}
+@media(prefers-reduced-motion:reduce) { .pr-progress-track>span { transition:none; } }
 
 /* Contextual evidence ties one actual inspected link to selection and execution. */
 .pr-link-receipt { margin:12px 0 8px; padding:12px 0 4px; border-top:1px solid var(--border); color:var(--foreground); }

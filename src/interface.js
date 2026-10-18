@@ -77,76 +77,6 @@
       savedPercent:budget.dense?100*(budget.dense-budget.remote)/budget.dense:0,
       sameBudget:budget.remote===fixedLinks,sameSupport:sameSparseSupport(),winnerKeys:winners.map(point=>point.key),status};
   }
-  function drawCodesign() {
-    const metrics=codesignMetrics();
-    $('codesign').hidden=!metrics;
-    if(!metrics) return;
-    const {points,denseLinks,learnedLinks,savedPercent,status}=metrics;
-    renderDeploymentReceipt();
-    $('codesign-summary').textContent=d3.format('.1f')(savedPercent)+'% fewer remote prediction links than dense · '+status;
-    const el=$('codesign-chart');
-    el.setAttribute('aria-label','Four evaluated designs. Lower cost and fewer remote prediction links are favorable. '+points.map(point=>point.label+', '+point.links+' remote links, cost '+d3.format('.6~g')(point.cost)).join('. ')+'. Shared feedback and local prediction channels are excluded.');
-    const scale=Math.max(1e-8,...points.map(point=>point.cost));
-    const span=Math.max(1,denseLinks);
-    const chart=chartBase(el,points.map(point=>({x:point.links,cost:point.cost})),['cost'],'Cumulative cost','Remote prediction links',150,{xDomain:[-span*.08,span*1.08],yDomain:[-scale*.08,scale*1.18]});
-    updateAxis(chart.svg.select('.x-axis'),d3.axisBottom(chart.x).tickValues([...new Set(points.map(point=>point.links))].sort((a,b)=>a-b)).tickSize(4).tickFormat(d3.format('d')));
-    // Sparse designs retain their exact common x coordinate. A ring keeps ties visible.
-    const order=points.filter(point=>point.key!=='online').concat(points.filter(point=>point.key==='online'));
-    const marks=chart.marks.selectAll('circle.codesign-point').data(order,point=>point.key).join(enter=>{const circle=enter.append('circle').attr('class','codesign-point');circle.append('title');return circle;}).order()
-      .attr('data-key',point=>point.key).attr('data-links',point=>point.links).attr('data-cost',point=>point.cost)
-      .attr('cx',point=>chart.x(point.links)).attr('cy',point=>chart.y(point.cost))
-      .attr('r',point=>point.key==='scalar'?8:point.key==='online'?4.5:5)
-      .attr('fill',point=>point.key==='scalar'?'var(--background)':point.color)
-      .attr('stroke',point=>point.color).attr('stroke-width',point=>point.key==='scalar'?2:1.5);
-    marks.select('title').text(point=>point.label+' · '+point.links+' remote links · Cost '+d3.format('.6~g')(point.cost));
-    renderCodesignKey(metrics);
-  }
-  function deploymentReceipt() {
-    if(!communicationComparison()||!snapshot.deployedSupport)return null;
-    const support=snapshot.deployedSupport;
-    if(!Array.isArray(support.links)||!Array.isArray(support.fixedLinks))return null;
-    const budget=predictionBudget();
-    const fixedLinks=support.fixedLinks.filter(link=>link.from!==link.to).length;
-    const scoreSamples=Number.isInteger(support.scoreSamples)?support.scoreSamples:null;
-    return {discoverySamples:protocolStatus().discoverySamples,scoreSamples,remoteLinks:budget.remote,fixedLinks,
-      newLinks:budget.replaced,comparisonSamples:snapshot.t,
-      stages:[
-        {key:'discovery',label:'Learn',value:protocolStatus().discoverySamples+' samples',detail:scoreSamples===null?'Scores unrecorded':scoreSamples+' scored actions',status:'complete'},
-        {key:'selection',label:'Select',value:budget.remote+' remote links',detail:budget.replaced+(budget.remote===fixedLinks?' replaced':' new vs fixed'),status:'complete'},
-        {key:'synthesis',label:'Synthesize',value:'Complete',detail:'Support constrained',status:'complete'},
-        {key:'comparison',label:'Compare',value:snapshot.t+' samples',detail:'Fresh stream · Links fixed',status:'current'}
-      ]};
-  }
-  function renderDeploymentReceipt() {
-    const panel=$('codesign-flow'),receipt=deploymentReceipt();panel.replaceChildren();
-    if(!receipt)return;
-    panel.title='Actual discovery and offline support selection precede controller resynthesis. The comparison uses fresh plant states and costs. Remote counts exclude local prediction and common feedback. Selected support and prediction correction stay fixed; this is not joint online topology optimization.';
-    for(const stage of receipt.stages){
-      const item=document.createElement('li'),label=document.createElement('span'),value=document.createElement('strong'),detail=document.createElement('span');
-      item.dataset.stage=stage.key;item.dataset.status=stage.status;
-      if(stage.status==='current')item.setAttribute('aria-current','step');
-      label.className='pr-protocol-label';label.textContent=stage.label;value.textContent=stage.value;
-      detail.className='pr-protocol-detail';detail.textContent=stage.detail;
-      item.append(label,value,detail);panel.append(item);
-    }
-    for(const key of ['discoverySamples','scoreSamples','remoteLinks','fixedLinks','newLinks','comparisonSamples'])panel.dataset[key]=receipt[key]===null?'':String(receipt[key]);
-  }
-  function renderCodesignKey(metrics) {
-    const key=$('codesign-key');key.replaceChildren();
-    if(!metrics)return;
-    for(const point of metrics.points) {
-      const winner=metrics.winnerKeys.includes(point.key);
-      const row=document.createElement('tr'),method=document.createElement('th'),label=document.createElement('span'),swatch=document.createElement('span');
-      row.dataset.key=point.key;row.dataset.links=String(point.links);row.dataset.cost=String(point.cost);row.dataset.winner=String(winner);
-      method.setAttribute('scope','row');label.className='pr-design-method';swatch.className='pr-swatch '+point.key;
-      label.append(swatch,document.createTextNode(point.label));method.append(label);
-      if(winner){const badge=document.createElement('span');badge.className='pr-design-lowest';badge.textContent='Lowest';method.append(badge);}
-      const links=document.createElement('td'),cost=document.createElement('td');
-      links.textContent=String(point.links);cost.textContent=d3.format('.6~g')(point.cost);
-      cost.title='Actual cumulative stage cost. No terminal penalty is added to the live trial.';
-      row.append(method,links,cost);key.append(row);
-    }
-  }
   function plottedSeries() { return activeSeries().filter(s=>visible.has(s.key)); }
   function sameSparseSupport() {
     const support=snapshot.deployedSupport;
@@ -1020,7 +950,9 @@
     if ($('cost')) { $('cost').hidden=!showCost; $('cost').style.display=showCost?'':'none'; }
     if ($('convergence')) { $('convergence').hidden=showCost; $('convergence').style.display=showCost?'none':''; }
     if ($('learning-flow')) $('learning-flow').hidden=showCost;
-    if ($('learning-title')) $('learning-title').textContent=showCost ? (snapshot.experiment==='communication'&&snapshot.phase==='discovery'?'Learning costs':'Controller comparison') : snapshot.experiment==='communication'?'Learning the topology':'Forecast learning';
+    $('learning-title').textContent=snapshot.experiment==='communication'?'Experiment results':showCost?'Controller comparison':'Forecast learning';
+    $('results-stage').hidden=snapshot.experiment!=='communication';
+    $('results-stage').textContent=communicationComparison()?'Controller comparison':showCost?'Learning costs':'Learning progress';
     if ($('learning-kind')) $('learning-kind').textContent='Original dashed · Matrix adaptation solid';
   }
   function protocolStatus() {
@@ -1030,6 +962,36 @@
       comparisonSamples:deployed?snapshot.t:0,selection:deployed?'complete':'pending',synthesis:deployed?'complete':'pending',
       links:deployed?'fixed':'candidates',predictionWeights:deployed&&snapshot.experiment==='communication'?'fixed':'adaptive',
       historyAt:saved?(historyIndex?topology.events[historyIndex-1]?.t:topology.initialT) ?? 0:null};
+  }
+  function experimentProgress() {
+    const status=protocolStatus(),deployed=status.phase==='deployment';
+    return {visible:snapshot.experiment==='communication',phase:status.phase,
+      discoverySamples:status.discoverySamples,comparisonSamples:status.comparisonSamples,
+      learningStatus:deployed?'complete':'active',
+      comparisonStatus:deployed?(comparisonComplete()?'complete':'active'):'pending',
+      learningCount:status.discoverySamples+(deployed?' samples · Complete':automaticComparison()?' / '+DISCOVERY_SAMPLES+' samples':' samples'),
+      comparisonCount:deployed?status.comparisonSamples+(guidedScenario()&&!comparisonContinued&&!comparisonComplete()?' / '+COMPARISON_SAMPLES:'')+' samples'+(comparisonComplete()?' · Complete':''):'Next',
+      learningFraction:deployed?1:Math.min(1,status.discoverySamples/DISCOVERY_SAMPLES),
+      comparisonFraction:deployed?Math.min(1,status.comparisonSamples/COMPARISON_SAMPLES):0,
+      note:deployed?'Learning complete. Comparison uses a fresh state and zero starting cost. Selected links stay fixed.'
+        :automaticComparison()?'After '+DISCOVERY_SAMPLES+' samples, links are fixed. Comparison starts automatically from a fresh state and zero cost.'
+        :'Choose Compare now in settings to fix the learned links and start comparison from a fresh state and zero cost.'};
+  }
+  function renderExperimentProgress() {
+    const progress=experimentProgress(),panel=$('experiment-progress');
+    panel.hidden=!progress.visible;
+    if(!progress.visible)return;
+    panel.dataset.phase=progress.phase;
+    for(const [id,key] of [['learning','learning'],['comparison','comparison']]) {
+      const step=$('progress-'+id),status=progress[key+'Status'];
+      step.dataset.status=status;
+      if((id==='learning'&&progress.phase==='discovery')||(id==='comparison'&&progress.phase==='deployment'))step.setAttribute('aria-current','step');
+      else step.removeAttribute('aria-current');
+      $('progress-'+id+'-count').textContent=progress[key+'Count'];
+      $('progress-'+id+'-fill').style.width=(progress[key+'Fraction']*100)+'%';
+    }
+    // Announce the phase boundary once, without a live announcement every sample.
+    if($('transition-note').textContent!==progress.note)$('transition-note').textContent=progress.note;
   }
   function displayedLinkController() {
     return communicationComparison()&&historyIndex===null?'Learned sparse':'Matrix adaptation';
@@ -1043,6 +1005,8 @@
       ?'Learning '+snapshot.t+' / '+DISCOVERY_SAMPLES+' s':'Learning '+snapshot.t+' s';
     for(const [key,value] of Object.entries(status))phase.dataset[key]=value===null?'':String(value);
     phase.title=receipt+' · No joint online topology adaptation is claimed.';
+    phase.hidden=snapshot.experiment==='communication';
+    renderExperimentProgress();
     $('phase-note').textContent=status.view==='saved-discovery'
       ? 'Saved discovery links at '+status.historyAt+' s · Plant and costs remain in '+(deployed?'comparison':'discovery')+' · Latest restores current links'
       :receipt;
@@ -1126,7 +1090,7 @@
     });
 
     $('clock').textContent=snapshot.t+' s';
-    $('clock').hidden=!deployed;
+    $('clock').hidden=!deployed||communication;
     $('learning').textContent=frozen?'Plant held · '+snapshot.mode:deployed?'Prediction links fixed':completedRows+' completed responses';
     $('run').textContent=playing?'Pause':comparisonComplete()?'Continue':frozen && snapshot.mode!=='converged'?'Fit':'Run';
     $('run').disabled=comparing;
@@ -1625,7 +1589,7 @@
     const active=activeSeries(),items=plottedSeries();
     const gap=$('cost-metric').value==='gap';
     const observations=[{x:0,...Object.fromEntries(series.map(item=>[item.key,0]))},...snapshot.history.map(d=>({x:d.t,...Object.fromEntries(series.map(item=>[item.key,d[item.key]-(gap?d.scalar:0)]))}))];
-    if ($('cost').hidden) return;
+    if ($('cost').hidden) { $('cost-detail').replaceChildren(); return; }
     $('cost').setAttribute('aria-label',gap?'Cumulative cost difference from '+gapReference()+'. Zero is the reference. Lower is better.':'Cumulative cost of '+active.length+' active controllers');
     const chart=chartBase($('cost'),observations,items.map(s=>s.key),gap?'Cost difference':'Cumulative cost','Time (s)',140);
     chart.marks.selectAll('line.cost-reference').data(gap?[0]:[]).join('line').attr('class','cost-reference')
@@ -1636,10 +1600,18 @@
     hover(chart,observations,items,gap?'Cost difference at t':'Time (s)');
     const c=snapshot.cumulative;
     $('cost-detail').replaceChildren();
+    const designs=codesignMetrics();
     for (const item of active) {
       const row=document.createElement('tr'), label=document.createElement('th'), value=document.createElement('td'), difference=document.createElement('td');
       const swatch=document.createElement('span'); swatch.className='pr-swatch '+item.key;
       label.scope='row'; label.append(swatch,document.createTextNode(item.label));
+      if(designs) {
+        const count=designs.points.find(point=>point.key===item.key).links,links=document.createElement('span');
+        links.className='pr-method-links';links.dataset.links=String(count);
+        links.textContent=count+' remote links';
+        links.title='Remote prediction links only. Local prediction channels and shared state feedback are excluded.';
+        label.append(links);
+      }
       value.textContent=costFormat(c[item.key]);value.title=d3.format('.10~g')(c[item.key]);
       value.dataset.cost=String(c[item.key]);
       difference.textContent=item.key==='causal' ? 'Reference' : comparativeCost(c[item.key],c.causal);
@@ -1785,7 +1757,7 @@
   }
   function render() {
     $('tooltip').style.display='none'; pin=null;
-    renderControls(); drawNetwork(); drawMatrix(); drawCodesign(); drawCost(); drawStage(); drawVoltage(); drawConvergence();highlightTopology();
+    renderControls(); drawNetwork(); drawMatrix(); drawCost(); drawStage(); drawVoltage(); drawConvergence();highlightTopology();
   }
   announce('Ready');
   hydrate(window.openai?.widgetState);

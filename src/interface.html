@@ -16,6 +16,13 @@
       <span id="pr-attack-hint" class="pr-attack-hint">Click to start or stop</span>
     </div>
   </div>
+  <section id="pr-experiment-progress" class="pr-experiment-progress" aria-label="Experiment stages">
+    <ol class="pr-progress-steps">
+      <li id="pr-progress-learning" data-status="active" aria-current="step"><span class="pr-step-number" aria-hidden="true">1</span><div><strong>Learn prediction links</strong><span id="pr-progress-learning-count" class="tabular-nums">0 / 180 samples</span></div><span class="pr-progress-track" aria-hidden="true"><span id="pr-progress-learning-fill"></span></span></li>
+      <li id="pr-progress-comparison" data-status="pending"><span class="pr-step-number" aria-hidden="true">2</span><div><strong>Compare four controllers</strong><span id="pr-progress-comparison-count" class="tabular-nums">Next</span></div><span class="pr-progress-track" aria-hidden="true"><span id="pr-progress-comparison-fill"></span></span></li>
+    </ol>
+    <p id="pr-transition-note" role="status">After 180 samples, links are fixed. Comparison starts automatically from a fresh state and zero cost.</p>
+  </section>
   <div class="pr-mission">
     <span class="pr-mission-goal"><span class="pr-status-dot" id="pr-voltage-status" aria-hidden="true"></span>Restore the <strong>nominal voltage profile</strong><span class="pr-target"> · Illustrative band 0.95 to 1.05 pu</span></span>
     <span id="pr-voltage-range" class="tabular-nums"></span>
@@ -29,14 +36,6 @@
       <svg class="pr-chart" id="pr-network" role="group" aria-label="24 bus radial power feeder. Click a load, solar, or battery bus to start a continuous disturbance. Click again to stop."></svg>
       <p id="pr-network-inspection" class="pr-network-inspection" hidden><span id="pr-network-inspection-source" class="pr-inspection-source"></span><span id="pr-network-inspection-join" aria-hidden="true"></span><span id="pr-network-inspection-receiver" class="pr-inspection-receiver"></span><span id="pr-network-inspection-status"></span></p>
       <div class="pr-panel-foot"><span id="pr-bus-detail" class="tabular-nums"></span><span class="pr-live-stage">Cost <strong id="pr-live-cost" class="tabular-nums">0.0000</strong></span></div>
-      <div id="pr-codesign" class="pr-codesign" hidden>
-        <div class="pr-subhead"><h3>Cost and communication</h3><span class="pr-caption">Current trial</span></div>
-        <ol id="pr-codesign-flow" class="pr-codesign-flow" aria-label="Completed discovery, offline selection and synthesis, then fixed comparison"></ol>
-        <div class="pr-plot-label"><span>Cumulative cost</span><span>Lower and left is better</span></div>
-        <svg id="pr-codesign-chart" class="pr-chart" role="img" aria-label="Current controller costs and remote prediction link counts"></svg>
-        <table class="pr-codesign-ledger tabular-nums" aria-label="Current stage costs and deployed remote prediction links"><thead><tr><th scope="col">Method</th><th scope="col" title="Local prediction channels and shared state feedback are excluded">Remote links</th><th scope="col">Stage cost</th></tr></thead><tbody id="pr-codesign-key"></tbody></table>
-        <p id="pr-codesign-summary" class="pr-caption"></p>
-      </div>
     </section>
     <section class="pr-panel pr-matrix-panel" aria-labelledby="pr-matrix-title">
       <div class="pr-subhead"><h2 id="pr-matrix-title">Prediction links</h2></div>
@@ -90,7 +89,7 @@
       </details>
     </section>
     <section class="pr-panel pr-learning-panel" aria-labelledby="pr-learning-title">
-      <div class="pr-subhead"><h2 id="pr-learning-title">Cost comparison</h2></div>
+      <div class="pr-subhead"><h2 id="pr-learning-title">Experiment results</h2><span id="pr-results-stage" class="pr-caption">Learning progress</span></div>
       <p id="pr-trial-context" class="pr-trial-context" hidden></p>
       <div id="pr-learning-content" hidden>
         <div class="pr-algorithm-flow" id="pr-learning-flow" aria-label="Shared prediction adaptation cycle">

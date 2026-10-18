@@ -61,7 +61,10 @@ async function main() {
     assert.equal(await page.locator('#pr-voltage-details').getAttribute('open'),null,'Voltage diagnostics start closed');
     assert.equal(await page.locator('#pr-link-history-details').getAttribute('open'),null,'Link archive starts closed');
     assert.equal(await page.locator('#pr-reference-study').getAttribute('open'),null,'Published study starts closed');
-    assert.equal(await page.locator('#pr-codesign').isVisible(),false,'Discovery does not imply deployed cost results');
+    assert.equal(await page.locator('#pr-experiment-progress').isVisible(),true,'Both experiment stages are explained before playback');
+    assert.equal(await page.locator('[id^="pr-codesign"]').count(),0,'The duplicate communication scatter and ledger are removed');
+    assert.equal(await page.locator('#pr-learning-title').textContent(),'Experiment results');
+    assert.match(await page.locator('#pr-transition-note').textContent(),/fresh.*zero|zero.*fresh/i);
     assert.equal(await page.locator('#pr-restart').textContent(),'Restart demo');
     for(const id of ['step','speed','deploy','attack-mode','strength','view','matrix-view'])assert.equal(await page.locator('#pr-'+id).isVisible(),false,'Advanced '+id+' stays out of the primary flow');
     for(const id of ['network','matrix','voltage','convergence'])assert.equal(await page.locator('#pr-'+id).isVisible(),true,'Main panel '+id+' stays visible');
@@ -389,8 +392,10 @@ async function main() {
       const networkPositions=await checkNetworkGeometry(surface);
       await checkMatrixGeometry(surface);
       if(viewport.width>650){
-        assert.ok(original.boxes[1].height<original.boxes[0].height-150,'Uninspected links no longer stretch into a large empty card');
-        assert.ok(original.boxes[3].y<original.boxes[0].bottom-100,'Comparison moves above the old stretched row boundary');
+        // Removing the duplicate design panel makes the network shorter than the matrix.
+        // Verify its own content ends cleanly instead of assuming which column is taller.
+        const footerGap=await surface.evaluate(()=>{const panel=document.querySelector('.pr-network-panel');return panel.getBoundingClientRect().bottom-panel.querySelector('.pr-panel-foot').getBoundingClientRect().bottom;});
+        assert.ok(footerGap>=8&&footerGap<=20,'Network ends after its actual bus readout without a duplicate results panel');
         await surface.locator('#pr-matrix .matrix-cell[data-receiver="5"][data-source="7"]').click();
         const inspected=await checkDashboardLayout(surface);
         assert.ok(inspected.boxes[1].height>original.boxes[1].height,'Actual source details expand their own column');
@@ -658,7 +663,7 @@ async function main() {
     };
 
     const checkPlots = async () => {
-      await checkCodesign(page);
+      await checkExperimentProgress(page);
       await checkEventMarkers(page);
       await checkVoltageMetrics(page);
       await checkProtocol(page);
@@ -673,69 +678,78 @@ async function main() {
       }
     };
 
-    const checkCodesign = async surface => {
+    const checkExperimentProgress = async surface => {
       const reading=await surface.evaluate(()=>{
-        const snapshot=document.querySelector('#power-response-demo').powerDemo.getSnapshot();
-        const section=document.querySelector('#pr-codesign'),chart=document.querySelector('#pr-codesign-chart');
+        const snapshot=document.querySelector('#power-response-demo').powerDemo.getSnapshot(),section=document.querySelector('#pr-experiment-progress');
         return {phase:snapshot.phase,experiment:snapshot.experiment,costs:snapshot.cumulative,support:snapshot.deployedSupport,
-          hidden:section.hidden,summary:document.querySelector('#pr-codesign-summary').textContent,
-          label:chart.getAttribute('aria-label'),
-          receipt:{data:{...document.querySelector('#pr-codesign-flow').dataset},items:Array.from(document.querySelectorAll('#pr-codesign-flow li')).map(item=>({stage:item.dataset.stage,status:item.dataset.status,current:item.getAttribute('aria-current'),text:item.textContent,boxes:Array.from(item.children).map(cell=>({font:parseFloat(getComputedStyle(cell).fontSize),...cell.getBoundingClientRect().toJSON()}))}))},
+          hidden:section.hidden,phaseHidden:document.querySelector('#pr-phase').hidden,
           discoverySamples:snapshot.discoveryRecord?.t,t:snapshot.t,
-          ledger:Array.from(document.querySelectorAll('#pr-codesign-key tr')).map(row=>({key:row.dataset.key,links:Number(row.dataset.links),cost:Number(row.dataset.cost),winner:row.dataset.winner,
-            name:row.querySelector('th').textContent,shown:Array.from(row.querySelectorAll('td')).map(cell=>cell.textContent),
-            expected:d3.format('.6~g')(snapshot.cumulative[row.dataset.key]),
-            boxes:Array.from(row.querySelectorAll('th,td')).map(cell=>({font:parseFloat(getComputedStyle(cell).fontSize),...cell.getBoundingClientRect().toJSON()}))})),
-          points:Array.from(chart.querySelectorAll('circle.codesign-point')).map(node=>({key:node.dataset.key,links:Number(node.dataset.links),
-            cost:Number(node.dataset.cost),x:Number(node.getAttribute('cx')),y:Number(node.getAttribute('cy')),r:Number(node.getAttribute('r'))}))};
+          title:document.querySelector('#pr-learning-title').textContent,subtitle:document.querySelector('#pr-results-stage').textContent,
+          note:document.querySelector('#pr-transition-note').textContent,
+          order:!!(document.querySelector('.pr-controlbar').compareDocumentPosition(section)&Node.DOCUMENT_POSITION_FOLLOWING),
+          interactive:section.querySelectorAll('button,a,input,select,[role="button"]').length,
+          steps:['learning','comparison'].map(name=>{
+            const item=document.querySelector('#pr-progress-'+name),count=document.querySelector('#pr-progress-'+name+'-count');
+            return {name,status:item.dataset.status,current:item.getAttribute('aria-current'),count:count.textContent,
+              boxes:[item,count].map(cell=>({font:parseFloat(getComputedStyle(cell).fontSize),...cell.getBoundingClientRect().toJSON()}))};
+          }),
+          rows:Array.from(document.querySelectorAll('#pr-cost-detail tr')).map(row=>{
+            const links=row.querySelector('.pr-method-links'),cost=row.querySelector('[data-cost]');
+            return {key:row.dataset.method,links:links?Number(links.dataset.links):null,linkText:links?.textContent,
+              cost:cost?Number(cost.dataset.cost):null,cells:row.querySelectorAll('th,td').length,
+              boxes:Array.from(row.querySelectorAll('th,td,.pr-method-links')).map(cell=>({tag:cell.tagName,font:parseFloat(getComputedStyle(cell).fontSize),...cell.getBoundingClientRect().toJSON()}))};
+          })};
       });
-      const deployed=reading.phase==='deployment'&&reading.experiment==='communication';
-      assert.equal(reading.hidden,!deployed,'The design tradeoff only describes deployed communication controllers');
-      if(!deployed)return reading;
-      assert.deepEqual(reading.points.map(point=>point.key).sort(),['causal','online','scalar','static']);
+      const communication=reading.experiment==='communication',deployed=reading.phase==='deployment';
+      assert.equal(reading.hidden,!communication,'Only communication topology has this fixed comparison protocol');
+      assert.equal(reading.phaseHidden,communication,'The main controls do not duplicate the progress stage');
+      if(!communication)return reading;
+      assert.equal(reading.title,'Experiment results','The same results panel keeps its identity across the reset');
+      assert.equal(reading.order,true,'The explanation follows the controls rather than hiding in settings');
+      assert.equal(reading.interactive,0,'The stage indicator adds no required action');
+      assert.match(reading.note,/fresh/i);assert.match(reading.note,/zero/i);
+      assert.equal(reading.steps[0].status,deployed?'complete':'active');
+      assert.equal(reading.steps[0].current,deployed?null:'step');
+      assert.equal(Number(reading.steps[0].count.match(/^\d+/)?.[0]),deployed?reading.discoverySamples:reading.t);
+      if(deployed)assert.equal(Number(reading.steps[1].count.match(/^\d+/)?.[0]),reading.t);
+      else assert.equal(reading.steps[1].count,'Next');
+      assert.ok(deployed?['active','complete'].includes(reading.steps[1].status):reading.steps[1].status==='pending');
+      assert.equal(reading.steps[1].current,deployed?'step':null);
+      if(deployed)assert.match(reading.note,/fixed/i);
+      for(const item of reading.steps)for(const box of item.boxes){
+        assert.ok(box.font>=12,'Visible phase counts remain readable');
+        assert.ok(box.left>=-1&&box.right<=surface.viewportSize().width+1,'Persistent phase text fits the viewport');
+      }
+      if(!deployed){
+        assert.ok(reading.rows.every(row=>row.links===null),'Candidate counts cannot be mistaken for deployed message budgets');
+        return reading;
+      }
+      assert.equal(reading.subtitle,'Controller comparison');
+      assert.deepEqual(reading.rows.map(row=>row.key),['online','scalar','static','causal'],'All four measured methods retain their existing cost rows');
       const expected={online:reading.support.links.filter(link=>link.from!==link.to).length,
         scalar:reading.support.fixedLinks.filter(link=>link.from!==link.to).length,static:176,causal:0};
-      for(const point of reading.points){
-        assert.equal(point.links,expected[point.key],'The plotted budget is the actual deployed remote support');
-        assert.equal(point.cost,reading.costs[point.key],'The plotted value is exact current stage cost');
-        assert.ok(Number.isFinite(point.x)&&Number.isFinite(point.y),'Measured points stay finite');
-        assert.ok(point.r>0,'Every design has a visible marker');
+      for(const row of reading.rows){
+        assert.equal(row.links,expected[row.key],'The existing cost row shows actual remote support');
+        assert.equal(row.linkText,expected[row.key]+' remote links');
+        assert.equal(row.cost,reading.costs[row.key],'The same row retains exact cumulative stage cost');
+        assert.equal(row.cells,3,'Remote counts do not add a fourth narrow numeric column');
+        for(const box of row.boxes){
+          assert.ok(box.font>=12,'Method budgets remain readable');
+          assert.ok(box.left>=-1&&box.right<=surface.viewportSize().width+1,'Cost cells and budgets fit the viewport');
+        }
+        const cells=row.boxes.filter(box=>box.tag==='TH'||box.tag==='TD');
+        assert.ok(cells.every((box,index)=>!index||box.left>=cells[index-1].right-1),'Cost columns do not overlap');
       }
-      const receipt=reading.receipt;
-      assert.equal(Number(receipt.data.discoverySamples),reading.discoverySamples);
-      assert.equal(Number(receipt.data.scoreSamples),reading.support.scoreSamples);
-      assert.equal(Number(receipt.data.remoteLinks),expected.online);assert.equal(Number(receipt.data.fixedLinks),expected.scalar);
-      const fixed=new Set(reading.support.fixedLinks.map(link=>link.from+'>'+link.to));
-      assert.equal(Number(receipt.data.newLinks),reading.support.links.filter(link=>link.from!==link.to&&!fixed.has(link.from+'>'+link.to)).length);
-      assert.equal(Number(receipt.data.comparisonSamples),reading.t);
-      assert.deepEqual(receipt.items.map(item=>item.stage),['discovery','selection','synthesis','comparison']);
-      assert.deepEqual(receipt.items.map(item=>item.status),['complete','complete','complete','current']);
-      assert.equal(receipt.items[3].current,'step');assert.match(receipt.items[3].text,/Fresh stream.*Links fixed/);
-      for(const item of receipt.items)for(const box of item.boxes){assert.ok(box.font>=12);assert.ok(box.left>=-1&&box.right<=surface.viewportSize().width+1,'Measured phase text fits the viewport');}
-      assert.deepEqual(reading.ledger.map(row=>row.key),['online','scalar','static','causal'],'All four cost and communication rows remain visible');
-      const minimum=Math.min(...Object.values(reading.costs)),pending=Object.values(reading.costs).every(value=>value<=1e-12);
-      for(const row of reading.ledger){
-        assert.equal(row.links,expected[row.key]);assert.equal(row.cost,reading.costs[row.key]);
-        assert.deepEqual(row.shown,[String(expected[row.key]),row.expected],'No hover is required to read real link counts and costs');
-        assert.equal(row.winner,String(!pending&&Math.abs(row.cost-minimum)<=1e-12),'Any actual winner or tie is retained');
-        assert.equal(row.name.includes('Lowest'),row.winner==='true');
-        for(const box of row.boxes){assert.ok(box.font>=12);assert.ok(box.left>=-1&&box.right<=surface.viewportSize().width+1,'Ledger cells fit the viewport');}
-        assert.ok(row.boxes.every((box,index)=>!index||box.left>=row.boxes[index-1].right-1),'Ledger columns do not overlap');
-      }
-      const point=key=>reading.points.find(item=>item.key===key);
-      assert.equal(point('online').x,point('scalar').x,'Equal remote budgets have the same horizontal coordinate');
-      assert.ok(point('causal').x<point('online').x&&point('online').x<point('static').x,'Zero, sparse and dense use an honest quantitative axis');
-      assert.ok(Math.abs((point('online').x-point('causal').x)/(point('static').x-point('causal').x)-24/176)<1e-9,'The link axis is proportional rather than categorical');
-      assert.ok(point('scalar').r>point('online').r,'The fixed outer marker remains visible when sparse designs coincide');
-      assert.ok(reading.summary.length>0,'The tradeoff has a concise interpretation');
       return reading;
     };
 
-    const captureCodesign = async surface => {
-      const section=surface.locator('#pr-codesign'),width=surface.viewportSize().width;
-      await section.screenshot({path:path.join(output,'communication-ledger-'+width+'.png')});
-      const preview=await section.screenshot({path:path.join(output,'communication-ledger-'+width+'.jpg'),type:'jpeg',quality:85});
-      console.log('CLOUD_DESIGN_PREVIEW_'+width+' '+preview.toString('base64'));
+    const captureExperimentProgress = async surface => {
+      const width=surface.viewportSize().width;
+      await surface.locator('#pr-experiment-progress').screenshot({path:path.join(output,'experiment-progress-'+width+'.png')});
+      const section=surface.locator('.pr-learning-panel');
+      await section.screenshot({path:path.join(output,'comparison-budgets-'+width+'.png')});
+      const preview=await section.screenshot({path:path.join(output,'comparison-budgets-'+width+'.jpg'),type:'jpeg',quality:85});
+      console.log('CLOUD_PROGRESS_PREVIEW_'+width+' '+preview.toString('base64'));
     };
     const inspectReferenceStudy = async surface => {
       assert.equal(await surface.locator('#pr-reference-study').getAttribute('open'),null);
@@ -917,8 +931,31 @@ async function main() {
     assert.match(await page.locator('#pr-scenario-description').getAttribute('title'),/compare four controllers automatically/);
     await captureForecastSettings(page);
     await checkControllerKey(page,true);
+    await checkExperimentProgress(page);
+    await page.evaluate(()=>{
+      const root=document.querySelector('#power-response-demo'),progress=document.querySelector('#pr-experiment-progress');
+      const observer=new MutationObserver(()=>{
+        if(progress.dataset.phase!=='deployment')return;
+        const snapshot=root.powerDemo.getSnapshot();
+        window.__experimentHandoff={t:snapshot.t,playing:root.powerDemo.getState().playing,costs:snapshot.cumulative,
+          title:document.querySelector('#pr-learning-title').textContent,
+          subtitle:document.querySelector('#pr-results-stage').textContent,
+          note:document.querySelector('#pr-transition-note').textContent,
+          learning:document.querySelector('#pr-progress-learning').dataset.status,
+          comparison:document.querySelector('#pr-progress-comparison').dataset.status};
+        observer.disconnect();
+      });
+      observer.observe(progress,{attributes:true,attributeFilter:['data-phase']});
+    });
     await page.locator('#pr-run').click();
     await page.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getState().comparisonComplete,null,{timeout:45000});
+    const handoff=await page.evaluate(()=>window.__experimentHandoff);
+    assert.ok(handoff,'The persistent strip identifies the actual automatic handoff');
+    assert.equal(handoff.t,0);assert.equal(handoff.playing,true,'Comparison starts without an extra click or pause');
+    assert.ok(Object.values(handoff.costs).every(cost=>cost===0),'Comparison begins with fresh costs');
+    assert.equal(handoff.title,'Experiment results');assert.equal(handoff.subtitle,'Controller comparison');
+    assert.equal(handoff.learning,'complete');assert.equal(handoff.comparison,'active');
+    assert.match(handoff.note,/fresh/i);assert.match(handoff.note,/zero/i);assert.match(handoff.note,/fixed/i);
     const reviewed=await page.evaluate(()=>{
       const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot();
       return {phase:snapshot.phase,t:snapshot.t,state:root.powerDemo.getState(),costs:snapshot.cumulative,
@@ -933,20 +970,20 @@ async function main() {
     assert.equal(await page.locator('#pr-cost-detail tr').count(),4);
     for(const chart of ['pr-cost','pr-stage','pr-voltage'])assert.equal(await page.locator('#'+chart+' path.data-series').count(),4);
     await checkEventMarkers(page);await checkVoltageMetrics(page);
-    await checkCodesign(page);
+    await checkExperimentProgress(page);
     await checkControllerKey(page,true);
     const designsBefore=await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
     for(const key of ['online','scalar','static'])await page.locator('[data-series="'+key+'"]').click();
-    await checkCodesign(page);
-    assert.equal(await page.locator('#pr-cost path.data-series').count(),1,'Curve visibility is independent from the four design points');
+    await checkExperimentProgress(page);
+    assert.equal(await page.locator('#pr-cost path.data-series').count(),1,'Curve visibility is independent from the four measured method budgets');
     for(const key of ['online','scalar','static'])await page.locator('[data-series="'+key+'"]').click();
     assert.equal(await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),designsBefore,'Comparative design inspection cannot alter the run');
     await inspectReferenceStudy(page);
     await inspectLinkEvidence(page);
     assert.ok((await page.locator('.intervention-badge title').allTextContents()).filter(text=>text.includes('Scheduled demand')).every(text=>text.includes('Included in issued forecasts')));
     await page.screenshot({path:path.join(output,'default-scenario-complete.png'),fullPage:true});
-    await page.locator('#pr-codesign').screenshot({path:path.join(output,'codesign-desktop.png')});
-    await captureCodesign(page);
+    await page.locator('#pr-experiment-progress').screenshot({path:path.join(output,'experiment-complete-desktop.png')});
+    await captureExperimentProgress(page);
     await captureDashboard(page);
     await exerciseDashboardLayout(page);
     await page.locator('.pr-learning-panel').screenshot({path:path.join(output,'default-scenario-costs.png')});
@@ -989,7 +1026,7 @@ async function main() {
     assert.deepEqual(completedRestored.costs,completedBefore.costs);
     assert.deepEqual(completedRestored.segments,completedBefore.segments);
     await stepSetting(page);assert.equal(await sample(),181);
-    await checkCodesign(page);
+    await checkExperimentProgress(page);
     await page.getByRole('button',{name:'Restart demo',exact:true}).click();
     const restarted=await page.evaluate(()=>{
       const root=document.querySelector('#power-response-demo');return {snapshot:root.powerDemo.getSnapshot(),state:root.powerDemo.getState()};
@@ -1003,7 +1040,7 @@ async function main() {
     assert.equal(await page.locator('#pr-speed').inputValue(),'32');
     assert.equal(await page.locator('#pr-adaptation').getAttribute('open'),null);
     assert.equal(await page.locator('#pr-run').textContent(),'Run');
-    await checkCodesign(page);
+    await checkExperimentProgress(page);
     await page.screenshot({path:path.join(output,'concise-restarted-desktop.png'),fullPage:true});
     await useReference(page);
     await mark('default scenario completed restored and explicitly continued');
@@ -1136,7 +1173,7 @@ async function main() {
     const savedMetricSnapshot=await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
     await page.reload({waitUntil:'networkidle'});
     await checkCostSwitch(page,'gap','fixed sparse');
-    await checkCodesign(page);
+    await checkExperimentProgress(page);
     assert.equal(await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),savedMetricSnapshot,'Restored gap changes no measured state or cost');
     assert.equal(await page.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getState().playing),false,'Restored gap stays paused');
     await page.locator('#pr-cost-total').click();await checkCostSwitch(page,'total','fixed sparse');
@@ -1497,7 +1534,7 @@ async function main() {
     await stepSetting(phone);
     assert.ok(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Default scenario fits the narrow mobile page');
     await phone.screenshot({path:path.join(output,'default-scenario-mobile.png'),fullPage:true});
-    await checkCodesign(phone);await inspectReferenceStudy(phone);
+    await checkExperimentProgress(phone);await inspectReferenceStudy(phone);
     await useReference(phone);
     await selectSetting(phone,'speed','32');
     await selectSetting(phone,'view','cost');
@@ -1618,11 +1655,11 @@ async function main() {
     assert.ok(attackBounds.width >= 44 && attackBounds.height >= 44, 'Primary touch target remains at least 44 pixels');
     await withinSettings(phone,()=>phone.locator('#pr-compare').click());
     await phone.waitForFunction(()=>!document.querySelector('#pr-compare').disabled);
-    await checkCodesign(phone);
+    await checkExperimentProgress(phone);
     await inspectLinkEvidence(phone);
-    assert.ok(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'The live design chart fits the mobile page');
-    await phone.locator('.pr-learning-panel').screenshot({path:path.join(output,'codesign-mobile.png')});
-    await captureCodesign(phone);
+    assert.ok(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'The cost table and persistent stages fit the mobile page');
+    await phone.locator('.pr-learning-panel').screenshot({path:path.join(output,'comparison-mobile.png')});
+    await captureExperimentProgress(phone);
     await captureNetworkInspection(phone);
     await captureDashboard(phone);
     await phone.screenshot({ path: path.join(output, 'mobile.png'), fullPage: true });

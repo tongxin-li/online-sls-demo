@@ -20,13 +20,12 @@ const cardEnd="    $('topology-events').hidden=total===0;";
 assert.equal(original.split(cardStart).length,2,'Topology cards anchor must be unique');
 const withoutCards=original.slice(0,original.indexOf(cardStart))+original.slice(original.indexOf(cardEnd));
 const source=withoutCards.replace(anchor,
-  '  drawNetwork=renderNetworkInspection;drawCost=drawStage=drawVoltage=drawConvergence=drawCodesign=highlightTopology=()=>{};\n'+
+  '  drawNetwork=renderNetworkInspection;drawCost=drawStage=drawVoltage=drawConvergence=highlightTopology=()=>{};\n'+
   '  drawMatrix=drawTopologyHistory;\n'+
   '  root.bindTestBus=(element,bus)=>bindAttackTarget(element,()=>bus);\n'+
   '  root.testSummary=()=>comparisonSummary();\n'+
   '  root.testCodesign=()=>codesignMetrics();\n'+
-  '  root.testRenderCodesign=()=>renderCodesignKey(codesignMetrics());\n'+
-  '  root.testDeploymentReceipt=()=>deploymentReceipt();root.testRenderDeploymentReceipt=renderDeploymentReceipt;\n'+
+  '  root.testProgress=()=>experimentProgress();root.testRenderProgress=renderExperimentProgress;\n'+
   '  root.testInspectPredictionLink=(receiver,source)=>inspectPredictionLink(receiver,source);\n'+
   '  root.testInspection=()=>predictionInspection();\n'+
   '  root.testProtocol=()=>protocolStatus();\n'+
@@ -76,6 +75,8 @@ function target(tagName='DIV') {
       return (listeners.get(type)||[]).map(handler=>handler(event)).at(-1);
     },
     setAttribute(name,value){this[name]=String(value);},
+    getAttribute(name){return this[name]??null;},
+    removeAttribute(name){delete this[name];},
     append(...children){this.children.push(...children);},
     replaceChildren(...children){this.children=children;},
     querySelector(selector){return this.children.find(child=>selector==='.pr-swatch'&&child.className?.startsWith('pr-swatch'))||null;},
@@ -134,7 +135,7 @@ function harness(saved,experiment='prediction',reducedMotion=true) {
   const node=id=>nodes.get('pr-'+id);
   return {clock,document,window,node,drawSeries:(...args)=>root.testDrawSeries(...args),pin:value=>root.testPin(value),
     interventionEvents:(view=root.powerDemo.getSnapshot())=>plain(root.testInterventionEvents(view)),interventionGroups:(view,domain=[0,20],scale=10)=>plain(root.testInterventionGroups(view,domain,v=>v*scale,{x:0,w:600})),
-    comparison:()=>plain(root.testComparison()),summary:()=>root.testSummary(),codesign:()=>plain(root.testCodesign()),renderCodesign:()=>root.testRenderCodesign(),deploymentReceipt:()=>plain(root.testDeploymentReceipt()),renderDeploymentReceipt:()=>root.testRenderDeploymentReceipt(),powerContext:()=>root.testPowerContext(),shownReference:()=>plain(root.testShownReference()),seriesButton:key=>seriesButtons.get(key),
+    comparison:()=>plain(root.testComparison()),summary:()=>root.testSummary(),codesign:()=>plain(root.testCodesign()),progress:()=>plain(root.testProgress()),renderProgress:()=>root.testRenderProgress(),powerContext:()=>root.testPowerContext(),shownReference:()=>plain(root.testShownReference()),seriesButton:key=>seriesButtons.get(key),
     samples:count=>clock.advance(count*1000/Number(node('speed').value)),
     bus:bus=>{const svg=element('g');svg.dataset.bus=String(bus);root.bindTestBus(svg,bus);return svg;},
     pointer(type,underPointer,detail={}){
@@ -1063,7 +1064,7 @@ test('communication design shows actual cost and deployed prediction budgets ind
   for(const key of ['online','scalar','static'])h.seriesButton(key).dispatch('click');
   assert.deepEqual(h.comparison().plotted,['causal']);
   assert.deepEqual(h.codesign(),view,'Hiding a time curve cannot hide a design or change its measured cost');
-  h.click('cost-gap');assert.deepEqual(h.codesign(),view,'The design chart always compares total stage cost');
+  h.click('cost-gap');assert.deepEqual(h.codesign(),view,'Measured method budgets and total costs are independent of the selected chart metric');
   assert.deepEqual(plain(h.snapshot()),before,'Read only design summaries cannot affect the experiment');
   const restored=harness(h.saved());assert.deepEqual(restored.codesign(),view);assert.equal(restored.state().playing,false);
   h.click('restart');assert.equal(h.codesign(),null);assert.equal(h.snapshot().t,0);
@@ -1081,8 +1082,6 @@ test('communication design acknowledges identical supports and a winning feedbac
   const view=allNoisy.codesign(),minimum=Math.min(...view.points.map(point=>point.cost));
   assert.equal(view.points.find(point=>point.key==='causal').cost,minimum,'The declared all noisy fixture makes feedback cheapest');
   assert.deepEqual(view.winnerKeys,['causal']);assert.match(view.status,/Feedback only/i);
-  allNoisy.renderCodesign();assert.deepEqual(allNoisy.node('codesign-key').children.filter(row=>row.dataset.winner==='true').map(row=>row.dataset.key),['causal']);
-  equal.renderCodesign();assert.deepEqual(equal.node('codesign-key').children.filter(row=>row.dataset.winner==='true').map(row=>row.dataset.key),ties.winnerKeys);
   assert.doesNotMatch(view.status,/learned.*(?:wins|best|optimal)|guaranteed|always better/i);
   const prediction=harness();assert.equal(prediction.codesign(),null);await compare(prediction);
   assert.equal(prediction.codesign(),null,'Prediction adaptation is not the isolated communication experiment');
@@ -2142,60 +2141,76 @@ test('link receipt distinguishes pending execution and saved history and preserv
   h.change('experiment','prediction');assert.equal(h.linkEvidence(),null,'Adaptive prediction is not a fixed sparse deployment comparison');
 });
 
-test('communication cost ledger keeps actual values, pending results and every winner without changing the run',async()=>{
-  const h=harness(undefined,'communication');await compare(h);
-  const inspect=()=>{
-    const before=plain(h.snapshot()),metrics=h.codesign();h.renderCodesign();
-    const rows=h.node('codesign-key').children;
-    assert.deepEqual(rows.map(row=>row.dataset.key),['online','scalar','static','causal']);
-    for(const [i,row] of rows.entries()){
-      const point=metrics.points[i];
-      assert.equal(Number(row.dataset.links),point.links);assert.equal(Number(row.dataset.cost),point.cost);
-      assert.equal(row.dataset.winner,String(metrics.winnerKeys.includes(point.key)));
-      assert.equal(row.children[0].scope,'row');
-      assert.equal(row.children[1].textContent,String(point.links));
-      assert.equal(row.children[2].textContent,d3.format('.6~g')(point.cost));
-      assert.equal(row.children[0].children.length,metrics.winnerKeys.includes(point.key)?2:1);
-    }
-    assert.deepEqual(plain(h.snapshot()),before,'Rendering the ledger does not advance time or modify a controller');
-    return metrics;
-  };
-  assert.deepEqual(inspect().winnerKeys,[],'Fresh zero costs do not declare a winner');
-  h.click('step');inspect();
-  for(const key of ['online','scalar','static'])h.seriesButton(key).dispatch('click');
-  h.click('cost-gap');inspect();
-  const restored=harness(h.saved());restored.renderCodesign();
-  assert.deepEqual(restored.node('codesign-key').children.map(row=>row.dataset),h.node('codesign-key').children.map(row=>row.dataset));
+test('persistent experiment stages explain the automatic reset without stopping ongoing attacks',async()=>{
+  const h=harness(undefined,'communication');
+  assert.equal(h.node('experiment-progress').hidden,false);
+  assert.equal(h.node('progress-learning').dataset.status,'active');
+  assert.equal(h.node('progress-learning')['aria-current'],'step');
+  assert.equal(h.node('progress-comparison').dataset.status,'pending');
+  assert.equal(h.node('progress-comparison')['aria-current'],undefined);
+  assert.match(h.node('progress-learning-count').textContent,/^0\b/);
+  assert.match(h.node('transition-note').textContent,/fresh/i);
+  assert.match(h.node('transition-note').textContent,/zero/i);
+  assert.equal(h.node('learning-title').textContent,'Experiment results');
+  assert.equal(h.node('results-stage').textContent,'Learning progress');
+  assert.equal(h.node('phase').hidden,true,'Communication uses one visible progress explanation');
+  const stageBefore=plain(h.progress());
+  h.change('intervention','power');pointerClick(h,h.bus(23));
+  await h.clock.until(()=>h.snapshot().phase==='deployment');
+  assert.equal(h.state().playing,true,'Automatic handoff introduces no confirmation or pause');
+  assert.deepEqual(h.state().activeAttackBuses,[23]);
+  assert.equal(h.snapshot().t,0);
+  assert.ok(Object.values(h.snapshot().cumulative).every(cost=>cost===0),'Fresh comparison excludes discovery costs');
+  assert.equal(h.node('progress-learning').dataset.status,'complete');
+  assert.equal(h.node('progress-learning')['aria-current'],undefined);
+  assert.equal(h.node('progress-comparison').dataset.status,'active');
+  assert.equal(h.node('progress-comparison')['aria-current'],'step');
+  assert.match(h.node('progress-learning-count').textContent,/^180\b/);
+  assert.match(h.node('progress-comparison-count').textContent,/^0\b/);
+  assert.match(h.node('transition-note').textContent,/fresh/i);
+  assert.match(h.node('transition-note').textContent,/zero/i);
+  assert.match(h.node('transition-note').textContent,/fixed/i);
+  assert.equal(h.node('learning-title').textContent,'Experiment results');
+  assert.equal(h.node('results-stage').textContent,'Controller comparison');
+  const support=plain(h.snapshot().deployedSupport);
+  await h.samples(8);
+  assert.ok(h.snapshot().t>=8,'Playback continues through the explained handoff');
+  assert.deepEqual(plain(h.snapshot().deployedSupport),support);
+  assert.ok(h.snapshot().eventLog.some(event=>event.type==='pulse'&&event.bus===23),'The attack executes in the comparison');
+  assert.match(h.node('transition-note').textContent,/zero/i,'Reset explanation remains after the first comparison samples');
+  h.click('run');
+  const restored=harness(h.saved());
+  assert.deepEqual(restored.progress(),h.progress());
+  assert.equal(restored.node('learning-title').textContent,'Experiment results');
+  assert.equal(restored.node('results-stage').textContent,'Controller comparison');
+  assert.equal(restored.state().playing,false);
+  h.click('restart');
+  assert.deepEqual(h.progress(),stageBefore);
+  assert.equal(h.node('progress-comparison').dataset.status,'pending');
 });
 
-test('deployment sequence uses actual short discovery, selection and fresh comparison without changing execution',async()=>{
+test('persistent stages report short discovery honestly and ignore historical topology inspection',()=>{
   const h=linkEvidenceFixture();
   const inspect=()=>{
-    const before=plain(h.snapshot()),receipt=h.deploymentReceipt(),support=before.deployedSupport;
-    assert.equal(receipt.discoverySamples,before.discoveryRecord.t);
-    assert.equal(receipt.scoreSamples,support.scoreSamples);
-    assert.equal(receipt.remoteLinks,support.links.filter(link=>link.from!==link.to).length);
-    assert.equal(receipt.fixedLinks,support.fixedLinks.filter(link=>link.from!==link.to).length);
-    const fixed=new Set(support.fixedLinks.map(link=>link.from+'>'+link.to));
-    assert.equal(receipt.newLinks,support.links.filter(link=>link.from!==link.to&&!fixed.has(link.from+'>'+link.to)).length);
-    assert.equal(receipt.comparisonSamples,before.t);
-    assert.deepEqual(receipt.stages.map(stage=>stage.key),['discovery','selection','synthesis','comparison']);
-    assert.deepEqual(receipt.stages.map(stage=>stage.status),['complete','complete','complete','current']);
-    h.renderDeploymentReceipt();
-    assert.equal(h.node('codesign-flow').children.length,4);
-    assert.equal(h.node('codesign-flow').children[3]['aria-current'],'step');
-    assert.deepEqual(plain(h.snapshot()),before,'Reading and rendering the sequence cannot change the physical trial');
-    return receipt;
+    const before=plain(h.snapshot()),progress=h.progress();h.renderProgress();
+    assert.match(h.node('progress-learning-count').textContent,new RegExp('^'+before.discoveryRecord.t+'\\b'));
+    assert.match(h.node('progress-comparison-count').textContent,new RegExp('^'+before.t+'\\b'));
+    assert.equal(h.node('progress-learning').dataset.status,'complete');
+    assert.equal(h.node('progress-comparison').dataset.status,'active');
+    assert.equal(h.node('progress-comparison')['aria-current'],'step');
+    assert.deepEqual(plain(h.snapshot()),before,'The persistent explanation does not alter physical execution');
+    return progress;
   };
-  const initial=inspect();assert.equal(initial.discoverySamples,35);assert.equal(initial.comparisonSamples,0);
-  h.click('step');const first=inspect();assert.equal(first.comparisonSamples,1);
-  h.click('source-fault');assert.deepEqual(inspect(),first,'A source toggle cannot rewrite completed discovery or synthesis');
-  h.event('topology-history','input');assert.deepEqual(inspect(),first,'Reviewing discovery links does not replace current trial evidence');
-  h.click('history-live');const restored=harness(h.saved());assert.deepEqual(restored.deploymentReceipt(),first);
-  await compare(h);const continued=inspect();assert.ok(continued.comparisonSamples>180);
-  assert.equal(continued.discoverySamples,35);assert.equal(continued.remoteLinks,first.remoteLinks);assert.equal(continued.newLinks,first.newLinks);
-  h.click('restart');assert.equal(h.deploymentReceipt(),null);h.renderDeploymentReceipt();assert.equal(h.node('codesign-flow').children.length,0);
-  const prediction=harness();assert.equal(prediction.deploymentReceipt(),null,'Adaptive correction is not a fixed communication comparison');
+  const initial=inspect();assert.equal(h.snapshot().discoveryRecord.t,35);
+  h.click('step');const first=inspect();assert.notDeepEqual(first,initial);
+  h.click('source-fault');assert.deepEqual(inspect(),first,'A source toggle cannot rewrite completed learning');
+  h.event('topology-history','input');assert.deepEqual(inspect(),first,'Historical links do not rewind the live experiment stage');
+  h.click('history-live');assert.deepEqual(harness(h.saved()).progress(),first);
+  h.click('restart');assert.equal(h.node('progress-learning').dataset.status,'active');
+  assert.equal(h.node('progress-comparison').dataset.status,'pending');
+  const prediction=harness();
+  assert.equal(prediction.node('experiment-progress').hidden,true,'The specialized communication explanation is not shown for adapting prediction coefficients');
+  assert.equal(prediction.node('phase').hidden,false);
 });
 
 test('forecast heading reports current synthetic source settings without rewriting sealed messages, discovery or replay',async()=>{
