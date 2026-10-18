@@ -139,7 +139,55 @@ async function main() {
       }
       assert.match(result.detail,/Δ .* mpu/);
     };
+    const checkNetworkInspection = async surface => {
+      const reading=await surface.evaluate(()=>{
+        const root=document.querySelector('#power-response-demo'),state=root.powerDemo.getState(),snapshot=root.powerDemo.getSnapshot();
+        const caption=document.querySelector('#pr-network-inspection'),network=document.querySelector('#pr-network');
+        const box=caption.getBoundingClientRect(),svg=network.getBoundingClientRect();
+        const glyphs=Array.from(caption.querySelectorAll('span')).filter(span=>!span.hidden).map(span=>{
+          const range=document.createRange();range.selectNodeContents(span);
+          return {text:span.textContent,font:parseFloat(getComputedStyle(span).fontSize),rects:Array.from(range.getClientRects()).map(r=>({left:r.left,right:r.right,top:r.top,bottom:r.bottom}))};
+        });
+        return {state,phase:snapshot.phase,glyphs,hidden:caption.hidden,data:{...caption.dataset},
+          source:document.querySelector('#pr-network-inspection-source').textContent,receiver:document.querySelector('#pr-network-inspection-receiver').textContent,
+          receiverHidden:document.querySelector('#pr-network-inspection-receiver').hidden,join:document.querySelector('#pr-network-inspection-join').textContent,
+          status:document.querySelector('#pr-network-inspection-status').textContent,description:network.getAttribute('aria-description'),
+          roles:Array.from(network.querySelectorAll('.bus-node')).filter(node=>node.dataset.inspectionRole!=='none').map(node=>{
+            const text=node.querySelector('.bus-number'),rect=text.getBoundingClientRect();
+            return {bus:Number(node.dataset.bus),role:node.dataset.inspectionRole,text:text.textContent,font:parseFloat(getComputedStyle(text).fontSize),
+              left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom};}),
+          box:{left:box.left,right:box.right,top:box.top,bottom:box.bottom},svg:{left:svg.left,right:svg.right,top:svg.top,bottom:svg.bottom},
+          inspectedColumnFont:parseFloat(getComputedStyle(document.querySelector('#pr-matrix .matrix-columns text[data-inspected="true"]')||caption).fontSize),
+          selectedRowFont:parseFloat(getComputedStyle(document.querySelector('#pr-matrix .matrix-rows g[aria-pressed="true"] text')||caption).fontSize)};
+      });
+      const {state}=reading,active=state.inspectedSource!==null&&[5,7,8,12,14,18,21,24].includes(state.selectedBus);
+      assert.equal(reading.hidden,!active,'Role caption is contextual, not another always visible diagnostic');
+      if(!active){assert.equal(reading.source,'');assert.equal(reading.roles.length,0);return;}
+      const local=state.inspectedSource===state.selectedBus,connected=local||!reading.description.includes('No link');
+      assert.equal(reading.data.source,String(state.inspectedSource));assert.equal(reading.data.receiver,String(state.selectedBus));
+      assert.equal(reading.data.local,String(local));assert.equal(reading.data.connected,String(connected));
+      assert.equal(reading.data.context,state.historyIndex!==null?'history':reading.phase==='deployment'?'deployed':'candidate');
+      assert.equal(reading.source,(local?'Source and inverter ':'Source ')+state.inspectedSource);
+      assert.equal(reading.receiver,local?'':'Inverter '+state.selectedBus);assert.equal(reading.receiverHidden,local);
+      assert.equal(reading.join,local?'':connected?'→':'·','Never imply a connection for an absent link');
+      assert.equal(reading.status,reading.description.split(' · ').slice(1).join(' · '));
+      assert.equal(reading.roles.length,local?1:2);
+      for(const mark of reading.roles){
+        assert.equal(mark.text,String(mark.bus));assert.ok(mark.font>=12,'Inspected bus number is readable');
+        assert.ok(mark.left>=reading.svg.left-1&&mark.right<=reading.svg.right+1&&mark.top>=reading.svg.top-1&&mark.bottom<=reading.svg.bottom+1,'Role number stays inside the actual feeder');
+      }
+      for(const span of reading.glyphs){assert.ok(span.font>=12);for(const rect of span.rects)assert.ok(rect.left>=reading.box.left-1&&rect.right<=reading.box.right+1&&rect.top>=reading.box.top-1&&rect.bottom<=reading.box.bottom+1,'Full role caption fits without clipping');}
+      assert.ok(reading.inspectedColumnFont>=12&&reading.selectedRowFont>=12,'Selected source column and receiver row remain readable');
+    };
+    const captureNetworkInspection = async surface => {
+      await checkNetworkInspection(surface);
+      const width=surface.viewportSize().width,phase=await surface.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().phase),before=await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
+      const preview=await surface.locator('.pr-network-panel').screenshot({path:path.join(output,'network-inspection-'+width+'-'+phase+'.jpg'),type:'jpeg',quality:90});
+      console.log('CLOUD_ROLE_PREVIEW_'+width+'_'+phase+' '+preview.toString('base64'));
+      assert.equal(await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),before,'Screenshot review changes no actual trial');
+    };
     const checkForecastObservation = async surface => {
+      await checkNetworkInspection(surface);
       const reading=await surface.evaluate(()=>{
         const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),state=root.powerDemo.getState();
         const panel=document.querySelector('#pr-forecast-observation'),values=document.querySelector('#pr-forecast-values');
@@ -727,6 +775,7 @@ async function main() {
       await inspect(Number(absent),false);
       await inspect(edge.receiver,true,true);
       await inspect(edge.source,true);
+      await captureNetworkInspection(page);
       const sourceState=async()=>page.evaluate(()=>{
         const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),state=root.powerDemo.getState();
         return {faults:snapshot.faults,state:{selectedBus:state.selectedBus,inspectedSource:state.inspectedSource,playing:state.playing},
@@ -1464,6 +1513,7 @@ async function main() {
     assert.ok(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'The live design chart fits the mobile page');
     await phone.locator('.pr-learning-panel').screenshot({path:path.join(output,'codesign-mobile.png')});
     await captureCodesign(phone);
+    await captureNetworkInspection(phone);
     await captureDashboard(phone);
     await phone.screenshot({ path: path.join(output, 'mobile.png'), fullPage: true });
     await selectSetting(phone,'noise','8');

@@ -521,6 +521,21 @@
       label:'Source bus '+inspectedSource+' → inverter '+selectedBus+' · '+(local?'Local source':connected?'Selected link':'No link')
         +' · '+(historyIndex!==null?'Saved discovery':snapshot.phase==='deployment'?'Deployed':'Candidate')};
   }
+  function renderNetworkInspection() {
+    const caption=$('network-inspection'),inspection=predictionInspection();
+    caption.hidden=!inspection;
+    caption.dataset.source=inspection?String(inspection.source):'';
+    caption.dataset.receiver=inspection?String(inspection.receiver):'';
+    caption.dataset.connected=inspection?String(inspection.connected):'';
+    caption.dataset.local=inspection?String(inspection.local):'';
+    caption.dataset.context=inspection?(historyIndex!==null?'history':snapshot.phase==='deployment'?'deployed':'candidate'):'';
+    $('network-inspection-source').textContent=inspection?(inspection.local?'Source and inverter ':'Source ')+inspection.source:'';
+    $('network-inspection-receiver').textContent=inspection&&!inspection.local?'Inverter '+inspection.receiver:'';
+    $('network-inspection-receiver').hidden=!inspection||inspection.local;
+    $('network-inspection-join').textContent=inspection&&!inspection.local?(inspection.connected?'→':'·'):'';
+    $('network-inspection-join').hidden=!inspection||inspection.local;
+    $('network-inspection-status').textContent=inspection?inspection.label.split(' · ').slice(1).join(' · '):'';
+  }
   function selectBus(bus) {
     selectedBus = bus;
     if(!hasInverter(bus)) inspectedSource=null;
@@ -874,7 +889,7 @@
     }
     actionNote(attack?(attack.latched?'Continuous attack · Bus ':'Holding bus ')+bus:'Pulse queued');
     // Queuing an event must not restart every chart transition.
-    renderControls(); drawNetwork(); save();
+    renderControls(); renderNetworkInspection(); drawNetwork(); save();
   }
   function fault(bus=selectedBus,{startPlayback=false,preserveSelection=false}={}) {
     if (!canAttack(bus)) return;
@@ -1261,7 +1276,7 @@
       .attr('stroke-opacity',bus=>Math.min(.85,Math.abs(scheduledByBus.get(bus) || 0)/scheduleScale))
       .attr('stroke-dasharray',bus=>(scheduledByBus.get(bus) || 0)<0?'3 2':null);
     nodes.select('.bus-number').attr('text-anchor','middle').attr('x',0).attr('y',27)
-      .style('fill','var(--muted-foreground)').style('font-size','9px').text(bus=>bus);
+      .style('fill','var(--muted-foreground)').style('font-size',bus=>inspection&&(bus===inspection.source||bus===inspection.receiver)?'12px':'9px').text(bus=>bus);
     nodes.select('.pr-inspection-ring')
       .attr('display',bus=>inspection && (bus===inspection.source || bus===inspection.receiver)?null:'none')
       .attr('stroke',bus=>bus===inspection?.source?'var(--primary)':'var(--foreground)').attr('stroke-width',2)

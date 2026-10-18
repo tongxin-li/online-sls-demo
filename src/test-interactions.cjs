@@ -2253,3 +2253,31 @@ test('shared controller key precedes every panel and toggles only visibility',()
     assert.equal(h.state().playing,false);
   }
 });
+
+test('network role caption traces actual candidate deployed local absent and history links without changing the trial',async()=>{
+  const h=harness(undefined,null);
+  assert.equal(h.node('network-inspection').hidden,true,'No persistent diagnostic before inspection');
+  const check=(receiver,source)=>{
+    const before=plain(h.snapshot());h.inspectLink(receiver,source);
+    const actual=h.inspection(),caption=h.node('network-inspection');
+    assert.equal(caption.hidden,false);assert.equal(caption.dataset.source,String(source));assert.equal(caption.dataset.receiver,String(receiver));
+    assert.equal(caption.dataset.connected,String(actual.connected));assert.equal(caption.dataset.local,String(actual.local));
+    assert.equal(h.node('network-inspection-source').textContent,(actual.local?'Source and inverter ':'Source ')+source);
+    assert.equal(h.node('network-inspection-join').textContent,actual.local?'':actual.connected?'→':'·','An absent link never gets an arrow');
+    assert.equal(h.node('network-inspection-receiver').hidden,actual.local);
+    assert.equal(h.node('network-inspection-status').textContent,actual.label.split(' · ').slice(1).join(' · '));
+    assert.deepEqual(plain(h.snapshot()),before,'Role labels cannot alter physical states, forecasts, support, events or costs');
+  };
+  for(const receiver of PowerDemo.constants.inverterBuses)for(let source=2;source<=24;source++)check(receiver,source);
+  assert.equal(h.node('network-inspection').dataset.context,'candidate');
+  await compare(h);
+  for(const source of [2,5,7,24])check(5,source);
+  assert.equal(h.node('network-inspection').dataset.context,'deployed');
+  h.event('topology-history','input');check(5,7);assert.equal(h.node('network-inspection').dataset.context,'history');
+  h.click('history-live');check(5,7);
+  const saved=h.saved(),restored=harness(saved,'communication');
+  assert.deepEqual(plain(restored.snapshot()),plain(h.snapshot()),'Inspected pair retains exact version 13 replay');
+  assert.equal(restored.node('network-inspection').dataset.source,'7');
+  h.change('bus',2);assert.equal(h.node('network-inspection').hidden,true);
+  assert.equal(h.node('network-inspection-source').textContent,'','No stale source label');
+});

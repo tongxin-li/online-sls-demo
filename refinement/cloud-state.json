@@ -783,7 +783,16 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-18T09:00:00+08:00",
+    "started_at": "2026-10-18T09:03:32+08:00",
+    "expires_at": "2026-10-18T09:43:32+08:00",
+    "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
+    "candidate_branch": "cloud/refine/20261018-0900",
+    "base_commit": "e5c4359617dcd084368f476a0ef86bdacdfa290f",
+    "status": "validating",
+    "scope": "Contextual physical source and inverter role caption with readable inspected labels"
+  },
   "next_focus": "Review small physical bus/source labels and selected source-to-inverter path on phone artifacts. Improve the existing network/matrix inspection hierarchy without extra panels or controls, preserve honest absent links, sealed forecast timing, measured commands, all four costs and fixed deployment. Keep the compact desktop columns and original phone reading order, recorded regimes, readable timing captions and stable cost buttons. No parameter retuning or broad benchmark study for visual work.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
@@ -901,10 +910,10 @@
       "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and candidate workflow results for metadata recovery. Do not count metadata validation as a new invocation or improvement, or promote an older branch over newer main."
     },
     "previous_renewed_metadata_verification": {
-      "commit": "a52fef1690a0cb9a2299669f7137eae09ba13552",
-      "candidate_run": 39078712721,
-      "main_run": 39079383623,
-      "pages_run": 39079383532,
+      "commit": "e5c4359617dcd084368f476a0ef86bdacdfa290f",
+      "candidate_run": 39082377587,
+      "main_run": 39082970486,
+      "pages_run": 39082970980,
       "result": "success independently verified before this slot"
     },
     "renewed_completion_history": {
@@ -1041,7 +1050,7 @@
     "hard_deadline": "2026-10-19T01:00:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 8,
+    "invocation_count": 9,
     "completed_count": 8,
     "runs": [
       {
@@ -1402,9 +1411,31 @@
         "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed. No public HTTP byte comparison performed this pass.",
         "completed_at": "2026-10-18T00:19:45.317Z",
         "publication": "Candidate and main validation succeeded. Generated child has the tested source as its single parent and only index.html changed. Promoted with expected current main SHA and force false. Pages succeeded for the exact tested ready version and deployment logs were read."
+      },
+      {
+        "slot": "2026-10-18T09:00:00+08:00",
+        "started_at": "2026-10-18T09:03:32+08:00",
+        "status": "validating",
+        "candidate_branch": "cloud/refine/20261018-0900",
+        "base_commit": "e5c4359617dcd084368f476a0ef86bdacdfa290f",
+        "counted_completed": false,
+        "changes": [
+          "Add a contextual caption under the existing feeder that identifies the inspected source and inverter using its actual connection, local channel and candidate/deployed/saved context. No arrow is displayed for an absent remote link.",
+          "Raise only the inspected physical bus numbers and selected matrix axis labels to 12 px with a white label halo, retaining all unselected buses, actual rings and link geometry. No new controls or always visible diagnostic.",
+          "Add all-cell read-only caption and exact replay regressions plus desktop/phone actual-label, role, containment and screenshot checks. Scientific model, controllers, costs and intervention behavior stay unchanged."
+        ]
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "slot": "2026-10-18T09:00:00+08:00",
+      "started_at": "2026-10-18T09:03:32+08:00",
+      "expires_at": "2026-10-18T09:43:32+08:00",
+      "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
+      "candidate_branch": "cloud/refine/20261018-0900",
+      "base_commit": "e5c4359617dcd084368f476a0ef86bdacdfa290f",
+      "status": "validating",
+      "scope": "Contextual physical source and inverter role caption with readable inspected labels"
+    },
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
