@@ -21,7 +21,7 @@
   const ongoing=()=>snapshot.protocol==='continuous-phi-v1';
   const communicationNoiseLevels=[...PowerDemo.constants.communicationBetas,...(PowerDemo.constants.communicationStressBetas || [])];
   function optionsFromControls() {
-    const experiment=$('experiment').value==='prediction'?'prediction':'communication';
+    const experiment=trialProtocol==='continuous-phi-v1'?'communication':$('experiment').value==='prediction'?'prediction':'communication';
     const beta=Number($('noise').value);
     return {networkId:PowerDemo.constants.networkId,experiment,powerScenario:$('power-scenario').value || DEFAULT_SCENARIO,beta:communicationNoiseLevels.includes(beta)?beta:1,preset:experiment==='communication'?'mixed':$('preset').value,
       ...(trialProtocol==='continuous-phi-v1'?{protocol:trialProtocol}:experiment==='communication'?{horizon:180}:{})};
@@ -2034,7 +2034,7 @@
   }
   announce('Ready');
   hydrate(window.openai?.widgetState);
-  if(!restored&&ongoing()) {$('view').value='cost';$('matrix-view').value='change';inspectedSource=hasInverter(selectedBus)?selectedBus:null;}
+  if(!restored&&ongoing()) {$('experiment').value='communication';$('view').value='cost';$('matrix-view').value='change';inspectedSource=hasInverter(selectedBus)?selectedBus:null;}
   if (!matrixReference) captureMatrixReference();
   actionNote(snapshot.pendingPulses?.length ? 'Pulse queued · Run or Step' : attackInstruction());
   window.addEventListener('openai:set_globals',e=>{if(!playing&&!restored&&!journal.length){hydrate(e.detail?.globals?.widgetState);render();}});

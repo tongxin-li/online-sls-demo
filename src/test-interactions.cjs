@@ -380,6 +380,7 @@ test('old algorithm saves start a clean paused trial instead of replaying incomp
     const old=plain(h.saved());old.privateContent.version=version;
     const restored=harness(old);
     assert.equal(restored.snapshot().t,0);assert.equal(restored.snapshot().phase,'ongoing');
+    assert.equal(restored.snapshot().experiment,'communication');assert.equal(restored.node('experiment').value,'communication');
     assert.ok(Object.values(restored.snapshot().cumulative).every(value=>value===0));
     assert.equal(restored.snapshot().eventLog.length,0);assert.equal(restored.state().playing,false);
     assert.equal(restored.node('attack-mode').value,'continuous');assert.equal(restored.node('view').value,'cost');
