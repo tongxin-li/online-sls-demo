@@ -1348,9 +1348,11 @@
     if(!scroller||!hint)return;
     const maximum=Math.max(0,scroller.scrollWidth-scroller.clientWidth),overflow=maximum>1;
     hint.hidden=!overflow;
-    const bounds=scroller.getBoundingClientRect();
+    const bounds=scroller.getBoundingClientRect(),inset=overflow?40:0,offset=overflow?scroller.scrollLeft:0;
+    el.querySelector('.matrix-receiver-axis')?.setAttribute('transform','translate('+offset+',0)');
+    if(overflow)el.querySelector('.matrix-source-title')?.setAttribute('x',offset+inset+(scroller.clientWidth-inset)/2);
     const shown=Array.from(el.querySelectorAll('.matrix-columns text')).filter(node=>{
-      const box=node.getBoundingClientRect();return box.left>=bounds.left-.5&&box.right<=bounds.right+.5;
+      const box=node.getBoundingClientRect();return box.left>=bounds.left+inset-.5&&box.right<=bounds.right+.5;
     }).map(node=>Number(node.__data__));
     const left=overflow&&scroller.scrollLeft>1,right=overflow&&scroller.scrollLeft<maximum-1;
     hint.dataset.first=overflow&&shown.length?String(shown[0]):'';
@@ -1414,12 +1416,15 @@
       .attr('data-history-index',historyIndex===null?'latest':historyIndex).attr('data-topology-updates',topology.cumulative.transitions);
     if(svg.select('.matrix-cells').empty()) {
       svg.append('title');svg.append('text').attr('class','matrix-source-title matrix-axis');
-      svg.append('text').attr('class','matrix-receiver-title matrix-axis');
       svg.append('g').attr('class','matrix-columns');svg.append('g').attr('class','matrix-cells');
       svg.append('rect').attr('class','matrix-selected-row').attr('fill','none').attr('pointer-events','none');
       svg.append('rect').attr('class','matrix-inspected-cell').attr('fill','none').attr('pointer-events','none');
-      svg.append('g').attr('class','matrix-rows');
+      const axis=svg.append('g').attr('class','matrix-receiver-axis');
+      axis.append('rect').attr('class','matrix-receiver-background').attr('x',0).attr('y',0).attr('width',left).attr('fill','var(--background)');
+      axis.append('text').attr('class','matrix-receiver-title matrix-axis');
+      axis.append('g').attr('class','matrix-rows');
     }
+    svg.select('.matrix-receiver-background').attr('height',height);
     svg.select('title').text(changing?'Signed change in learned gain energy divided by each receiver’s offline energy. Outline shows selected sources.':'Rows are inverter receivers. Columns are prediction sources.');
     svg.select('.matrix-source-title').attr('x',left+(width-left)/2).attr('y',14).attr('text-anchor','middle').text('Source bus');
     svg.select('.matrix-receiver-title').attr('transform','translate(12,'+(top+cellHeight*receivers.length/2)+') rotate(-90)').attr('text-anchor','middle').text('Inverter');
@@ -1447,7 +1452,16 @@
     $('matrix-inspect-hint').style.visibility=inspected?'hidden':'visible';
     const inspect=(receiver,source,focus=false)=>{
       inspectPredictionLink(receiver,source);
-      if(focus) svg.select('.matrix-cells').selectAll('rect').filter(d=>d.receiver===receiver&&d.source===source).node()?.focus();
+      if(focus) {
+        const node=svg.select('.matrix-cells').selectAll('rect').filter(d=>d.receiver===receiver&&d.source===source).node();
+        node?.focus();
+        const scroller=el.parentElement;
+        if(node&&scroller.scrollWidth>scroller.clientWidth+1) {
+          const box=node.getBoundingClientRect(),bounds=scroller.getBoundingClientRect();
+          if(box.left<bounds.left+left)scroller.scrollLeft-=bounds.left+left-box.left;
+          updateMatrixScrollHint();
+        }
+      }
     };
     const marks=svg.select('.matrix-cells').selectAll('rect').data(cells,d=>d.receiver+','+d.source).join(enter=>{const r=enter.append('rect').attr('class','matrix-cell');r.append('title');return r;})
       .attr('x',d=>left+d.j*cellWidth+1).attr('y',d=>top+d.i*cellHeight+1).attr('width',Math.max(2,cellWidth-2)).attr('height',cellHeight-2).attr('rx',2)

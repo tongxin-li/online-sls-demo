@@ -114,19 +114,35 @@ async function main() {
     const before=await read(surface),scroller=surface.locator('.pr-matrix-scroll'),hint=surface.locator('#pr-matrix-scroll-hint');
     assert.equal(before.snapshot.networkId,'feeder47');
     assert.equal(await scroller.getAttribute('aria-describedby'),'pr-matrix-scroll-hint');
-    const initial=await scroller.evaluate(node=>node.scrollLeft);
+    await scroller.scrollIntoViewIfNeeded();
+    const seen=new Set(),initial=await scroller.evaluate(node=>node.scrollLeft);
     const move=async fraction=>{
       await scroller.evaluate((node,fraction)=>{node.scrollLeft=fraction*(node.scrollWidth-node.clientWidth);},fraction);
       const position=fraction===0?'start':fraction===1?'end':'middle';
       await surface.waitForFunction(position=>document.querySelector('#pr-matrix-scroll-hint').dataset.position===position,position);
       const measured=await scroller.evaluate(node=>{
         const bounds=node.getBoundingClientRect(),columns=Array.from(node.querySelectorAll('.matrix-columns text'));
-        const visible=columns.filter(label=>{const box=label.getBoundingClientRect();return box.left>=bounds.left-.5&&box.right<=bounds.right+.5;}).map(label=>Number(label.firstChild.nodeValue));
+        const axis=node.querySelector('.matrix-receiver-background').getBoundingClientRect(),sourceTitle=node.querySelector('.matrix-source-title').getBoundingClientRect();
+        const visible=columns.filter(label=>{const box=label.getBoundingClientRect();return box.left>=axis.right-.5&&box.right<=bounds.right+.5;}).map(label=>Number(label.firstChild.nodeValue));
+        const receivers=Array.from(node.querySelectorAll('.matrix-rows g')).map(row=>{
+          const box=row.querySelector('text').getBoundingClientRect(),point=row.querySelector('rect').getBoundingClientRect();
+          return {bus:row.__data__,left:box.left,right:box.right,centre:(box.top+box.bottom)/2,rowCentre:(point.top+point.bottom)/2,
+            hit:document.elementFromPoint((point.left+point.right)/2,(point.top+point.bottom)/2)?.closest('g')===row};
+        });
+        const hits=Array.from(node.querySelectorAll('.matrix-cell')).filter(cell=>{const box=cell.getBoundingClientRect();return box.left>=axis.right&&box.right<=bounds.right;}).map(cell=>{
+          const box=cell.getBoundingClientRect();return document.elementFromPoint((box.left+box.right)/2,(box.top+box.bottom)/2)?.closest('.matrix-cell')===cell;
+        });
         const hint=document.querySelector('#pr-matrix-scroll-hint');
-        return {visible,text:hint.textContent,hidden:hint.hidden,data:{...hint.dataset},sources:columns.map(label=>Number(label.firstChild.nodeValue)),
+        return {visible,axis:{left:axis.left,right:axis.right},bounds:{left:bounds.left,right:bounds.right},sourceTitle:{left:sourceTitle.left,right:sourceTitle.right},receivers,hits,text:hint.textContent,hidden:hint.hidden,data:{...hint.dataset},sources:columns.map(label=>Number(label.firstChild.nodeValue)),
           cells:node.querySelectorAll('.matrix-cell').length,left:node.scrollLeft,maximum:node.scrollWidth-node.clientWidth,font:parseFloat(getComputedStyle(hint).fontSize)};
       });
       assert.equal(measured.hidden,false);assert.ok(measured.font>=12);
+      assert.ok(Math.abs(measured.axis.left-measured.bounds.left)<1,'Receiver gutter stays at the viewport edge');
+      assert.equal(measured.receivers.length,16);
+      for(const row of measured.receivers){assert.ok(row.left>=measured.bounds.left&&row.right<measured.axis.right,'Every inverter number remains fully visible');assert.ok(Math.abs(row.centre-row.rowCentre)<3,'Receiver numbers stay aligned with their row');assert.equal(row.hit,true,'Every pinned receiver remains an actual pointer target');}
+      assert.ok(measured.sourceTitle.left>=measured.axis.right&&measured.sourceTitle.right<=measured.bounds.right,'Source title stays over visible columns');
+      assert.ok(measured.hits.length>0&&measured.hits.every(Boolean),'Uncovered source cells retain their real hit targets');
+      measured.visible.forEach(source=>seen.add(source));
       assert.deepEqual(measured.sources,Array.from({length:46},(_,i)=>i+2),'Scrolling retains every source header in order');
       assert.equal(measured.cells,736,'Scrolling retains all 16 by 46 actual cells');
       assert.equal(Number(measured.data.first),measured.visible[0]);assert.equal(Number(measured.data.last),measured.visible.at(-1));
@@ -151,12 +167,32 @@ async function main() {
       requestAnimationFrame(settled);
     }));
     for(const fraction of [0,.5,1])await move(fraction);
+    assert.deepEqual([...seen].sort((a,b)=>a-b),Array.from({length:46},(_,i)=>i+2),'Scrolling exposes every source beyond the fixed receiver labels');
     await scroller.evaluate((node,left)=>{node.scrollLeft=left;},initial);
     const after=await read(surface);
     assert.deepEqual(after.snapshot,before.snapshot,'Navigating the viewport changes no forecasts, state, support, event or cost');
     assert.equal(after.state.inspectedSource,before.state.inspectedSource);assert.equal(after.state.selectedBus,before.state.selectedBus);
     assert.equal(after.state.playing,false);
-    checks.push('Actual visible source ranges, both end directions, native keyboard scrolling and full trial invariance at '+surface.viewportSize().width);
+    checks.push('Pinned inverter labels, visible source title, truthful uncovered ranges, real row and cell hit targets, all source reachability, native keyboard scrolling and full trial invariance at '+surface.viewportSize().width);
+  };
+  const inspectMatrixKeyboard = async surface => {
+    const before=await read(surface),scroller=surface.locator('.pr-matrix-scroll');
+    await scroller.evaluate(node=>{node.scrollLeft=node.scrollWidth-node.clientWidth;});
+    await surface.waitForFunction(()=>document.querySelector('#pr-matrix-scroll-hint').dataset.position==='end');
+    const first=Number(await surface.locator('#pr-matrix-scroll-hint').getAttribute('data-first'));
+    const receiver=await surface.locator('.matrix-rows g[aria-pressed="true"]').evaluate(node=>node.__data__);
+    await surface.locator('.matrix-cell[data-receiver="'+receiver+'"][data-source="'+(first+1)+'"]').focus();
+    for(let i=0;i<3;i++){
+      await surface.keyboard.press('ArrowLeft');
+      const focus=await surface.evaluate(()=>{
+        const cell=document.activeElement,box=cell.getBoundingClientRect(),axis=document.querySelector('.matrix-receiver-background').getBoundingClientRect();
+        return {source:Number(cell.dataset.source),left:box.left,axisRight:axis.right};
+      });
+      assert.equal(focus.source,first-i);
+      assert.ok(focus.left>=focus.axisRight-.5,'Keyboard inspection keeps the focused source clear of pinned labels');
+    }
+    assert.deepEqual((await read(surface)).snapshot,before.snapshot,'Keyboard inspection changes no physical state or controller data');
+    checks.push('Native cell arrow inspection stays clear of fixed receiver labels at '+surface.viewportSize().width);
   };
   const switchNetwork = async (surface, id) => {
     await surface.locator('#pr-network-scenario').selectOption(id);
@@ -250,6 +286,7 @@ async function main() {
 
     await switchNetwork(page, 'feeder47');
     await inspectMatrixNavigation(page,true);
+    await inspectMatrixKeyboard(page);
     await page.locator('#pr-intervention').selectOption('power');
     await setting(page, 'speed', '32');
     const lastBus = page.locator('#pr-network [data-bus="47"] .pe-hit');
@@ -281,6 +318,7 @@ async function main() {
     const phone = await open({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
     await switchNetwork(phone, 'feeder47');
     await inspectMatrixNavigation(phone,true);
+    await inspectMatrixKeyboard(phone);
     await phone.locator('#pr-intervention').selectOption('power');
     await setting(phone, 'speed', '32');
     const phoneBus = phone.locator('#pr-network [data-bus="47"] .pe-hit');

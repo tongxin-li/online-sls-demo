@@ -783,8 +783,13 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
-  "next_focus": "First read final main repeat and reconcile this validated completion metadata without an improvement increment. Then consider preserving inverter receiver context while scrolling the existing large source matrix, retaining every source and fixed scientific results.",
+  "active_run": {
+    "slot": "2026-10-18T15:00:00+08:00",
+    "branch": "cloud/refine/20261018-1500",
+    "started_at": "2026-10-18T15:00:00+08:00",
+    "lease_expires_at": "2026-10-18T15:36:08+08:00"
+  },
+  "next_focus": "Validate persistent receiver context and native source inspection in the existing large matrix while preserving all sources and numerical results.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -902,7 +907,7 @@
       "main_run": 39104465997,
       "pages_run": 39104465907,
       "scope": "Completion record only. Product is already validated and deployed.",
-      "status": "Metadata validation pending at record creation. Main repeat 39104465997 is still running. Original historical count 15 and renewed invocation 13 completion 13 yield total 28. Parent 13:00 hold skip and duplicate 14:33 dispatch remain uncounted.",
+      "status": "14:00 completion metadata validated by 39104577790 with successful prepare and promoted at 1fde5eda0e08fa5db9708aa29213b0963cb90528. Product main repeat 39104465997 independently passed. Recovered metadata only; no count increment.",
       "instruction": "At the next existing scheduled slot read the actual main repeat result before source edits and the metadata candidate validation before promotion. This 14:00 completion is counted once in this candidate. Promote metadata only after normal successful validation with expected current main 3ca4649a50cb94e3e667392382042371f3510134 and force false. On newer main reapply only verified metadata without overwriting concurrent product changes or double counting. Metadata recovery, parent handoffs, held skip and duplicate dispatches are not refinements. Preserve the original 14:40:49 pass deadline."
     },
     "previous_renewed_metadata_verification": {
@@ -1036,6 +1041,12 @@
         "main_run": 39097144012,
         "pages_run": 39097143798,
         "result": "Main validation final success independently read. Commit is already an ancestor of current parent release. No recovery or completion increment."
+      },
+      {
+        "commit": "1fde5eda0e08fa5db9708aa29213b0963cb90528",
+        "candidate_run": 39104577790,
+        "product_main_run": 39104465997,
+        "result": "Final candidate prepare and product main success read with completed logs. Only cloud-state changed. Promoted by matching expected main with force false. No new completion or invocation for recovery."
       }
     ]
   },
@@ -1143,7 +1154,7 @@
     "hard_deadline": "2026-10-19T01:00:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 13,
+    "invocation_count": 14,
     "completed_count": 13,
     "runs": [
       {
@@ -1743,7 +1754,7 @@
           "candidate": "Passed with successful prepare job after native keyboard scroll settling fixture correction. Original failed candidate remains recorded unpublished.",
           "build": "passed",
           "reference_artifact": "passed unchanged reference fragment and all existing data checks",
-          "main": "Repeat validation 39104465997 is running at completion recording. Read its final actual result before next source edit.",
+          "main": "Main repeat 39104465997 final success independently read before this slot. All 224 cases, current generated page and complete original plus network desktop and phone browser suites passed.",
           "browser": "Full original desktop and phone browser suite and both network suites passed without runtime errors. Existing playback, repeated and continuous attacks, forecast corruption and repair, automatic fresh comparison, stable cost view switching, all four traces, network scoped exact replay and per network controls remain covered. New geometry checks verify fully visible source ranges and start middle end arrows, native keyboard scrolling, all 46 sources and 736 rendered cells, and full paused trial invariance before and after saved replay on desktop 1440 and phone 390.",
           "benchmarks": "Not rerun. No engine, objective, controller, learning, forecast, noise, limit, attack, scientific result or benchmark changes."
         },
@@ -1785,13 +1796,43 @@
         "main_run": 39104465997,
         "pages_run": 39104465907,
         "completed_at": "2026-10-18T06:35:10.282Z",
-        "publication": "Candidate validation and prepare succeeded. Generated child has tested source as its single parent and changes only index.html. Main was advanced with matching expected base 02231469c16b43f03c33460e76d86145373b7c2d and force false. Pages build and deploy logs independently confirmed the exact ready version 3ca4649a50cb94e3e667392382042371f3510134 and canonical deployment environment. Main repeat remains running.",
+        "publication": "Candidate validation and prepare succeeded. Generated child has tested source as its single parent and changes only index.html. Main was advanced with matching expected base 02231469c16b43f03c33460e76d86145373b7c2d and force false. Pages build and deploy logs independently confirmed the exact ready version 3ca4649a50cb94e3e667392382042371f3510134 and canonical deployment environment. Main repeat remains running. Final main repeat success independently verified at the next existing scheduled preflight.",
         "remaining_visual_limitations": [
           "Existing receiver axis labels and the centered source axis title scroll out of the viewport on the large matrix. Every cell remains reachable and visible source ranges now identify the viewport. Assess receiver context in the existing matrix on the next pass without hiding sources or adding panels."
         ]
+      },
+      {
+        "slot": "2026-10-18T15:00:00+08:00",
+        "started_at": "2026-10-18T15:00:00+08:00",
+        "preflight_at": "2026-10-18T14:56:08+08:00",
+        "status": "validating",
+        "candidate_branch": "cloud/refine/20261018-1500",
+        "base_commit": "1fde5eda0e08fa5db9708aa29213b0963cb90528",
+        "counted_invocation": true,
+        "counted_completed": false,
+        "lease_expires_at": "2026-10-18T15:36:08+08:00",
+        "slot_resolution": "Read only early preflight before 15:00. Source publication begins after the scheduled start. Retain the stricter deadline from the original 14:56 dispatch. This slot is counted once.",
+        "changes": [
+          "Keep existing inverter row numbers and their title at the visible left edge of the scrolling source matrix. Center the existing Source bus title over the visible source region. No new panel or control.",
+          "Update the existing range cue to exclude the fixed receiver label area. Keep every source and cell reachable and keep native cell keyboard inspection clear of the fixed labels.",
+          "Add real browser geometry, row and cell hit targets, all source reachability, native keyboard focus and exact paused trial invariance checks plus actual desktop and phone screenshot previews. No scientific or numerical result changes."
+        ],
+        "tests": {
+          "status": "Pending full cloud validation",
+          "benchmarks": "Not rerun for visual work."
+        },
+        "screenshots": {
+          "pixel_review": "Pending actual authorized Actions JPEG previews"
+        },
+        "direct_live_inspection": "Unverified. Previously denied direct live access will not be retried or bypassed."
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "slot": "2026-10-18T15:00:00+08:00",
+      "branch": "cloud/refine/20261018-1500",
+      "started_at": "2026-10-18T15:00:00+08:00",
+      "lease_expires_at": "2026-10-18T15:36:08+08:00"
+    },
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
