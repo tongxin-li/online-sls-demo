@@ -558,3 +558,6 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   .pr-actions .btn-stop-attacks { flex:0 0 100%; width:100%; margin-left:0; }
 }
 #pr-response-history text { font-size:12px; }
+
+/* No executed history means no SVG plot or blank reserved chart area. */
+#pr-response-history[hidden] { display:none; }

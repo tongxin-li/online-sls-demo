@@ -3441,7 +3441,8 @@
         "Fresh unsaved sessions construct the actual continuous-phi-v1 engine, show measured response weights and initial source gain inspection, and hide the inapplicable legacy experiment selector.",
         "Original lifecycle checks use explicit actual version 13 production restore records. No controller hook or hidden action replaces playback. Fresh ongoing desktop and phone tests no longer inject protocol 14 records.",
         "Add a fresh unsaved interaction regression crossing 360 actions, exact replay, read only matrix views and fresh ongoing restart. Document current archived migration publication gates.",
-        "Include network identity in fresh browser readout. Run the unchanged required interaction suite first for faster failure feedback; no suite or assertion is removed."
+        "Include network identity in fresh browser readout. Run the unchanged required interaction suite first for faster failure feedback; no suite or assertion is removed.",
+        "Honor the actual hidden state of the executed gain SVG at startup, removing an empty plot before any action. Add a real visibility assertion."
       ],
       "tests": {
         "preflight": {
@@ -3462,7 +3463,23 @@
           "full_validation": "in_progress_before_corrective_source"
         }
       },
-      "next_focus": "Enable and validate fresh ongoing trials with explicit archived replay fixtures. Keep unpublished until every new trial migration and required acceptance gate is coherent."
+      "next_focus": "Enable and validate fresh ongoing trials with explicit archived replay fixtures. Keep unpublished until every new trial migration and required acceptance gate is coherent.",
+      "pixel_review": {
+        "source_commit": "c5653d2bba6bca67e713de8c684960511d7eaa5b",
+        "status": "actual_initial_toy8_desktop_pixels_reviewed_corrective_edit_pending",
+        "review_job": 117774337567,
+        "artifact": {
+          "file": "failure-0.png",
+          "sha": "645b768ae07d6763fa854cd5a6807a1a7735b6ba",
+          "base64_text_sha": "e8a533bcce9ff20f6848262dd92dd8eab743399d",
+          "bytes": 282393
+        },
+        "findings": [
+          "Fresh ongoing status, selected local source and pending command quantities are visible and truthful at action zero.",
+          "The gain SVG hidden attribute was overridden by its explicit display style, leaving an empty plot area before execution. Add a precise hidden style and require actual browser invisibility before the first action.",
+          "The failed test screenshot was taken after network switching. It is not a completed fresh desktop and phone visual approval."
+        ]
+      }
     },
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
