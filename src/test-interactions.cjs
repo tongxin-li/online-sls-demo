@@ -2362,3 +2362,68 @@ test('displayed link ownership follows the actual controller phase and saved dis
     h.click('restart');check('Matrix adaptation','discovery');
   }
 });
+
+
+// The version 14 saved-trial route exercises ongoing UI integration while the
+// public default remains archived until all ongoing browser and pixel gates pass.
+function ongoingSaved(networkId='toy8',steps=0,events=[]) {
+  return {privateContent:{version:14,networkId,continuousRecord:{version:14,protocol:'continuous-phi-v1',networkId,
+    options:{networkId,protocol:'continuous-phi-v1',experiment:'communication',powerScenario:'forecasted-demand',beta:4,preset:'mixed',seed:20261013},
+    steps,events},phase:'ongoing',t:steps,selectedBus:7,speed:'32',view:'cost',costMetric:'total',matrixView:'change',intervention:'forecast'}};
+}
+test('ongoing UI crosses both old boundaries without reset and restores exact version 14 replay',async()=>{
+  const h=harness(ongoingSaved(),null);
+  assert.equal(h.snapshot().protocol,'continuous-phi-v1');assert.equal(h.snapshot().phase,'ongoing');
+  assert.equal(h.protocol().predictionWeights,'adaptive');
+  h.click('run');await h.samples(190);
+  assert.equal(h.snapshot().t,191);assert.equal(h.state().playing,true);
+  const at190=h.snapshot(),cost=at190.cumulative.online;
+  h.click('fault');await h.samples(70);h.click('fault');await h.samples(150);h.click('run');
+  const final=h.snapshot();
+  assert.ok(final.t>400);assert.equal(final.phase,'ongoing');assert.equal(h.state().comparisonComplete,false);
+  assert.ok(final.cumulative.online>=cost);assert.equal(final.history.length,final.t);
+  assert.ok(final.learning.sourceUpdates>at190.learning.sourceUpdates);
+  assert.notDeepEqual(final.calibration.matrix,at190.calibration.matrix);
+  assert.match(h.node('transition-note').textContent,/No reset or stop/);
+  assert.equal(h.node('deploy').hidden,true);assert.equal(h.node('auto-compare').disabled,true);
+  assert.equal(h.saved().privateContent.version,14);
+  const restored=harness(h.saved(),null).snapshot();
+  for(const field of ['t','cumulative','states','commandQ','lastExecution','faults'])assert.deepEqual(plain(restored[field]),plain(final[field]),field+' replays exactly');
+});
+test('ongoing linked inspector uses exact admitted executed weights and all four bounded commands',async()=>{
+  const h=harness(ongoingSaved('feeder24',91,[{t:45,type:'forecast',bus:7,faulty:true}]),null);
+  const s=h.snapshot(),receiver=s.deployedSupport.links[0].to,source=s.deployedSupport.links[0].from;
+  h.inspectLink(receiver,source);
+  const command=h.commandInspection(),evidence=h.linkEvidence(),r=PowerDemo.constants.inverterBuses.indexOf(receiver);
+  assert.equal(command.action,s.lastExecution.action);assert.equal(evidence.ongoing,true);
+  const adaptive=command.rows.find(row=>row.key==='online'),receipt=s.lastExecution.policies.online;
+  assert.equal(adaptive.coefficient,receipt.receivedCoefficients[r][source-2]);
+  assert.equal(adaptive.sourceKvar,1000*receipt.sourceContributions[r][source-2]);
+  assert.equal(adaptive.currentGain,receipt.currentGains[r][source-2]);
+  for(const row of command.rows) {
+    assert.ok(Math.abs(row.sourceKvar+row.otherKvar+row.feedbackKvar-row.requestedKvar)<1e-9);
+    assert.ok(Math.abs(row.commandKvar)<=70+1e-10);
+    assert.equal(row.commandKvar,1000*s.lastExecution.policies[row.key].bounded[r]);
+  }
+  const excluded=Array.from({length:23},(_,i)=>i+2).find(bus=>bus!==receiver&&!s.deployedSupport.links.some(link=>link.from===bus&&link.to===receiver));
+  h.inspectLink(receiver,excluded);
+  const absent=h.commandInspection().rows.find(row=>row.key==='online');
+  assert.equal(absent.coefficient,null);assert.equal(absent.gainNorm,0);assert.equal(absent.sourceKvar,0);
+  assert.equal(h.linkEvidence().rows.find(row=>row.key==='online').selection,'Excluded');
+  assert.match(h.node('link-receipt-time').textContent,/Excluded sources send no messages/);
+});
+test('ongoing UI keeps arbitrary multi bus held attacks and fresh paused network switching',async()=>{
+  const h=harness(ongoingSaved('toy8',175),null);h.change('intervention','power');
+  h.quickClick();h.change('bus','5');h.quickClick();await h.samples(200);
+  assert.ok(h.snapshot().t>360);assert.deepEqual(h.state().activeAttackBuses,[7,5]);
+  assert.ok(h.snapshot().eventLog.filter(e=>e.type==='pulse'&&e.bus===7).length>=199);
+  h.click('stop-attacks');h.click('run');
+  const prior=h.snapshot().cumulative.online;h.change('cost-metric','gap');h.change('cost-metric','total');
+  assert.equal(h.snapshot().cumulative.online,prior);
+  for(const id of ['feeder24','feeder47','toy8']) {
+    h.change('network-scenario',id);
+    assert.equal(h.snapshot().networkId,id);assert.equal(h.snapshot().protocol,'continuous-phi-v1');
+    assert.equal(h.snapshot().t,0);assert.equal(h.state().playing,false);assert.equal(h.snapshot().cumulative.online,0);
+    assert.equal(h.snapshot().deployedSupport.links.filter(e=>e.from!==e.to).length,{toy8:6,feeder24:24,feeder47:48}[id]);
+  }
+});

@@ -14,12 +14,15 @@
   let PowerDemo = networkCatalog;
   const DEFAULT_SCENARIO='forecasted-demand';
   const COMPARISON_SAMPLES=180;
+  // Legacy is retained until ongoing UI acceptance and pixel review are complete.
+  let trialProtocol=null;
+  const ongoing=()=>snapshot.protocol==='continuous-phi-v1';
   const communicationNoiseLevels=[...PowerDemo.constants.communicationBetas,...(PowerDemo.constants.communicationStressBetas || [])];
   function optionsFromControls() {
     const experiment=$('experiment').value==='prediction'?'prediction':'communication';
     const beta=Number($('noise').value);
     return {networkId:PowerDemo.constants.networkId,experiment,powerScenario:$('power-scenario').value || DEFAULT_SCENARIO,beta:communicationNoiseLevels.includes(beta)?beta:1,preset:experiment==='communication'?'mixed':$('preset').value,
-      ...(experiment==='communication'?{horizon:180}:{})};
+      ...(trialProtocol==='continuous-phi-v1'?{protocol:trialProtocol}:experiment==='communication'?{horizon:180}:{})};
   }
   let simulation = new PowerDemo.Simulation(optionsFromControls());
   const series = [
@@ -32,9 +35,9 @@
   const DISCOVERY_SAMPLES=180;
   const automaticComparison=()=>$('auto-compare').checked;
   // All four policies execute throughout discovery and the fresh comparison.
-  function communicationComparison() { return snapshot.experiment==='communication' && snapshot.phase==='deployment'; }
+  function communicationComparison() { return snapshot.experiment==='communication' && (snapshot.phase==='deployment'||ongoing()); }
   function activeSeries() {
-    const labels=communicationComparison()?['Learned sparse','Fixed sparse','Dense prediction','Feedback only']
+    const labels=ongoing()?['Adaptive sparse','Fixed sparse','Dense prediction','Feedback only']:communicationComparison()?['Learned sparse','Fixed sparse','Dense prediction','Feedback only']
       :['Matrix adaptation','Scalar adaptation','Fixed prediction','Feedback only'];
     series.forEach((item,i)=>{item.label=labels[i];});
     return series;
@@ -243,7 +246,7 @@
     $('history-count').textContent=total+' link update'+(total===1?'':'s');
     const gain=100*(snapshot.predictionDiagnostics?.relativeGainChange || 0);
     $('topology-status').textContent=historyIndex!==null?'Viewing saved topology':snapshot.phase==='deployment'?'Deployed links fixed':topology.latest && snapshot.t-topology.latest.t<8?'Link changed at '+topology.latest.t+' s':'Connectivity unchanged';
-    $('topology-gain').textContent=communicationComparison()?'Learned scores fixed':'Weights changed '+d3.format('.3~g')(gain)+'%';
+    $('topology-gain').textContent=ongoing()?'Response energy change '+d3.format('.3~g')(gain)+'%':communicationComparison()?'Learned scores fixed':'Weights changed '+d3.format('.3~g')(gain)+'%';
     const cards=d3.select($('topology-events')).selectAll('button').data(topology.events.slice(-3),e=>e.index).join(enter=>{
       const b=enter.append('button').attr('type','button');b.append('span');b.append('strong');return b;
     }).attr('aria-pressed',e=>String(historyIndex===e.index || historyIndex===null && e.index===total))
@@ -264,6 +267,10 @@
       : snapshot.phase==='deployment' ? 'No link changes during discovery. Deployed links stay fixed.'
       : snapshot.t<30 ? 'Weights start adapting at 30 s. Each link update is kept here.'
       : 'No links have changed yet. Learning weights may still change.';
+    if(ongoing()) {
+      $('topology-status').textContent='Deployed support fixed';
+      $('topology-note').textContent='Weights use only revealed source pairs. Unchanged support is intentional.';
+    }
     $('topology-note').title=snapshot.phase==='deployment' ? (communicationComparison()?'Discovery history. Deployed links and prediction weights stay fixed.':'Discovery history. Deployed links stay fixed while prediction weights continue adapting.') : 'History displays observed connectivity only. Reviewing an update does not change the controller.';
   }
   // Reconstruct the last executed command from the exact issued preview and
@@ -271,6 +278,7 @@
   function commandContributions(view,segments,forecasts,source,receiver) {
     if(!view.lastSample) return null;
     const action=view.lastSample.t,row=PowerDemo.constants.inverterBuses.indexOf(receiver),column=source-2;
+    if(view.protocol==='continuous-phi-v1') return ongoingCommandContributions(view,forecasts,source,receiver,simulation.continuousController);
     const segment=segments.find(item=>action>=item.start&&action<item.end);
     if(row<0 || column<0 || column>=PowerDemo.constants.N-1 || !segment) return null;
     const fixed=view.phase==='deployment'&&view.experiment==='communication';
@@ -294,6 +302,28 @@
         limited:view.saturation[key][receiver-1]};
     });
     return {source,receiver,action,rows};
+  }
+  // Read the immutable executed receipt, never the learner's newer coefficients.
+  function ongoingCommandContributions(view,forecasts,source,receiver,controller) {
+    const receipt=view.lastExecution,row=PowerDemo.constants.inverterBuses.indexOf(receiver),column=source-2;
+    if(!receipt||!controller||row<0||column<0||column>=PowerDemo.constants.N-1)return null;
+    const rows=['online','scalar','static','causal'].map(key=>{
+      const policy=receipt.policies[key],plan=key==='static'?controller.dense:controller.sparse;
+      const admitted=key!=='causal'&&controller.permissions[key][row][column];
+      const coefficient=key==='online'?policy.receivedCoefficients[row][column]:admitted?1:null;
+      let sourcePart=key==='online'?policy.sourceContributions[row][column]:0,gainSquared=0,currentGain=0;
+      if(admitted)for(const block of plan.row(receipt.action)) {
+        const gain=block.L[row][column]*coefficient;
+        gainSquared+=gain*gain;
+        if(block.target===receipt.action)currentGain=gain;
+        if(key!=='online')sourcePart+=gain*forecasts[block.target].forecast[source-1];
+      }
+      return {key,sourceKvar:1000*sourcePart,otherKvar:1000*(policy.prediction[row]-sourcePart),
+        feedbackKvar:1000*policy.feedback[row],requestedKvar:1000*policy.raw[row],
+        commandKvar:1000*policy.bounded[row],gainNorm:Math.sqrt(gainSquared),currentGain,coefficient,
+        limited:Math.abs(policy.raw[row]-policy.bounded[row])>1e-12};
+    });
+    return {source,receiver,action:receipt.action,trainedThrough:receipt.trainedThrough,rows};
   }
   function inspectedCommand() {
     const inspection=predictionInspection();
@@ -348,6 +378,19 @@
     const inspection=predictionInspection(),support=snapshot.deployedSupport;
     if(!inspection || historyIndex!==null || !communicationComparison() || !support) return null;
     const row=PowerDemo.constants.inverterBuses.indexOf(inspection.receiver),column=inspection.source-2;
+    if(ongoing()) {
+      if(row<0||column<0)return null;
+      const rows=[['scalar','Fixed sparse',support.fixedLinks],['online','Adaptive sparse',support.links]].map(([key,label,links])=>{
+        const executed=command?.rows.find(item=>item.key===key);
+        return {key,label,budget:links.filter(link=>link.from!==link.to).length,
+          selection:inspection.local?'Local':links.some(link=>link.from===inspection.source&&link.to===inspection.receiver)?'Selected':'Excluded',
+          score:executed?.coefficient??null,gainNorm:executed?.gainNorm??null,currentGain:executed?.currentGain??null,
+          sourceKvar:executed?.sourceKvar??null,commandKvar:executed?.commandKvar??null,limited:executed?.limited??null};
+      });
+      return {ongoing:true,source:inspection.source,receiver:inspection.receiver,discoverySamples:null,scoreSamples:null,
+        trainedThrough:command?.trainedThrough??null,sourcePairs:snapshot.lastExecution?.sourceReports[column]?.totalPairs??0,
+        action:command?.action??null,rows};
+    }
     const diagnostics=support.discoveryDiagnostics;
     if(row<0 || column<0 || !diagnostics) return null;
     const rows=[['scalar','Fixed sparse',support.fixedLinks,diagnostics.baselineScores],['online','Learned sparse',support.links,diagnostics.learnedScores]].map(([key,label,links,scores])=>{
@@ -369,13 +412,13 @@
       panel.dataset[key]=reading&&reading[key]!==null?String(reading[key]):'';
     if(!reading) return;
     $('link-receipt-title').textContent='Source '+reading.source+' → inverter '+reading.receiver;
-    $('link-receipt-time').textContent=reading.discoverySamples+' discovery samples · '+reading.scoreSamples+' scored actions · Links and scores fixed';
+    $('link-receipt-time').textContent=reading.ongoing?(reading.trainedThrough===null?'Calibration warmup':'Weights use observations through '+reading.trainedThrough+' s')+' · Support fixed · Excluded sources send no messages':reading.discoverySamples+' discovery samples · '+reading.scoreSamples+' scored actions · Links and scores fixed';
     $('link-receipt-action').textContent=reading.action===null?'Step to reveal executed gains and commands':'Executed action '+reading.action+' s · Full issued preview';
     for(const item of reading.rows) {
       const header=$('link-receipt-'+item.key);header.textContent=item.label+'\n'+item.budget+' remote';
       header.dataset.budget=String(item.budget);
     }
-    for(const [key,label] of [['selection','Selected support'],['score','Discovery score'],['gainNorm','Deployed gain'],['sourceKvar','Source (kvar)'],['commandKvar','Command (kvar)']]) {
+    for(const [key,label] of [['selection','Selected support'],['score',reading.ongoing?'Received correction':'Discovery score'],...(reading.ongoing?[['currentGain','Signed current gain']]:[]),['gainNorm','Temporal gain norm'],['sourceKvar','Source (kvar)'],['commandKvar','Command (kvar)']]) {
       const row=document.createElement('tr'),labelCell=document.createElement('th');labelCell.scope='row';labelCell.textContent=label;row.append(labelCell);row.dataset.measure=key;
       for(const item of reading.rows) {
         const cell=document.createElement('td');cell.dataset.controller=item.key;cell.dataset.measure=key;
@@ -496,7 +539,7 @@
     const connected=local || (frame.links || []).some(edge=>edge.from===inspectedSource && edge.to===selectedBus);
     return {source:inspectedSource,receiver:selectedBus,local,connected,
       label:'Source bus '+inspectedSource+' → inverter '+selectedBus+' · '+(local?'Local source':connected?'Selected link':'No link')
-        +' · '+(historyIndex!==null?'Saved discovery':snapshot.phase==='deployment'?'Deployed':'Candidate')+' · '+displayedLinkController()};
+        +' · '+(historyIndex!==null?'Saved discovery':snapshot.phase==='deployment'||ongoing()?'Deployed':'Candidate')+' · '+displayedLinkController()};
   }
   function renderNetworkInspection() {
     const caption=$('network-inspection'),inspection=predictionInspection();
@@ -506,7 +549,7 @@
     caption.dataset.receiver=inspection?String(inspection.receiver):'';
     caption.dataset.connected=inspection?String(inspection.connected):'';
     caption.dataset.local=inspection?String(inspection.local):'';
-    caption.dataset.context=inspection?(historyIndex!==null?'history':snapshot.phase==='deployment'?'deployed':'candidate'):'';
+    caption.dataset.context=inspection?(historyIndex!==null?'history':snapshot.phase==='deployment'||ongoing()?'deployed':'candidate'):'';
     $('network-inspection-source').textContent=inspection?(inspection.local?'Source and inverter ':'Source ')+inspection.source:'';
     $('network-inspection-receiver').textContent=inspection&&!inspection.local?'Inverter '+inspection.receiver:'';
     $('network-inspection-receiver').hidden=!inspection||inspection.local;
@@ -536,7 +579,7 @@
     const events=snapshot.eventLog || [];
     const state = {
       modelContent: { scenario:PowerDemo.constants.N+' bus LinDistFlow voltage regulation', variant:snapshot.experiment==='communication'?'Communication topology comparison':'Shared prediction adaptation and sparse deployment', phase:snapshot.phase, step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
-      privateContent: { version:13, networkId:PowerDemo.constants.networkId, comparisonContinued, intervention:$('intervention').value, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, automaticComparison:automaticComparison(), view:$('view').value, costMetric:$('cost-metric').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, inspectedSource, speed:$('speed').value, allLinks:$('all-links').checked }
+      privateContent: { version:ongoing()?14:13, ...(ongoing()?{continuousRecord:simulation.recordContinuous()}:{}), networkId:PowerDemo.constants.networkId, comparisonContinued, intervention:$('intervention').value, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, automaticComparison:automaticComparison(), view:$('view').value, costMetric:$('cost-metric').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, inspectedSource, speed:$('speed').value, allLinks:$('all-links').checked }
     };
     window.openai.setWidgetState(state).catch(() => {});
   }
@@ -567,8 +610,10 @@
   }
   function hydrate(saved) {
     const data=saved?.privateContent;
-    if(restored||!data||data.version!==13) return;
-    const savedOptions=data.phase==='deployment'&&data.discoveryRecord?data.discoveryRecord.options:data.initialOptions;
+    if(restored||!data||![13,14].includes(data.version)) return;
+    if(data.version===14&&data.continuousRecord?.protocol!=='continuous-phi-v1')return;
+    trialProtocol=data.version===14?'continuous-phi-v1':null;
+    const savedOptions=data.version===14?data.continuousRecord.options:data.phase==='deployment'&&data.discoveryRecord?data.discoveryRecord.options:data.initialOptions;
     const networkId=data.networkId || savedOptions?.networkId || 'feeder24';
     if(!networkCatalog.networks.some(network=>network.id===networkId)) {announce('Saved network unavailable · Start a new trial');return;}
     bindNetwork(networkId);
@@ -589,7 +634,10 @@
     $('noise').value=String(communicationNoiseLevels.includes(savedOptions?.beta)?savedOptions.beta:1);
     $('preset').value=preset;
     $('power-scenario').value=['reference','solar-outage',DEFAULT_SCENARIO].includes(savedOptions?.powerScenario)?savedOptions.powerScenario:'reference';
-    if(data.phase==='deployment' && data.discoveryRecord) {
+    if(data.version===14) {
+      simulation=PowerDemo.replayContinuous(data.continuousRecord);
+      topology.reset(simulation.snapshot());
+    } else if(data.phase==='deployment' && data.discoveryRecord) {
       simulation=new PowerDemo.Simulation(data.discoveryRecord.options || optionsFromControls());
       topology.reset(simulation.snapshot());
       replayRecord(data.discoveryRecord);
@@ -600,7 +648,7 @@
       topology.reset(simulation.snapshot());
     }
     const initialLinks=simulation.snapshot().recommendations.map(e=>({...e}));
-    replayRecord({t:data.t,events:data.events});
+    if(data.version!==14) replayRecord({t:data.t,events:data.events});
     snapshot=simulation.snapshot();
     $('preset').value=snapshot.preset; $('experiment').value=snapshot.experiment; $('noise').value=String(snapshot.beta);
     $('view').value=data.view==='learning'?'learning':'cost';
@@ -704,7 +752,7 @@
   function resetExperiment() {
     stop(); simulation.reset();comparisonContinued=false;restoredTrial=false;
     snapshot = simulation.snapshot(); journal = []; fitSteps = 0; pin = null; lastPulse = null;
-    if(snapshot.phase==='discovery') topology.reset(snapshot);
+    if(snapshot.phase==='discovery'||ongoing()) topology.reset(snapshot);
     else topology.observe(snapshot);
     historyIndex=null;visualTopologyEvent=null;inspectedSource=null;
     captureMatrixReference(); $('cost-metric').value='total';
@@ -1012,11 +1060,13 @@
     if ($('learning-flow')) $('learning-flow').hidden=showCost;
     $('learning-title').textContent=snapshot.experiment==='communication'?'Experiment results':showCost?'Controller comparison':'Forecast learning';
     $('results-stage').hidden=snapshot.experiment!=='communication';
-    $('results-stage').textContent=communicationComparison()?'Controller comparison':showCost?'Learning costs':'Learning progress';
+    $('results-stage').textContent=ongoing()?'Ongoing controller comparison':communicationComparison()?'Controller comparison':showCost?'Learning costs':'Learning progress';
     if ($('learning-kind')) $('learning-kind').textContent='Original dashed · Matrix adaptation solid';
   }
   function protocolStatus() {
     const deployed=snapshot.phase==='deployment',saved=historyIndex!==null;
+    if(ongoing())return {phase:'ongoing',view:'ongoing',discoverySamples:0,comparisonSamples:snapshot.t,
+      selection:'offline',synthesis:'stationary',links:'fixed',predictionWeights:'adaptive',historyAt:null};
     return {phase:deployed?'deployment':'discovery',view:saved?'saved-discovery':deployed?'comparison':'discovery',
       discoverySamples:deployed?(snapshot.discoveryRecord?.t ?? snapshot.deployedSupport?.discoveryTime ?? 0):snapshot.t,
       comparisonSamples:deployed?snapshot.t:0,selection:deployed?'complete':'pending',synthesis:deployed?'complete':'pending',
@@ -1025,6 +1075,10 @@
   }
   function experimentProgress() {
     const status=protocolStatus(),deployed=status.phase==='deployment';
+    if(ongoing())return {visible:true,phase:'ongoing',learningStatus:'active',comparisonStatus:'active',
+      learningCount:(snapshot.learning?.sourcePairs||0)+' revealed pairs per source',comparisonCount:snapshot.t+' samples · All costs retained',
+      learningFraction:Math.min(1,(snapshot.learning?.sourcePairs||0)/30),comparisonFraction:0,
+      note:'One ongoing trial. Source corrections update after observations. Prediction support stays fixed. No reset or stop at 180 or 360 samples.'};
     return {visible:snapshot.experiment==='communication',phase:status.phase,
       discoverySamples:status.discoverySamples,comparisonSamples:status.comparisonSamples,
       learningStatus:deployed?'complete':'active',
@@ -1050,11 +1104,19 @@
       $('progress-'+id+'-count').textContent=progress[key+'Count'];
       $('progress-'+id+'-fill').style.width=(progress[key+'Fraction']*100)+'%';
     }
+    $('progress-learning-label').textContent=ongoing()?'Observe and update':'Learn prediction links';
+    $('progress-comparison-label').textContent=ongoing()?'Execute and compare':'Compare four controllers';
+    for(const id of ['learning','comparison']) {
+      const number=$('progress-'+id).querySelector('.pr-step-number');if(number)number.hidden=ongoing();
+    }
+    if(ongoing()) {
+      $('progress-learning').removeAttribute('aria-current');$('progress-comparison').removeAttribute('aria-current');
+    }
     // Announce the phase boundary once, without a live announcement every sample.
     if($('transition-note').textContent!==progress.note)$('transition-note').textContent=progress.note;
   }
   function displayedLinkController() {
-    return communicationComparison()&&historyIndex===null?'Learned sparse':'Matrix adaptation';
+    return ongoing()?'Adaptive sparse':communicationComparison()&&historyIndex===null?'Learned sparse':'Matrix adaptation';
   }
   function renderProtocol() {
     const status=protocolStatus(),deployed=status.phase==='deployment',phase=$('phase');
@@ -1067,6 +1129,13 @@
     phase.title=receipt+' · No joint online topology adaptation is claimed.';
     phase.hidden=snapshot.experiment==='communication';
     renderExperimentProgress();
+    if(ongoing()) {
+      phase.textContent='Continuous response adaptation';phase.title='Fixed offline support · Causal source correction · No online topology selection';
+      $('phase-note').textContent='Source local learning · Fixed support · Executed weights update causally';
+      $('phase-note').title='A source sends its correction with each permitted forecast. Adaptive sparse sends one extra correction scalar per message; fixed sparse and dense send raw forecasts. No probing. Common state feedback is excluded from prediction link counts.';
+      const title=$('matrix-title');title.textContent='Adaptive sparse links';title.dataset.controller='Adaptive sparse';title.dataset.context='ongoing';
+      title.title='Fixed offline support · Matrix color shows measured effective response energy change';return;
+    }
     $('phase-note').textContent=status.view==='saved-discovery'
       ? 'Saved discovery links at '+status.historyAt+' s · Plant and costs remain in '+(deployed?'comparison':'discovery')+' · Latest restores current links'
       :receipt;
@@ -1093,7 +1162,7 @@
     const allNoisy=scheduled && snapshot.beta>0 && Array.from({length:PowerDemo.constants.N-1},(_,i)=>i+2).every(bus=>snapshot.faults.includes(bus));
     $('scenario-name').textContent=scheduled?'Demand and solar cycle':snapshot.powerScenario==='solar-outage'?'Solar outage trial':'Reference trial';
     const description=$('scenario-description'),settings=forecastSettings();
-    const guidance=scheduled?(snapshot.phase==='deployment'?(snapshot.experiment==='communication'?'Fresh comparison · Deployed links and prediction correction stay fixed':'Fresh comparison · Links fixed · Prediction correction adapts')
+    const guidance=ongoing()?'Ongoing trial · No physical reset · Corrections learn from revealed source errors':scheduled?(snapshot.phase==='deployment'?(snapshot.experiment==='communication'?'Fresh comparison · Deployed links and prediction correction stay fixed':'Fresh comparison · Links fixed · Prediction correction adapts')
       :automaticComparison()?'Run to learn the links, then compare four controllers automatically':'Manual comparison enabled in Experiment settings')
       :(restoredTrial?'Restored run · ':'')+'Previous samples and costs retained';
     description.dataset.forecastSettings=String(!!settings);
@@ -1121,11 +1190,11 @@
   function renderControls() {
     renderInspectedSource();
     const frozen=isFit();
-    const deployed=snapshot.phase==='deployment',communication=snapshot.experiment==='communication';
+    const deployed=snapshot.phase==='deployment'||ongoing(),communication=snapshot.experiment==='communication';
     const completedRows=snapshot.learning?.completedRows || 0;
     const preparing=!deployed && automaticComparison();
     renderProtocol();renderScenario();
-    if($('deploy')) { $('deploy').hidden=preparing; $('deploy').disabled=comparing || (!deployed && !snapshot.canDeploy); $('deploy').textContent=deployed?'Rebuild prediction links':'Compare now'; $('deploy').title=deployed?'Discard this trial and learn new links from the current forecast source settings':snapshot.canDeploy?'Start four controllers on the same fresh disturbance sequence':'Collecting observed samples for comparison'; }
+    if($('deploy')) { $('deploy').hidden=preparing||ongoing(); $('deploy').disabled=comparing || (!deployed && !snapshot.canDeploy); $('deploy').textContent=deployed?'Rebuild prediction links':'Compare now'; $('deploy').title=deployed?'Discard this trial and learn new links from the current forecast source settings':snapshot.canDeploy?'Start four controllers on the same fresh disturbance sequence':'Collecting observed samples for comparison'; }
 
     $('noise-control').hidden=!communication; $('noise-caption').hidden=!communication; $('preset-control').hidden=communication;
     const beta=snapshot.beta || 0;
@@ -1135,10 +1204,10 @@
     $('network-scenario').disabled=comparing; $('experiment').disabled=comparing; $('noise').disabled=comparing; $('power-scenario').disabled=comparing;
     const scenario=snapshot.scenario;
     $('scenario-status').hidden=scenario?.id!=='solar-outage';
-    $('scenario-status').textContent=snapshot.phase!=='deployment'?'Solar outage reserved for comparison · '+PowerDemo.constants.busProfiles.filter(profile=>profile.role==='Solar').length+' sites · 30 to 50 s':snapshot.t<=30?'Solar outage starts at comparison 30 s':scenario.active?'Solar outage · '+scenario.requestedKw.toFixed(1)+' kW requested · '+scenario.appliedKw.toFixed(1)+' kW applied':'Solar restored · Background power continues';
+    $('scenario-status').textContent=snapshot.phase!=='deployment'&&!ongoing()?'Solar outage reserved for comparison · '+PowerDemo.constants.busProfiles.filter(profile=>profile.role==='Solar').length+' sites · 30 to 50 s':snapshot.t<=30?'Solar outage starts at comparison 30 s':scenario.active?'Solar outage · '+scenario.requestedKw.toFixed(1)+' kW requested · '+scenario.appliedKw.toFixed(1)+' kW applied':'Solar restored · Background power continues';
     renderCostMetric();
     const matrixChangeOption=$('matrix-view').querySelector('option[value="change"]');
-    const matrixChangeLabel=communicationComparison()?'Learned scores':'Learning weights';
+    const matrixChangeLabel=ongoing()?'Response weights':communicationComparison()?'Learned scores':'Learning weights';
     if(matrixChangeOption && matrixChangeOption.textContent!==matrixChangeLabel) matrixChangeOption.textContent=matrixChangeLabel;
     if(!plottedSeries().length) activeSeries().forEach(item=>visible.add(item.key));
     root.querySelectorAll('[data-series]').forEach(button=>{
@@ -1198,6 +1267,16 @@
     write('flow-control',hasInverter(selectedBus) ? 'Q* '+d3.format('+.0f')(reactiveCommand(selectedBus))+' kvar' : 'No inverter');
     write('flow-observe',selectedBus===1 ? busVoltage(1).toFixed(3)+' pu' : sample ? 'w '+d3.format('+.2~g')(sample.disturbance[i])+' pu' : 'Awaiting response');
     write('flow-update',communicationComparison()?'Learning complete':calibration?.updates ? calibration.windowSize+' revealed samples' : 'Starts at 30 s');
+    if(ongoing()) {
+      $('auto-compare').disabled=true;if($('auto-compare').parentElement)$('auto-compare').parentElement.hidden=true;
+      $('clock').hidden=false;$('learning').textContent=(snapshot.learning?.sourcePairs||0)+' source pairs · Weights adapt';
+      $('fit-title').textContent='Continuous source correction';
+      $('fit-detail').textContent='First update after 30 revealed pairs · Last 60 pairs · Five second preview';
+      $('mode-note').textContent='Fixed sparse and dense use raw predictions. Adaptive sparse uses admitted source corrections. All costs include the full ongoing trial.';
+      write('flow-update',(snapshot.learning?.sourceUpdates||0)+' correction updates');
+      $('attack-hint').textContent=forecast?'New forecasts only · Weights learn after reveal':$('attack-hint').textContent;
+      $('scenario-description').title='One physical clock and accumulated cost. Forecast settings affect newly issued messages only. Source corrections use revealed observations, never the synthetic reliability labels.';
+    } else {$('auto-compare').disabled=false;if($('auto-compare').parentElement)$('auto-compare').parentElement.hidden=false;}
     renderLearningView();
   }
   function drawNetwork() {
@@ -1399,7 +1478,7 @@
     if(!matrixReference) captureMatrixReference();
     const diagnostics=snapshot.predictionDiagnostics;
     const receivers=PowerDemo.constants.inverterBuses, sources=d3.range(2,PowerDemo.constants.N+1);
-    const changing=$('matrix-view').value==='change', deployed=snapshot.phase==='deployment';
+    const changing=$('matrix-view').value==='change', deployed=snapshot.phase==='deployment'||ongoing();
     const large=PowerDemo.constants.N>24;
     const available=el.parentElement.getBoundingClientRect().width;
     const width=Math.max(large?784:240,available);
@@ -1427,6 +1506,11 @@
     $('matrix-changes').textContent=(deployed?(historyIndex===null?(communicationComparison()?'vs fixed sparse · ':'Fixed links · '):'Discovery history · '):'')+added.length+' added · '+removed.length+' removed';
     $('matrix-changes').title=communicationComparison()&&historyIndex===null?'Deployed learned topology compared with fixed sparse':'Changes in the displayed topology update';
     drawTopologyHistory();
+    if(ongoing()) {
+      $('matrix-detail').textContent=changing?'Effective response energy change from identity correction':$('matrix-detail').textContent;
+      $('matrix-changes').textContent='Fixed support · Weights continue adapting';
+      $('matrix-changes').title='No dynamic topology reselection or probing in this protocol';
+    }
     const delta=diagnostics?.receiverNormalizedChange || receivers.map(()=>sources.map(()=>0));
     const maximum=Math.max(.0001,...delta.flat().map(v=>Math.abs(v)));
     const shade=d3.scaleLinear().domain([-maximum,0,maximum]).range(['#c56c1b','#f5f5f7','#0071e3']).clamp(true);
@@ -1752,12 +1836,13 @@
     }
     $('comparison-summary').textContent=comparisonSummary();
     const recovery=powerRecoveryContext();
-    $('cost-note').textContent=gap?'Compared with '+gapReference()+' · Below zero is cheaper · '+(recovery?'Totals include load recovery':'Table shows totals')
+    $('cost-note').textContent=ongoing()?'All accumulated stage costs · No terminal penalty · Common physical inputs and feedback · '+(gap?'Difference from fixed sparse':'Lower is better'):gap?'Compared with '+gapReference()+' · Below zero is cheaper · '+(recovery?'Totals include load recovery':'Table shows totals')
       : recovery || (snapshot.phase==='deployment'?(communicationComparison()?'Learning costs excluded · Prediction links only · Common feedback unchanged':'Fresh comparison · Learning costs excluded · Identical disturbances'):'Dense messages during learning · Adaptation starts at 30 s');
   }
   function comparisonSummary() {
     const c=snapshot.cumulative,comparison=comparativeCost(c.online,c.scalar);
     if(snapshot.experiment==='communication') {
+      if(ongoing())return codesignMetrics().status+' · Same sparse support · Adaptive correction adds one scalar per forecast';
       if(snapshot.phase!=='deployment') return 'Discovery costs · Sparse controllers have not been deployed';
       const dense=comparativeCost(c.online,c.static),budget=predictionBudget();
       if(comparison==='Pending'||dense==='Pending') return 'Fresh trial · '+budget.remote+' remote links for each sparse controller · '+budget.dense+' for dense';

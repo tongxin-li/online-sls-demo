@@ -794,7 +794,10 @@
     "status": "in_progress",
     "counted_invocation": true,
     "counted_completed": false,
-    "changes": [],
+    "changes": [
+      "Integrate version 14 ongoing saved trials into live UI state, source and command inspection, stable cost comparison, protocol status and network scoped restart. Keep the public default unchanged pending ongoing browser and pixel acceptance.",
+      "Add predefined ongoing interaction and real desktop and phone browser suites for exact replay, old boundary crossing, arbitrary multi bus held attacks, admitted weights and commands."
+    ],
     "tests": {
       "metadata_repeat": {
         "run_id": 39149170485,
@@ -803,7 +806,11 @@
       }
     },
     "remaining_gaps": [],
-    "next_focus": "Integrate actual execution receipts and ongoing UI replay before enabling the new live protocol."
+    "next_focus": "Run full validation and inspect actual failures before enabling the ongoing default.",
+    "pixel_review": {
+      "status": "pending_cloud_capture_and_actual_pixel_review",
+      "publication": false
+    }
   },
   "next_focus": "Continue this same validated candidate into the single ongoing UI and new replay. Read metadata repeat and current main checks first. Use actual execution receipts and source pair counts, not legacy completed row diagnostics. Preserve all archived data and full regression suites. Keep unpublished until ongoing browser and pixel acceptance.",
   "priorities": [
@@ -2850,7 +2857,10 @@
         "status": "in_progress",
         "counted_invocation": true,
         "counted_completed": false,
-        "changes": [],
+        "changes": [
+          "Integrate version 14 ongoing saved trials into live UI state, source and command inspection, stable cost comparison, protocol status and network scoped restart. Keep the public default unchanged pending ongoing browser and pixel acceptance.",
+          "Add predefined ongoing interaction and real desktop and phone browser suites for exact replay, old boundary crossing, arbitrary multi bus held attacks, admitted weights and commands."
+        ],
         "tests": {
           "metadata_repeat": {
             "run_id": 39149170485,
@@ -2859,7 +2869,11 @@
           }
         },
         "remaining_gaps": [],
-        "next_focus": "Integrate actual execution receipts and ongoing UI replay before enabling the new live protocol."
+        "next_focus": "Run full validation and inspect actual failures before enabling the ongoing default.",
+        "pixel_review": {
+          "status": "pending_cloud_capture_and_actual_pixel_review",
+          "publication": false
+        }
       }
     ],
     "active_run": {
@@ -2873,7 +2887,10 @@
       "status": "in_progress",
       "counted_invocation": true,
       "counted_completed": false,
-      "changes": [],
+      "changes": [
+        "Integrate version 14 ongoing saved trials into live UI state, source and command inspection, stable cost comparison, protocol status and network scoped restart. Keep the public default unchanged pending ongoing browser and pixel acceptance.",
+        "Add predefined ongoing interaction and real desktop and phone browser suites for exact replay, old boundary crossing, arbitrary multi bus held attacks, admitted weights and commands."
+      ],
       "tests": {
         "metadata_repeat": {
           "run_id": 39149170485,
@@ -2882,7 +2899,11 @@
         }
       },
       "remaining_gaps": [],
-      "next_focus": "Integrate actual execution receipts and ongoing UI replay before enabling the new live protocol."
+      "next_focus": "Run full validation and inspect actual failures before enabling the ongoing default.",
+      "pixel_review": {
+        "status": "pending_cloud_capture_and_actual_pixel_review",
+        "publication": false
+      }
     },
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",

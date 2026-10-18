@@ -100,3 +100,12 @@ Independent checks reconstruct the full nominal plus scaled predictive affine dy
 An action varying diagonal correction yields adaptive feedforward with shared feedback. Each frozen candidate is feasible under the documented response equations. This does not identify the entire switched trajectory as one fixed lifted response or establish a stability theorem under arbitrary adaptation or clipping. Full ongoing UI interactions, long playback performance and pixel review remain publication gates.
 
 Equal sparse link budgets do not imply equal scalar payload. Adaptive sparse sends an additional correction scalar with each raw forecast message. The explicit traffic counters retain that overhead and shared state feedback remains separate. No byte price or numerical communication penalty is invented.
+
+
+## Ongoing interface integration candidate
+
+The version 14 restore route now renders one physical clock with continuous corrections and the existing four controller comparison. The default remains the archived protocol until ongoing browser and pixel acceptance. This temporary candidate gate is not a protocol selector exposed to users. Version 13 restoration retains its exact legacy execution. New ongoing trials created by restart or network switching retain protocol 14.
+
+Command inspection reads the immutable last execution receipt. It separates received source correction from source local diagnostics, signed current target gain from temporal gain norm, additive source contribution from bounded command, and fixed support from effective weights. An excluded source has no received coefficient. Fixed sparse and dense retain identity correction. Adaptive sparse sends an additional correction scalar per admitted forecast. The same link count therefore does not imply the same payload. There is no online probing or topology reselection.
+
+The cloud browser suite predeclares all three network sizes at desktop and phone widths with actual visible playback, corruption and repair across old boundaries, arbitrary multi bus held attacks, cost switching, five 180 action advances beyond 900 actions, exact saved UI replay and fresh paused network changes. Screenshots are evidence capture only until their actual pixels have been inspected. This integration remains unpublished.
