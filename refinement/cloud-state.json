@@ -783,13 +783,8 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-18T16:00:00+08:00",
-    "branch": "cloud/refine/20261018-1600",
-    "started_at": "2026-10-18T16:02:22+08:00",
-    "lease_expires_at": "2026-10-18T16:42:22+08:00"
-  },
-  "next_focus": "Validate readable method identity and complete measured terms while navigating the existing command breakdown, without duplicating results or changing scientific controls.",
+  "active_run": null,
+  "next_focus": "Verify final repeated checks and completion metadata. Then review source observation timing and command action identity in the existing linked inspector, keeping measured error, discovery score, resynthesized gain and bounded command distinct. Preserve the single cost table, two stage strip, stable headings and every source. Do not add panels or broaden the numerical study.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -899,16 +894,16 @@
       "pages_run": 39052070867
     },
     "renewed_completion": {
-      "slot": "2026-10-18T15:00:00+08:00",
-      "branch": "cloud/refine/20261018-1500",
-      "product_ready_commit": "7f0bdc7d900aa478c9339fa39c63e38dfe3037b7",
-      "source_commit": "760aad15acb10e4e4fbabf87bf93aceb9f9d25b0",
-      "candidate_run": 39106155876,
-      "main_run": 39107039720,
-      "pages_run": 39107039339,
+      "slot": "2026-10-18T16:00:00+08:00",
+      "branch": "cloud/refine/20261018-1600",
+      "product_ready_commit": "76b2e15f503ebe2f0159b1247e1f6534e56c3b5d",
+      "source_commit": "864713df937b8c17f3f844986dce9dbdfeddb936",
+      "candidate_run": 39110280338,
+      "main_run": 39111191529,
+      "pages_run": 39111191339,
       "scope": "Completion record only. Product already validated and deployed.",
-      "status": "15:00 completion metadata is already main at de6ab60feef72ba3d7b81aed82a72b1c38d0cae6. Its candidate and prepare plus main repeat succeeded, and exact Pages deployment was verified. No recovery invocation or completion increment.",
-      "instruction": "Read actual main repeat result before further source edits. This 15:00 slot is counted once in this metadata candidate. Promote metadata only after normal successful validation with expected current main 7f0bdc7d900aa478c9339fa39c63e38dfe3037b7 and force false. On newer main, reapply only verified metadata without overwriting concurrent product changes or double counting. Metadata recovery, preflight and duplicate dispatches are not refinements. Preserve the original stricter 15:36:08 deadline from the early dispatch."
+      "status": "Metadata validation pending at record creation. Historical completed 15, renewed invocation 15 and completed 15 yield total 30. Previous metadata verification did not increment either count.",
+      "instruction": "Read actual main repeat before further source edits and metadata validation before promotion. This 16:00 completion is counted once in this candidate. Promote metadata only after normal successful validation with matching current main 76b2e15f503ebe2f0159b1247e1f6534e56c3b5d and force false. On newer main reapply only verified metadata without overwriting concurrent product changes or double counting. Recovery, coordination, preflight and duplicate dispatches are not refinements. Preserve the original 16:42:22 pass deadline."
     },
     "previous_renewed_metadata_verification": {
       "commit": "e72156d27b731f00f88edee1ce3fe007ea3786f8",
@@ -1023,6 +1018,18 @@
         "scope": "Completion record only. Product is already validated and deployed.",
         "status": "14:00 completion metadata validated by 39104577790 with successful prepare and promoted at 1fde5eda0e08fa5db9708aa29213b0963cb90528. Product main repeat 39104465997 independently passed. Recovered metadata only; no count increment.",
         "instruction": "At the next existing scheduled slot read the actual main repeat result before source edits and the metadata candidate validation before promotion. This 14:00 completion is counted once in this candidate. Promote metadata only after normal successful validation with expected current main 3ca4649a50cb94e3e667392382042371f3510134 and force false. On newer main reapply only verified metadata without overwriting concurrent product changes or double counting. Metadata recovery, parent handoffs, held skip and duplicate dispatches are not refinements. Preserve the original 14:40:49 pass deadline."
+      },
+      "13": {
+        "slot": "2026-10-18T15:00:00+08:00",
+        "branch": "cloud/refine/20261018-1500",
+        "product_ready_commit": "7f0bdc7d900aa478c9339fa39c63e38dfe3037b7",
+        "source_commit": "760aad15acb10e4e4fbabf87bf93aceb9f9d25b0",
+        "candidate_run": 39106155876,
+        "main_run": 39107039720,
+        "pages_run": 39107039339,
+        "scope": "Completion record only. Product already validated and deployed.",
+        "status": "15:00 completion metadata is already main at de6ab60feef72ba3d7b81aed82a72b1c38d0cae6. Its candidate and prepare plus main repeat succeeded, and exact Pages deployment was verified. No recovery invocation or completion increment.",
+        "instruction": "Read actual main repeat result before further source edits. This 15:00 slot is counted once in this metadata candidate. Promote metadata only after normal successful validation with expected current main 7f0bdc7d900aa478c9339fa39c63e38dfe3037b7 and force false. On newer main, reapply only verified metadata without overwriting concurrent product changes or double counting. Metadata recovery, preflight and duplicate dispatches are not refinements. Preserve the original stricter 15:36:08 deadline from the early dispatch."
       }
     },
     "renewed_metadata_verification_history": [
@@ -1176,7 +1183,7 @@
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
     "invocation_count": 15,
-    "completed_count": 14,
+    "completed_count": 15,
     "runs": [
       {
         "slot": "2026-10-18T01:00:00+08:00",
@@ -1878,11 +1885,11 @@
       {
         "slot": "2026-10-18T16:00:00+08:00",
         "started_at": "2026-10-18T16:02:22+08:00",
-        "status": "validating",
+        "status": "completed",
         "candidate_branch": "cloud/refine/20261018-1600",
         "base_commit": "de6ab60feef72ba3d7b81aed82a72b1c38d0cae6",
         "counted_invocation": true,
-        "counted_completed": false,
+        "counted_completed": true,
         "lease_expires_at": "2026-10-18T16:42:22+08:00",
         "changes": [
           "Keep the existing command breakdown method column visible while horizontally panning its source, feedback, request, actual command and gain columns. Raise command table and unit note typography to 12 px with consistent row spacing.",
@@ -1890,21 +1897,44 @@
           "Add actual desktop and phone browser panning, fixed row header, native keyboard, all term reachability, full trial and displayed value invariance tests and authorized screenshot previews. No scientific, numerical benchmark or engine changes."
         ],
         "tests": {
-          "status": "Pending normal cloud validation",
-          "benchmarks": "Not rerun for this visual change."
+          "suites": 8,
+          "total": 224,
+          "failed": 0,
+          "candidate": "Full validation and prepare passed on first candidate.",
+          "build": "passed",
+          "reference_artifact": "Passed unchanged reference generator and artifact checks.",
+          "main": "Repeat validation 39111191529 is running at completion record creation. Read actual final status before further source edits.",
+          "browser": "Full original desktop and phone browser suite and both network suites passed without runtime errors. Existing playback, repeated and continuous attacks, forecast toggles, automatic fresh comparison, stable cost view switching, all four traces, model switching and exact replay remain covered. New checks open the real command disclosure, pan start middle end, verify all four method names stay fully visible against opaque pinned backgrounds, every heading and value has at least 12 px type, every numeric heading remains reachable, native keyboard panning works, all 24 displayed terms remain present and correctly formatted, and full trial snapshots and inspection state remain unchanged by disclosure and scrolling.",
+          "benchmarks": "Not rerun. No engine, control, objective, learning, forecast timing, noise, limits, attack, numerical output or recorded result changes."
         },
         "screenshots": {
-          "pixel_review": "Pending actual Actions JPEG previews of the command disclosure"
+          "artifact_id": 12130223409,
+          "artifact_digest": "sha256:a6e9361f2b588639395fc377636dbba47fb4f3ecbacc275c2f1b143708d0bd75",
+          "captures": [
+            "command-navigation-1440-start.jpg",
+            "command-navigation-1440-middle.jpg",
+            "command-navigation-1440-end.jpg",
+            "command-navigation-390-start.jpg",
+            "command-navigation-390-middle.jpg",
+            "command-navigation-390-end.jpg"
+          ],
+          "pixel_review": "Actual desktop 1440 and phone 390 JPEG pixels reviewed through authorized Actions previews. Desktop retains every method and numeric term in one readable table. Phone start middle and end retain all four method names with opaque pinned backgrounds; the Command and Gain norm columns are readable at the far end. Unit and limiting notes remain visible in larger type. Normal partial numeric column clipping still occurs at pan boundaries, and every numeric heading was independently reached in browser checks. No direct live browser access claimed."
         },
-        "direct_live_inspection": "Unverified. Previously denied direct live browser access will not be retried or bypassed."
+        "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed. Public HTTP bytes were not independently fetched in this pass. Actual generated page interactions and desktop and phone screenshot pixels were reviewed through authorized Actions evidence.",
+        "source_commit": "864713df937b8c17f3f844986dce9dbdfeddb936",
+        "published_commit": "76b2e15f503ebe2f0159b1247e1f6534e56c3b5d",
+        "candidate_run": 39110280338,
+        "main_run": 39111191529,
+        "pages_run": 39111191339,
+        "completed_at": "2026-10-18T08:24:26.395Z",
+        "publication": "Candidate validation and prepare succeeded. The generated child has the tested source as its single parent and only index.html changed. Promoted with matching expected main de6ab60feef72ba3d7b81aed82a72b1c38d0cae6 and force false. Pages deployment logs independently confirm exact version 76b2e15f503ebe2f0159b1247e1f6534e56c3b5d and the canonical environment. Main repeat pending at creation.",
+        "remaining_visual_limitations": [
+          "The phone command table still requires horizontal panning and numeric text can clip at viewport boundaries. All terms remain reachable and the method identity now stays visible.",
+          "Matrix partial source glyph clipping from the previous pass remains unchanged. Only declared Chrome desktop and phone layouts have pixel review, and direct live browser inspection remains unavailable."
+        ]
       }
     ],
-    "active_run": {
-      "slot": "2026-10-18T16:00:00+08:00",
-      "branch": "cloud/refine/20261018-1600",
-      "started_at": "2026-10-18T16:02:22+08:00",
-      "lease_expires_at": "2026-10-18T16:42:22+08:00"
-    },
+    "active_run": null,
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
@@ -1924,5 +1954,5 @@
     "baseline_main": "2a9ff26b59565ecac1eb5274fbea4d813a18f24f"
   },
   "completed_count_scope": "Original bounded program, retained at 15. Renewed counts are tracked independently in renewed_program.",
-  "total_completed_count": 29
+  "total_completed_count": 30
 }
