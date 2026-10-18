@@ -1182,6 +1182,240 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   }
   return {fit,identity,apply,compatibleMask,constants:Object.freeze({dimension:DIMENSION,window:WINDOW,lambda:LAMBDA})};
 });
+
+/* Causal source local scaling foundation for the candidate continuous protocol.
+ * This module does not change the shipped engine or register a UI experiment.
+ * It restricts the public mean loss correction objective to one scalar per
+ * source. Receiver access and actual engine integration remain release gates. */
+(function(root,factory){
+  const api=factory();
+  if(typeof module==='object'&&module.exports)module.exports=api;
+  else root.CausalSourceScale=api;
+})(typeof globalThis!=='undefined'?globalThis:this,function(){
+  'use strict';
+  const finite=(x,name)=>{if(!Number.isFinite(x))throw new TypeError(name+' must be finite');return x;};
+  const integer=(x,min,name)=>{if(!Number.isSafeInteger(x)||x<min)throw new RangeError(name+' must be an integer at least '+min);return x;};
+  function fitSource(pairs,lambda){
+    finite(lambda,'lambda');if(lambda<=0)throw new RangeError('lambda must be positive');
+    if(!Array.isArray(pairs))throw new TypeError('Source pairs must be an array');
+    if(!pairs.length)return Object.freeze({coefficient:1,count:0,rawRms:null,correctedRms:null,objective:0,rawObjective:0});
+    let ff=0,fw=0;
+    for(const pair of pairs){const f=finite(pair.forecast,'forecast'),w=finite(pair.forcing,'forcing');ff+=f*f;fw+=f*w;}
+    const coefficient=(fw/pairs.length+lambda)/(ff/pairs.length+lambda);
+    if(!Number.isFinite(ff)||!Number.isFinite(fw)||!Number.isFinite(coefficient))throw new RangeError('Source moments overflow');
+    let raw=0,corrected=0;
+    for(const {forecast,forcing} of pairs){raw+=(forecast-forcing)**2;corrected+=(coefficient*forecast-forcing)**2;}
+    const objective=.5*(corrected/pairs.length+lambda*(coefficient-1)**2);
+    if(!Number.isFinite(raw)||!Number.isFinite(corrected)||!Number.isFinite(objective))throw new RangeError('Source loss overflow');
+    return Object.freeze({coefficient,count:pairs.length,rawRms:Math.sqrt(raw/pairs.length),
+      correctedRms:Math.sqrt(corrected/pairs.length),objective,rawObjective:.5*raw/pairs.length});
+  }
+  class SourceScale{
+    constructor({source,lambda,window=60,warmup=30,preview=5}={}){
+      this.source=integer(source,2,'source');finite(lambda,'lambda');
+      if(lambda<=0)throw new RangeError('lambda must be positive');
+      this.lambda=lambda;this.window=integer(window,1,'window');this.warmup=integer(warmup,1,'warmup');
+      this.preview=integer(preview,1,'preview');if(this.warmup>this.window)throw new RangeError('warmup exceeds window');
+      this.pairs=[];this.count=0;this.updates=0;this.availableAt=0;this.trainedThrough=null;
+      this.coefficient=1;this.parameterChange=0;this.fit=fitSource([],lambda);
+    }
+    observe(pair,now){
+      integer(now,0,'now');
+      const target=integer(pair.target,0,'target'),issuedAt=integer(pair.issuedAt,0,'issuedAt'),revealedAt=integer(pair.revealedAt,1,'revealedAt');
+      if(target!==this.count)throw new RangeError('Source observations must arrive once in target order');
+      if(issuedAt!==Math.max(0,target-this.preview+1))throw new RangeError('Forecast issue does not match sealed preview timing');
+      if(revealedAt!==target+1||revealedAt>now||now<this.availableAt)throw new RangeError('Unrevealed or out of order source observation');
+      const next=Object.freeze({target,issuedAt,revealedAt,forecast:finite(pair.forecast,'forecast'),forcing:finite(pair.forcing,'forcing')});
+      const pairs=this.pairs.concat(next).slice(-this.window),count=this.count+1,ready=count>=this.warmup;
+      const fit=ready?fitSource(pairs,this.lambda):this.fit,coefficient=ready?fit.coefficient:1;
+      // All validation and the solve finish before any source state changes.
+      this.pairs=pairs;this.count=count;this.availableAt=now;this.parameterChange=coefficient-this.coefficient;
+      this.coefficient=coefficient;this.fit=fit;
+      if(ready){this.updates++;this.trainedThrough=target;}
+      return this.at(now);
+    }
+    at(action){
+      integer(action,0,'action');if(action<this.availableAt)throw new RangeError('Requested action precedes available source data');
+      return Object.freeze({source:this.source,coefficient:this.coefficient,totalPairs:this.count,windowCount:this.pairs.length,
+        windowStart:this.pairs[0]?.target??null,windowEnd:this.pairs.at(-1)?.target??null,
+        updates:this.updates,trainedThrough:this.trainedThrough,availableAt:this.availableAt,
+        parameterChange:this.parameterChange,rawRms:this.fit.rawRms,correctedRms:this.fit.correctedRms});
+    }
+  }
+  function receiverMessages({receiverBus,permission,remoteBudget,nodes,forecast,target,issuedAt,action,preview=5}){
+    integer(action,0,'action');integer(target,0,'target');integer(issuedAt,0,'issuedAt');integer(preview,1,'preview');
+    integer(remoteBudget,0,'remoteBudget');integer(receiverBus,2,'receiverBus');
+    if(!Array.isArray(permission)||!permission.length||permission.some(v=>typeof v!=='boolean'))throw new TypeError('Boolean source permissions required');
+    const n=permission.length,local=receiverBus-2;
+    if(local>=n||!permission[local])throw new RangeError('Mandatory local source permission missing');
+    if(permission.filter(Boolean).length-1>remoteBudget)throw new RangeError('Remote source budget exceeded');
+    if(!Array.isArray(nodes)||nodes.length!==n||!Array.isArray(forecast)||forecast.length!==n)throw new RangeError('Source dimension mismatch');
+    if(issuedAt!==Math.max(0,target-preview+1)||issuedAt>action||target>action+preview-1)throw new RangeError('Forecast is not causally available');
+    const messages=[];
+    for(let j=0;j<n;j++)if(permission[j]){
+      // Excluded source nodes and raw forecasts are never accessed here.
+      const report=nodes[j].at(action);if(report.source!==j+2)throw new RangeError('Source identity mismatch');
+      integer(report.availableAt,0,'source available time');
+      if(report.availableAt>action||(report.trainedThrough!==null&&(!Number.isSafeInteger(report.trainedThrough)||report.trainedThrough<0||report.trainedThrough>=action||report.trainedThrough+1>report.availableAt)))throw new RangeError('Future source parameter');
+      messages.push(Object.freeze({source:j+2,forecast:finite(forecast[j],'admitted forecast'),
+        coefficient:finite(report.coefficient,'source coefficient'),target,issuedAt,action,
+        trainedThrough:report.trainedThrough,availableAt:report.availableAt,updates:report.updates}));
+    }
+    return Object.freeze(messages);
+  }
+  function prediction(gainRow,messages){
+    if(!Array.isArray(gainRow)||!Array.isArray(messages))throw new TypeError('Gain row and messages required');
+    const seen=new Set();let total=0;
+    for(const message of messages){
+      const column=integer(message.source,2,'source')-2;if(column>=gainRow.length||seen.has(column))throw new RangeError('Invalid or duplicate message source');
+      seen.add(column);total+=finite(gainRow[column],'prediction gain')*finite(message.coefficient,'coefficient')*finite(message.forecast,'forecast');
+    }
+    if(!Number.isFinite(total))throw new RangeError('Prediction contribution overflow');return total;
+  }
+  function scaleColumn(column,coefficients){
+    if(!Array.isArray(coefficients)||!coefficients.length||coefficients.some(v=>!Number.isFinite(v)))throw new TypeError('Finite source coefficients required');
+    const scaled={...column};
+    for(const group of ['X','U','L']){
+      if(!column[group]||typeof column[group]!=='object')throw new TypeError('Response maps required');
+      scaled[group]=Object.fromEntries(Object.entries(column[group]).map(([time,matrix])=>{
+        if(!Array.isArray(matrix)||matrix.some(row=>!Array.isArray(row)||row.length!==coefficients.length))throw new RangeError('Response dimension mismatch');
+        return [time,matrix.map(row=>row.map((v,j)=>{const value=finite(v,'response coefficient')*coefficients[j];if(!Number.isFinite(value))throw new RangeError('Scaled response overflow');return value;}))];
+      }));
+    }
+    return scaled;
+  }
+  return {fitSource,SourceScale,receiverMessages,prediction,scaleColumn};
+});
+
+/* Ongoing experimental causal prediction protocol.
+ * Sources fit only their own revealed forcing. Receivers use admitted cached
+ * messages and coefficient metadata. Offline support is fixed in this version.
+ * Frozen response feasibility is distinct from stability of adaptive execution. */
+(function(root,factory){
+  const api=factory(typeof module==='object'&&module.exports?require('./causal-source-scale.js'):root.CausalSourceScale);
+  if(typeof module==='object'&&module.exports)module.exports=api;else root.ContinuousResponse=api;
+})(typeof globalThis!=='undefined'?globalThis:this,function(Scale){
+  'use strict';
+  const keys=['online','scalar','static','causal'];
+  const freeze=value=>{if(value&&typeof value==='object'&&!Object.isFrozen(value)){Object.values(value).forEach(freeze);Object.freeze(value);}return value;};
+  const zeros=(m,n)=>Array.from({length:m},()=>Array(n).fill(0));
+  const mv=(a,x)=>a.map(row=>row.reduce((sum,v,j)=>sum+v*x[j],0));
+  const actionNumber=t=>{if(!Number.isSafeInteger(t)||t<0)throw new RangeError('Action must be a nonnegative integer');};
+  function kernel(api,support=null){
+    const {preview:depth,N,M}=api.constants,T=4*depth+1,anchor=depth+1,design=api.math.getDesign(T,support);
+    const startup=design.columns.slice(0,depth),interior=design.columns[anchor-1];
+    function column(target){
+      actionNumber(target);
+      const base=target<depth?startup[target]:interior,shift=target+1-base.k,out={k:target+1,target,pattern:base.pattern};
+      for(const group of ['X','U','L'])out[group]=Object.fromEntries(Object.entries(base[group]).map(([time,value])=>[Number(time)+shift,value]));
+      return out;
+    }
+    function row(action){
+      actionNumber(action);const blocks=[];
+      for(let target=Math.max(0,action-depth);target<action+depth;target++){
+        const col=column(target),X=col.X[action],U=col.U[action],L=col.L[action];
+        if(L)blocks.push({k:target+1,target,X:X||zeros(N-1,N-1),U:U||zeros(M,N-1),L});
+      }
+      return blocks;
+    }
+    const scores=zeros(M,N-1);
+    for(const matrix of Object.values(interior.L))for(let r=0;r<M;r++)for(let j=0;j<N-1;j++)scores[r][j]+=matrix[r][j]**2;
+    return {version:'stationary-preview-v1',planningHorizon:T,depth,startupTargets:depth,support:design.support,
+      column,row,scores,interior,startup,design};
+  }
+  class Controller{
+    constructor(api){
+      if(!Scale)throw new Error('Causal source scaling must be loaded for the ongoing protocol');
+      this.api=api;const {N,M,preview,remoteBudget,inverterBuses}=api.constants;
+      this.n=N-1;this.m=M;this.depth=preview;this.observed=0;this.nextTarget=0;this.lastAction=-1;
+      this.dense=kernel(api);this.selection=api.math.Response.supportFromScores(this.dense.scores,inverterBuses,remoteBudget,1e-12);
+      this.sparse=kernel(api,this.selection.support);
+      this.sources=Array.from({length:this.n},(_,j)=>new Scale.SourceScale({source:j+2,lambda:api.model.calibrationRidge,preview}));
+      this.identity=Array.from({length:this.n},(_,j)=>({at:()=>({source:j+2,coefficient:1,trainedThrough:null,availableAt:0,updates:0})}));
+      this.permissions={online:this.selection.support,scalar:this.selection.support,static:zeros(M,this.n).map(row=>row.map(()=>true)),causal:zeros(M,this.n).map(row=>row.map(()=>false))};
+      this.boxes=Object.fromEntries(keys.map(key=>[key,Array.from({length:M},()=>({packets:new Map(),reports:new Map()}))]));
+      this.traffic=Object.fromEntries(keys.map(key=>[key,{forecastMessages:0,remoteForecastMessages:0,localForecastMessages:0,correctionScalars:0,remoteCorrectionScalars:0,probingMessages:0}]));
+      this.receipt=null;this.pending=null;this.sourceReports=this.sources.map(s=>s.at(0));
+    }
+    deliverPolicy(key,action,issued){
+      if(key==='causal')return;
+      const {inverterBuses,remoteBudget}=this.api.constants,n=this.n;
+      // This view never reads an excluded coordinate just to build an array.
+      const forecast=Array(n);for(let j=0;j<n;j++)Object.defineProperty(forecast,j,{get:()=>issued.forecast[j+1]});
+      for(let r=0;r<this.m;r++){
+        const messages=Scale.receiverMessages({receiverBus:inverterBuses[r],permission:this.permissions[key][r],
+          remoteBudget:key==='static'?n-1:remoteBudget,nodes:key==='online'?this.sources:this.identity,
+          forecast,target:issued.t,issuedAt:issued.issuedAt,action,preview:this.depth});
+        const box=this.boxes[key][r];box.packets.set(issued.t,messages);
+        for(const message of messages){
+          box.reports.set(message.source-2,message);
+          const remote=message.source!==inverterBuses[r],traffic=this.traffic[key];
+          traffic.forecastMessages++;traffic[remote?'remoteForecastMessages':'localForecastMessages']++;
+          if(key==='online'){traffic.correctionScalars++;if(remote)traffic.remoteCorrectionScalars++;}
+        }
+      }
+    }
+    begin(action,samples,forecasts){
+      actionNumber(action);if(action!==this.lastAction+1||samples.length!==action)throw new RangeError('Ongoing actions require exactly the revealed prefix');
+      for(let t=this.observed;t<action;t++){
+        const sample=samples[t],issued=forecasts[t];
+        if(sample.t!==t||issued.t!==t||issued.issuedAt!==Math.max(0,t-this.depth+1))throw new RangeError('Invalid revealed source timing');
+        for(let j=0;j<this.n;j++)this.sources[j].observe({target:t,issuedAt:issued.issuedAt,revealedAt:t+1,
+          forecast:issued.forecast[j+1],forcing:sample.disturbance[j+1]},action);
+      }
+      this.observed=action;this.sourceReports=this.sources.map(source=>source.at(action));
+      for(let target=this.nextTarget;target<action+this.depth;target++){
+        const issued=forecasts[target];if(!issued||issued.t!==target||issued.issuedAt>action)throw new RangeError('Forecast not issued');
+        for(const key of keys)this.deliverPolicy(key,action,issued);
+      }
+      this.nextTarget=action+this.depth;
+      for(const key of keys)for(const box of this.boxes[key])for(const target of box.packets.keys())if(target<action-this.depth)box.packets.delete(target);
+      this.lastAction=action;
+      this.pending={protocol:'continuous-phi-v1',action,parameterAvailableAt:action,trainedThrough:action>=30?action-1:null,
+        sourceReports:this.sourceReports,policies:{},traffic:JSON.parse(JSON.stringify(this.traffic))};
+    }
+    command(key,state){
+      if(!keys.includes(key)||!this.pending)throw new Error('Begin the ongoing action before commands');
+      if(!Array.isArray(state)||state.length!==this.n||state.some(v=>!Number.isFinite(v)))throw new RangeError('Invalid physical state');
+      const feedback=mv(this.api.model.K,state),prediction=Array(this.m).fill(0);
+      const online=key==='online',sourceContributions=online?zeros(this.m,this.n):null,currentGains=online?zeros(this.m,this.n):null;
+      const plan=key==='static'?this.dense:this.sparse;
+      if(key!=='causal')for(const block of plan.row(this.lastAction)){
+        for(let r=0;r<this.m;r++){
+          const box=this.boxes[key][r],messages=box.packets.get(block.target);
+          if(!messages)throw new Error('Required admitted forecast missing');
+          for(const message of messages){
+            const j=message.source-2,report=box.reports.get(j),coefficient=online?report.coefficient:1;
+            if(report.availableAt>this.lastAction||(report.trainedThrough!==null&&report.trainedThrough>=this.lastAction))throw new RangeError('Future admitted parameter');
+            const gain=block.L[r][j]*coefficient,value=gain*message.forecast;
+            prediction[r]+=value;
+            if(online){sourceContributions[r][j]+=value;if(block.target===this.lastAction)currentGains[r][j]=gain;}
+          }
+        }
+      }
+      const raw=feedback.map((v,r)=>v+prediction[r]);
+      if(raw.some(v=>!Number.isFinite(v)))throw new RangeError('Nonfinite ongoing command');
+      const result={feedback,prediction,raw};
+      if(online)Object.assign(result,{sourceContributions,currentGains,
+        receivedCoefficients:this.boxes.online.map(box=>Array.from({length:this.n},(_,j)=>box.reports.get(j)?.coefficient??null))});
+      this.pending.policies[key]=result;return raw.slice();
+    }
+    finish(commands){
+      for(const key of keys){if(!this.pending?.policies[key])throw new Error('Missing executed policy');this.pending.policies[key].bounded=commands[key].slice();}
+      this.receipt=freeze(this.pending);this.pending=null;return this.receipt;
+    }
+    diagnostics(action){
+      const reports=this.sourceReports,coefficients=reports.map(r=>r.coefficient),row=this.sparse.row(action);
+      const baselineScores=zeros(this.m,this.n),learnedScores=zeros(this.m,this.n);
+      for(const block of row)for(let r=0;r<this.m;r++)for(let j=0;j<this.n;j++){
+        if(!this.selection.support[r][j])continue;
+        baselineScores[r][j]+=block.L[r][j]**2;learnedScores[r][j]+=(block.L[r][j]*coefficients[j])**2;
+      }
+      return {coefficients,reports,baselineScores,learnedScores};
+    }
+  }
+  return {kernel,Controller};
+});
 </script>
 <script>/* Synthetic radial LinDistFlow feeder with bounded inverter commands.
  * Shared rolling forecast calibration changes executed prediction gains.
@@ -1466,6 +1700,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   if(!Response)throw new Error('Load response-controller.js before simulation.js');
   const Calibration=typeof module==='object'&&module.exports?require('./forecast-calibration.js'):globalThis.ForecastCalibration;
   if(!Calibration)throw new Error('Load forecast-calibration.js before simulation.js');
+  const Ongoing=typeof module==='object'&&module.exports?require('./continuous-response.js'):globalThis.ContinuousResponse;
   const synthesizer=new Response.Synthesizer(model,PREVIEW),designCache=new Map(),gramCache=new WeakMap();
   // At the larger feeder's fixed slack, each outgoing radial component is
   // independent. A, B, Q, R and P are block diagonal up to bus ordering, so
@@ -1549,7 +1784,10 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   class Simulation{
     constructor(options={}){
       if(options.networkId!==undefined&&options.networkId!==network.id)throw new RangeError('Saved trial network does not match '+network.id);
-      const experiment=options.experiment===undefined?'prediction':options.experiment;
+      const ongoing=options.protocol==='continuous-phi-v1';
+      if(options.protocol!==undefined&&!ongoing)throw new RangeError('Unknown trial protocol');
+      if(ongoing&&options.experiment!==undefined&&options.experiment!=='communication')throw new RangeError('Ongoing protocol requires communication baselines');
+      const experiment=ongoing?'communication':options.experiment===undefined?'prediction':options.experiment;
       if(!['prediction','communication'].includes(experiment))throw new RangeError('Unknown experiment');
       const beta=options.beta===undefined?1:options.beta;
       if(!COMMUNICATION_BETAS.includes(beta)&&!COMMUNICATION_STRESS_BETAS.includes(beta))throw new RangeError('Invalid communication noise level');
@@ -1560,11 +1798,13 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       if(!['reference','solar-outage','forecasted-demand'].includes(powerScenario))throw new RangeError('Unknown power scenario');
       this.preset=preset;
       this.initialOptions={networkId:network.id,experiment,beta,powerScenario,seed:options.seed===undefined?20261013:options.seed,
-        horizon:options.horizon===undefined?480:options.horizon,preset:id,
+        horizon:ongoing?null:options.horizon===undefined?480:options.horizon,preset:id,
         faultBuses:options.faultBuses===undefined?(powerScenario==='forecasted-demand'&&id==='mixed'?FORECASTED_DEMAND.noisySources:preset.faultBuses).slice():options.faultBuses.slice()};
-      if(!Number.isInteger(this.initialOptions.horizon)||this.initialOptions.horizon<1)throw new Error('Invalid horizon');
-      this.phase='discovery';this.discoveryRecord=null;this.deployedSupport=null;this.reset();
+      if(!ongoing&&(!Number.isInteger(this.initialOptions.horizon)||this.initialOptions.horizon<1))throw new Error('Invalid horizon');
+      if(ongoing)this.initialOptions.protocol='continuous-phi-v1';
+      this.phase=ongoing?'ongoing':'discovery';this.discoveryRecord=null;this.deployedSupport=null;this.reset();
     }
+    get ongoing(){return this.initialOptions?.protocol==='continuous-phi-v1';}
     reset(){
       this.options={...this.initialOptions,faultBuses:this.initialOptions.faultBuses.slice()};
       this.random=seededRandom(this.options.seed);this.t=0;this.mode='running';
@@ -1579,7 +1819,15 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       this.latent=Array.from({length:N+1},()=>this.random.normal());
       this.pulses=[];this.samples=[];this.history=[];this.eventLog=[];this.forecasts=[];this.lastPreview=[];
       this.lastPulseApplications=[];this.lastScenarioApplications=[];this.lastSample=null;this.lastInputs=null;
-      this.rows=[];this.rowIds=new Set();this.segments=[];this.addSegment(0,this.options.horizon);
+      this.rows=[];this.rowIds=new Set();this.segments=[];
+      if(this.ongoing){
+        if(!Ongoing)throw new Error('Load the continuous response modules before an ongoing trial');
+        this.continuousController=new Ongoing.Controller({model,constants:{N,M,preview:PREVIEW,remoteBudget:REMOTE_BUDGET,inverterBuses:INVERTER_BUSES},math:{getDesign,Response}});
+        const selection=this.continuousController.selection;
+        this.deployedSupport=deepFreeze({learned:selection.support,fixed:selection.support,links:selection.links,fixedLinks:selection.links,
+          selection:'fixed offline stationary response energy',topologyAdaptive:false,discoveryTime:null,trainingSamples:[]});
+        this.lastExecution=null;
+      }else this.addSegment(0,this.options.horizon);
       this.learning={completedRows:0,delay:PREVIEW,updates:0,updateCount:0,prefixError:null,prefixLoss:null,
         stepSize:null,fitError:null,rawRms:null,calibratedRms:null,windowStart:null,windowEnd:null,windowSize:0};
       this.fit=null;this.fitHistory=[];this.fitError=null;this.fitObjective=null;this.fitIteration=0;
@@ -1614,6 +1862,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         eventName:profile.eventName,decay:profile.decay,steps:profile.steps,...extra,message:profile.eventName+' at bus '+bus}));return true;
     }
     extend(steps=480){
+      if(this.ongoing)return this.snapshot();
       if(!Number.isInteger(steps)||steps<1)throw new RangeError('Extension must be a positive number of steps');
       this.addSegment(this.options.horizon,steps);this.options.horizon+=steps;
       this.eventLog.push(deepFreeze({t:this.t,type:'extend',steps,message:'New finite planning segment'}));
@@ -1700,6 +1949,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       this.lastTrainingTime=this.learning.windowEnd;this.lastTrainingSampleCount=this.rows.length;
     }
     updateCalibration(){
+      if(this.ongoing)return;
       // Current truth is not yet available. All pairs here were observed before
       // this action, including the carried discovery window on a fresh trial.
       if(this._calibrationAt===this.t)return;
@@ -1717,6 +1967,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         parameterChange:frobenius(combine(fit.matrix,previous,1,-1))};
     }
     refreshScores(){
+      if(this.ongoing)return this.refreshContinuousScores();
       const segment=this.segments.find(s=>this.t>=s.start&&this.t<s.end)||this.segments.at(-1);
       const measured=calibratedScores(segment.designs.online,this.calibration.matrix);
       let scores=measured.scores;
@@ -1769,14 +2020,15 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     }
     step(){
       if(this.mode!=='running')return this.snapshot();
-      if(this.t>=this.options.horizon){this.mode='completed';return this.snapshot();}
-      const time=this.t,segment=this.segments.find(s=>time>=s.start&&time<s.end),local=time-segment.start;
-      this.updateCalibration();
-      this.sealPreview();this.lastPreview=segment.dense.rows[local].map(block=>this.forecasts[segment.start+block.k-1]);
+      if(!this.ongoing&&this.t>=this.options.horizon){this.mode='completed';return this.snapshot();}
+      const time=this.t,segment=this.ongoing?null:this.segments.find(s=>time>=s.start&&time<s.end),local=segment?time-segment.start:time;
+      this.updateCalibration();this.sealPreview();
+      if(this.ongoing){this.prepareContinuousAction();this.lastPreview=this.continuousController.dense.row(time).map(block=>this.forecasts[block.target]);}
+      else this.lastPreview=segment.dense.rows[local].map(block=>this.forecasts[segment.start+block.k-1]);
       const issued=this.forecasts[time],background=issued.base,requested=Array(N).fill(0);
       // A prespecified unannounced generation outage is realized only after
       // deployment. It never enters sealPreview or changes discovery selection.
-      const outage=this.phase==='deployment'&&this.options.powerScenario==='solar-outage'&&time>=30&&time<50;
+      const outage=(this.phase==='deployment'||this.ongoing)&&this.options.powerScenario==='solar-outage'&&time>=30&&time<50;
       const scenarioRequest=background.map((v,i)=>outage&&SOLAR_BUSES.includes(i+1)?Math.max(0,BUS_PROFILES[i].baseGenerationKw-v*1000):0);
       const scenarioBase=background.map((v,i)=>boundedPowerDeviation(i+1,v+scenarioRequest[i]/1000));
       this.lastScenarioApplications=issued.scheduledPowerKw
@@ -1784,7 +2036,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         :scenarioRequest.flatMap((requestedKw,i)=>requestedKw>0?[{bus:i+1,requestedKw,appliedKw:(scenarioBase[i]-background[i])*1000}]:[]);
       if(this.options.powerScenario==='forecasted-demand'&&time%FORECASTED_DEMAND.periodSeconds===0)
         this.eventLog.push(deepFreeze({t:time,type:'scenario',kind:'demand',forecasted:true,message:'Scheduled demand and solar cycle'}));
-      if(this.phase==='deployment'&&this.options.powerScenario==='solar-outage'&&(time===30||time===50))
+      if((this.phase==='deployment'||this.ongoing)&&this.options.powerScenario==='solar-outage'&&(time===30||time===50))
         this.eventLog.push(deepFreeze({t:time,type:'scenario',action:time===30?'start':'restore',buses:SOLAR_BUSES.slice(),message:time===30?'Solar outage begins':'Solar generation restored'}));
       for(const event of this.pulses){event.requestedKw=event.strength*Math.exp(-event.age/event.decay);requested[event.bus-1]+=event.requestedKw;}
       const nextPower=scenarioBase.map((v,i)=>boundedPowerDeviation(i+1,v+requested[i]/1000));
@@ -1797,8 +2049,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       const inputs={},rms={},regulationRms={},recovered={};
       for(const key of CONTROLLERS){
         const x=this.states[key].slice(1).map((v,i)=>v-model.baseDrop[i+1]);
-        const raw=matvec(model.K,x);
-        if(key!=='causal')for(const block of segment.designs[key].rows[local]){
+        const raw=this.ongoing?this.continuousController.command(key,x):matvec(model.K,x);
+        if(!this.ongoing&&key!=='causal')for(const block of segment.designs[key].rows[local]){
           const forecast=this.forecasts[segment.start+block.k-1].forecast.slice(1);
           const fixedTopologyTrial=this.phase==='deployment'&&this.options.experiment==='communication';
           const corrected=fixedTopologyTrial?forecast:key==='online'?matvec(this.calibration.matrix,forecast):key==='scalar'?forecast.map(v=>v*this.calibration.scalar):forecast;
@@ -1814,6 +2066,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         recovered[key]=[0,...xn.map((v,i)=>v-LAG*x[i]-bu[i])];
         rms[key]=Math.sqrt(squared(this.states[key].slice(1))/(N-1));regulationRms[key]=Math.sqrt(squared(xn)/(N-1));
       }
+      if(this.ongoing)this.lastExecution=this.continuousController.finish(this.command);
       const sample=deepFreeze({t:time,forecast:issued.forecast,disturbance:recovered.online,
         voltageDisturbance:recovered.online,disturbances:recovered,base:background,powerDeviation:nextPower,
         pulse,scenarioApplications:this.lastScenarioApplications.map(p=>({...p})),pulseApplications:this.lastPulseApplications.map(p=>({...p})),units:'pu voltage forcing',pulseUnits:'kW',
@@ -1833,8 +2086,40 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         rawForecastRms:this.learning.rawRms,
         calibratedForecastRms:Math.sqrt(squared(matvec(this.calibration.matrix,sample.forecast.slice(1)).map((v,i)=>v-sample.disturbance[i+1]))/(N-1)),
         prefixError:this.learning.prefixError,prefixLoss:this.learning.prefixLoss,
-        completedRows:this.rows.length,drift:this.drift,changedEdges:this.changedEdges}));
-      if(this.t>=this.options.horizon)this.mode='completed';return this.snapshot();
+        completedRows:this.rows.length,drift:this.drift,changedEdges:this.changedEdges,
+        ...(this.ongoing?{execution:this.lastExecution,sourcePairs:this.continuousController.observed,sourceUpdates:this.calibration.updates}:{} )}));
+      if(!this.ongoing&&this.t>=this.options.horizon)this.mode='completed';return this.snapshot();
+    }
+    prepareContinuousAction(){
+      const controller=this.continuousController;controller.begin(this.t,this.samples,this.forecasts);
+      const reports=controller.sourceReports,c=reports.map(r=>r.coefficient),updates=Math.max(0,this.t-WARMUP+1);
+      const rms=key=>reports[0][key]===null?null:Math.sqrt(reports.reduce((sum,r)=>sum+r[key]**2,0)/(N-1));
+      this.calibration={matrix:c.map((v,i)=>c.map((_,j)=>i===j?v:0)),scalar:1,windowSize:Math.min(this.t,WINDOW),
+        updates,trainedThrough:updates?this.t-1:null,carriedSamples:0,parameterChange:Math.sqrt(reports.reduce((sum,r)=>sum+r.parameterChange**2,0)),
+        rawRms:rms('rawRms'),matrixRms:rms('correctedRms'),protocol:'source-local-diagonal-v1'};
+      Object.assign(this.learning,{completedRows:0,sourcePairs:this.t,sourceFits:updates*(N-1),sourceUpdates:updates,windowSize:Math.min(this.t,WINDOW),windowStart:this.t?Math.max(0,this.t-WINDOW):null,
+        windowEnd:this.t?this.t-1:null,updates,updateCount:updates,calibratedRms:this.calibration.matrixRms});
+      this.lastTrainingTime=this.t?this.t-1:null;this.lastTrainingSampleCount=this.t;
+    }
+    refreshContinuousScores(){
+      const controller=this.continuousController,measured=controller.diagnostics(this.t),scores=measured.learnedScores,baseline=measured.baselineScores;
+      const gain=scoreGain(scores),energyChange=scores.map((row,r)=>row.map((v,j)=>v-baseline[r][j]));
+      const receiverEnergy=baseline.map(row=>row.reduce((sum,v)=>sum+v,0)),total=receiverEnergy.reduce((sum,v)=>sum+v,0);
+      this.drift=this.directGain?frobenius(combine(gain,this.directGain,1,-1))/Math.max(frobenius(this.directGain),1e-12):0;
+      this.changedEdges=0;this.directGain=gain;this.predictionScores=scores;
+      this.recommendations=controller.selection.links.map(e=>({...e,weight:scores[INVERTER_BUSES.indexOf(e.to)][e.from-2]}));
+      this.predictionDiagnostics=deepFreeze({available:this.calibration.windowSize>0,frozen:false,actualDeployed:true,topologyAdaptive:false,
+        completedRows:0,sourcePairs:controller.observed,sourceWindowSize:this.calibration.windowSize,scoreSamples:0,receiverBuses:INVERTER_BUSES.slice(),sourceBuses:Array.from({length:N-1},(_,j)=>j+2),
+        baselineScores:baseline,learnedScores:scores,energyChange,relativeEnergyChange:energyChange.map((row,r)=>row.map((v,j)=>baseline[r][j]>0?v/baseline[r][j]:null)),
+        receiverNormalizedChange:energyChange.map((row,r)=>row.map(v=>receiverEnergy[r]>0?v/receiverEnergy[r]:0)),
+        relativeGainChange:total>0?Math.sqrt(scores.flatMap((row,r)=>row.map((_,j)=>(Math.sqrt(scores[r][j])-Math.sqrt(baseline[r][j]))**2)).reduce((a,b)=>a+b,0)/total):null,
+        overallRelativeEnergyChange:total>0?energyChange.flat().reduce((a,b)=>a+b,0)/total:null,
+        offlineLinks:controller.selection.links,addedLinkCount:0,removedLinkCount:0,changedLinkCount:0});
+    }
+    recordContinuous(){
+      if(!this.ongoing)throw new Error('Use legacy replay for an archived protocol');
+      return deepFreeze({version:14,protocol:'continuous-phi-v1',networkId:network.id,options:{...this.initialOptions,faultBuses:this.initialOptions.faultBuses.slice()},
+        steps:this.t,events:this.eventLog.filter(e=>e.type==='pulse'||e.type==='forecast').map(e=>({...e}))});
     }
     freeze(){
       if(this.phase!=='discovery'||this.rows.length<WARMUP)return false;
@@ -1855,7 +2140,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       if(this.fitError<TOLERANCE)this.mode='converged';return this.snapshot();
     }
     resume(){
-      this.mode=this.t>=this.options.horizon?'completed':'running';this.fit=null;this.fitError=null;this.fitObjective=null;
+      this.mode=!this.ongoing&&this.t>=this.options.horizon?'completed':'running';this.fit=null;this.fitError=null;this.fitObjective=null;
       this.fitIteration=0;this.fitHistory=[];this.drift=0;this.changedEdges=0;this.sinceStable=0;
       this.eventLog.push(deepFreeze({t:this.t,type:'resume',message:'Physical trial resumed'}));return this.snapshot();
     }
@@ -1892,9 +2177,12 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         requestedKw:this.lastScenarioApplications.reduce((sum,item)=>sum+item.requestedKw,0),appliedKw:sumScheduled(),
         demandChangeKw:sumScheduled('Homes'),solarLossKw:sumScheduled('Solar'),batteryChangeKw:sumScheduled('Battery'),
         absoluteAppliedKw:this.lastScenarioApplications.reduce((sum,item)=>sum+Math.abs(item.appliedKw),0)}
-        :{id:this.options.powerScenario,start:30,end:50,active:this.phase==='deployment'&&this.t>30&&this.t<=50,requestedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.requestedKw,0),appliedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.appliedKw,0)};
+        :{id:this.options.powerScenario,start:30,end:50,active:(this.phase==='deployment'||this.ongoing)&&this.t>30&&this.t<=50,requestedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.requestedKw,0),appliedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.appliedKw,0)};
       return{networkId:network.id,networkLabel:network.label,t:this.t,costTime:this.lastSample?this.lastSample.t:null,stateTime:this.t,horizon:this.options.horizon,
         initialOptions:{...this.initialOptions,faultBuses:this.initialOptions.faultBuses.slice()},
+        ...(this.ongoing?{protocol:'continuous-phi-v1',ongoing:true,lastExecution:this.lastExecution,
+          planning:{kind:'stationary finite memory predictive response',horizon:this.continuousController.dense.planningHorizon,preview:PREVIEW,topologyAdaptive:false},
+          traffic:JSON.parse(JSON.stringify(this.continuousController.traffic)),sourceReports:this.continuousController.sourceReports}:{}),
         phase:this.phase,experiment:this.options.experiment,beta:this.options.beta,canDeploy:this.phase==='discovery'&&this.samples.length>=WARMUP&&(this.options.experiment!=='communication'||this.communicationScoreSamples>0),
         discoveryRecord:this.discoveryRecord,deployedSupport:this.deployedSupport,
         segments:this.segments.map(s=>({start:s.start,end:s.end,length:s.length})),
@@ -1947,7 +2235,26 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         limitedCount:(snapshot.saturation?.[key] || []).filter(Boolean).length}];
     }));
   }
-  return{Simulation,model,voltageMetrics,constants:deepFreeze({networkId:network.id,networkLabel:network.label,N,M,edges:EDGES,edgeData:model.edgeData,inverterBuses:INVERTER_BUSES,
+  function replayContinuous(record){
+    if(record?.version!==14||record.protocol!=='continuous-phi-v1'||record.networkId!==network.id||record.options?.protocol!=='continuous-phi-v1')throw new RangeError('Invalid ongoing replay protocol or network');
+    if(!Number.isSafeInteger(record.steps)||record.steps<0||!Array.isArray(record.events))throw new RangeError('Invalid ongoing replay prefix');
+    let previous=-1;
+    for(const event of record.events){
+      if(!Number.isSafeInteger(event.t)||event.t<0||event.t<previous||event.t>record.steps||!Number.isInteger(event.bus)||event.bus<2||event.bus>N||!['pulse','forecast'].includes(event.type))throw new RangeError('Invalid ongoing replay event order');
+      previous=event.t;
+    }
+    const sim=new Simulation(record.options);let index=0;
+    for(let action=0;action<=record.steps;action++){
+      while(index<record.events.length&&record.events[index].t===action){
+        const event=record.events[index++];
+        if(event.type==='pulse')sim.queuePulse(event.bus,event.strength,event.protocol??null);
+        else if(sim.toggleFault(event.bus)!==event.faulty)throw new RangeError('Ongoing replay reliability state mismatch');
+      }
+      if(action<record.steps)sim.step();
+    }
+    return sim;
+  }
+  return{Simulation,replayContinuous,model,voltageMetrics,constants:deepFreeze({networkId:network.id,networkLabel:network.label,N,M,edges:EDGES,edgeData:model.edgeData,inverterBuses:INVERTER_BUSES,
     amplitude:AMPLITUDE,ridge:RIDGE,rawRidge:RAW_RIDGE,remoteBudget:REMOTE_BUDGET,preview:PREVIEW,window:WINDOW,warmup:WARMUP,
     busProfiles:BUS_PROFILES,controllers:CONTROLLERS,forecastPresets:FORECAST_PRESETS,communicationBetas:COMMUNICATION_BETAS,
     communicationStressBetas:COMMUNICATION_STRESS_BETAS,forecastedDemand:FORECASTED_DEMAND,tolerance:TOLERANCE,horizon:480,
