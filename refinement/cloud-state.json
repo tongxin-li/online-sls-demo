@@ -783,7 +783,15 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-18T11:00:00+08:00",
+    "started_at": "2026-10-18T11:00:15+08:00",
+    "expires_at": "2026-10-18T11:40:15+08:00",
+    "candidate_branch": "cloud/refine/20261018-1100",
+    "base_commit": "6d6a48b5d2abf11f3c4428402a6b7eafd956c60e",
+    "owner": "6ad2628236888191b683d1e7ed2e5b93",
+    "program": "20261018-visual-codesign"
+  },
   "next_focus": "Inspect whether the controller represented by the network and matrix links is unmistakable in existing headings and current/history labels. Reuse actual protocol and support information, including Learned sparse versus Matrix adaptation, without adding panels or controls or implying all four designs use the displayed links. Preserve actual scores, commands, fixed deployment, all four costs and honest recorded regimes. Keep the readable phone feeder and contextual source/receiver marks. No scientific retuning or broad benchmark study for visual work.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
@@ -902,11 +910,11 @@
       "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and metadata candidate workflow results before recovery. Promote only after normal validation with expected main 5bb463c9d9f40e04440755a59275c918e92a6c2b and force false if still matching. On newer main reapply only verified completion metadata and validate normally. Do not count metadata recovery, previous recovery or a duplicate dispatch as another invocation or improvement. Preserve the original 10:37:54 pass deadline."
     },
     "previous_renewed_metadata_verification": {
-      "commit": "86ab70244254733b22f3991a328470e010a615d5",
-      "candidate_run": 39087283602,
-      "main_run": 39088429417,
-      "pages_run": 39088429153,
-      "result": "success independently verified during this slot; recovered metadata only with no invocation or completion increment"
+      "commit": "6d6a48b5d2abf11f3c4428402a6b7eafd956c60e",
+      "candidate_run": 39089722135,
+      "main_run": 39090335905,
+      "pages_run": 39090336026,
+      "result": "success independently verified before this slot; all 212 tests, build consistency and full browser checks. Exact metadata Pages version verified in deployment logs."
     },
     "renewed_completion_history": {
       "0": {
@@ -974,6 +982,16 @@
         "instruction": "The 09:00 slot is counted once in this candidate's renewed_program.completed_count. At the next existing slot read actual metadata candidate workflow result and branch head. Promote only after normal validation with expected current main 78f803f6cc8de784a14b60cdedc4cb19a1ab2faa and force false if still matching. If main changed, reapply only the verified completion metadata onto latest main and validate normally. Do not overwrite newer source, count metadata recovery as another improvement, or count this slot twice. Original 40 minute pass deadline remains 09:43:32. Do not extend it or start an additional refinement from a duplicate dispatch.",
         "main_run": 39088429417,
         "pages_run": 39088429153
+      },
+      "9": {
+        "slot": "2026-10-18T10:00:00+08:00",
+        "branch": "cloud/refine/20261018-1000",
+        "product_ready_commit": "5bb463c9d9f40e04440755a59275c918e92a6c2b",
+        "scope": "Completion record only, no product changes",
+        "status": "Completion metadata published at 6d6a48b5d2abf11f3c4428402a6b7eafd956c60e and independently verified main and exact Pages before this slot. Counted 10:00 once.",
+        "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and metadata candidate workflow results before recovery. Promote only after normal validation with expected main 5bb463c9d9f40e04440755a59275c918e92a6c2b and force false if still matching. On newer main reapply only verified completion metadata and validate normally. Do not count metadata recovery, previous recovery or a duplicate dispatch as another invocation or improvement. Preserve the original 10:37:54 pass deadline.",
+        "main_run": 39090335905,
+        "pages_run": 39090336026
       }
     },
     "renewed_metadata_verification_history": [
@@ -983,6 +1001,13 @@
         "main_run": 39082970486,
         "pages_run": 39082970980,
         "result": "success independently verified before this slot"
+      },
+      {
+        "commit": "86ab70244254733b22f3991a328470e010a615d5",
+        "candidate_run": 39087283602,
+        "main_run": 39088429417,
+        "pages_run": 39088429153,
+        "result": "success independently verified during this slot; recovered metadata only with no invocation or completion increment"
       }
     ]
   },
@@ -1068,7 +1093,7 @@
     "hard_deadline": "2026-10-19T01:00:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 10,
+    "invocation_count": 11,
     "completed_count": 10,
     "runs": [
       {
@@ -1537,9 +1562,38 @@
         "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed. No public HTTP byte comparison performed this pass.",
         "completed_at": "2026-10-18T02:20:02.541Z",
         "publication": "Candidate and main validation succeeded. Generated ready child has the tested source as its single parent and only index.html changed. Promoted with expected current main SHA and force false. Pages succeeded for that exact tested ready version; deployment logs verified."
+      },
+      {
+        "slot": "2026-10-18T11:00:00+08:00",
+        "started_at": "2026-10-18T11:00:15+08:00",
+        "status": "validating",
+        "candidate_branch": "cloud/refine/20261018-1100",
+        "base_commit": "6d6a48b5d2abf11f3c4428402a6b7eafd956c60e",
+        "counted_completed": false,
+        "changes": [
+          "Name the actual displayed link controller in the existing matrix heading and contextual feeder inspection caption. Matrix adaptation owns discovery and saved discovery candidates; Learned sparse owns current communication deployment; Matrix adaptation owns prediction deployment.",
+          "Retain visible candidate, deployed and exact saved-time context in the existing budget line and accessible descriptions. Other policies explicitly keep their own prediction sources. No extra panel, control, scientific change or numerical study.",
+          "Add controller ownership, current/history restoration and exact paused-trial/replay regressions across both experiments, plus desktop/phone browser ownership and screenshot evidence."
+        ],
+        "tests": {
+          "status": "pending cloud validation",
+          "benchmarks": "Not rerun. Engine, physical parameters, controller gains, learning, defaults, forecast timing, source errors, limits, costs and all recorded studies unchanged."
+        },
+        "screenshots": {
+          "pixel_review": "Pending candidate cloud screenshots. Prior published matrix desktop and phone pixels reviewed to identify ambiguous ownership before this edit."
+        },
+        "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed."
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "slot": "2026-10-18T11:00:00+08:00",
+      "started_at": "2026-10-18T11:00:15+08:00",
+      "expires_at": "2026-10-18T11:40:15+08:00",
+      "candidate_branch": "cloud/refine/20261018-1100",
+      "base_commit": "6d6a48b5d2abf11f3c4428402a6b7eafd956c60e",
+      "owner": "6ad2628236888191b683d1e7ed2e5b93",
+      "program": "20261018-visual-codesign"
+    },
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",

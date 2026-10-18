@@ -519,11 +519,12 @@
     const connected=local || (frame.links || []).some(edge=>edge.from===inspectedSource && edge.to===selectedBus);
     return {source:inspectedSource,receiver:selectedBus,local,connected,
       label:'Source bus '+inspectedSource+' → inverter '+selectedBus+' · '+(local?'Local source':connected?'Selected link':'No link')
-        +' · '+(historyIndex!==null?'Saved discovery':snapshot.phase==='deployment'?'Deployed':'Candidate')};
+        +' · '+(historyIndex!==null?'Saved discovery':snapshot.phase==='deployment'?'Deployed':'Candidate')+' · '+displayedLinkController()};
   }
   function renderNetworkInspection() {
     const caption=$('network-inspection'),inspection=predictionInspection();
     caption.hidden=!inspection;
+    caption.dataset.controller=inspection?displayedLinkController():'';
     caption.dataset.source=inspection?String(inspection.source):'';
     caption.dataset.receiver=inspection?String(inspection.receiver):'';
     caption.dataset.connected=inspection?String(inspection.connected):'';
@@ -1030,6 +1031,9 @@
       links:deployed?'fixed':'candidates',predictionWeights:deployed&&snapshot.experiment==='communication'?'fixed':'adaptive',
       historyAt:saved?(historyIndex?topology.events[historyIndex-1]?.t:topology.initialT) ?? 0:null};
   }
+  function displayedLinkController() {
+    return communicationComparison()&&historyIndex===null?'Learned sparse':'Matrix adaptation';
+  }
   function renderProtocol() {
     const status=protocolStatus(),deployed=status.phase==='deployment',phase=$('phase');
     const receipt=deployed?'Offline selection and synthesis complete · '+status.discoverySamples+' discovery samples · Fresh comparison · '
@@ -1043,8 +1047,12 @@
       ? 'Saved discovery links at '+status.historyAt+' s · Plant and costs remain in '+(deployed?'comparison':'discovery')+' · Latest restores current links'
       :receipt;
     $('phase-note').title=receipt;
-    $('matrix-title').textContent=status.view==='saved-discovery'?'Discovery links at '+status.historyAt+' s'
-      :deployed?'Deployed prediction links':'Candidate prediction links';
+    const title=$('matrix-title'),controller=displayedLinkController();
+    title.textContent=controller+' links';
+    title.dataset.controller=controller;title.dataset.context=status.view;
+    title.title=(status.view==='saved-discovery'?'Saved discovery links at '+status.historyAt+' s'
+      :deployed?'Fixed deployed prediction links':'Candidate sparse links · Discovery uses dense messages')
+      +' · '+controller+' only · Other controllers use their own prediction sources';
   }
   function scheduledApplications() {
     return snapshot.powerScenario===DEFAULT_SCENARIO ? (snapshot.lastScenarioApplications || []) : [];
@@ -1343,7 +1351,7 @@
     const budget=predictionBudget(recommendations);
     const showSourceQuality=snapshot.experiment==='communication'&&snapshot.beta>0&&historyIndex===null;
     const noisySources=new Set(showSourceQuality?snapshot.faults:[]);
-    $('link-budget').textContent=(historyIndex!==null?'Saved · ':deployed?'':'Candidate · ')+budget.remote+' of '+budget.dense+' remote links · '+budget.replaced+' replaced';
+    $('link-budget').textContent=(historyIndex!==null?'Saved at '+protocolStatus().historyAt+' s · ':deployed?'Deployed · ':'Candidate · ')+budget.remote+' of '+budget.dense+' remote links · '+budget.replaced+' replaced';
     $('link-budget').title='Replacements relative to the offline fixed sparse topology. Remote prediction channels only. Local predictions and common state feedback are excluded.';
     $('noisy-links').hidden=!showSourceQuality||!deployed||historyIndex!==null;
     $('noisy-links').textContent=budget.noisy+' noisy remote links used · Fixed sparse '+budget.fixedNoisy;
@@ -1371,7 +1379,7 @@
       key.append(label);
     }
     const svg=d3.select(el).attr('viewBox','0 0 '+width+' '+height).attr('height',height)
-      .attr('role','group').attr('aria-label',historyIndex!==null?'Saved discovery prediction sources for eight inverter receivers':changing?'Learning changes in predictive response weights':'Current selected prediction sources for eight inverter receivers')
+      .attr('role','group').attr('aria-label',displayedLinkController()+' · '+(historyIndex!==null?'Saved discovery prediction sources for eight inverter receivers':changing?'Learning changes in predictive response weights':'Current selected prediction sources for eight inverter receivers'))
       .attr('data-gain-change',gainPercent).attr('data-source-changes',added.length).attr('data-offline-source-changes',replaced)
       .attr('data-history-index',historyIndex===null?'latest':historyIndex).attr('data-topology-updates',topology.cumulative.transitions);
     if(svg.select('.matrix-cells').empty()) {

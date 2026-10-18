@@ -1723,12 +1723,14 @@ test('leaving saved discovery through matrix mode restores live source controls 
   const before=plain(h.snapshot());assert.ok(h.sourceHistory().stats);
   h.event('topology-history','input');
   assert.equal(h.protocol().view,'saved-discovery');assert.equal(h.node('source-fault').disabled,true);
-  assert.equal(h.sourceHistory(),null);assert.match(h.node('matrix-title').textContent,/Discovery links at/);
+  assert.equal(h.sourceHistory(),null);assert.equal(h.node('matrix-title').textContent,'Matrix adaptation links');
+  assert.match(h.node('matrix-title').title,/Saved discovery links at/);assert.equal(h.node('matrix-title').dataset.context,'saved-discovery');
   h.change('matrix-view','change');
   assert.equal(h.state().historyIndex,null);assert.equal(h.protocol().view,'comparison');
   assert.equal(h.node('source-fault').disabled,false);assert.ok(h.sourceHistory().stats);
   assert.ok(h.commandInspection());assert.equal(h.state().playing,false);
-  assert.match(h.node('matrix-title').textContent,/Deployed prediction links/);
+  assert.equal(h.node('matrix-title').textContent,'Learned sparse links');
+  assert.match(h.node('matrix-title').title,/Fixed deployed prediction links/);assert.equal(h.node('matrix-title').dataset.context,'comparison');
   assert.deepEqual(plain(h.snapshot()),before);
 });
 
@@ -2280,4 +2282,35 @@ test('network role caption traces actual candidate deployed local absent and his
   assert.equal(restored.node('network-inspection').dataset.source,'7');
   h.change('bus',2);assert.equal(h.node('network-inspection').hidden,true);
   assert.equal(h.node('network-inspection-source').textContent,'','No stale source label');
+});
+
+test('displayed link ownership follows the actual controller phase and saved discovery without changing the trial',()=>{
+  for(const experiment of ['communication','prediction']){
+    const h=harness(undefined,experiment);h.check('auto-compare',false);h.inspectLink(5,7);
+    const check=(controller,context)=>{
+      const heading=h.node('matrix-title');
+      assert.equal(heading.textContent,controller+' links');assert.equal(heading.dataset.controller,controller);
+      assert.equal(heading.dataset.context,context);assert.match(heading.title,/Other controllers use their own prediction sources/);
+      if(h.inspection()){
+        assert.equal(h.node('network-inspection').dataset.controller,controller);
+        assert.ok(h.node('network-inspection-status').textContent.endsWith(' · '+controller));
+      }
+    };
+    check('Matrix adaptation','discovery');assert.match(h.node('matrix-title').title,/Candidate sparse links.*dense messages/);
+    for(let i=0;i<31;i++)h.click('step');
+    h.click('deploy');if(h.state().playing)h.click('run');
+    const controller=experiment==='communication'?'Learned sparse':'Matrix adaptation',before=plain(h.snapshot());
+    check(controller,'comparison');assert.match(h.node('matrix-title').title,/Fixed deployed prediction links/);
+    h.node('topology-history').value='0';h.event('topology-history','input');
+    check('Matrix adaptation','saved-discovery');
+    assert.ok(h.node('matrix-title').title.startsWith('Saved discovery links at '+h.protocol().historyAt+' s'));
+    assert.deepEqual(plain(h.snapshot()),before,'Reading archived ownership cannot deploy archived links or alter the four policies');
+    h.click('history-live');check(controller,'comparison');
+    h.change('matrix-view','change');check(controller,'comparison');
+    assert.deepEqual(plain(h.snapshot()),before,'Changing the ownership view never changes forecasts, states, support or costs');
+    const restored=harness(h.saved(),experiment);
+    assert.deepEqual(plain(restored.snapshot()),before,'Version 13 replay remains exact');
+    assert.equal(restored.node('matrix-title').dataset.controller,controller);
+    h.click('restart');check('Matrix adaptation','discovery');
+  }
 });

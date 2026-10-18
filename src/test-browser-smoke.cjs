@@ -515,7 +515,10 @@ async function main() {
         const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),state=root.powerDemo.getState();
         const phase=document.querySelector('#pr-phase');
         return {snapshot:{phase:snapshot.phase,experiment:snapshot.experiment,t:snapshot.t,discoveryRecord:snapshot.discoveryRecord?{t:snapshot.discoveryRecord.t}:null},state,data:{...phase.dataset},badge:phase.textContent,note:document.querySelector('#pr-phase-note').textContent,
-          title:document.querySelector('#pr-matrix-title').textContent};
+          title:document.querySelector('#pr-matrix-title').textContent,headingData:{...document.querySelector('#pr-matrix-title').dataset},headingNote:document.querySelector('#pr-matrix-title').title,
+          budget:document.querySelector('#pr-link-budget').textContent,matrixName:document.querySelector('#pr-matrix').getAttribute('aria-label'),
+          captionController:document.querySelector('#pr-network-inspection').dataset.controller,
+          inspected:state.inspectedSource!==null&&[5,7,8,12,14,18,21,24].includes(state.selectedBus)};
       });
       const {snapshot,state,data}=reading,deployed=snapshot.phase==='deployment',saved=state.historyIndex!==null;
       assert.equal(data.phase,snapshot.phase);
@@ -527,10 +530,25 @@ async function main() {
       assert.equal(data.predictionWeights,deployed&&snapshot.experiment==='communication'?'fixed':'adaptive');
       if(saved){
         assert.match(reading.note,/Saved discovery links.*Plant and costs remain/);
-        assert.match(reading.title,/Discovery links at/);
+        assert.ok(reading.headingNote.startsWith('Saved discovery links at '+data.historyAt+' s'));
+        assert.ok(reading.budget.startsWith('Saved at '+data.historyAt+' s · '));
       }else if(deployed)assert.match(reading.note,/Offline selection and synthesis complete.*discovery samples.*Links/);
       else {assert.match(reading.badge,/Learning/);assert.match(reading.note,/Dense discovery/);}
+      const controller=!saved&&deployed&&snapshot.experiment==='communication'?'Learned sparse':'Matrix adaptation';
+      assert.equal(reading.title,controller+' links');assert.equal(reading.headingData.controller,controller);
+      assert.equal(reading.headingData.context,data.view);assert.ok(reading.matrixName.startsWith(controller+' · '));
+      assert.match(reading.headingNote,/Other controllers use their own prediction sources/);
+      if(!saved)assert.ok(reading.budget.startsWith(deployed?'Deployed · ':'Candidate · '));
+      if(reading.inspected)assert.equal(reading.captionController,controller);
       return reading;
+    };
+
+    const captureLinkOwner = async (surface,label) => {
+      await checkProtocol(surface);
+      const before=await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
+      const preview=await surface.locator('.pr-matrix-panel').screenshot({path:path.join(output,'link-owner-'+label+'.jpg'),type:'jpeg',quality:85});
+      console.log('CLOUD_OWNER_PREVIEW_'+label+' '+preview.toString('base64'));
+      assert.equal(await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),before,'Reading link ownership changes no trial');
     };
 
     const checkEventMarkers = async surface => {
@@ -949,6 +967,7 @@ async function main() {
     await checkKeyboardInspection();
     await inspectLinks();
     await mark('discovery inspection');
+    await captureLinkOwner(page,'1440-discovery');
     await checkVoltageMetrics(page);
     await checkProtocol(page);
     await page.locator('#pr-command-title').click();
@@ -1031,6 +1050,7 @@ async function main() {
     assert.equal(await page.locator('#pr-source-fault').isDisabled(),true);
     assert.equal(await page.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),liveBefore);
     await page.screenshot({path:path.join(output,'protocol-history.png'),fullPage:true});
+    await captureLinkOwner(page,'1440-history');
     await selectSetting(page,'matrix-view','change');
     await checkProtocol(page);await checkForecastObservation(page);await checkSourceHistory(page);await checkCommandInspection(page);
     assert.equal(await page.locator('#pr-source-fault').isDisabled(),false,'Leaving history through matrix view restores live source actions immediately');
@@ -1569,6 +1589,13 @@ async function main() {
       beta:document.querySelector('#power-response-demo').powerDemo.getSnapshot().beta}));
     assert.equal(stressLayout.beta,8);assert.ok(stressLayout.page<=stressLayout.viewport+1,'Forecast stress controls fit the mobile page');
     await phone.screenshot({path:path.join(output,'forecast-stress-mobile.png'),fullPage:true});
+    // The alternate experiment must not inherit Learned sparse ownership labels.
+    await selectSetting(phone,'experiment','prediction');
+    await captureLinkOwner(phone,'390-prediction-discovery');
+    await withinSettings(phone,()=>phone.locator('#pr-compare').click());
+    await phone.waitForFunction(()=>!document.querySelector('#pr-compare').disabled);
+    if(await phone.locator('#pr-run').textContent()==='Pause')await phone.locator('#pr-run').tap();
+    await captureLinkOwner(phone,'390-prediction-deployment');
     await phone.goto(address+'/environment.html',{waitUntil:'networkidle'});
     const reportLayout=await phone.evaluate(()=>({page:document.documentElement.scrollWidth,viewport:innerWidth}));
     assert.ok(reportLayout.page<=reportLayout.viewport+1,'Scientific report stays within the mobile page');
