@@ -12,6 +12,8 @@ const { chromium } = require('playwright');
 async function archivedPage(owner,options){
  const page=await owner.newPage(options);
  await page.addInitScript(()=>{
+  const pending=sessionStorage.getItem('online-sls-demo-test-restore');
+  if(pending){localStorage.setItem('online-sls-demo-v1',pending);sessionStorage.removeItem('online-sls-demo-test-restore');}
   // Explicit archived v13 production record, preserving superseded lifecycle tests.
   if(!localStorage.getItem('online-sls-demo-v1'))localStorage.setItem('online-sls-demo-v1',JSON.stringify({privateContent:{
    version:13,networkId:'feeder24',phase:'discovery',t:0,events:[],selectedBus:7,speed:'16',
@@ -72,7 +74,7 @@ async function main() {
       const current=await surface.evaluate(()=>{const d=document.querySelector('#power-response-demo').powerDemo,s=d.getSnapshot();return {protocol:s.protocol,networkId:s.networkId,playing:d.getState().playing,speed:document.querySelector('#pr-speed').value};});
       if(current.protocol==='continuous-phi-v1'){
         if(current.playing)await surface.locator('#pr-run').click();
-        await surface.evaluate(({networkId,speed})=>localStorage.setItem('online-sls-demo-v1',JSON.stringify({privateContent:{
+        await surface.evaluate(({networkId,speed})=>sessionStorage.setItem('online-sls-demo-test-restore',JSON.stringify({privateContent:{
           version:13,networkId,phase:'discovery',t:0,events:[],selectedBus:7,speed,view:'learning',matrixView:'links',intervention:'forecast',automaticComparison:true,
           initialOptions:{networkId,experiment:'communication',powerScenario:'reference',beta:1,preset:'mixed',seed:20261013,horizon:180}
         }})),current);

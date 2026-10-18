@@ -26,6 +26,8 @@ async function main(){
   for(const mobile of [false,true])for(const networkId of ['toy8','feeder24','feeder47']){
    const context=await browser.newContext({viewport:mobile?{width:390,height:844}:{width:1440,height:1000},isMobile:mobile,hasTouch:mobile,deviceScaleFactor:1});
    await context.addInitScript(({networkId})=>{
+    const pending=sessionStorage.getItem('online-sls-demo-test-restore');
+    if(pending){localStorage.setItem('online-sls-demo-v1',pending);sessionStorage.removeItem('online-sls-demo-test-restore');}
     window.__attackPointerEvents=[];
     for(const type of ['pointerdown','pointerup','pointercancel','lostpointercapture','click'])document.addEventListener(type,event=>{
       if(event.target.closest?.('#pr-pulse, #pr-stop-attacks'))window.__attackPointerEvents.push({type,target:event.target.closest('#pr-pulse, #pr-stop-attacks').id,pointerType:event.pointerType??null,button:event.button,detail:event.detail,touch:event.sourceCapabilities?.firesTouchEvents??null});
@@ -162,7 +164,7 @@ async function main(){
    const handoffs=[];
    for(const action of ['restart','new-scenario','network-scenario']){
     await pause(page);
-    await page.evaluate(networkId=>localStorage.setItem('online-sls-demo-v1',JSON.stringify({privateContent:{
+    await page.evaluate(networkId=>sessionStorage.setItem('online-sls-demo-test-restore',JSON.stringify({privateContent:{
       version:13,networkId,phase:'discovery',t:8,events:[],selectedBus:7,speed:'32',view:'learning',matrixView:'links',intervention:'forecast',automaticComparison:false,
       initialOptions:{networkId,experiment:'communication',powerScenario:'reference',beta:4,preset:'mixed',seed:20261013,horizon:180}
     }})),networkId);

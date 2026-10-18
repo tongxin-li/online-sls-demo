@@ -803,6 +803,15 @@
         "all_completed_logs_read": true,
         "strict_native_receipt_bound": "passed",
         "candidate_ready_same_source": true
+      },
+      "handoff_first_attempt": {
+        "source": "a2ace42bc3678b2242666fd7d77fd2c951d7737e",
+        "run": 39169852556,
+        "ongoing_job": 117800550592,
+        "ongoing_conclusion": "failure",
+        "completed_logs_read": true,
+        "reason": "A fixture written to localStorage before reload was overwritten by the normal visibility save of the current ongoing trial. The test restored t0 of that current trial instead of the declared archived t8 record.",
+        "repair": "Use a one-navigation session marker that copies the actual v13 record to production localStorage before the next document bridge reads it. Clear the marker immediately. Fresh tests still start from empty storage and exact v14 replay uses no marker."
       }
     },
     "changes": [
@@ -4429,6 +4438,15 @@
             "all_completed_logs_read": true,
             "strict_native_receipt_bound": "passed",
             "candidate_ready_same_source": true
+          },
+          "handoff_first_attempt": {
+            "source": "a2ace42bc3678b2242666fd7d77fd2c951d7737e",
+            "run": 39169852556,
+            "ongoing_job": 117800550592,
+            "ongoing_conclusion": "failure",
+            "completed_logs_read": true,
+            "reason": "A fixture written to localStorage before reload was overwritten by the normal visibility save of the current ongoing trial. The test restored t0 of that current trial instead of the declared archived t8 record.",
+            "repair": "Use a one-navigation session marker that copies the actual v13 record to production localStorage before the next document bridge reads it. Clear the marker immediately. Fresh tests still start from empty storage and exact v14 replay uses no marker."
           }
         },
         "changes": [
@@ -4468,6 +4486,15 @@
           "all_completed_logs_read": true,
           "strict_native_receipt_bound": "passed",
           "candidate_ready_same_source": true
+        },
+        "handoff_first_attempt": {
+          "source": "a2ace42bc3678b2242666fd7d77fd2c951d7737e",
+          "run": 39169852556,
+          "ongoing_job": 117800550592,
+          "ongoing_conclusion": "failure",
+          "completed_logs_read": true,
+          "reason": "A fixture written to localStorage before reload was overwritten by the normal visibility save of the current ongoing trial. The test restored t0 of that current trial instead of the declared archived t8 record.",
+          "repair": "Use a one-navigation session marker that copies the actual v13 record to production localStorage before the next document bridge reads it. Clear the marker immediately. Fresh tests still start from empty storage and exact v14 replay uses no marker."
         }
       },
       "changes": [
