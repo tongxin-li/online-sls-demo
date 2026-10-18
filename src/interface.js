@@ -343,8 +343,9 @@
       scoreSamples:support.scoreSamples,action:command?.action??null,rows};
   }
   function renderLinkEvidence(reading) {
-    const panel=$('link-receipt'),body=$('link-receipt-rows');
+    const panel=$('link-receipt'),body=$('link-receipt-rows'),execution=$('link-receipt-execution');
     panel.hidden=!reading;body.replaceChildren();
+    execution.querySelectorAll('tr[data-measure]').forEach(row=>row.remove());
     panel.dataset.available=String(!!reading);
     for(const key of ['source','receiver','discoverySamples','scoreSamples','action'])
       panel.dataset[key]=reading&&reading[key]!==null?String(reading[key]):'';
@@ -356,7 +357,7 @@
       const header=$('link-receipt-'+item.key);header.textContent=item.label+'\n'+item.budget+' remote';
       header.dataset.budget=String(item.budget);
     }
-    for(const [key,label] of [['selection','Prediction link'],['score','Score (gain²)'],['gainNorm','Gain norm'],['sourceKvar','Source (kvar)'],['commandKvar','Command (kvar)']]) {
+    for(const [key,label] of [['selection','Selected support'],['score','Discovery score'],['gainNorm','Deployed gain'],['sourceKvar','Source (kvar)'],['commandKvar','Command (kvar)']]) {
       const row=document.createElement('tr'),labelCell=document.createElement('th');labelCell.scope='row';labelCell.textContent=label;row.append(labelCell);row.dataset.measure=key;
       for(const item of reading.rows) {
         const cell=document.createElement('td');cell.dataset.controller=item.key;cell.dataset.measure=key;
@@ -366,7 +367,7 @@
         if(key==='commandKvar')cell.title=item.limited?'Actual command limited to ±70 kvar':'Actual bounded command, not a causal share of this source';
         row.append(cell);
       }
-      body.append(row);
+      (key==='selection'||key==='score'?body:execution).append(row);
     }
   }
   // Read only the last revealed pair. Never read a future forcing or forecast base.

@@ -783,7 +783,12 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-18T19:00:00+08:00",
+    "branch": "cloud/refine/20261018-1900",
+    "started_at": "2026-10-18T19:01:33+08:00",
+    "lease_expires_at": "2026-10-18T19:41:33+08:00"
+  },
   "next_focus": "Verify final repeated checks and completion metadata. Then review the existing linked inspector for compact hierarchy between current revealed error, frozen discovery score and executed resynthesized command without repeating source and receiver identity. Preserve complete matrix edge labels, all sources, the single cost table, two stage strip and stable headings. Do not add panels or broaden numerical studies.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
@@ -902,7 +907,7 @@
       "main_run": 39118725048,
       "pages_run": 39118724552,
       "scope": "Completion record only. Product already validated and deployed.",
-      "status": "Metadata validation pending at creation. Historical completed 15, renewed invocation 17 and completed 17 yield total 32. Earlier verification and cancelled superseded source did not increment counts.",
+      "status": "18:00 metadata is already main at f77a4d26b54cf5c83e5f05577ede94c0e82ddd32. Candidate and prepare, product and metadata main repeats succeeded. Final metadata repeat 39119747464 independently read with completed logs before source edits. Exact Pages deployment was verified in the previous pass. No recovery increment.",
       "instruction": "Read actual product main repeat before further source edits and metadata validation before promotion. This 18:00 slot is counted once. Promote metadata only after normal successful validation with matching current main 947d397913477c59285e3d687499dee901202687 and force false. On newer main preserve concurrent changes and reapply only verified metadata without double counting. Recovery, coordination, early preflight, cancelled superseded candidates and duplicate dispatches are not refinements. Preserve the original stricter 18:35:26 deadline from the 17:55:26 early dispatch."
     },
     "previous_renewed_metadata_verification": {
@@ -1099,6 +1104,13 @@
         "main_run": 39107982572,
         "pages_run": 39107982661,
         "result": "Final main success independently read with all 224 tests, build consistency and full browser suites. Exact metadata Pages version independently verified in prior pass. Counts already include 15:00 once."
+      },
+      {
+        "commit": "f77a4d26b54cf5c83e5f05577ede94c0e82ddd32",
+        "candidate_run": 39118816992,
+        "main_run": 39119747464,
+        "pages_run": 39119746793,
+        "result": "Final main success independently read with completed logs before this slot. All 224 tests, build consistency and browser suites passed. Prior pass verified exact metadata Pages version. No recovery count."
       }
     ]
   },
@@ -1206,7 +1218,7 @@
     "hard_deadline": "2026-10-19T01:00:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 17,
+    "invocation_count": 18,
     "completed_count": 17,
     "runs": [
       {
@@ -2033,7 +2045,7 @@
           "candidate": "Current candidate validation and prepare succeeded. Earlier source was superseded before publication by test synchronization and both of its jobs were cancelled, preserved above.",
           "build": "passed",
           "reference_artifact": "Passed unchanged reference generator and artifact checks.",
-          "main": "Repeat validation 39118725048 is running at completion record creation. Read actual final status before further source edits.",
+          "main": "Repeat validation 39118725048 succeeded and was read with completed logs. Completion metadata main repeat 39119747464 independently succeeded with all 224 tests, build consistency and both browser suites.",
           "browser": "Full original desktop and phone browser suite and both network suites passed without runtime errors. Existing playback, repeated and continuous attacks, forecast toggles, automatic fresh comparison, stable cost buttons, all four traces, network switching and exact replay remain covered. New actual desktop and phone tests inspect eight pan positions, require whole numbers for every exposed source column, no source label overlap or hidden sources, guide starts at actual labels and ends at original column coordinates. Existing real pointer hit targets, pinned receiver geometry, correct visible range and direction cues, all 46 source headers and 736 cells, every source reachable, native keyboard scrolling and unchanged full paused trial snapshots remain checked. Consecutive middle positions wait for native scroll dispatch and paint before assertions.",
           "benchmarks": "Not rerun. No engine, controller, objective, learning, forecast timing, noise, limits, attack, numerical output or recorded result changes."
         },
@@ -2072,9 +2084,37 @@
           "Support cells can still be partly clipped at native pan boundaries. Whole labels and existing guides identify their source; all sources and cells remain reachable.",
           "Existing command table numeric text can still partly clip at pan boundaries. No extra panel or control was added. Only the declared Chrome desktop and phone layouts have pixel review. No direct live browser inspection claimed."
         ]
+      },
+      {
+        "slot": "2026-10-18T19:00:00+08:00",
+        "branch": "cloud/refine/20261018-1900",
+        "started_at": "2026-10-18T19:01:33+08:00",
+        "lease_expires_at": "2026-10-18T19:41:33+08:00",
+        "status": "candidate",
+        "candidate_branch": "cloud/refine/20261018-1900",
+        "base_commit": "f77a4d26b54cf5c83e5f05577ede94c0e82ddd32",
+        "counted_invocation": true,
+        "counted_completed": false,
+        "changes": [
+          "Separate frozen discovery support and score from executed resynthesized gain and command in two semantic row groups within the same existing link receipt table.",
+          "Move the actual execution time to introduce its three executed rows, improve the explanation font and use concise discovery versus deployed row labels. Keep one table and unchanged measured values, all sources and every scientific control.",
+          "Add actual desktop and phone row grouping, timing position, visible values and full trial invariance regression checks. No new panel, control or broad numerical study."
+        ],
+        "tests": {
+          "status": "pending"
+        },
+        "screenshots": {
+          "pixel_review": "Pending actual authorized cloud JPEG review before publication."
+        },
+        "direct_live_inspection": "Unverified. Previously denied live browser access is not retried. Public HTTP bytes not fetched."
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "slot": "2026-10-18T19:00:00+08:00",
+      "branch": "cloud/refine/20261018-1900",
+      "started_at": "2026-10-18T19:01:33+08:00",
+      "lease_expires_at": "2026-10-18T19:41:33+08:00"
+    },
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",

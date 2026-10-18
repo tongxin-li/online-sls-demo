@@ -597,12 +597,21 @@ async function main() {
               font:Number.parseFloat(getComputedStyle(cell).fontSize),box:cell.getBoundingClientRect().toJSON()})),
             title:document.querySelector('#pr-link-receipt-title').textContent,
             timing:document.querySelector('#pr-link-receipt-action').textContent,
+            groups:Array.from(panel.querySelectorAll('tbody')).map(group=>({label:group.getAttribute('aria-label'),measures:Array.from(group.querySelectorAll('tr[data-measure]')).map(row=>row.dataset.measure)})),
+            rowLabels:Array.from(panel.querySelectorAll('tr[data-measure]>th')).map(cell=>cell.textContent),
+            actionHeader:{tag:document.querySelector('#pr-link-receipt-action').tagName,scope:document.querySelector('#pr-link-receipt-action').scope,span:document.querySelector('#pr-link-receipt-action').colSpan},
+            verticalOrder:['pr-link-receipt-action','pr-link-receipt-note'].map(id=>document.getElementById(id).getBoundingClientRect().top),
+            gainTop:panel.querySelector('tr[data-measure="gainNorm"]').getBoundingClientRect().top,
             command:Array.from(document.querySelectorAll('#pr-command-rows tr')).map(row=>({...row.dataset}))};
         });
         assert.equal(reading.hidden,false);assert.equal(reading.evidence.source,edge.from);assert.equal(reading.evidence.receiver,edge.to);
         assert.equal(reading.title,'Source '+edge.from+' → inverter '+edge.to);
         assert.equal(Number(reading.data.action),reading.snapshot.lastSample.t);
         assert.match(reading.timing,/Executed action.*Full issued preview/);
+        assert.deepEqual(reading.groups,[{label:'Frozen discovery evidence',measures:['selection','score']},{label:'Executed controller evidence',measures:['gainNorm','sourceKvar','commandKvar']}]);
+        assert.deepEqual(reading.rowLabels,['Selected support','Discovery score','Deployed gain','Source (kvar)','Command (kvar)']);
+        assert.deepEqual(reading.actionHeader,{tag:'TH',scope:'rowgroup',span:3});
+        assert.ok(reading.verticalOrder[0]<reading.gainTop&&reading.gainTop<reading.verticalOrder[1],'Actual execution time introduces only the executed controller rows');
         const receiver=[5,7,8,12,14,18,21,24].indexOf(edge.to),column=edge.from-2;
         for(const row of reading.evidence.rows){
           const support=reading.snapshot.deployedSupport,links=row.key==='scalar'?support.fixedLinks:support.links;

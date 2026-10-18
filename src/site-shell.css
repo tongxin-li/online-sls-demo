@@ -466,7 +466,9 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 .pr-link-receipt td { color:var(--foreground); }
 .pr-link-receipt .pr-link-choice.selected { color:var(--primary); font-weight:600; }
 .pr-link-receipt .pr-link-choice.excluded { color:var(--muted-foreground); }
-.pr-link-receipt #pr-link-receipt-action { color:var(--foreground); font-size:12px; }
+.pr-link-receipt #pr-link-receipt-action { width:auto; padding-top:12px; text-align:left; color:var(--muted-foreground); font-size:12px; font-weight:500; }
+.pr-link-receipt tr[data-measure='commandKvar'] { font-weight:600; }
+.pr-link-receipt #pr-link-receipt-note { font-size:12px; }
 .pr-forecast-values dt { color:var(--muted-foreground); }
 
 /* Current configuration replaces generic heading copy without another panel. */
