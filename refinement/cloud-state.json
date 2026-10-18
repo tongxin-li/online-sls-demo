@@ -783,13 +783,8 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-18T23:00:00+08:00",
-    "branch": "cloud/refine/20261018-2300",
-    "started_at": "2026-10-18T23:00:00+08:00",
-    "lease_expires_at": "2026-10-18T23:37:20+08:00"
-  },
-  "next_focus": "Validate repeated scheduled label compaction without dropping any event or marker detail. Review actual desktop and phone plots before publication.",
+  "active_run": null,
+  "next_focus": "At the final existing scheduled invocation read actual product main and completion metadata outcomes, reconcile without another improvement, perform final deployment audit and pause this same hosted automation. Do not create another automation, start a broad study or add an immediate pass. Report actual completed counts and unfinished limitations.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -899,16 +894,16 @@
       "pages_run": 39052070867
     },
     "renewed_completion": {
-      "slot": "2026-10-18T22:00:00+08:00",
-      "branch": "cloud/refine/20261018-2200",
-      "source_commit": "be6000cdda4fe45404aa4c3be99395ebbb199e90",
-      "product_ready_commit": "3eec702fe23e0c5af5dd4e181ff04e1d93d00474",
-      "candidate_run": 39134838015,
-      "main_run": 39135943487,
-      "pages_run": 39135943442,
-      "scope": "Completion metadata only. Actual product validated, pixel reviewed and exact Pages version verified. No additional improvement.",
-      "status": "Metadata validation pending at creation. Historical completed 15, renewed invocation 21 and completed 20 yield total 35. Corrected source is the same scheduled pass. Cancelled source, coordination, metadata and recovery do not create additional improvements.",
-      "instruction": "Keep metadata unpublished until normal validate and prepare succeed and actual product main repeat 39135943487 succeeds. Promote only with expected main 3eec702fe23e0c5af5dd4e181ff04e1d93d00474 and force false. Inspect concurrent changes and reapply only verified metadata without overwriting or double counting. If checks remain pending at 22:35:18 stop this pass and reconcile at the next existing scheduled slot. No extra immediate pass or deadline extension. Read final metadata main repeat before later source edits."
+      "slot": "2026-10-18T23:00:00+08:00",
+      "branch": "cloud/refine/20261018-2300",
+      "source_commit": "5e7940c3a382b469d671ca5ca0a520d13f7b0a3c",
+      "product_ready_commit": "ad240dba37538d5ea0baf7d1354348fa32a9ad09",
+      "candidate_run": 39139768947,
+      "main_run": 39140578138,
+      "pages_run": 39140577896,
+      "scope": "Completion metadata only. Product validated and pixel reviewed, exact Pages verified. No extra product improvement.",
+      "status": "Metadata validation pending at creation. Historical completed 15, renewed invocation 22 and completed 21 yield total 36. Four cancelled source drafts and one API orchestration retry are not separate invocations or completions.",
+      "instruction": "Read actual final product main 39140578138 and normal metadata validate and prepare before promotion. Promote only with matching expected main ad240dba37538d5ea0baf7d1354348fa32a9ad09 and force false. Preserve concurrent changes and all failed or cancelled history without double counting. If checks remain pending at original 23:37:20 deadline stop this pass and recover at the final existing scheduled invocation. No immediate extra pass or deadline extension. Final invocation must reconcile and verify, pause the same automation and report actual counts and unfinished work by the original program deadline. Read final metadata main repeat before further source edits."
     },
     "previous_renewed_metadata_verification": {
       "commit": "e72156d27b731f00f88edee1ce3fe007ea3786f8",
@@ -1096,6 +1091,18 @@
         "scope": "Completion record only. Product already validated and deployed.",
         "status": "Metadata validation pending at creation. Historical completed 15, renewed invocation 20 and completed 19 yield total 34. Recovery and read only preflight did not increment completion.",
         "instruction": "Read actual product main repeat before metadata promotion or further source changes. Validate metadata normally and promote only when current main matches b1513b4d7db153d1302684d6ea69fde5918dc0f4 with force false. On newer main inspect and reapply only verified metadata without overwriting concurrent changes or double counting. Read final metadata repeat at the next existing scheduled slot if still pending. Preserve the original stricter 21:35:32 deadline measured from 20:55:32 early dispatch. Do not extend it or start an extra pass for duplicates. This 21:00 product improvement is counted once only; recovery and metadata are not new improvements."
+      },
+      "19": {
+        "slot": "2026-10-18T22:00:00+08:00",
+        "branch": "cloud/refine/20261018-2200",
+        "source_commit": "be6000cdda4fe45404aa4c3be99395ebbb199e90",
+        "product_ready_commit": "3eec702fe23e0c5af5dd4e181ff04e1d93d00474",
+        "candidate_run": 39134838015,
+        "main_run": 39135943487,
+        "pages_run": 39135943442,
+        "scope": "Completion metadata only. Actual product validated, pixel reviewed and exact Pages version verified. No additional improvement.",
+        "status": "Metadata validation pending at creation. Historical completed 15, renewed invocation 21 and completed 20 yield total 35. Corrected source is the same scheduled pass. Cancelled source, coordination, metadata and recovery do not create additional improvements.",
+        "instruction": "Keep metadata unpublished until normal validate and prepare succeed and actual product main repeat 39135943487 succeeds. Promote only with expected main 3eec702fe23e0c5af5dd4e181ff04e1d93d00474 and force false. Inspect concurrent changes and reapply only verified metadata without overwriting or double counting. If checks remain pending at 22:35:18 stop this pass and reconcile at the next existing scheduled slot. No extra immediate pass or deadline extension. Read final metadata main repeat before later source edits."
       }
     },
     "renewed_metadata_verification_history": [
@@ -1290,7 +1297,7 @@
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
     "invocation_count": 22,
-    "completed_count": 20,
+    "completed_count": 21,
     "runs": [
       {
         "slot": "2026-10-18T01:00:00+08:00",
@@ -2436,9 +2443,9 @@
         "started_at": "2026-10-18T23:00:00+08:00",
         "preflight_at": "2026-10-18T22:57:20+08:00",
         "lease_expires_at": "2026-10-18T23:37:20+08:00",
-        "status": "in_progress",
+        "status": "completed",
         "counted_invocation": true,
-        "counted_completed": false,
+        "counted_completed": true,
         "slot_resolution": "Read only early preflight until 23:00. Preserve stricter original dispatch deadline 23:37:20. Recover 22:00 completion once without another improvement or invocation. No extra immediate pass for duplicates.",
         "changes": [
           "Reduce repeated scheduled cycle badges to one visible label per chart window while retaining every measured marker, timestamp, span and original event detail.",
@@ -2446,17 +2453,34 @@
           "Extend existing read only grouping regression and actual browser geometry, visibility and full marker detail checks. No event, physical model, controller, scale, trajectory or cost changes. No broad benchmark rerun."
         ],
         "tests": {
-          "status": "Candidate pending"
+          "suites": 8,
+          "total": 224,
+          "failed": 0,
+          "candidate": "Final validate 117711698084 and prepare 117713618679 succeeded. Completed logs independently read.",
+          "build": "passed",
+          "reference_artifact": "All unchanged reference artifact checks passed.",
+          "interaction": "Existing scheduled event regression now checks pure group label compaction, actual timestamps, current window count, unchanged unforecast labels, original complete group descriptions and explicit latest eight detail cap for nine events. Input view, physical snapshot and UI state remain unchanged.",
+          "browser": "Full original desktop and phone suite and both network suites passed without browser errors. Actual event records, types, counts, marker coordinates and spans are retained. Only repeated pure forecasted cycle glyphs hide; other event labels remain. Single visible cycle label reports actual compacted count and retains every original group description in its existing native title despite plot hover overlay. Original marker titles and semantic descriptions remain. Native tooltip content is DOM verified, not a claim of separate browser tooltip pixel inspection. Existing attacks, forecast toggles, automatic handoff, stable cost buttons, all four traces, network switching and exact replay pass. Same paused scheduled trial checks at desktop and phone preserve full snapshot through responsive reflow.",
+          "main": "Main repeat 39140578138 is running at record creation. Read final actual result before metadata promotion or any next source edit. Do not cancel it with another main push.",
+          "benchmarks": "Not rerun. No physical engine, controller, objective, gain, actuator limit, noise, forecast timing, learning equation, attack or archived result changes."
         },
         "screenshots": {
-          "status": "Review actual desktop and phone plot pixels before promotion"
+          "artifact_id": 12141482038,
+          "artifact_digest": "sha256:26952cfaf690852c2d7ede603b401396f8919c7e845c0cc7a97891635e27fc17",
+          "captures": [
+            "cycle-markers-1440-cost.jpg",
+            "cycle-markers-1440-voltage.jpg",
+            "cycle-markers-390-cost.jpg",
+            "cycle-markers-390-voltage.jpg"
+          ],
+          "pixel_review": "Four actual final candidate desktop 1440 and phone 390 cost and voltage panel JPEG pixels reviewed through authorized Actions log previews before promotion. Desktop cumulative plot keeps all three measured cycle lines with one Scheduled ×3 badge. Phone preserves its existing grouped span and actual three cycle count. Rolling voltage and stage plots retain their actual single current-window cycle label. All four controller curves, stable cost buttons, integrated costs and actual link counts remain readable without overlap. Existing units, nominal profile and bus readout remain. No new panel or control. Native tooltip text is verified in DOM, not separate tooltip pixels."
         },
         "candidate_revisions": [
           {
             "source_commit": "8e4e2184bfee6919007164a96a1fe509a7e8f1e1",
             "status": "superseded_unpublished",
             "reason": "Before browser validation, keep one assistive event description on the retained actual marker and mark its decorative badge hidden from assistive technology. Full native titles and labels stay in the DOM. This avoids introducing duplicate semantic event readings.",
-            "validation_conclusion": "In progress at correction. Read actual final cancellation result before completion.",
+            "validation_conclusion": "Cancelled by workflow concurrency. Completed job 117708374729 logs read. First four suites passed with no failures before interruption. No full validation or publication.",
             "candidate_run": 39138677274
           },
           {
@@ -2464,31 +2488,41 @@
             "candidate_run": 39138864044,
             "status": "superseded_unpublished",
             "reason": "Add targeted phone and desktop scheduled cycle plot pixel captures and actual marker checks during the existing paused responsive reflow fixture. Ordinary phone fixture uses the reference scenario and cannot demonstrate repeated scheduled cycle labels. No further product change.",
-            "validation_conclusion": "In progress at correction. Read actual final result before completion."
+            "validation_conclusion": "Cancelled by workflow concurrency. Completed job 117709003538 logs read. First two suites passed before interruption. No full validation or publication."
           },
           {
             "source_commit": "e9bbf5e60e6def46da86836e4170d5b0eedce38c",
             "candidate_run": 39138983285,
             "status": "superseded_unpublished",
             "reason": "Source review confirmed cross-series hover overlay covers marker bands. Preserve mouse access to every compacted cycle detail through the existing first visible badge tooltip, with its actual cycle count, while retaining all original marker details and geometry. No new controls or numerical changes.",
-            "validation_conclusion": "In progress at correction. Read actual final result."
+            "validation_conclusion": "Cancelled by workflow concurrency. Completed job 117709325977 logs read. All 224 cases passed, browser execution interrupted before completion. No full browser validation or publication."
           },
           {
             "source_commit": "e5cec7bc0d5a7d06a85d216d12eb066d08f1600e",
             "candidate_run": 39139474702,
             "status": "superseded_unpublished",
             "reason": "Qualify documentation to preserve the original latest eight detail cap for a dense event group and extend the existing regression to nine actual cycles. No further product or rendering change. Full event records, counts and markers remain intact.",
-            "validation_conclusion": "In progress at correction. Read actual final result."
+            "validation_conclusion": "Cancelled by workflow concurrency. Completed job 117710790659 logs read. First four suites passed before interruption. No full validation or publication."
           }
-        ]
+        ],
+        "source_commit": "5e7940c3a382b469d671ca5ca0a520d13f7b0a3c",
+        "published_commit": "ad240dba37538d5ea0baf7d1354348fa32a9ad09",
+        "candidate_run": 39139768947,
+        "main_run": 39140578138,
+        "pages_run": 39140577896,
+        "completed_at": "2026-10-18T15:30:20.434Z",
+        "publication": "Final candidate validate and prepare succeeded. Ready ad240dba37538d5ea0baf7d1354348fa32a9ad09 has tested source 5e7940c3a382b469d671ca5ca0a520d13f7b0a3c as its only parent and only index.html changed, containing exactly expected annotation rendering changes. Full source comparison contains only intended interface, tests, README and progress. Guarded main promotion at 2026-10-18T15:27:41.028Z matched expected 3eec702fe23e0c5af5dd4e181ff04e1d93d00474 with force false. Completed Pages deploy 117714033678 logs independently confirm exact ready version at 2026-10-18T15:29:01.770Z. Product main repeat pending at record creation. Previously tested 22:00 completion metadata was folded into this validated release without an extra improvement.",
+        "direct_live_inspection": "Unverified. Previously denied live browser access not retried or bypassed. Public HTTP bytes not independently fetched. Actual generated interactions and four plot screenshot pixels reviewed through authorized cloud evidence. Exact Pages build version independently verified.",
+        "remaining_visual_limitations": [
+          "The native tooltip retains the original latest eight detail cap for a dense group. Complete event records, total counts, markers, trajectories and costs remain intact.",
+          "Tooltip strings and semantic metadata are browser DOM verified. Actual screenshot pixel review covers desktop 1440 and phone 390 panels, not native tooltip pixels or direct live browser.",
+          "Existing numeric table pan boundaries still show partial columns, with accurate whole term cues and full reachability. This plot annotation pass does not change that layout."
+        ],
+        "cloud_api_recovery": "One correction orchestration attempt produced no commit SHA and its following update was rejected for a missing sha argument. Readback confirmed branch unchanged. A guarded tree and commit retry succeeded. No main change or validation bypass occurred.",
+        "next_focus": "At the final existing scheduled invocation read actual product main and completion metadata outcomes, reconcile without another improvement, perform final deployment audit and pause this same hosted automation. Do not create another automation, start a broad study or add an immediate pass. Report actual completed counts and unfinished limitations."
       }
     ],
-    "active_run": {
-      "slot": "2026-10-18T23:00:00+08:00",
-      "branch": "cloud/refine/20261018-2300",
-      "started_at": "2026-10-18T23:00:00+08:00",
-      "lease_expires_at": "2026-10-18T23:37:20+08:00"
-    },
+    "active_run": null,
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
@@ -2508,5 +2542,5 @@
     "baseline_main": "2a9ff26b59565ecac1eb5274fbea4d813a18f24f"
   },
   "completed_count_scope": "Original bounded program, retained at 15. Renewed counts are tracked independently in renewed_program.",
-  "total_completed_count": 35
+  "total_completed_count": 36
 }
