@@ -2458,6 +2458,13 @@
             "reason": "Before browser validation, keep one assistive event description on the retained actual marker and mark its decorative badge hidden from assistive technology. Full native titles and labels stay in the DOM. This avoids introducing duplicate semantic event readings.",
             "validation_conclusion": "In progress at correction. Read actual final cancellation result before completion.",
             "candidate_run": 39138677274
+          },
+          {
+            "source_commit": "77c4045863f476701d05f5e7abb5a4b75013214b",
+            "candidate_run": 39138864044,
+            "status": "superseded_unpublished",
+            "reason": "Add targeted phone and desktop scheduled cycle plot pixel captures and actual marker checks during the existing paused responsive reflow fixture. Ordinary phone fixture uses the reference scenario and cannot demonstrate repeated scheduled cycle labels. No further product change.",
+            "validation_conclusion": "In progress at correction. Read actual final result before completion."
           }
         ]
       }

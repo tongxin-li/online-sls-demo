@@ -418,10 +418,19 @@ async function main() {
         await surface.locator('#pr-link-history-details > summary').click();
         await checkDashboardLayout(surface);
         await surface.locator('#pr-link-history-details > summary').click();
+        const eventPreviewWidths=new Set();
         for(const width of [390,768,1440,650,651,viewport.width]){
           await surface.setViewportSize({width,height:1000});
           await checkDashboardLayout(surface);
           await checkMatrixGeometry(surface);
+          await checkEventMarkers(surface);
+          if([390,1440].includes(width)&&!eventPreviewWidths.has(width)){
+            eventPreviewWidths.add(width);
+            for(const [name,selector] of [['voltage','.pr-stage-panel'],['cost','.pr-learning-panel']]){
+              const preview=await surface.locator(selector).screenshot({path:path.join(output,'cycle-markers-'+width+'-'+name+'.jpg'),type:'jpeg',quality:90});
+              console.log('CLOUD_CYCLE_PREVIEW_'+width+'_'+name+' '+preview.toString('base64'));
+            }
+          }
           const positions=await checkNetworkGeometry(surface);
           for(let i=0;i<positions.length;i++)for(const key of ['normalX','normalY'])assert.ok(Math.abs(positions[i][key]-networkPositions[i][key])<1e-6,'Responsive spacing does not change the normalized bus layout');
         }
