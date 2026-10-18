@@ -79,6 +79,7 @@ function target(tagName='DIV') {
     removeAttribute(name){delete this[name];},
     append(...children){this.children.push(...children);},
     replaceChildren(...children){this.children=children;},
+    querySelectorAll(){return this.children;},
     querySelector(selector){return this.children.find(child=>selector==='.pr-swatch'&&child.className?.startsWith('pr-swatch'))||null;},
     getBoundingClientRect(){return {width:550};},
     setPointerCapture(id){this.capturedPointer=id;},
@@ -98,6 +99,7 @@ function harness(saved,experiment='prediction',reducedMotion=true) {
   for(const match of html.matchAll(/<(\w+)[^>]*\bid="(pr-[^"]+)"/g)){
     const node=element(match[1].toUpperCase());node.id=match[2];nodes.set(node.id,node);
   }
+  for(const name of ['network','matrix']) nodes.get('pr-'+name).parentElement=target();
   for(const input of html.matchAll(/<input\b[^>]*\bid="(pr-[^"]+)"[^>]*>/g)){
     const node=nodes.get(input[1]);
     node.checked=/\bchecked\b/.test(input[0]);

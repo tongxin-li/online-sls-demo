@@ -4,31 +4,52 @@
  * This experimental shared-parameter specialization is not literal Algorithm 1.
  * Completed-row delayed gradients remain an independent legacy diagnostic. */
 (function (root, factory) {
-  const api=factory();
+  const edges=[[1,2],[2,3],[3,4],[4,5],[4,6],[6,7],[4,8],
+    [3,9],[9,10],[9,11],[11,12],[1,15],[15,13],[13,14],[13,16],
+    [16,17],[16,18],[18,19],[19,20],[20,21],[18,22],[22,23],[23,24]];
+  const inverters=[5,7,8,12,14,18,21,24],solar=[5,7,14,21],battery=[8,12,18,24];
+  const mixed=[3,6,9,12,15,18,21,24],secondBus=bus=>bus===1?1:bus+23;
+  const definitions=[
+    {id:'toy8',label:'Toy feeder',N:8,remoteBudget:2,edges:edges.filter(([from,to])=>from<=8&&to<=8),
+      inverters:inverters.filter(bus=>bus<=8),solar:solar.filter(bus=>bus<=8),battery:battery.filter(bus=>bus<=8),
+      mixed:mixed.filter(bus=>bus<=8),edgePeriod:23},
+    {id:'feeder24',label:'Distribution feeder',N:24,remoteBudget:3,edges,inverters,solar,battery,mixed,edgePeriod:23},
+    {id:'feeder47',label:'Larger feeder',N:47,remoteBudget:3,edges:[...edges,...edges.map(edge=>edge.map(secondBus))],
+      inverters:[...inverters,...inverters.map(secondBus)],solar:[...solar,...solar.map(secondBus)],
+      battery:[...battery,...battery.map(secondBus)],mixed:[...mixed,...mixed.map(secondBus)],edgePeriod:23}
+  ];
+  const networks=Object.freeze(definitions.map(network=>Object.freeze({id:network.id,label:network.label,N:network.N,
+    M:network.inverters.length,remoteBudget:network.remoteBudget})));
+  const cache=new Map();
+  function forNetwork(id='feeder24'){
+    const definition=definitions.find(network=>network.id===id);
+    if(!definition)throw new RangeError('Unknown network '+id);
+    if(!cache.has(id))cache.set(id,Object.assign(factory(definition),{networks,forNetwork}));
+    return cache.get(id);
+  }
+  const api=forNetwork();
   if(typeof module==='object'&&module.exports)module.exports=api;
   else root.PowerDemo=api;
-})(typeof globalThis!=='undefined'?globalThis:this,function(){
+})(typeof globalThis!=='undefined'?globalThis:this,function(network){
   'use strict';
-  const N=24, M=8, AMPLITUDE=.006, RAW_RIDGE=1e-6;
+  const N=network.N, M=network.inverters.length, AMPLITUDE=.006, RAW_RIDGE=1e-6;
   const CALIBRATION_REFERENCE_SCALE=.006,CALIBRATION_NORMALIZED_RIDGE=1.27e-5/CALIBRATION_REFERENCE_SCALE**2;
-  const RIDGE=RAW_RIDGE,REMOTE_BUDGET=3,PREVIEW=5,WINDOW=60,WARMUP=30,TOLERANCE=1e-5;
+  const RIDGE=RAW_RIDGE,REMOTE_BUDGET=network.remoteBudget,PREVIEW=5,WINDOW=60,WARMUP=30,TOLERANCE=1e-5;
   const BASE_KV=12.47,BASE_MVA=1,POWER_BASE_KW=1000,SAMPLE_SECONDS=1,TAU_SECONDS=2;
   const LAG=Math.exp(-SAMPLE_SECONDS/TAU_SECONDS),Q_LIMIT=.07,S_RATING=.12;
   const PULSE_DEFAULT=100,PULSE_MIN=10,PULSE_MAX=150;
   const CONTROLLERS=['online','scalar','static','causal'];
   const COMMUNICATION_BETAS=[0,.25,.5,1,2];
   const COMMUNICATION_STRESS_BETAS=[4,8,16];
-  const INVERTER_BUSES=[5,7,8,12,14,18,21,24];
-  const SOLAR_BUSES=[5,7,14,21],BATTERY_BUSES=[8,12,18,24];
+  const INVERTER_BUSES=network.inverters;
+  const SOLAR_BUSES=network.solar,BATTERY_BUSES=network.battery;
   const PF_RATIO=Math.tan(Math.acos(.95));
-  const EDGES=[[1,2],[2,3],[3,4],[4,5],[4,6],[6,7],[4,8],
-    [3,9],[9,10],[9,11],[11,12],[1,15],[15,13],[13,14],[13,16],
-    [16,17],[16,18],[18,19],[19,20],[20,21],[18,22],[22,23],[23,24]];
+  const EDGES=network.edges;
   const FORECAST_PRESETS=[
     {id:'reliable',label:'Reliable forecasts',faultBuses:[],gain:1,noise:.05,faultyGain:.15,faultyNoise:1.6},
-    {id:'uniform',label:'Uniform corruption',faultBuses:Array.from({length:23},(_,i)=>i+2),
+    {id:'uniform',label:'Uniform corruption',faultBuses:Array.from({length:N-1},(_,i)=>i+2),
       gain:1,noise:.05,faultyGain:.65,faultyNoise:.65},
-    {id:'mixed',label:'Mixed reliability',faultBuses:[3,6,9,12,15,18,21,24],
+    {id:'mixed',label:'Mixed reliability',faultBuses:network.mixed,
       gain:1,noise:.05,faultyGain:.15,faultyNoise:1.6}
   ];
   const BUS_PROFILES=Array.from({length:N},(_,i)=>{
@@ -45,10 +66,10 @@
   });
   const FORECASTED_DEMAND={id:'forecasted-demand',label:'Forecastable demand and solar',periodSeconds:60,
     homeAmplitudeKw:35,solarLossMaxKw:30,batteryAmplitudeKw:15,maxScheduledKw:35,
-    phaseRule:'2 pi times bus modulo 6 divided by 6',previewSamples:PREVIEW,leadSteps:PREVIEW-1,
+    phaseRule:network.id==='feeder47'?'2 pi times original branch bus modulo 6 divided by 6':'2 pi times bus modulo 6 divided by 6',previewSamples:PREVIEW,leadSteps:PREVIEW-1,
     noisySources:BUS_PROFILES.filter(profile=>profile.role==='Homes').map(profile=>profile.bus)};
   function scheduledPower(bus,t){
-    const profile=BUS_PROFILES[bus-1],phase=2*Math.PI*(bus%6)/6;
+    const profile=BUS_PROFILES[bus-1],phaseBus=network.id==='feeder47'&&bus>24?bus-23:bus,phase=2*Math.PI*(phaseBus%6)/6;
     if(profile.role==='Solar')return .030*(1-Math.cos(2*Math.PI*t/60))/2;
     if(profile.role==='Battery')return .015*Math.sin(2*Math.PI*t/60+phase);
     if(profile.role==='Homes')return .035*Math.sin(2*Math.PI*t/60+phase);
@@ -123,7 +144,8 @@
   function buildModel(){
     const children=Array.from({length:N},()=>[]),parent=Array(N).fill(-1),parentEdge=Array(N).fill(-1);
     const edgeData=EDGES.map(([from,to],index)=>{
-      const rOhm=.45+.15*(index%4),xOhm=.30+.08*(index%3),zBase=BASE_KV*BASE_KV/BASE_MVA;
+      const branchIndex=index%network.edgePeriod;
+      const rOhm=.45+.15*(branchIndex%4),xOhm=.30+.08*(branchIndex%3),zBase=BASE_KV*BASE_KV/BASE_MVA;
       children[from-1].push(to-1);parent[to-1]=from-1;parentEdge[to-1]=index;
       return{from,to,rOhm,xOhm,rPu:rOhm/zBase,xPu:xOhm/zBase};
     });
@@ -188,7 +210,7 @@
         const weight=gain[receiver-1][source-1]**2;
         if(weight>1e-20)ranked.push({from:source,to:receiver,weight});
       }
-      ranked.sort((a,b)=>b.weight-a.weight||a.from-b.from);result.push(...ranked.slice(0,3));
+      ranked.sort((a,b)=>b.weight-a.weight||a.from-b.from);result.push(...ranked.slice(0,REMOTE_BUDGET));
     }
     return result;
   }
@@ -260,6 +282,55 @@
   const Calibration=typeof module==='object'&&module.exports?require('./forecast-calibration.js'):globalThis.ForecastCalibration;
   if(!Calibration)throw new Error('Load forecast-calibration.js before simulation.js');
   const synthesizer=new Response.Synthesizer(model,PREVIEW),designCache=new Map(),gramCache=new WeakMap();
+  // At the larger feeder's fixed slack, each outgoing radial component is
+  // independent. A, B, Q, R and P are block diagonal up to bus ordering, so
+  // every forecast-column quadratic separates exactly. Cross-component
+  // responses have zero forcing and a positive control penalty, hence their
+  // optimum is zero even when finite-data scoring selects such a channel.
+  const synthesisComponents=network.id==='feeder47'?model.children[0].map(first=>{
+    const buses=[first];for(let i=0;i<buses.length;i++)buses.push(...model.children[buses[i]]);
+    const states=buses.map(bus=>bus-1).sort((a,b)=>a-b);
+    const inputs=INVERTER_BUSES.flatMap((bus,index)=>buses.includes(bus-1)?[index]:[]);
+    const block=(matrix,rows,columns)=>rows.map(i=>columns.map(j=>matrix[i][j]));
+    const component={A:block(model.A,states,states),B:block(model.B,states,inputs),
+      Q:block(model.Q,states,states),R:block(model.R,inputs,inputs),P:block(model.P,states,states),
+      K:block(model.K,inputs,states)};
+    return{states,inputs,synthesizer:new Response.Synthesizer(component,PREVIEW)};
+  }):null;
+  function synthesizeDesign(horizon,support){
+    if(!synthesisComponents)return synthesizer.synthesize(horizon,support);
+    const designs=synthesisComponents.map(component=>component.synthesizer.synthesize(horizon,
+      support?component.inputs.map(i=>component.states.map(j=>support[i][j])):null));
+    const joined={X:new WeakMap(),U:new WeakMap(),L:new WeakMap()};
+    function assemble(parts,group){
+      let cache=joined[group];
+      for(const part of parts.slice(0,-1)){
+        if(!cache.has(part))cache.set(part,new WeakMap());cache=cache.get(part);
+      }
+      const last=parts.at(-1);
+      if(!cache.has(last)){
+        const result=zeros(group==='X'?N-1:M,N-1);
+        synthesisComponents.forEach((component,index)=>{
+          const rows=group==='X'?component.states:component.inputs;
+          rows.forEach((row,i)=>component.states.forEach((column,j)=>result[row][column]=parts[index][i][j]));
+        });
+        cache.set(last,result);
+      }
+      return cache.get(last);
+    }
+    const rows=Array.from({length:horizon+1},()=>[]);
+    const columns=designs[0].columns.map((first,index)=>{
+      const column={k:first.k,pattern:first.pattern};
+      for(const group of ['X','U','L'])column[group]=Object.fromEntries(Object.keys(first[group]).map(time=>
+        [time,assemble(designs.map(design=>design.columns[index][group][time]),group)]));
+      for(const key of Object.keys(column.X)){
+        const time=Number(key);rows[time].push({k:column.k,X:column.X[time],
+          U:column.U[time]||zeros(M,N-1),L:column.L[time]||zeros(M,N-1)});
+      }
+      return column;
+    });
+    return{T:horizon,rows,columns,support:support?support.map(row=>row.slice()):null};
+  }
   // Sum L' L once per receiver and design. Scores of L C can then be computed
   // exactly without rebuilding every temporal response block each sample.
   function calibratedScores(design,C){
@@ -283,7 +354,7 @@
   }
   function getDesign(horizon,support=null){
     const key=JSON.stringify([horizon,support]);
-    if(!designCache.has(key))designCache.set(key,deepFreeze(synthesizer.synthesize(horizon,support)));
+    if(!designCache.has(key))designCache.set(key,deepFreeze(synthesizeDesign(horizon,support)));
     return designCache.get(key);
   }
   function scoreGain(scores){
@@ -292,6 +363,7 @@
   function addScores(a,b){for(let i=0;i<M;i++)for(let j=0;j<N-1;j++)a[i][j]+=b[i][j];}
   class Simulation{
     constructor(options={}){
+      if(options.networkId!==undefined&&options.networkId!==network.id)throw new RangeError('Saved trial network does not match '+network.id);
       const experiment=options.experiment===undefined?'prediction':options.experiment;
       if(!['prediction','communication'].includes(experiment))throw new RangeError('Unknown experiment');
       const beta=options.beta===undefined?1:options.beta;
@@ -302,7 +374,7 @@
       const powerScenario=options.powerScenario || 'reference';
       if(!['reference','solar-outage','forecasted-demand'].includes(powerScenario))throw new RangeError('Unknown power scenario');
       this.preset=preset;
-      this.initialOptions={experiment,beta,powerScenario,seed:options.seed===undefined?20261013:options.seed,
+      this.initialOptions={networkId:network.id,experiment,beta,powerScenario,seed:options.seed===undefined?20261013:options.seed,
         horizon:options.horizon===undefined?480:options.horizon,preset:id,
         faultBuses:options.faultBuses===undefined?(powerScenario==='forecasted-demand'&&id==='mixed'?FORECASTED_DEMAND.noisySources:preset.faultBuses).slice():options.faultBuses.slice()};
       if(!Number.isInteger(this.initialOptions.horizon)||this.initialOptions.horizon<1)throw new Error('Invalid horizon');
@@ -342,7 +414,7 @@
       }
       this.segments.push({start,end:start+length,length,dense,designs,offlineScores,fixed});
     }
-    checkBus(bus){if(!Number.isInteger(bus)||bus<1||bus>N)throw new Error('Bus must be an integer from 1 through 24');return bus;}
+    checkBus(bus){if(!Number.isInteger(bus)||bus<1||bus>N)throw new Error('Bus must be an integer from 1 through '+N);return bus;}
     queuePulse(bus,strength=PULSE_DEFAULT,protocol=null){
       this.checkBus(bus);
       if(!Number.isFinite(strength)||strength<PULSE_MIN||strength>PULSE_MAX)throw new RangeError('Pulse strength must be from 10 through 150 kW');
@@ -454,7 +526,7 @@
       if(samples.length<WARMUP)return;
       this._calibrationAt=this.t;
       const previous=this.calibration.matrix;
-      const fit=Calibration.fit(samples,{lambda:model.calibrationRidge,support:this.phase==='deployment'?this.deployedSupport.learned:null});
+      const fit=Calibration.fit(samples,{dimension:N-1,lambda:model.calibrationRidge,support:this.phase==='deployment'?this.deployedSupport.learned:null});
       this.calibration={...fit,updates:this.calibration.updates+1,trainedThrough:this.t-1,
         carriedSamples:Math.max(0,samples.length-this.samples.length),
         parameterChange:frobenius(combine(fit.matrix,previous,1,-1))};
@@ -636,7 +708,7 @@
         demandChangeKw:sumScheduled('Homes'),solarLossKw:sumScheduled('Solar'),batteryChangeKw:sumScheduled('Battery'),
         absoluteAppliedKw:this.lastScenarioApplications.reduce((sum,item)=>sum+Math.abs(item.appliedKw),0)}
         :{id:this.options.powerScenario,start:30,end:50,active:this.phase==='deployment'&&this.t>30&&this.t<=50,requestedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.requestedKw,0),appliedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.appliedKw,0)};
-      return{t:this.t,costTime:this.lastSample?this.lastSample.t:null,stateTime:this.t,horizon:this.options.horizon,
+      return{networkId:network.id,networkLabel:network.label,t:this.t,costTime:this.lastSample?this.lastSample.t:null,stateTime:this.t,horizon:this.options.horizon,
         initialOptions:{...this.initialOptions,faultBuses:this.initialOptions.faultBuses.slice()},
         phase:this.phase,experiment:this.options.experiment,beta:this.options.beta,canDeploy:this.phase==='discovery'&&this.samples.length>=WARMUP&&(this.options.experiment!=='communication'||this.communicationScoreSamples>0),
         discoveryRecord:this.discoveryRecord,deployedSupport:this.deployedSupport,
@@ -690,7 +762,7 @@
         limitedCount:(snapshot.saturation?.[key] || []).filter(Boolean).length}];
     }));
   }
-  return{Simulation,model,voltageMetrics,constants:deepFreeze({N,M,edges:EDGES,edgeData:model.edgeData,inverterBuses:INVERTER_BUSES,
+  return{Simulation,model,voltageMetrics,constants:deepFreeze({networkId:network.id,networkLabel:network.label,N,M,edges:EDGES,edgeData:model.edgeData,inverterBuses:INVERTER_BUSES,
     amplitude:AMPLITUDE,ridge:RIDGE,rawRidge:RAW_RIDGE,remoteBudget:REMOTE_BUDGET,preview:PREVIEW,window:WINDOW,warmup:WARMUP,
     busProfiles:BUS_PROFILES,controllers:CONTROLLERS,forecastPresets:FORECAST_PRESETS,communicationBetas:COMMUNICATION_BETAS,
     communicationStressBetas:COMMUNICATION_STRESS_BETAS,forecastedDemand:FORECASTED_DEMAND,tolerance:TOLERANCE,horizon:480,

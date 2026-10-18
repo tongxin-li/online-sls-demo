@@ -1,0 +1,273 @@
+'use strict';
+
+// Network switching is tested through visible controls and real playback.
+// The read only hook supplies measured state, never an alternative test path.
+const assert = require('node:assert/strict');
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const http = require('node:http');
+const { chromium } = require('playwright');
+
+const networks = {
+  toy8: { buses: 8, receivers: 3, solar: 2, sparse: 6, dense: 18 },
+  feeder24: { buses: 24, receivers: 8, solar: 4, sparse: 24, dense: 176 },
+  feeder47: { buses: 47, receivers: 16, solar: 8, sparse: 48, dense: 720 }
+};
+
+async function main() {
+  let root = path.resolve(__dirname, '..');
+  try { await fs.access(path.join(root, 'index.html')); }
+  catch (_) { root = __dirname; }
+  let entry = 'index.html';
+  try { await fs.access(path.join(root, entry)); }
+  catch (_) { entry = 'power-response-demo.html'; }
+  const output = process.env.DEMO_NETWORK_OUTPUT || path.join(process.env.DEMO_SMOKE_OUTPUT || path.join(root, 'browser-results'), 'networks');
+  await fs.mkdir(output, { recursive: true });
+  const server = http.createServer(async (request, response) => {
+    try {
+      const pathname = decodeURIComponent(new URL(request.url, 'http://localhost').pathname);
+      const file = path.resolve(root, pathname === '/' ? entry : '.' + pathname);
+      if (!file.startsWith(root + path.sep)) { response.writeHead(403).end(); return; }
+      const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json' };
+      response.writeHead(200, { 'Content-Type': types[path.extname(file)] || 'application/octet-stream' });
+      response.end(await fs.readFile(file));
+    } catch (_) { response.writeHead(404).end(); }
+  });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  let browser;
+  const errors = [], checks = [], results = [];
+  const address = `http://127.0.0.1:${server.address().port}`;
+  const read = surface => surface.evaluate(() => {
+    const demo = document.querySelector('#power-response-demo').powerDemo;
+    return { snapshot: demo.getSnapshot(), state: demo.getState() };
+  });
+  const withinSettings = async (surface, action) => {
+    const opened = await surface.locator('#pr-adaptation').getAttribute('open') !== null;
+    if (!opened) await surface.locator('#pr-adaptation > summary').click();
+    await action();
+    if (!opened) await surface.locator('#pr-adaptation > summary').click();
+  };
+  const setting = (surface, id, value) => withinSettings(surface, () => surface.locator('#pr-' + id).selectOption(value));
+  const pause = async surface => {
+    if ((await read(surface)).state.playing) await surface.locator('#pr-run').click();
+    assert.equal((await read(surface)).state.playing, false);
+  };
+  const waitSamples = async (surface, count) => {
+    const before = await read(surface);
+    await surface.waitForFunction(({ phase, target }) => {
+      const s = document.querySelector('#power-response-demo').powerDemo.getSnapshot();
+      return s.phase !== phase || s.t >= target;
+    }, { phase: before.snapshot.phase, target: before.snapshot.t + count }, { timeout: 30000 });
+  };
+  const checkLayout = async (surface, id) => {
+    const expected = networks[id], measured = await surface.evaluate(() => ({
+      viewport: innerWidth, page: document.documentElement.scrollWidth,
+      buses: document.querySelectorAll('#pr-network .bus-node').length,
+      edges: document.querySelectorAll('#pr-network .physical line').length,
+      cells: document.querySelectorAll('#pr-matrix .matrix-cell').length,
+      rows: document.querySelectorAll('#pr-matrix .matrix-rows g').length,
+      sources: document.querySelectorAll('#pr-matrix .matrix-columns text').length,
+      networkLabel: document.querySelector('#pr-network').getAttribute('aria-label'),
+      summary: document.querySelector('[data-network-summary]')?.textContent,
+      scrolls: Array.from(document.querySelectorAll('.pr-network-scroll, .pr-matrix-scroll')).map(node => ({
+        width: node.clientWidth, content: node.scrollWidth, overflow: getComputedStyle(node).overflowX,
+        left: node.getBoundingClientRect().left, right: node.getBoundingClientRect().right
+      })),
+      matrixLabels: Array.from(document.querySelectorAll('#pr-matrix .matrix-columns text, #pr-matrix .matrix-rows text')).map(node => {
+        const box = node.getBoundingClientRect();
+        return { text: node.textContent, font: parseFloat(getComputedStyle(node).fontSize), width: box.width, height: box.height };
+      })
+    }));
+    assert.equal(measured.buses, expected.buses, id + ' shows every bus');
+    assert.equal(measured.edges, expected.buses - 1, id + ' has one radial tree');
+    assert.equal(measured.cells, expected.receivers * (expected.buses - 1), id + ' retains every matrix cell');
+    assert.equal(measured.rows, expected.receivers);
+    assert.equal(measured.sources, expected.buses - 1);
+    assert.match(measured.networkLabel, new RegExp('\\b' + expected.buses + '\\b'));
+    assert.match(measured.summary || '', new RegExp('\\b' + expected.buses + '\\b'));
+    assert.ok(measured.page <= measured.viewport + 1, id + ' has no page level horizontal overflow');
+    assert.equal(await surface.locator('#pr-reference-study').isVisible(), id === 'feeder24', 'Reference evidence is specific to its measured network');
+    if (id !== 'feeder24') assert.equal(await surface.locator('.pr-study-overview').isVisible(), false);
+    for (const label of measured.matrixLabels) {
+      assert.ok(label.width > 0 && label.height > 0, 'All matrix numbers are rendered');
+      assert.ok(label.font >= (id === 'feeder47' ? 12 : 11), 'Network size does not reduce matrix label type');
+    }
+    if (id === 'feeder47' && measured.viewport <= 650) {
+      assert.equal(measured.scrolls.length, 2, 'Only the network and full matrix receive dedicated scrolling');
+      for (const scroller of measured.scrolls) {
+        assert.ok(scroller.content > scroller.width + 1, 'Larger network uses real native horizontal scrolling');
+        assert.match(scroller.overflow, /auto|scroll/);
+        assert.ok(scroller.left >= -1 && scroller.right <= measured.viewport + 1);
+      }
+      for (const selector of ['.pr-network-scroll', '.pr-matrix-scroll']) {
+        const moved = await surface.locator(selector).evaluate(node => {
+          const initial = node.scrollLeft; node.scrollLeft = node.scrollWidth;
+          const end = node.scrollLeft; node.scrollLeft = initial; return end;
+        });
+        assert.ok(moved > 0, 'Native horizontal scrolling reaches the hidden columns');
+      }
+    }
+    checks.push(id + ' geometry and evidence scope at ' + measured.viewport);
+  };
+  const switchNetwork = async (surface, id) => {
+    await surface.locator('#pr-network-scenario').selectOption(id);
+    await surface.waitForFunction(id => document.querySelector('#power-response-demo').powerDemo.getSnapshot().networkId === id, id);
+    const { snapshot, state } = await read(surface);
+    assert.equal(snapshot.initialOptions.networkId, id);
+    assert.equal(snapshot.states.online.length, networks[id].buses);
+    assert.equal(snapshot.t, 0, 'Switch begins a fresh trial');
+    assert.equal(snapshot.phase, 'discovery');
+    assert.equal(state.playing, false, 'Changing a model pauses playback');
+    assert.deepEqual(state.activeAttackBuses, [], 'Attacks do not cross different plants');
+    assert.ok(state.selectedBus >= 1 && state.selectedBus <= networks[id].buses);
+    assert.deepEqual(Object.values(snapshot.cumulative), [0, 0, 0, 0]);
+    assert.equal(state.historyIndex, null);
+    assert.equal(state.inspectedSource, null);
+    await checkLayout(surface, id);
+    await setting(surface, 'power-scenario', 'solar-outage');
+    assert.match(await surface.locator('#pr-scenario-status').textContent(), new RegExp('\\b' + networks[id].solar + ' sites\\b'), 'Solar scenario uses the active network site count');
+    assert.equal((await read(surface)).snapshot.networkId, id, 'Scenario changes retain the selected physical model');
+    await setting(surface, 'power-scenario', 'forecasted-demand');
+  };
+  const compare = async (surface, id, carryAttack = false) => {
+    await setting(surface, 'speed', '32');
+    if (!(await read(surface)).state.playing) await surface.locator('#pr-run').click();
+    await surface.waitForFunction(() => document.querySelector('#power-response-demo').powerDemo.getSnapshot().phase === 'deployment', null, { timeout: 120000 });
+    if (carryAttack) {
+      const { snapshot, state } = await read(surface);
+      assert.ok(state.activeAttackBuses.includes(47), 'Largest bus attack survives the automatic phase change');
+      assert.ok(snapshot.eventLog.some(item => item.type === 'pulse' && item.bus === 47), 'Transferred attack affects the new comparison');
+      await surface.locator('#pr-stop-attacks').click();
+    }
+    await surface.waitForFunction(() => {
+      const demo = document.querySelector('#power-response-demo').powerDemo;
+      return demo.getSnapshot().phase === 'deployment' && demo.getSnapshot().t === 180 && !demo.getState().playing;
+    }, null, { timeout: 120000 });
+    const { snapshot } = await read(surface), expected = networks[id];
+    assert.equal(snapshot.networkId, id);
+    assert.equal(snapshot.deployedSupport.links.filter(link => link.from !== link.to).length, expected.sparse);
+    assert.equal(snapshot.deployedSupport.fixedLinks.filter(link => link.from !== link.to).length, expected.sparse);
+    const rows = await surface.locator('#pr-cost-detail tr').evaluateAll(nodes => nodes.map(node => ({
+      method: node.dataset.method, links: Number(node.querySelector('.pr-method-links').dataset.links),
+      cost: Number(node.querySelector('[data-cost]').dataset.cost)
+    })));
+    assert.deepEqual(rows.map(row => row.method), ['online', 'scalar', 'static', 'causal']);
+    assert.deepEqual(rows.map(row => row.links), [expected.sparse, expected.sparse, expected.dense, 0]);
+    for (const row of rows) {
+      assert.ok(Number.isFinite(row.cost) && row.cost > 0, 'Every controller has an actual measured comparison cost');
+      assert.equal(row.cost, snapshot.cumulative[row.method]);
+      assert.equal(snapshot.states[row.method].length, expected.buses);
+      assert.ok(snapshot.states[row.method].every(Number.isFinite));
+    }
+    assert.equal(await surface.locator('#pr-cost path.data-series').count(), 4, 'All four comparison curves remain visible');
+    results.push({ networkId: id, width: surface.viewportSize().width, costs: snapshot.cumulative, links: rows.map(row => row.links) });
+    checks.push(id + ' real automatic handoff and all four comparison costs');
+    console.log('Network comparison passed ' + id + ' at ' + surface.viewportSize().width);
+  };
+  const roundTrip = async (surface, id) => {
+    await pause(surface);
+    const select = s => ({ networkId: s.networkId, t: s.t, phase: s.phase, initialOptions: s.initialOptions,
+      states: s.states, cumulative: s.cumulative, stage: s.stage, eventLog: s.eventLog, deployedSupport: s.deployedSupport });
+    const before = select((await read(surface)).snapshot);
+    const saved = await surface.evaluate(() => window.openai.widgetState);
+    assert.equal(saved.privateContent.networkId, id);
+    assert.equal(saved.privateContent.initialOptions.networkId, id);
+    await surface.reload({ waitUntil: 'networkidle' });
+    assert.equal(await surface.locator('#pr-network-scenario').inputValue(), id);
+    assert.deepEqual(select((await read(surface)).snapshot), before, 'Saved ' + id + ' trial replays exactly');
+    assert.equal((await read(surface)).state.playing, false);
+    await checkLayout(surface, id);
+    checks.push(id + ' saved state reload');
+  };
+  try {
+    browser = await chromium.launch({ headless: true, ...(process.env.DEMO_SMOKE_CHANNEL ? { channel: process.env.DEMO_SMOKE_CHANNEL } : {}) });
+    const open = async options => {
+      const page = await browser.newPage(options);
+      page.setDefaultTimeout(30000);
+      page.on('pageerror', error => errors.push(error.message));
+      await page.goto(address, { waitUntil: 'networkidle' });
+      await page.locator('#pr-network-scenario').waitFor();
+      return page;
+    };
+    const page = await open({ viewport: { width: 1440, height: 1000 } });
+    assert.equal(await page.locator('#pr-network-scenario').inputValue(), 'feeder24');
+    assert.deepEqual(await page.locator('#pr-network-scenario option').evaluateAll(nodes => nodes.map(node => node.value)), ['toy8', 'feeder24', 'feeder47']);
+    assert.equal(await page.locator('#pr-adaptation').getAttribute('open'), null, 'Network selector is available without opening advanced settings');
+    await checkLayout(page, 'feeder24');
+    await switchNetwork(page, 'toy8');
+    await compare(page, 'toy8');
+    await roundTrip(page, 'toy8');
+    await page.screenshot({ path: path.join(output, 'toy8-desktop.png'), fullPage: true });
+
+    await switchNetwork(page, 'feeder47');
+    await page.locator('#pr-intervention').selectOption('power');
+    await setting(page, 'speed', '32');
+    const lastBus = page.locator('#pr-network [data-bus="47"] .pe-hit');
+    await lastBus.click();
+    await waitSamples(page, 5);
+    let reading = await read(page);
+    assert.ok(reading.state.activeAttackBuses.includes(47));
+    assert.ok(reading.snapshot.eventLog.filter(item => item.type === 'pulse' && item.bus === 47).length >= 4, 'One click generates ongoing attacks');
+    await lastBus.click();
+    assert.equal((await read(page)).state.activeAttackBuses.includes(47), false);
+    await lastBus.click();
+    await waitSamples(page, 3);
+    assert.ok((await read(page)).state.activeAttackBuses.includes(47), 'The same far bus can be attacked repeatedly');
+    await compare(page, 'feeder47', true);
+    await roundTrip(page, 'feeder47');
+    await page.screenshot({ path: path.join(output, 'feeder47-desktop.png'), fullPage: true });
+    await page.locator('.pr-network-panel').screenshot({ path: path.join(output, 'feeder47-network-desktop.png') });
+    await page.locator('.pr-matrix-panel').screenshot({ path: path.join(output, 'feeder47-matrix-desktop.png') });
+    await lastBus.click();
+    await waitSamples(page, 2);
+    assert.equal((await read(page)).state.playing, true);
+    await switchNetwork(page, 'toy8');
+    await page.waitForTimeout(150);
+    assert.equal((await read(page)).snapshot.t, 0, 'Old playback timer cannot mutate the replacement trial');
+    await switchNetwork(page, 'feeder24');
+    checks.push('Switching from a running attacked larger network clears old timers and attacks');
+
+    const phone = await open({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
+    await switchNetwork(phone, 'feeder47');
+    await phone.locator('#pr-intervention').selectOption('power');
+    await setting(phone, 'speed', '32');
+    const phoneBus = phone.locator('#pr-network [data-bus="47"] .pe-hit');
+    await phoneBus.scrollIntoViewIfNeeded();
+    await phoneBus.tap();
+    await waitSamples(phone, 4);
+    assert.ok((await read(phone)).state.activeAttackBuses.includes(47), 'Touch reaches bus 47 inside its scroller');
+    await phoneBus.tap();
+    assert.equal((await read(phone)).state.activeAttackBuses.includes(47), false);
+    await pause(phone);
+    const finalCell = phone.locator('#pr-matrix .matrix-cell[data-source="47"]').last();
+    await finalCell.scrollIntoViewIfNeeded();
+    await finalCell.tap();
+    assert.equal((await read(phone)).state.inspectedSource, 47, 'Touch reaches source 47 inside its matrix scroller');
+    await checkLayout(phone, 'feeder47');
+    await compare(phone, 'feeder47');
+    await roundTrip(phone, 'feeder47');
+    await phone.screenshot({ path: path.join(output, 'feeder47-mobile.png'), fullPage: true });
+    await phone.locator('.pr-network-panel').screenshot({ path: path.join(output, 'feeder47-network-mobile.png') });
+    await phone.locator('.pr-matrix-panel').screenshot({ path: path.join(output, 'feeder47-matrix-mobile.png') });
+    await switchNetwork(phone, 'toy8');
+    await compare(phone, 'toy8');
+    await phone.screenshot({ path: path.join(output, 'toy8-mobile.png'), fullPage: true });
+    assert.deepEqual(errors, [], 'No runtime errors during network switches or replay');
+    await fs.writeFile(path.join(output, 'summary.json'), JSON.stringify({ passed: true, browser: browser.version(), checks, results, errors }, null, 2));
+    console.log('Network browser checks passed');
+  } catch (error) {
+    if (browser) {
+      for (const [index, context] of browser.contexts().entries()) {
+        const surface = context.pages().at(-1);
+        if (surface) await surface.screenshot({ path: path.join(output, 'failure-' + index + '.png'), fullPage: true }).catch(() => {});
+      }
+    }
+    await fs.writeFile(path.join(output, 'failure.json'), JSON.stringify({ passed: false, message: error.message, checks, results, errors }, null, 2));
+    throw error;
+  } finally {
+    if (browser) await browser.close();
+    await new Promise(resolve => server.close(resolve));
+  }
+}
+
+main().catch(error => { console.error(error); process.exitCode = 1; });

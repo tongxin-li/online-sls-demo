@@ -34,6 +34,7 @@ jobs:
           node src/test-forecasted-scenario.cjs
           node src/test-interactions.cjs
           node src/test-topology-timeline.cjs
+          node src/test-network-scenarios.cjs
           node src/build-reference-study.cjs --check
           node src/test-reference-study.cjs
       - name: Build the deployable page
@@ -49,7 +50,9 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/browser-test/node_modules
           DEMO_SMOKE_OUTPUT: ${{ runner.temp }}/browser-results
-        run: node src/test-browser-smoke.cjs
+        run: |
+          node src/test-browser-smoke.cjs
+          node src/test-network-browser.cjs
       - name: Save browser evidence
         if: always()
         uses: actions/upload-artifact@v4

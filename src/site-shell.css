@@ -521,3 +521,14 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 #pr-matrix .matrix-columns text,
 #pr-matrix .matrix-rows text,
 #pr-matrix .matrix-axis { font-size:12px; }
+
+/* Network choice changes the physical model and retains readable geometry. */
+.pr-network-picker { display:flex; align-items:center; gap:10px; flex-shrink:0; color:var(--muted-foreground); font-size:12px; }
+.pr-network-picker select { min-height:40px; border:1px solid #e8e8ed; border-radius:10px; background:#f5f5f7; color:var(--foreground); padding:8px 30px 8px 12px; font:inherit; font-size:13px; cursor:pointer; }
+.pr-network-scroll,.pr-matrix-scroll { min-width:0; }
+[data-network="feeder47"] .pr-network-scroll,[data-network="feeder47"] .pr-matrix-scroll { overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:thin; padding-bottom:8px; }
+[data-network="feeder47"] .pr-network-scroll:focus-visible,[data-network="feeder47"] .pr-matrix-scroll:focus-visible { outline:2px solid var(--primary); outline-offset:3px; border-radius:4px; }
+@media(max-width:650px) { .pr-network-picker { width:100%; justify-content:space-between; } .pr-network-picker select { flex:1; max-width:240px; min-height:44px; } }
+[data-network="feeder47"] .pr-chart .matrix-columns text,[data-network="feeder47"] .pr-chart .matrix-rows text { font-size:12px; }
+
+.pr-scroll-hint { margin:4px 0 8px; color:var(--muted-foreground); font-size:11px; text-align:right; }

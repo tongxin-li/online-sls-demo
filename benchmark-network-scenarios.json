@@ -1,0 +1,3215 @@
+{
+  "protocol": "network-size-check-v1",
+  "seeds": [
+    21,
+    22,
+    23,
+    24,
+    25
+  ],
+  "discoverySamples": 180,
+  "comparisonSamples": 180,
+  "networks": [
+    {
+      "id": "toy8",
+      "label": "Toy feeder",
+      "N": 8,
+      "M": 3,
+      "remoteBudget": 2
+    },
+    {
+      "id": "feeder24",
+      "label": "Distribution feeder",
+      "N": 24,
+      "M": 8,
+      "remoteBudget": 3
+    },
+    {
+      "id": "feeder47",
+      "label": "Larger feeder",
+      "N": 47,
+      "M": 16,
+      "remoteBudget": 3
+    }
+  ],
+  "cases": [
+    {
+      "id": "reliable",
+      "beta": 0
+    },
+    {
+      "id": "mixed2",
+      "beta": 2
+    },
+    {
+      "id": "mixed4",
+      "beta": 4
+    },
+    {
+      "id": "allNoisy",
+      "beta": 4,
+      "allNoisy": true
+    }
+  ],
+  "cost": "All stage costs plus the terminal Riccati penalty. Savings are ratios of paired mean costs.",
+  "construction": "Toy feeder is the first eight buses of the existing tree. Larger feeder repeats both original radial arms with a shared fixed slack. Roles, line impedances and scheduled phases are copied. Toy budget is two remote links per inverter, otherwise three.",
+  "limits": "Synthetic feeders, not standard utility test cases. Larger network is a repeated feeder, not arbitrary topology scaling. Four predefined reliability settings and five predefined seeds are reported in full. Similar qualitative mechanisms do not guarantee identical rankings.",
+  "results": [
+    {
+      "networkId": "toy8",
+      "scenario": "reliable",
+      "beta": 0,
+      "means": {
+        "online": 0.009172737745803742,
+        "scalar": 0.009172737745803742,
+        "static": 0.00870055752860365,
+        "causal": 0.010040486797358233
+      },
+      "comparisons": {
+        "scalar": {
+          "learnedSavingsPercent": 0,
+          "wins": 0,
+          "ties": 5,
+          "losses": 0
+        },
+        "static": {
+          "learnedSavingsPercent": -5.427011035186755,
+          "wins": 0,
+          "ties": 0,
+          "losses": 5
+        },
+        "causal": {
+          "learnedSavingsPercent": 8.642499801730784,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        }
+      },
+      "runs": [
+        {
+          "seed": 21,
+          "deploymentSeed": 2654435756,
+          "costs": {
+            "online": 0.007508541175416311,
+            "scalar": 0.007508541175416311,
+            "static": 0.007125897018578693,
+            "causal": 0.008212032985341339
+          },
+          "stageCosts": {
+            "online": 0.007503359411812016,
+            "scalar": 0.007503359411812016,
+            "static": 0.007121105159357007,
+            "causal": 0.008206072665108147
+          },
+          "terminalCosts": {
+            "online": 5.181763604294977e-06,
+            "scalar": 5.181763604294977e-06,
+            "static": 4.791859221686648e-06,
+            "causal": 5.960320233191094e-06
+          },
+          "links": {
+            "learned": 6,
+            "fixed": 6,
+            "dense": 18,
+            "feedback": 0
+          },
+          "replacedLinks": 0,
+          "minimumVoltage": {
+            "online": 0.9950492990866409,
+            "scalar": 0.9950492990866409,
+            "static": 0.995157438732589,
+            "causal": 0.9949577281353925
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 13.855754391475559,
+          "commonForcingResidual": 1.1655173354219173e-18,
+          "realizationHash": "3580fe165e065aba6e3b47d10dcfa2705422ed6da7f553f49807ee7ff86b6c48",
+          "supportHash": "43e4e118e54bbf804dd980349ceafba6f4f31d4f4053badc8f5d846da2274a3f",
+          "acNominalMaxErrorPu": 1.3533136526411305e-05
+        },
+        {
+          "seed": 22,
+          "deploymentSeed": 2654435759,
+          "costs": {
+            "online": 0.008906492854049963,
+            "scalar": 0.008906492854049963,
+            "static": 0.008444535116252603,
+            "causal": 0.009746107020303797
+          },
+          "stageCosts": {
+            "online": 0.008898919536073684,
+            "scalar": 0.008898919536073684,
+            "static": 0.008437682001785499,
+            "causal": 0.009737406481959551
+          },
+          "terminalCosts": {
+            "online": 7.573317976278964e-06,
+            "scalar": 7.573317976278964e-06,
+            "static": 6.85311446710355e-06,
+            "causal": 8.700538344245994e-06
+          },
+          "links": {
+            "learned": 6,
+            "fixed": 6,
+            "dense": 18,
+            "feedback": 0
+          },
+          "replacedLinks": 0,
+          "minimumVoltage": {
+            "online": 0.994960295606042,
+            "scalar": 0.994960295606042,
+            "static": 0.995077510755947,
+            "causal": 0.9948663225255275
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 15.972265284080446,
+          "commonForcingResidual": 1.1384122811097797e-18,
+          "realizationHash": "962cf1b622b30624c2336e37ecbb0a75fcb2728a2ae8efa592b575f2fc64404f",
+          "supportHash": "f0b804bfb5f2cf4796ae9984f3700eea311383306a81256334a92de341f975d3",
+          "acNominalMaxErrorPu": 1.3533136526411305e-05
+        },
+        {
+          "seed": 23,
+          "deploymentSeed": 2654435758,
+          "costs": {
+            "online": 0.011261172194668852,
+            "scalar": 0.011261172194668852,
+            "static": 0.010678151259078159,
+            "causal": 0.012337294984418327
+          },
+          "stageCosts": {
+            "online": 0.011255213442109066,
+            "scalar": 0.011255213442109066,
+            "static": 0.010672781244046605,
+            "causal": 0.012330185885808208
+          },
+          "terminalCosts": {
+            "online": 5.958752559786465e-06,
+            "scalar": 5.958752559786465e-06,
+            "static": 5.370015031553228e-06,
+            "causal": 7.109098610118586e-06
+          },
+          "links": {
+            "learned": 6,
+            "fixed": 6,
+            "dense": 18,
+            "feedback": 0
+          },
+          "replacedLinks": 0,
+          "minimumVoltage": {
+            "online": 0.9948226131066651,
+            "scalar": 0.9948226131066651,
+            "static": 0.9949727805500196,
+            "causal": 0.9947053809466602
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 18.721500968878626,
+          "commonForcingResidual": 1.1384122811097797e-18,
+          "realizationHash": "b8d57224f5b40c3d9fa0393565b76854466c82f08d0b331fc8c75afbe4ffe5bf",
+          "supportHash": "b51bce901a18fc4b8fb12f22996409847f85c35bd563c4600ceb447dc26df463",
+          "acNominalMaxErrorPu": 1.3533136526411305e-05
+        },
+        {
+          "seed": 24,
+          "deploymentSeed": 2654435745,
+          "costs": {
+            "online": 0.009979423456187556,
+            "scalar": 0.009979423456187556,
+            "static": 0.009461726585260542,
+            "causal": 0.010921644331817845
+          },
+          "stageCosts": {
+            "online": 0.009971723207193934,
+            "scalar": 0.009971723207193934,
+            "static": 0.009454681331856313,
+            "causal": 0.010912565767558254
+          },
+          "terminalCosts": {
+            "online": 7.700248993621549e-06,
+            "scalar": 7.700248993621549e-06,
+            "static": 7.045253404228541e-06,
+            "causal": 9.078564259591642e-06
+          },
+          "links": {
+            "learned": 6,
+            "fixed": 6,
+            "dense": 18,
+            "feedback": 0
+          },
+          "replacedLinks": 0,
+          "minimumVoltage": {
+            "online": 0.9948263914545118,
+            "scalar": 0.9948263914545118,
+            "static": 0.9949598030846116,
+            "causal": 0.9947128945721493
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 16.99911799202015,
+          "commonForcingResidual": 1.1926223897340549e-18,
+          "realizationHash": "d70706b6c7bc60c75f943d51e8c01c34ef5d41ad1d55c61af917a7a9a5f9df17",
+          "supportHash": "1c3452b5fd5e2beaeda20c9dfd2c8185806a6117656b7f24d04fbab4cb5000cc",
+          "acNominalMaxErrorPu": 1.3533136526411305e-05
+        },
+        {
+          "seed": 25,
+          "deploymentSeed": 2654435744,
+          "costs": {
+            "online": 0.00820805904869602,
+            "scalar": 0.00820805904869602,
+            "static": 0.007792477663848258,
+            "causal": 0.008985354664909857
+          },
+          "stageCosts": {
+            "online": 0.008204377341706289,
+            "scalar": 0.008204377341706289,
+            "static": 0.007789159141764254,
+            "causal": 0.00898094000269658
+          },
+          "terminalCosts": {
+            "online": 3.6817069897303005e-06,
+            "scalar": 3.6817069897303005e-06,
+            "static": 3.3185220840042857e-06,
+            "causal": 4.414662213275896e-06
+          },
+          "links": {
+            "learned": 6,
+            "fixed": 6,
+            "dense": 18,
+            "feedback": 0
+          },
+          "replacedLinks": 0,
+          "minimumVoltage": {
+            "online": 0.9949864907907212,
+            "scalar": 0.9949864907907212,
+            "static": 0.9951068048273698,
+            "causal": 0.9948938651513618
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 15.451809512274515,
+          "commonForcingResidual": 1.3010426069826053e-18,
+          "realizationHash": "5f677d6dd884c0b88bed064e4ed28a9b4290b88344012afcb983a80cbae94805",
+          "supportHash": "54c7a04dbe5ef485f456f5b79eceb5de09fdbca413a7975ebd18d541e8a30559",
+          "acNominalMaxErrorPu": 1.3533136526411305e-05
+        }
+      ]
+    },
+    {
+      "networkId": "toy8",
+      "scenario": "mixed2",
+      "beta": 2,
+      "means": {
+        "online": 0.008965637821207401,
+        "scalar": 0.010056383151185904,
+        "static": 0.01014589642992431,
+        "causal": 0.010040486797358233
+      },
+      "comparisons": {
+        "scalar": {
+          "learnedSavingsPercent": 10.846298451246627,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        },
+        "static": {
+          "learnedSavingsPercent": 11.632866714821308,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        },
+        "causal": {
+          "learnedSavingsPercent": 10.705148045547322,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        }
+      },
+      "runs": [
+        {
+          "seed": 21,
+          "deploymentSeed": 2654435756,
+          "costs": {
+            "online": 0.007341529798951151,
+            "scalar": 0.008341442887847344,
+            "static": 0.008737727971187359,
+            "causal": 0.008212032985341339
+          },
+          "stageCosts": {
+            "online": 0.007336340409517884,
+            "scalar": 0.008332240580462585,
+            "static": 0.008727494668618241,
+            "causal": 0.008206072665108147
+          },
+          "terminalCosts": {
+            "online": 5.189389433267248e-06,
+            "scalar": 9.202307384758452e-06,
+            "static": 1.0233302569117012e-05,
+            "causal": 5.960320233191094e-06
+          },
+          "links": {
+            "learned": 6,
+            "fixed": 6,
+            "dense": 18,
+            "feedback": 0
+          },
+          "replacedLinks": 4,
+          "minimumVoltage": {
+            "online": 0.9950792094469301,
+            "scalar": 0.9950496993882223,
+            "static": 0.9951165934642424,
+            "causal": 0.9949577281353925
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 32.56960859677203,
+          "commonForcingResidual": 1.1926223897340549e-18,
+          "realizationHash": "3580fe165e065aba6e3b47d10dcfa2705422ed6da7f553f49807ee7ff86b6c48",
+          "supportHash": "fd4f1e6aa47103f373d3cadeff7a3e7442adc44b67f830f7deeba246d89104f8",
+          "acNominalMaxErrorPu": 1.3533136526411305e-05
+        },
+        {
+          "seed": 22,
+          "deploymentSeed": 2654435759,
+          "costs": {
+            "online": 0.00870143948350571,
+            "scalar": 0.009645215834019165,
+            "static": 0.0098651347150479,
+            "causal": 0.009746107020303797
+          },
+          "stageCosts": {
+            "online": 0.008693745091960562,
+            "scalar": 0.009640519037409388,
+            "static": 0.009863244218778317,
+            "causal": 0.009737406481959551
+          },
+          "terminalCosts": {
+            "online": 7.694391545147915e-06,
+            "scalar": 4.696796609776145e-06,
+            "static": 1.890496269583838e-06,
+            "causal": 8.700538344245994e-06
+          },
+          "links": {
+            "learned": 6,
+            "fixed": 6,
+            "dense": 18,
+            "feedback": 0
+          },
+          "replacedLinks": 4,
+          "minimumVoltage": {
+            "online": 0.9949956710054221,
+            "scalar": 0.9949929391152921,
+            "static": 0.9950561496878387,
+            "causal": 0.9948663225255275
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 26.030395774855847,
+          "commonForcingResidual": 1.2468324983583301e-18,
+          "realizationHash": "962cf1b622b30624c2336e37ecbb0a75fcb2728a2ae8efa592b575f2fc64404f",
+          "supportHash": "5440191d4f69cfbfae31e3a12ccf93a3b220e18cb50ab2ebb3d67c7f7514099f",
+          "acNominalMaxErrorPu": 1.3533136526411305e-05
+        },
+        {
+          "seed": 23,
+          "deploymentSeed": 2654435758,
+          "costs": {
+            "online": 0.011003965478105863,
+            "scalar": 0.01230514850538656,
+            "static": 0.012053033522450116,
+            "causal": 0.012337294984418327
+          },
+          "stageCosts": {
+            "online": 0.010997904723241551,
+            "scalar": 0.012299704318048145,
+            "static": 0.012047965017613614,
+            "causal": 0.012330185885808208
+          },
+          "terminalCosts": {
+            "online": 6.0607548643119345e-06,
+            "scalar": 5.444187338416748e-06,
+            "static": 5.068504836501851e-06,
+            "causal": 7.109098610118586e-06
+          },
+          "links": {
+            "learned": 6,
+            "fixed": 6,
+            "dense": 18,
+            "feedback": 0
+          },
+          "replacedLinks": 4,
+          "minimumVoltage": {
+            "online": 0.9948679124131202,
+            "scalar": 0.9948154291140219,
+            "static": 0.9949206164843103,
+            "causal": 0.9947053809466602
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 28.077783091408545,
+          "commonForcingResidual": 1.1248597539537109e-18,
+          "realizationHash": "b8d57224f5b40c3d9fa0393565b76854466c82f08d0b331fc8c75afbe4ffe5bf",
+          "supportHash": "3428fb40ff9c046730385e49ca7ce8dabdd141788424805e2f681bde261f6819",
+          "acNominalMaxErrorPu": 1.3533136526411305e-05
+        },
+        {
+          "seed": 24,
+          "deploymentSeed": 2654435745,
+          "costs": {
+            "online": 0.00975379887779302,
+            "scalar": 0.010835588257815415,
+            "static": 0.010962188283458242,
+            "causal": 0.010921644331817845
+          },
+          "stageCosts": {
+            "online": 0.009745961563606192,
+            "scalar": 0.010831206672475675,
+            "static": 0.010957725209161398,
+            "causal": 0.010912565767558254
+          },
+          "terminalCosts": {
+            "online": 7.837314186827608e-06,
+            "scalar": 4.381585339739647e-06,
+            "static": 4.4630742968442695e-06,
+            "causal": 9.078564259591642e-06
+          },
+          "links": {
+            "learned": 6,
+            "fixed": 6,
+            "dense": 18,
+            "feedback": 0
+          },
+          "replacedLinks": 4,
+          "minimumVoltage": {
+            "online": 0.9948608069195267,
+            "scalar": 0.9947423941200588,
+            "static": 0.9948679305433175,
+            "causal": 0.9947128945721493
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 30.92822866814344,
+          "commonForcingResidual": 1.2468324983583301e-18,
+          "realizationHash": "d70706b6c7bc60c75f943d51e8c01c34ef5d41ad1d55c61af917a7a9a5f9df17",
+          "supportHash": "f826c98a7ab9ccd3e2f1672525c0886c74bcb0ee021a8367de07b8d5f550e70f",
+          "acNominalMaxErrorPu": 1.3533136526411305e-05
+        },
+        {
+          "seed": 25,
+          "deploymentSeed": 2654435744,
+          "costs": {
+            "online": 0.00802745546768126,
+            "scalar": 0.009154520270861045,
+            "static": 0.009111397657477927,
+            "causal": 0.008985354664909857
+          },
+          "stageCosts": {
+            "online": 0.008023486922830676,
+            "scalar": 0.009146759125747667,
+            "static": 0.00910414381384903,
+            "causal": 0.00898094000269658
+          },
+          "terminalCosts": {
+            "online": 3.968544850583146e-06,
+            "scalar": 7.761145113378623e-06,
+            "static": 7.253843628896478e-06,
+            "causal": 4.414662213275896e-06
+          },
+          "links": {
+            "learned": 6,
+            "fixed": 6,
+            "dense": 18,
+            "feedback": 0
+          },
+          "replacedLinks": 4,
+          "minimumVoltage": {
+            "online": 0.9950224894191833,
+            "scalar": 0.9949321796916575,
+            "static": 0.994982159336535,
+            "causal": 0.9948938651513618
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 26.452090312024666,
+          "commonForcingResidual": 1.1926223897340549e-18,
+          "realizationHash": "5f677d6dd884c0b88bed064e4ed28a9b4290b88344012afcb983a80cbae94805",
+          "supportHash": "a06fa7ba8b78ca411b6f15e551ce6fd87ca5f42cd6040dbd8a8555872d02b996",
+          "acNominalMaxErrorPu": 1.3533136526411305e-05
+        }
+      ]
+    },
+    {
+      "networkId": "toy8",
+      "scenario": "mixed4",
+      "beta": 4,
+      "means": {
+        "online": 0.008964275730050472,
+        "scalar": 0.012842021706155856,
+        "static": 0.014488194006345878,
+        "causal": 0.010040486797358233
+      },
+      "comparisons": {
+        "scalar": {
+          "learnedSavingsPercent": 30.195759397031516,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        },
+        "static": {
+          "learnedSavingsPercent": 38.12703138759676,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        },
+        "causal": {
+          "learnedSavingsPercent": 10.718714032779008,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        }
+      },
+      "runs": [
+        {
+          "seed": 21,
+          "deploymentSeed": 2654435756,
+          "costs": {
+            "online": 0.007341095013915659,
+            "scalar": 0.011079046935856424,
+            "static": 0.013612275385469032,
+            "causal": 0.008212032985341339
+          },
+          "stageCosts": {
+            "online": 0.007336019613844628,
+            "scalar": 0.011064408361500605,
+            "static": 0.013594044610287195,
+            "causal": 0.008206072665108147
+          },
+          "terminalCosts": {
+            "online": 5.07540007103121e-06,
+            "scalar": 1.4638574355819344e-05,
+            "static": 1.8230775181835954e-05,
+            "causal": 5.960320233191094e-06
+          },
+          "links": {
+            "learned": 6,
+            "fixed": 6,
+            "dense": 18,
+            "feedback": 0
+          },
+          "replacedLinks": 4,
+          "minimumVoltage": {
+            "online": 0.995081419733899,
+            "scalar": 0.9949867211551903,
+            "static": 0.9949865037905051,
+            "causal": 0.9949577281353925
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 57.14531936132963,
+          "commonForcingResidual": 1.2332799712022613e-18,
+          "realizationHash": "3580fe165e065aba6e3b47d10dcfa2705422ed6da7f553f49807ee7ff86b6c48",
+          "supportHash": "c1ed40024e1b4dfe871ec32c73dd7b1e26fcf6f0e69e4652e4f1f3a6bc1a58bd",
+          "acNominalMaxErrorPu": 1.3533136526411305e-05
+        },
+        {
+          "seed": 22,
+          "deploymentSeed": 2654435759,
+          "costs": {
+            "online": 0.008698306944214836,
+            "scalar": 0.012283902688392365,
+            "static": 0.014141079802410408,
+            "causal": 0.009746107020303797
+          },
+          "stageCosts": {
+            "online": 0.008690503251086102,
+            "scalar": 0.012281182151589107,
+            "static": 0.014139934168348179,
+            "causal": 0.009737406481959551
+          },
+          "terminalCosts": {
+            "online": 7.803693128734412e-06,
+            "scalar": 2.7205368032581005e-06,
+            "static": 1.145634062228332e-06,
+            "causal": 8.700538344245994e-06
+          },
+          "links": {
+            "learned": 6,
+            "fixed": 6,
+            "dense": 18,
+            "feedback": 0
+          },
+          "replacedLinks": 4,
+          "minimumVoltage": {
+            "online": 0.9949959020928568,
+            "scalar": 0.9949325269134747,
+            "static": 0.9950212341005282,
+            "causal": 0.9948663225255275
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 39.33042555713805,
+          "commonForcingResidual": 1.1993986533120893e-18,
+          "realizationHash": "962cf1b622b30624c2336e37ecbb0a75fcb2728a2ae8efa592b575f2fc64404f",
+          "supportHash": "60b82c9e72980c322e3cef06eb0df54c1a9889b7b7ed96d517e48b9275ee9dec",
+          "acNominalMaxErrorPu": 1.3533136526411305e-05
+        },
+        {
+          "seed": 23,
+          "deploymentSeed": 2654435758,
+          "costs": {
+            "online": 0.011000125059587423,
+            "scalar": 0.015130433126339037,
+            "static": 0.01613034892671981,
+            "causal": 0.012337294984418327
+          },
+          "stageCosts": {
+            "online": 0.010994082596117937,
+            "scalar": 0.015125477060738602,
+            "static": 0.016125572044401917,
+            "causal": 0.012330185885808208
+          },
+          "terminalCosts": {
+            "online": 6.042463469486082e-06,
+            "scalar": 4.956065600435389e-06,
+            "static": 4.776882317893651e-06,
+            "causal": 7.109098610118586e-06
+          },
+          "links": {
+            "learned": 6,
+            "fixed": 6,
+            "dense": 18,
+            "feedback": 0
+          },
+          "replacedLinks": 4,
+          "minimumVoltage": {
+            "online": 0.9948709163511537,
+            "scalar": 0.9946654288492861,
+            "static": 0.9946991629308928,
+            "causal": 0.9947053809466602
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 42.723836805844904,
+          "commonForcingResidual": 1.1926223897340549e-18,
+          "realizationHash": "b8d57224f5b40c3d9fa0393565b76854466c82f08d0b331fc8c75afbe4ffe5bf",
+          "supportHash": "081659dae292e139e27848c21ee0fab997bf4d0c5e0a006194ca1cf6c660175e",
+          "acNominalMaxErrorPu": 1.3533136526411305e-05
+        },
+        {
+          "seed": 24,
+          "deploymentSeed": 2654435745,
+          "costs": {
+            "online": 0.009754446843745185,
+            "scalar": 0.013815463355332019,
+            "static": 0.015508332625015355,
+            "causal": 0.010921644331817845
+          },
+          "stageCosts": {
+            "online": 0.009746594667903154,
+            "scalar": 0.013813316303637628,
+            "static": 0.015505760818249354,
+            "causal": 0.010912565767558254
+          },
+          "terminalCosts": {
+            "online": 7.85217584203032e-06,
+            "scalar": 2.1470516943914974e-06,
+            "static": 2.571806766001485e-06,
+            "causal": 9.078564259591642e-06
+          },
+          "links": {
+            "learned": 6,
+            "fixed": 6,
+            "dense": 18,
+            "feedback": 0
+          },
+          "replacedLinks": 4,
+          "minimumVoltage": {
+            "online": 0.9948621230845415,
+            "scalar": 0.9946583967856057,
+            "static": 0.9947760580020232,
+            "causal": 0.9947128945721493
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 53.90177060183423,
+          "commonForcingResidual": 1.1926223897340549e-18,
+          "realizationHash": "d70706b6c7bc60c75f943d51e8c01c34ef5d41ad1d55c61af917a7a9a5f9df17",
+          "supportHash": "6d6fae8de64290a7987e925cc402cb5b01868405cdd5dd5cbe0f7a77e8408ba7",
+          "acNominalMaxErrorPu": 1.3533136526411305e-05
+        },
+        {
+          "seed": 25,
+          "deploymentSeed": 2654435744,
+          "costs": {
+            "online": 0.008027404788789256,
+            "scalar": 0.011901262424859432,
+            "static": 0.01304893329211477,
+            "causal": 0.008985354664909857
+          },
+          "stageCosts": {
+            "online": 0.008023208051611833,
+            "scalar": 0.011887677136469753,
+            "static": 0.013035991889588717,
+            "causal": 0.00898094000269658
+          },
+          "terminalCosts": {
+            "online": 4.19673717742379e-06,
+            "scalar": 1.3585288389679175e-05,
+            "static": 1.2941402526053025e-05,
+            "causal": 4.414662213275896e-06
+          },
+          "links": {
+            "learned": 6,
+            "fixed": 6,
+            "dense": 18,
+            "feedback": 0
+          },
+          "replacedLinks": 4,
+          "minimumVoltage": {
+            "online": 0.9950246314089074,
+            "scalar": 0.9948778685925936,
+            "static": 0.9948575138457002,
+            "causal": 0.9948938651513618
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 38.890294039442026,
+          "commonForcingResidual": 1.2468324983583301e-18,
+          "realizationHash": "5f677d6dd884c0b88bed064e4ed28a9b4290b88344012afcb983a80cbae94805",
+          "supportHash": "9c033435b1322c1fa643cb938dc4d0d817e85935d98734fe00e0995fe1f7feb2",
+          "acNominalMaxErrorPu": 1.3533136526411305e-05
+        }
+      ]
+    },
+    {
+      "networkId": "toy8",
+      "scenario": "allNoisy",
+      "beta": 4,
+      "means": {
+        "online": 0.015662425749735177,
+        "scalar": 0.019315274552922194,
+        "static": 0.02422692821801689,
+        "causal": 0.010040486797358233
+      },
+      "comparisons": {
+        "scalar": {
+          "learnedSavingsPercent": 18.91171048684048,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        },
+        "static": {
+          "learnedSavingsPercent": 35.35116953833434,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        },
+        "causal": {
+          "learnedSavingsPercent": -55.992693042095745,
+          "wins": 0,
+          "ties": 0,
+          "losses": 5
+        }
+      },
+      "runs": [
+        {
+          "seed": 21,
+          "deploymentSeed": 2654435756,
+          "costs": {
+            "online": 0.012663227811325697,
+            "scalar": 0.01666636903572999,
+            "static": 0.022718912840603494,
+            "causal": 0.008212032985341339
+          },
+          "stageCosts": {
+            "online": 0.012659884471794048,
+            "scalar": 0.01666410774894277,
+            "static": 0.022717062113168544,
+            "causal": 0.008206072665108147
+          },
+          "terminalCosts": {
+            "online": 3.3433395316495313e-06,
+            "scalar": 2.26128678722036e-06,
+            "static": 1.8507274349510087e-06,
+            "causal": 5.960320233191094e-06
+          },
+          "links": {
+            "learned": 6,
+            "fixed": 6,
+            "dense": 18,
+            "feedback": 0
+          },
+          "replacedLinks": 3,
+          "minimumVoltage": {
+            "online": 0.9949937678481073,
+            "scalar": 0.9950439340691053,
+            "static": 0.9950216459977618,
+            "causal": 0.9949577281353925
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 59.96746029525074,
+          "commonForcingResidual": 1.1926223897340549e-18,
+          "realizationHash": "3580fe165e065aba6e3b47d10dcfa2705422ed6da7f553f49807ee7ff86b6c48",
+          "supportHash": "639f8d9768038ac7538626303a458d73aceda7b1b6294d601dd38f791938070e",
+          "acNominalMaxErrorPu": 1.3533136526411305e-05
+        },
+        {
+          "seed": 22,
+          "deploymentSeed": 2654435759,
+          "costs": {
+            "online": 0.016295905006858884,
+            "scalar": 0.018919991862364764,
+            "static": 0.02508244953673657,
+            "causal": 0.009746107020303797
+          },
+          "stageCosts": {
+            "online": 0.0162646501045029,
+            "scalar": 0.018906997096179923,
+            "static": 0.02507348154348609,
+            "causal": 0.009737406481959551
+          },
+          "terminalCosts": {
+            "online": 3.125490235598417e-05,
+            "scalar": 1.2994766184840404e-05,
+            "static": 8.967993250479349e-06,
+            "causal": 8.700538344245994e-06
+          },
+          "links": {
+            "learned": 6,
+            "fixed": 6,
+            "dense": 18,
+            "feedback": 0
+          },
+          "replacedLinks": 6,
+          "minimumVoltage": {
+            "online": 0.9949552351827764,
+            "scalar": 0.9950280016250876,
+            "static": 0.9949961253198603,
+            "causal": 0.9948663225255275
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 61.036187210732756,
+          "commonForcingResidual": 1.2197274440461925e-18,
+          "realizationHash": "962cf1b622b30624c2336e37ecbb0a75fcb2728a2ae8efa592b575f2fc64404f",
+          "supportHash": "69c7c4c6dab7e04be5dc108cc2dc0c51f31170cd9e7816ac1bf216c6c1abb915",
+          "acNominalMaxErrorPu": 1.3533136526411305e-05
+        },
+        {
+          "seed": 23,
+          "deploymentSeed": 2654435758,
+          "costs": {
+            "online": 0.016337871856902955,
+            "scalar": 0.021993507722367387,
+            "static": 0.026920727973420617,
+            "causal": 0.012337294984418327
+          },
+          "stageCosts": {
+            "online": 0.016332596515339953,
+            "scalar": 0.02199012925464152,
+            "static": 0.026918093598043744,
+            "causal": 0.012330185885808208
+          },
+          "terminalCosts": {
+            "online": 5.275341563000987e-06,
+            "scalar": 3.37846772586808e-06,
+            "static": 2.6343753768717826e-06,
+            "causal": 7.109098610118586e-06
+          },
+          "links": {
+            "learned": 6,
+            "fixed": 6,
+            "dense": 18,
+            "feedback": 0
+          },
+          "replacedLinks": 6,
+          "minimumVoltage": {
+            "online": 0.9947975095841216,
+            "scalar": 0.9944576577879112,
+            "static": 0.9944246216078835,
+            "causal": 0.9947053809466602
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 1.1926223897340549e-18,
+          "realizationHash": "b8d57224f5b40c3d9fa0393565b76854466c82f08d0b331fc8c75afbe4ffe5bf",
+          "supportHash": "39356f02fd1b82066a48cf6b082449c9e87b080c25d7892c878a99e5c36a587c",
+          "acNominalMaxErrorPu": 1.3533136526411305e-05
+        },
+        {
+          "seed": 24,
+          "deploymentSeed": 2654435745,
+          "costs": {
+            "online": 0.017507800220206128,
+            "scalar": 0.019834740321715002,
+            "static": 0.02582650587401743,
+            "causal": 0.010921644331817845
+          },
+          "stageCosts": {
+            "online": 0.01749478660991698,
+            "scalar": 0.01983211912120943,
+            "static": 0.025822574284090762,
+            "causal": 0.010912565767558254
+          },
+          "terminalCosts": {
+            "online": 1.3013610289148777e-05,
+            "scalar": 2.6212005055701358e-06,
+            "static": 3.931589926667454e-06,
+            "causal": 9.078564259591642e-06
+          },
+          "links": {
+            "learned": 6,
+            "fixed": 6,
+            "dense": 18,
+            "feedback": 0
+          },
+          "replacedLinks": 5,
+          "minimumVoltage": {
+            "online": 0.9947059937420969,
+            "scalar": 0.9946412641930165,
+            "static": 0.9944190393836441,
+            "causal": 0.9947128945721493
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 52.3733930351793,
+          "commonForcingResidual": 1.1926223897340549e-18,
+          "realizationHash": "d70706b6c7bc60c75f943d51e8c01c34ef5d41ad1d55c61af917a7a9a5f9df17",
+          "supportHash": "9f1d15ef3ac66e89b7b19bb90a13e134ad30bce12199d0b63a8a929458d6064a",
+          "acNominalMaxErrorPu": 1.3533136526411305e-05
+        },
+        {
+          "seed": 25,
+          "deploymentSeed": 2654435744,
+          "costs": {
+            "online": 0.015507323853382226,
+            "scalar": 0.01916176382243385,
+            "static": 0.020586044865306345,
+            "causal": 0.008985354664909857
+          },
+          "stageCosts": {
+            "online": 0.015419382400255317,
+            "scalar": 0.019074004704594107,
+            "static": 0.02041175359437158,
+            "causal": 0.00898094000269658
+          },
+          "terminalCosts": {
+            "online": 8.794145312690938e-05,
+            "scalar": 8.775911783973955e-05,
+            "static": 0.00017429127093476592,
+            "causal": 4.414662213275896e-06
+          },
+          "links": {
+            "learned": 6,
+            "fixed": 6,
+            "dense": 18,
+            "feedback": 0
+          },
+          "replacedLinks": 5,
+          "minimumVoltage": {
+            "online": 0.9949783019749483,
+            "scalar": 0.9949034398900025,
+            "static": 0.9949958212454926,
+            "causal": 0.9948938651513618
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 69.80550336987501,
+          "commonForcingResidual": 1.1926223897340549e-18,
+          "realizationHash": "5f677d6dd884c0b88bed064e4ed28a9b4290b88344012afcb983a80cbae94805",
+          "supportHash": "9f22070a5d2e3ae6871601d73ecb90afc1e7b05c37459e5f78db63432299c120",
+          "acNominalMaxErrorPu": 1.3533136526411305e-05
+        }
+      ]
+    },
+    {
+      "networkId": "feeder24",
+      "scenario": "reliable",
+      "beta": 0,
+      "means": {
+        "online": 0.0797836305523125,
+        "scalar": 0.0797836305523125,
+        "static": 0.06548695387293632,
+        "causal": 0.08560847299544164
+      },
+      "comparisons": {
+        "scalar": {
+          "learnedSavingsPercent": 0,
+          "wins": 0,
+          "ties": 5,
+          "losses": 0
+        },
+        "static": {
+          "learnedSavingsPercent": -21.831335607876756,
+          "wins": 0,
+          "ties": 0,
+          "losses": 5
+        },
+        "causal": {
+          "learnedSavingsPercent": 6.804048991084439,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        }
+      },
+      "runs": [
+        {
+          "seed": 21,
+          "deploymentSeed": 2654435756,
+          "costs": {
+            "online": 0.0873630124854441,
+            "scalar": 0.0873630124854441,
+            "static": 0.07180302669694963,
+            "causal": 0.09405865181682256
+          },
+          "stageCosts": {
+            "online": 0.08678117579529979,
+            "scalar": 0.08678117579529979,
+            "static": 0.07132595546699692,
+            "causal": 0.09331711317465012
+          },
+          "terminalCosts": {
+            "online": 0.0005818366901443222,
+            "scalar": 0.0005818366901443222,
+            "static": 0.00047707122995270334,
+            "causal": 0.0007415386421724431
+          },
+          "links": {
+            "learned": 24,
+            "fixed": 24,
+            "dense": 176,
+            "feedback": 0
+          },
+          "replacedLinks": 0,
+          "minimumVoltage": {
+            "online": 0.9850896000177559,
+            "scalar": 0.9850896000177559,
+            "static": 0.9858609306045583,
+            "causal": 0.984910551522911
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 46.4059134574127,
+          "commonForcingResidual": 2.710505431213761e-18,
+          "realizationHash": "42eff8b06a99af50d80971f82040a5469c36a2f179d205df184e3ae032923050",
+          "supportHash": "759a14d4e9293c5e62b8e101c90b60293ac2f2ab15a0d0915588df29d9ab1641",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 22,
+          "deploymentSeed": 2654435759,
+          "costs": {
+            "online": 0.0836470225019324,
+            "scalar": 0.0836470225019324,
+            "static": 0.06855372232124095,
+            "causal": 0.08979974669792577
+          },
+          "stageCosts": {
+            "online": 0.0831654292408929,
+            "scalar": 0.0831654292408929,
+            "static": 0.06815904560323391,
+            "causal": 0.0891823529670459
+          },
+          "terminalCosts": {
+            "online": 0.00048159326103949253,
+            "scalar": 0.00048159326103949253,
+            "static": 0.00039467671800703507,
+            "causal": 0.000617393730879876
+          },
+          "links": {
+            "learned": 24,
+            "fixed": 24,
+            "dense": 176,
+            "feedback": 0
+          },
+          "replacedLinks": 0,
+          "minimumVoltage": {
+            "online": 0.98526893399517,
+            "scalar": 0.98526893399517,
+            "static": 0.9859943053622333,
+            "causal": 0.9851567778013278
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 44.1524158048402,
+          "commonForcingResidual": 2.6020852139652106e-18,
+          "realizationHash": "ac27ee8ed8f2061a82c39ba537e2d16a9882f455124d615dd11dd02a75660295",
+          "supportHash": "b906038a874340903b1c609b9052c160ff9b2a462da00891ca93198a0e58b531",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 23,
+          "deploymentSeed": 2654435758,
+          "costs": {
+            "online": 0.07468410650046323,
+            "scalar": 0.07468410650046323,
+            "static": 0.0613920445921079,
+            "causal": 0.08003189380100205
+          },
+          "stageCosts": {
+            "online": 0.07430457247728908,
+            "scalar": 0.07430457247728908,
+            "static": 0.06107636989213736,
+            "causal": 0.07955292302641885
+          },
+          "terminalCosts": {
+            "online": 0.0003795340231741484,
+            "scalar": 0.0003795340231741484,
+            "static": 0.00031567469997053824,
+            "causal": 0.0004789707745831933
+          },
+          "links": {
+            "learned": 24,
+            "fixed": 24,
+            "dense": 176,
+            "feedback": 0
+          },
+          "replacedLinks": 0,
+          "minimumVoltage": {
+            "online": 0.9852590870221911,
+            "scalar": 0.9852590870221911,
+            "static": 0.9860857984500161,
+            "causal": 0.9850745494761702
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 49.281449609997495,
+          "commonForcingResidual": 2.4936649967166602e-18,
+          "realizationHash": "f85bd447a1317b0ff4ab37024768adc02277026cebab9b0d8df5322f354d7d3a",
+          "supportHash": "56f25da5411a1a5ab3f57388392f13c6ca7c95f3fd84db60aca82923b05621fc",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 24,
+          "deploymentSeed": 2654435745,
+          "costs": {
+            "online": 0.07282046912421442,
+            "scalar": 0.07282046912421442,
+            "static": 0.05975088506401677,
+            "causal": 0.07790634173187788
+          },
+          "stageCosts": {
+            "online": 0.07244743080167795,
+            "scalar": 0.07244743080167795,
+            "static": 0.05944312935492326,
+            "causal": 0.07743166098491099
+          },
+          "terminalCosts": {
+            "online": 0.0003730383225364574,
+            "scalar": 0.0003730383225364574,
+            "static": 0.00030775570909350586,
+            "causal": 0.0004746807469668925
+          },
+          "links": {
+            "learned": 24,
+            "fixed": 24,
+            "dense": 176,
+            "feedback": 0
+          },
+          "replacedLinks": 0,
+          "minimumVoltage": {
+            "online": 0.9852739243749805,
+            "scalar": 0.9852739243749805,
+            "static": 0.986014467423201,
+            "causal": 0.98510715571921
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 44.53001881419493,
+          "commonForcingResidual": 2.4936649967166602e-18,
+          "realizationHash": "87ce8c7cc1aa922694c2759a5d4e510e873b2d0e6ffa341cf6e6f7c2985c6279",
+          "supportHash": "e8512d12c746f3d6c17f8d6c8e14fb8608f5425ae49295e33dbb66e5012c8dde",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 25,
+          "deploymentSeed": 2654435744,
+          "costs": {
+            "online": 0.08040354214950834,
+            "scalar": 0.08040354214950834,
+            "static": 0.06593509069036639,
+            "causal": 0.08624573092957993
+          },
+          "stageCosts": {
+            "online": 0.08012455974830965,
+            "scalar": 0.08012455974830965,
+            "static": 0.06569739787956755,
+            "causal": 0.0859013839482532
+          },
+          "terminalCosts": {
+            "online": 0.00027898240119869855,
+            "scalar": 0.00027898240119869855,
+            "static": 0.0002376928107988414,
+            "causal": 0.0003443469813267329
+          },
+          "links": {
+            "learned": 24,
+            "fixed": 24,
+            "dense": 176,
+            "feedback": 0
+          },
+          "replacedLinks": 0,
+          "minimumVoltage": {
+            "online": 0.9852813021213417,
+            "scalar": 0.9852813021213417,
+            "static": 0.9860481371065482,
+            "causal": 0.9851747695755483
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 46.41337436249737,
+          "commonForcingResidual": 2.4936649967166602e-18,
+          "realizationHash": "9b46fc1724e61aa89c2aea32490475fedcdb21df84d15c44a7f6d370a496668d",
+          "supportHash": "9621c1df321a4b17c5868083fcf3c12aa74d137313b676339246896a7495380c",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        }
+      ]
+    },
+    {
+      "networkId": "feeder24",
+      "scenario": "mixed2",
+      "beta": 2,
+      "means": {
+        "online": 0.07290112496097792,
+        "scalar": 0.08924545962612244,
+        "static": 0.0881971638802658,
+        "causal": 0.08560847299544164
+      },
+      "comparisons": {
+        "scalar": {
+          "learnedSavingsPercent": 18.31391169210863,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        },
+        "static": {
+          "learnedSavingsPercent": 17.34300542821693,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        },
+        "causal": {
+          "learnedSavingsPercent": 14.843563481316085,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        }
+      },
+      "runs": [
+        {
+          "seed": 21,
+          "deploymentSeed": 2654435756,
+          "costs": {
+            "online": 0.07999165204249245,
+            "scalar": 0.09628607844697767,
+            "static": 0.09362338662505655,
+            "causal": 0.09405865181682256
+          },
+          "stageCosts": {
+            "online": 0.07936222033969527,
+            "scalar": 0.09573610474509414,
+            "static": 0.09315027652743334,
+            "causal": 0.09331711317465012
+          },
+          "terminalCosts": {
+            "online": 0.0006294317027971791,
+            "scalar": 0.0005499737018835364,
+            "static": 0.0004731100976232071,
+            "causal": 0.0007415386421724431
+          },
+          "links": {
+            "learned": 24,
+            "fixed": 24,
+            "dense": 176,
+            "feedback": 0
+          },
+          "replacedLinks": 19,
+          "minimumVoltage": {
+            "online": 0.9852762433198858,
+            "scalar": 0.9849869123997825,
+            "static": 0.9855305086130263,
+            "causal": 0.984910551522911
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.3852447794681098e-18,
+          "realizationHash": "42eff8b06a99af50d80971f82040a5469c36a2f179d205df184e3ae032923050",
+          "supportHash": "2f7fc26fa2d5457430ddd7d3ca1cfc78fb1acae47ba36f054130fdf8f5d24f5b",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 22,
+          "deploymentSeed": 2654435759,
+          "costs": {
+            "online": 0.07637668268223512,
+            "scalar": 0.09253297233333285,
+            "static": 0.08677262220550278,
+            "causal": 0.08979974669792577
+          },
+          "stageCosts": {
+            "online": 0.07585031684532924,
+            "scalar": 0.0921653764999084,
+            "static": 0.08647488983898693,
+            "causal": 0.0891823529670459
+          },
+          "terminalCosts": {
+            "online": 0.0005263658369058733,
+            "scalar": 0.0003675958334244465,
+            "static": 0.00029773236651584376,
+            "causal": 0.000617393730879876
+          },
+          "links": {
+            "learned": 24,
+            "fixed": 24,
+            "dense": 176,
+            "feedback": 0
+          },
+          "replacedLinks": 19,
+          "minimumVoltage": {
+            "online": 0.9854724876555522,
+            "scalar": 0.985266572677496,
+            "static": 0.9858370286470407,
+            "causal": 0.9851567778013278
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.656295322589486e-18,
+          "realizationHash": "ac27ee8ed8f2061a82c39ba537e2d16a9882f455124d615dd11dd02a75660295",
+          "supportHash": "c4b4ca6ed5ba5d9d889f88a450401b01d0a63a7fcbadd8a4c1d37834979f9da3",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 23,
+          "deploymentSeed": 2654435758,
+          "costs": {
+            "online": 0.06822662269522144,
+            "scalar": 0.08431383432461735,
+            "static": 0.08325800584300504,
+            "causal": 0.08003189380100205
+          },
+          "stageCosts": {
+            "online": 0.06781582359547739,
+            "scalar": 0.08400973507826895,
+            "static": 0.08302008132179967,
+            "causal": 0.07955292302641885
+          },
+          "terminalCosts": {
+            "online": 0.00041079909974405063,
+            "scalar": 0.0003040992463483996,
+            "static": 0.00023792452120537203,
+            "causal": 0.0004789707745831933
+          },
+          "links": {
+            "learned": 24,
+            "fixed": 24,
+            "dense": 176,
+            "feedback": 0
+          },
+          "replacedLinks": 19,
+          "minimumVoltage": {
+            "online": 0.9854680108657597,
+            "scalar": 0.9852056655061111,
+            "static": 0.9857116238517193,
+            "causal": 0.9850745494761702
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 62.767157018035576,
+          "commonForcingResidual": 2.5478751053409354e-18,
+          "realizationHash": "f85bd447a1317b0ff4ab37024768adc02277026cebab9b0d8df5322f354d7d3a",
+          "supportHash": "0503ee97cb26a6a1416bebcad5564d87e77c09bba9462eb036987c3847935133",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 24,
+          "deploymentSeed": 2654435745,
+          "costs": {
+            "online": 0.0664468031089341,
+            "scalar": 0.08288402408083814,
+            "static": 0.08941773252455064,
+            "causal": 0.07790634173187788
+          },
+          "stageCosts": {
+            "online": 0.06604458120584604,
+            "scalar": 0.08271706253425584,
+            "static": 0.08922781061907126,
+            "causal": 0.07743166098491099
+          },
+          "terminalCosts": {
+            "online": 0.00040222190308805423,
+            "scalar": 0.00016696154658230448,
+            "static": 0.00018992190547938766,
+            "causal": 0.0004746807469668925
+          },
+          "links": {
+            "learned": 24,
+            "fixed": 24,
+            "dense": 176,
+            "feedback": 0
+          },
+          "replacedLinks": 19,
+          "minimumVoltage": {
+            "online": 0.9854633910814145,
+            "scalar": 0.9852973699510196,
+            "static": 0.9855004977684282,
+            "causal": 0.98510715571921
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 68.3526421406929,
+          "commonForcingResidual": 2.5478751053409354e-18,
+          "realizationHash": "87ce8c7cc1aa922694c2759a5d4e510e873b2d0e6ffa341cf6e6f7c2985c6279",
+          "supportHash": "2b519584c15d96620067a7283d8dcbd5a286fd632b2265e07e2f048a1315db0b",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 25,
+          "deploymentSeed": 2654435744,
+          "costs": {
+            "online": 0.07346386427600655,
+            "scalar": 0.09021038894484623,
+            "static": 0.08791407220321401,
+            "causal": 0.08624573092957993
+          },
+          "stageCosts": {
+            "online": 0.07316435065750558,
+            "scalar": 0.08974236473288073,
+            "static": 0.08730368738818096,
+            "causal": 0.0859013839482532
+          },
+          "terminalCosts": {
+            "online": 0.0002995136185009775,
+            "scalar": 0.0004680242119654949,
+            "static": 0.0006103848150330415,
+            "causal": 0.0003443469813267329
+          },
+          "links": {
+            "learned": 24,
+            "fixed": 24,
+            "dense": 176,
+            "feedback": 0
+          },
+          "replacedLinks": 19,
+          "minimumVoltage": {
+            "online": 0.9855323089073804,
+            "scalar": 0.9853339738075352,
+            "static": 0.9860059759718565,
+            "causal": 0.9851747695755483
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.6020852139652106e-18,
+          "realizationHash": "9b46fc1724e61aa89c2aea32490475fedcdb21df84d15c44a7f6d370a496668d",
+          "supportHash": "1186fcad569195e1d657eebf4144070a48f9ab389ce0eb50ee5f35cb83cc7ab3",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        }
+      ]
+    },
+    {
+      "networkId": "feeder24",
+      "scenario": "mixed4",
+      "beta": 4,
+      "means": {
+        "online": 0.07290907290142642,
+        "scalar": 0.1178466483536508,
+        "static": 0.14950128872338977,
+        "causal": 0.08560847299544164
+      },
+      "comparisons": {
+        "scalar": {
+          "learnedSavingsPercent": 38.13224735706473,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        },
+        "static": {
+          "learnedSavingsPercent": 51.2318097562863,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        },
+        "causal": {
+          "learnedSavingsPercent": 14.834279423126041,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        }
+      },
+      "runs": [
+        {
+          "seed": 21,
+          "deploymentSeed": 2654435756,
+          "costs": {
+            "online": 0.07997625270409713,
+            "scalar": 0.12445981508367597,
+            "static": 0.14861906628815055,
+            "causal": 0.09405865181682256
+          },
+          "stageCosts": {
+            "online": 0.0793466851169753,
+            "scalar": 0.12393852851016204,
+            "static": 0.14814401127590474,
+            "causal": 0.09331711317465012
+          },
+          "terminalCosts": {
+            "online": 0.0006295675871218213,
+            "scalar": 0.0005212865735139295,
+            "static": 0.00047505501224582935,
+            "causal": 0.0007415386421724431
+          },
+          "links": {
+            "learned": 24,
+            "fixed": 24,
+            "dense": 176,
+            "feedback": 0
+          },
+          "replacedLinks": 19,
+          "minimumVoltage": {
+            "online": 0.9852761135880314,
+            "scalar": 0.984796040442787,
+            "static": 0.9850679396678595,
+            "causal": 0.984910551522911
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.3852447794681098e-18,
+          "realizationHash": "42eff8b06a99af50d80971f82040a5469c36a2f179d205df184e3ae032923050",
+          "supportHash": "c5267783f020d5b762b6739c8e15b1fc4c5087ce11516b0a75b2fa93aa3b87bc",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 22,
+          "deploymentSeed": 2654435759,
+          "costs": {
+            "online": 0.07640793511182051,
+            "scalar": 0.11869629532464346,
+            "static": 0.13908844717037333,
+            "causal": 0.08979974669792577
+          },
+          "stageCosts": {
+            "online": 0.07587858188532545,
+            "scalar": 0.11828305102656907,
+            "static": 0.1386260480548265,
+            "causal": 0.0891823529670459
+          },
+          "terminalCosts": {
+            "online": 0.0005293532264950582,
+            "scalar": 0.0004132442980743925,
+            "static": 0.00046239911554682493,
+            "causal": 0.000617393730879876
+          },
+          "links": {
+            "learned": 24,
+            "fixed": 24,
+            "dense": 176,
+            "feedback": 0
+          },
+          "replacedLinks": 19,
+          "minimumVoltage": {
+            "online": 0.9854667088467397,
+            "scalar": 0.9851385310655737,
+            "static": 0.9849826369828597,
+            "causal": 0.9851567778013278
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.4936649967166602e-18,
+          "realizationHash": "ac27ee8ed8f2061a82c39ba537e2d16a9882f455124d615dd11dd02a75660295",
+          "supportHash": "887e90c6f09d17a277f57e51ad94648439221872c70ce9624b77eb212a2fc73b",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 23,
+          "deploymentSeed": 2654435758,
+          "costs": {
+            "online": 0.06821685082156484,
+            "scalar": 0.11277773221863101,
+            "static": 0.14520428207505143,
+            "causal": 0.08003189380100205
+          },
+          "stageCosts": {
+            "online": 0.06780508238766947,
+            "scalar": 0.11247797595725274,
+            "static": 0.14493750840413072,
+            "causal": 0.07955292302641885
+          },
+          "terminalCosts": {
+            "online": 0.0004117684338953712,
+            "scalar": 0.0002997562613782708,
+            "static": 0.00026677367092070727,
+            "causal": 0.0004789707745831933
+          },
+          "links": {
+            "learned": 24,
+            "fixed": 24,
+            "dense": 176,
+            "feedback": 0
+          },
+          "replacedLinks": 19,
+          "minimumVoltage": {
+            "online": 0.9854643119141764,
+            "scalar": 0.9851522439900312,
+            "static": 0.984991312733433,
+            "causal": 0.9850745494761702
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.5478751053409354e-18,
+          "realizationHash": "f85bd447a1317b0ff4ab37024768adc02277026cebab9b0d8df5322f354d7d3a",
+          "supportHash": "e70d36fa4a385829fa7f0ef875351c3966daa9780aa7e8fce57a3a1572c8c8a7",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 24,
+          "deploymentSeed": 2654435745,
+          "costs": {
+            "online": 0.0664490377130908,
+            "scalar": 0.11411313940536487,
+            "static": 0.1690277592225969,
+            "causal": 0.07790634173187788
+          },
+          "stageCosts": {
+            "online": 0.06604883103650375,
+            "scalar": 0.11387048491467405,
+            "static": 0.16840029226623945,
+            "causal": 0.07743166098491099
+          },
+          "terminalCosts": {
+            "online": 0.00040020667658705153,
+            "scalar": 0.00024265449069081534,
+            "static": 0.000627466956357458,
+            "causal": 0.0004746807469668925
+          },
+          "links": {
+            "learned": 24,
+            "fixed": 24,
+            "dense": 176,
+            "feedback": 0
+          },
+          "replacedLinks": 19,
+          "minimumVoltage": {
+            "online": 0.9854719716462493,
+            "scalar": 0.9853206349710346,
+            "static": 0.9844107598560816,
+            "causal": 0.98510715571921
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.6020852139652106e-18,
+          "realizationHash": "87ce8c7cc1aa922694c2759a5d4e510e873b2d0e6ffa341cf6e6f7c2985c6279",
+          "supportHash": "0de6cf8cd8e5be99cb0c9cd8b4bb38f420e6dd0b86ffcda36ee1fd703f8ec1a0",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 25,
+          "deploymentSeed": 2654435744,
+          "costs": {
+            "online": 0.07349528815655888,
+            "scalar": 0.11918625973593863,
+            "static": 0.14556688886077665,
+            "causal": 0.08624573092957993
+          },
+          "stageCosts": {
+            "online": 0.07319710865138657,
+            "scalar": 0.11842910015373981,
+            "static": 0.14423849999216046,
+            "causal": 0.0859013839482532
+          },
+          "terminalCosts": {
+            "online": 0.00029817950517231704,
+            "scalar": 0.0007571595821988239,
+            "static": 0.0013283888686161927,
+            "causal": 0.0003443469813267329
+          },
+          "links": {
+            "learned": 24,
+            "fixed": 24,
+            "dense": 176,
+            "feedback": 0
+          },
+          "replacedLinks": 19,
+          "minimumVoltage": {
+            "online": 0.985524257907203,
+            "scalar": 0.9852726434399107,
+            "static": 0.985460534669927,
+            "causal": 0.9851747695755483
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.8189256484623115e-18,
+          "realizationHash": "9b46fc1724e61aa89c2aea32490475fedcdb21df84d15c44a7f6d370a496668d",
+          "supportHash": "daca9ae49c76372112323dd1edaa9b2bb4f01352160b76f25187fb34ceae56a9",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        }
+      ]
+    },
+    {
+      "networkId": "feeder24",
+      "scenario": "allNoisy",
+      "beta": 4,
+      "means": {
+        "online": 0.11116814043893812,
+        "scalar": 0.1496889411562497,
+        "static": 0.20491380136585927,
+        "causal": 0.08560847299544164
+      },
+      "comparisons": {
+        "scalar": {
+          "learnedSavingsPercent": 25.733898857032088,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        },
+        "static": {
+          "learnedSavingsPercent": 45.74882721517856,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        },
+        "causal": {
+          "learnedSavingsPercent": -29.85646928296157,
+          "wins": 0,
+          "ties": 0,
+          "losses": 5
+        }
+      },
+      "runs": [
+        {
+          "seed": 21,
+          "deploymentSeed": 2654435756,
+          "costs": {
+            "online": 0.11833904382257275,
+            "scalar": 0.15654928759362913,
+            "static": 0.20566542400906154,
+            "causal": 0.09405865181682256
+          },
+          "stageCosts": {
+            "online": 0.11754731542006971,
+            "scalar": 0.1559912301891869,
+            "static": 0.20514880135682137,
+            "causal": 0.09331711317465012
+          },
+          "terminalCosts": {
+            "online": 0.0007917284025030349,
+            "scalar": 0.0005580574044422406,
+            "static": 0.0005166226522401782,
+            "causal": 0.0007415386421724431
+          },
+          "links": {
+            "learned": 24,
+            "fixed": 24,
+            "dense": 176,
+            "feedback": 0
+          },
+          "replacedLinks": 24,
+          "minimumVoltage": {
+            "online": 0.9848056908667363,
+            "scalar": 0.9848430460940301,
+            "static": 0.9843307341585464,
+            "causal": 0.984910551522911
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.6020852139652106e-18,
+          "realizationHash": "42eff8b06a99af50d80971f82040a5469c36a2f179d205df184e3ae032923050",
+          "supportHash": "7f06b1bdb6abdaba482b07a2314f41f500054d4d12b41b2d16779b05b800b9f9",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 22,
+          "deploymentSeed": 2654435759,
+          "costs": {
+            "online": 0.11417607068687229,
+            "scalar": 0.14641289854516087,
+            "static": 0.1915703257518759,
+            "causal": 0.08979974669792577
+          },
+          "stageCosts": {
+            "online": 0.11313735487440219,
+            "scalar": 0.14586659770728536,
+            "static": 0.19099433511503433,
+            "causal": 0.0891823529670459
+          },
+          "terminalCosts": {
+            "online": 0.0010387158124701068,
+            "scalar": 0.0005463008378755106,
+            "static": 0.0005759906368415673,
+            "causal": 0.000617393730879876
+          },
+          "links": {
+            "learned": 24,
+            "fixed": 24,
+            "dense": 176,
+            "feedback": 0
+          },
+          "replacedLinks": 20,
+          "minimumVoltage": {
+            "online": 0.9850412785215769,
+            "scalar": 0.9846767083402859,
+            "static": 0.9847196455807002,
+            "causal": 0.9851567778013278
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.656295322589486e-18,
+          "realizationHash": "ac27ee8ed8f2061a82c39ba537e2d16a9882f455124d615dd11dd02a75660295",
+          "supportHash": "665ea8ae5255804a1f7675017103f035197c8525d65942a97f5d1c0df9646eb4",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 23,
+          "deploymentSeed": 2654435758,
+          "costs": {
+            "online": 0.10728762513074126,
+            "scalar": 0.14415239854146705,
+            "static": 0.19405125209853546,
+            "causal": 0.08003189380100205
+          },
+          "stageCosts": {
+            "online": 0.10646514158231812,
+            "scalar": 0.14385461503268177,
+            "static": 0.1938361426252654,
+            "causal": 0.07955292302641885
+          },
+          "terminalCosts": {
+            "online": 0.0008224835484231331,
+            "scalar": 0.0002977835087852963,
+            "static": 0.00021510947327004027,
+            "causal": 0.0004789707745831933
+          },
+          "links": {
+            "learned": 24,
+            "fixed": 24,
+            "dense": 176,
+            "feedback": 0
+          },
+          "replacedLinks": 22,
+          "minimumVoltage": {
+            "online": 0.9853198332897639,
+            "scalar": 0.9846306120853359,
+            "static": 0.9846553691666478,
+            "causal": 0.9850745494761702
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.4936649967166602e-18,
+          "realizationHash": "f85bd447a1317b0ff4ab37024768adc02277026cebab9b0d8df5322f354d7d3a",
+          "supportHash": "151237e39928cf2db77162b371833d5ce149804235859bac1593509d16c46a62",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 24,
+          "deploymentSeed": 2654435745,
+          "costs": {
+            "online": 0.10576309631670355,
+            "scalar": 0.15001732169955811,
+            "static": 0.22848916811171646,
+            "causal": 0.07790634173187788
+          },
+          "stageCosts": {
+            "online": 0.105478267156126,
+            "scalar": 0.1495864832167681,
+            "static": 0.22757992120949175,
+            "causal": 0.07743166098491099
+          },
+          "terminalCosts": {
+            "online": 0.0002848291605775579,
+            "scalar": 0.0004308384827900121,
+            "static": 0.0009092469022247214,
+            "causal": 0.0004746807469668925
+          },
+          "links": {
+            "learned": 24,
+            "fixed": 24,
+            "dense": 176,
+            "feedback": 0
+          },
+          "replacedLinks": 22,
+          "minimumVoltage": {
+            "online": 0.9851009123707019,
+            "scalar": 0.9850068135065959,
+            "static": 0.9840851616823361,
+            "causal": 0.98510715571921
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.656295322589486e-18,
+          "realizationHash": "87ce8c7cc1aa922694c2759a5d4e510e873b2d0e6ffa341cf6e6f7c2985c6279",
+          "supportHash": "76f8b82ccc43ff9012f493ef38a648457d6c82b6a1ab0a1e201b6f71d0d06246",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 25,
+          "deploymentSeed": 2654435744,
+          "costs": {
+            "online": 0.11027486623780075,
+            "scalar": 0.15131279940143333,
+            "static": 0.20479283685810695,
+            "causal": 0.08624573092957993
+          },
+          "stageCosts": {
+            "online": 0.11000576211858067,
+            "scalar": 0.15084933304593,
+            "static": 0.2041549315695679,
+            "causal": 0.0859013839482532
+          },
+          "terminalCosts": {
+            "online": 0.0002691041192200907,
+            "scalar": 0.0004634663555033224,
+            "static": 0.000637905288539036,
+            "causal": 0.0003443469813267329
+          },
+          "links": {
+            "learned": 24,
+            "fixed": 24,
+            "dense": 176,
+            "feedback": 0
+          },
+          "replacedLinks": 24,
+          "minimumVoltage": {
+            "online": 0.9848441620849542,
+            "scalar": 0.9852255967725801,
+            "static": 0.9851591570727297,
+            "causal": 0.9851747695755483
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.520770051028798e-18,
+          "realizationHash": "9b46fc1724e61aa89c2aea32490475fedcdb21df84d15c44a7f6d370a496668d",
+          "supportHash": "2e8dfc290ffdc0a413b8928427baa71960601a2228131ad89afc787450a037f1",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        }
+      ]
+    },
+    {
+      "networkId": "feeder47",
+      "scenario": "reliable",
+      "beta": 0,
+      "means": {
+        "online": 0.15540150781337378,
+        "scalar": 0.15540150781337378,
+        "static": 0.12749594901391437,
+        "causal": 0.16646285862676855
+      },
+      "comparisons": {
+        "scalar": {
+          "learnedSavingsPercent": 0,
+          "wins": 0,
+          "ties": 5,
+          "losses": 0
+        },
+        "static": {
+          "learnedSavingsPercent": -21.887408200251066,
+          "wins": 0,
+          "ties": 0,
+          "losses": 5
+        },
+        "causal": {
+          "learnedSavingsPercent": 6.6449362366146545,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        }
+      },
+      "runs": [
+        {
+          "seed": 21,
+          "deploymentSeed": 2654435756,
+          "costs": {
+            "online": 0.13569579512218405,
+            "scalar": 0.13569579512218405,
+            "static": 0.11215442207026255,
+            "causal": 0.14565496295294378
+          },
+          "stageCosts": {
+            "online": 0.13512070690747727,
+            "scalar": 0.13512070690747727,
+            "static": 0.11164644819108747,
+            "causal": 0.14497448535206048
+          },
+          "terminalCosts": {
+            "online": 0.0005750882147067785,
+            "scalar": 0.0005750882147067785,
+            "static": 0.0005079738791750743,
+            "causal": 0.0006804776008833087
+          },
+          "links": {
+            "learned": 48,
+            "fixed": 48,
+            "dense": 720,
+            "feedback": 0
+          },
+          "replacedLinks": 0,
+          "minimumVoltage": {
+            "online": 0.9853943625178279,
+            "scalar": 0.9853943625178279,
+            "static": 0.9859730087456997,
+            "causal": 0.9852773851033071
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 38.63029079969017,
+          "commonForcingResidual": 2.6834003769016235e-18,
+          "realizationHash": "236c7e7006437fcc945d9b697fe78ed6269d4f7b2f5b6d3a81b2d04819cfabb1",
+          "supportHash": "f89ddc28bf4fc397bf5fa717138487ad16fea8dff6a35a695f9b5dabd6c86342",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 22,
+          "deploymentSeed": 2654435759,
+          "costs": {
+            "online": 0.1644063984528485,
+            "scalar": 0.1644063984528485,
+            "static": 0.13402427417519044,
+            "causal": 0.17545078801470967
+          },
+          "stageCosts": {
+            "online": 0.16399113374245464,
+            "scalar": 0.16399113374245464,
+            "static": 0.13364951099981073,
+            "causal": 0.17496670736337858
+          },
+          "terminalCosts": {
+            "online": 0.00041526471039385863,
+            "scalar": 0.00041526471039385863,
+            "static": 0.0003747631753797233,
+            "causal": 0.00048408065133108863
+          },
+          "links": {
+            "learned": 48,
+            "fixed": 48,
+            "dense": 720,
+            "feedback": 0
+          },
+          "replacedLinks": 0,
+          "minimumVoltage": {
+            "online": 0.9849230506249808,
+            "scalar": 0.9849230506249808,
+            "static": 0.9857109885772981,
+            "causal": 0.9847320598238731
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 48.853745026388495,
+          "commonForcingResidual": 2.656295322589486e-18,
+          "realizationHash": "dda88caaceae85d061f95b080a206258c9c9096be8e5f688d623638a40997855",
+          "supportHash": "e81b94f82b97d7c0c2f04bdf0f21d90e8d953f9636fe2ceb523bf76f650d6f90",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 23,
+          "deploymentSeed": 2654435758,
+          "costs": {
+            "online": 0.15812189523293477,
+            "scalar": 0.15812189523293477,
+            "static": 0.12969295408645692,
+            "causal": 0.16874794609349833
+          },
+          "stageCosts": {
+            "online": 0.157816109276986,
+            "scalar": 0.157816109276986,
+            "static": 0.12940721297968674,
+            "causal": 0.16840412818359302
+          },
+          "terminalCosts": {
+            "online": 0.0003057859559487663,
+            "scalar": 0.0003057859559487663,
+            "static": 0.000285741106770174,
+            "causal": 0.000343817909905302
+          },
+          "links": {
+            "learned": 48,
+            "fixed": 48,
+            "dense": 720,
+            "feedback": 0
+          },
+          "replacedLinks": 0,
+          "minimumVoltage": {
+            "online": 0.9852532049642099,
+            "scalar": 0.9852532049642099,
+            "static": 0.9859786714392331,
+            "causal": 0.9850846003945121
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 44.121280148171444,
+          "commonForcingResidual": 2.6020852139652106e-18,
+          "realizationHash": "c515810a9b4b97ffcf054e78aa8ebbe27ff98d13f9dbed98edf1a25ce9d2b77e",
+          "supportHash": "afb56f9f34017391e547cf01a2a69fd70a45645a85fab06b9cfc8630f3232a45",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 24,
+          "deploymentSeed": 2654435745,
+          "costs": {
+            "online": 0.14727089724809986,
+            "scalar": 0.14727089724809986,
+            "static": 0.12075994974453502,
+            "causal": 0.15799875114790696
+          },
+          "stageCosts": {
+            "online": 0.14667419324564887,
+            "scalar": 0.14667419324564887,
+            "static": 0.12023620628893468,
+            "causal": 0.1572808913255627
+          },
+          "terminalCosts": {
+            "online": 0.0005967040024509894,
+            "scalar": 0.0005967040024509894,
+            "static": 0.0005237434556003367,
+            "causal": 0.0007178598223442706
+          },
+          "links": {
+            "learned": 48,
+            "fixed": 48,
+            "dense": 720,
+            "feedback": 0
+          },
+          "replacedLinks": 0,
+          "minimumVoltage": {
+            "online": 0.9856147969885282,
+            "scalar": 0.9856147969885282,
+            "static": 0.9861672056627819,
+            "causal": 0.9854938875711355
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 46.298658834415775,
+          "commonForcingResidual": 2.673235981534572e-18,
+          "realizationHash": "e97fa17e6aa56c02b1ec588bed7d75ffdbd03b54fa961f13a1a8ded3c565bae2",
+          "supportHash": "7ca981d109a921559f42fa5448f5773dba2ffc2e2d0cf59383ed907b204fb92f",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 25,
+          "deploymentSeed": 2654435744,
+          "costs": {
+            "online": 0.1715125530108018,
+            "scalar": 0.1715125530108018,
+            "static": 0.14084814499312687,
+            "causal": 0.18446184492478399
+          },
+          "stageCosts": {
+            "online": 0.17072956660466887,
+            "scalar": 0.17072956660466887,
+            "static": 0.14017442803440605,
+            "causal": 0.18350714430944015
+          },
+          "terminalCosts": {
+            "online": 0.0007829864061329187,
+            "scalar": 0.0007829864061329187,
+            "static": 0.0006737169587208249,
+            "causal": 0.0009547006153438453
+          },
+          "links": {
+            "learned": 48,
+            "fixed": 48,
+            "dense": 720,
+            "feedback": 0
+          },
+          "replacedLinks": 0,
+          "minimumVoltage": {
+            "online": 0.9852422734837599,
+            "scalar": 0.9852422734837599,
+            "static": 0.9858632259810577,
+            "causal": 0.9850787132636866
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 40.93339200340089,
+          "commonForcingResidual": 2.656295322589486e-18,
+          "realizationHash": "73ffb9a9eaf98c83ad250a7f3c59d676b917557d09aed2270ea21e649ef4b993",
+          "supportHash": "27e77d4d657a0c74c7cfb10be1253d7262d07344d4e2995fded8050c66163e92",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        }
+      ]
+    },
+    {
+      "networkId": "feeder47",
+      "scenario": "mixed2",
+      "beta": 2,
+      "means": {
+        "online": 0.14183464568916673,
+        "scalar": 0.17571616253087002,
+        "static": 0.17333413653227547,
+        "causal": 0.16646285862676855
+      },
+      "comparisons": {
+        "scalar": {
+          "learnedSavingsPercent": 19.28195810430981,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        },
+        "static": {
+          "learnedSavingsPercent": 18.172698969336267,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        },
+        "causal": {
+          "learnedSavingsPercent": 14.795019826507655,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        }
+      },
+      "runs": [
+        {
+          "seed": 21,
+          "deploymentSeed": 2654435756,
+          "costs": {
+            "online": 0.12439219879195951,
+            "scalar": 0.1546611319993272,
+            "static": 0.16021057473086342,
+            "causal": 0.14565496295294378
+          },
+          "stageCosts": {
+            "online": 0.12378579069491119,
+            "scalar": 0.15409257652468988,
+            "static": 0.1596989401767271,
+            "causal": 0.14497448535206048
+          },
+          "terminalCosts": {
+            "online": 0.0006064080970483153,
+            "scalar": 0.0005685554746373403,
+            "static": 0.0005116345541363307,
+            "causal": 0.0006804776008833087
+          },
+          "links": {
+            "learned": 48,
+            "fixed": 48,
+            "dense": 720,
+            "feedback": 0
+          },
+          "replacedLinks": 38,
+          "minimumVoltage": {
+            "online": 0.9855572726507924,
+            "scalar": 0.9854306148288652,
+            "static": 0.985514892970499,
+            "causal": 0.9852773851033071
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.710505431213761e-18,
+          "realizationHash": "236c7e7006437fcc945d9b697fe78ed6269d4f7b2f5b6d3a81b2d04819cfabb1",
+          "supportHash": "ecd874856d3276261f3294a070aef994eb9f6989d1f8e23eecfd57713cb60d29",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 22,
+          "deploymentSeed": 2654435759,
+          "costs": {
+            "online": 0.14925817543408812,
+            "scalar": 0.18490112318597074,
+            "static": 0.18239186047731523,
+            "causal": 0.17545078801470967
+          },
+          "stageCosts": {
+            "online": 0.14882151616793093,
+            "scalar": 0.18421874246024422,
+            "static": 0.18160464434283927,
+            "causal": 0.17496670736337858
+          },
+          "terminalCosts": {
+            "online": 0.00043665926615717426,
+            "scalar": 0.0006823807257265122,
+            "static": 0.0007872161344759737,
+            "causal": 0.00048408065133108863
+          },
+          "links": {
+            "learned": 48,
+            "fixed": 48,
+            "dense": 720,
+            "feedback": 0
+          },
+          "replacedLinks": 38,
+          "minimumVoltage": {
+            "online": 0.9851081115031454,
+            "scalar": 0.9846867666268805,
+            "static": 0.9852929731209172,
+            "causal": 0.9847320598238731
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.6020852139652106e-18,
+          "realizationHash": "dda88caaceae85d061f95b080a206258c9c9096be8e5f688d623638a40997855",
+          "supportHash": "1e28e93e496e13aa4a209925c35df3b9f6ed70bcebb4569eeb4897db880f3d5b",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 23,
+          "deploymentSeed": 2654435758,
+          "costs": {
+            "online": 0.14409615755985314,
+            "scalar": 0.1768825091027641,
+            "static": 0.17220153608187522,
+            "causal": 0.16874794609349833
+          },
+          "stageCosts": {
+            "online": 0.1437768871090464,
+            "scalar": 0.17660337761170314,
+            "static": 0.17194080390450145,
+            "causal": 0.16840412818359302
+          },
+          "terminalCosts": {
+            "online": 0.00031927045080674797,
+            "scalar": 0.00027913149106095314,
+            "static": 0.00026073217737376217,
+            "causal": 0.000343817909905302
+          },
+          "links": {
+            "learned": 48,
+            "fixed": 48,
+            "dense": 720,
+            "feedback": 0
+          },
+          "replacedLinks": 38,
+          "minimumVoltage": {
+            "online": 0.9854348179749632,
+            "scalar": 0.9851784885775554,
+            "static": 0.9852265641709962,
+            "causal": 0.9850846003945121
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 67.05988307492673,
+          "commonForcingResidual": 2.6020852139652106e-18,
+          "realizationHash": "c515810a9b4b97ffcf054e78aa8ebbe27ff98d13f9dbed98edf1a25ce9d2b77e",
+          "supportHash": "9710b314be0bf4cca3d489193d09792e358b1df17bac73aa513f0a130c6d5e66",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 24,
+          "deploymentSeed": 2654435745,
+          "costs": {
+            "online": 0.1344964226903404,
+            "scalar": 0.16858122399772704,
+            "static": 0.16522452556477515,
+            "causal": 0.15799875114790696
+          },
+          "stageCosts": {
+            "online": 0.13386249803515238,
+            "scalar": 0.16806996077284922,
+            "static": 0.16475941925244092,
+            "causal": 0.1572808913255627
+          },
+          "terminalCosts": {
+            "online": 0.000633924655188031,
+            "scalar": 0.0005112632248778286,
+            "static": 0.00046510631233423694,
+            "causal": 0.0007178598223442706
+          },
+          "links": {
+            "learned": 48,
+            "fixed": 48,
+            "dense": 720,
+            "feedback": 0
+          },
+          "replacedLinks": 38,
+          "minimumVoltage": {
+            "online": 0.9857475226329191,
+            "scalar": 0.985483473914101,
+            "static": 0.9856291450079834,
+            "causal": 0.9854938875711355
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.4936649967166602e-18,
+          "realizationHash": "e97fa17e6aa56c02b1ec588bed7d75ffdbd03b54fa961f13a1a8ded3c565bae2",
+          "supportHash": "cbf6aa4fb48dbc1b105bb7a561d425e3ab3ab677fe9ca105269ab2a2914ed9c6",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 25,
+          "deploymentSeed": 2654435744,
+          "costs": {
+            "online": 0.15693027396959242,
+            "scalar": 0.1935548243685611,
+            "static": 0.18664218580654834,
+            "causal": 0.18446184492478399
+          },
+          "stageCosts": {
+            "online": 0.1560986198051145,
+            "scalar": 0.19275564446048407,
+            "static": 0.1859119352805332,
+            "causal": 0.18350714430944015
+          },
+          "terminalCosts": {
+            "online": 0.0008316541644779075,
+            "scalar": 0.0007991799080770533,
+            "static": 0.0007302505260151429,
+            "causal": 0.0009547006153438453
+          },
+          "links": {
+            "learned": 48,
+            "fixed": 48,
+            "dense": 720,
+            "feedback": 0
+          },
+          "replacedLinks": 38,
+          "minimumVoltage": {
+            "online": 0.9853795285221365,
+            "scalar": 0.9850900801124264,
+            "static": 0.9856483329796432,
+            "causal": 0.9850787132636866
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.6291902682773483e-18,
+          "realizationHash": "73ffb9a9eaf98c83ad250a7f3c59d676b917557d09aed2270ea21e649ef4b993",
+          "supportHash": "4e82b7dc0c1ee9014a86068bfc031c9efbf2a3581639eeffa3946181480a05d4",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        }
+      ]
+    },
+    {
+      "networkId": "feeder47",
+      "scenario": "mixed4",
+      "beta": 4,
+      "means": {
+        "online": 0.14185010638696038,
+        "scalar": 0.23487015285644292,
+        "static": 0.2979195046386963,
+        "causal": 0.16646285862676855
+      },
+      "comparisons": {
+        "scalar": {
+          "learnedSavingsPercent": 39.60488182010004,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        },
+        "static": {
+          "learnedSavingsPercent": 52.38643184541074,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        },
+        "causal": {
+          "learnedSavingsPercent": 14.785732050290669,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        }
+      },
+      "runs": [
+        {
+          "seed": 21,
+          "deploymentSeed": 2654435756,
+          "costs": {
+            "online": 0.12438944825579584,
+            "scalar": 0.21076455153779675,
+            "static": 0.28825451005110997,
+            "causal": 0.14565496295294378
+          },
+          "stageCosts": {
+            "online": 0.1237837742754465,
+            "scalar": 0.21018647241327124,
+            "static": 0.28761695675710536,
+            "causal": 0.14497448535206048
+          },
+          "terminalCosts": {
+            "online": 0.0006056739803493393,
+            "scalar": 0.0005780791245255189,
+            "static": 0.0006375532940046277,
+            "causal": 0.0006804776008833087
+          },
+          "links": {
+            "learned": 48,
+            "fixed": 48,
+            "dense": 720,
+            "feedback": 0
+          },
+          "replacedLinks": 38,
+          "minimumVoltage": {
+            "online": 0.9855548492152258,
+            "scalar": 0.9851436036237927,
+            "static": 0.9846793745582086,
+            "causal": 0.9852773851033071
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.5478751053409354e-18,
+          "realizationHash": "236c7e7006437fcc945d9b697fe78ed6269d4f7b2f5b6d3a81b2d04819cfabb1",
+          "supportHash": "98ca6f9c2eef7c3e10e9e7a823d02edfa7ad1b804f696438abac26818400e909",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 22,
+          "deploymentSeed": 2654435759,
+          "costs": {
+            "online": 0.14926343997874203,
+            "scalar": 0.24598290614840793,
+            "static": 0.3101818050245442,
+            "causal": 0.17545078801470967
+          },
+          "stageCosts": {
+            "online": 0.1488268878374365,
+            "scalar": 0.24478480603670066,
+            "static": 0.30849080953882224,
+            "causal": 0.17496670736337858
+          },
+          "terminalCosts": {
+            "online": 0.0004365521413055287,
+            "scalar": 0.0011981001117072573,
+            "static": 0.0016909954857219107,
+            "causal": 0.00048408065133108863
+          },
+          "links": {
+            "learned": 48,
+            "fixed": 48,
+            "dense": 720,
+            "feedback": 0
+          },
+          "replacedLinks": 38,
+          "minimumVoltage": {
+            "online": 0.9851054361196713,
+            "scalar": 0.98444492735598,
+            "static": 0.9848269129211317,
+            "causal": 0.9847320598238731
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.6020852139652106e-18,
+          "realizationHash": "dda88caaceae85d061f95b080a206258c9c9096be8e5f688d623638a40997855",
+          "supportHash": "b0172dc095c790d3de73c8056a7eeb1a475a7f0089fae03a554359da4ad5818e",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 23,
+          "deploymentSeed": 2654435758,
+          "costs": {
+            "online": 0.1441275341255051,
+            "scalar": 0.23332605513972537,
+            "static": 0.291818488049028,
+            "causal": 0.16874794609349833
+          },
+          "stageCosts": {
+            "online": 0.14380854540714413,
+            "scalar": 0.2330644701070442,
+            "static": 0.2915504476000415,
+            "causal": 0.16840412818359302
+          },
+          "terminalCosts": {
+            "online": 0.00031898871836097837,
+            "scalar": 0.00026158503268118485,
+            "static": 0.00026804044898650394,
+            "causal": 0.000343817909905302
+          },
+          "links": {
+            "learned": 48,
+            "fixed": 48,
+            "dense": 720,
+            "feedback": 0
+          },
+          "replacedLinks": 38,
+          "minimumVoltage": {
+            "online": 0.9854352385866401,
+            "scalar": 0.9850352177616275,
+            "static": 0.9843396951518529,
+            "causal": 0.9850846003945121
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.4936649967166602e-18,
+          "realizationHash": "c515810a9b4b97ffcf054e78aa8ebbe27ff98d13f9dbed98edf1a25ce9d2b77e",
+          "supportHash": "5299865d42bd33a82403e90f4c3f5328a0326c51f127128eb44e98f513339949",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 24,
+          "deploymentSeed": 2654435745,
+          "costs": {
+            "online": 0.13454332304196526,
+            "scalar": 0.22982176931063647,
+            "static": 0.2888663455816093,
+            "causal": 0.15799875114790696
+          },
+          "stageCosts": {
+            "online": 0.13390904166995668,
+            "scalar": 0.22935122112842068,
+            "static": 0.28830618448009443,
+            "causal": 0.1572808913255627
+          },
+          "terminalCosts": {
+            "online": 0.000634281372008581,
+            "scalar": 0.00047054818221579323,
+            "static": 0.0005601611015148388,
+            "causal": 0.0007178598223442706
+          },
+          "links": {
+            "learned": 48,
+            "fixed": 48,
+            "dense": 720,
+            "feedback": 0
+          },
+          "replacedLinks": 38,
+          "minimumVoltage": {
+            "online": 0.9857434503221529,
+            "scalar": 0.9853307439679472,
+            "static": 0.9846197379281314,
+            "causal": 0.9854938875711355
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.7376104855258987e-18,
+          "realizationHash": "e97fa17e6aa56c02b1ec588bed7d75ffdbd03b54fa961f13a1a8ded3c565bae2",
+          "supportHash": "1a4a000636fca31cead493973fec472d42bcc65cafe3d1093a9f3a998489ea0c",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 25,
+          "deploymentSeed": 2654435744,
+          "costs": {
+            "online": 0.15692678653279363,
+            "scalar": 0.254455482145648,
+            "static": 0.3104763744871901,
+            "causal": 0.18446184492478399
+          },
+          "stageCosts": {
+            "online": 0.1560957028445289,
+            "scalar": 0.2536318789142598,
+            "static": 0.3096583751358793,
+            "causal": 0.18350714430944015
+          },
+          "terminalCosts": {
+            "online": 0.0008310836882647212,
+            "scalar": 0.0008236032313881795,
+            "static": 0.0008179993513108522,
+            "causal": 0.0009547006153438453
+          },
+          "links": {
+            "learned": 48,
+            "fixed": 48,
+            "dense": 720,
+            "feedback": 0
+          },
+          "replacedLinks": 38,
+          "minimumVoltage": {
+            "online": 0.9853767423083242,
+            "scalar": 0.9849378867507479,
+            "static": 0.984888371069569,
+            "causal": 0.9850787132636866
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.710505431213761e-18,
+          "realizationHash": "73ffb9a9eaf98c83ad250a7f3c59d676b917557d09aed2270ea21e649ef4b993",
+          "supportHash": "1ed91be79a578b0f68764d00f6bc1337398dc3beb4259f8c6621eaa887d20c15",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        }
+      ]
+    },
+    {
+      "networkId": "feeder47",
+      "scenario": "allNoisy",
+      "beta": 4,
+      "means": {
+        "online": 0.21668455772995437,
+        "scalar": 0.2961228141311302,
+        "static": 0.4121503921482891,
+        "causal": 0.16646285862676855
+      },
+      "comparisons": {
+        "scalar": {
+          "learnedSavingsPercent": 26.82611828955491,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        },
+        "static": {
+          "learnedSavingsPercent": 47.42585185943663,
+          "wins": 5,
+          "ties": 0,
+          "losses": 0
+        },
+        "causal": {
+          "learnedSavingsPercent": -30.169912686522725,
+          "wins": 0,
+          "ties": 0,
+          "losses": 5
+        }
+      },
+      "runs": [
+        {
+          "seed": 21,
+          "deploymentSeed": 2654435756,
+          "costs": {
+            "online": 0.1972116275061558,
+            "scalar": 0.27054856963345825,
+            "static": 0.41949945276858075,
+            "causal": 0.14565496295294378
+          },
+          "stageCosts": {
+            "online": 0.19664450761182692,
+            "scalar": 0.2700462633014089,
+            "static": 0.41878960486586175,
+            "causal": 0.14497448535206048
+          },
+          "terminalCosts": {
+            "online": 0.0005671198943288981,
+            "scalar": 0.0005023063320493506,
+            "static": 0.0007098479027189762,
+            "causal": 0.0006804776008833087
+          },
+          "links": {
+            "learned": 48,
+            "fixed": 48,
+            "dense": 720,
+            "feedback": 0
+          },
+          "replacedLinks": 44,
+          "minimumVoltage": {
+            "online": 0.985172147843222,
+            "scalar": 0.9850160607942585,
+            "static": 0.9834870757548083,
+            "causal": 0.9852773851033071
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.927345865710862e-18,
+          "realizationHash": "236c7e7006437fcc945d9b697fe78ed6269d4f7b2f5b6d3a81b2d04819cfabb1",
+          "supportHash": "3ad29966cb4b7c6617509cb0fe8de749c41a3a3cf7ebdcd80354d327bd9f8c90",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 22,
+          "deploymentSeed": 2654435759,
+          "costs": {
+            "online": 0.2225511429624171,
+            "scalar": 0.2997494088059622,
+            "static": 0.4020382196534761,
+            "causal": 0.17545078801470967
+          },
+          "stageCosts": {
+            "online": 0.22198509638852476,
+            "scalar": 0.2984316366474105,
+            "static": 0.39972579999131863,
+            "causal": 0.17496670736337858
+          },
+          "terminalCosts": {
+            "online": 0.0005660465738923431,
+            "scalar": 0.0013177721585516567,
+            "static": 0.002312419662157451,
+            "causal": 0.00048408065133108863
+          },
+          "links": {
+            "learned": 48,
+            "fixed": 48,
+            "dense": 720,
+            "feedback": 0
+          },
+          "replacedLinks": 48,
+          "minimumVoltage": {
+            "online": 0.984725205872203,
+            "scalar": 0.984522055342821,
+            "static": 0.9841592204608257,
+            "causal": 0.9847320598238731
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.6020852139652106e-18,
+          "realizationHash": "dda88caaceae85d061f95b080a206258c9c9096be8e5f688d623638a40997855",
+          "supportHash": "0e676174995c7793313a7c81346bf9b33177c5670e28b70fd2d4a7551a826427",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 23,
+          "deploymentSeed": 2654435758,
+          "costs": {
+            "online": 0.21787219357126997,
+            "scalar": 0.2940667171302444,
+            "static": 0.41773798271452917,
+            "causal": 0.16874794609349833
+          },
+          "stageCosts": {
+            "online": 0.21749239077171842,
+            "scalar": 0.29373307696802003,
+            "static": 0.41742429933352315,
+            "causal": 0.16840412818359302
+          },
+          "terminalCosts": {
+            "online": 0.00037980279955155804,
+            "scalar": 0.00033364016222438736,
+            "static": 0.0003136833810060125,
+            "causal": 0.000343817909905302
+          },
+          "links": {
+            "learned": 48,
+            "fixed": 48,
+            "dense": 720,
+            "feedback": 0
+          },
+          "replacedLinks": 48,
+          "minimumVoltage": {
+            "online": 0.9850566100385542,
+            "scalar": 0.984461005121026,
+            "static": 0.9847814375389046,
+            "causal": 0.9850846003945121
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.6020852139652106e-18,
+          "realizationHash": "c515810a9b4b97ffcf054e78aa8ebbe27ff98d13f9dbed98edf1a25ce9d2b77e",
+          "supportHash": "a192d9a9e1aac477e1b4f75998b7030061e13f3ffe33bedc41bc13bf86aec190",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 24,
+          "deploymentSeed": 2654435745,
+          "costs": {
+            "online": 0.2088475330213894,
+            "scalar": 0.29527614352757253,
+            "static": 0.40214754340696773,
+            "causal": 0.15799875114790696
+          },
+          "stageCosts": {
+            "online": 0.2079310893796203,
+            "scalar": 0.29471105284428667,
+            "static": 0.4013385090456363,
+            "causal": 0.1572808913255627
+          },
+          "terminalCosts": {
+            "online": 0.0009164436417691067,
+            "scalar": 0.0005650906832858579,
+            "static": 0.0008090343613314709,
+            "causal": 0.0007178598223442706
+          },
+          "links": {
+            "learned": 48,
+            "fixed": 48,
+            "dense": 720,
+            "feedback": 0
+          },
+          "replacedLinks": 44,
+          "minimumVoltage": {
+            "online": 0.9852638756324265,
+            "scalar": 0.9849686378917392,
+            "static": 0.9843684896173341,
+            "causal": 0.9854938875711355
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.656295322589486e-18,
+          "realizationHash": "e97fa17e6aa56c02b1ec588bed7d75ffdbd03b54fa961f13a1a8ded3c565bae2",
+          "supportHash": "7744f129861337620eaa2c3c3e5f4ede7f02243d17a4190a44ae61ea33bcb39c",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        },
+        {
+          "seed": 25,
+          "deploymentSeed": 2654435744,
+          "costs": {
+            "online": 0.2369402915885396,
+            "scalar": 0.3209732315584132,
+            "static": 0.4193287621978915,
+            "causal": 0.18446184492478399
+          },
+          "stageCosts": {
+            "online": 0.23611628615444813,
+            "scalar": 0.3200265576548202,
+            "static": 0.4182642949818858,
+            "causal": 0.18350714430944015
+          },
+          "terminalCosts": {
+            "online": 0.0008240054340914781,
+            "scalar": 0.0009466739035930076,
+            "static": 0.001064467216005752,
+            "causal": 0.0009547006153438453
+          },
+          "links": {
+            "learned": 48,
+            "fixed": 48,
+            "dense": 720,
+            "feedback": 0
+          },
+          "replacedLinks": 48,
+          "minimumVoltage": {
+            "online": 0.9849901981931161,
+            "scalar": 0.9846264904125109,
+            "static": 0.9841487592567814,
+            "causal": 0.9850787132636866
+          },
+          "maximumVoltage": {
+            "online": 1,
+            "scalar": 1,
+            "static": 1,
+            "causal": 1
+          },
+          "maximumCommandKvar": 70,
+          "commonForcingResidual": 2.8189256484623115e-18,
+          "realizationHash": "73ffb9a9eaf98c83ad250a7f3c59d676b917557d09aed2270ea21e649ef4b993",
+          "supportHash": "d4ae66eae981571308638d23626190ea0668060bb1747dcd3c46469a61771c14",
+          "acNominalMaxErrorPu": 0.00014464330495811417
+        }
+      ]
+    }
+  ]
+}

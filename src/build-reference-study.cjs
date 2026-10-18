@@ -103,7 +103,7 @@ function build(report=JSON.parse(fs.readFileSync(source,'utf8'))){
     .pr-reference-study .pr-regime-uncertainty { margin:10px 0 0; padding-top:8px; border-top:1px solid var(--border,#e5e5e9); }
     @media(max-width:420px) { .pr-study-regime { padding:10px; } .pr-regime-row { grid-template-columns:108px minmax(0,1fr); gap:7px; } .pr-regime-row dd { grid-template-columns:minmax(0,1fr) 45px; gap:5px; } }
   </style>
-  <p class="pr-caption">Recorded study · No clicked attacks · Separate from your live trial</p>
+  <p class="pr-caption">Recorded 24 bus study · No clicked attacks · Separate from your live trial</p>
   <p class="pr-study-intro">Forecast quality changes the winner</p>
   <p class="pr-caption">Mean total cost / feedback cost · Lower is better · Same bar scale in all three cases</p>
   <div class="pr-study-overview" aria-label="Three recorded forecast quality regimes">${overview}</div>
