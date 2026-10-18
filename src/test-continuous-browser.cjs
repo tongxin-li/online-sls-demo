@@ -43,9 +43,36 @@ async function main(){
    assert.equal(await page.locator('#pr-response-history').isVisible(),false,'No executed gain plot before the first action');
    assert.equal((await read(page)).s.networkId,networkId);
    await settings(page,async()=>assert.equal(await page.locator('#pr-experiment').isVisible(),false,'No inapplicable legacy experiment selector'));
+   const label=networkId+(mobile?'-phone':'-desktop');
+   await page.screenshot({path:path.join(output,label+'-start.png'),fullPage:true});
+   const nativeBefore=await read(page);
+   const nativeStarted=Date.now();
+   await page.evaluate(()=>{
+    const m=window.__nativePlayback={frames:0,maxFrameGapMs:0,over50ms:0,over100ms:0,last:null,stopped:false,
+      initialDomNodes:document.getElementsByTagName('*').length,initialHeapBytes:performance.memory?.usedJSHeapSize??null};
+    const frame=now=>{if(m.stopped)return;if(m.last!==null){const gap=now-m.last;m.maxFrameGapMs=Math.max(m.maxFrameGapMs,gap);if(gap>50)m.over50ms++;if(gap>100)m.over100ms++;}m.last=now;m.frames++;requestAnimationFrame(frame);};
+    requestAnimationFrame(frame);
+   });
    await page.locator('#pr-run').click();await page.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t>=35);
    await page.locator('#pr-cost-gap').click();assert.equal((await read(page)).ui.playing,true);
-   await page.locator('#pr-cost-total').click();await pause(page);
+   await page.locator('#pr-cost-total').click();
+   await page.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t>=901,null,{timeout:150000,polling:100});
+   assert.equal((await read(page)).ui.playing,true,'Native Run must not stop at old finite boundaries');
+   await pause(page);
+   const native=await read(page),nativeMetrics=await page.evaluate(()=>{
+    const m=window.__nativePlayback;m.stopped=true;
+    return {frames:m.frames,maxFrameGapMs:m.maxFrameGapMs,over50ms:m.over50ms,over100ms:m.over100ms,
+      initialDomNodes:m.initialDomNodes,finalDomNodes:document.getElementsByTagName('*').length,
+      initialHeapBytes:m.initialHeapBytes,finalHeapBytes:performance.memory?.usedJSHeapSize??null};
+   });
+   nativeMetrics.elapsedMs=Date.now()-nativeStarted;nativeMetrics.actions=native.s.t-nativeBefore.s.t;
+   assert.ok(native.s.t>=901);assert.equal(native.s.phase,'ongoing');assert.equal(native.s.mode,'running');
+   assert.equal(native.s.historyLength,native.s.t,'Native playback retains all observed samples');
+   assert.ok(native.s.learning.sourceUpdates>nativeBefore.s.learning.sourceUpdates);
+   for(const key of ['online','scalar','static','causal'])assert.ok(native.s.cumulative[key]>nativeBefore.s.cumulative[key],'Native full physical costs continue '+key);
+   assert.ok(nativeMetrics.frames>100,'Actual rendering frames are observed during native playback');
+   console.log('NATIVE_PLAYBACK '+JSON.stringify({networkId,mobile,...nativeMetrics,costs:native.s.cumulative,sourceUpdates:native.s.learning.sourceUpdates}));
+   await page.screenshot({path:path.join(output,label+'-native-long.png'),fullPage:true});
    const initial=await read(page),edge=initial.s.deployedSupport.links.find(e=>e.from!==e.to);
    const cell=page.locator('#pr-matrix .matrix-cell[data-receiver="'+edge.to+'"][data-source="'+edge.from+'"]');
    await cell.scrollIntoViewIfNeeded();if(mobile)await cell.tap();else{await cell.focus();await page.keyboard.press('Enter');}
@@ -114,7 +141,7 @@ async function main(){
    await page.locator('.pr-matrix-panel').screenshot({path:path.join(output,networkId+(mobile?'-phone':'-desktop')+'-inspection.png')});
    const next=networkId==='toy8'?'feeder47':'toy8';await page.locator('#pr-network-scenario').selectOption(next);
    const switched=await read(page);assert.equal(switched.s.t,0);assert.equal(switched.ui.playing,false);assert.equal(switched.s.protocol,'continuous-phi-v1');
-   results.push({networkId,mobile,actions:final.s.t,costs:final.s.cumulative,updates:final.s.learning.sourceUpdates,traffic:final.s.traffic,passed:true});
+   results.push({networkId,mobile,actions:final.s.t,nativePlayback:nativeMetrics,costs:final.s.cumulative,updates:final.s.learning.sourceUpdates,traffic:final.s.traffic,passed:true});
    console.log('Ongoing UI passed '+networkId+' '+(mobile?'phone':'desktop')+' '+final.s.t+' actions');
    await context.close();
   }
