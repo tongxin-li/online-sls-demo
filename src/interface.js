@@ -889,7 +889,7 @@
     }
     actionNote(attack?(attack.latched?'Continuous attack · Bus ':'Holding bus ')+bus:'Pulse queued');
     // Queuing an event must not restart every chart transition.
-    renderControls(); renderNetworkInspection(); drawNetwork(); save();
+    renderControls(); drawNetwork(); save();
   }
   function fault(bus=selectedBus,{startPlayback=false,preserveSelection=false}={}) {
     if (!canAttack(bus)) return;
@@ -1169,6 +1169,7 @@
     renderLearningView();
   }
   function drawNetwork() {
+    renderNetworkInspection();
     const el = $('network');
     const width = Math.max(240, el.getBoundingClientRect().width);
     const height = 220;

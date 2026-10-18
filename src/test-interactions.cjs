@@ -20,7 +20,7 @@ const cardEnd="    $('topology-events').hidden=total===0;";
 assert.equal(original.split(cardStart).length,2,'Topology cards anchor must be unique');
 const withoutCards=original.slice(0,original.indexOf(cardStart))+original.slice(original.indexOf(cardEnd));
 const source=withoutCards.replace(anchor,
-  '  drawNetwork=drawCost=drawStage=drawVoltage=drawConvergence=drawCodesign=highlightTopology=()=>{};\n'+
+  '  drawNetwork=renderNetworkInspection;drawCost=drawStage=drawVoltage=drawConvergence=drawCodesign=highlightTopology=()=>{};\n'+
   '  drawMatrix=drawTopologyHistory;\n'+
   '  root.bindTestBus=(element,bus)=>bindAttackTarget(element,()=>bus);\n'+
   '  root.testSummary=()=>comparisonSummary();\n'+

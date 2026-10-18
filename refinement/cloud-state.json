@@ -1423,6 +1423,14 @@
           "Add a contextual caption under the existing feeder that identifies the inspected source and inverter using its actual connection, local channel and candidate/deployed/saved context. No arrow is displayed for an absent remote link.",
           "Raise only the inspected physical bus numbers and selected matrix axis labels to 12 px with a white label halo, retaining all unselected buses, actual rings and link geometry. No new controls or always visible diagnostic.",
           "Add all-cell read-only caption and exact replay regressions plus desktop/phone actual-label, role, containment and screenshot checks. Scientific model, controllers, costs and intervention behavior stay unchanged."
+        ],
+        "superseded_candidates": [
+          {
+            "source_commit": "29bcc566fe1009e03c18034548881e48242744bb",
+            "candidate_run": 39085325688,
+            "status": "failure",
+            "reason": "Static review found caption refresh inserted in an early event handler instead of the network redraw. Move it into drawNetwork and exercise the real caption renderer in the Node harness, including direct history and matrix view redraws. No failed check is removed."
+          }
         ]
       }
     ],
