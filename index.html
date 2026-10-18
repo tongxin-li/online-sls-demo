@@ -304,9 +304,11 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 .pr-command-inspector {margin-top:8px;border-top:1px solid var(--border,#e5e5e7);padding-top:7px}
 .pr-command-inspector summary {cursor:pointer;font-size:12px;font-weight:600;min-height:44px;display:list-item}
 .pr-command-scroll {max-width:100%;overflow-x:auto}
-.pr-command-scroll table {width:100%;min-width:520px;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums}
-.pr-command-scroll th,.pr-command-scroll td {padding:5px 7px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--border,#e5e5e7)}
-.pr-command-scroll th:first-child {text-align:left}
+.pr-command-scroll table {width:100%;min-width:520px;border-collapse:collapse;font-size:12px;line-height:1.5;font-variant-numeric:tabular-nums}
+.pr-command-scroll th,.pr-command-scroll td {padding:7px 7px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--border,#e5e5e7)}
+.pr-command-scroll th:first-child {text-align:left;position:sticky;left:0;z-index:1;width:130px;min-width:130px;background:var(--surface-subtle,#f5f5f7);box-shadow:1px 0 0 var(--border,#e5e5e7)}
+.pr-command-scroll thead th:first-child {z-index:2}
+.pr-command-inspector>.pr-caption {font-size:12px;line-height:1.5}
 .pr-forecast-observation {margin:8px 0;padding:8px 10px;background:var(--surface-subtle,#f5f5f7);border-radius:8px}
 .pr-forecast-observation p {margin:3px 0;overflow-wrap:anywhere}
 .pr-forecast-values {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:7px 0}
