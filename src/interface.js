@@ -1177,7 +1177,7 @@
       $('phase-note').textContent='Source local learning · Fixed support · Executed weights update causally';
       $('phase-note').title='A source sends its correction with each permitted forecast. Adaptive sparse sends one extra correction scalar per message; fixed sparse and dense send raw forecasts. No probing. Common state feedback is excluded from prediction link counts.';
       const title=$('matrix-title');title.textContent='Adaptive sparse links';title.dataset.controller='Adaptive sparse';title.dataset.context='ongoing';
-      title.title='Fixed offline support · Matrix color shows measured effective response energy change';return;
+      title.title='Fixed offline support · Matrix color shows measured effective response energy change · Adaptive sparse only · Other controllers use their own prediction sources';return;
     }
     $('phase-note').textContent=status.view==='saved-discovery'
       ? 'Saved discovery links at '+status.historyAt+' s · Plant and costs remain in '+(deployed?'comparison':'discovery')+' · Latest restores current links'
