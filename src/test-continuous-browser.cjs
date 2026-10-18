@@ -49,6 +49,7 @@ async function main(){
    assert.ok(second.s.cumulative.online>=first.s.cumulative.online);
    await page.locator('#pr-intervention').selectOption('power');
    await setting(page,'bus','7');if(mobile)await page.locator('#pr-pulse').tap();else await page.locator('#pr-pulse').click();
+   console.log('ATTACK_DIAGNOSTIC '+JSON.stringify(await page.evaluate(()=>{const d=document.querySelector('#power-response-demo').powerDemo,u=d.getState();return {mobile:matchMedia('(pointer:coarse)').matches,playing:u.playing,attacks:u.activeAttackBuses,intervention:u.intervention,selectedBus:u.selectedBus,attackMode:document.querySelector('#pr-attack-mode').value,events:u.journal.slice(-3),button:document.querySelector('#pr-pulse').outerHTML};})));
    await page.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getState().activeAttackBuses.includes(7));
    await setting(page,'bus','5');if(mobile)await page.locator('#pr-pulse').tap();else await page.locator('#pr-pulse').click();
    const attackStart=(await read(page)).s.t;

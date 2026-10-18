@@ -831,9 +831,25 @@
         "conclusion": "success",
         "completed_logs_read": true,
         "scope": "Archived frozen solar protocol, all 20 seeds and beta 0, 1, 2. Not ongoing performance."
+      },
+      "ongoing_browser_attempt": {
+        "source_commit": "5b6b006f59d015e00848025430fdb8ed86961643",
+        "run_id": 39153498763,
+        "job_id": 117751806084,
+        "conclusion": "failure",
+        "completed_logs_read": true,
+        "desktop": {
+          "toy8": 953,
+          "feeder24": 969,
+          "feeder47": 987
+        },
+        "phone": "Toy8 touch attack button did not remain active. Investigating actual pointer behavior; phone acceptance not claimed."
       }
     },
-    "remaining_gaps": [],
+    "remaining_gaps": [
+      "Investigate the ongoing phone header attack activation failure. Keep this failure distinct from passing desktop trials.",
+      "Default is still archived, and full ongoing phone, pixel, traffic payload and archived evidence labeling acceptance remain open."
+    ],
     "next_focus": "Read independent ongoing browser outcome and actual cloud screenshots. Keep the default gated and do not publish before final ongoing workflow and visual acceptance.",
     "pixel_review": {
       "status": "pending_cloud_capture_and_actual_pixel_review",
@@ -861,6 +877,23 @@
         "completed_logs_read": true,
         "publication": false,
         "reason": "New ongoing browser fixture did not use the real storage adapter. Numerical and all old browser cases passed."
+      },
+      {
+        "source_commit": "5b6b006f59d015e00848025430fdb8ed86961643",
+        "validation_run": 39153498763,
+        "ongoing_job": 117751806084,
+        "ongoing_conclusion": "failure",
+        "completed_logs_read": true,
+        "publication": false
+      }
+    ],
+    "duplicate_dispatches": [
+      {
+        "at": "2026-10-19T02:19:19+08:00",
+        "status": "read_only_overlap",
+        "counted_invocation": false,
+        "counted_completed": false,
+        "lease_extended": false
       }
     ]
   },
@@ -2946,9 +2979,25 @@
             "conclusion": "success",
             "completed_logs_read": true,
             "scope": "Archived frozen solar protocol, all 20 seeds and beta 0, 1, 2. Not ongoing performance."
+          },
+          "ongoing_browser_attempt": {
+            "source_commit": "5b6b006f59d015e00848025430fdb8ed86961643",
+            "run_id": 39153498763,
+            "job_id": 117751806084,
+            "conclusion": "failure",
+            "completed_logs_read": true,
+            "desktop": {
+              "toy8": 953,
+              "feeder24": 969,
+              "feeder47": 987
+            },
+            "phone": "Toy8 touch attack button did not remain active. Investigating actual pointer behavior; phone acceptance not claimed."
           }
         },
-        "remaining_gaps": [],
+        "remaining_gaps": [
+          "Investigate the ongoing phone header attack activation failure. Keep this failure distinct from passing desktop trials.",
+          "Default is still archived, and full ongoing phone, pixel, traffic payload and archived evidence labeling acceptance remain open."
+        ],
         "next_focus": "Read independent ongoing browser outcome and actual cloud screenshots. Keep the default gated and do not publish before final ongoing workflow and visual acceptance.",
         "pixel_review": {
           "status": "pending_cloud_capture_and_actual_pixel_review",
@@ -2976,6 +3025,23 @@
             "completed_logs_read": true,
             "publication": false,
             "reason": "New ongoing browser fixture did not use the real storage adapter. Numerical and all old browser cases passed."
+          },
+          {
+            "source_commit": "5b6b006f59d015e00848025430fdb8ed86961643",
+            "validation_run": 39153498763,
+            "ongoing_job": 117751806084,
+            "ongoing_conclusion": "failure",
+            "completed_logs_read": true,
+            "publication": false
+          }
+        ],
+        "duplicate_dispatches": [
+          {
+            "at": "2026-10-19T02:19:19+08:00",
+            "status": "read_only_overlap",
+            "counted_invocation": false,
+            "counted_completed": false,
+            "lease_extended": false
           }
         ]
       }
@@ -3028,9 +3094,25 @@
           "conclusion": "success",
           "completed_logs_read": true,
           "scope": "Archived frozen solar protocol, all 20 seeds and beta 0, 1, 2. Not ongoing performance."
+        },
+        "ongoing_browser_attempt": {
+          "source_commit": "5b6b006f59d015e00848025430fdb8ed86961643",
+          "run_id": 39153498763,
+          "job_id": 117751806084,
+          "conclusion": "failure",
+          "completed_logs_read": true,
+          "desktop": {
+            "toy8": 953,
+            "feeder24": 969,
+            "feeder47": 987
+          },
+          "phone": "Toy8 touch attack button did not remain active. Investigating actual pointer behavior; phone acceptance not claimed."
         }
       },
-      "remaining_gaps": [],
+      "remaining_gaps": [
+        "Investigate the ongoing phone header attack activation failure. Keep this failure distinct from passing desktop trials.",
+        "Default is still archived, and full ongoing phone, pixel, traffic payload and archived evidence labeling acceptance remain open."
+      ],
       "next_focus": "Read independent ongoing browser outcome and actual cloud screenshots. Keep the default gated and do not publish before final ongoing workflow and visual acceptance.",
       "pixel_review": {
         "status": "pending_cloud_capture_and_actual_pixel_review",
@@ -3058,6 +3140,23 @@
           "completed_logs_read": true,
           "publication": false,
           "reason": "New ongoing browser fixture did not use the real storage adapter. Numerical and all old browser cases passed."
+        },
+        {
+          "source_commit": "5b6b006f59d015e00848025430fdb8ed86961643",
+          "validation_run": 39153498763,
+          "ongoing_job": 117751806084,
+          "ongoing_conclusion": "failure",
+          "completed_logs_read": true,
+          "publication": false
+        }
+      ],
+      "duplicate_dispatches": [
+        {
+          "at": "2026-10-19T02:19:19+08:00",
+          "status": "read_only_overlap",
+          "counted_invocation": false,
+          "counted_completed": false,
+          "lease_extended": false
         }
       ]
     },

@@ -13,8 +13,6 @@ import urllib.request
 root = Path(os.environ["REVIEW_ROOT"])
 repo = os.environ["GITHUB_REPOSITORY"]
 for image in sorted(root.glob("*.png")):
-    if image.name.startswith("failure"):
-        continue
     data = image.read_bytes()
     request = urllib.request.Request(
         f"https://api.github.com/repos/{repo}/git/blobs",
