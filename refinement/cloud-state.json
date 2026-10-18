@@ -783,7 +783,31 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "program_id": "continuous-phi-20261018T234500",
+    "slot": "2026-10-19T02:45:00+08:00",
+    "started_at": "2026-10-19T02:41:05+08:00",
+    "implementation_started_at": "2026-10-18T18:45:29.201Z",
+    "lease_expires_at": "2026-10-19T03:21:05+08:00",
+    "early_dispatch": "Read only preflight until 02:45. Original dispatch deadline retained.",
+    "branch": "cloud/refine/continuous-phi-20261018-2345",
+    "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+    "candidate_parent": "f7609eb59b415afc7ee6364df1c984d93bfa5a5e",
+    "status": "in_progress",
+    "counted_invocation": true,
+    "counted_completed": false,
+    "changes": [],
+    "tests": {
+      "main": {
+        "run_id": 39144310544,
+        "validate_job": 117724923758,
+        "conclusion": "success",
+        "completed_logs_read": true
+      }
+    },
+    "remaining_gaps": [],
+    "next_focus": "Stabilize real phone attack geometry, repair ongoing strip layout and complete actual response inspection."
+  },
   "next_focus": "Trace and fix actual phone header pointer cancellation or duplicate activation first, using ATTACK_DIAGNOSTIC pointerEvents. Inspect base64 wrapped actual screenshots. Then finish traffic and archived labels and enable a fully validated ongoing default without resetting plant time or costs.",
   "priorities": [
     "Actual continuous causal response adaptation and executed command evidence",
@@ -2594,7 +2618,7 @@
     "hard_deadline": "2026-10-19T23:45:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 3,
+    "invocation_count": 4,
     "completed_count": 0,
     "runs": [
       {
@@ -2937,7 +2961,32 @@
             "feeder47_desktop": "c0b544d9599865e6cd01adffdd7b37570f05afe6",
             "toy8_desktop": "d9373dacde1c60d986e10994e9b9e6a3b041ae02"
           },
-          "limitation": "Actual cloud PNG screenshots captured and archived. GitHub fetch rejects binary blobs as UTF-8 only and fetch_blob raises UnicodeDecodeError. No pixels were emitted or inspected. Add an identical ASCII base64 blob wrapper in the next checkpoint and inspect through UTF-8 blob reader. No direct live browser route retried."
+          "limitation": "Actual cloud PNG screenshots captured and archived. GitHub fetch rejects binary blobs as UTF-8 only and fetch_blob raises UnicodeDecodeError. No pixels were emitted or inspected. Add an identical ASCII base64 blob wrapper in the next checkpoint and inspect through UTF-8 blob reader. No direct live browser route retried.",
+          "wrapper_exercised": true,
+          "reviewed_now": {
+            "source_commit": "f7609eb59b415afc7ee6364df1c984d93bfa5a5e",
+            "at": "2026-10-18T18:45:29.201Z",
+            "files": [
+              {
+                "name": "failure-0.png",
+                "base64_text_sha": "37a594c1cf1ffac38e2cbaad0319165f1766d8ce"
+              },
+              {
+                "name": "feeder24-desktop.png",
+                "base64_text_sha": "765da3c875d9f6638cc34e946b69715d399f50d9"
+              },
+              {
+                "name": "feeder47-desktop.png",
+                "base64_text_sha": "bee5d59c4b1ac56aa293c2ec378f2396fc47fc12"
+              }
+            ],
+            "findings": [
+              "Actual pixels inspected through identical UTF-8 base64 cloud blobs.",
+              "Ongoing strip text is trapped in the hidden stage-number column at phone and desktop widths.",
+              "All source columns and per network supports retained. Inspector shows actual correction, signed gain and commands.",
+              "Phone attack activation remains unresolved. No visual release approval."
+            ]
+          }
         },
         "candidate_revisions": [
           {
@@ -3007,10 +3056,72 @@
         },
         "checkpoint_at": "2026-10-18T18:25:26.749Z",
         "bounded_work_completed_at": "2026-10-18T18:25:26.749Z",
-        "checkpoint_validation": "Pending new diagnostic and UTF-8 pixel wrapper repeat. No completed live improvement counted."
+        "checkpoint_validation": {
+          "source_commit": "f7609eb59b415afc7ee6364df1c984d93bfa5a5e",
+          "run_id": 39154112557,
+          "validate_job": 117753914139,
+          "validate": "success",
+          "numerical": 251,
+          "legacy_browser": "success",
+          "ongoing_job": 117753914255,
+          "ongoing": "failure",
+          "review_job": 117754349387,
+          "review": "success",
+          "completed_logs_read": true,
+          "prepare": "skipped"
+        }
+      },
+      {
+        "program_id": "continuous-phi-20261018T234500",
+        "slot": "2026-10-19T02:45:00+08:00",
+        "started_at": "2026-10-19T02:41:05+08:00",
+        "implementation_started_at": "2026-10-18T18:45:29.201Z",
+        "lease_expires_at": "2026-10-19T03:21:05+08:00",
+        "early_dispatch": "Read only preflight until 02:45. Original dispatch deadline retained.",
+        "branch": "cloud/refine/continuous-phi-20261018-2345",
+        "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+        "candidate_parent": "f7609eb59b415afc7ee6364df1c984d93bfa5a5e",
+        "status": "in_progress",
+        "counted_invocation": true,
+        "counted_completed": false,
+        "changes": [],
+        "tests": {
+          "main": {
+            "run_id": 39144310544,
+            "validate_job": 117724923758,
+            "conclusion": "success",
+            "completed_logs_read": true
+          }
+        },
+        "remaining_gaps": [],
+        "next_focus": "Stabilize real phone attack geometry, repair ongoing strip layout and complete actual response inspection."
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "program_id": "continuous-phi-20261018T234500",
+      "slot": "2026-10-19T02:45:00+08:00",
+      "started_at": "2026-10-19T02:41:05+08:00",
+      "implementation_started_at": "2026-10-18T18:45:29.201Z",
+      "lease_expires_at": "2026-10-19T03:21:05+08:00",
+      "early_dispatch": "Read only preflight until 02:45. Original dispatch deadline retained.",
+      "branch": "cloud/refine/continuous-phi-20261018-2345",
+      "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+      "candidate_parent": "f7609eb59b415afc7ee6364df1c984d93bfa5a5e",
+      "status": "in_progress",
+      "counted_invocation": true,
+      "counted_completed": false,
+      "changes": [],
+      "tests": {
+        "main": {
+          "run_id": 39144310544,
+          "validate_job": 117724923758,
+          "conclusion": "success",
+          "completed_logs_read": true
+        }
+      },
+      "remaining_gaps": [],
+      "next_focus": "Stabilize real phone attack geometry, repair ongoing strip layout and complete actual response inspection."
+    },
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
       "is_enabled": true,
