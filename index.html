@@ -531,6 +531,17 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 #pr-matrix .matrix-rows text,
 #pr-matrix .matrix-axis { font-size:12px; }
 
+/* Network choice changes the physical model and retains readable geometry. */
+.pr-network-picker { display:flex; align-items:center; gap:10px; flex-shrink:0; color:var(--muted-foreground); font-size:12px; }
+.pr-network-picker select { min-height:40px; border:1px solid #e8e8ed; border-radius:10px; background:#f5f5f7; color:var(--foreground); padding:8px 30px 8px 12px; font:inherit; font-size:13px; cursor:pointer; }
+.pr-network-scroll,.pr-matrix-scroll { min-width:0; }
+[data-network="feeder47"] .pr-network-scroll,[data-network="feeder47"] .pr-matrix-scroll { overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:thin; padding-bottom:8px; }
+[data-network="feeder47"] .pr-network-scroll:focus-visible,[data-network="feeder47"] .pr-matrix-scroll:focus-visible { outline:2px solid var(--primary); outline-offset:3px; border-radius:4px; }
+@media(max-width:650px) { .pr-network-picker { width:100%; justify-content:space-between; } .pr-network-picker select { flex:1; max-width:240px; min-height:44px; } }
+[data-network="feeder47"] .pr-chart .matrix-columns text,[data-network="feeder47"] .pr-chart .matrix-rows text { font-size:12px; }
+
+.pr-scroll-hint { margin:4px 0 8px; color:var(--muted-foreground); font-size:11px; text-align:right; }
+
 /* Artwork stays decorative. The enclosing bus handles hit area and badge input. */
 .pe-host { -webkit-user-select:none; user-select:none; touch-action:manipulation; }
 .pe-hit { fill:transparent; pointer-events:all; }
@@ -658,6 +669,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 <main id="power-response-demo">
   <div class="pr-scenario-heading">
     <div><strong id="pr-scenario-name">Forecasted demand</strong><p id="pr-scenario-description" class="pr-caption">Forecast settings · β 4 · 8 quiet / 15 noisy</p></div>
+    <label class="pr-network-picker" for="pr-network-scenario"><span>Network</span><select id="pr-network-scenario" aria-label="Network scenario" title="Changing network starts a fresh learning and comparison trial"><option value="toy8">Toy · 8 buses</option><option value="feeder24" selected>Feeder · 24 buses</option><option value="feeder47">Larger · 47 buses</option></select></label>
   </div>
   <div class="pr-controlbar" aria-label="Simulation controls">
     <div class="pr-toolbar">
@@ -690,13 +702,13 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     <section class="pr-panel pr-network-panel" aria-labelledby="pr-network-title">
       <div class="pr-subhead"><h2 id="pr-network-title">Power network</h2><span id="pr-action-note" class="pr-caption" aria-live="polite">Click a bus to start · Click again to stop</span></div>
       <p id="pr-scheduled-power" class="pr-caption pr-scheduled-power" hidden></p>
-      <svg class="pr-chart" id="pr-network" role="group" aria-label="24 bus radial power feeder. Click a load, solar, or battery bus to start a continuous disturbance. Click again to stop."></svg>
+      <p id="pr-network-scroll-hint" class="pr-scroll-hint" hidden>Scroll to explore all buses →</p><div class="pr-network-scroll" role="region"><svg class="pr-chart" id="pr-network" role="group" aria-label="24 bus radial power feeder. Click a load, solar, or battery bus to start a continuous disturbance. Click again to stop."></svg></div>
       <p id="pr-network-inspection" class="pr-network-inspection" hidden><span id="pr-network-inspection-source" class="pr-inspection-source"></span><span id="pr-network-inspection-join" aria-hidden="true"></span><span id="pr-network-inspection-receiver" class="pr-inspection-receiver"></span><span id="pr-network-inspection-status"></span></p>
       <div class="pr-panel-foot"><span id="pr-bus-detail" class="tabular-nums"></span><span class="pr-live-stage">Cost <strong id="pr-live-cost" class="tabular-nums">0.0000</strong></span></div>
     </section>
     <section class="pr-panel pr-matrix-panel" aria-labelledby="pr-matrix-title">
       <div class="pr-subhead"><h2 id="pr-matrix-title">Prediction links</h2></div>
-      <p id="pr-link-budget" class="pr-caption pr-link-budget"></p><p id="pr-noisy-links" class="pr-caption pr-noisy-links" hidden></p><div class="pr-matrix-key" id="pr-matrix-key"></div><svg class="pr-chart" id="pr-matrix" role="group" aria-label="Candidate prediction links. Rows receive forecasts from columns"></svg>
+      <p id="pr-link-budget" class="pr-caption pr-link-budget"></p><p id="pr-noisy-links" class="pr-caption pr-noisy-links" hidden></p><div class="pr-matrix-key" id="pr-matrix-key"></div><p id="pr-matrix-scroll-hint" class="pr-scroll-hint" hidden>Scroll to explore all sources →</p><div class="pr-matrix-scroll" role="region"><svg class="pr-chart" id="pr-matrix" role="group" aria-label="Candidate prediction links. Rows receive forecasts from columns"></svg></div>
       <p id="pr-matrix-inspect-hint" class="pr-caption">Select a link to inspect its source</p>
       <div id="pr-source-controls" class="pr-source-controls" hidden><button type="button" id="pr-source-fault" class="btn btn-quiet" aria-describedby="pr-source-status" disabled>Corrupt source</button><span id="pr-source-status" class="pr-caption" role="status"></span></div>
       <div id="pr-forecast-observation" class="pr-forecast-observation" hidden>
@@ -802,7 +814,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     .pr-reference-study .pr-regime-uncertainty { margin:10px 0 0; padding-top:8px; border-top:1px solid var(--border,#e5e5e9); }
     @media(max-width:420px) { .pr-study-regime { padding:10px; } .pr-regime-row { grid-template-columns:108px minmax(0,1fr); gap:7px; } .pr-regime-row dd { grid-template-columns:minmax(0,1fr) 45px; gap:5px; } }
   </style>
-  <p class="pr-caption">Recorded study · No clicked attacks · Separate from your live trial</p>
+  <p class="pr-caption">Recorded 24 bus study · No clicked attacks · Separate from your live trial</p>
   <p class="pr-study-intro">Forecast quality changes the winner</p>
   <p class="pr-caption">Mean total cost / feedback cost · Lower is better · Same bar scale in all three cases</p>
   <div class="pr-study-overview" aria-label="Three recorded forecast quality regimes"><section class="pr-study-regime" data-regime="reliable" data-winner="Dense prediction" aria-labelledby="pr-regime-reliable">
@@ -879,7 +891,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   <div role="alert" id="pr-error" hidden></div>
 </main>
 
-<footer class="research-footer"><span class="research-colophon">24 bus radial feeder · LinDistFlow</span><a href="environment.html">Experimental environment ↗</a></footer>
+<footer class="research-footer"><span class="research-colophon" data-network-summary>24 bus radial feeder · LinDistFlow</span><a href="environment.html">Experimental environment ↗</a></footer>
 
 <script src="assets/d3.v7.min.js"></script>
 <script>/* Finite-horizon predictive SLS synthesis and the literal support-projected
@@ -1037,8 +1049,9 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
  * matrix/scalar comparison, not the completed-row Algorithm 1 update.
  *
  * fit accepts an array of already revealed {forecast, disturbance} pairs.
- * Each vector contains 23 nonslack voltage-forcing coordinates in physical pu,
- * or 24 coordinates with an exactly zero slack coordinate at index zero.
+ * Each vector contains dimension nonslack voltage-forcing coordinates in physical
+ * pu, or dimension + 1 coordinates with an exactly zero slack at index zero.
+ * The explicit dimension defaults to 23 for saved single-feeder experiments.
  * The caller owns causality and warmup. Only pass observations available before
  * the current action. This module retains the last 60 supplied observations.
  *
@@ -1058,21 +1071,21 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   const identity=(n=DIMENSION)=>Array.from({length:n},(_,i)=>Array.from({length:n},(_,j)=>+(i===j)));
   const squared=values=>values.reduce((sum,value)=>sum+value*value,0);
 
-  function coordinates(values){
-    if(!Array.isArray(values)||![DIMENSION,DIMENSION+1].includes(values.length))
-      throw new RangeError('Expected 23 nonslack or 24 slack-padded coordinates');
+  function coordinates(values,dimension=DIMENSION){
+    if(!Array.isArray(values)||![dimension,dimension+1].includes(values.length))
+      throw new RangeError('Expected '+dimension+' nonslack or '+(dimension+1)+' slack-padded coordinates');
     if(values.some(value=>!Number.isFinite(value)))throw new TypeError('Coordinates must be finite numbers');
-    if(values.length===DIMENSION+1&&values[0]!==0)throw new RangeError('The padded slack coordinate must be zero');
-    return values.length===DIMENSION+1?values.slice(1):values.slice();
+    if(values.length===dimension+1&&values[0]!==0)throw new RangeError('The padded slack coordinate must be zero');
+    return values.length===dimension+1?values.slice(1):values.slice();
   }
 
-  function compatibleMask(support=null){
+  function compatibleMask(support=null,dimension=DIMENSION){
     if(support!==null&&(!Array.isArray(support)||!support.length||support.some(row=>
-      !Array.isArray(row)||row.length!==DIMENSION||row.some(value=>typeof value!=='boolean'))))
-      throw new TypeError('Support must contain boolean receiver rows with 23 source columns');
+      !Array.isArray(row)||row.length!==dimension||row.some(value=>typeof value!=='boolean'))))
+      throw new TypeError('Support must contain boolean receiver rows with '+dimension+' source columns');
     // C[a][b] lets raw source b influence calibrated source a. Every receiver
     // already using a must also be allowed to receive b. Diagonal terms survive.
-    return Array.from({length:DIMENSION},(_,a)=>Array.from({length:DIMENSION},(_,b)=>
+    return Array.from({length:dimension},(_,a)=>Array.from({length:dimension},(_,b)=>
       support===null||support.every(row=>!row[a]||row[b])));
   }
 
@@ -1095,54 +1108,55 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     return x;
   }
 
-  function apply(matrix,vector){
-    const input=coordinates(vector);
-    if(!Array.isArray(matrix)||matrix.length!==DIMENSION||matrix.some(row=>
-      !Array.isArray(row)||row.length!==DIMENSION||row.some(value=>!Number.isFinite(value))))
-      throw new TypeError('Correction matrix must be a finite 23 by 23 array');
+  function apply(matrix,vector,dimension=DIMENSION){
+    const input=coordinates(vector,dimension);
+    if(!Array.isArray(matrix)||matrix.length!==dimension||matrix.some(row=>
+      !Array.isArray(row)||row.length!==dimension||row.some(value=>!Number.isFinite(value))))
+      throw new TypeError('Correction matrix must be a finite '+dimension+' by '+dimension+' array');
     const output=matrix.map(row=>row.reduce((sum,value,j)=>sum+value*input[j],0));
-    return vector.length===DIMENSION+1?[0,...output]:output;
+    return vector.length===dimension+1?[0,...output]:output;
   }
 
-  function fit(samples,{support=null,lambda=LAMBDA}={}){
+  function fit(samples,{support=null,lambda=LAMBDA,dimension=DIMENSION}={}){
+    if(!Number.isInteger(dimension)||dimension<1)throw new RangeError('Dimension must be a positive integer');
     if(!Array.isArray(samples))throw new TypeError('Revealed samples must be an array');
     if(!Number.isFinite(lambda)||lambda<=0)throw new RangeError('Ridge parameter must be positive');
-    const mask=compatibleMask(support),observed=samples.slice(-WINDOW).map(sample=>({
-      forecast:coordinates(sample.forecast),disturbance:coordinates(sample.disturbance)
+    const mask=compatibleMask(support,dimension),observed=samples.slice(-WINDOW).map(sample=>({
+      forecast:coordinates(sample.forecast,dimension),disturbance:coordinates(sample.disturbance,dimension)
     }));
     const effectiveSumRidge=lambda*Math.max(1,observed.length);
-    if(!observed.length)return{matrix:identity(),scalar:1,windowSize:0,lambda,effectiveSumRidge,
+    if(!observed.length)return{matrix:identity(dimension),scalar:1,windowSize:0,lambda,effectiveSumRidge,
       rawRms:null,matrixRms:null,scalarRms:null,matrixDelta:0,scalarDelta:0,
       rawObjective:0,matrixObjective:0,scalarObjective:0};
     // Multiplying the mean loss normal equations by the observation count
     // leaves the optimizer unchanged and scales the prior by that same count.
-    const covariance=identity().map(row=>row.map(value=>effectiveSumRidge*value));
-    const cross=identity().map(row=>row.map(value=>effectiveSumRidge*value));
-    let scalarNumerator=effectiveSumRidge*DIMENSION,scalarDenominator=effectiveSumRidge*DIMENSION;
+    const covariance=identity(dimension).map(row=>row.map(value=>effectiveSumRidge*value));
+    const cross=identity(dimension).map(row=>row.map(value=>effectiveSumRidge*value));
+    let scalarNumerator=effectiveSumRidge*dimension,scalarDenominator=effectiveSumRidge*dimension;
     for(const {forecast,disturbance} of observed){
-      for(let a=0;a<DIMENSION;a++){
+      for(let a=0;a<dimension;a++){
         scalarNumerator+=disturbance[a]*forecast[a];scalarDenominator+=forecast[a]*forecast[a];
-        for(let b=0;b<DIMENSION;b++){
+        for(let b=0;b<dimension;b++){
           covariance[a][b]+=forecast[a]*forecast[b];
           cross[a][b]+=disturbance[a]*forecast[b];
         }
       }
     }
-    const matrix=identity().map((_,a)=>{
+    const matrix=identity(dimension).map((_,a)=>{
       const allowed=mask[a].flatMap((ok,b)=>ok?[b]:[]);
       const coefficients=solveSPD(allowed.map(b=>allowed.map(c=>covariance[b][c])),allowed.map(b=>cross[a][b]));
-      const row=Array(DIMENSION).fill(0);allowed.forEach((b,j)=>row[b]=coefficients[j]);return row;
+      const row=Array(dimension).fill(0);allowed.forEach((b,j)=>row[b]=coefficients[j]);return row;
     });
     const scalar=scalarNumerator/scalarDenominator;
     let rawSquared=0,matrixSquared=0,scalarSquared=0;
     for(const {forecast,disturbance} of observed){
-      const corrected=apply(matrix,forecast);
+      const corrected=apply(matrix,forecast,dimension);
       rawSquared+=squared(forecast.map((value,a)=>value-disturbance[a]));
       matrixSquared+=squared(corrected.map((value,a)=>value-disturbance[a]));
       scalarSquared+=squared(forecast.map((value,a)=>scalar*value-disturbance[a]));
     }
     const matrixDeltaSquared=matrix.reduce((sum,row,a)=>sum+squared(row.map((value,b)=>value-+(a===b))),0);
-    const scalarDeltaSquared=DIMENSION*(scalar-1)**2,count=observed.length*DIMENSION;
+    const scalarDeltaSquared=dimension*(scalar-1)**2,count=observed.length*dimension;
     return {matrix,scalar,windowSize:observed.length,lambda,effectiveSumRidge,
       rawRms:count?Math.sqrt(rawSquared/count):null,
       matrixRms:count?Math.sqrt(matrixSquared/count):null,
@@ -1161,31 +1175,52 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
  * This experimental shared-parameter specialization is not literal Algorithm 1.
  * Completed-row delayed gradients remain an independent legacy diagnostic. */
 (function (root, factory) {
-  const api=factory();
+  const edges=[[1,2],[2,3],[3,4],[4,5],[4,6],[6,7],[4,8],
+    [3,9],[9,10],[9,11],[11,12],[1,15],[15,13],[13,14],[13,16],
+    [16,17],[16,18],[18,19],[19,20],[20,21],[18,22],[22,23],[23,24]];
+  const inverters=[5,7,8,12,14,18,21,24],solar=[5,7,14,21],battery=[8,12,18,24];
+  const mixed=[3,6,9,12,15,18,21,24],secondBus=bus=>bus===1?1:bus+23;
+  const definitions=[
+    {id:'toy8',label:'Toy feeder',N:8,remoteBudget:2,edges:edges.filter(([from,to])=>from<=8&&to<=8),
+      inverters:inverters.filter(bus=>bus<=8),solar:solar.filter(bus=>bus<=8),battery:battery.filter(bus=>bus<=8),
+      mixed:mixed.filter(bus=>bus<=8),edgePeriod:23},
+    {id:'feeder24',label:'Distribution feeder',N:24,remoteBudget:3,edges,inverters,solar,battery,mixed,edgePeriod:23},
+    {id:'feeder47',label:'Larger feeder',N:47,remoteBudget:3,edges:[...edges,...edges.map(edge=>edge.map(secondBus))],
+      inverters:[...inverters,...inverters.map(secondBus)],solar:[...solar,...solar.map(secondBus)],
+      battery:[...battery,...battery.map(secondBus)],mixed:[...mixed,...mixed.map(secondBus)],edgePeriod:23}
+  ];
+  const networks=Object.freeze(definitions.map(network=>Object.freeze({id:network.id,label:network.label,N:network.N,
+    M:network.inverters.length,remoteBudget:network.remoteBudget})));
+  const cache=new Map();
+  function forNetwork(id='feeder24'){
+    const definition=definitions.find(network=>network.id===id);
+    if(!definition)throw new RangeError('Unknown network '+id);
+    if(!cache.has(id))cache.set(id,Object.assign(factory(definition),{networks,forNetwork}));
+    return cache.get(id);
+  }
+  const api=forNetwork();
   if(typeof module==='object'&&module.exports)module.exports=api;
   else root.PowerDemo=api;
-})(typeof globalThis!=='undefined'?globalThis:this,function(){
+})(typeof globalThis!=='undefined'?globalThis:this,function(network){
   'use strict';
-  const N=24, M=8, AMPLITUDE=.006, RAW_RIDGE=1e-6;
+  const N=network.N, M=network.inverters.length, AMPLITUDE=.006, RAW_RIDGE=1e-6;
   const CALIBRATION_REFERENCE_SCALE=.006,CALIBRATION_NORMALIZED_RIDGE=1.27e-5/CALIBRATION_REFERENCE_SCALE**2;
-  const RIDGE=RAW_RIDGE,REMOTE_BUDGET=3,PREVIEW=5,WINDOW=60,WARMUP=30,TOLERANCE=1e-5;
+  const RIDGE=RAW_RIDGE,REMOTE_BUDGET=network.remoteBudget,PREVIEW=5,WINDOW=60,WARMUP=30,TOLERANCE=1e-5;
   const BASE_KV=12.47,BASE_MVA=1,POWER_BASE_KW=1000,SAMPLE_SECONDS=1,TAU_SECONDS=2;
   const LAG=Math.exp(-SAMPLE_SECONDS/TAU_SECONDS),Q_LIMIT=.07,S_RATING=.12;
   const PULSE_DEFAULT=100,PULSE_MIN=10,PULSE_MAX=150;
   const CONTROLLERS=['online','scalar','static','causal'];
   const COMMUNICATION_BETAS=[0,.25,.5,1,2];
   const COMMUNICATION_STRESS_BETAS=[4,8,16];
-  const INVERTER_BUSES=[5,7,8,12,14,18,21,24];
-  const SOLAR_BUSES=[5,7,14,21],BATTERY_BUSES=[8,12,18,24];
+  const INVERTER_BUSES=network.inverters;
+  const SOLAR_BUSES=network.solar,BATTERY_BUSES=network.battery;
   const PF_RATIO=Math.tan(Math.acos(.95));
-  const EDGES=[[1,2],[2,3],[3,4],[4,5],[4,6],[6,7],[4,8],
-    [3,9],[9,10],[9,11],[11,12],[1,15],[15,13],[13,14],[13,16],
-    [16,17],[16,18],[18,19],[19,20],[20,21],[18,22],[22,23],[23,24]];
+  const EDGES=network.edges;
   const FORECAST_PRESETS=[
     {id:'reliable',label:'Reliable forecasts',faultBuses:[],gain:1,noise:.05,faultyGain:.15,faultyNoise:1.6},
-    {id:'uniform',label:'Uniform corruption',faultBuses:Array.from({length:23},(_,i)=>i+2),
+    {id:'uniform',label:'Uniform corruption',faultBuses:Array.from({length:N-1},(_,i)=>i+2),
       gain:1,noise:.05,faultyGain:.65,faultyNoise:.65},
-    {id:'mixed',label:'Mixed reliability',faultBuses:[3,6,9,12,15,18,21,24],
+    {id:'mixed',label:'Mixed reliability',faultBuses:network.mixed,
       gain:1,noise:.05,faultyGain:.15,faultyNoise:1.6}
   ];
   const BUS_PROFILES=Array.from({length:N},(_,i)=>{
@@ -1202,10 +1237,10 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   });
   const FORECASTED_DEMAND={id:'forecasted-demand',label:'Forecastable demand and solar',periodSeconds:60,
     homeAmplitudeKw:35,solarLossMaxKw:30,batteryAmplitudeKw:15,maxScheduledKw:35,
-    phaseRule:'2 pi times bus modulo 6 divided by 6',previewSamples:PREVIEW,leadSteps:PREVIEW-1,
+    phaseRule:network.id==='feeder47'?'2 pi times original branch bus modulo 6 divided by 6':'2 pi times bus modulo 6 divided by 6',previewSamples:PREVIEW,leadSteps:PREVIEW-1,
     noisySources:BUS_PROFILES.filter(profile=>profile.role==='Homes').map(profile=>profile.bus)};
   function scheduledPower(bus,t){
-    const profile=BUS_PROFILES[bus-1],phase=2*Math.PI*(bus%6)/6;
+    const profile=BUS_PROFILES[bus-1],phaseBus=network.id==='feeder47'&&bus>24?bus-23:bus,phase=2*Math.PI*(phaseBus%6)/6;
     if(profile.role==='Solar')return .030*(1-Math.cos(2*Math.PI*t/60))/2;
     if(profile.role==='Battery')return .015*Math.sin(2*Math.PI*t/60+phase);
     if(profile.role==='Homes')return .035*Math.sin(2*Math.PI*t/60+phase);
@@ -1280,7 +1315,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   function buildModel(){
     const children=Array.from({length:N},()=>[]),parent=Array(N).fill(-1),parentEdge=Array(N).fill(-1);
     const edgeData=EDGES.map(([from,to],index)=>{
-      const rOhm=.45+.15*(index%4),xOhm=.30+.08*(index%3),zBase=BASE_KV*BASE_KV/BASE_MVA;
+      const branchIndex=index%network.edgePeriod;
+      const rOhm=.45+.15*(branchIndex%4),xOhm=.30+.08*(branchIndex%3),zBase=BASE_KV*BASE_KV/BASE_MVA;
       children[from-1].push(to-1);parent[to-1]=from-1;parentEdge[to-1]=index;
       return{from,to,rOhm,xOhm,rPu:rOhm/zBase,xPu:xOhm/zBase};
     });
@@ -1345,7 +1381,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         const weight=gain[receiver-1][source-1]**2;
         if(weight>1e-20)ranked.push({from:source,to:receiver,weight});
       }
-      ranked.sort((a,b)=>b.weight-a.weight||a.from-b.from);result.push(...ranked.slice(0,3));
+      ranked.sort((a,b)=>b.weight-a.weight||a.from-b.from);result.push(...ranked.slice(0,REMOTE_BUDGET));
     }
     return result;
   }
@@ -1417,6 +1453,55 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   const Calibration=typeof module==='object'&&module.exports?require('./forecast-calibration.js'):globalThis.ForecastCalibration;
   if(!Calibration)throw new Error('Load forecast-calibration.js before simulation.js');
   const synthesizer=new Response.Synthesizer(model,PREVIEW),designCache=new Map(),gramCache=new WeakMap();
+  // At the larger feeder's fixed slack, each outgoing radial component is
+  // independent. A, B, Q, R and P are block diagonal up to bus ordering, so
+  // every forecast-column quadratic separates exactly. Cross-component
+  // responses have zero forcing and a positive control penalty, hence their
+  // optimum is zero even when finite-data scoring selects such a channel.
+  const synthesisComponents=network.id==='feeder47'?model.children[0].map(first=>{
+    const buses=[first];for(let i=0;i<buses.length;i++)buses.push(...model.children[buses[i]]);
+    const states=buses.map(bus=>bus-1).sort((a,b)=>a-b);
+    const inputs=INVERTER_BUSES.flatMap((bus,index)=>buses.includes(bus-1)?[index]:[]);
+    const block=(matrix,rows,columns)=>rows.map(i=>columns.map(j=>matrix[i][j]));
+    const component={A:block(model.A,states,states),B:block(model.B,states,inputs),
+      Q:block(model.Q,states,states),R:block(model.R,inputs,inputs),P:block(model.P,states,states),
+      K:block(model.K,inputs,states)};
+    return{states,inputs,synthesizer:new Response.Synthesizer(component,PREVIEW)};
+  }):null;
+  function synthesizeDesign(horizon,support){
+    if(!synthesisComponents)return synthesizer.synthesize(horizon,support);
+    const designs=synthesisComponents.map(component=>component.synthesizer.synthesize(horizon,
+      support?component.inputs.map(i=>component.states.map(j=>support[i][j])):null));
+    const joined={X:new WeakMap(),U:new WeakMap(),L:new WeakMap()};
+    function assemble(parts,group){
+      let cache=joined[group];
+      for(const part of parts.slice(0,-1)){
+        if(!cache.has(part))cache.set(part,new WeakMap());cache=cache.get(part);
+      }
+      const last=parts.at(-1);
+      if(!cache.has(last)){
+        const result=zeros(group==='X'?N-1:M,N-1);
+        synthesisComponents.forEach((component,index)=>{
+          const rows=group==='X'?component.states:component.inputs;
+          rows.forEach((row,i)=>component.states.forEach((column,j)=>result[row][column]=parts[index][i][j]));
+        });
+        cache.set(last,result);
+      }
+      return cache.get(last);
+    }
+    const rows=Array.from({length:horizon+1},()=>[]);
+    const columns=designs[0].columns.map((first,index)=>{
+      const column={k:first.k,pattern:first.pattern};
+      for(const group of ['X','U','L'])column[group]=Object.fromEntries(Object.keys(first[group]).map(time=>
+        [time,assemble(designs.map(design=>design.columns[index][group][time]),group)]));
+      for(const key of Object.keys(column.X)){
+        const time=Number(key);rows[time].push({k:column.k,X:column.X[time],
+          U:column.U[time]||zeros(M,N-1),L:column.L[time]||zeros(M,N-1)});
+      }
+      return column;
+    });
+    return{T:horizon,rows,columns,support:support?support.map(row=>row.slice()):null};
+  }
   // Sum L' L once per receiver and design. Scores of L C can then be computed
   // exactly without rebuilding every temporal response block each sample.
   function calibratedScores(design,C){
@@ -1440,7 +1525,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   }
   function getDesign(horizon,support=null){
     const key=JSON.stringify([horizon,support]);
-    if(!designCache.has(key))designCache.set(key,deepFreeze(synthesizer.synthesize(horizon,support)));
+    if(!designCache.has(key))designCache.set(key,deepFreeze(synthesizeDesign(horizon,support)));
     return designCache.get(key);
   }
   function scoreGain(scores){
@@ -1449,6 +1534,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   function addScores(a,b){for(let i=0;i<M;i++)for(let j=0;j<N-1;j++)a[i][j]+=b[i][j];}
   class Simulation{
     constructor(options={}){
+      if(options.networkId!==undefined&&options.networkId!==network.id)throw new RangeError('Saved trial network does not match '+network.id);
       const experiment=options.experiment===undefined?'prediction':options.experiment;
       if(!['prediction','communication'].includes(experiment))throw new RangeError('Unknown experiment');
       const beta=options.beta===undefined?1:options.beta;
@@ -1459,7 +1545,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       const powerScenario=options.powerScenario || 'reference';
       if(!['reference','solar-outage','forecasted-demand'].includes(powerScenario))throw new RangeError('Unknown power scenario');
       this.preset=preset;
-      this.initialOptions={experiment,beta,powerScenario,seed:options.seed===undefined?20261013:options.seed,
+      this.initialOptions={networkId:network.id,experiment,beta,powerScenario,seed:options.seed===undefined?20261013:options.seed,
         horizon:options.horizon===undefined?480:options.horizon,preset:id,
         faultBuses:options.faultBuses===undefined?(powerScenario==='forecasted-demand'&&id==='mixed'?FORECASTED_DEMAND.noisySources:preset.faultBuses).slice():options.faultBuses.slice()};
       if(!Number.isInteger(this.initialOptions.horizon)||this.initialOptions.horizon<1)throw new Error('Invalid horizon');
@@ -1499,7 +1585,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       }
       this.segments.push({start,end:start+length,length,dense,designs,offlineScores,fixed});
     }
-    checkBus(bus){if(!Number.isInteger(bus)||bus<1||bus>N)throw new Error('Bus must be an integer from 1 through 24');return bus;}
+    checkBus(bus){if(!Number.isInteger(bus)||bus<1||bus>N)throw new Error('Bus must be an integer from 1 through '+N);return bus;}
     queuePulse(bus,strength=PULSE_DEFAULT,protocol=null){
       this.checkBus(bus);
       if(!Number.isFinite(strength)||strength<PULSE_MIN||strength>PULSE_MAX)throw new RangeError('Pulse strength must be from 10 through 150 kW');
@@ -1611,7 +1697,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       if(samples.length<WARMUP)return;
       this._calibrationAt=this.t;
       const previous=this.calibration.matrix;
-      const fit=Calibration.fit(samples,{lambda:model.calibrationRidge,support:this.phase==='deployment'?this.deployedSupport.learned:null});
+      const fit=Calibration.fit(samples,{dimension:N-1,lambda:model.calibrationRidge,support:this.phase==='deployment'?this.deployedSupport.learned:null});
       this.calibration={...fit,updates:this.calibration.updates+1,trainedThrough:this.t-1,
         carriedSamples:Math.max(0,samples.length-this.samples.length),
         parameterChange:frobenius(combine(fit.matrix,previous,1,-1))};
@@ -1793,7 +1879,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         demandChangeKw:sumScheduled('Homes'),solarLossKw:sumScheduled('Solar'),batteryChangeKw:sumScheduled('Battery'),
         absoluteAppliedKw:this.lastScenarioApplications.reduce((sum,item)=>sum+Math.abs(item.appliedKw),0)}
         :{id:this.options.powerScenario,start:30,end:50,active:this.phase==='deployment'&&this.t>30&&this.t<=50,requestedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.requestedKw,0),appliedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.appliedKw,0)};
-      return{t:this.t,costTime:this.lastSample?this.lastSample.t:null,stateTime:this.t,horizon:this.options.horizon,
+      return{networkId:network.id,networkLabel:network.label,t:this.t,costTime:this.lastSample?this.lastSample.t:null,stateTime:this.t,horizon:this.options.horizon,
         initialOptions:{...this.initialOptions,faultBuses:this.initialOptions.faultBuses.slice()},
         phase:this.phase,experiment:this.options.experiment,beta:this.options.beta,canDeploy:this.phase==='discovery'&&this.samples.length>=WARMUP&&(this.options.experiment!=='communication'||this.communicationScoreSamples>0),
         discoveryRecord:this.discoveryRecord,deployedSupport:this.deployedSupport,
@@ -1847,7 +1933,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         limitedCount:(snapshot.saturation?.[key] || []).filter(Boolean).length}];
     }));
   }
-  return{Simulation,model,voltageMetrics,constants:deepFreeze({N,M,edges:EDGES,edgeData:model.edgeData,inverterBuses:INVERTER_BUSES,
+  return{Simulation,model,voltageMetrics,constants:deepFreeze({networkId:network.id,networkLabel:network.label,N,M,edges:EDGES,edgeData:model.edgeData,inverterBuses:INVERTER_BUSES,
     amplitude:AMPLITUDE,ridge:RIDGE,rawRidge:RAW_RIDGE,remoteBudget:REMOTE_BUDGET,preview:PREVIEW,window:WINDOW,warmup:WARMUP,
     busProfiles:BUS_PROFILES,controllers:CONTROLLERS,forecastPresets:FORECAST_PRESETS,communicationBetas:COMMUNICATION_BETAS,
     communicationStressBetas:COMMUNICATION_STRESS_BETAS,forecastedDemand:FORECASTED_DEMAND,tolerance:TOLERANCE,horizon:480,
@@ -2173,13 +2259,15 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     return;
   }
   const d3 = window.d3;
+  const networkCatalog = window.PowerDemo;
+  let PowerDemo = networkCatalog;
   const DEFAULT_SCENARIO='forecasted-demand';
   const COMPARISON_SAMPLES=180;
   const communicationNoiseLevels=[...PowerDemo.constants.communicationBetas,...(PowerDemo.constants.communicationStressBetas || [])];
   function optionsFromControls() {
     const experiment=$('experiment').value==='prediction'?'prediction':'communication';
     const beta=Number($('noise').value);
-    return {experiment,powerScenario:$('power-scenario').value || DEFAULT_SCENARIO,beta:communicationNoiseLevels.includes(beta)?beta:1,preset:experiment==='communication'?'mixed':$('preset').value,
+    return {networkId:PowerDemo.constants.networkId,experiment,powerScenario:$('power-scenario').value || DEFAULT_SCENARIO,beta:communicationNoiseLevels.includes(beta)?beta:1,preset:experiment==='communication'?'mixed':$('preset').value,
       ...(experiment==='communication'?{horizon:180}:{})};
   }
   let simulation = new PowerDemo.Simulation(optionsFromControls());
@@ -2216,7 +2304,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   }
   function predictionBudget(displayedLinks=null) {
     const receivers=PowerDemo.constants.inverterBuses;
-    const sources=snapshot.predictionDiagnostics?.sourceBuses || Array.from({length:23},(_,i)=>i+2);
+    const sources=snapshot.predictionDiagnostics?.sourceBuses || Array.from({length:PowerDemo.constants.N-1},(_,i)=>i+2);
     const dense=receivers.reduce((sum,bus)=>sum+sources.filter(source=>source!==bus).length,0);
     const links=displayedLinks || snapshot.deployedSupport?.links || snapshot.recommendations || [];
     const fixed=snapshot.deployedSupport?.fixedLinks || snapshot.predictionDiagnostics?.offlineLinks || [];
@@ -2317,19 +2405,45 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     return disturbanceName(bus)+' '+Math.round(power.applied)+' kW applied'+(power.capped?' · Equipment limit':'');
   }
   function disturbanceName(bus) { return busRole(bus)==='Solar' ? 'PV loss' : busRole(bus)==='Battery' ? 'Charging surge' : 'Load surge'; }
-  const positions = [
+  const feederPositions = [
     [.03,.48],[.12,.28],[.27,.28],[.43,.16],[.43,.01],[.60,.12],
     [.77,.03],[.61,.31],[.27,.48],[.44,.38],[.44,.57],[.61,.49],
     [.28,.76],[.28,.96],[.12,.68],[.45,.78],[.45,.96],[.62,.76],
     [.77,.64],[.91,.52],[.97,.35],[.77,.91],[.91,.84],[.98,.68]
   ];
-  for (let bus = 1; bus <= 24; bus++) {
-    const option = document.createElement('option');
-    option.value = String(bus);
-    option.textContent = String(bus);
-    $('bus').append(option);
+  let positions = feederPositions;
+  function bindNetwork(id) {
+    PowerDemo = networkCatalog.forNetwork(id);
+    const count=PowerDemo.constants.N, large=count>24;
+    root.dataset.network=id;
+    $('network-scenario').value=id;
+    // Rebuild keyed glyphs and interrupt exits before changing the geometry.
+    for(const name of ['network','matrix']) {
+      const chart=d3.select($(name));
+      chart.interrupt().interrupt('update');
+      chart.selectAll('*').interrupt().interrupt('update').remove();
+    }
+    if(id==='toy8') {
+      positions=[[.03,.5],[.19,.5],[.36,.5],[.52,.5],[.52,.13],[.71,.5],[.94,.22],[.94,.79]];
+    } else if(large) {
+      const branch=feederPositions.slice(1).map(([x,y],i)=>[i===3?x+.07:x,y]);
+      positions=[[.015,.5],...branch.map(([x,y])=>[.1+.9*x,.015+.43*y]),...branch.map(([x,y])=>[.1+.9*x,.555+.43*y])];
+    } else positions=feederPositions;
+    $('bus').replaceChildren();
+    for(let bus=1;bus<=count;bus++) {
+      const option=document.createElement('option');option.value=String(bus);option.textContent=String(bus);$('bus').append(option);
+    }
+    selectedBus=Math.min(selectedBus,count);$('bus').value=String(selectedBus);
+    for(const name of ['network','matrix']) {
+      const container=$(name).parentElement;
+      container.tabIndex=large?0:-1;
+      container.setAttribute('aria-label',name==='network'?'Power network'+(large?' · Scroll to explore all buses':''):'Prediction links'+(large?' · Scroll to explore all source buses':''));
+    }
+    const study=$('reference-study');if(study) study.hidden=id!=='feeder24';
+    const footer=document.querySelector?.('[data-network-summary]');
+    if(footer) footer.textContent=count+' bus radial feeder · LinDistFlow';
   }
-  $('bus').value = String(selectedBus);
+  bindNetwork('feeder24');
   function isFit() { return ['frozen','fitting','converged'].includes(snapshot.mode); }
   function announce(message) { $('event').textContent = message; }
   function actionNote(message) { if ($('action-note')) $('action-note').textContent = message; }
@@ -2407,7 +2521,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     if(!view.lastSample) return null;
     const action=view.lastSample.t,row=PowerDemo.constants.inverterBuses.indexOf(receiver),column=source-2;
     const segment=segments.find(item=>action>=item.start&&action<item.end);
-    if(row<0 || column<0 || column>=23 || !segment) return null;
+    if(row<0 || column<0 || column>=PowerDemo.constants.N-1 || !segment) return null;
     const fixed=view.phase==='deployment'&&view.experiment==='communication';
     const rows=['online','scalar','static','causal'].map(key=>{
       const state=view.costStates[key].slice(1).map((value,i)=>value-PowerDemo.model.baseDrop[i+1]);
@@ -2651,8 +2765,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     if (!window.openai?.setWidgetState) return;
     const events=snapshot.eventLog || [];
     const state = {
-      modelContent: { scenario:'24 bus LinDistFlow voltage regulation', variant:snapshot.experiment==='communication'?'Communication topology comparison':'Shared prediction adaptation and sparse deployment', phase:snapshot.phase, step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
-      privateContent: { version:13, comparisonContinued, intervention:$('intervention').value, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, automaticComparison:automaticComparison(), view:$('view').value, costMetric:$('cost-metric').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, inspectedSource, speed:$('speed').value, allLinks:$('all-links').checked }
+      modelContent: { scenario:PowerDemo.constants.N+' bus LinDistFlow voltage regulation', variant:snapshot.experiment==='communication'?'Communication topology comparison':'Shared prediction adaptation and sparse deployment', phase:snapshot.phase, step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
+      privateContent: { version:13, networkId:PowerDemo.constants.networkId, comparisonContinued, intervention:$('intervention').value, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, automaticComparison:automaticComparison(), view:$('view').value, costMetric:$('cost-metric').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, inspectedSource, speed:$('speed').value, allLinks:$('all-links').checked }
     };
     window.openai.setWidgetState(state).catch(() => {});
   }
@@ -2671,7 +2785,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         if(item.type==='freeze') { simulation.freeze(); continue; }
         if(item.type==='fit') { simulation.fitStep(Math.max(1,Math.floor(item.count || item.steps || 1))); continue; }
         if(item.type==='resume') { simulation.resume(); continue; }
-        if(!Number.isInteger(item.bus)||item.bus<2||item.bus>24) continue;
+        if(!Number.isInteger(item.bus)||item.bus<2||item.bus>PowerDemo.constants.N) continue;
         if(item.type==='pulse') simulation.queuePulse(item.bus,[50,100,150].includes(item.strength)?item.strength:100,item.protocol==='held-target-v1'?item.protocol:null);
         else if(item.type==='forecast'||item.type==='fault') simulation.toggleFault(item.bus);
       }
@@ -2684,12 +2798,16 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   function hydrate(saved) {
     const data=saved?.privateContent;
     if(restored||!data||data.version!==13) return;
+    const savedOptions=data.phase==='deployment'&&data.discoveryRecord?data.discoveryRecord.options:data.initialOptions;
+    const networkId=data.networkId || savedOptions?.networkId || 'feeder24';
+    if(!networkCatalog.networks.some(network=>network.id===networkId)) {announce('Saved network unavailable · Start a new trial');return;}
+    bindNetwork(networkId);
     restored=true;restoredTrial=true;
     comparisonContinued=!!data.comparisonContinued || (data.phase==='deployment'&&data.t>COMPARISON_SAMPLES);
     $('auto-compare').checked=data.automaticComparison!==false;
-    selectedBus=Math.max(1,Math.min(24,Math.floor(Number(data.selectedBus)||7)));
+    selectedBus=Math.max(1,Math.min(PowerDemo.constants.N,Math.floor(Number(data.selectedBus)||7)));
     $('bus').value=String(selectedBus);
-    inspectedSource=hasInverter(selectedBus)&&Number.isInteger(data.inspectedSource)&&data.inspectedSource>=2&&data.inspectedSource<=24?data.inspectedSource:null;
+    inspectedSource=PowerDemo.constants.inverterBuses.includes(selectedBus)&&Number.isInteger(data.inspectedSource)&&data.inspectedSource>=2&&data.inspectedSource<=PowerDemo.constants.N?data.inspectedSource:null;
     $('speed').value=['2','4','8','16','32'].includes(data.speed)?data.speed:'16';
     $('attack-mode').value=data.attackMode==='pulse'?'pulse':'continuous';
     $('intervention').value=data.intervention==='forecast'?'forecast':'power';
@@ -2697,7 +2815,6 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     $('all-links').checked=!!data.allLinks;
     $('matrix-view').value=data.matrixView==='change'?'change':'links';
     const preset=['reliable','uniform','mixed'].includes(data.preset)?data.preset:'mixed';
-    const savedOptions=data.phase==='deployment'&&data.discoveryRecord?data.discoveryRecord.options:data.initialOptions;
     $('experiment').value=savedOptions?.experiment==='prediction'?'prediction':'communication';
     $('noise').value=String(communicationNoiseLevels.includes(savedOptions?.beta)?savedOptions.beta:1);
     $('preset').value=preset;
@@ -2864,6 +2981,13 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     $('experiment').value='communication';$('power-scenario').value=DEFAULT_SCENARIO;
     $('noise').value='4';$('preset').value='mixed';$('auto-compare').checked=true;
     startSelectedExperiment();toggleRun();
+  });
+  $('network-scenario').addEventListener('change',()=>{
+    if(comparing) return;
+    stop();selectedBus=7;inspectedSource=null;
+    bindNetwork($('network-scenario').value);
+    startSelectedExperiment();
+    announce(PowerDemo.constants.networkLabel+' · New learning trial · Press Run');
   });
   $('preset').addEventListener('change',startSelectedExperiment);
   $('experiment').addEventListener('change',startSelectedExperiment);
@@ -3235,10 +3359,10 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     const noiseMpu=1000*PowerDemo.model.forecastForcingScales[selectedBus-1]*beta*(snapshot.faults.includes(selectedBus)?4:.05);
     $('noise-caption').textContent=beta===0?'No forecast noise':'Bus '+selectedBus+' · '+(snapshot.faults.includes(selectedBus)?'Noisy':'Quiet')+' · Noise SD '+d3.format('.3~g')(noiseMpu)+' mpu'+(beta>2?' · Extended stress':'');
     $('noise-caption').title='Configured additive error in newly issued voltage forcing forecasts, not actual bus voltage. 1 mpu = 0.001 pu. Noisy sources have 80 times the noise SD of quiet sources. β 4, 8 and 16 are additional feeder stress tests outside the reference grid. Changing β starts a fresh trial.';
-    $('experiment').disabled=comparing; $('noise').disabled=comparing; $('power-scenario').disabled=comparing;
+    $('network-scenario').disabled=comparing; $('experiment').disabled=comparing; $('noise').disabled=comparing; $('power-scenario').disabled=comparing;
     const scenario=snapshot.scenario;
     $('scenario-status').hidden=scenario?.id!=='solar-outage';
-    $('scenario-status').textContent=snapshot.phase!=='deployment'?'Solar outage reserved for comparison · Four sites · 30 to 50 s':snapshot.t<=30?'Solar outage starts at comparison 30 s':scenario.active?'Solar outage · '+scenario.requestedKw.toFixed(1)+' kW requested · '+scenario.appliedKw.toFixed(1)+' kW applied':'Solar restored · Background power continues';
+    $('scenario-status').textContent=snapshot.phase!=='deployment'?'Solar outage reserved for comparison · '+PowerDemo.constants.busProfiles.filter(profile=>profile.role==='Solar').length+' sites · 30 to 50 s':snapshot.t<=30?'Solar outage starts at comparison 30 s':scenario.active?'Solar outage · '+scenario.requestedKw.toFixed(1)+' kW requested · '+scenario.appliedKw.toFixed(1)+' kW applied':'Solar restored · Background power continues';
     renderCostMetric();
     const matrixChangeOption=$('matrix-view').querySelector('option[value="change"]');
     const matrixChangeLabel=communicationComparison()?'Learned scores':'Learning weights';
@@ -3306,11 +3430,16 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   function drawNetwork() {
     renderNetworkInspection();
     const el = $('network');
-    const width = Math.max(240, el.getBoundingClientRect().width);
+    const large=PowerDemo.constants.N>24;
+    const available=el.parentElement.getBoundingClientRect().width;
+    const width = Math.max(large&&available<500?680:240,available);
+    $('network-scroll-hint').hidden=width<=available+1;
+    el.parentElement.tabIndex=width>available+1?0:-1;
     const compactNetwork=window.innerWidth<=650;
-    const height = compactNetwork?360:220;
+    const height = large?480:compactNetwork?360:220;
+    el.style.width=large?width+'px':'100%';
     const svg = d3.select(el).attr('viewBox', '0 0 ' + width + ' ' + height).attr('height', height)
-      .attr('role','group').attr('aria-label','Radial power feeder. '+attackInstruction()+(forecastMode()?'. Changes forecast reliability, not physical power.':'. Disturbances change load, solar generation or battery charging.'));
+      .attr('role','group').attr('aria-label',PowerDemo.constants.N+' bus radial power feeder. '+attackInstruction()+(forecastMode()?'. Changes forecast reliability, not physical power.':'. Disturbances change load, solar generation or battery charging.'));
     const point = bus => [25 + positions[bus - 1][0] * (width - 54), 26 + positions[bus - 1][1] * (height - 54)];
     if (svg.select('defs').empty()) {
       svg.append('title').text('Radial electrical feeder and prediction source links');
@@ -3359,7 +3488,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       .attr('stroke',e => color(e.change === 'retained' ? 'var(--viz-series-1)' : matrixColors[e.change]))
       .attr('stroke-width',e => inspection?.connected && e.change!=='removed' && e.from===inspection.source && e.to===inspection.receiver ? 4 : e.change !== 'retained' ? 2.5 : Number.isFinite(e.weight)?strength(e.weight):1.5)
       .attr('opacity',e => inspection?.connected && e.change!=='removed' && e.from===inspection.source && e.to===inspection.receiver ? 1 : e.change !== 'retained' ? .95 : e.to === selectedBus ? .7 : .12);
-    const nodes = svg.select('.nodes').selectAll('g.bus-node').data(d3.range(1,25),bus => bus).join(enter => {
+    const nodes = svg.select('.nodes').selectAll('g.bus-node').data(d3.range(1,PowerDemo.constants.N+1),bus => bus).join(enter => {
       const g=enter.append('g').attr('class','bus-node').attr('role','button').attr('tabindex',0)
         .style('cursor','pointer').style('user-select','none');
       g.append('circle').attr('class','pr-scheduled-ring').attr('r',18).attr('fill','none').attr('pointer-events','none');
@@ -3419,9 +3548,10 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
         .data(inspection&&(bus===inspection.source||bus===inspection.receiver)?[bus]:[]).join('circle')
         .attr('class','pr-inspection-number-bg').attr('r',11).attr('fill','#fff').attr('pointer-events','none').raise();
     });
-    nodes.select('.bus-number').raise().attr('text-anchor','middle').attr('x',0)
-      .attr('y',bus=>inspection&&(bus===inspection.source||bus===inspection.receiver)?4:27)
-      .style('fill','var(--muted-foreground)').style('font-size',bus=>compactNetwork||inspection&&(bus===inspection.source||bus===inspection.receiver)?'12px':'9px').text(bus=>bus);
+    const inspectedBus=bus=>inspection&&(bus===inspection.source||bus===inspection.receiver);
+    nodes.select('.bus-number').raise().attr('text-anchor',bus=>large&&!inspectedBus(bus)?'end':'middle').attr('x',bus=>large&&!inspectedBus(bus)?-22:0)
+      .attr('y',bus=>large||inspectedBus(bus)?4:27)
+      .style('fill','var(--muted-foreground)').style('font-size',bus=>compactNetwork||inspectedBus(bus)?'12px':large?'10px':'9px').text(bus=>bus);
     nodes.select('.pr-inspection-ring')
       .attr('display',bus=>inspection && (bus===inspection.source || bus===inspection.receiver)?null:'none')
       .attr('stroke',bus=>bus===inspection?.source?'var(--primary)':'var(--foreground)').attr('stroke-width',2)
@@ -3432,7 +3562,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     nodes.select('.fault-mark').text('');
     nodes.select('.bus-description').text(bus=>busRole(bus)+' · Bus '+bus+' · '+busVoltage(bus).toFixed(4)+' pu · '+powerDescription(bus)+(hasInverter(bus)?' · Q '+reactivePower(bus).toFixed(0)+' kvar':'')+'. '+(bus===1?'Fixed voltage substation.':forecastMode()?(forecastNoisy(bus)?'Noisy forecast channel. ':'Quiet forecast channel. ')+(snapshot.faults.includes(bus)?'Click to repair new forecasts.':'Click to corrupt new forecasts.'):disturbanceName(bus)+' '+pulseMagnitude($('strength').value)+' requested. '+attackInstruction()+'.'));
     showBusDetail(selectedBus);
-    const voltages=d3.range(1,25).map(bus=>busVoltage(bus));
+    const voltages=d3.range(1,PowerDemo.constants.N+1).map(bus=>busVoltage(bus));
     const low=Math.min(...voltages), high=Math.max(...voltages);
     const inRange=low>=.95 && high<=1.05;
     const nearNominal=voltages.every((voltage,index)=>Math.abs(voltage-referenceVoltage(index+1))<.001);
@@ -3466,11 +3596,16 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     renderProtocol();
     if(!matrixReference) captureMatrixReference();
     const diagnostics=snapshot.predictionDiagnostics;
-    const receivers=PowerDemo.constants.inverterBuses, sources=d3.range(2,25);
+    const receivers=PowerDemo.constants.inverterBuses, sources=d3.range(2,PowerDemo.constants.N+1);
     const changing=$('matrix-view').value==='change', deployed=snapshot.phase==='deployment';
-    const width=Math.max(240,el.getBoundingClientRect().width);
+    const large=PowerDemo.constants.N>24;
+    const available=el.parentElement.getBoundingClientRect().width;
+    const width=Math.max(large?784:240,available);
+    $('matrix-scroll-hint').hidden=width<=available+1;
+    el.parentElement.tabIndex=width>available+1?0:-1;
+    el.style.width=large?width+'px':'100%';
     const left=40,cellWidth=(width-left-8)/sources.length,cellHeight=17;
-    const staggered=cellWidth<18,top=staggered?64:42,height=top+153;
+    const staggered=cellWidth<18,top=staggered?64:42,height=top+cellHeight*(receivers.length+1);
     const frame=topologyFrame(),recommendations=frame.links || [],current=new Set(recommendations.map(recommendationKey));
 
     const added=[...current].filter(key=>!frame.reference.has(key)),removed=[...frame.reference].filter(key=>!current.has(key));
@@ -3486,7 +3621,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     const replaced=diagnostics?.changedLinkCount || 0;
     const matrixReceiver=hasInverter(selectedBus)?selectedBus:null;
     const selectedSources=recommendations.filter(e=>e.to===selectedBus).map(e=>e.from).sort((a,b)=>a-b);
-    $('matrix-detail').textContent=changing ? (communicationComparison()?'Saved discovery scores':'Coefficient change '+d3.format('.3~g')(gainPercent)+'%') : matrixReceiver ? 'Inverter '+selectedBus+' ← '+selectedSources.join(', ') : 'Eight inverter receivers';
+    $('matrix-detail').textContent=changing ? (communicationComparison()?'Saved discovery scores':'Coefficient change '+d3.format('.3~g')(gainPercent)+'%') : matrixReceiver ? 'Inverter '+selectedBus+' ← '+selectedSources.join(', ') : receivers.length+' inverter receivers';
     $('matrix-changes').textContent=(deployed?(historyIndex===null?(communicationComparison()?'vs fixed sparse · ':'Fixed links · '):'Discovery history · '):'')+added.length+' added · '+removed.length+' removed';
     $('matrix-changes').title=communicationComparison()&&historyIndex===null?'Deployed learned topology compared with fixed sparse':'Changes in the displayed topology update';
     drawTopologyHistory();
@@ -3506,7 +3641,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       key.append(label);
     }
     const svg=d3.select(el).attr('viewBox','0 0 '+width+' '+height).attr('height',height)
-      .attr('role','group').attr('aria-label',displayedLinkController()+' · '+(historyIndex!==null?'Saved discovery prediction sources for eight inverter receivers':changing?'Learning changes in predictive response weights':'Current selected prediction sources for eight inverter receivers'))
+      .attr('role','group').attr('aria-label',displayedLinkController()+' · '+(historyIndex!==null?'Saved discovery prediction sources for '+receivers.length+' inverter receivers':changing?'Learning changes in predictive response weights':'Current selected prediction sources for '+receivers.length+' inverter receivers'))
       .attr('data-gain-change',gainPercent).attr('data-source-changes',added.length).attr('data-offline-source-changes',replaced)
       .attr('data-history-index',historyIndex===null?'latest':historyIndex).attr('data-topology-updates',topology.cumulative.transitions);
     if(svg.select('.matrix-cells').empty()) {
@@ -3519,7 +3654,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     }
     svg.select('title').text(changing?'Signed change in learned gain energy divided by each receiver’s offline energy. Outline shows selected sources.':'Rows are inverter receivers. Columns are prediction sources.');
     svg.select('.matrix-source-title').attr('x',left+(width-left)/2).attr('y',14).attr('text-anchor','middle').text('Source bus');
-    svg.select('.matrix-receiver-title').attr('transform','translate(12,'+(top+cellHeight*4)+') rotate(-90)').attr('text-anchor','middle').text('Inverter');
+    svg.select('.matrix-receiver-title').attr('transform','translate(12,'+(top+cellHeight*receivers.length/2)+') rotate(-90)').attr('text-anchor','middle').text('Inverter');
     const labelY=(_,i)=>top-8-(staggered&&i%2===0?16:0);
     svg.select('.matrix-columns').selectAll('line').data(staggered?sources:[]).join('line')
       .attr('x1',(_,i)=>left+(i+.5)*cellWidth).attr('x2',(_,i)=>left+(i+.5)*cellWidth)
