@@ -114,3 +114,13 @@ test('restore rejects discontinuities or false change counts without corrupting 
   }
   assert.throws(()=>timeline.at(-1),RangeError);assert.throws(()=>timeline.at(2),RangeError);
 });
+
+
+ test('ongoing fixed permissions retain real clock and changing weights without invented link events',()=>{
+  const timeline=new TopologyTimeline(snap(0,[a,c],'ongoing'));
+  for(const t of [1,30,180,360,901])assert.equal(timeline.observe(snap(t,[{...a,weight:t*.01},{...c,weight:-t}],'ongoing')),null);
+  assert.equal(timeline.phase,'ongoing');assert.equal(timeline.frozen,true);assert.equal(timeline.lastT,901);
+  assert.equal(timeline.events.length,0);assert.deepEqual(timeline.current,[a,c]);
+  const restored=new TopologyTimeline();restored.restore(timeline.export());assert.deepEqual(restored.export(),timeline.export());
+  timeline.observe(snap(0,[b],'discovery'));assert.equal(timeline.phase,'discovery');assert.equal(timeline.events.length,0);assert.deepEqual(timeline.current,[b]);
+ });

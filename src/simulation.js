@@ -683,13 +683,13 @@
       this.lastTrainingTime=this.t?this.t-1:null;this.lastTrainingSampleCount=this.t;
     }
     refreshContinuousScores(){
-      const controller=this.continuousController,measured=controller.diagnostics(this.t),scores=measured.learnedScores,baseline=measured.baselineScores;
+      const controller=this.continuousController,measured=controller.diagnostics(Math.max(0,controller.lastAction)),scores=measured.learnedScores,baseline=measured.baselineScores;
       const gain=scoreGain(scores),energyChange=scores.map((row,r)=>row.map((v,j)=>v-baseline[r][j]));
       const receiverEnergy=baseline.map(row=>row.reduce((sum,v)=>sum+v,0)),total=receiverEnergy.reduce((sum,v)=>sum+v,0);
       this.drift=this.directGain?frobenius(combine(gain,this.directGain,1,-1))/Math.max(frobenius(this.directGain),1e-12):0;
       this.changedEdges=0;this.directGain=gain;this.predictionScores=scores;
       this.recommendations=controller.selection.links.map(e=>({...e,weight:scores[INVERTER_BUSES.indexOf(e.to)][e.from-2]}));
-      this.predictionDiagnostics=deepFreeze({available:this.calibration.windowSize>0,frozen:false,actualDeployed:true,topologyAdaptive:false,
+      this.predictionDiagnostics=deepFreeze({available:this.calibration.windowSize>0,frozen:false,actualDeployed:true,topologyAdaptive:false,action:controller.receipt?.action??null,
         completedRows:0,sourcePairs:controller.observed,sourceWindowSize:this.calibration.windowSize,scoreSamples:0,receiverBuses:INVERTER_BUSES.slice(),sourceBuses:Array.from({length:N-1},(_,j)=>j+2),
         baselineScores:baseline,learnedScores:scores,energyChange,relativeEnergyChange:energyChange.map((row,r)=>row.map((v,j)=>baseline[r][j]>0?v/baseline[r][j]:null)),
         receiverNormalizedChange:energyChange.map((row,r)=>row.map(v=>receiverEnergy[r]>0?v/receiverEnergy[r]:0)),

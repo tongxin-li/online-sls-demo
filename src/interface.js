@@ -246,7 +246,7 @@
     $('history-count').textContent=total+' link update'+(total===1?'':'s');
     const gain=100*(snapshot.predictionDiagnostics?.relativeGainChange || 0);
     $('topology-status').textContent=historyIndex!==null?'Viewing saved topology':snapshot.phase==='deployment'?'Deployed links fixed':topology.latest && snapshot.t-topology.latest.t<8?'Link changed at '+topology.latest.t+' s':'Connectivity unchanged';
-    $('topology-gain').textContent=ongoing()?'Response energy change '+d3.format('.3~g')(gain)+'%':communicationComparison()?'Learned scores fixed':'Weights changed '+d3.format('.3~g')(gain)+'%';
+    $('topology-gain').textContent=ongoing()?'Response weight change '+d3.format('.3~g')(gain)+'%':communicationComparison()?'Learned scores fixed':'Weights changed '+d3.format('.3~g')(gain)+'%';
     const cards=d3.select($('topology-events')).selectAll('button').data(topology.events.slice(-3),e=>e.index).join(enter=>{
       const b=enter.append('button').attr('type','button');b.append('span');b.append('strong');return b;
     }).attr('aria-pressed',e=>String(historyIndex===e.index || historyIndex===null && e.index===total))
@@ -1078,7 +1078,7 @@
   function experimentProgress() {
     const status=protocolStatus(),deployed=status.phase==='deployment';
     if(ongoing())return {visible:true,phase:'ongoing',learningStatus:'active',comparisonStatus:'active',
-      learningCount:(snapshot.learning?.sourcePairs||0)+' revealed pairs per source',comparisonCount:snapshot.t+' samples · All costs retained',
+      learningCount:(snapshot.learning?.sourcePairs||0)+' pairs used per source',comparisonCount:snapshot.t+' samples · All costs retained',
       learningFraction:Math.min(1,(snapshot.learning?.sourcePairs||0)/30),comparisonFraction:0,
       note:'One ongoing trial. Source corrections update after observations. Prediction support stays fixed. No reset or stop at 180 or 360 samples.'};
     return {visible:snapshot.experiment==='communication',phase:status.phase,

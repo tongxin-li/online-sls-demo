@@ -214,3 +214,21 @@ test('an excluded newly issued source cannot enter a sparse receiver command or 
   assert.equal(bb.lastExecution.policies.online.sourceContributions[receiver][excluded.j],0);
   assert.deepEqual(b.continuousController.selection,a.continuousController.selection);
 });
+
+
+// Matrix diagnostics must describe the same action as the immutable receipt,
+// including startup columns. A future row with stale coefficients is misleading.
+test('ongoing displayed response energy is reconstructed from the executed row',()=>{
+ for(const id of ['toy8','feeder24','feeder47']) {
+  const api=Demo.forNetwork(id),sim=new api.Simulation({protocol:'continuous-phi-v1',networkId:id,experiment:'communication',powerScenario:'forecasted-demand',beta:4,seed:20261013});
+  assert.equal(sim.snapshot().predictionDiagnostics.action,null);
+  for(let action=0;action<35;action++){
+   const s=sim.step(),receipt=s.lastExecution,blocks=sim.continuousController.sparse.row(action);
+   assert.equal(s.predictionDiagnostics.action,receipt.action);
+   for(let r=0;r<api.constants.M;r++)for(let j=0;j<api.constants.N-1;j++){
+    const coefficient=receipt.policies.online.receivedCoefficients[r][j],expected=coefficient===null?0:blocks.reduce((sum,block)=>sum+(block.L[r][j]*coefficient)**2,0);
+    near(s.predictionDiagnostics.learnedScores[r][j],expected,1e-11);
+   }
+  }
+ }
+});

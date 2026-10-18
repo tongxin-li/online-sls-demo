@@ -25,7 +25,7 @@
     return value;
   }
   function phase(value){
-    if(value!=='discovery'&&value!=='deployment')throw new TypeError('Unknown experiment phase');
+    if(value!=='discovery'&&value!=='deployment'&&value!=='ongoing')throw new TypeError('Unknown experiment phase');
     return value;
   }
   function difference(before,after){
@@ -55,6 +55,7 @@
       if(!snapshot)throw new TypeError('An experiment snapshot is required');
       const nextPhase=phase(snapshot.phase);
       if(!this._initialized){this.reset(snapshot);return null;}
+      if((nextPhase==='ongoing')!==(this._phase==='ongoing')){this.reset(snapshot);return null;}
       // Deployment displays this completed discovery record as a frozen reference.
       // Its fresh trial clock and resynthesized weights must not create link events.
       if(nextPhase==='deployment'){this._phase=nextPhase;return null;}
@@ -70,7 +71,7 @@
       return change;
     }
     get phase(){return this._phase;}
-    get frozen(){return this._phase==='deployment';}
+    get frozen(){return this._phase==='deployment'||this._phase==='ongoing';}
     get initialT(){return this._initialT;}
     get lastT(){return this._lastT;}
     get initial(){return this._initial;}

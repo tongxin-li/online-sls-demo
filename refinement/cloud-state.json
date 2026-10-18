@@ -796,7 +796,9 @@
     "counted_completed": false,
     "changes": [
       "Integrate version 14 ongoing saved trials into live UI state, source and command inspection, stable cost comparison, protocol status and network scoped restart. Keep the public default unchanged pending ongoing browser and pixel acceptance.",
-      "Add predefined ongoing interaction and real desktop and phone browser suites for exact replay, old boundary crossing, arbitrary multi bus held attacks, admitted weights and commands."
+      "Add predefined ongoing interaction and real desktop and phone browser suites for exact replay, old boundary crossing, arbitrary multi bus held attacks, admitted weights and commands.",
+      "Add a cloud Actions screenshot blob archive using existing candidate job permission, without a branch or hosting change, so actual captured pixels can be inspected through the authenticated GitHub API.",
+      "Teach the topology observer the ongoing phase without inventing support motion, and align matrix energy diagnostics with the exact last executed row rather than the next row with stale coefficients. Add independent reconstruction checks."
     ],
     "tests": {
       "metadata_repeat": {
@@ -810,7 +812,23 @@
     "pixel_review": {
       "status": "pending_cloud_capture_and_actual_pixel_review",
       "publication": false
-    }
+    },
+    "candidate_revisions": [
+      {
+        "source_commit": "440cc5bced95fdb62ef50d114629abf5321fd79a",
+        "validation_run": 39151736395,
+        "status": "pending_when_superseded",
+        "publication": false,
+        "reason": "Keep legacy inspector labels exact, make ongoing group labels accurate, deterministic browser restoration and authenticated cloud screenshot review path."
+      },
+      {
+        "source_commit": "1b6f61cca5a019458eec7fb54848fac2b94da149",
+        "validation_run": 39151902916,
+        "status": "pending_when_superseded",
+        "publication": false,
+        "reason": "Complete ongoing topology observer support and exact executed matrix row diagnostics before full acceptance."
+      }
+    ]
   },
   "next_focus": "Continue this same validated candidate into the single ongoing UI and new replay. Read metadata repeat and current main checks first. Use actual execution receipts and source pair counts, not legacy completed row diagnostics. Preserve all archived data and full regression suites. Keep unpublished until ongoing browser and pixel acceptance.",
   "priorities": [
@@ -2860,7 +2878,8 @@
         "changes": [
           "Integrate version 14 ongoing saved trials into live UI state, source and command inspection, stable cost comparison, protocol status and network scoped restart. Keep the public default unchanged pending ongoing browser and pixel acceptance.",
           "Add predefined ongoing interaction and real desktop and phone browser suites for exact replay, old boundary crossing, arbitrary multi bus held attacks, admitted weights and commands.",
-          "Add a cloud Actions screenshot blob archive using existing candidate job permission, without a branch or hosting change, so actual captured pixels can be inspected through the authenticated GitHub API."
+          "Add a cloud Actions screenshot blob archive using existing candidate job permission, without a branch or hosting change, so actual captured pixels can be inspected through the authenticated GitHub API.",
+          "Teach the topology observer the ongoing phase without inventing support motion, and align matrix energy diagnostics with the exact last executed row rather than the next row with stale coefficients. Add independent reconstruction checks."
         ],
         "tests": {
           "metadata_repeat": {
@@ -2882,6 +2901,13 @@
             "status": "pending_when_superseded",
             "publication": false,
             "reason": "Keep legacy inspector labels exact, make ongoing group labels accurate, deterministic browser restoration and authenticated cloud screenshot review path."
+          },
+          {
+            "source_commit": "1b6f61cca5a019458eec7fb54848fac2b94da149",
+            "validation_run": 39151902916,
+            "status": "pending_when_superseded",
+            "publication": false,
+            "reason": "Complete ongoing topology observer support and exact executed matrix row diagnostics before full acceptance."
           }
         ]
       }
@@ -2899,7 +2925,9 @@
       "counted_completed": false,
       "changes": [
         "Integrate version 14 ongoing saved trials into live UI state, source and command inspection, stable cost comparison, protocol status and network scoped restart. Keep the public default unchanged pending ongoing browser and pixel acceptance.",
-        "Add predefined ongoing interaction and real desktop and phone browser suites for exact replay, old boundary crossing, arbitrary multi bus held attacks, admitted weights and commands."
+        "Add predefined ongoing interaction and real desktop and phone browser suites for exact replay, old boundary crossing, arbitrary multi bus held attacks, admitted weights and commands.",
+        "Add a cloud Actions screenshot blob archive using existing candidate job permission, without a branch or hosting change, so actual captured pixels can be inspected through the authenticated GitHub API.",
+        "Teach the topology observer the ongoing phase without inventing support motion, and align matrix energy diagnostics with the exact last executed row rather than the next row with stale coefficients. Add independent reconstruction checks."
       ],
       "tests": {
         "metadata_repeat": {
@@ -2913,7 +2941,23 @@
       "pixel_review": {
         "status": "pending_cloud_capture_and_actual_pixel_review",
         "publication": false
-      }
+      },
+      "candidate_revisions": [
+        {
+          "source_commit": "440cc5bced95fdb62ef50d114629abf5321fd79a",
+          "validation_run": 39151736395,
+          "status": "pending_when_superseded",
+          "publication": false,
+          "reason": "Keep legacy inspector labels exact, make ongoing group labels accurate, deterministic browser restoration and authenticated cloud screenshot review path."
+        },
+        {
+          "source_commit": "1b6f61cca5a019458eec7fb54848fac2b94da149",
+          "validation_run": 39151902916,
+          "status": "pending_when_superseded",
+          "publication": false,
+          "reason": "Complete ongoing topology observer support and exact executed matrix row diagnostics before full acceptance."
+        }
+      ]
     },
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
