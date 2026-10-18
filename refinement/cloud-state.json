@@ -2610,28 +2610,40 @@
         "branch": "cloud/refine/continuous-phi-20261018-2345",
         "base_commit": "ad240dba37538d5ea0baf7d1354348fa32a9ad09",
         "reconciled_parent_commit": "715de5fb0dd046908c0dfd866e6b4f8db1082bae",
-        "status": "audit_and_foundation_in_progress",
+        "status": "unpublished_foundation_pending_validation",
         "counted_invocation": true,
         "counted_completed": false,
         "changes": [
           "Audit public engine, synthesis, calibration, reset and stopping boundaries, UI command inspection, message support and replay.",
           "Write precise engineering implementation map and predefined acceptance streams before changing algorithm code.",
-          "Develop a source local scalar calibration foundation on the same candidate after the map is committed. It remains unpublished until integrated protocol acceptance."
+          "Develop a source local scalar calibration foundation on the same candidate after the map is committed. It remains unpublished until integrated protocol acceptance.",
+          "Add standalone source local causal scaling, admission gates and independent tests without changing the live engine, UI or build dependency."
         ],
         "implementation_map": "refinement/continuous-response-map.md",
         "acceptance_plan": "refinement/continuous-response-plan.json",
         "tests": {
           "prior_product_main": 39140578138,
           "prior_completion_candidate": 39140803186,
-          "prior_checks": "Actual successful completed logs read. New candidate validation pending."
+          "prior_checks": "Actual successful completed logs read. New candidate validation pending.",
+          "audit_candidate": {
+            "run_id": 39143242506,
+            "status": "pending_completed_log_review"
+          },
+          "foundation": "Pending candidate workflow on exact source"
         },
         "live_fix": false,
         "remaining_gaps": [
           "Default communication deployment still freezes actual coefficients and support and resets at 180.",
           "Continuous engine protocol, causal receiver access, executed response history, replay schema and ongoing UI are not yet integrated.",
-          "A source calibration foundation alone is not a validated continuous controller."
+          "A source calibration foundation alone is not a validated continuous controller.",
+          "Source local foundation is not connected to executed commands. Do not attribute its unit results to the live controller."
         ],
-        "next_focus": "Implement and independently test the causal source local response scaling foundation, then integrate an explicitly versioned ongoing engine and UI in subsequent bounded passes. Keep partial algorithm candidates unpublished."
+        "next_focus": "Read foundation CI and integrate explicitly versioned ongoing engine with stationary planning review, admitted source messages, parameter versions in executed history, deterministic replay and continuous UI. Follow all predefined acceptance conditions before publication.",
+        "pixel_review": {
+          "status": "not_required_for_unpublished_numerical_foundation",
+          "reason": "No page, layout or build dependency changed. Full integrated browser and pixel review remain required before live protocol publication."
+        },
+        "source_commit": "Recorded by workflow head SHA and next handoff metadata after commit creation"
       }
     ],
     "active_run": {
