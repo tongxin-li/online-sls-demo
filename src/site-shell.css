@@ -484,3 +484,10 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 @media(max-width:650px) {
   .pr-stage-label #pr-pulse-summary:not(:empty) { flex-basis:100%; text-align:left; }
 }
+
+/* Compact desktop columns with the original network, links, voltage, cost DOM order.
+   Intrinsic heights are measured by observeDashboardLayout; ordinary grid is fallback. */
+@media(min-width:651px) {
+  .pr-dashboard[data-layout="columns"] { grid-auto-rows:1px; row-gap:0; align-items:start; }
+  .pr-dashboard[data-layout="columns"]>.pr-panel { align-self:start; }
+}

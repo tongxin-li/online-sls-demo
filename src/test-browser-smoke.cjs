@@ -228,11 +228,69 @@ async function main() {
       assert.equal(await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),before,'Key operation preserves every measured sample and cost');
       assert.equal(await surface.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getState().playing),false,'Native key activation cannot trigger playback');
     };
+    const checkDashboardLayout = async surface => {
+      await surface.waitForFunction(()=>{
+        const grid=document.querySelector('.pr-dashboard'),panels=Array.from(grid.children);
+        if(innerWidth<=650)return !grid.hasAttribute('data-layout')&&panels.every(panel=>!panel.style.gridRow&&!panel.style.gridColumn);
+        return grid.dataset.layout==='columns'&&panels.every(panel=>Number(panel.style.gridRowEnd.replace('span ',''))===Math.ceil(panel.getBoundingClientRect().height));
+      });
+      const result=await surface.evaluate(()=>{
+        const grid=document.querySelector('.pr-dashboard'),panels=Array.from(grid.children);
+        return {layout:grid.dataset.layout,width:innerWidth,page:document.documentElement.scrollWidth,
+          order:panels.map(panel=>panel.className),boxes:panels.map(panel=>{const b=panel.getBoundingClientRect();return {x:b.x,y:b.y,right:b.right,bottom:b.bottom,width:b.width,height:b.height};})};
+      });
+      const [network,matrix,voltage,cost]=result.boxes;
+      assert.equal(result.boxes.length,4,'Exactly four main panels');
+      for(const [index,name] of ['pr-network-panel','pr-matrix-panel','pr-stage-panel','pr-learning-panel'].entries())assert.ok(result.order[index].includes(name),'Logical reading order is unchanged');
+      assert.ok(result.page<=result.width+1,'Independent columns never widen the viewport');
+      if(result.width>650){
+        assert.equal(result.layout,'columns');
+        assert.ok(Math.abs(network.y-matrix.y)<1);
+        assert.ok(Math.abs(network.x-voltage.x)<1&&Math.abs(matrix.x-cost.x)<1);
+        assert.ok(matrix.x-network.right>=10);
+        for(const gap of [voltage.y-network.bottom,cost.y-matrix.bottom])assert.ok(gap>=11&&gap<=14,'Each column follows its own actual content with a 12 px gap');
+      }else{
+        assert.equal(result.layout,undefined);
+        for(let i=1;i<4;i++)assert.ok(result.boxes[i].y-result.boxes[i-1].bottom>=9,'Phone retains nonoverlapping logical order');
+      }
+      return result;
+    };
+    const exerciseDashboardLayout = async surface => {
+      const before=await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
+      const viewport=surface.viewportSize(),original=await checkDashboardLayout(surface);
+      if(viewport.width>650){
+        assert.ok(original.boxes[1].height<original.boxes[0].height-150,'Uninspected links no longer stretch into a large empty card');
+        assert.ok(original.boxes[3].y<original.boxes[0].bottom-100,'Comparison moves above the old stretched row boundary');
+        await surface.locator('#pr-matrix .matrix-cell[data-receiver="5"][data-source="7"]').click();
+        const inspected=await checkDashboardLayout(surface);
+        assert.ok(inspected.boxes[1].height>original.boxes[1].height,'Actual source details expand their own column');
+        await surface.locator('#pr-link-history-details > summary').click();
+        await checkDashboardLayout(surface);
+        await surface.locator('#pr-link-history-details > summary').click();
+        for(const width of [390,768,1440,650,651,viewport.width]){
+          await surface.setViewportSize({width,height:1000});
+          await checkDashboardLayout(surface);
+        }
+        await surface.locator('#pr-voltage-details > summary').click();
+        await checkDashboardLayout(surface);
+        await surface.locator('#pr-voltage-details > summary').click();
+        await checkDashboardLayout(surface);
+        // Reload restores the exact trial, not an inspection-only selection.
+        await surface.reload({waitUntil:'networkidle'});
+        await checkDashboardLayout(surface);
+        assert.equal(await surface.locator('#pr-reference-study').getAttribute('open'),null);
+      }
+      assert.equal(await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),before,'Reflow, disclosures and breakpoint changes preserve exact physical replay and every cost');
+    };
+
     const captureDashboard = async surface => {
+      await checkDashboardLayout(surface);
       await checkControllerKey(surface);
       const before=await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),width=surface.viewportSize().width;
       assert.equal(await surface.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getState().playing),false);
       await surface.locator('#power-response-demo').screenshot({path:path.join(output,'four-panels-'+width+'.png')});
+      const composite=await surface.locator('.pr-dashboard').screenshot({path:path.join(output,'dashboard-columns-'+width+'.jpg'),type:'jpeg',quality:80});
+      console.log('CLOUD_LAYOUT_PREVIEW_'+width+' '+composite.toString('base64'));
       for(const [name,selector] of [['key','#pr-controller-key'],['network','.pr-network-panel'],['matrix','.pr-matrix-panel'],['voltage','.pr-stage-panel'],['cost','.pr-learning-panel']]){
         const preview=await surface.locator(selector).screenshot({path:path.join(output,'panel-'+name+'-'+width+'.jpg'),type:'jpeg',quality:80});
         console.log('CLOUD_PANEL_PREVIEW_'+width+'_'+name+' '+preview.toString('base64'));
@@ -733,6 +791,7 @@ async function main() {
     await page.locator('#pr-codesign').screenshot({path:path.join(output,'codesign-desktop.png')});
     await captureCodesign(page);
     await captureDashboard(page);
+    await exerciseDashboardLayout(page);
     await page.locator('.pr-learning-panel').screenshot({path:path.join(output,'default-scenario-costs.png')});
     await fs.writeFile(path.join(output,'default-scenario.json'),JSON.stringify(reviewed,null,2));
     // Completed results stay reviewed while source settings are edited in place.
