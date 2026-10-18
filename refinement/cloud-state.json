@@ -783,7 +783,37 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "program_id": "continuous-phi-20261018T234500",
+    "slot": "2026-10-19T04:45:00+08:00",
+    "started_at": "2026-10-19T04:42:05+08:00",
+    "implementation_started_at": "2026-10-19T04:45:04+08:00",
+    "lease_expires_at": "2026-10-19T05:22:05+08:00",
+    "branch": "cloud/refine/continuous-phi-20261018-2345",
+    "candidate_parent": "b0407d5094437bfc5bc5e70fedf89e28e7d99350",
+    "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+    "status": "in_progress",
+    "counted_invocation": true,
+    "counted_completed": false,
+    "preflight": {
+      "early_dispatch_read_only": true,
+      "main_run": 39144310544,
+      "main_conclusion": "success",
+      "candidate_run": 39163148477,
+      "candidate_conclusion": "success",
+      "completed_logs_read": true
+    },
+    "changes": [],
+    "remaining_gaps": [
+      "Fresh unsaved sessions now execute ongoing response adaptation. Explicit new trial actions from an archived version 13 context still retain that archived protocol. Complete and test the header Restart, restore scenario and Network handoff before publication.",
+      "Make archived replay context clear without another protocol selector. Preserve exact archived states and costs until an explicit new trial. Keep any reproduction controls honestly scoped.",
+      "Capture passing action zero screenshots on phone and desktop after the native SVG hidden fix. Current screenshots are actual fresh trial outputs after roughly 1000 actions and exact replay.",
+      "Extend real ordinary playback beyond the old boundaries, preferably 901 native Run actions on every network and surface before the existing 180 action batches. Report render and history growth evidence. Current numerical retention is 1801 actions; indefinite high speed performance is not established.",
+      "Finish the README and environment scope audit when the explicit archived handoff is implemented. Frozen benchmark percentages and terminal penalties must stay archival.",
+      "No continuous protocol release has been promoted or publicly verified yet. Source, full checks, generated child, expected main lease, Pages revision and canonical public behavior remain release gates."
+    ],
+    "next_focus": "Complete native long playback and startup pixel evidence on all three networks and both surfaces. Keep candidate unpublished until explicit archived new trial handoff and scientific documentation gates are complete."
+  },
   "next_focus": "Read completed current candidate checks first. Complete explicit new trial handoff from archived version 13 records to continuous-phi-v1, using real compatibility fixtures and preserving every physical, replay and browser protection. Add true ordinary long playback and action zero screenshot capture. Resolve actual failures, inspect pixels, then use expected main SHA and force false for the validated Pages route. Keep partial candidates unpublished and count no completion until live verification.",
   "priorities": [
     "Actual continuous causal response adaptation and executed command evidence",
@@ -2594,7 +2624,7 @@
     "hard_deadline": "2026-10-19T23:45:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 5,
+    "invocation_count": 6,
     "completed_count": 0,
     "runs": [
       {
@@ -3661,9 +3691,70 @@
             "action": "Read only preflight while current counted invocation finishes. No extra lease, invocation, source change or deadline extension."
           }
         ]
+      },
+      {
+        "program_id": "continuous-phi-20261018T234500",
+        "slot": "2026-10-19T04:45:00+08:00",
+        "started_at": "2026-10-19T04:42:05+08:00",
+        "implementation_started_at": "2026-10-19T04:45:04+08:00",
+        "lease_expires_at": "2026-10-19T05:22:05+08:00",
+        "branch": "cloud/refine/continuous-phi-20261018-2345",
+        "candidate_parent": "b0407d5094437bfc5bc5e70fedf89e28e7d99350",
+        "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+        "status": "in_progress",
+        "counted_invocation": true,
+        "counted_completed": false,
+        "preflight": {
+          "early_dispatch_read_only": true,
+          "main_run": 39144310544,
+          "main_conclusion": "success",
+          "candidate_run": 39163148477,
+          "candidate_conclusion": "success",
+          "completed_logs_read": true
+        },
+        "changes": [],
+        "remaining_gaps": [
+          "Fresh unsaved sessions now execute ongoing response adaptation. Explicit new trial actions from an archived version 13 context still retain that archived protocol. Complete and test the header Restart, restore scenario and Network handoff before publication.",
+          "Make archived replay context clear without another protocol selector. Preserve exact archived states and costs until an explicit new trial. Keep any reproduction controls honestly scoped.",
+          "Capture passing action zero screenshots on phone and desktop after the native SVG hidden fix. Current screenshots are actual fresh trial outputs after roughly 1000 actions and exact replay.",
+          "Extend real ordinary playback beyond the old boundaries, preferably 901 native Run actions on every network and surface before the existing 180 action batches. Report render and history growth evidence. Current numerical retention is 1801 actions; indefinite high speed performance is not established.",
+          "Finish the README and environment scope audit when the explicit archived handoff is implemented. Frozen benchmark percentages and terminal penalties must stay archival.",
+          "No continuous protocol release has been promoted or publicly verified yet. Source, full checks, generated child, expected main lease, Pages revision and canonical public behavior remain release gates."
+        ],
+        "next_focus": "Complete native long playback and startup pixel evidence on all three networks and both surfaces. Keep candidate unpublished until explicit archived new trial handoff and scientific documentation gates are complete."
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "program_id": "continuous-phi-20261018T234500",
+      "slot": "2026-10-19T04:45:00+08:00",
+      "started_at": "2026-10-19T04:42:05+08:00",
+      "implementation_started_at": "2026-10-19T04:45:04+08:00",
+      "lease_expires_at": "2026-10-19T05:22:05+08:00",
+      "branch": "cloud/refine/continuous-phi-20261018-2345",
+      "candidate_parent": "b0407d5094437bfc5bc5e70fedf89e28e7d99350",
+      "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+      "status": "in_progress",
+      "counted_invocation": true,
+      "counted_completed": false,
+      "preflight": {
+        "early_dispatch_read_only": true,
+        "main_run": 39144310544,
+        "main_conclusion": "success",
+        "candidate_run": 39163148477,
+        "candidate_conclusion": "success",
+        "completed_logs_read": true
+      },
+      "changes": [],
+      "remaining_gaps": [
+        "Fresh unsaved sessions now execute ongoing response adaptation. Explicit new trial actions from an archived version 13 context still retain that archived protocol. Complete and test the header Restart, restore scenario and Network handoff before publication.",
+        "Make archived replay context clear without another protocol selector. Preserve exact archived states and costs until an explicit new trial. Keep any reproduction controls honestly scoped.",
+        "Capture passing action zero screenshots on phone and desktop after the native SVG hidden fix. Current screenshots are actual fresh trial outputs after roughly 1000 actions and exact replay.",
+        "Extend real ordinary playback beyond the old boundaries, preferably 901 native Run actions on every network and surface before the existing 180 action batches. Report render and history growth evidence. Current numerical retention is 1801 actions; indefinite high speed performance is not established.",
+        "Finish the README and environment scope audit when the explicit archived handoff is implemented. Frozen benchmark percentages and terminal penalties must stay archival.",
+        "No continuous protocol release has been promoted or publicly verified yet. Source, full checks, generated child, expected main lease, Pages revision and canonical public behavior remain release gates."
+      ],
+      "next_focus": "Complete native long playback and startup pixel evidence on all three networks and both surfaces. Keep candidate unpublished until explicit archived new trial handoff and scientific documentation gates are complete."
+    },
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
       "is_enabled": true,
