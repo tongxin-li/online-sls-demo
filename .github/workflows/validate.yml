@@ -15,7 +15,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -55,7 +55,6 @@ jobs:
         run: |
           node src/test-browser-smoke.cjs
           node src/test-network-browser.cjs
-          node src/test-continuous-browser.cjs
       - name: Save browser evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -70,9 +69,62 @@ jobs:
           path: index.html
           if-no-files-found: error
 
+  ongoing-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build the same ongoing candidate
+        run: python3 build.py
+      - name: Install isolated browser test tools
+        run: |
+          npm install --prefix "$RUNNER_TEMP/browser-test" --no-audit --no-fund playwright@1.56.1
+          "$RUNNER_TEMP/browser-test/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Check ongoing desktop and phone trials
+        env:
+          NODE_PATH: ${{ runner.temp }}/browser-test/node_modules
+          DEMO_SMOKE_OUTPUT: ${{ runner.temp }}/ongoing-results
+        run: node src/test-continuous-browser.cjs
+      - name: Save ongoing browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ongoing-browser-evidence
+          path: ${{ runner.temp }}/ongoing-results/ongoing
+          if-no-files-found: error
+
+  review-ongoing:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/cloud/refine/')
+    needs: ongoing-browser
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: ongoing-browser-evidence
+          path: ${{ runner.temp }}/ongoing-review
+      - name: Make captured ongoing pixels available for authenticated review
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REVIEW_ROOT: ${{ runner.temp }}/ongoing-review
+        run: python3 src/archive-browser-review.py
+
   prepare-candidate:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/cloud/refine/')
-    needs: validate
+    needs: [validate, ongoing-browser, review-ongoing]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -85,15 +137,6 @@ jobs:
         with:
           name: validated-page
           path: ${{ runner.temp }}/validated-page
-      - uses: actions/download-artifact@v4
-        with:
-          name: browser-evidence
-          path: ${{ runner.temp }}/browser-evidence
-      - name: Make captured ongoing pixels available for authenticated review
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REVIEW_ROOT: ${{ runner.temp }}/browser-evidence/ongoing
-        run: python3 src/archive-browser-review.py
       - name: Save only the validated page on the tested candidate
         env:
           CANDIDATE_BRANCH: ${{ github.ref_name }}

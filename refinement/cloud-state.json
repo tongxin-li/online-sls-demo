@@ -798,17 +798,43 @@
       "Integrate version 14 ongoing saved trials into live UI state, source and command inspection, stable cost comparison, protocol status and network scoped restart. Keep the public default unchanged pending ongoing browser and pixel acceptance.",
       "Add predefined ongoing interaction and real desktop and phone browser suites for exact replay, old boundary crossing, arbitrary multi bus held attacks, admitted weights and commands.",
       "Add a cloud Actions screenshot blob archive using existing candidate job permission, without a branch or hosting change, so actual captured pixels can be inspected through the authenticated GitHub API.",
-      "Teach the topology observer the ongoing phase without inventing support motion, and align matrix energy diagnostics with the exact last executed row rather than the next row with stale coefficients. Add independent reconstruction checks."
+      "Teach the topology observer the ongoing phase without inventing support motion, and align matrix energy diagnostics with the exact last executed row rather than the next row with stale coefficients. Add independent reconstruction checks.",
+      "Correct the ongoing browser fixture to seed the actual page storage key. Reduce transport to fields used by assertions, retain full last execution replay checks, require real touch power attacks and at least five applied multi bus samples, and check all four cost traces. Run new ongoing browser checks as a separate required job; preserve all old suites. Raise existing validator ceiling from 15 to 20 minutes after observed 14 minute legacy execution."
     ],
     "tests": {
       "metadata_repeat": {
         "run_id": 39149170485,
         "conclusion": "success",
         "completed_logs_read": true
+      },
+      "first_full_validation": {
+        "source_commit": "8dd9628e0fda99cd62a8f55a577545a27c940bec",
+        "run_id": 39152130517,
+        "job_id": 117747864743,
+        "conclusion": "failure",
+        "completed_logs_read": true,
+        "numerical": {
+          "total": 251,
+          "failed": 0,
+          "ongoing_engine": 12,
+          "source_scale": 11,
+          "legacy": 224,
+          "ongoing_ui_added": 3,
+          "topology_added": 1
+        },
+        "legacy_browser": "Original browser checks and both network suites passed.",
+        "ongoing_browser": "Fixture failed before ongoing trial because page adapter replaces window.openai. No ongoing browser acceptance claimed."
+      },
+      "solar_audit": {
+        "run_id": 39152130525,
+        "job_id": 117747767613,
+        "conclusion": "success",
+        "completed_logs_read": true,
+        "scope": "Archived frozen solar protocol, all 20 seeds and beta 0, 1, 2. Not ongoing performance."
       }
     },
     "remaining_gaps": [],
-    "next_focus": "Run full validation and inspect actual failures before enabling the ongoing default.",
+    "next_focus": "Read independent ongoing browser outcome and actual cloud screenshots. Keep the default gated and do not publish before final ongoing workflow and visual acceptance.",
     "pixel_review": {
       "status": "pending_cloud_capture_and_actual_pixel_review",
       "publication": false
@@ -827,6 +853,14 @@
         "status": "pending_when_superseded",
         "publication": false,
         "reason": "Complete ongoing topology observer support and exact executed matrix row diagnostics before full acceptance."
+      },
+      {
+        "source_commit": "8dd9628e0fda99cd62a8f55a577545a27c940bec",
+        "validation_run": 39152130517,
+        "conclusion": "failure",
+        "completed_logs_read": true,
+        "publication": false,
+        "reason": "New ongoing browser fixture did not use the real storage adapter. Numerical and all old browser cases passed."
       }
     ]
   },
@@ -2879,17 +2913,43 @@
           "Integrate version 14 ongoing saved trials into live UI state, source and command inspection, stable cost comparison, protocol status and network scoped restart. Keep the public default unchanged pending ongoing browser and pixel acceptance.",
           "Add predefined ongoing interaction and real desktop and phone browser suites for exact replay, old boundary crossing, arbitrary multi bus held attacks, admitted weights and commands.",
           "Add a cloud Actions screenshot blob archive using existing candidate job permission, without a branch or hosting change, so actual captured pixels can be inspected through the authenticated GitHub API.",
-          "Teach the topology observer the ongoing phase without inventing support motion, and align matrix energy diagnostics with the exact last executed row rather than the next row with stale coefficients. Add independent reconstruction checks."
+          "Teach the topology observer the ongoing phase without inventing support motion, and align matrix energy diagnostics with the exact last executed row rather than the next row with stale coefficients. Add independent reconstruction checks.",
+          "Correct the ongoing browser fixture to seed the actual page storage key. Reduce transport to fields used by assertions, retain full last execution replay checks, require real touch power attacks and at least five applied multi bus samples, and check all four cost traces. Run new ongoing browser checks as a separate required job; preserve all old suites. Raise existing validator ceiling from 15 to 20 minutes after observed 14 minute legacy execution."
         ],
         "tests": {
           "metadata_repeat": {
             "run_id": 39149170485,
             "conclusion": "success",
             "completed_logs_read": true
+          },
+          "first_full_validation": {
+            "source_commit": "8dd9628e0fda99cd62a8f55a577545a27c940bec",
+            "run_id": 39152130517,
+            "job_id": 117747864743,
+            "conclusion": "failure",
+            "completed_logs_read": true,
+            "numerical": {
+              "total": 251,
+              "failed": 0,
+              "ongoing_engine": 12,
+              "source_scale": 11,
+              "legacy": 224,
+              "ongoing_ui_added": 3,
+              "topology_added": 1
+            },
+            "legacy_browser": "Original browser checks and both network suites passed.",
+            "ongoing_browser": "Fixture failed before ongoing trial because page adapter replaces window.openai. No ongoing browser acceptance claimed."
+          },
+          "solar_audit": {
+            "run_id": 39152130525,
+            "job_id": 117747767613,
+            "conclusion": "success",
+            "completed_logs_read": true,
+            "scope": "Archived frozen solar protocol, all 20 seeds and beta 0, 1, 2. Not ongoing performance."
           }
         },
         "remaining_gaps": [],
-        "next_focus": "Run full validation and inspect actual failures before enabling the ongoing default.",
+        "next_focus": "Read independent ongoing browser outcome and actual cloud screenshots. Keep the default gated and do not publish before final ongoing workflow and visual acceptance.",
         "pixel_review": {
           "status": "pending_cloud_capture_and_actual_pixel_review",
           "publication": false
@@ -2908,6 +2968,14 @@
             "status": "pending_when_superseded",
             "publication": false,
             "reason": "Complete ongoing topology observer support and exact executed matrix row diagnostics before full acceptance."
+          },
+          {
+            "source_commit": "8dd9628e0fda99cd62a8f55a577545a27c940bec",
+            "validation_run": 39152130517,
+            "conclusion": "failure",
+            "completed_logs_read": true,
+            "publication": false,
+            "reason": "New ongoing browser fixture did not use the real storage adapter. Numerical and all old browser cases passed."
           }
         ]
       }
@@ -2927,17 +2995,43 @@
         "Integrate version 14 ongoing saved trials into live UI state, source and command inspection, stable cost comparison, protocol status and network scoped restart. Keep the public default unchanged pending ongoing browser and pixel acceptance.",
         "Add predefined ongoing interaction and real desktop and phone browser suites for exact replay, old boundary crossing, arbitrary multi bus held attacks, admitted weights and commands.",
         "Add a cloud Actions screenshot blob archive using existing candidate job permission, without a branch or hosting change, so actual captured pixels can be inspected through the authenticated GitHub API.",
-        "Teach the topology observer the ongoing phase without inventing support motion, and align matrix energy diagnostics with the exact last executed row rather than the next row with stale coefficients. Add independent reconstruction checks."
+        "Teach the topology observer the ongoing phase without inventing support motion, and align matrix energy diagnostics with the exact last executed row rather than the next row with stale coefficients. Add independent reconstruction checks.",
+        "Correct the ongoing browser fixture to seed the actual page storage key. Reduce transport to fields used by assertions, retain full last execution replay checks, require real touch power attacks and at least five applied multi bus samples, and check all four cost traces. Run new ongoing browser checks as a separate required job; preserve all old suites. Raise existing validator ceiling from 15 to 20 minutes after observed 14 minute legacy execution."
       ],
       "tests": {
         "metadata_repeat": {
           "run_id": 39149170485,
           "conclusion": "success",
           "completed_logs_read": true
+        },
+        "first_full_validation": {
+          "source_commit": "8dd9628e0fda99cd62a8f55a577545a27c940bec",
+          "run_id": 39152130517,
+          "job_id": 117747864743,
+          "conclusion": "failure",
+          "completed_logs_read": true,
+          "numerical": {
+            "total": 251,
+            "failed": 0,
+            "ongoing_engine": 12,
+            "source_scale": 11,
+            "legacy": 224,
+            "ongoing_ui_added": 3,
+            "topology_added": 1
+          },
+          "legacy_browser": "Original browser checks and both network suites passed.",
+          "ongoing_browser": "Fixture failed before ongoing trial because page adapter replaces window.openai. No ongoing browser acceptance claimed."
+        },
+        "solar_audit": {
+          "run_id": 39152130525,
+          "job_id": 117747767613,
+          "conclusion": "success",
+          "completed_logs_read": true,
+          "scope": "Archived frozen solar protocol, all 20 seeds and beta 0, 1, 2. Not ongoing performance."
         }
       },
       "remaining_gaps": [],
-      "next_focus": "Run full validation and inspect actual failures before enabling the ongoing default.",
+      "next_focus": "Read independent ongoing browser outcome and actual cloud screenshots. Keep the default gated and do not publish before final ongoing workflow and visual acceptance.",
       "pixel_review": {
         "status": "pending_cloud_capture_and_actual_pixel_review",
         "publication": false
@@ -2956,6 +3050,14 @@
           "status": "pending_when_superseded",
           "publication": false,
           "reason": "Complete ongoing topology observer support and exact executed matrix row diagnostics before full acceptance."
+        },
+        {
+          "source_commit": "8dd9628e0fda99cd62a8f55a577545a27c940bec",
+          "validation_run": 39152130517,
+          "conclusion": "failure",
+          "completed_logs_read": true,
+          "publication": false,
+          "reason": "New ongoing browser fixture did not use the real storage adapter. Numerical and all old browser cases passed."
         }
       ]
     },

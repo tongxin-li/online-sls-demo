@@ -16,7 +16,7 @@ async function main(){
   }catch(_){res.writeHead(404).end();}
  });await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  const address='http://127.0.0.1:'+server.address().port,errors=[],results=[];let browser;
- const read=page=>page.evaluate(()=>{const d=document.querySelector('#power-response-demo').powerDemo;return {s:d.getSnapshot(),ui:d.getState(),evidence:d.getLinkEvidence()};});
+ const read=page=>page.evaluate(()=>{const d=document.querySelector('#power-response-demo').powerDemo,s=d.getSnapshot();return {s:{protocol:s.protocol,phase:s.phase,t:s.t,mode:s.mode,historyLength:s.history.length,learning:s.learning,cumulative:s.cumulative,commandQ:s.commandQ,states:s.states,lastExecution:s.lastExecution,deployedSupport:s.deployedSupport,traffic:s.traffic},ui:d.getState(),evidence:d.getLinkEvidence()};});
  const settings=async(page,fn)=>{const box=page.locator('#pr-adaptation');const open=await box.getAttribute('open')!==null;if(!open)await box.locator('summary').first().click();await fn();if(!open)await box.locator('summary').first().click();};
  const setting=(page,id,value)=>settings(page,()=>page.locator('#pr-'+id).selectOption(value));
  const pause=async page=>{if((await read(page)).ui.playing)await page.locator('#pr-run').click();};
@@ -28,8 +28,7 @@ async function main(){
    await context.addInitScript(({networkId})=>{
     const state={privateContent:{version:14,networkId,phase:'ongoing',t:0,selectedBus:7,speed:'32',view:'cost',matrixView:'change',intervention:'forecast',
      continuousRecord:{version:14,protocol:'continuous-phi-v1',networkId,options:{networkId,protocol:'continuous-phi-v1',experiment:'communication',powerScenario:'forecasted-demand',beta:4,preset:'mixed',seed:20261013},steps:0,events:[]}}};
-    const restored=localStorage.getItem('ongoing-replay');
-    window.openai={widgetState:restored?JSON.parse(restored):state,setWidgetState:async value=>{window.__savedTrial=value;}};
+    if(!localStorage.getItem('online-sls-demo-v1'))localStorage.setItem('online-sls-demo-v1',JSON.stringify(state));
    },{networkId});
    const page=await context.newPage();page.setDefaultTimeout(30000);page.on('pageerror',e=>errors.push(e.message));
    await page.goto(address,{waitUntil:'networkidle'});
@@ -41,22 +40,23 @@ async function main(){
    const cell=page.locator('#pr-matrix .matrix-cell[data-receiver="'+edge.to+'"][data-source="'+edge.from+'"]');
    await cell.scrollIntoViewIfNeeded();if(mobile)await cell.tap();else{await cell.focus();await page.keyboard.press('Enter');}
    assert.equal((await read(page)).ui.inspectedSource,edge.from);
-   await page.locator('#pr-source-fault').click();
+   if(mobile)await page.locator('#pr-source-fault').tap();else await page.locator('#pr-source-fault').click();
    await advance(page);const first=await read(page);
    assert.ok(first.s.t>180);assert.equal(first.s.phase,'ongoing');assert.equal(first.ui.comparisonComplete,false);
    assert.equal(first.evidence.ongoing,true);
    await page.locator('#pr-source-fault').click();
-   await advance(page);const second=await read(page);assert.ok(second.s.t>360);assert.equal(second.s.history.length,second.s.t);
+   await advance(page);const second=await read(page);assert.ok(second.s.t>360);assert.equal(second.s.historyLength,second.s.t);
    assert.ok(second.s.cumulative.online>=first.s.cumulative.online);
    await page.locator('#pr-intervention').selectOption('power');
-   await setting(page,'bus','7');await page.locator('#pr-pulse').click();
+   await setting(page,'bus','7');if(mobile)await page.locator('#pr-pulse').tap();else await page.locator('#pr-pulse').click();
    await page.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getState().activeAttackBuses.includes(7));
-   await setting(page,'bus','5');await page.locator('#pr-pulse').click();
-   await page.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t>370);
+   await setting(page,'bus','5');if(mobile)await page.locator('#pr-pulse').tap();else await page.locator('#pr-pulse').click();
+   const attackStart=(await read(page)).s.t;
+   await page.waitForFunction(target=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t>=target,attackStart+5);
    await page.locator('#pr-stop-attacks').click();await pause(page);
    for(let i=0;i<3;i++)await advance(page);
    const final=await read(page);assert.ok(final.s.t>900);assert.equal(final.s.phase,'ongoing');assert.equal(final.ui.comparisonComplete,false);
-   assert.equal(final.s.history.length,final.s.t);assert.equal(final.s.mode,'running');
+   assert.equal(final.s.historyLength,final.s.t);assert.equal(final.s.mode,'running');
    assert.ok(final.s.learning.sourceUpdates>second.s.learning.sourceUpdates);
    for(const key of ['online','scalar','static','causal']){
     assert.ok(final.s.cumulative[key]>=second.s.cumulative[key]);
@@ -65,8 +65,8 @@ async function main(){
    assert.equal(await page.locator('#pr-cost-detail tr').count(),4);assert.equal(await page.locator('.pr-panel').count(),4);
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
    assert.match(await page.locator('#pr-transition-note').textContent(),/No reset or stop/);
-   const saved=await page.evaluate(()=>window.__savedTrial);assert.equal(saved.privateContent.version,14);
-   await page.evaluate(saved=>localStorage.setItem('ongoing-replay',JSON.stringify(saved)),saved);
+   assert.equal(await page.locator('#pr-cost path.data-series').count(),4);
+   const saved=await page.evaluate(()=>window.openai.widgetState);assert.equal(saved.privateContent.version,14);
    await page.reload({waitUntil:'networkidle'});const restored=await read(page);
    for(const field of ['t','cumulative','states','commandQ','lastExecution'])assert.deepEqual(restored.s[field],final.s[field],field+' exact UI replay');
    await page.screenshot({path:path.join(output,networkId+(mobile?'-phone':'-desktop')+'.png'),fullPage:true});
