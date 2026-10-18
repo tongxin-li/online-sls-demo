@@ -1686,10 +1686,19 @@ async function main() {
     await mark('repeated mobile forecast and power taps');
     await phone.locator('#pr-run').tap();
     await phone.locator('#pr-matrix .matrix-cell[data-receiver="5"][data-source="7"]').tap();
-    const mobileBefore=await phone.evaluate(()=>{
+    let mobileBefore=await phone.evaluate(()=>{
       const root=document.querySelector('#power-response-demo');return {state:root.powerDemo.getState(),snapshot:root.powerDemo.getSnapshot()};
     });
     assert.equal(mobileBefore.state.playing,false);
+    assert.equal(mobileBefore.state.inspectedSource,7);assert.equal(mobileBefore.state.selectedBus,5);assert.equal(mobileBefore.state.historyIndex,null);
+    // Native pause can land exactly on the fresh automatic comparison handoff.
+    // Require a real executed action rather than treating pending rows as commands.
+    if(!mobileBefore.snapshot.lastSample){
+      assert.equal(mobileBefore.snapshot.phase,'deployment');assert.equal(mobileBefore.snapshot.t,0);
+      await phone.locator('#pr-step').tap();
+      mobileBefore=await phone.evaluate(()=>{const root=document.querySelector('#power-response-demo');return {state:root.powerDemo.getState(),snapshot:root.powerDemo.getSnapshot()};});
+      assert.equal(mobileBefore.snapshot.t,1);assert.equal(mobileBefore.snapshot.lastSample.t,0);assert.equal(mobileBefore.state.playing,false);
+    }
     await phone.locator('#pr-command-title').tap();
     await checkCommandInspection(phone);
     assert.equal(await phone.locator('#pr-command-gain-heading').textContent(),'Gain norm');

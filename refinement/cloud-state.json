@@ -783,13 +783,8 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-18T19:00:00+08:00",
-    "branch": "cloud/refine/20261018-1900",
-    "started_at": "2026-10-18T19:01:33+08:00",
-    "lease_expires_at": "2026-10-18T19:41:33+08:00"
-  },
-  "next_focus": "Verify final repeated checks and completion metadata. Then review the existing linked inspector for compact hierarchy between current revealed error, frozen discovery score and executed resynthesized command without repeating source and receiver identity. Preserve complete matrix edge labels, all sources, the single cost table, two stage strip and stable headings. Do not add panels or broaden numerical studies.",
+  "active_run": null,
+  "next_focus": "Finish the corrected full candidate suite and inspect actual phone plus network receipt JPEG pixels before any promotion. Read final current main and lease, preserve all failed attempts and unchanged scientific tests. Do not count this unfinished 19:00 work as completed, or recovery as a separate improvement.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -1112,7 +1107,14 @@
         "pages_run": 39119746793,
         "result": "Final main success independently read with completed logs before this slot. All 224 tests, build consistency and browser suites passed. Prior pass verified exact metadata Pages version. No recovery count."
       }
-    ]
+    ],
+    "pending_visual_candidate": {
+      "slot": "2026-10-18T19:00:00+08:00",
+      "branch": "cloud/refine/20261018-1900",
+      "expected_main": "f77a4d26b54cf5c83e5f05577ede94c0e82ddd32",
+      "status": "Corrected candidate validation pending. Product unpublished. Renewed invocation 18, completion 17, historical 15, total completed 32.",
+      "instruction": "At the next existing scheduled slot read the actual candidate workflow result, source and ready ancestry and current main. Do not promote a failed, unreviewed or expired candidate blindly. Preserve every failed attempt. Complete real phone and both new network screenshot pixel review plus all normal checks before publication. Reapply to current main if needed. Metadata and interrupted recovery are not new improvements. No extension of the original 19:41:33 deadline."
+    }
   },
   "parent_handoffs": [
     {
@@ -2090,7 +2092,7 @@
         "branch": "cloud/refine/20261018-1900",
         "started_at": "2026-10-18T19:01:33+08:00",
         "lease_expires_at": "2026-10-18T19:41:33+08:00",
-        "status": "candidate",
+        "status": "unpublished_validation_recovery",
         "candidate_branch": "cloud/refine/20261018-1900",
         "base_commit": "f77a4d26b54cf5c83e5f05577ede94c0e82ddd32",
         "counted_invocation": true,
@@ -2101,10 +2103,21 @@
           "Add actual desktop and phone row grouping, timing position, visible values and full trial invariance regression checks. No new panel, control or broad numerical study."
         ],
         "tests": {
-          "status": "pending"
+          "suites": 8,
+          "total": 224,
+          "failed": 0,
+          "build": "passed",
+          "reference_artifact": "passed",
+          "browser": "Failed in existing mobile command gain fixture with zero current rows. Corrected fixture must pass unchanged full workflow; no completed browser suite or live release claimed.",
+          "benchmarks": "Not rerun. Numerical and scientific source files unchanged."
         },
         "screenshots": {
-          "pixel_review": "Pending actual authorized cloud JPEG review before publication."
+          "artifact_id": 12134184720,
+          "artifact_digest": "sha256:5fb39f9e23e0549618d9d3f3b0f2af8a7068587bdb16992b08327cdb603984cd",
+          "captures": [
+            "link-evidence-1440.jpg"
+          ],
+          "pixel_review": "Actual desktop revised receipt pixels reviewed through authorized Actions JPEG preview. Frozen discovery rows, execution time before deployed rows, actual near-zero excluded gain, full bounded commands and 12 px notes are legible without clipping. Phone and new network receipt pixel review incomplete. Candidate remains unpublished."
         },
         "direct_live_inspection": "Unverified. Previously denied live browser access is not retried. Public HTTP bytes not fetched.",
         "candidate_attempts": [
@@ -2123,16 +2136,23 @@
             "validation_conclusion": "failure",
             "prepare_conclusion": "skipped",
             "reason": "136 of 137 interaction cases passed. The existing all-cell receipt assertion expected five rows in its old single tbody; the new discovery body correctly contains two. Update that assertion to verify both semantic groups, retained execution header, all ten actual values for every source and receiver, and execution row clearing in historical view. No scientific assertion removed or weakened. Later suites and browser did not run."
+          },
+          {
+            "source_commit": "ba333501abf4fa011fd4a1363e2c3047f766a4d0",
+            "candidate_run": 39122716776,
+            "status": "failed_unpublished",
+            "validation_conclusion": "failure",
+            "prepare_conclusion": "skipped",
+            "reason": "All 224 numerical and interaction cases plus reference checks and build passed. Full browser run stopped at existing phone command gain count assertion, actual 0 expected 4 at line 1696, after checkCommandInspection accepted no current execution. Desktop revised receipt checks and actual pixels passed. No phone receipt screenshot or network browser suite completed. Pausing exactly at fresh automatic handoff is a possible fixture cause, not independently confirmed. The next fixture asserts inspected source, receiver, latest history, and if no sample exists requires phase deployment and t zero before one real native Step. All four command and exact state checks remain required."
           }
-        ]
+        ],
+        "source_commit": "ba333501abf4fa011fd4a1363e2c3047f766a4d0",
+        "candidate_run": 39122716776,
+        "publication": "None. Main remains f77a4d26b54cf5c83e5f05577ede94c0e82ddd32. No Pages publication was requested.",
+        "next_focus": "Finish the corrected full candidate suite and inspect actual phone plus network receipt JPEG pixels before any promotion. Read final current main and lease, preserve all failed attempts and unchanged scientific tests. Do not count this unfinished 19:00 work as completed, or recovery as a separate improvement."
       }
     ],
-    "active_run": {
-      "slot": "2026-10-18T19:00:00+08:00",
-      "branch": "cloud/refine/20261018-1900",
-      "started_at": "2026-10-18T19:01:33+08:00",
-      "lease_expires_at": "2026-10-18T19:41:33+08:00"
-    },
+    "active_run": null,
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
