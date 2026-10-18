@@ -783,271 +783,8 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "program_id": "continuous-phi-20261018T234500",
-    "slot": "2026-10-19T02:45:00+08:00",
-    "started_at": "2026-10-19T02:41:05+08:00",
-    "implementation_started_at": "2026-10-18T18:45:29.201Z",
-    "lease_expires_at": "2026-10-19T03:21:05+08:00",
-    "early_dispatch": "Read only preflight until 02:45. Original dispatch deadline retained.",
-    "branch": "cloud/refine/continuous-phi-20261018-2345",
-    "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
-    "candidate_parent": "f7609eb59b415afc7ee6364df1c984d93bfa5a5e",
-    "status": "in_progress",
-    "counted_invocation": true,
-    "counted_completed": false,
-    "changes": [
-      "Keep the phone attack target geometry fixed when Stop all appears, preserving the existing capture, cancellation and keyboard logic. Add a real touch bounding box regression.",
-      "Repair ongoing status strip grid after hiding stage numbers and remove finite progress tracks from the ongoing protocol.",
-      "Add an actual executed signed gain trace inside the existing source inspector, derived only from admitted per action receipts. Preserve every source, controller and history sample.",
-      "Show cumulative remote forecast and correction payload values in the existing comparison, and explicitly label the archived frozen study. No physical, estimator, baseline or synthesis parameter is changed.",
-      "Separate axis captions from numeric ticks in actual phone and desktop charts. Add rendered glyph separation assertions without changing plotted samples.",
-      "Repair the existing legacy phone smoke conditional Step action by opening Experiment settings through its existing helper. All command timing and pause assertions remain intact; no forced or hidden click is used."
-    ],
-    "tests": {
-      "main": {
-        "run_id": 39144310544,
-        "validate_job": 117724923758,
-        "conclusion": "success",
-        "completed_logs_read": true
-      },
-      "first_source": {
-        "source_commit": "7b6cbd904084aafdd4c08514ad57a816e2c74243",
-        "run_id": 39155796893,
-        "ongoing_browser_job": 117758805646,
-        "ongoing_browser": "success",
-        "review_job": 117759201425,
-        "review": "success",
-        "full_validation": "cancelled_by_followup",
-        "logs_read": [
-          "ongoing-browser",
-          "review-ongoing"
-        ]
-      },
-      "axis_spacing_attempt": {
-        "source_commit": "dfa0c141a7c2874291b082f95fa81be034895bad",
-        "run_id": 39156270680,
-        "ongoing_browser_job": 117760259620,
-        "conclusion": "failure",
-        "completed_logs_read": true,
-        "reason": "Rendered response chart axis gap 1.4799995 px fails required 2 px separation. Increase margin by 2 px and retain the assertion.",
-        "full_validation": "superseded_after_rendered_layout_failure",
-        "actual_jobs": [
-          {
-            "id": 117760259620,
-            "name": "ongoing-browser",
-            "status": "completed",
-            "conclusion": "failure"
-          },
-          {
-            "id": 117760259787,
-            "name": "validate",
-            "status": "completed",
-            "conclusion": "cancelled"
-          },
-          {
-            "id": 117760415442,
-            "name": "review-ongoing",
-            "status": "completed",
-            "conclusion": "success"
-          },
-          {
-            "id": 117760870886,
-            "name": "prepare-candidate",
-            "status": "completed",
-            "conclusion": "cancelled"
-          }
-        ]
-      },
-      "ongoing_browser": {
-        "run_id": 39156457573,
-        "job_id": 117760871493,
-        "conclusion": "success",
-        "completed_logs_read": true,
-        "conditions": [
-          {
-            "network": "toy8",
-            "surface": "desktop",
-            "actions": 955
-          },
-          {
-            "network": "feeder24",
-            "surface": "desktop",
-            "actions": 997
-          },
-          {
-            "network": "feeder47",
-            "surface": "desktop",
-            "actions": 994
-          },
-          {
-            "network": "toy8",
-            "surface": "phone",
-            "actions": 959
-          },
-          {
-            "network": "feeder24",
-            "surface": "phone",
-            "actions": 1004
-          },
-          {
-            "network": "feeder47",
-            "surface": "phone",
-            "actions": 1004
-          }
-        ],
-        "checks": [
-          "Actual header touch target geometry remains stable when Stop all appears. Real multi bus attacks remain active across multiple physical samples.",
-          "Corruption and repair, playback and both old boundaries, four costs and traces, stable cost switching, full receipt history, actual traffic, archived labels and glyph box separation.",
-          "Exact version 14 UI replay and fresh paused network switching across all three networks."
-        ],
-        "long_run_mode": "Ordinary visible playback and actual attack timers, followed by the existing Advance 180 button in yielding batches. Roughly 1000 actions is not a continuous real time frame latency benchmark."
-      },
-      "cloud_review": {
-        "run_id": 39156457573,
-        "job_id": 117761287452,
-        "conclusion": "success",
-        "completed_logs_read": true
-      },
-      "source_scope": {
-        "base": "f7609eb59b415afc7ee6364df1c984d93bfa5a5e",
-        "head": "e6ba21f4f1a522760b181d70f35c2d9c9ec78aad",
-        "ahead_by": 4,
-        "behind_by": 0,
-        "files": [
-          "refinement/cloud-state.json",
-          "refinement/continuous-response-map.md",
-          "src/interface.html",
-          "src/interface.js",
-          "src/site-shell.css",
-          "src/test-continuous-browser.cjs",
-          "src/test-interactions.cjs"
-        ],
-        "engine_changed": false
-      },
-      "full_validation_attempt": {
-        "source_commit": "e6ba21f4f1a522760b181d70f35c2d9c9ec78aad",
-        "run_id": 39156457573,
-        "job_id": 117760871133,
-        "conclusion": "failure",
-        "completed_logs_read": true,
-        "numerical_cases": 252,
-        "numerical_passed": 252,
-        "build": "success",
-        "reference_artifacts": "success",
-        "legacy_browser": "Stopped in a previously conditional pending command path. The phone paused at the exact automatic handoff at comparison t 0. Test line 1751 tried tapping Step inside closed Experiment settings.",
-        "network_browser": "not_reached",
-        "prepare": "skipped",
-        "repair": "Use the existing withinSettings helper and tap the visible native Step button. Retain every pending state, exact time, lastSample and pause assertion."
-      }
-    },
-    "remaining_gaps": [
-      "Continuous protocol is not yet the fresh public UI default. Exact archived version 13 replay must stay intact without exposing a protocol selector.",
-      "The fresh ongoing default must visibly expose measured weights rather than only static connectivity. Choose its initial inspection deterministically from the existing selected inverter and actual admitted support, document that choice before implementation, and test that view changes do not affect commands.",
-      "Fresh default, explicit restart, restored legacy to new trial and network change migration need predefined browser and interaction acceptance.",
-      "README and environment still describe the archived default. Update default workflow and archived evidence boundaries together with the default switch.",
-      "Growing history has numerical evidence to 1801 actions and browser evidence to roughly 1000 actions. Indefinite high speed memory and replay responsiveness are not established.",
-      "Fixed support and diagonal causal response adaptation are implemented experimentally. No online topology reselection or arbitrary switched stability theorem is claimed."
-    ],
-    "next_focus": "Finish candidate validation and pixel review, then enable the ongoing default with explicit legacy replay fixtures and updated default documentation. Preserve current branch and all failed or cancelled checks. Never present the current gated UI as a live fix.",
-    "pixel_review": {
-      "source_commit": "e6ba21f4f1a522760b181d70f35c2d9c9ec78aad",
-      "status": "actual_cloud_pixels_reviewed_candidate_only",
-      "review_job": 117761287452,
-      "route": "Actual Playwright PNG files archived unchanged as binary Git blobs plus ASCII base64 text blobs, read through authenticated GitHub and emitted as images. No direct live browser or local file path.",
-      "reviewed": [
-        "feeder24-phone.png",
-        "feeder47-desktop.png",
-        "toy8-phone-inspection.png",
-        "feeder47-phone.png",
-        "toy8-desktop.png"
-      ],
-      "artifacts": [
-        {
-          "file": "feeder24-desktop-inspection.png",
-          "sha": "6152a078709394527f56bd576fa2675f1b0d6151",
-          "base64_text_sha": "c444f2a1f18fc0feed16952fa0f165986dfd9739",
-          "bytes": 135734
-        },
-        {
-          "file": "feeder24-desktop.png",
-          "sha": "52c660adcd32b9669571532fd1a9f4ff877c1f08",
-          "base64_text_sha": "c3ca48e5e1963674787183a8ede88aeec8cf59b9",
-          "bytes": 439496
-        },
-        {
-          "file": "feeder24-phone-inspection.png",
-          "sha": "9843f46a963cb1bc2a3bc85e1541fe1c26083da9",
-          "base64_text_sha": "59968bd5efb86b8e40e38211deb8ff08e7f71a36",
-          "bytes": 128673
-        },
-        {
-          "file": "feeder24-phone.png",
-          "sha": "1a2249f45119149ef11b9a04627c357f119528fc",
-          "base64_text_sha": "8bdb3954dbba2d99e1bb217c253d13c0724c23cb",
-          "bytes": 391199
-        },
-        {
-          "file": "feeder47-desktop-inspection.png",
-          "sha": "a7e2be442426d69b2c4c517e88b468571010bdfd",
-          "base64_text_sha": "0921305500e6249bef477ff55cb1aae146b494f9",
-          "bytes": 140048
-        },
-        {
-          "file": "feeder47-desktop.png",
-          "sha": "95f6c7777a08ac46000e0d9a8b6d953cfe359f58",
-          "base64_text_sha": "70d40aac5edc997ef0369472f85a6e0dc67c4c5c",
-          "bytes": 525544
-        },
-        {
-          "file": "feeder47-phone-inspection.png",
-          "sha": "3e0dd41dfd5c2a8ed0e72b43624c86dac9310638",
-          "base64_text_sha": "df8b4d05ce620626ccc3fd4e701db731c8c66bc1",
-          "bytes": 117530
-        },
-        {
-          "file": "feeder47-phone.png",
-          "sha": "b1f632a359855a5c4cb9f9fee6dd0695cbeec1f3",
-          "base64_text_sha": "c489beb0fad3c09186493a82995196e2dc5e2845",
-          "bytes": 354416
-        },
-        {
-          "file": "toy8-desktop-inspection.png",
-          "sha": "69671d4da3f8544316663bc0e4df7fcac68e086c",
-          "base64_text_sha": "92a2fa397ded688692c3e64f2257f89f5966cb7e",
-          "bytes": 125214
-        },
-        {
-          "file": "toy8-desktop.png",
-          "sha": "a6ace6b98d4d12f41ceae3b3336fc193fe4b50aa",
-          "base64_text_sha": "2df517179f52e33e026e760f3989b584e79770de",
-          "bytes": 373675
-        },
-        {
-          "file": "toy8-phone-inspection.png",
-          "sha": "3b9649c3247b8f9af350f2b77977c8d509763894",
-          "base64_text_sha": "b88832d45a0160788660cc56c6c0486f9af198bc",
-          "bytes": 117996
-        },
-        {
-          "file": "toy8-phone.png",
-          "sha": "65b36ba927c1da1b2ee2d9e59aaa5f02591dbf38",
-          "base64_text_sha": "7566567f8c01a49c650a00f5a1c03d8cfbc1ca46",
-          "bytes": 326408
-        }
-      ],
-      "findings": [
-        "Ongoing observation and execution status is compact and readable without finite stage bars.",
-        "All four panels and controller comparisons remain present. Actual remote forecasts and additional correction payload are readable under the existing method names.",
-        "The signed executed gain history visibly changes through the tested corruption and repair stream. Actual received correction, signed current gain, temporal norm, additive source term and bounded receiver command remain distinct.",
-        "Axis captions now have visible separation from numeric ticks on the reviewed phone and desktop screenshots, matching the unchanged rendered glyph assertion.",
-        "The larger matrix retains readable scrolling and source cues. Archived 24 bus frozen study is explicitly labeled and is absent on other sizes.",
-        "This reviews the restored ongoing candidate at roughly 1000 actions. Fresh default and explicit migration acceptance are still pending, so it is not a public release approval.",
-        "On the 47 bus phone screenshot the native feeder viewport shows its left section while the inspected receiver lies farther right. The scroll cue and source receiver caption remain visible. Automatic panning of the inspected pair is not established by this review."
-      ]
-    }
-  },
-  "next_focus": "Trace and fix actual phone header pointer cancellation or duplicate activation first, using ATTACK_DIAGNOSTIC pointerEvents. Inspect base64 wrapped actual screenshots. Then finish traffic and archived labels and enable a fully validated ongoing default without resetting plant time or costs.",
+  "active_run": null,
+  "next_focus": "First read latest candidate checks, including the visible settings Step test repair, and reconcile interrupted or metadata repeat checks. Then make fresh unsaved sessions and explicit new trials use continuous-phi-v1, preserve exact archived version 13 replay through declared fixtures, expose actual measured weight evolution by default, remove inapplicable legacy controls and update README and environment. Run every required suite and inspect actual fresh desktop and phone pixels before main promotion. Evaluate longer ordinary playback and memory growth explicitly.",
   "priorities": [
     "Actual continuous causal response adaptation and executed command evidence",
     "Explicit forecast message access and support feasibility",
@@ -3320,7 +3057,7 @@
         "branch": "cloud/refine/continuous-phi-20261018-2345",
         "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
         "candidate_parent": "f7609eb59b415afc7ee6364df1c984d93bfa5a5e",
-        "status": "in_progress",
+        "status": "ongoing_inspector_and_phone_candidate_unpublished_full_revalidation_pending",
         "counted_invocation": true,
         "counted_completed": false,
         "changes": [
@@ -3466,6 +3203,33 @@
             "network_browser": "not_reached",
             "prepare": "skipped",
             "repair": "Use the existing withinSettings helper and tap the visible native Step button. Retain every pending state, exact time, lastSample and pause assertion."
+          },
+          "followup": {
+            "source_commit": "3a873d47bcb27b70bfc627e14647e758c49d4f84",
+            "run_id": 39157540598,
+            "validate_job": 117763772249,
+            "validate_status": "in_progress_at_checkpoint",
+            "ongoing_browser_job": 117763772412,
+            "ongoing_browser": "success",
+            "ongoing_logs_read": true,
+            "review_job": 117764298047,
+            "review": "success",
+            "review_logs_read": true,
+            "actions": {
+              "toy8": {
+                "desktop": 964,
+                "phone": 968
+              },
+              "feeder24": {
+                "desktop": 1008,
+                "phone": 1011
+              },
+              "feeder47": {
+                "desktop": 1001,
+                "phone": 1008
+              }
+            },
+            "progress_commit_note": "This final metadata checkpoint changes no demo source or test. Its normal push may supersede this still running source validation. Read actual final jobs for the latest candidate head and preserve any cancellations. Do not treat this record as full validation or a live completion."
           }
         },
         "remaining_gaps": [
@@ -3476,7 +3240,7 @@
           "Growing history has numerical evidence to 1801 actions and browser evidence to roughly 1000 actions. Indefinite high speed memory and replay responsiveness are not established.",
           "Fixed support and diagonal causal response adaptation are implemented experimentally. No online topology reselection or arbitrary switched stability theorem is claimed."
         ],
-        "next_focus": "Finish candidate validation and pixel review, then enable the ongoing default with explicit legacy replay fixtures and updated default documentation. Preserve current branch and all failed or cancelled checks. Never present the current gated UI as a live fix.",
+        "next_focus": "First read latest candidate checks, including the visible settings Step test repair, and reconcile interrupted or metadata repeat checks. Then make fresh unsaved sessions and explicit new trials use continuous-phi-v1, preserve exact archived version 13 replay through declared fixtures, expose actual measured weight evolution by default, remove inapplicable legacy controls and update README and environment. Run every required suite and inspect actual fresh desktop and phone pixels before main promotion. Evaluate longer ordinary playback and memory growth explicitly.",
         "pixel_review": {
           "source_commit": "e6ba21f4f1a522760b181d70f35c2d9c9ec78aad",
           "status": "actual_cloud_pixels_reviewed_candidate_only",
@@ -3571,274 +3335,33 @@
             "The larger matrix retains readable scrolling and source cues. Archived 24 bus frozen study is explicitly labeled and is absent on other sizes.",
             "This reviews the restored ongoing candidate at roughly 1000 actions. Fresh default and explicit migration acceptance are still pending, so it is not a public release approval.",
             "On the 47 bus phone screenshot the native feeder viewport shows its left section while the inspected receiver lies farther right. The scroll cue and source receiver caption remain visible. Automatic panning of the inspected pair is not established by this review."
-          ]
+          ],
+          "source_equivalence": {
+            "reviewed_ui_source": "e6ba21f4f1a522760b181d70f35c2d9c9ec78aad",
+            "current_source": "3a873d47bcb27b70bfc627e14647e758c49d4f84",
+            "verified_compare": [
+              "refinement/cloud-state.json",
+              "refinement/continuous-response-map.md",
+              "src/test-browser-smoke.cjs"
+            ],
+            "same_ui_and_engine": true
+          }
+        },
+        "source_commit": "3a873d47bcb27b70bfc627e14647e758c49d4f84",
+        "ready_commit": null,
+        "published_commit": null,
+        "completed_at": "2026-10-18T19:13:53Z",
+        "end_reason": "Bounded implementation checkpoint. Preserve this candidate and finish required checks at the next existing invocation before enabling a fresh ongoing default. No main or hosting change.",
+        "deployment_verification": {
+          "status": "not_published",
+          "main": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+          "canonical_url": "https://tongxin.me/online-sls-demo/",
+          "main_unchanged": true,
+          "generated_child": "None from the failed full run. Never promote the current unverified candidate."
         }
       }
     ],
-    "active_run": {
-      "program_id": "continuous-phi-20261018T234500",
-      "slot": "2026-10-19T02:45:00+08:00",
-      "started_at": "2026-10-19T02:41:05+08:00",
-      "implementation_started_at": "2026-10-18T18:45:29.201Z",
-      "lease_expires_at": "2026-10-19T03:21:05+08:00",
-      "early_dispatch": "Read only preflight until 02:45. Original dispatch deadline retained.",
-      "branch": "cloud/refine/continuous-phi-20261018-2345",
-      "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
-      "candidate_parent": "f7609eb59b415afc7ee6364df1c984d93bfa5a5e",
-      "status": "in_progress",
-      "counted_invocation": true,
-      "counted_completed": false,
-      "changes": [
-        "Keep the phone attack target geometry fixed when Stop all appears, preserving the existing capture, cancellation and keyboard logic. Add a real touch bounding box regression.",
-        "Repair ongoing status strip grid after hiding stage numbers and remove finite progress tracks from the ongoing protocol.",
-        "Add an actual executed signed gain trace inside the existing source inspector, derived only from admitted per action receipts. Preserve every source, controller and history sample.",
-        "Show cumulative remote forecast and correction payload values in the existing comparison, and explicitly label the archived frozen study. No physical, estimator, baseline or synthesis parameter is changed.",
-        "Separate axis captions from numeric ticks in actual phone and desktop charts. Add rendered glyph separation assertions without changing plotted samples.",
-        "Repair the existing legacy phone smoke conditional Step action by opening Experiment settings through its existing helper. All command timing and pause assertions remain intact; no forced or hidden click is used."
-      ],
-      "tests": {
-        "main": {
-          "run_id": 39144310544,
-          "validate_job": 117724923758,
-          "conclusion": "success",
-          "completed_logs_read": true
-        },
-        "first_source": {
-          "source_commit": "7b6cbd904084aafdd4c08514ad57a816e2c74243",
-          "run_id": 39155796893,
-          "ongoing_browser_job": 117758805646,
-          "ongoing_browser": "success",
-          "review_job": 117759201425,
-          "review": "success",
-          "full_validation": "cancelled_by_followup",
-          "logs_read": [
-            "ongoing-browser",
-            "review-ongoing"
-          ]
-        },
-        "axis_spacing_attempt": {
-          "source_commit": "dfa0c141a7c2874291b082f95fa81be034895bad",
-          "run_id": 39156270680,
-          "ongoing_browser_job": 117760259620,
-          "conclusion": "failure",
-          "completed_logs_read": true,
-          "reason": "Rendered response chart axis gap 1.4799995 px fails required 2 px separation. Increase margin by 2 px and retain the assertion.",
-          "full_validation": "superseded_after_rendered_layout_failure",
-          "actual_jobs": [
-            {
-              "id": 117760259620,
-              "name": "ongoing-browser",
-              "status": "completed",
-              "conclusion": "failure"
-            },
-            {
-              "id": 117760259787,
-              "name": "validate",
-              "status": "completed",
-              "conclusion": "cancelled"
-            },
-            {
-              "id": 117760415442,
-              "name": "review-ongoing",
-              "status": "completed",
-              "conclusion": "success"
-            },
-            {
-              "id": 117760870886,
-              "name": "prepare-candidate",
-              "status": "completed",
-              "conclusion": "cancelled"
-            }
-          ]
-        },
-        "ongoing_browser": {
-          "run_id": 39156457573,
-          "job_id": 117760871493,
-          "conclusion": "success",
-          "completed_logs_read": true,
-          "conditions": [
-            {
-              "network": "toy8",
-              "surface": "desktop",
-              "actions": 955
-            },
-            {
-              "network": "feeder24",
-              "surface": "desktop",
-              "actions": 997
-            },
-            {
-              "network": "feeder47",
-              "surface": "desktop",
-              "actions": 994
-            },
-            {
-              "network": "toy8",
-              "surface": "phone",
-              "actions": 959
-            },
-            {
-              "network": "feeder24",
-              "surface": "phone",
-              "actions": 1004
-            },
-            {
-              "network": "feeder47",
-              "surface": "phone",
-              "actions": 1004
-            }
-          ],
-          "checks": [
-            "Actual header touch target geometry remains stable when Stop all appears. Real multi bus attacks remain active across multiple physical samples.",
-            "Corruption and repair, playback and both old boundaries, four costs and traces, stable cost switching, full receipt history, actual traffic, archived labels and glyph box separation.",
-            "Exact version 14 UI replay and fresh paused network switching across all three networks."
-          ],
-          "long_run_mode": "Ordinary visible playback and actual attack timers, followed by the existing Advance 180 button in yielding batches. Roughly 1000 actions is not a continuous real time frame latency benchmark."
-        },
-        "cloud_review": {
-          "run_id": 39156457573,
-          "job_id": 117761287452,
-          "conclusion": "success",
-          "completed_logs_read": true
-        },
-        "source_scope": {
-          "base": "f7609eb59b415afc7ee6364df1c984d93bfa5a5e",
-          "head": "e6ba21f4f1a522760b181d70f35c2d9c9ec78aad",
-          "ahead_by": 4,
-          "behind_by": 0,
-          "files": [
-            "refinement/cloud-state.json",
-            "refinement/continuous-response-map.md",
-            "src/interface.html",
-            "src/interface.js",
-            "src/site-shell.css",
-            "src/test-continuous-browser.cjs",
-            "src/test-interactions.cjs"
-          ],
-          "engine_changed": false
-        },
-        "full_validation_attempt": {
-          "source_commit": "e6ba21f4f1a522760b181d70f35c2d9c9ec78aad",
-          "run_id": 39156457573,
-          "job_id": 117760871133,
-          "conclusion": "failure",
-          "completed_logs_read": true,
-          "numerical_cases": 252,
-          "numerical_passed": 252,
-          "build": "success",
-          "reference_artifacts": "success",
-          "legacy_browser": "Stopped in a previously conditional pending command path. The phone paused at the exact automatic handoff at comparison t 0. Test line 1751 tried tapping Step inside closed Experiment settings.",
-          "network_browser": "not_reached",
-          "prepare": "skipped",
-          "repair": "Use the existing withinSettings helper and tap the visible native Step button. Retain every pending state, exact time, lastSample and pause assertion."
-        }
-      },
-      "remaining_gaps": [
-        "Continuous protocol is not yet the fresh public UI default. Exact archived version 13 replay must stay intact without exposing a protocol selector.",
-        "The fresh ongoing default must visibly expose measured weights rather than only static connectivity. Choose its initial inspection deterministically from the existing selected inverter and actual admitted support, document that choice before implementation, and test that view changes do not affect commands.",
-        "Fresh default, explicit restart, restored legacy to new trial and network change migration need predefined browser and interaction acceptance.",
-        "README and environment still describe the archived default. Update default workflow and archived evidence boundaries together with the default switch.",
-        "Growing history has numerical evidence to 1801 actions and browser evidence to roughly 1000 actions. Indefinite high speed memory and replay responsiveness are not established.",
-        "Fixed support and diagonal causal response adaptation are implemented experimentally. No online topology reselection or arbitrary switched stability theorem is claimed."
-      ],
-      "next_focus": "Finish candidate validation and pixel review, then enable the ongoing default with explicit legacy replay fixtures and updated default documentation. Preserve current branch and all failed or cancelled checks. Never present the current gated UI as a live fix.",
-      "pixel_review": {
-        "source_commit": "e6ba21f4f1a522760b181d70f35c2d9c9ec78aad",
-        "status": "actual_cloud_pixels_reviewed_candidate_only",
-        "review_job": 117761287452,
-        "route": "Actual Playwright PNG files archived unchanged as binary Git blobs plus ASCII base64 text blobs, read through authenticated GitHub and emitted as images. No direct live browser or local file path.",
-        "reviewed": [
-          "feeder24-phone.png",
-          "feeder47-desktop.png",
-          "toy8-phone-inspection.png",
-          "feeder47-phone.png",
-          "toy8-desktop.png"
-        ],
-        "artifacts": [
-          {
-            "file": "feeder24-desktop-inspection.png",
-            "sha": "6152a078709394527f56bd576fa2675f1b0d6151",
-            "base64_text_sha": "c444f2a1f18fc0feed16952fa0f165986dfd9739",
-            "bytes": 135734
-          },
-          {
-            "file": "feeder24-desktop.png",
-            "sha": "52c660adcd32b9669571532fd1a9f4ff877c1f08",
-            "base64_text_sha": "c3ca48e5e1963674787183a8ede88aeec8cf59b9",
-            "bytes": 439496
-          },
-          {
-            "file": "feeder24-phone-inspection.png",
-            "sha": "9843f46a963cb1bc2a3bc85e1541fe1c26083da9",
-            "base64_text_sha": "59968bd5efb86b8e40e38211deb8ff08e7f71a36",
-            "bytes": 128673
-          },
-          {
-            "file": "feeder24-phone.png",
-            "sha": "1a2249f45119149ef11b9a04627c357f119528fc",
-            "base64_text_sha": "8bdb3954dbba2d99e1bb217c253d13c0724c23cb",
-            "bytes": 391199
-          },
-          {
-            "file": "feeder47-desktop-inspection.png",
-            "sha": "a7e2be442426d69b2c4c517e88b468571010bdfd",
-            "base64_text_sha": "0921305500e6249bef477ff55cb1aae146b494f9",
-            "bytes": 140048
-          },
-          {
-            "file": "feeder47-desktop.png",
-            "sha": "95f6c7777a08ac46000e0d9a8b6d953cfe359f58",
-            "base64_text_sha": "70d40aac5edc997ef0369472f85a6e0dc67c4c5c",
-            "bytes": 525544
-          },
-          {
-            "file": "feeder47-phone-inspection.png",
-            "sha": "3e0dd41dfd5c2a8ed0e72b43624c86dac9310638",
-            "base64_text_sha": "df8b4d05ce620626ccc3fd4e701db731c8c66bc1",
-            "bytes": 117530
-          },
-          {
-            "file": "feeder47-phone.png",
-            "sha": "b1f632a359855a5c4cb9f9fee6dd0695cbeec1f3",
-            "base64_text_sha": "c489beb0fad3c09186493a82995196e2dc5e2845",
-            "bytes": 354416
-          },
-          {
-            "file": "toy8-desktop-inspection.png",
-            "sha": "69671d4da3f8544316663bc0e4df7fcac68e086c",
-            "base64_text_sha": "92a2fa397ded688692c3e64f2257f89f5966cb7e",
-            "bytes": 125214
-          },
-          {
-            "file": "toy8-desktop.png",
-            "sha": "a6ace6b98d4d12f41ceae3b3336fc193fe4b50aa",
-            "base64_text_sha": "2df517179f52e33e026e760f3989b584e79770de",
-            "bytes": 373675
-          },
-          {
-            "file": "toy8-phone-inspection.png",
-            "sha": "3b9649c3247b8f9af350f2b77977c8d509763894",
-            "base64_text_sha": "b88832d45a0160788660cc56c6c0486f9af198bc",
-            "bytes": 117996
-          },
-          {
-            "file": "toy8-phone.png",
-            "sha": "65b36ba927c1da1b2ee2d9e59aaa5f02591dbf38",
-            "base64_text_sha": "7566567f8c01a49c650a00f5a1c03d8cfbc1ca46",
-            "bytes": 326408
-          }
-        ],
-        "findings": [
-          "Ongoing observation and execution status is compact and readable without finite stage bars.",
-          "All four panels and controller comparisons remain present. Actual remote forecasts and additional correction payload are readable under the existing method names.",
-          "The signed executed gain history visibly changes through the tested corruption and repair stream. Actual received correction, signed current gain, temporal norm, additive source term and bounded receiver command remain distinct.",
-          "Axis captions now have visible separation from numeric ticks on the reviewed phone and desktop screenshots, matching the unchanged rendered glyph assertion.",
-          "The larger matrix retains readable scrolling and source cues. Archived 24 bus frozen study is explicitly labeled and is absent on other sizes.",
-          "This reviews the restored ongoing candidate at roughly 1000 actions. Fresh default and explicit migration acceptance are still pending, so it is not a public release approval.",
-          "On the 47 bus phone screenshot the native feeder viewport shows its left section while the inspected receiver lies farther right. The scroll cue and source receiver caption remain visible. Automatic panning of the inspected pair is not established by this review."
-        ]
-      }
-    },
+    "active_run": null,
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
       "is_enabled": true,
@@ -3849,6 +3372,6 @@
       "setup_counts_as_improvement": false
     },
     "candidate_branch": "cloud/refine/continuous-phi-20261018-2345",
-    "next_focus": "Trace and fix actual phone header pointer cancellation or duplicate activation first, using ATTACK_DIAGNOSTIC pointerEvents. Inspect base64 wrapped actual screenshots. Then finish traffic and archived labels and enable a fully validated ongoing default without resetting plant time or costs."
+    "next_focus": "First read latest candidate checks, including the visible settings Step test repair, and reconcile interrupted or metadata repeat checks. Then make fresh unsaved sessions and explicit new trials use continuous-phi-v1, preserve exact archived version 13 replay through declared fixtures, expose actual measured weight evolution by default, remove inapplicable legacy controls and update README and environment. Run every required suite and inspect actual fresh desktop and phone pixels before main promotion. Evaluate longer ordinary playback and memory growth explicitly."
   }
 }
