@@ -821,7 +821,7 @@
     if(!Number.isSafeInteger(record.steps)||record.steps<0||!Array.isArray(record.events))throw new RangeError('Invalid ongoing replay prefix');
     let previous=-1;
     for(const event of record.events){
-      if(!Number.isSafeInteger(event.t)||event.t<previous||event.t>record.steps||!['pulse','forecast'].includes(event.type))throw new RangeError('Invalid ongoing replay event order');
+      if(!Number.isSafeInteger(event.t)||event.t<0||event.t<previous||event.t>record.steps||!Number.isInteger(event.bus)||event.bus<2||event.bus>N||!['pulse','forecast'].includes(event.type))throw new RangeError('Invalid ongoing replay event order');
       previous=event.t;
     }
     const sim=new Simulation(record.options);let index=0;

@@ -126,6 +126,8 @@ for(const network of Demo.networks)test(network.id+' executes all predefined qua
       const record=JSON.parse(JSON.stringify(sim.recordContinuous())),copy=api.replayContinuous(record);
       assert.deepEqual(copy.snapshot(),snap,'New protocol replay is exact with all arbitrary attacks and repairs');
       assert.throws(()=>api.replayContinuous({...record,networkId:'different'}),/network/);
+      assert.throws(()=>api.replayContinuous({...record,events:[{t:-1,type:'pulse',bus:2,strength:100}]}),/event order/);
+      assert.throws(()=>api.replayContinuous({...record,events:[{t:0,type:'forecast',bus:1,faulty:false}]}),/event order/);
     }
   }
   console.log('Predeclared ongoing protocol acceptance outcomes '+JSON.stringify(outcomes));

@@ -2702,7 +2702,8 @@
           "Continue tested causal source scaling on the same unpublished candidate toward an explicitly versioned ongoing engine and independently checked stationary response.",
           "Implement an explicit ongoing engine option with source local coefficients used in admitted sparse prediction commands, fixed offline support, stationary startup and interior response columns, real traffic counters and versioned exact engine replay.",
           "Add nine independent and predefined ongoing engine cases covering all 18 network quality seed conditions and actual commands through 901 actions plus 1801 action history.",
-          "Bundle the numerical modules into the candidate build without enabling the unfinished ongoing UI."
+          "Bundle the numerical modules into the candidate build without enabling the unfinished ongoing UI.",
+          "Reject negative replay times and invalid slack source events; report correction scalar overhead separately from equal link permissions."
         ],
         "tests": {
           "prior_foundation": {
@@ -2725,7 +2726,15 @@
         "pixel_review": {
           "status": "pending_for_future_ongoing_ui",
           "reason": "No ongoing visual redesign is published by this candidate."
-        }
+        },
+        "candidate_revisions": [
+          {
+            "source_commit": "685750a5889de9aa1baf905a27aadfe5faf2a248",
+            "validation_run": 39147453898,
+            "status": "superseded_by_causal_replay_input_hardening",
+            "publication": false
+          }
+        ]
       }
     ],
     "active_run": {
