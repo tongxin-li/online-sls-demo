@@ -3608,7 +3608,18 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     const bounds=scroller.getBoundingClientRect(),inset=overflow?40:0,offset=overflow?scroller.scrollLeft:0;
     el.querySelector('.matrix-receiver-axis')?.setAttribute('transform','translate('+offset+',0)');
     if(overflow)el.querySelector('.matrix-source-title')?.setAttribute('x',offset+inset+(scroller.clientWidth-inset)/2);
-    const shown=Array.from(el.querySelectorAll('.matrix-columns text')).filter(node=>{
+    // Keep an exposed edge column's full number readable. Only labels and
+    // their existing guides move; source cells and their data stay fixed.
+    const labels=Array.from(el.querySelectorAll('.matrix-columns text'));
+    const lo=offset+inset+.75,hi=offset+scroller.clientWidth-.75;
+    const positions=labels.map(node=>{
+      const centre=Number(node.dataset.columnX),cellWidth=Number(node.dataset.columnWidth),half=node.getBBox().width/2;
+      const exposed=overflow&&centre+cellWidth/2>offset+inset&&centre-cellWidth/2<offset+scroller.clientWidth;
+      return exposed?Math.max(lo+half,Math.min(hi-half,centre)):centre;
+    });
+    labels.forEach((node,i)=>node.setAttribute('x',positions[i]));
+    el.querySelectorAll('.matrix-columns line').forEach((node,i)=>node.setAttribute('x1',positions[i]));
+    const shown=labels.filter(node=>{
       const box=node.getBoundingClientRect();return box.left>=bounds.left+inset-.5&&box.right<=bounds.right+.5;
     }).map(node=>Number(node.__data__));
     const left=overflow&&scroller.scrollLeft>1,right=overflow&&scroller.scrollLeft<maximum-1;
@@ -3690,6 +3701,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       .attr('x1',(_,i)=>left+(i+.5)*cellWidth).attr('x2',(_,i)=>left+(i+.5)*cellWidth)
       .attr('y1',(bus,i)=>labelY(bus,i)+3).attr('y2',top-3).attr('stroke','#d9d9df');
     const sourceLabels=svg.select('.matrix-columns').selectAll('text').data(sources).join('text').attr('x',(_,i)=>left+(i+.5)*cellWidth).attr('y',labelY).attr('text-anchor','middle')
+      .attr('data-column-x',(_,i)=>left+(i+.5)*cellWidth).attr('data-column-width',cellWidth)
       .attr('data-inspected',bus=>String(bus===inspectedSource)).attr('data-noisy',bus=>String(noisySources.has(bus)))
       .attr('aria-label',bus=>'Source bus '+bus+(noisySources.has(bus)?' · Noisy forecast source':''))
       .text(bus=>bus);
