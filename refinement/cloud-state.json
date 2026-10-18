@@ -783,8 +783,13 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
-  "next_focus": "First verify final repeat validation and completion metadata. Then review source inspection and command evidence in the existing matrix with its now persistent receiver context, preserving the single integrated cost comparison, concise two stage strip and fixed deployed support. Do not add panels or broaden the numerical study.",
+  "active_run": {
+    "slot": "2026-10-18T16:00:00+08:00",
+    "branch": "cloud/refine/20261018-1600",
+    "started_at": "2026-10-18T16:02:22+08:00",
+    "lease_expires_at": "2026-10-18T16:42:22+08:00"
+  },
+  "next_focus": "Validate readable method identity and complete measured terms while navigating the existing command breakdown, without duplicating results or changing scientific controls.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -902,7 +907,7 @@
       "main_run": 39107039720,
       "pages_run": 39107039339,
       "scope": "Completion record only. Product already validated and deployed.",
-      "status": "Metadata validation pending at creation. Historical completed 15, renewed invocation 14 and completed 14, total 29. Recovery of 14:00 metadata and its final repeated checks did not increment counts.",
+      "status": "15:00 completion metadata is already main at de6ab60feef72ba3d7b81aed82a72b1c38d0cae6. Its candidate and prepare plus main repeat succeeded, and exact Pages deployment was verified. No recovery invocation or completion increment.",
       "instruction": "Read actual main repeat result before further source edits. This 15:00 slot is counted once in this metadata candidate. Promote metadata only after normal successful validation with expected current main 7f0bdc7d900aa478c9339fa39c63e38dfe3037b7 and force false. On newer main, reapply only verified metadata without overwriting concurrent product changes or double counting. Metadata recovery, preflight and duplicate dispatches are not refinements. Preserve the original stricter 15:36:08 deadline from the early dispatch."
     },
     "previous_renewed_metadata_verification": {
@@ -1056,6 +1061,13 @@
         "result": "Final candidate prepare and product main success read with completed logs. Only cloud-state changed. Promoted by matching expected main with force false. No new completion or invocation for recovery. Main repeat all 224 cases and both browser suites plus exact metadata Pages version independently verified during this slot.",
         "main_run": 39106069436,
         "pages_run": 39106069338
+      },
+      {
+        "commit": "de6ab60feef72ba3d7b81aed82a72b1c38d0cae6",
+        "candidate_run": 39107142696,
+        "main_run": 39107982572,
+        "pages_run": 39107982661,
+        "result": "Final main success independently read with all 224 tests, build consistency and full browser suites. Exact metadata Pages version independently verified in prior pass. Counts already include 15:00 once."
       }
     ]
   },
@@ -1163,7 +1175,7 @@
     "hard_deadline": "2026-10-19T01:00:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 14,
+    "invocation_count": 15,
     "completed_count": 14,
     "runs": [
       {
@@ -1833,7 +1845,7 @@
           "candidate": "Full validation and prepare passed on first candidate.",
           "build": "passed",
           "reference_artifact": "Passed unchanged generator and reference artifact checks.",
-          "main": "Repeat validation 39107039720 is running at completion recording. Read actual final status before further source edits.",
+          "main": "Published product repeat 39107039720 and metadata main repeat 39107982572 both succeeded. Latest metadata main completed logs independently read before this source edit; all 224 cases, build consistency and full original plus network browser suites passed.",
           "browser": "Full original desktop and phone suite and both network suites passed without runtime errors. Existing playback, repeated and continuous attacks, forecast toggles, automatic learning to comparison transition, stable cost view buttons, all four traces and network scoped exact replay retained. New actual browser checks verify every pinned inverter row glyph and hit target, row alignment, visible source title, true uncovered source ranges, start middle end direction cues, all 46 source headers and 736 rendered cells, source reachability across the pan, exposed cell hit targets, native arrow inspection clear of the gutter and exact paused trial invariance before and after replay on desktop 1440 and phone 390.",
           "benchmarks": "Not rerun. Physical model, objective, gain synthesis, learning, controller coefficients, forecast timing, noise, attack behavior, limits, all costs, replay and recorded studies are unchanged."
         },
@@ -1862,9 +1874,37 @@
           "Partially visible source glyphs still clip at viewport and receiver gutter boundaries. The cue conservatively names only fully visible source labels. Every source remains reachable.",
           "Only the declared desktop and phone Chrome layouts were tested. No new claim of arbitrary topology performance or direct live browser inspection."
         ]
+      },
+      {
+        "slot": "2026-10-18T16:00:00+08:00",
+        "started_at": "2026-10-18T16:02:22+08:00",
+        "status": "validating",
+        "candidate_branch": "cloud/refine/20261018-1600",
+        "base_commit": "de6ab60feef72ba3d7b81aed82a72b1c38d0cae6",
+        "counted_invocation": true,
+        "counted_completed": false,
+        "lease_expires_at": "2026-10-18T16:42:22+08:00",
+        "changes": [
+          "Keep the existing command breakdown method column visible while horizontally panning its source, feedback, request, actual command and gain columns. Raise command table and unit note typography to 12 px with consistent row spacing.",
+          "Preserve all four actual method rows, all six numeric terms, every unit and qualification, and the existing single cost comparison and two stage strip. No new panel, control or data calculation.",
+          "Add actual desktop and phone browser panning, fixed row header, native keyboard, all term reachability, full trial and displayed value invariance tests and authorized screenshot previews. No scientific, numerical benchmark or engine changes."
+        ],
+        "tests": {
+          "status": "Pending normal cloud validation",
+          "benchmarks": "Not rerun for this visual change."
+        },
+        "screenshots": {
+          "pixel_review": "Pending actual Actions JPEG previews of the command disclosure"
+        },
+        "direct_live_inspection": "Unverified. Previously denied direct live browser access will not be retried or bypassed."
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "slot": "2026-10-18T16:00:00+08:00",
+      "branch": "cloud/refine/20261018-1600",
+      "started_at": "2026-10-18T16:02:22+08:00",
+      "lease_expires_at": "2026-10-18T16:42:22+08:00"
+    },
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",

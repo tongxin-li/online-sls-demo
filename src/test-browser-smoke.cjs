@@ -504,6 +504,62 @@ async function main() {
         if(key==='causal'){assert.equal(source,0);assert.equal(other,0);assert.equal(Number(data.gainNorm),0);}
       }
     };
+    const inspectCommandNavigation = async surface => {
+      await checkCommandInspection(surface);
+      const before=await surface.evaluate(()=>{const root=document.querySelector('#power-response-demo');return {snapshot:JSON.stringify(root.powerDemo.getSnapshot()),state:root.powerDemo.getState(),rows:document.querySelector('#pr-command-rows').textContent};});
+      assert.equal(before.state.playing,false);
+      const detail=surface.locator('#pr-command-inspector'),opened=await detail.getAttribute('open')!==null;
+      if(!opened)await surface.locator('#pr-command-title').click();
+      const scroll=surface.getByRole('region',{name:'Receiver command table',exact:true});
+      await scroll.scrollIntoViewIfNeeded();
+      const initial=await scroll.evaluate(node=>node.scrollLeft),seen=new Set();
+      const maximum=await scroll.evaluate(node=>node.scrollWidth-node.clientWidth);
+      await scroll.evaluate(node=>{node.scrollLeft=0;});
+      if(maximum>1){
+        await scroll.focus();
+        for(let i=0;i<6;i++)await scroll.press('ArrowRight');
+        await surface.waitForFunction(()=>document.querySelector('.pr-command-scroll').scrollLeft>0);
+        await scroll.evaluate(node=>new Promise(resolve=>{
+          let last=node.scrollLeft,quietSince=performance.now();
+          const settled=()=>{const now=performance.now();if(node.scrollLeft!==last){last=node.scrollLeft;quietSince=now;}
+            if(now-quietSince>=250)resolve();else requestAnimationFrame(settled);};
+          requestAnimationFrame(settled);
+        }));
+      }
+      for(const [position,fraction] of [['start',0],['middle',.5],['end',1]]){
+        await scroll.evaluate((node,fraction)=>{node.scrollLeft=fraction*(node.scrollWidth-node.clientWidth);},fraction);
+        const view=await scroll.evaluate(node=>{
+          const bounds=node.getBoundingClientRect(),labels=Array.from(node.querySelectorAll('th:first-child')),edge=labels[0].getBoundingClientRect().right;
+          const glyph=cell=>{const range=document.createRange();range.selectNodeContents(cell);const box=range.getBoundingClientRect();return {left:box.left,right:box.right};};
+          const columns=Array.from(node.querySelectorAll('thead th')).slice(1).map((cell,index)=>({index,label:cell.textContent,...glyph(cell)}));
+          return {left:bounds.left,right:bounds.right,edge,page:document.documentElement.scrollWidth,viewport:innerWidth,
+            labels:labels.map(cell=>({text:cell.textContent,left:cell.getBoundingClientRect().left,right:cell.getBoundingClientRect().right,glyph:glyph(cell),background:getComputedStyle(cell).backgroundColor})),
+            visible:columns.filter(cell=>cell.left>=edge-.5&&cell.right<=bounds.right+.5).map(cell=>cell.index),
+            fonts:Array.from(node.querySelectorAll('th,td')).map(cell=>parseFloat(getComputedStyle(cell).fontSize)),
+            cells:node.querySelectorAll('tbody td').length,rows:Array.from(node.querySelectorAll('tbody tr')).map(row=>row.dataset.controller)};
+        });
+        assert.ok(view.page<=view.viewport+1,'Command panning does not overflow the page');
+        assert.deepEqual(view.rows,['online','scalar','static','causal']);assert.equal(view.cells,24,'All six terms for all four policies remain rendered');
+        assert.ok(view.fonts.every(font=>font>=12),'Every command heading and value uses readable type');
+        assert.equal(view.labels.length,5);
+        for(const label of view.labels){
+          assert.ok(Math.abs(label.left-view.left)<1,'Controller names stay at the scroller edge');
+          assert.ok(label.glyph.left>=view.left-.5&&label.glyph.right<=view.edge+.5,'Controller text fits the pinned column');
+          assert.ok(label.right<=view.right,'Controller names remain visible at every pan position');
+          assert.notEqual(label.background,'rgba(0, 0, 0, 0)','Pinned names have an opaque background');
+        }
+        view.visible.forEach(index=>seen.add(index));
+        const width=surface.viewportSize().width,preview=await detail.screenshot({path:path.join(output,'command-navigation-'+width+'-'+position+'.jpg'),type:'jpeg',quality:85});
+        console.log('CLOUD_COMMAND_PREVIEW_'+width+'_'+position+' '+preview.toString('base64'));
+      }
+      assert.deepEqual([...seen].sort((a,b)=>a-b),[0,1,2,3,4,5],'Every numeric command heading remains reachable beyond the method column');
+      await scroll.evaluate((node,left)=>{node.scrollLeft=left;},initial);
+      if(!opened)await surface.locator('#pr-command-title').click();
+      const after=await surface.evaluate(()=>{const root=document.querySelector('#power-response-demo');return {snapshot:JSON.stringify(root.powerDemo.getSnapshot()),state:root.powerDemo.getState(),rows:document.querySelector('#pr-command-rows').textContent};});
+      assert.equal(after.snapshot,before.snapshot);assert.equal(after.rows,before.rows);
+      assert.equal(after.state.playing,before.state.playing);assert.equal(after.state.inspectedSource,before.state.inspectedSource);assert.equal(after.state.selectedBus,before.state.selectedBus);
+      await checkCommandInspection(surface);
+    };
     const inspectLinkEvidence = async surface => {
       const initial=await surface.evaluate(()=>{const root=document.querySelector('#power-response-demo');return {snapshot:JSON.stringify(root.powerDemo.getSnapshot()),state:root.powerDemo.getState(),support:root.powerDemo.getSnapshot().deployedSupport};});
       assert.ok(initial.support,'The receipt fixture uses an actual deployed controller');
@@ -550,6 +606,7 @@ async function main() {
         assert.deepEqual(reading.headers.map(header=>header.budget),[24,24]);
         assert.equal(JSON.stringify(reading.snapshot),initial.snapshot,'Inspection does not change the physical trial, costs, forecasts or support');
         if(index===0){
+          await inspectCommandNavigation(surface);
           await surface.locator('#pr-forecast-observation').screenshot({path:path.join(output,'link-evidence-'+surface.viewportSize().width+'.png')});
           const preview=await surface.locator('#pr-forecast-observation').screenshot({type:'jpeg',quality:85,path:path.join(output,'link-evidence-'+surface.viewportSize().width+'.jpg')});
           console.log('CLOUD_LINK_PREVIEW_'+surface.viewportSize().width+' '+preview.toString('base64'));
