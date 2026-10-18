@@ -783,17 +783,8 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-18T12:00:00+08:00",
-    "started_at": "2026-10-18T12:00:00+08:00",
-    "preflight_at": "2026-10-18T11:56:04+08:00",
-    "expires_at": "2026-10-18T12:36:04+08:00",
-    "candidate_branch": "cloud/refine/20261018-1200",
-    "base_commit": "e72156d27b731f00f88edee1ce3fe007ea3786f8",
-    "owner": "6ad2628236888191b683d1e7ed2e5b93",
-    "program": "20261018-visual-codesign"
-  },
-  "next_focus": "Audit remaining chart and matrix axis readability using actual desktop and phone screenshots. Prioritize source and inverter labels and measured interpretation without adding controls or panels, hiding any of the 23 sources/eight receivers/four methods, or implying live graph adaptation. Preserve explicit controller ownership, candidate/deployed/history context, readable phone feeder, honest recorded regimes, fixed comparison, all physical costs and exact replay. No scientific retuning or broad numerical study for visual work.",
+  "active_run": null,
+  "next_focus": "Audit voltage, stage-cost and cumulative-cost tick labels and time axes using the current desktop/phone screenshots. Improve readability with explicit units and measured event timing while preserving four traces, zero/difference references, actual extrema and immutable event markers. Keep compact four-panel hierarchy and stable live cost controls. Retain the 12 px matrix labels, all 23 sources/eight receivers, actual link ownership and current/history context. No scientific retuning, invented thresholds or broad numerical study for visual work.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -903,12 +894,12 @@
       "pages_run": 39052070867
     },
     "renewed_completion": {
-      "slot": "2026-10-18T11:00:00+08:00",
-      "branch": "cloud/refine/20261018-1100",
-      "product_ready_commit": "0399672ad9d64229b449ec9f035778dd6fcbeb67",
+      "slot": "2026-10-18T12:00:00+08:00",
+      "branch": "cloud/refine/20261018-1200",
+      "product_ready_commit": "d1051473ebf998551a18189f60e622aaf7f2106d",
       "scope": "Completion record only, no product changes",
-      "status": "Metadata candidate validation pending at record creation. Product candidate and main passed all 213 tests, build consistency and full browser checks. Exact ready Pages deployment succeeded.",
-      "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and metadata candidate workflow results before recovery. Promote only after normal validation with expected main 0399672ad9d64229b449ec9f035778dd6fcbeb67 and force false if still matching. On newer main, reapply only verified completion metadata and validate normally. Do not count metadata recovery or a duplicate dispatch as another invocation or improvement. Preserve original 11:40:15 pass deadline."
+      "status": "Metadata candidate validation pending at record creation. Product candidate and main passed all 213 tests, build consistency and full browser checks; exact ready Pages deployment succeeded.",
+      "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and metadata candidate workflow results before recovery. Promote only after normal validation with expected main d1051473ebf998551a18189f60e622aaf7f2106d and force false if still matching. On newer main reapply only verified completion metadata and validate normally. Do not count metadata recovery, preflight or duplicate dispatches as another invocation or improvement. Preserve the stricter original 12:36:04 pass deadline."
     },
     "previous_renewed_metadata_verification": {
       "commit": "e72156d27b731f00f88edee1ce3fe007ea3786f8",
@@ -1112,7 +1103,7 @@
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
     "invocation_count": 12,
-    "completed_count": 11,
+    "completed_count": 12,
     "runs": [
       {
         "slot": "2026-10-18T01:00:00+08:00",
@@ -1640,10 +1631,10 @@
         "slot": "2026-10-18T12:00:00+08:00",
         "started_at": "2026-10-18T12:00:00+08:00",
         "preflight_at": "2026-10-18T11:56:04+08:00",
-        "status": "validating",
+        "status": "completed",
         "candidate_branch": "cloud/refine/20261018-1200",
         "base_commit": "e72156d27b731f00f88edee1ce3fe007ea3786f8",
-        "counted_completed": false,
+        "counted_completed": true,
         "slot_resolution": "Early dispatch used read-only preflight before 12:00. Candidate publication begins after the scheduled start. Count this 12:00 slot once; retain the stricter 12:36:04 deadline from the original dispatch.",
         "changes": [
           "Enlarge every matrix source/inverter number and axis title to 12 px. Increase only the header spacing and narrow-view stagger separation, keeping all 23 sources, eight receivers and 184 actual cells.",
@@ -1651,25 +1642,37 @@
           "Add real browser checks for label font size, glyph containment and pairwise nonoverlap, source/receiver cell alignment, every cell centre hit target, responsive page fit and full paused-trial invariance, including a 320 px matrix capture."
         ],
         "tests": {
-          "status": "Pending full current cloud validation",
-          "benchmarks": "Not rerun. Matrix typography and header spacing only. Physical model, controllers, learning, defaults, source errors, objective, limits, costs and recorded results unchanged."
+          "suites": 7,
+          "total": 213,
+          "failed": 0,
+          "candidate": "passed",
+          "main": "All 213 tests, build consistency and full desktop/phone browser checks passed.",
+          "build": "passed",
+          "main_consistency": "passed",
+          "browser": "Full desktop/phone browser suite passed. All 23 source columns, eight receiver rows and 184 cell centres retained; every centre hits its actual source/receiver cell. Every matrix number and axis title is at least 12 px, has no pairwise glyph overlap and stays within the drawing. Source/receiver glyphs stay aligned with their actual columns/rows. Matrix page fit and full paused-trial invariance passed at 320, 390, 650, 651, 768 and 1440 px. Existing real playback, repeated/continuous attacks, forecast corruption/repair, automatic handoff, stable live cost switches, all four curves, controller ownership/history and exact old replay retained.",
+          "benchmarks": "Not rerun. Only matrix typography and header spacing changed. Physical model, controller gains, learning, defaults, source errors, forecast timing, objective, limits, all costs and recorded numerical results unchanged."
         },
         "screenshots": {
-          "pixel_review": "Pending candidate pixels. Actual current desktop/phone matrix and voltage panel pixels reviewed to choose a focused matrix readability improvement."
+          "artifact_id": 12125140270,
+          "artifact_digest": "sha256:362632befb399e2fd89b102d3367c7cf1500579eff7324deb5a3fde505eb03e9",
+          "captures": [
+            "matrix-labels-320.jpg",
+            "panel-matrix-390.jpg",
+            "panel-matrix-1440.jpg"
+          ],
+          "pixel_review": "Actual desktop 1440 and phone 390 full matrix panel JPEG pixels, plus the 320 px matrix drawing JPEG pixels reviewed through authorized Actions logs. All source numbers, inverter numbers and axis titles are larger and clearly separated. Source bus title has its own space above the staggered phone numbers, Inverter title fits left of receiver labels, and all 23 source columns/eight rows remain visible with no glyph overlap or clipping observed in reviewed drawings. Existing controller ownership, budget, current observation, selection/synthesis receipt and command disclosure remain in the same panel. Full DOM checks additionally cover 650, 651 and 768 px; no screenshot pixel review is claimed at those extra widths. This is artifact pixel review, not direct live browser access."
         },
-        "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed."
+        "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed.",
+        "source_commit": "b201274413ee1dbe6ae0b5737f6819e4a78f5d52",
+        "published_commit": "d1051473ebf998551a18189f60e622aaf7f2106d",
+        "candidate_run": 39095626334,
+        "main_run": 39096116138,
+        "pages_run": 39096115724,
+        "completed_at": "2026-10-18T04:16:47.516Z",
+        "publication": "Candidate and main validation succeeded. Generated ready child has tested source as its single parent and only index.html changed. Promoted with expected current main SHA and force false. Pages deployment logs confirmed success for the exact tested ready version."
       }
     ],
-    "active_run": {
-      "slot": "2026-10-18T12:00:00+08:00",
-      "started_at": "2026-10-18T12:00:00+08:00",
-      "preflight_at": "2026-10-18T11:56:04+08:00",
-      "expires_at": "2026-10-18T12:36:04+08:00",
-      "candidate_branch": "cloud/refine/20261018-1200",
-      "base_commit": "e72156d27b731f00f88edee1ce3fe007ea3786f8",
-      "owner": "6ad2628236888191b683d1e7ed2e5b93",
-      "program": "20261018-visual-codesign"
-    },
+    "active_run": null,
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
@@ -1689,5 +1692,5 @@
     "baseline_main": "2a9ff26b59565ecac1eb5274fbea4d813a18f24f"
   },
   "completed_count_scope": "Original bounded program, retained at 15. Renewed counts are tracked independently in renewed_program.",
-  "total_completed_count": 26
+  "total_completed_count": 27
 }
