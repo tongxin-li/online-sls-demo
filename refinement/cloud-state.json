@@ -1730,13 +1730,22 @@
           "No model, controller, objective, limits, learning, forecast, attack, replay, baseline or recorded numerical changes. No duplicate panel or control."
         ],
         "tests": {
-          "status": "Pending cloud validation",
+          "status": "Full cloud validation rerun after waiting for native keyboard scrolling to settle.",
           "benchmarks": "Not rerun for this interface-only change."
         },
         "screenshots": {
           "pixel_review": "Pending authorized cloud JPEG previews"
         },
-        "direct_live_inspection": "Unverified. Previously denied direct live browser access will not be retried or bypassed."
+        "direct_live_inspection": "Unverified. Previously denied direct live browser access will not be retried or bypassed.",
+        "superseded_candidates": [
+          {
+            "source_commit": "c4e64791a6bd5ebb3a9c1066d85cac67cae863a9",
+            "candidate_run": 39102956307,
+            "status": "failed unpublished",
+            "evidence": "All 224 numerical and interaction cases, build and original browser suite passed. New navigation fixture timed out while the browser keyboard scroll animation continued after setting a new scroll position. Add a measured 250 ms scroll stability condition before further navigation. Product source unchanged.",
+            "screenshot_review": "Actual desktop start view pixel preview readable. Other positions not captured; publication withheld."
+          }
+        ]
       }
     ],
     "active_run": {

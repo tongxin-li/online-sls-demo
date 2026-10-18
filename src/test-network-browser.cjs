@@ -143,6 +143,13 @@ async function main() {
     for(let i=0;i<6;i++)await scroller.press('ArrowRight');
     await surface.waitForFunction(()=>document.querySelector('.pr-matrix-scroll').scrollLeft>0);
     assert.ok((await hint.textContent()).includes('Sources'),'Native keyboard scrolling keeps the cue available');
+    // Let the browser finish its native keyboard scroll animation before setting a new position.
+    await scroller.evaluate(node=>new Promise(resolve=>{
+      let last=node.scrollLeft,quietSince=performance.now();
+      const settled=()=>{const now=performance.now();if(node.scrollLeft!==last){last=node.scrollLeft;quietSince=now;}
+        if(now-quietSince>=250)resolve();else requestAnimationFrame(settled);};
+      requestAnimationFrame(settled);
+    }));
     for(const fraction of [0,.5,1])await move(fraction);
     await scroller.evaluate((node,left)=>{node.scrollLeft=left;},initial);
     const after=await read(surface);
