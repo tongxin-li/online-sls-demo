@@ -783,13 +783,8 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-18T17:00:00+08:00",
-    "branch": "cloud/refine/20261018-1700",
-    "started_at": "2026-10-18T17:01:35+08:00",
-    "lease_expires_at": "2026-10-18T17:41:35+08:00"
-  },
-  "next_focus": "Validate chronological observed source timing and readable forcing error in the existing linked inspector, while preserving all four command previews and frozen deployment.",
+  "active_run": null,
+  "next_focus": "Verify final repeated checks and completion metadata. Then review source label clipping at large matrix pan boundaries while preserving the pinned receiver axis, exact visible ranges, every source and keyboard reachability. Keep the existing concise inspector, single cost table, two stage strip and stable headings. Do not add panels or broaden numerical studies.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -899,16 +894,16 @@
       "pages_run": 39052070867
     },
     "renewed_completion": {
-      "slot": "2026-10-18T16:00:00+08:00",
-      "branch": "cloud/refine/20261018-1600",
-      "product_ready_commit": "76b2e15f503ebe2f0159b1247e1f6534e56c3b5d",
-      "source_commit": "864713df937b8c17f3f844986dce9dbdfeddb936",
-      "candidate_run": 39110280338,
-      "main_run": 39111191529,
-      "pages_run": 39111191339,
+      "slot": "2026-10-18T17:00:00+08:00",
+      "branch": "cloud/refine/20261018-1700",
+      "product_ready_commit": "13eb5e384f1aad5b1c66fa2aae3b9e76bc101b54",
+      "source_commit": "03d40975d86ff941af9d5b9c3db09ea9f0e3dbf3",
+      "candidate_run": 39113979517,
+      "main_run": 39114876692,
+      "pages_run": 39114876840,
       "scope": "Completion record only. Product already validated and deployed.",
-      "status": "16:00 completion metadata is already main at f7b71ba54c2e8d6bc0c200c28b9107e0df6ad8ed. Its candidate and prepare plus main repeat succeeded. Product repeat also succeeded and exact Pages deployment was verified. No recovery invocation or completion increment.",
-      "instruction": "Read actual main repeat before further source edits and metadata validation before promotion. This 16:00 completion is counted once in this candidate. Promote metadata only after normal successful validation with matching current main 76b2e15f503ebe2f0159b1247e1f6534e56c3b5d and force false. On newer main reapply only verified metadata without overwriting concurrent product changes or double counting. Recovery, coordination, preflight and duplicate dispatches are not refinements. Preserve the original 16:42:22 pass deadline."
+      "status": "Metadata validation pending at record creation. Historical completed 15, renewed invocation 16 and completed 16 yield total 31. Previous metadata verification did not increment either count.",
+      "instruction": "Read actual product main repeat before further source edits and metadata validation before promotion. This 17:00 completion is counted once in this candidate. Promote metadata only after normal successful validation with matching current main 13eb5e384f1aad5b1c66fa2aae3b9e76bc101b54 and force false. On newer main reapply only verified metadata without overwriting concurrent product changes or double counting. Recovery, coordination, preflight and duplicate dispatches are not refinements. Preserve the original 17:41:35 pass deadline."
     },
     "previous_renewed_metadata_verification": {
       "commit": "e72156d27b731f00f88edee1ce3fe007ea3786f8",
@@ -1035,6 +1030,18 @@
         "scope": "Completion record only. Product already validated and deployed.",
         "status": "15:00 completion metadata is already main at de6ab60feef72ba3d7b81aed82a72b1c38d0cae6. Its candidate and prepare plus main repeat succeeded, and exact Pages deployment was verified. No recovery invocation or completion increment.",
         "instruction": "Read actual main repeat result before further source edits. This 15:00 slot is counted once in this metadata candidate. Promote metadata only after normal successful validation with expected current main 7f0bdc7d900aa478c9339fa39c63e38dfe3037b7 and force false. On newer main, reapply only verified metadata without overwriting concurrent product changes or double counting. Metadata recovery, preflight and duplicate dispatches are not refinements. Preserve the original stricter 15:36:08 deadline from the early dispatch."
+      },
+      "14": {
+        "slot": "2026-10-18T16:00:00+08:00",
+        "branch": "cloud/refine/20261018-1600",
+        "product_ready_commit": "76b2e15f503ebe2f0159b1247e1f6534e56c3b5d",
+        "source_commit": "864713df937b8c17f3f844986dce9dbdfeddb936",
+        "candidate_run": 39110280338,
+        "main_run": 39111191529,
+        "pages_run": 39111191339,
+        "scope": "Completion record only. Product already validated and deployed.",
+        "status": "16:00 completion metadata is already main at f7b71ba54c2e8d6bc0c200c28b9107e0df6ad8ed. Its candidate and prepare plus main repeat succeeded. Product repeat also succeeded and exact Pages deployment was verified. No recovery invocation or completion increment.",
+        "instruction": "Read actual main repeat before further source edits and metadata validation before promotion. This 16:00 completion is counted once in this candidate. Promote metadata only after normal successful validation with matching current main 76b2e15f503ebe2f0159b1247e1f6534e56c3b5d and force false. On newer main reapply only verified metadata without overwriting concurrent product changes or double counting. Recovery, coordination, preflight and duplicate dispatches are not refinements. Preserve the original 16:42:22 pass deadline."
       }
     },
     "renewed_metadata_verification_history": [
@@ -1188,7 +1195,7 @@
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
     "invocation_count": 16,
-    "completed_count": 15,
+    "completed_count": 16,
     "runs": [
       {
         "slot": "2026-10-18T01:00:00+08:00",
@@ -1943,32 +1950,55 @@
         "branch": "cloud/refine/20261018-1700",
         "started_at": "2026-10-18T17:01:35+08:00",
         "lease_expires_at": "2026-10-18T17:41:35+08:00",
-        "status": "validating",
+        "status": "completed",
         "candidate_branch": "cloud/refine/20261018-1700",
         "base_commit": "f7b71ba54c2e8d6bc0c200c28b9107e0df6ad8ed",
         "counted_invocation": true,
-        "counted_completed": false,
+        "counted_completed": true,
         "changes": [
           "Clarify the existing revealed source observation in chronological issue, target action and reveal order. Explicitly identify forcing error rather than bus voltage. No timing calculation changes.",
           "Raise existing observation labels and notes to 12 px and measured values to 16 px. Emphasize signed error without a success or failure color. Keep the existing panel, all values, rolling statistics, current support and full preview command qualification.",
           "Add exact chronological timing, raw value preservation, assistive unit description, readable typography and text wrapping checks across existing browser interactions, plus actual source inspection and unchanged full snapshot checks on both new networks at desktop and phone sizes. No engine, scientific or recorded result changes."
         ],
         "tests": {
-          "status": "Pending normal cloud validation",
-          "benchmarks": "Not rerun for this presentation change."
+          "suites": 8,
+          "total": 224,
+          "failed": 0,
+          "candidate": "Full validation and prepare passed on first candidate.",
+          "build": "passed",
+          "reference_artifact": "Passed unchanged reference generator and artifact checks.",
+          "main": "Repeat validation 39114876692 is running at completion record creation. Read actual final status before further source edits.",
+          "browser": "Full original desktop and phone browser suite and both network suites passed without runtime errors. Existing playback, repeated and continuous attacks, forecast toggles, automatic fresh comparison, stable cost view switching, all four traces, model switching and exact replay remain covered. New checks require the exact issue target reveal text from actual revealed samples, unchanged displayed forecast forcing and signed errors, assistive unit description, at least 12 px labels and 16 px values, readable signed error emphasis and in-column text wrapping. Actual toy8 and feeder47 source selections at desktop and phone sizes verify chronological timestamps, preserved values and invariant full snapshots before and after inspection and pixel capture.",
+          "benchmarks": "Not rerun. No engine, control, objective, learning, forecast timing, noise, limits, attack, numerical output or recorded result changes."
         },
         "screenshots": {
-          "pixel_review": "Pending actual Actions JPEG previews. Before choice, reviewed actual current phone link inspector screenshot from completed main Actions logs."
+          "artifact_id": 12131393051,
+          "artifact_digest": "sha256:05dd8cfab65575e9335df5e0134a591f12871a12839211641809c4a4be99c829",
+          "captures": [
+            "link-evidence-1440.jpg",
+            "link-evidence-390.jpg",
+            "networks/observation-toy8-1440.jpg",
+            "networks/observation-feeder47-1440.jpg",
+            "networks/observation-feeder47-390.jpg",
+            "networks/observation-toy8-390.jpg"
+          ],
+          "pixel_review": "Six actual desktop 1440 and phone 390 JPEG pixels reviewed through authorized Actions previews before promotion, covering feeder24 source 7 plus toy8 and feeder47 source 2. Chronological issue target reveal labels fit. Three actual raw forcing values stay distinct with larger signed error and no success color. Unit and error window notes wrap without overlap or hiding terms. Current support, both real sparse budgets and existing selection and synthesis data remain intact. Larger phone notes require slightly more vertical space. Existing command pan boundary clipping remains unchanged. No direct live browser inspection claimed."
         },
-        "direct_live_inspection": "Unverified. Previously denied direct live browser access will not be retried or bypassed."
+        "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed. Public HTTP bytes were not independently fetched in this pass. Actual generated page interactions and desktop and phone screenshot pixels were reviewed through authorized Actions evidence.",
+        "source_commit": "03d40975d86ff941af9d5b9c3db09ea9f0e3dbf3",
+        "published_commit": "13eb5e384f1aad5b1c66fa2aae3b9e76bc101b54",
+        "candidate_run": 39113979517,
+        "main_run": 39114876692,
+        "pages_run": 39114876840,
+        "completed_at": "2026-10-18T09:20:38.848Z",
+        "publication": "Candidate validation and prepare succeeded. Generated child has the tested source as its single parent and only index.html changed, with exactly the expected observation CSS, unit text and chronological label changes. Promoted with matching expected main f7b71ba54c2e8d6bc0c200c28b9107e0df6ad8ed and force false. Pages deployment logs independently confirm exact version 13eb5e384f1aad5b1c66fa2aae3b9e76bc101b54 and canonical environment. Main repeat pending at creation.",
+        "remaining_visual_limitations": [
+          "Larger observation notes use slightly more vertical space on a phone. No values, timing, current support or existing selection and synthesis evidence were removed.",
+          "Existing command numeric text and matrix source glyphs still partially clip at horizontal pan boundaries, with every term and source reachable. Only declared Chrome desktop and phone layouts have pixel review. No direct live browser inspection is claimed."
+        ]
       }
     ],
-    "active_run": {
-      "slot": "2026-10-18T17:00:00+08:00",
-      "branch": "cloud/refine/20261018-1700",
-      "started_at": "2026-10-18T17:01:35+08:00",
-      "lease_expires_at": "2026-10-18T17:41:35+08:00"
-    },
+    "active_run": null,
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
@@ -1988,5 +2018,5 @@
     "baseline_main": "2a9ff26b59565ecac1eb5274fbea4d813a18f24f"
   },
   "completed_count_scope": "Original bounded program, retained at 15. Renewed counts are tracked independently in renewed_program.",
-  "total_completed_count": 30
+  "total_completed_count": 31
 }
