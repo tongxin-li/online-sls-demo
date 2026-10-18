@@ -817,11 +817,20 @@
         "ongoing_browser": "success",
         "review_job": 117759201425,
         "review": "success",
-        "full_validation": "in_progress_at_followup",
+        "full_validation": "cancelled_by_followup",
         "logs_read": [
           "ongoing-browser",
           "review-ongoing"
         ]
+      },
+      "axis_spacing_attempt": {
+        "source_commit": "dfa0c141a7c2874291b082f95fa81be034895bad",
+        "run_id": 39156270680,
+        "ongoing_browser_job": 117760259620,
+        "conclusion": "failure",
+        "completed_logs_read": true,
+        "reason": "Rendered response chart axis gap 1.4799995 px fails required 2 px separation. Increase margin by 2 px and retain the assertion.",
+        "full_validation": "superseded_after_rendered_layout_failure"
       }
     },
     "remaining_gaps": [],
@@ -3137,11 +3146,20 @@
             "ongoing_browser": "success",
             "review_job": 117759201425,
             "review": "success",
-            "full_validation": "in_progress_at_followup",
+            "full_validation": "cancelled_by_followup",
             "logs_read": [
               "ongoing-browser",
               "review-ongoing"
             ]
+          },
+          "axis_spacing_attempt": {
+            "source_commit": "dfa0c141a7c2874291b082f95fa81be034895bad",
+            "run_id": 39156270680,
+            "ongoing_browser_job": 117760259620,
+            "conclusion": "failure",
+            "completed_logs_read": true,
+            "reason": "Rendered response chart axis gap 1.4799995 px fails required 2 px separation. Increase margin by 2 px and retain the assertion.",
+            "full_validation": "superseded_after_rendered_layout_failure"
           }
         },
         "remaining_gaps": [],
@@ -3195,11 +3213,20 @@
           "ongoing_browser": "success",
           "review_job": 117759201425,
           "review": "success",
-          "full_validation": "in_progress_at_followup",
+          "full_validation": "cancelled_by_followup",
           "logs_read": [
             "ongoing-browser",
             "review-ongoing"
           ]
+        },
+        "axis_spacing_attempt": {
+          "source_commit": "dfa0c141a7c2874291b082f95fa81be034895bad",
+          "run_id": 39156270680,
+          "ongoing_browser_job": 117760259620,
+          "conclusion": "failure",
+          "completed_logs_read": true,
+          "reason": "Rendered response chart axis gap 1.4799995 px fails required 2 px separation. Increase margin by 2 px and retain the assertion.",
+          "full_validation": "superseded_after_rendered_layout_failure"
         }
       },
       "remaining_gaps": [],

@@ -1664,7 +1664,7 @@
   function chartBase(el, observations, keys, yTitle, xTitle, height, options={}) {
     const width = Math.max(240,el.getBoundingClientRect().width);
     // Keep numeric tick labels and the axis caption on separate lines, including touch layouts.
-    const margin = {left:52,right:12,top:25,bottom:36};
+    const margin = {left:52,right:12,top:25,bottom:38};
     const frame={x:margin.left,y:margin.top,w:width-margin.left-margin.right,h:height-margin.top-margin.bottom};
     const svg=d3.select(el).attr('viewBox','0 0 '+width+' '+height).attr('height',height);
     const clip='pr-clip-'+el.id;
