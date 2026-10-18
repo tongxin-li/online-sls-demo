@@ -2123,7 +2123,14 @@ test('link receipt compares actual same-budget supports and discovery scores wit
       assert.equal(item.commandKvar,snapshot.commandQ[item.key][receiver-1]);
       if(item.selection==='Excluded'){assert.ok(Math.abs(item.gainNorm)<1e-8);assert.ok(Math.abs(item.sourceKvar)<1e-8);}
     }
-    assert.equal(h.node('link-receipt-rows').children.length,5);
+    const discovery=h.node('link-receipt-rows').children,execution=h.node('link-receipt-execution').children;
+    assert.deepEqual(plain(discovery.map(row=>row.dataset.measure)),['selection','score']);
+    assert.equal(execution[0],h.node('link-receipt-execution-time'),'Keep the actual execution header across repeated inspection');
+    assert.deepEqual(plain(execution.slice(1).map(row=>row.dataset.measure)),['gainNorm','sourceKvar','commandKvar']);
+    for(const rendered of [...discovery,...execution.slice(1)])for(const cell of rendered.children.slice(1)){
+      const item=reading.rows.find(item=>item.key===cell.dataset.controller);
+      assert.equal(cell.dataset.value,String(item[rendered.dataset.measure]),'Both groups retain every actual measured value');
+    }
   }
   assert.deepEqual(plain(h.snapshot()),snapshot,'Every receipt is read only');
 });
@@ -2139,6 +2146,7 @@ test('link receipt distinguishes pending execution and saved history and preserv
   const restored=harness(h.saved());assert.deepEqual(restored.linkEvidence(),evidence,'Version 13 replay recovers actual evidence');
   h.event('topology-history','input');assert.equal(h.linkEvidence(),null);assert.equal(h.node('link-receipt').hidden,true);
   assert.equal(h.node('link-receipt-rows').children.length,0,'Historical view hides current executed values');
+  assert.equal(h.node('link-receipt-execution').children.length,1,'Historical view clears all executed rows and retains only its hidden timing header');
   h.click('history-live');assert.deepEqual(h.linkEvidence(),evidence);
   h.change('experiment','prediction');assert.equal(h.linkEvidence(),null,'Adaptive prediction is not a fixed sparse deployment comparison');
 });

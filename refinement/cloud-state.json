@@ -2115,6 +2115,14 @@
             "validation_conclusion": "failure",
             "prepare_conclusion": "skipped",
             "reason": "17 interaction cases encountered the lightweight DOM harness missing Element.remove; 120 interaction cases passed. One dependent timer assertion was a consequence. No browser or later suites ran. Renderer cleanup changed to existing replaceChildren pattern without modifying or weakening the harness, assertions or scientific code."
+          },
+          {
+            "source_commit": "7be3c246f2435970502f5e584d7cb4dca0c82d71",
+            "candidate_run": 39122284849,
+            "status": "failed_unpublished",
+            "validation_conclusion": "failure",
+            "prepare_conclusion": "skipped",
+            "reason": "136 of 137 interaction cases passed. The existing all-cell receipt assertion expected five rows in its old single tbody; the new discovery body correctly contains two. Update that assertion to verify both semantic groups, retained execution header, all ten actual values for every source and receiver, and execution row clearing in historical view. No scientific assertion removed or weakened. Later suites and browser did not run."
           }
         ]
       }
