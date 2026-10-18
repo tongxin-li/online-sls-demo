@@ -783,7 +783,16 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-18T10:00:00+08:00",
+    "started_at": "2026-10-18T09:57:54+08:00",
+    "expires_at": "2026-10-18T10:37:54+08:00",
+    "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
+    "candidate_branch": "cloud/refine/20261018-1000",
+    "base_commit": "86ab70244254733b22f3991a328470e010a615d5",
+    "status": "validating",
+    "scope": "Readable phone network geometry without label/equipment collisions"
+  },
   "next_focus": "Review remaining dense phone feeder geometry and 9 px unselected bus numbers from actual cloud screenshots. Consider a modest responsive network height or clearer existing selection hierarchy only after measured overlap/touch checks and pixel review, without new panels or controls. Preserve contextual source/receiver marks and caption, all four costs and recorded regimes, compact desktop columns and phone order. No scientific retuning or broad benchmark study for visual work.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
@@ -898,7 +907,7 @@
       "branch": "cloud/refine/20261018-0900",
       "product_ready_commit": "78f803f6cc8de784a14b60cdedc4cb19a1ab2faa",
       "scope": "Completion record only, no product changes",
-      "status": "Metadata candidate validation pending at record creation. Product source and ready build are independently verified on candidate and main, and Pages succeeded.",
+      "status": "Recovered metadata candidate 86ab70244254733b22f3991a328470e010a615d5 after normal validation 39087283602 passed all 212 tests and full browser checks. Expected-main guarded metadata-only promotion succeeded. No count increment.",
       "instruction": "The 09:00 slot is counted once in this candidate's renewed_program.completed_count. At the next existing slot read actual metadata candidate workflow result and branch head. Promote only after normal validation with expected current main 78f803f6cc8de784a14b60cdedc4cb19a1ab2faa and force false if still matching. If main changed, reapply only the verified completion metadata onto latest main and validate normally. Do not overwrite newer source, count metadata recovery as another improvement, or count this slot twice. Original 40 minute pass deadline remains 09:43:32. Do not extend it or start an additional refinement from a duplicate dispatch."
     },
     "previous_renewed_metadata_verification": {
@@ -1049,7 +1058,7 @@
     "hard_deadline": "2026-10-19T01:00:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 9,
+    "invocation_count": 10,
     "completed_count": 9,
     "runs": [
       {
@@ -1476,9 +1485,31 @@
         "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed. No public HTTP byte comparison performed this pass.",
         "completed_at": "2026-10-18T01:39:09.315Z",
         "publication": "Candidate and main validation succeeded. Generated ready child has tested source as its single parent and only index.html changed. Promoted with expected current main SHA and force false. Pages succeeded for that exact ready version; deployment logs verified."
+      },
+      {
+        "slot": "2026-10-18T10:00:00+08:00",
+        "started_at": "2026-10-18T09:57:54+08:00",
+        "status": "validating",
+        "candidate_branch": "cloud/refine/20261018-1000",
+        "base_commit": "86ab70244254733b22f3991a328470e010a615d5",
+        "counted_completed": false,
+        "changes": [
+          "Give the existing phone network a 360 px drawing area and 12 px higher contrast bus numbers instead of compressing all 24 physical buses into the 220 px desktop height. Retain desktop geometry and normalized bus layout.",
+          "Preserve every physical and prediction connection, real source/receiver markers, power and forecast badges, all four policies, scientific settings, costs and exact replay. No new panel, control, dependency or numerical study.",
+          "Add actual all-bus centre hit testing, glyph-to-glyph and glyph-to-equipment overlap checks, viewport containment and physical line attachment checks, plus responsive geometry and full trial invariance assertions and pixel screenshots."
+        ]
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "slot": "2026-10-18T10:00:00+08:00",
+      "started_at": "2026-10-18T09:57:54+08:00",
+      "expires_at": "2026-10-18T10:37:54+08:00",
+      "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
+      "candidate_branch": "cloud/refine/20261018-1000",
+      "base_commit": "86ab70244254733b22f3991a328470e010a615d5",
+      "status": "validating",
+      "scope": "Readable phone network geometry without label/equipment collisions"
+    },
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",

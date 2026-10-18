@@ -1172,7 +1172,8 @@
     renderNetworkInspection();
     const el = $('network');
     const width = Math.max(240, el.getBoundingClientRect().width);
-    const height = 220;
+    const compactNetwork=window.innerWidth<=650;
+    const height = compactNetwork?360:220;
     const svg = d3.select(el).attr('viewBox', '0 0 ' + width + ' ' + height).attr('height', height)
       .attr('role','group').attr('aria-label','Radial power feeder. '+attackInstruction()+(forecastMode()?'. Changes forecast reliability, not physical power.':'. Disturbances change load, solar generation or battery charging.'));
     const point = bus => [25 + positions[bus - 1][0] * (width - 54), 26 + positions[bus - 1][1] * (height - 54)];
@@ -1285,7 +1286,7 @@
     });
     nodes.select('.bus-number').raise().attr('text-anchor','middle').attr('x',0)
       .attr('y',bus=>inspection&&(bus===inspection.source||bus===inspection.receiver)?4:27)
-      .style('fill','var(--muted-foreground)').style('font-size',bus=>inspection&&(bus===inspection.source||bus===inspection.receiver)?'12px':'9px').text(bus=>bus);
+      .style('fill','var(--muted-foreground)').style('font-size',bus=>compactNetwork||inspection&&(bus===inspection.source||bus===inspection.receiver)?'12px':'9px').text(bus=>bus);
     nodes.select('.pr-inspection-ring')
       .attr('display',bus=>inspection && (bus===inspection.source || bus===inspection.receiver)?null:'none')
       .attr('stroke',bus=>bus===inspection?.source?'var(--primary)':'var(--foreground)').attr('stroke-width',2)

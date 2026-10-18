@@ -179,7 +179,50 @@ async function main() {
       for(const span of reading.glyphs){assert.ok(span.font>=12);for(const rect of span.rects)assert.ok(rect.left>=reading.box.left-1&&rect.right<=reading.box.right+1&&rect.top>=reading.box.top-1&&rect.bottom<=reading.box.bottom+1,'Full role caption fits without clipping');}
       assert.ok(reading.inspectedColumnFont>=12&&reading.selectedRowFont>=12,'Selected source column and receiver row remain readable');
     };
+    const checkNetworkGeometry = async surface => {
+      const before=await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
+      await surface.waitForFunction(()=>Number(document.querySelector('#pr-network').getAttribute('height'))===(innerWidth<=650?360:220));
+      await surface.locator('#pr-network').scrollIntoViewIfNeeded();
+      const geometry=await surface.evaluate(()=>{
+        const svg=document.querySelector('#pr-network'),frame=svg.getBoundingClientRect(),view=svg.viewBox.baseVal;
+        const box=el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom};};
+        const buses=Array.from(svg.querySelectorAll('.bus-node')).map(node=>{
+          const label=node.querySelector('.bus-number'),point=svg.createSVGPoint();point.x=0;point.y=0;
+          const centre=point.matrixTransform(node.getScreenCTM()),hit=document.elementFromPoint(centre.x,centre.y)?.closest('.bus-node');
+          const local=point.matrixTransform(node.transform.baseVal.getItem(0).matrix);
+          return {bus:Number(node.dataset.bus),text:label.textContent,label:box(label),disc:box(node.querySelector('.pe-disc')),
+            font:parseFloat(getComputedStyle(label).fontSize),hit:Number(hit?.dataset.bus),
+            x:local.x,y:local.y,normalX:(local.x-25)/(view.width-54),normalY:(local.y-26)/(view.height-54)};
+        });
+        return {width:innerWidth,height:parseFloat(svg.getAttribute('height')),frame:box(svg),page:document.documentElement.scrollWidth,
+          buses,edges:Array.from(svg.querySelectorAll('.physical line')).map(line=>({pair:line.__data__,x1:Number(line.getAttribute('x1')),y1:Number(line.getAttribute('y1')),x2:Number(line.getAttribute('x2')),y2:Number(line.getAttribute('y2'))})),
+          expectedEdges:window.PowerDemo.constants.edges};
+      });
+      assert.equal(geometry.height,geometry.width<=650?360:220,'Only the phone drawing receives extra vertical room');
+      assert.equal(geometry.buses.length,24);assert.equal(geometry.edges.length,23);
+      assert.deepEqual(geometry.edges.map(edge=>edge.pair),geometry.expectedEdges,'Same constructed physical feeder connections');
+      const overlap=(a,b)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>.5&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>.5;
+      for(const bus of geometry.buses){
+        assert.equal(bus.text,String(bus.bus));assert.equal(bus.hit,bus.bus,'Each actual bus centre targets itself, not a neighbour or label');
+        assert.ok(bus.label.left>=geometry.frame.left-1&&bus.label.right<=geometry.frame.right+1&&bus.label.top>=geometry.frame.top-1&&bus.label.bottom<=geometry.frame.bottom+1,'Every bus number fits the drawing');
+        if(geometry.width<=650){
+          assert.ok(bus.font>=12,'All phone bus numbers are readable without hover');
+          for(const other of geometry.buses)if(other.bus!==bus.bus){
+            assert.equal(overlap(bus.label,other.label),false,'Phone bus labels cannot overlap '+bus.bus+' and '+other.bus);
+            assert.equal(overlap(bus.label,other.disc),false,'A phone number cannot cover another equipment icon '+bus.bus+' and '+other.bus);
+          }
+        }
+      }
+      for(const edge of geometry.edges){
+        const from=geometry.buses.find(bus=>bus.bus===edge.pair[0]),to=geometry.buses.find(bus=>bus.bus===edge.pair[1]);
+        for(const [actual,expected] of [[edge.x1,from.x],[edge.y1,from.y],[edge.x2,to.x],[edge.y2,to.y]])assert.ok(Math.abs(actual-expected)<.01,'Physical line remains attached to its actual bus');
+      }
+      assert.ok(geometry.page<=geometry.width+1);
+      assert.equal(await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),before,'Geometry inspection leaves all physical states, forecasts, support and costs unchanged');
+      return geometry.buses.map(({bus,normalX,normalY})=>({bus,normalX,normalY}));
+    };
     const captureNetworkInspection = async surface => {
+      await checkNetworkGeometry(surface);
       await checkNetworkInspection(surface);
       const width=surface.viewportSize().width,phase=await surface.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().phase),before=await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
       const preview=await surface.locator('.pr-network-panel').screenshot({path:path.join(output,'network-inspection-'+width+'-'+phase+'.jpg'),type:'jpeg',quality:90});
@@ -306,6 +349,7 @@ async function main() {
     const exerciseDashboardLayout = async surface => {
       const before=await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
       const viewport=surface.viewportSize(),original=await checkDashboardLayout(surface);
+      const networkPositions=await checkNetworkGeometry(surface);
       if(viewport.width>650){
         assert.ok(original.boxes[1].height<original.boxes[0].height-150,'Uninspected links no longer stretch into a large empty card');
         assert.ok(original.boxes[3].y<original.boxes[0].bottom-100,'Comparison moves above the old stretched row boundary');
@@ -318,6 +362,8 @@ async function main() {
         for(const width of [390,768,1440,650,651,viewport.width]){
           await surface.setViewportSize({width,height:1000});
           await checkDashboardLayout(surface);
+          const positions=await checkNetworkGeometry(surface);
+          for(let i=0;i<positions.length;i++)for(const key of ['normalX','normalY'])assert.ok(Math.abs(positions[i][key]-networkPositions[i][key])<1e-6,'Responsive spacing does not change the normalized bus layout');
         }
         await surface.locator('#pr-voltage-details > summary').click();
         await checkDashboardLayout(surface);

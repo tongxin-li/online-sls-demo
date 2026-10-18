@@ -507,3 +507,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 #pr-network .bus-node[data-inspection-role="source"] .bus-number { fill:#0066cc !important; }
 #pr-matrix .matrix-columns text[data-inspected="true"],
 #pr-matrix .matrix-rows g[aria-pressed="true"] text { font-size:12px; font-weight:750; }
+
+/* The phone feeder gives all bus numbers room to be read, not smaller type. */
+@media(max-width:650px) {
+  #pr-network .bus-number { fill:#53535a !important; paint-order:stroke; stroke:#fff; stroke-width:2px; stroke-linejoin:round; }
+}
