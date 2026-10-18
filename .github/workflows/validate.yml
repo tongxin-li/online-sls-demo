@@ -28,13 +28,13 @@ jobs:
           python-version: '3.12'
       - name: Test controllers and interactions
         run: |
+          node src/test-interactions.cjs
           node src/test-continuous-response.cjs
           node src/test-causal-source-scale.cjs
           node src/test-forecast-calibration.cjs
           node src/test-simulation.cjs
           node src/test-communication.cjs
           node src/test-forecasted-scenario.cjs
-          node src/test-interactions.cjs
           node src/test-topology-timeline.cjs
           node src/test-network-scenarios.cjs
           node src/build-reference-study.cjs --check

@@ -3440,7 +3440,8 @@
       "changes": [
         "Fresh unsaved sessions construct the actual continuous-phi-v1 engine, show measured response weights and initial source gain inspection, and hide the inapplicable legacy experiment selector.",
         "Original lifecycle checks use explicit actual version 13 production restore records. No controller hook or hidden action replaces playback. Fresh ongoing desktop and phone tests no longer inject protocol 14 records.",
-        "Add a fresh unsaved interaction regression crossing 360 actions, exact replay, read only matrix views and fresh ongoing restart. Document current archived migration publication gates."
+        "Add a fresh unsaved interaction regression crossing 360 actions, exact replay, read only matrix views and fresh ongoing restart. Document current archived migration publication gates.",
+        "Include network identity in fresh browser readout. Run the unchanged required interaction suite first for faster failure feedback; no suite or assertion is removed."
       ],
       "tests": {
         "preflight": {
@@ -3450,6 +3451,15 @@
           "candidate": "success",
           "completed_logs_read": true,
           "generated_child_only_index": true
+        },
+        "first_fresh_candidate": {
+          "source_commit": "c5653d2bba6bca67e713de8c684960511d7eaa5b",
+          "run_id": 39160995429,
+          "ongoing_browser_job": 117774205877,
+          "ongoing_browser": "failure",
+          "completed_logs_read": true,
+          "reason": "New assertion read projected snapshot.networkId without including it in the read helper. Real network switching executed but the test value was undefined.",
+          "full_validation": "in_progress_before_corrective_source"
         }
       },
       "next_focus": "Enable and validate fresh ongoing trials with explicit archived replay fixtures. Keep unpublished until every new trial migration and required acceptance gate is coherent."
