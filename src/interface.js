@@ -300,13 +300,30 @@
     return !inspection || historyIndex!==null ? null
       : commandContributions(snapshot,simulation.segments,simulation.forecasts,inspection.source,inspection.receiver);
   }
+  function updateCommandScrollHint() {
+    const scroller=$('command-scroll'),hint=$('command-scroll-hint');
+    hint.hidden=true;hint.textContent='';
+    for(const key of ['visible','left','right','offset'])hint.dataset[key]='';
+    const headers=Array.from(scroller.querySelectorAll('thead th'));
+    if(!scroller.clientWidth || !headers.length || !$('command-rows').children.length) return;
+    const bounds=scroller.getBoundingClientRect(),edge=headers[0].getBoundingClientRect().right;
+    const visible=headers.slice(1).filter(cell=>{
+      const box=cell.getBoundingClientRect();return box.left>=edge-.5&&box.right<=bounds.right+.5;
+    }).map(cell=>cell.textContent);
+    const maximum=Math.max(0,scroller.scrollWidth-scroller.clientWidth);
+    const left=scroller.scrollLeft>1,right=scroller.scrollLeft<maximum-1;
+    hint.dataset.visible=visible.join('|');hint.dataset.left=String(left);hint.dataset.right=String(right);
+    hint.dataset.offset=String(scroller.scrollLeft);hint.hidden=maximum<=1;
+    if(!hint.hidden)hint.textContent=(visible.length?'Visible '+visible.join(', ')+' · ':'')
+      +(left&&right?'Scroll both ways':left?'Scroll left':'Scroll right');
+  }
   function renderCommandInspection(inspection) {
     const reading=inspectedCommand(),panel=$('command-inspector');
     panel.hidden=!inspection;
     $('command-title').textContent=reading ? 'Command at inverter '+reading.receiver+' · Action '+reading.action+' s'
       : 'Command breakdown · '+(historyIndex!==null?'Show Latest':'Step to reveal');
     const body=$('command-rows');body.replaceChildren();
-    if(!reading) return null;
+    if(!reading){updateCommandScrollHint();return null;}
     const names=Object.fromEntries(activeSeries().map(item=>[item.key,item.label]));
     const format=value=>(Math.abs(value)<.0005?0:value).toFixed(3);
     for(const item of reading.rows) {
@@ -322,6 +339,7 @@
       const gain=document.createElement('td');gain.className='source-gain';gain.textContent=item.gainNorm.toPrecision(4);row.append(gain);
       body.append(row);
     }
+    updateCommandScrollHint();
     return reading;
   }
   // Keep selection energy distinct from the gain of a resynthesized executed row.
@@ -803,6 +821,8 @@
     render();save();
   });
   $('matrix')?.parentElement?.addEventListener('scroll',updateMatrixScrollHint,{passive:true});
+  $('command-scroll').addEventListener('scroll',updateCommandScrollHint,{passive:true});
+  $('command-inspector').addEventListener('toggle',updateCommandScrollHint);
   if ($('matrix-view')) $('matrix-view').addEventListener('change',()=>{historyIndex=null;renderProtocol();renderInspectedSource();drawNetwork();drawMatrix();save();});
   $('topology-history').addEventListener('input',()=>reviewTopology(Number($('topology-history').value)));
   $('history-live').addEventListener('click',()=>reviewTopology(null));

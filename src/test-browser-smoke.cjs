@@ -544,17 +544,31 @@ async function main() {
       }
       for(const [position,fraction] of [['start',0],['middle',.5],['end',1]]){
         await scroll.evaluate((node,fraction)=>{node.scrollLeft=fraction*(node.scrollWidth-node.clientWidth);},fraction);
+        await scroll.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
         const view=await scroll.evaluate(node=>{
           const bounds=node.getBoundingClientRect(),labels=Array.from(node.querySelectorAll('th:first-child')),edge=labels[0].getBoundingClientRect().right;
           const glyph=cell=>{const range=document.createRange();range.selectNodeContents(cell);const box=range.getBoundingClientRect();return {left:box.left,right:box.right};};
           const columns=Array.from(node.querySelectorAll('thead th')).slice(1).map((cell,index)=>({index,label:cell.textContent,...glyph(cell)}));
+          const hint=document.querySelector('#pr-command-scroll-hint');
+          const whole=Array.from(node.querySelectorAll('thead th')).slice(1).filter(cell=>{const box=cell.getBoundingClientRect();return box.left>=edge-.5&&box.right<=bounds.right+.5;}).map(cell=>cell.textContent);
           return {left:bounds.left,right:bounds.right,edge,page:document.documentElement.scrollWidth,viewport:innerWidth,
+            whole,scrollLeft:node.scrollLeft,maximum:node.scrollWidth-node.clientWidth,
+            hint:{text:hint.textContent,hidden:hint.hidden,data:{...hint.dataset},font:parseFloat(getComputedStyle(hint).fontSize),box:hint.getBoundingClientRect().toJSON()},
             labels:labels.map(cell=>({text:cell.textContent,left:cell.getBoundingClientRect().left,right:cell.getBoundingClientRect().right,glyph:glyph(cell),background:getComputedStyle(cell).backgroundColor})),
             visible:columns.filter(cell=>cell.left>=edge-.5&&cell.right<=bounds.right+.5).map(cell=>cell.index),
             fonts:Array.from(node.querySelectorAll('th,td')).map(cell=>parseFloat(getComputedStyle(cell).fontSize)),
             cells:node.querySelectorAll('tbody td').length,rows:Array.from(node.querySelectorAll('tbody tr')).map(row=>row.dataset.controller)};
         });
         assert.ok(view.page<=view.viewport+1,'Command panning does not overflow the page');
+        assert.deepEqual(view.hint.data.visible?view.hint.data.visible.split('|'):[],view.whole,'Caption names only whole command columns beyond the pinned method names');
+        assert.ok(Math.abs(Number(view.hint.data.offset)-view.scrollLeft)<.5,'Caption follows actual native scrolling');
+        assert.equal(view.hint.hidden,view.maximum<=1);
+        if(view.maximum>1){
+          const left=view.scrollLeft>1,right=view.scrollLeft<view.maximum-1;
+          assert.equal(view.hint.data.left,String(left));assert.equal(view.hint.data.right,String(right));
+          assert.equal(view.hint.text,(view.whole.length?'Visible '+view.whole.join(', ')+' · ':'')+(left&&right?'Scroll both ways':left?'Scroll left':'Scroll right'));
+          assert.ok(view.hint.font>=12&&view.hint.box.left>=0&&view.hint.box.right<=view.viewport+1,'Native scroll caption stays readable inside the phone');
+        }
         assert.deepEqual(view.rows,['online','scalar','static','causal']);assert.equal(view.cells,24,'All six terms for all four policies remain rendered');
         assert.ok(view.fonts.every(font=>font>=12),'Every command heading and value uses readable type');
         assert.equal(view.labels.length,5);

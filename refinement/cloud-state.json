@@ -783,7 +783,13 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-18T21:00:00+08:00",
+    "branch": "cloud/refine/20261018-2100",
+    "started_at": "2026-10-18T21:00:00+08:00",
+    "preflight_at": "2026-10-18T20:55:32+08:00",
+    "lease_expires_at": "2026-10-18T21:35:32+08:00"
+  },
   "next_focus": "Verify product and metadata final repeated checks first. The 19:00 two-group receipt improvement is counted once; 20:00 recovery is not a new improvement. Then review existing inspection usability without adding panels, repeating results, hiding sources or changing the scientific protocol.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
@@ -903,7 +909,7 @@
       "main_run": 39125642852,
       "pages_run": 39125642340,
       "scope": "Completion and recovery record only. Product already validated and deployed. No new source improvement.",
-      "status": "Metadata validation pending at creation. Historical completed 15, renewed invocation 19 and completed 18 yield total 33. Actual 19:00 product is counted once only. 20:00 recovery and 19:33 duplicate do not add a completion.",
+      "status": "19:00 product and 20:00 recovery metadata are already main at db596461f147c57f8e5ad61cbb7542a886a58067. Candidate and prepare, both main repeats and exact Pages versions succeeded. Final metadata main 39126592304 independently read with completed logs before this slot. No recovery invocation or completion increment.",
       "instruction": "Read actual product main repeat before metadata promotion or further source edits. Validate metadata normally and promote only when current main matches 6ac9de8994dadfcb0482971f13819461866b1dc4 with force false. On newer main inspect and reapply only verified metadata without overwriting concurrent changes or double counting. Preserve failed source attempts, recorded screenshot limitations and both original pass deadlines. Read final metadata repeat at the next existing scheduled slot. Do not treat recovery, metadata or duplicate dispatches as extra improvements."
     },
     "previous_renewed_metadata_verification": {
@@ -1119,6 +1125,13 @@
         "main_run": 39119747464,
         "pages_run": 39119746793,
         "result": "Final main success independently read with completed logs before this slot. All 224 tests, build consistency and browser suites passed. Prior pass verified exact metadata Pages version. No recovery count."
+      },
+      {
+        "commit": "db596461f147c57f8e5ad61cbb7542a886a58067",
+        "candidate_run": 39125834640,
+        "main_run": 39126592304,
+        "pages_run": 39126591886,
+        "result": "All final checks independently verified with completed logs before source changes. Exact metadata Pages version verified in prior pass. Nineteen source completion and twenty recovery remain counted once with no new metadata improvement."
       }
     ],
     "pending_visual_candidate": {
@@ -1237,7 +1250,7 @@
     "hard_deadline": "2026-10-19T01:00:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 19,
+    "invocation_count": 20,
     "completed_count": 18,
     "runs": [
       {
@@ -2127,7 +2140,7 @@
           "build": "passed",
           "reference_artifact": "Unchanged generator and all reference checks passed.",
           "browser": "Full original desktop and phone suite plus both network suites passed without browser errors. All playback, repeated and continuous attacks, forecast toggles, automatic fresh comparison, stable Total cost and Difference switches, all four traces, network scoped replay and layouts remain covered. Every source and inverter receipt verifies both semantic row groups, all ten exact displayed values, actual execution time placement, no stale history rows and unchanged full trial snapshots. The phone command fixture requires actual native execution at a fresh t zero handoff rather than fabricating a pending command; every original command and physical state assertion remains.",
-          "main": "Product repeat 39125642852 pending at completion record creation. Read actual final result before metadata promotion or further source edits.",
+          "main": "Product main repeat 39125642852 and metadata main repeat 39126592304 succeeded. Completed logs independently read, all 224 tests, reference and build consistency checks and both browser suites passed.",
           "benchmarks": "Not rerun. No engine, physical model, controller, objective, limit, learning, noise, forecast timing, attacks or numerical result changes."
         },
         "screenshots": {
@@ -2230,13 +2243,45 @@
           "candidate_run": 39123575684,
           "main_run": 39125642852,
           "pages_run": 39125642340,
-          "result": "Candidate all 224 tests and full browser suites passed. Pages exact version succeeded. Product main repeat pending at metadata creation, must pass before metadata promotion. Metadata receives normal full validation."
+          "result": "Recovery metadata candidate 39125834640 and prepare succeeded. Product main 39125642852 and metadata main 39126592304 both succeeded with all 224 cases and full browser suites; completed logs read. Pages 39125642340 and 39126591886 exact build versions were independently verified in prior pass. No extra improvement for recovery."
         },
         "completed_at": "2026-10-18T12:04:59.823Z",
         "next_focus": "Read actual main repeat and metadata candidate results before further edits. Preserve counts and failed history; no recovery completion increment."
+      },
+      {
+        "slot": "2026-10-18T21:00:00+08:00",
+        "branch": "cloud/refine/20261018-2100",
+        "started_at": "2026-10-18T21:00:00+08:00",
+        "preflight_at": "2026-10-18T20:55:32+08:00",
+        "lease_expires_at": "2026-10-18T21:35:32+08:00",
+        "status": "candidate",
+        "candidate_branch": "cloud/refine/20261018-2100",
+        "base_commit": "db596461f147c57f8e5ad61cbb7542a886a58067",
+        "counted_invocation": true,
+        "counted_completed": false,
+        "slot_resolution": "Read only early preflight until 21:00. Source edits and publication occur only after scheduled start, retaining the stricter 21:35:32 deadline measured from the original early dispatch. Count the slot once.",
+        "changes": [
+          "Use the existing optional command caption to name only fully visible numeric columns beyond the pinned controller names and the actual available native scroll directions.",
+          "Keep the same table, all four methods, all six terms and every value. No new panel or control, source filtering, layout snapping or scientific calculation change.",
+          "Add actual desktop and phone start middle end geometry, caption direction, native scroll synchronization and full paused trial invariance assertions, retaining existing keyboard reachability checks."
+        ],
+        "tests": {
+          "status": "pending",
+          "benchmarks": "Not rerun. Pure presentation and read only DOM geometry work."
+        },
+        "screenshots": {
+          "pixel_review": "Pending actual desktop and phone JPEG review before publication."
+        },
+        "direct_live_inspection": "Unverified. Previously denied live browser access is not retried. Public HTTP bytes not fetched."
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "slot": "2026-10-18T21:00:00+08:00",
+      "branch": "cloud/refine/20261018-2100",
+      "started_at": "2026-10-18T21:00:00+08:00",
+      "preflight_at": "2026-10-18T20:55:32+08:00",
+      "lease_expires_at": "2026-10-18T21:35:32+08:00"
+    },
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
