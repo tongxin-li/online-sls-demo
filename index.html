@@ -542,6 +542,9 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 
 .pr-scroll-hint { margin:4px 0 8px; color:var(--muted-foreground); font-size:11px; text-align:right; }
 
+/* The existing matrix cue reports the columns actually visible while scrolling. */
+#pr-matrix-scroll-hint { font-size:12px; }
+
 /* Artwork stays decorative. The enclosing bus handles hit area and badge input. */
 .pe-host { -webkit-user-select:none; user-select:none; touch-action:manipulation; }
 .pe-hit { fill:transparent; pointer-events:all; }
@@ -708,7 +711,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     </section>
     <section class="pr-panel pr-matrix-panel" aria-labelledby="pr-matrix-title">
       <div class="pr-subhead"><h2 id="pr-matrix-title">Prediction links</h2></div>
-      <p id="pr-link-budget" class="pr-caption pr-link-budget"></p><p id="pr-noisy-links" class="pr-caption pr-noisy-links" hidden></p><div class="pr-matrix-key" id="pr-matrix-key"></div><p id="pr-matrix-scroll-hint" class="pr-scroll-hint" hidden>Scroll to explore all sources →</p><div class="pr-matrix-scroll" role="region"><svg class="pr-chart" id="pr-matrix" role="group" aria-label="Candidate prediction links. Rows receive forecasts from columns"></svg></div>
+      <p id="pr-link-budget" class="pr-caption pr-link-budget"></p><p id="pr-noisy-links" class="pr-caption pr-noisy-links" hidden></p><div class="pr-matrix-key" id="pr-matrix-key"></div><p id="pr-matrix-scroll-hint" class="pr-scroll-hint" hidden>Scroll to explore all sources →</p><div class="pr-matrix-scroll" role="region" aria-describedby="pr-matrix-scroll-hint"><svg class="pr-chart" id="pr-matrix" role="group" aria-label="Candidate prediction links. Rows receive forecasts from columns"></svg></div>
       <p id="pr-matrix-inspect-hint" class="pr-caption">Select a link to inspect its source</p>
       <div id="pr-source-controls" class="pr-source-controls" hidden><button type="button" id="pr-source-fault" class="btn btn-quiet" aria-describedby="pr-source-status" disabled>Corrupt source</button><span id="pr-source-status" class="pr-caption" role="status"></span></div>
       <div id="pr-forecast-observation" class="pr-forecast-observation" hidden>
@@ -3050,6 +3053,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     announce((stopped?'Power attack stopped · ':'')+(forecastMode()?'Click a bus to change forecast reliability':'Click a bus to disturb physical power'));
     render();save();
   });
+  $('matrix')?.parentElement?.addEventListener('scroll',updateMatrixScrollHint,{passive:true});
   if ($('matrix-view')) $('matrix-view').addEventListener('change',()=>{historyIndex=null;renderProtocol();renderInspectedSource();drawNetwork();drawMatrix();save();});
   $('topology-history').addEventListener('input',()=>reviewTopology(Number($('topology-history').value)));
   $('history-live').addEventListener('click',()=>reviewTopology(null));
@@ -3591,6 +3595,22 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       +(status.queued?' · '+status.queued+' queued':hovered && canAttack(bus)?(forecastMode()?' · Click to '+(snapshot.faults.includes(bus)?'repair':'corrupt'):continuousMode()?' · Click to toggle attack':' · Hold to keep attacking'):'');
   }
 
+  function updateMatrixScrollHint() {
+    const el=$('matrix'),hint=$('matrix-scroll-hint'),scroller=el?.parentElement;
+    if(!scroller||!hint)return;
+    const maximum=Math.max(0,scroller.scrollWidth-scroller.clientWidth),overflow=maximum>1;
+    hint.hidden=!overflow;
+    const bounds=scroller.getBoundingClientRect();
+    const shown=Array.from(el.querySelectorAll('.matrix-columns text')).filter(node=>{
+      const box=node.getBoundingClientRect();return box.left>=bounds.left-.5&&box.right<=bounds.right+.5;
+    }).map(node=>Number(node.__data__));
+    const left=overflow&&scroller.scrollLeft>1,right=overflow&&scroller.scrollLeft<maximum-1;
+    hint.dataset.first=overflow&&shown.length?String(shown[0]):'';
+    hint.dataset.last=overflow&&shown.length?String(shown.at(-1)):'';
+    hint.dataset.position=!overflow?'all':left?(right?'middle':'end'):'start';
+    const range=shown.length?'Sources '+shown[0]+' to '+shown.at(-1):'Prediction sources';
+    hint.textContent=!overflow?'':left?(right?'← '+range+' →':'← Scroll left · '+range):range+' · Scroll right →';
+  }
   function drawMatrix() {
     const el=$('matrix'); if(!el) return;
     renderProtocol();
@@ -3719,6 +3739,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       });
     rows.select('rect').attr('fill',bus=>bus===selectedBus?'var(--primary)':'transparent');
     rows.select('text').style('fill',bus=>bus===selectedBus?'#fff':'var(--muted-foreground)').text(bus=>bus);
+    updateMatrixScrollHint();
   }
   function chartBase(el, observations, keys, yTitle, xTitle, height, options={}) {
     const width = Math.max(240,el.getBoundingClientRect().width);
