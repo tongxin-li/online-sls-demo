@@ -1640,7 +1640,11 @@
       if(previous&&position-previous.right<120){previous.items.push(item);previous.right=position;}
       else groups.push({left:position,right:position,items:[item]});
     }
+    let scheduledLabelShown=false;
     return groups.map(group=>{
+      const scheduledOnly=group.items.every(item=>item.type==='scenario'&&item.forecasted);
+      group.labelVisible=!scheduledOnly||!scheduledLabelShown;
+      if(scheduledOnly)scheduledLabelShown=true;
       const first=group.items[0];group.key=first.order+'_'+first.t+'_'+first.type;
       group.attacks=group.items.filter(item=>item.type==='pulse').length;
       group.forecasts=group.items.filter(item=>item.type==='forecast').length;
@@ -1675,7 +1679,9 @@
     const markers=chart.marks.selectAll('g.intervention-markers').data([null]).join('g').attr('class','intervention-markers');
     markers.selectAll('rect').data(groups,group=>group.key).join('rect')
       .attr('x',g=>g.left-2).attr('width',g=>Math.max(4,g.right-g.left+4))
-      .attr('y',chart.frame.y).attr('height',chart.frame.h).attr('fill',g=>g.attacks?'var(--attack)':'#687580').attr('opacity',.085);
+      .attr('y',chart.frame.y).attr('height',chart.frame.h).attr('fill',g=>g.attacks?'var(--attack)':'#687580').attr('opacity',.085)
+      .attr('role','img').attr('aria-label',g=>g.accessible)
+      .selectAll('title').data(g=>[g]).join('title').text(g=>g.description);
     markers.selectAll('line').data(groups,group=>group.key).join('line')
       .interrupt().interrupt('update').attr('x1',g=>g.left).attr('x2',g=>g.left)
       .attr('y1',chart.frame.y).attr('y2',chart.frame.y+chart.frame.h)
@@ -1687,7 +1693,7 @@
       .attr('data-event-steps',g=>g.items.map(item=>item.at).join(','))
       .attr('data-event-types',g=>g.items.map(item=>item.type).join(','))
       .attr('data-forecast-count',g=>g.forecasts).attr('data-scenario-count',g=>g.scenarios)
-      .attr('aria-label',g=>g.accessible);
+      .attr('data-label-visible',g=>String(g.labelVisible)).attr('aria-label',g=>g.accessible);
     // Position badges directly. They must never fly in from a stale chart scale.
     labels.interrupt().interrupt('update').attr('transform',g=>'translate('+g.x+','+(chart.frame.y-14)+')');
     labels.select('rect').attr('x',g=>-g.width/2).attr('y',-10).attr('width',g=>g.width).attr('height',20).attr('rx',6)
@@ -1697,6 +1703,8 @@
     labels.select('text').attr('x',g=>g.attacks?8:0).attr('y',.5).attr('text-anchor','middle').attr('dominant-baseline','middle')
       .style('font-size','11px').style('font-weight','650').style('fill','#fff').text(g=>g.label);
     labels.select('title').text(g=>g.description);
+    // Repeated forecasted cycles retain their measured markers and full details.
+    labels.selectAll('rect,path,text').attr('display',g=>g.labelVisible?null:'none');
   }
 
   function drawCost() {

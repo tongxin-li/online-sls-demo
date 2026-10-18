@@ -783,8 +783,13 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
-  "next_focus": "Read final product main and completion metadata results first. Recover metadata without another completion increment. Review real remaining visual clarity gaps without duplicate panels, redundant copy or a broad new numerical study.",
+  "active_run": {
+    "slot": "2026-10-18T23:00:00+08:00",
+    "branch": "cloud/refine/20261018-2300",
+    "started_at": "2026-10-18T23:00:00+08:00",
+    "lease_expires_at": "2026-10-18T23:37:20+08:00"
+  },
+  "next_focus": "Validate repeated scheduled label compaction without dropping any event or marker detail. Review actual desktop and phone plots before publication.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -1158,6 +1163,14 @@
         "main_run": 39131727782,
         "pages_run": 39131727631,
         "result": "Success. Actual completed final main job 117688109417 logs independently read before next source edits. All 224 cases, build and full original plus network browser suites passed. Exact metadata Pages independently verified during prior completion. Coordination and read only verification do not increment counts."
+      },
+      {
+        "slot": "2026-10-18T22:00:00+08:00",
+        "commit": "4864dcf57bc309bd1b828f63e1d8d2129c4af6b8",
+        "candidate_run": 39136157080,
+        "product_main_run": 39135943487,
+        "pages_run": 39135943442,
+        "result": "Product main and completion metadata candidate plus prepare succeeded. Actual completed logs independently read. Metadata generated no index diff and is folded into the next current-main-descendant source candidate, not counted as another improvement."
       }
     ],
     "pending_visual_candidate": {
@@ -1276,7 +1289,7 @@
     "hard_deadline": "2026-10-19T01:00:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 21,
+    "invocation_count": 22,
     "completed_count": 20,
     "runs": [
       {
@@ -2364,7 +2377,7 @@
           "build": "passed",
           "reference_artifact": "Unchanged generator and all reference checks passed.",
           "browser": "Full original desktop and phone suite plus both network suites passed without browser errors. New assertions preserve exact preview scope, highlighted link ownership, norm units and amplitude independence, additive request before limiting, bounded command and noncausal source qualification. The same three captions have at least 12 px text, fit both viewports and use 57 words rather than 69. All four methods and 24 numeric values, native panning, accurate visible term cues, keyboard reachability and full paused trial invariance remain checked. All playback, attacks, forecast toggles, automatic handoff, stable cost buttons, network switching and exact replay remain covered.",
-          "main": "Product main repeat 39135943487 is running at record creation. Read actual final result before metadata promotion or any next source edit. Do not cancel it with another main push.",
+          "main": "Product main 39135943487 independently confirmed successful in completed validate job 117700350103 logs. All 224 cases, build consistency and original plus network browser suites passed. Completion metadata candidate 39136157080 and prepare succeeded with no generated diff, independently read before next source edits.",
           "benchmarks": "Not rerun. No scientific model, engine, controller, objective, limit, gain, noise, learning, timing, attack or numerical result change."
         },
         "screenshots": {
@@ -2396,15 +2409,56 @@
         "candidate_run": 39134838015,
         "main_run": 39135943487,
         "pages_run": 39135943442,
-        "publication": "Corrected validate and prepare succeeded. Ready 3eec702fe23e0c5af5dd4e181ff04e1d93d00474 has tested source be6000cdda4fe45404aa4c3be99395ebbb199e90 as its only parent and only index.html changed, with exactly the three intended caption replacements. Guarded main promotion at 2026-10-18T14:25:44.936Z matched expected 26915d0413bf1a9516402bdd68c22605982f3746 with force false. Completed Pages deploy 117700376994 logs independently confirm exact ready build version at 2026-10-18T14:26:51.557Z. Product main repeat pending at record creation. Do not promote completion metadata before both it and its own normal validation succeed.",
+        "publication": "Corrected validate and prepare succeeded. Ready 3eec702fe23e0c5af5dd4e181ff04e1d93d00474 has tested source be6000cdda4fe45404aa4c3be99395ebbb199e90 as its only parent and only index.html changed, with exactly the three intended caption replacements. Guarded main promotion at 2026-10-18T14:25:44.936Z matched expected 26915d0413bf1a9516402bdd68c22605982f3746 with force false. Completed Pages deploy 117700376994 logs independently confirm exact ready build version at 2026-10-18T14:26:51.557Z. Product main repeat pending at record creation. Do not promote completion metadata before both it and its own normal validation succeed. At the next existing scheduled invocation product main 39135943487 and metadata candidate 39136157080 were independently confirmed successful. Completion commit 4864dcf57bc309bd1b828f63e1d8d2129c4af6b8 changes only progress and has no generated diff. It is incorporated into the next normal source candidate without a separate metadata main update. No extra improvement or count for recovery.",
         "remaining_visual_limitations": [
           "Native pan boundaries still show partial numeric columns. The existing cue names only whole terms and every term remains reachable. This wording pass does not change table layout.",
           "Pixel review covers declared Chrome desktop 1440 and phone 390 command layouts, not direct live browser or public byte inspection."
         ],
-        "next_focus": "Read final product main and completion metadata results first. Recover metadata without another completion increment. Review real remaining visual clarity gaps without duplicate panels, redundant copy or a broad new numerical study."
+        "next_focus": "Read final product main and completion metadata results first. Recover metadata without another completion increment. Review real remaining visual clarity gaps without duplicate panels, redundant copy or a broad new numerical study.",
+        "duplicate_dispatches": [
+          {
+            "at": "2026-10-18T22:28:08+08:00",
+            "disposition": "skipped_duplicate_overlap",
+            "counted_invocation": false,
+            "counted_completed": false,
+            "source_edits": false,
+            "publication": false,
+            "note": "Read only overlap check while closing the existing 22:00 release. Original 22:35:18 deadline retained. Completion metadata was already under validation. Reconciled at the next legitimate slot without cancelling CI."
+          }
+        ]
+      },
+      {
+        "slot": "2026-10-18T23:00:00+08:00",
+        "branch": "cloud/refine/20261018-2300",
+        "candidate_branch": "cloud/refine/20261018-2300",
+        "base_commit": "3eec702fe23e0c5af5dd4e181ff04e1d93d00474",
+        "reconciled_parent_commit": "4864dcf57bc309bd1b828f63e1d8d2129c4af6b8",
+        "started_at": "2026-10-18T23:00:00+08:00",
+        "preflight_at": "2026-10-18T22:57:20+08:00",
+        "lease_expires_at": "2026-10-18T23:37:20+08:00",
+        "status": "in_progress",
+        "counted_invocation": true,
+        "counted_completed": false,
+        "slot_resolution": "Read only early preflight until 23:00. Preserve stricter original dispatch deadline 23:37:20. Recover 22:00 completion once without another improvement or invocation. No extra immediate pass for duplicates.",
+        "changes": [
+          "Reduce repeated scheduled cycle badges to one visible label per chart window while retaining every measured marker, timestamp, span and original event detail.",
+          "Only pure forecasted cycle groups are compacted. Power requests, forecast setting changes, mixed groups and unforecast solar events keep their labels. Add complete native titles to retained markers.",
+          "Extend existing read only grouping regression and actual browser geometry, visibility and full marker detail checks. No event, physical model, controller, scale, trajectory or cost changes. No broad benchmark rerun."
+        ],
+        "tests": {
+          "status": "Candidate pending"
+        },
+        "screenshots": {
+          "status": "Review actual desktop and phone plot pixels before promotion"
+        }
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "slot": "2026-10-18T23:00:00+08:00",
+      "branch": "cloud/refine/20261018-2300",
+      "started_at": "2026-10-18T23:00:00+08:00",
+      "lease_expires_at": "2026-10-18T23:37:20+08:00"
+    },
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",

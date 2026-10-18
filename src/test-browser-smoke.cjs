@@ -714,7 +714,9 @@ async function main() {
         return {snapshot:{t:snapshot.t,eventLog:snapshot.eventLog},charts:['pr-cost','pr-stage','pr-voltage'].map(id=>{
           const svg=document.getElementById(id),frame=svg.querySelector('[data-chart-frame]');
           return {id,hidden:svg.hidden||svg.style.display==='none',frame:frame?{x:Number(frame.getAttribute('x')),w:Number(frame.getAttribute('width'))}:null,
-            badges:Array.from(svg.querySelectorAll('.intervention-badge')).map(node=>({data:{...node.dataset},label:node.getAttribute('aria-label'),title:node.querySelector('title').textContent})),
+            badges:Array.from(svg.querySelectorAll('.intervention-badge')).map(node=>({data:{...node.dataset},label:node.getAttribute('aria-label'),title:node.querySelector('title').textContent,
+              visible:!Array.from(node.querySelectorAll('rect,path,text')).some(child=>getComputedStyle(child).display==='none')})),
+            markerDetails:Array.from(svg.querySelectorAll('.intervention-markers rect')).map(node=>({label:node.getAttribute('aria-label'),title:node.querySelector('title')?.textContent})),
             lines:Array.from(svg.querySelectorAll('.intervention-markers line')).map(node=>({x1:Number(node.getAttribute('x1')),x2:Number(node.getAttribute('x2'))}))};
         })};
       });
@@ -730,8 +732,16 @@ async function main() {
         assert.deepEqual(times,expected.map(event=>event.at),'Markers use actual setting time or first physical state time');
         assert.deepEqual(types,expected.map(event=>event.type),'No mixed events are relabeled as forecasts');
         assert.equal(chart.lines.length,chart.badges.length);
+        assert.equal(chart.markerDetails.length,chart.badges.length,'Every actual event group retains its marker and hover details');
+        let eventOffset=0,scheduledLabelShown=false;
         for(let i=0;i<chart.badges.length;i++){
           const {data}=chart.badges[i],kinds=data.eventTypes.split(',');
+          const events=expected.slice(eventOffset,eventOffset+Number(data.eventCount));eventOffset+=Number(data.eventCount);
+          const scheduledOnly=events.every(event=>event.type==='scenario'&&event.forecasted),visible=!scheduledOnly||!scheduledLabelShown;
+          if(scheduledOnly)scheduledLabelShown=true;
+          assert.equal(data.labelVisible,String(visible),'Only repeated pure scheduled cycle labels are suppressed');
+          assert.equal(chart.badges[i].visible,visible,'Actual SVG glyph visibility follows the measured event group');
+          assert.equal(chart.markerDetails[i].label,chart.badges[i].label);assert.equal(chart.markerDetails[i].title,chart.badges[i].title,'Every retained marker exposes the original complete event details');
           assert.equal(Number(data.disturbanceCount),kinds.filter(type=>type==='pulse').length);
           assert.equal(Number(data.forecastCount),kinds.filter(type=>type==='forecast').length);
           assert.equal(Number(data.scenarioCount),kinds.filter(type=>type==='scenario').length);
