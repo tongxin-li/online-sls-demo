@@ -785,12 +785,12 @@
   ],
   "active_run": {
     "program_id": "continuous-phi-20261018T234500",
-    "slot": "2026-10-18T23:45:00+08:00",
+    "slot": "2026-10-19T00:45:00+08:00",
     "branch": "cloud/refine/continuous-phi-20261018-2345",
-    "started_at": "2026-10-18T23:49:41+08:00",
-    "lease_expires_at": "2026-10-19T00:29:41+08:00"
+    "started_at": "2026-10-19T00:44:30+08:00",
+    "lease_expires_at": "2026-10-19T01:24:30+08:00"
   },
-  "next_focus": "Implement and independently test the causal source local response scaling foundation, then integrate an explicitly versioned ongoing engine and UI in subsequent bounded passes. Keep partial algorithm candidates unpublished.",
+  "next_focus": "Integrate a truthful ongoing engine behind an explicit protocol, without changing legacy default or archived replay before UI acceptance.",
   "priorities": [
     "Actual continuous causal response adaptation and executed command evidence",
     "Explicit forecast message access and support feasibility",
@@ -2600,7 +2600,7 @@
     "hard_deadline": "2026-10-19T23:45:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 1,
+    "invocation_count": 2,
     "completed_count": 0,
     "runs": [
       {
@@ -2610,7 +2610,7 @@
         "branch": "cloud/refine/continuous-phi-20261018-2345",
         "base_commit": "ad240dba37538d5ea0baf7d1354348fa32a9ad09",
         "reconciled_parent_commit": "715de5fb0dd046908c0dfd866e6b4f8db1082bae",
-        "status": "unpublished_foundation_pending_validation",
+        "status": "validated_foundation_unpublished",
         "counted_invocation": true,
         "counted_completed": false,
         "changes": [
@@ -2627,9 +2627,26 @@
           "prior_checks": "Actual successful completed logs read. New candidate validation pending.",
           "audit_candidate": {
             "run_id": 39143242506,
-            "status": "pending_completed_log_review"
+            "conclusion": "success",
+            "completed_logs_read_in_prior_invocation": true
           },
-          "foundation": "Pending candidate workflow on exact source"
+          "foundation": {
+            "run_id": 39144327415,
+            "validate_job": 117724972925,
+            "prepare_job": 117727868938,
+            "conclusion": "success",
+            "completed_logs_read": true,
+            "cases": 235,
+            "foundation_cases": 11,
+            "integrated_controller": false,
+            "generated_child": "None. Candidate still matches tested source and build is unchanged."
+          },
+          "audit_main_repeat": {
+            "run_id": 39144310544,
+            "conclusion": "success",
+            "validate_job": 117724923758,
+            "completed_logs_read": true
+          }
         },
         "live_fix": false,
         "remaining_gaps": [
@@ -2643,15 +2660,64 @@
           "status": "not_required_for_unpublished_numerical_foundation",
           "reason": "No page, layout or build dependency changed. Full integrated browser and pixel review remain required before live protocol publication."
         },
-        "source_commit": "Recorded by workflow head SHA and next handoff metadata after commit creation"
+        "source_commit": "4e27460fa29d8565cbe7891ac9b1d212cbb18fcf",
+        "closed_at": "2026-10-19T00:28:46+08:00",
+        "closure_reconciled_at": "2026-10-18T16:46:06.719Z",
+        "publication": {
+          "scope": "Audit documentation and progress only",
+          "commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+          "pages_run": 39144310532,
+          "pages_job": 117724952513,
+          "conclusion": "success",
+          "completed_pages_log_read": true,
+          "interface_changed": false
+        },
+        "recovered_lease": {
+          "reason": "Prior bounded pass ended before full candidate workflow completed. Expired lease reconciled without counting another improvement.",
+          "counted_completed": false
+        },
+        "duplicate_dispatches": [
+          {
+            "at": "2026-10-19T00:22:22+08:00",
+            "status": "read_only_overlap",
+            "counted_invocation": false,
+            "counted_completed": false,
+            "lease_extended": false
+          }
+        ]
+      },
+      {
+        "program_id": "continuous-phi-20261018T234500",
+        "slot": "2026-10-19T00:45:00+08:00",
+        "branch": "cloud/refine/continuous-phi-20261018-2345",
+        "started_at": "2026-10-19T00:44:30+08:00",
+        "lease_expires_at": "2026-10-19T01:24:30+08:00",
+        "status": "engine_integration_in_progress",
+        "counted_invocation": true,
+        "counted_completed": false,
+        "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+        "candidate_parent": "4e27460fa29d8565cbe7891ac9b1d212cbb18fcf",
+        "early_dispatch": "Read only preflight until 00:45. No extra invocation or deadline extension.",
+        "changes": [
+          "Continue tested causal source scaling on the same unpublished candidate toward an explicitly versioned ongoing engine and independently checked stationary response."
+        ],
+        "tests": {
+          "status": "pending"
+        },
+        "live_fix": false,
+        "remaining_gaps": [
+          "Ongoing engine and UI not yet integrated or published.",
+          "Full predefined continuous commands, replay, browser and pixel acceptance remain required."
+        ],
+        "next_focus": "Integrate a truthful ongoing engine behind an explicit protocol, without changing legacy default or archived replay before UI acceptance."
       }
     ],
     "active_run": {
       "program_id": "continuous-phi-20261018T234500",
-      "slot": "2026-10-18T23:45:00+08:00",
+      "slot": "2026-10-19T00:45:00+08:00",
       "branch": "cloud/refine/continuous-phi-20261018-2345",
-      "started_at": "2026-10-18T23:49:41+08:00",
-      "lease_expires_at": "2026-10-19T00:29:41+08:00"
+      "started_at": "2026-10-19T00:44:30+08:00",
+      "lease_expires_at": "2026-10-19T01:24:30+08:00"
     },
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
