@@ -783,8 +783,13 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
-  "next_focus": "Verify product and metadata final repeated checks first. Preserve the concise existing command cue, two-group receipt, all actual values, single cost table, persistent two stage strip, stable results heading and every source. Review remaining inspection clarity only where concrete evidence warrants it. Do not add more panels, controls or broad numerical studies.",
+  "active_run": {
+    "slot": "2026-10-18T22:00:00+08:00",
+    "branch": "cloud/refine/20261018-2200",
+    "started_at": "2026-10-18T22:00:00+08:00",
+    "lease_expires_at": "2026-10-18T22:35:18+08:00"
+  },
+  "next_focus": "Validate compact existing command notes and inspect actual desktop and phone pixels before any promotion. Preserve all scientific qualifications and values.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -1138,6 +1143,14 @@
         "main_run": 39126592304,
         "pages_run": 39126591886,
         "result": "All final checks independently verified with completed logs before source changes. Exact metadata Pages version verified in prior pass. Nineteen source completion and twenty recovery remain counted once with no new metadata improvement."
+      },
+      {
+        "slot": "2026-10-18T21:00:00+08:00",
+        "commit": "26915d0413bf1a9516402bdd68c22605982f3746",
+        "candidate_run": 39130954154,
+        "main_run": 39131727782,
+        "pages_run": 39131727631,
+        "result": "Success. Actual completed final main job 117688109417 logs independently read before next source edits. All 224 cases, build and full original plus network browser suites passed. Exact metadata Pages independently verified during prior completion. Coordination and read only verification do not increment counts."
       }
     ],
     "pending_visual_candidate": {
@@ -1256,7 +1269,7 @@
     "hard_deadline": "2026-10-19T01:00:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 20,
+    "invocation_count": 21,
     "completed_count": 19,
     "runs": [
       {
@@ -2278,7 +2291,7 @@
           "candidate": "Validate and prepare succeeded. Completed logs independently read.",
           "build": "passed",
           "reference_artifact": "Unchanged generator and all reference checks passed.",
-          "main": "Product main repeat pending at completion record creation. Read final actual result before metadata promotion or further source edits.",
+          "main": "Product main 39130815409 and final metadata main 39131727782 succeeded with all 224 cases and full original and network browser suites. Completed logs independently read before any next source edit.",
           "browser": "Full original desktop and phone suite plus both network suites passed without browser errors. Native command panning checks whole column caption names and exact direction at start middle end, accurate scroll offset, caption hidden when all terms fit, minimum 12 px text and viewport containment. Existing pinned identities, all four methods and 24 numeric cells, every term reachable by keyboard, and full paused trial snapshot invariance remain checked. All playback, repeated and continuous attacks, forecast toggles, automatic comparison, stable cost switches, network switching and exact replay are preserved.",
           "benchmarks": "Not rerun. No model, engine, controller, objective, limit, gain, noise, learning, forecast timing, attack or numerical result changes."
         },
@@ -2306,10 +2319,51 @@
           "Pixel review covers declared Chrome desktop 1440 and phone 390 command layouts. No direct live browser inspection claimed."
         ],
         "completed_at": "2026-10-18T13:17:58.526Z",
-        "publication": "Candidate validate and prepare succeeded. Generated child has tested source as its only parent and only index.html changed with exactly the intended caption span, style and DOM geometry helper. Guarded main promotion at 2026-10-18T13:16:21.179Z used matching expected db596461f147c57f8e5ad61cbb7542a886a58067 and force false. Completed Pages logs independently confirm exact version b1513b4d7db153d1302684d6ea69fde5918dc0f4. Main repeat pending at record creation."
+        "publication": "Candidate validate and prepare succeeded. Generated child has tested source as its only parent and only index.html changed with exactly the intended caption span, style and DOM geometry helper. Guarded main promotion at 2026-10-18T13:16:21.179Z used matching expected db596461f147c57f8e5ad61cbb7542a886a58067 and force false. Completed Pages logs independently confirm exact version b1513b4d7db153d1302684d6ea69fde5918dc0f4. Main repeat pending at record creation. Final metadata 26915d0413bf1a9516402bdd68c22605982f3746 candidate 39130954154 and prepare succeeded with no generated diff. Product repeat 39130815409 passed before guarded metadata promotion. Exact metadata Pages 39131727631 succeeded. Final metadata main 39131727782 independently confirmed successful at the next scheduled preflight.",
+        "duplicate_dispatches": [
+          {
+            "at": "2026-10-18T21:28:29+08:00",
+            "disposition": "skipped_duplicate_overlap",
+            "counted_invocation": false,
+            "counted_completed": false,
+            "source_edits": false,
+            "publication": false,
+            "note": "Only finishing deployment checks of the existing 21:00 pass. No extra pass or deadline extension. Reconciled at the next legitimate invocation without cancelling CI."
+          }
+        ]
+      },
+      {
+        "slot": "2026-10-18T22:00:00+08:00",
+        "branch": "cloud/refine/20261018-2200",
+        "candidate_branch": "cloud/refine/20261018-2200",
+        "started_at": "2026-10-18T22:00:00+08:00",
+        "preflight_at": "2026-10-18T21:55:18+08:00",
+        "lease_expires_at": "2026-10-18T22:35:18+08:00",
+        "status": "in_progress",
+        "base_commit": "26915d0413bf1a9516402bdd68c22605982f3746",
+        "counted_invocation": true,
+        "counted_completed": false,
+        "slot_resolution": "Read only early preflight until 22:00. Source edits begin after scheduled start. Retain stricter 22:35:18 deadline from original dispatch. No extra refinement or extended deadline for duplicates.",
+        "changes": [
+          "Consolidate the original three command notes so preview scope, highlighted link ownership, gain norm units and amplitude independence remain explicit without repeating long explanations.",
+          "Place the additive request before limiting beside the bounded command and noncausal source qualification. Preserve all four methods, six terms, 24 values, native scroll cues and every scientific calculation.",
+          "Add desktop and phone assertions for exact scientific qualifications, 12 px type, viewport containment and compact wording. No new panels, controls or dependencies. No broad benchmark rerun."
+        ],
+        "tests": {
+          "status": "Candidate validation pending"
+        },
+        "screenshots": {
+          "status": "Candidate desktop and phone command pixels must be reviewed before promotion. Prior live screenshot pixels read during preflight."
+        },
+        "direct_live_inspection": "Unverified. Previously denied live browser access not retried. Public HTTP bytes not independently fetched."
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "slot": "2026-10-18T22:00:00+08:00",
+      "branch": "cloud/refine/20261018-2200",
+      "started_at": "2026-10-18T22:00:00+08:00",
+      "lease_expires_at": "2026-10-18T22:35:18+08:00"
+    },
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",

@@ -68,13 +68,13 @@
         </section>
         <details id="pr-command-inspector" class="pr-command-inspector" hidden>
           <summary id="pr-command-title">Command breakdown</summary>
-          <p class="pr-caption">kvar · Source and other messages before limiting · Includes the full issued preview, not just the revealed pair · Highlighted links belong to the learned or matrix controller<span id="pr-command-scroll-hint" hidden></span></p>
+          <p class="pr-caption">kvar · Full issued preview, not just the revealed pair · Highlights show learned or matrix links<span id="pr-command-scroll-hint" hidden></span></p>
           <div id="pr-command-scroll" class="pr-command-scroll" tabindex="0" role="region" aria-label="Receiver command table" aria-describedby="pr-command-gain-note pr-command-scroll-hint" data-command-scroll><table aria-label="Latest receiver command decomposition in kvar" aria-describedby="pr-command-gain-note">
             <thead><tr><th>Controller</th><th>Source</th><th>Other</th><th>Feedback</th><th>Request</th><th>Command</th><th id="pr-command-gain-heading" scope="col">Gain norm</th></tr></thead>
             <tbody id="pr-command-rows"></tbody>
           </table></div>
-          <p id="pr-command-gain-note" class="pr-caption">Gain norm · pu command / pu forcing · Across the issued preview, independent of message amplitude</p>
-          <p class="pr-caption">Request = Source + Other + Feedback · Command is bounded to ±70 kvar · Source is not a causal share after limiting</p>
+          <p id="pr-command-gain-note" class="pr-caption">Gain norm · pu command / pu forcing · Full preview norm, independent of message amplitude</p>
+          <p class="pr-caption">Request = Source + Other + Feedback before limiting · Command bounded to ±70 kvar · Source is not a causal share after limiting</p>
         </details>
       </div>
       <div class="pr-panel-foot pr-matrix-detail"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div><details id="pr-link-history-details" class="pr-panel-details"><summary>Link history</summary><div class="pr-topology-status"><strong id="pr-topology-status">Connectivity unchanged</strong><span id="pr-topology-gain">Weights changed 0%</span></div><div id="pr-topology-events" class="pr-topology-events" aria-label="Recent topology changes" hidden></div><div class="pr-topology-history"><label for="pr-topology-history" id="pr-history-count">0 link updates</label><input id="pr-topology-history" type="range" min="0" max="0" step="1" value="0" aria-label="Topology history" disabled><button type="button" id="pr-history-live" aria-pressed="true">Latest</button></div><p id="pr-topology-note" class="pr-caption" aria-live="polite"></p></details>

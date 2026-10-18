@@ -526,6 +526,18 @@ async function main() {
       assert.equal(before.state.playing,false);
       const detail=surface.locator('#pr-command-inspector'),opened=await detail.getAttribute('open')!==null;
       if(!opened)await surface.locator('#pr-command-title').click();
+      const notes=await detail.evaluate(node=>Array.from(node.querySelectorAll(':scope > p.pr-caption')).map(note=>{
+        const copy=note.cloneNode(true);copy.querySelector('#pr-command-scroll-hint')?.remove();
+        const box=note.getBoundingClientRect();return {text:copy.textContent,font:parseFloat(getComputedStyle(note).fontSize),left:box.left,right:box.right,viewport:innerWidth};
+      }));
+      assert.deepEqual(notes.map(note=>note.text),[
+        'kvar · Full issued preview, not just the revealed pair · Highlights show learned or matrix links',
+        'Gain norm · pu command / pu forcing · Full preview norm, independent of message amplitude',
+        'Request = Source + Other + Feedback before limiting · Command bounded to ±70 kvar · Source is not a causal share after limiting'
+      ],'Concise command notes retain preview scope, link ownership, norm units, amplitude independence, additive terms and saturation qualification');
+      assert.equal(notes.length,3,'Reuse the original notes without adding panels or controls');
+      assert.ok(notes.every(note=>note.font>=12&&note.left>=0&&note.right<=note.viewport+1),'Command qualifications stay readable inside desktop and phone layouts');
+      assert.ok(notes.map(note=>note.text).join(' ').split(/\\s+/).length<=66,'Keep command notes concise without shrinking their text');
       const scroll=surface.getByRole('region',{name:'Receiver command table',exact:true});
       await scroll.scrollIntoViewIfNeeded();
       const initial=await scroll.evaluate(node=>node.scrollLeft),seen=new Set();
