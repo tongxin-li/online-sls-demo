@@ -1,0 +1,476 @@
+{
+  "protocol": "continuous-phi-v1",
+  "status": "validated_unpublished_engine_acceptance_not_live_ui_or_performance_benchmark",
+  "source_commit": "bf9201227ef102aa77f60f5bdbbb07580ffe3115",
+  "ready_commit": "ee246f2bfd1b1fefa18e34092c88f508924a65b6",
+  "validation_run": 39148153140,
+  "validate_job": 117736264613,
+  "prepare_job": 117738350165,
+  "completed_logs_read": true,
+  "created_at": "2026-10-18T17:20:07.407Z",
+  "predefined_plan": "refinement/continuous-response-plan.json",
+  "numerical_cases": 246,
+  "ongoing_cases": 11,
+  "source_scale_cases": 11,
+  "legacy_cases": 224,
+  "command_test": "Counterfactual old and new coefficients on identical current state and issued forecasts, both before and after actuator clipping",
+  "costs": "All 901 accumulated physical stage costs without a terminal penalty. Archived frozen finite episode references retain their original terminal penalty.",
+  "methods": {
+    "online": "Adaptive source local diagonal weights with fixed offline sparse support",
+    "scalar": "Identity weights with the same fixed offline sparse support",
+    "static": "Identity weights with dense prediction",
+    "causal": "Shared stabilizing feedback without prediction"
+  },
+  "source_information": "Each source fits only its own immutable forecast and revealed forcing under the shared full state feedback assumption. A receiver gets only its admitted raw forecasts and coefficients.",
+  "communication": "Actual target forecast and correction scalar counts are tested. Startup sends five target messages per allowed channel, then one new target per action. Adaptive adds one correction scalar per forecast message. Zero effective gains still count permitted traffic. No probing or online selector.",
+  "supports": "Fixed offline stationary response energy with mandatory local permission and actual per network remote budgets. The actual full mask is retained in the deterministic engine snapshot and replay. This compact outcome file exports link counts.",
+  "uncertainty": "Two predefined engineering seeds per condition. No statistical confidence estimate or universal performance conclusion is claimed.",
+  "long_history": {
+    "actions": 1801,
+    "physical_history": "complete",
+    "source_window": 60,
+    "receiver_target_cache_max": 10,
+    "costs": "never reset"
+  },
+  "browser_scope": "All existing original and network desktop and phone suites passed against the candidate build. The ongoing UI is not yet enabled or accepted.",
+  "pixel_review": "No ongoing UI visual publication or pixel approval claimed.",
+  "results": [
+    {
+      "network": "toy8",
+      "quality": "reliable",
+      "seed": 20261013,
+      "steps": 901,
+      "stageCosts": {
+        "online": 0.06761358521404416,
+        "scalar": 0.06784030732917712,
+        "static": 0.06472667036923556,
+        "causal": 0.07281388183203523
+      },
+      "changedCommands": 402,
+      "changedExecutedCommands": 402,
+      "remoteLinks": {
+        "online": 6,
+        "scalar": 6,
+        "static": 18,
+        "causal": 0
+      },
+      "minimumStageCost": 0.06472667036923556,
+      "minimumMethods": [
+        "static"
+      ]
+    },
+    {
+      "network": "toy8",
+      "quality": "reliable",
+      "seed": 21,
+      "steps": 901,
+      "stageCosts": {
+        "online": 0.06699809847159384,
+        "scalar": 0.06723965565690028,
+        "static": 0.06414939139143012,
+        "causal": 0.07227651690827944
+      },
+      "changedCommands": 402,
+      "changedExecutedCommands": 402,
+      "remoteLinks": {
+        "online": 6,
+        "scalar": 6,
+        "static": 18,
+        "causal": 0
+      },
+      "minimumStageCost": 0.06414939139143012,
+      "minimumMethods": [
+        "static"
+      ]
+    },
+    {
+      "network": "toy8",
+      "quality": "mixed",
+      "seed": 20261013,
+      "steps": 901,
+      "stageCosts": {
+        "online": 0.07083596206354514,
+        "scalar": 0.08666328005240963,
+        "static": 0.09514482961435579,
+        "causal": 0.07281388183203523
+      },
+      "changedCommands": 871,
+      "changedExecutedCommands": 871,
+      "remoteLinks": {
+        "online": 6,
+        "scalar": 6,
+        "static": 18,
+        "causal": 0
+      },
+      "minimumStageCost": 0.07083596206354514,
+      "minimumMethods": [
+        "online"
+      ]
+    },
+    {
+      "network": "toy8",
+      "quality": "mixed",
+      "seed": 21,
+      "steps": 901,
+      "stageCosts": {
+        "online": 0.07031322925493573,
+        "scalar": 0.08719667436609203,
+        "static": 0.09567260428191014,
+        "causal": 0.07227651690827944
+      },
+      "changedCommands": 871,
+      "changedExecutedCommands": 871,
+      "remoteLinks": {
+        "online": 6,
+        "scalar": 6,
+        "static": 18,
+        "causal": 0
+      },
+      "minimumStageCost": 0.07031322925493573,
+      "minimumMethods": [
+        "online"
+      ]
+    },
+    {
+      "network": "toy8",
+      "quality": "all_noisy",
+      "seed": 20261013,
+      "steps": 901,
+      "stageCosts": {
+        "online": 0.07375153636789665,
+        "scalar": 0.10387533077837238,
+        "static": 0.12305685205924516,
+        "causal": 0.07281388183203523
+      },
+      "changedCommands": 871,
+      "changedExecutedCommands": 871,
+      "remoteLinks": {
+        "online": 6,
+        "scalar": 6,
+        "static": 18,
+        "causal": 0
+      },
+      "minimumStageCost": 0.07281388183203523,
+      "minimumMethods": [
+        "causal"
+      ]
+    },
+    {
+      "network": "toy8",
+      "quality": "all_noisy",
+      "seed": 21,
+      "steps": 901,
+      "stageCosts": {
+        "online": 0.0723471802384765,
+        "scalar": 0.10299813258504373,
+        "static": 0.1234171291090188,
+        "causal": 0.07227651690827944
+      },
+      "changedCommands": 871,
+      "changedExecutedCommands": 871,
+      "remoteLinks": {
+        "online": 6,
+        "scalar": 6,
+        "static": 18,
+        "causal": 0
+      },
+      "minimumStageCost": 0.07227651690827944,
+      "minimumMethods": [
+        "causal"
+      ]
+    },
+    {
+      "network": "feeder24",
+      "quality": "reliable",
+      "seed": 20261013,
+      "steps": 901,
+      "stageCosts": {
+        "online": 0.42442595871180394,
+        "scalar": 0.42456851020550346,
+        "static": 0.3499321680519172,
+        "causal": 0.45270272709873405
+      },
+      "changedCommands": 402,
+      "changedExecutedCommands": 402,
+      "remoteLinks": {
+        "online": 24,
+        "scalar": 24,
+        "static": 176,
+        "causal": 0
+      },
+      "minimumStageCost": 0.3499321680519172,
+      "minimumMethods": [
+        "static"
+      ]
+    },
+    {
+      "network": "feeder24",
+      "quality": "reliable",
+      "seed": 21,
+      "steps": 901,
+      "stageCosts": {
+        "online": 0.4463653337498601,
+        "scalar": 0.4465409313033901,
+        "static": 0.3671341438411501,
+        "causal": 0.47577900214371543
+      },
+      "changedCommands": 402,
+      "changedExecutedCommands": 402,
+      "remoteLinks": {
+        "online": 24,
+        "scalar": 24,
+        "static": 176,
+        "causal": 0
+      },
+      "minimumStageCost": 0.3671341438411501,
+      "minimumMethods": [
+        "static"
+      ]
+    },
+    {
+      "network": "feeder24",
+      "quality": "mixed",
+      "seed": 20261013,
+      "steps": 901,
+      "stageCosts": {
+        "online": 0.4452011267462031,
+        "scalar": 0.6189753982121603,
+        "static": 0.7763754330906147,
+        "causal": 0.45270272709873405
+      },
+      "changedCommands": 871,
+      "changedExecutedCommands": 871,
+      "remoteLinks": {
+        "online": 24,
+        "scalar": 24,
+        "static": 176,
+        "causal": 0
+      },
+      "minimumStageCost": 0.4452011267462031,
+      "minimumMethods": [
+        "online"
+      ]
+    },
+    {
+      "network": "feeder24",
+      "quality": "mixed",
+      "seed": 21,
+      "steps": 901,
+      "stageCosts": {
+        "online": 0.4686729652435266,
+        "scalar": 0.6561224047615223,
+        "static": 0.7995984480657945,
+        "causal": 0.47577900214371543
+      },
+      "changedCommands": 871,
+      "changedExecutedCommands": 871,
+      "remoteLinks": {
+        "online": 24,
+        "scalar": 24,
+        "static": 176,
+        "causal": 0
+      },
+      "minimumStageCost": 0.4686729652435266,
+      "minimumMethods": [
+        "online"
+      ]
+    },
+    {
+      "network": "feeder24",
+      "quality": "all_noisy",
+      "seed": 20261013,
+      "steps": 901,
+      "stageCosts": {
+        "online": 0.4598045548862704,
+        "scalar": 0.7182304569640992,
+        "static": 0.9506831109233368,
+        "causal": 0.45270272709873405
+      },
+      "changedCommands": 871,
+      "changedExecutedCommands": 871,
+      "remoteLinks": {
+        "online": 24,
+        "scalar": 24,
+        "static": 176,
+        "causal": 0
+      },
+      "minimumStageCost": 0.45270272709873405,
+      "minimumMethods": [
+        "causal"
+      ]
+    },
+    {
+      "network": "feeder24",
+      "quality": "all_noisy",
+      "seed": 21,
+      "steps": 901,
+      "stageCosts": {
+        "online": 0.4816615238936065,
+        "scalar": 0.7573807879328734,
+        "static": 0.9893192860177694,
+        "causal": 0.47577900214371543
+      },
+      "changedCommands": 871,
+      "changedExecutedCommands": 871,
+      "remoteLinks": {
+        "online": 24,
+        "scalar": 24,
+        "static": 176,
+        "causal": 0
+      },
+      "minimumStageCost": 0.47577900214371543,
+      "minimumMethods": [
+        "causal"
+      ]
+    },
+    {
+      "network": "feeder47",
+      "quality": "reliable",
+      "seed": 20261013,
+      "steps": 901,
+      "stageCosts": {
+        "online": 0.8442002921785271,
+        "scalar": 0.8443741536930952,
+        "static": 0.6915509960166925,
+        "causal": 0.9008349782487005
+      },
+      "changedCommands": 402,
+      "changedExecutedCommands": 402,
+      "remoteLinks": {
+        "online": 48,
+        "scalar": 48,
+        "static": 720,
+        "causal": 0
+      },
+      "minimumStageCost": 0.6915509960166925,
+      "minimumMethods": [
+        "static"
+      ]
+    },
+    {
+      "network": "feeder47",
+      "quality": "reliable",
+      "seed": 21,
+      "steps": 901,
+      "stageCosts": {
+        "online": 0.8169750416664258,
+        "scalar": 0.8173432607754189,
+        "static": 0.672462846008029,
+        "causal": 0.8722769027899735
+      },
+      "changedCommands": 402,
+      "changedExecutedCommands": 402,
+      "remoteLinks": {
+        "online": 48,
+        "scalar": 48,
+        "static": 720,
+        "causal": 0
+      },
+      "minimumStageCost": 0.672462846008029,
+      "minimumMethods": [
+        "static"
+      ]
+    },
+    {
+      "network": "feeder47",
+      "quality": "mixed",
+      "seed": 20261013,
+      "steps": 901,
+      "stageCosts": {
+        "online": 0.8867550050499907,
+        "scalar": 1.244017450387809,
+        "static": 1.6010663456897147,
+        "causal": 0.9008349782487005
+      },
+      "changedCommands": 871,
+      "changedExecutedCommands": 871,
+      "remoteLinks": {
+        "online": 48,
+        "scalar": 48,
+        "static": 720,
+        "causal": 0
+      },
+      "minimumStageCost": 0.8867550050499907,
+      "minimumMethods": [
+        "online"
+      ]
+    },
+    {
+      "network": "feeder47",
+      "quality": "mixed",
+      "seed": 21,
+      "steps": 901,
+      "stageCosts": {
+        "online": 0.8598311297916594,
+        "scalar": 1.2030435568572946,
+        "static": 1.5195656555157944,
+        "causal": 0.8722769027899735
+      },
+      "changedCommands": 871,
+      "changedExecutedCommands": 871,
+      "remoteLinks": {
+        "online": 48,
+        "scalar": 48,
+        "static": 720,
+        "causal": 0
+      },
+      "minimumStageCost": 0.8598311297916594,
+      "minimumMethods": [
+        "online"
+      ]
+    },
+    {
+      "network": "feeder47",
+      "quality": "all_noisy",
+      "seed": 20261013,
+      "steps": 901,
+      "stageCosts": {
+        "online": 0.9155990398090669,
+        "scalar": 1.5066942281552362,
+        "static": 2.0979463251101547,
+        "causal": 0.9008349782487005
+      },
+      "changedCommands": 871,
+      "changedExecutedCommands": 871,
+      "remoteLinks": {
+        "online": 48,
+        "scalar": 48,
+        "static": 720,
+        "causal": 0
+      },
+      "minimumStageCost": 0.9008349782487005,
+      "minimumMethods": [
+        "causal"
+      ]
+    },
+    {
+      "network": "feeder47",
+      "quality": "all_noisy",
+      "seed": 21,
+      "steps": 901,
+      "stageCosts": {
+        "online": 0.8857850858716445,
+        "scalar": 1.4513655177146247,
+        "static": 2.013328439915568,
+        "causal": 0.8722769027899735
+      },
+      "changedCommands": 871,
+      "changedExecutedCommands": 871,
+      "remoteLinks": {
+        "online": 48,
+        "scalar": 48,
+        "static": 720,
+        "causal": 0
+      },
+      "minimumStageCost": 0.8722769027899735,
+      "minimumMethods": [
+        "causal"
+      ]
+    }
+  ],
+  "limitations": [
+    "Fixed support is not online topology optimization.",
+    "Frozen response feasibility is not a theorem for the adaptive switched trajectory or clipping.",
+    "New UI workflow, replay integration, continuous desktop and phone interactions and pixel review remain publication gates."
+  ]
+}

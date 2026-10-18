@@ -783,14 +783,8 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "program_id": "continuous-phi-20261018T234500",
-    "slot": "2026-10-19T00:45:00+08:00",
-    "branch": "cloud/refine/continuous-phi-20261018-2345",
-    "started_at": "2026-10-19T00:44:30+08:00",
-    "lease_expires_at": "2026-10-19T01:24:30+08:00"
-  },
-  "next_focus": "Read exact candidate validation and generated ancestry. Continue the same unpublished branch toward an honest single ongoing UI and new replay. Preserve legacy replay and archived evidence. Do not publish until ongoing interaction and pixel acceptance pass.",
+  "active_run": null,
+  "next_focus": "Continue this same validated candidate into the single ongoing UI and new replay. Read metadata repeat and current main checks first. Use actual execution receipts and source pair counts, not legacy completed row diagnostics. Preserve all archived data and full regression suites. Keep unpublished until ongoing browser and pixel acceptance.",
   "priorities": [
     "Actual continuous causal response adaptation and executed command evidence",
     "Explicit forecast message access and support feasibility",
@@ -2661,7 +2655,6 @@
           "reason": "No page, layout or build dependency changed. Full integrated browser and pixel review remain required before live protocol publication."
         },
         "source_commit": "4e27460fa29d8565cbe7891ac9b1d212cbb18fcf",
-        "closed_at": "2026-10-19T00:28:46+08:00",
         "closure_reconciled_at": "2026-10-18T16:46:06.719Z",
         "publication": {
           "scope": "Audit documentation and progress only",
@@ -2684,7 +2677,9 @@
             "counted_completed": false,
             "lease_extended": false
           }
-        ]
+        ],
+        "last_observed_work_at": "2026-10-19T00:28:46+08:00",
+        "closure_status": "Exact final response time unavailable. Prior last tool time is preserved; the expired lease was recovered without a completion count."
       },
       {
         "program_id": "continuous-phi-20261018T234500",
@@ -2692,7 +2687,7 @@
         "branch": "cloud/refine/continuous-phi-20261018-2345",
         "started_at": "2026-10-19T00:44:30+08:00",
         "lease_expires_at": "2026-10-19T01:24:30+08:00",
-        "status": "ongoing_engine_candidate_pending_validation",
+        "status": "validated_ongoing_engine_unpublished",
         "counted_invocation": true,
         "counted_completed": false,
         "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
@@ -2708,56 +2703,123 @@
           "Independently compare old and new weights after actuator clipping on identical current state and forecasts, and retain actual bounded command change counts for every predefined case."
         ],
         "tests": {
-          "prior_foundation": {
-            "run_id": 39144327415,
+          "validation_run": 39148153140,
+          "validate_job": 117736264613,
+          "prepare_job": 117738350165,
+          "conclusion": "success",
+          "completed_logs_read": true,
+          "numerical": {
+            "total": 246,
+            "ongoing": 11,
+            "source_scale": 11,
+            "legacy": 224,
+            "failed": 0,
+            "conditions": 18,
+            "actions_each": 901,
+            "long_history": 1801
+          },
+          "causal": "Hidden current truth and excluded newly issued forecast counterfactuals passed. Weight delay and immutable messages passed.",
+          "commands": "Independent full response and raw and bounded executed command reconstruction passed. Every predefined case retained actual bounded changes after warmup.",
+          "replay": "Exact new engine replay passed on all three networks. Existing legacy UI replay tests passed unchanged.",
+          "build": "Passed. Generated child has tested source as only parent and only index.html changed.",
+          "browser": "All original browser checks and both network desktop and phone suites passed. Scope is the existing default UI and module load; ongoing UI acceptance remains open.",
+          "solar_audit": {
+            "run_id": 39147631712,
+            "job_id": 117734686491,
+            "source_commit": "86f2551e65aee7711cc0268ef7403753d43310a5",
             "conclusion": "success",
             "completed_logs_read": true,
-            "cases": 235
+            "scope": "Existing archived solar protocol, all twenty predefined seeds and beta zero one two. All product source blobs unchanged between this audit source and final tested source; later diffs contain only tests and progress."
           },
-          "ongoing_candidate": "Pending exact source workflow",
-          "required_legacy_suites": "Preserved without weakening or deleting cases",
-          "predefined_ongoing_cases": 11
+          "evidence_file": "refinement/continuous-response-acceptance.json"
         },
         "live_fix": false,
         "remaining_gaps": [
-          "Ongoing engine candidate must pass full validation. It is not enabled in the live interface.",
-          "UI phase replacement, causal linked inspection, new UI replay schema and actual desktop and phone ongoing interactions remain unfinished.",
-          "All substantial changed visual output needs authorized cloud pixel review before publication.",
-          "No dynamic topology selection is implemented. Fixed support and actual changing weights must be displayed honestly."
+          "Make the candidate ongoing protocol the actual default live UI with one physical clock and full accumulated costs.",
+          "Wire version 14 engine records into network scoped UI save and restore while retaining exact version 13 archived replay.",
+          "Use exact execution receipts for observed error, source correction, admitted support, signed effective gains, bounded commands and outcomes. Keep excluded source local diagnostics separate from received weights.",
+          "Replace obsolete automatic discovery and comparison boundaries and show fixed support with genuinely updating weights.",
+          "Run real ongoing desktop and phone interactions, arbitrary held and repeated attacks, multiple repairs, stable cost switches, all four traces, 901 action boundaries and long history performance.",
+          "Inspect actual authorized cloud screenshot pixels before visual publication and verify exact Pages and public output before claiming a live fix.",
+          "Keep archived frozen benchmarks labeled and separate. No dynamic support selection or theorem guarantee is implemented."
         ],
-        "next_focus": "Read exact candidate validation and generated ancestry. Continue the same unpublished branch toward an honest single ongoing UI and new replay. Preserve legacy replay and archived evidence. Do not publish until ongoing interaction and pixel acceptance pass.",
+        "next_focus": "Continue this same validated candidate into the single ongoing UI and new replay. Read metadata repeat and current main checks first. Use actual execution receipts and source pair counts, not legacy completed row diagnostics. Preserve all archived data and full regression suites. Keep unpublished until ongoing browser and pixel acceptance.",
         "pixel_review": {
-          "status": "pending_for_future_ongoing_ui",
-          "reason": "No ongoing visual redesign is published by this candidate."
+          "status": "ongoing_ui_not_reviewed_or_published",
+          "scope": "Existing visible UI remains the archived default. Node engine tests and DOM assertions do not constitute pixel approval."
         },
         "candidate_revisions": [
           {
             "source_commit": "685750a5889de9aa1baf905a27aadfe5faf2a248",
             "validation_run": 39147453898,
-            "status": "superseded_by_causal_replay_input_hardening",
+            "conclusion": "cancelled",
+            "completed_log_read": true,
+            "partial_ongoing_cases_passed": 9,
+            "reason": "Superseded by replay input validation",
+            "solar_run": 39147453827,
+            "solar_conclusion": "cancelled",
             "publication": false
           },
           {
             "source_commit": "86f2551e65aee7711cc0268ef7403753d43310a5",
             "validation_run": 39147631742,
-            "status": "superseded_by_additional_independent_causality_acceptance",
+            "conclusion": "cancelled",
+            "completed_log_read": true,
+            "partial_ongoing_cases_passed": 9,
+            "reason": "Superseded by explicit hidden truth and excluded forecast counterfactuals",
             "publication": false
           },
           {
             "source_commit": "198e093ac8094f7aa15f0bc833e1fe66a9bc7bcf",
-            "status": "superseded_by_bounded_counterfactual_command_assertion",
+            "validation_run": 39148053765,
+            "conclusion": "cancelled",
+            "completed_log_read": true,
+            "partial_ongoing_cases_passed": 11,
+            "reason": "Superseded by actual bounded command counterfactual counts",
+            "publication": false
+          },
+          {
+            "source_commit": "bf9201227ef102aa77f60f5bdbbb07580ffe3115",
+            "validation_run": 39148153140,
+            "conclusion": "success",
+            "completed_log_read": true,
+            "generated_child": "ee246f2bfd1b1fefa18e34092c88f508924a65b6",
             "publication": false
           }
-        ]
+        ],
+        "duplicate_dispatches": [
+          {
+            "at": "2026-10-19T01:16:59+08:00",
+            "status": "read_only_overlap",
+            "counted_invocation": false,
+            "counted_completed": false,
+            "lease_extended": false
+          }
+        ],
+        "source_commit": "bf9201227ef102aa77f60f5bdbbb07580ffe3115",
+        "ready_commit": "ee246f2bfd1b1fefa18e34092c88f508924a65b6",
+        "published_commit": null,
+        "checkpoint_at": "2026-10-18T17:20:07.409Z",
+        "metadata_lease_validation": {
+          "source_commit": "65281a0a34c34db1ea2457aade8b3b76c9507e11",
+          "run_id": 39146527319,
+          "conclusion": "success",
+          "completed_logs_read": true,
+          "counts_as_improvement": false
+        },
+        "publication": {
+          "status": "No algorithm publication. Candidate retained for continuous UI integration.",
+          "main_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+          "main_unchanged": true,
+          "prior_pages_run": 39144310532,
+          "prior_pages_conclusion": "success",
+          "public_http_behavior": "Not rechecked because no live change was made. Previously denied direct live browser access was not retried or bypassed."
+        },
+        "checkpoint_validation": "Pending metadata only repeat. The successful scientific and browser evidence above refers to exact source bf9201227ef102aa77f60f5bdbbb07580ffe3115 and its generated child. This checkpoint changes only progress and the saved acceptance outcomes.",
+        "bounded_work_completed_at": "2026-10-18T17:20:48.362Z"
       }
     ],
-    "active_run": {
-      "program_id": "continuous-phi-20261018T234500",
-      "slot": "2026-10-19T00:45:00+08:00",
-      "branch": "cloud/refine/continuous-phi-20261018-2345",
-      "started_at": "2026-10-19T00:44:30+08:00",
-      "lease_expires_at": "2026-10-19T01:24:30+08:00"
-    },
+    "active_run": null,
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
       "is_enabled": true,
