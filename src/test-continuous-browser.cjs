@@ -56,7 +56,24 @@ async function main(){
    await page.locator('#pr-run').click();await page.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t>=35);
    await page.locator('#pr-cost-gap').click();assert.equal((await read(page)).ui.playing,true);
    await page.locator('#pr-cost-total').click();
+   const nativeSwitches=[];
+   const nativeReceipt=()=>page.evaluate(()=>{
+    const root=document.querySelector('#power-response-demo'),s=root.powerDemo.getSnapshot(),receipt=s.lastExecution;
+    const r=window.PowerDemo.forNetwork(root.dataset.network).constants.inverterBuses.indexOf(7),j=5;
+    return {action:receipt.action,trainedThrough:receipt.trainedThrough,coefficient:receipt.policies.online.receivedCoefficients[r][j],
+      gain:receipt.policies.online.currentGains[r][j],raw:receipt.policies.online.raw[r],bounded:receipt.policies.online.bounded[r],corrupted:s.faults.includes(7)};
+   });
+   for(const target of [90,220,430,650]){
+    await page.waitForFunction(target=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t>=target,target,{timeout:150000,polling:100});
+    nativeSwitches.push(await nativeReceipt());
+    await page.locator('#pr-pulse').click();
+    assert.equal((await read(page)).ui.playing,true,'Source corruption or repair does not pause native Run');
+   }
    await page.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t>=901,null,{timeout:150000,polling:100});
+   nativeSwitches.push(await nativeReceipt());
+   assert.deepEqual(nativeSwitches.map(row=>row.corrupted),[false,true,false,true,false],'All predefined native corruption and repair switches execute');
+   assert.ok(nativeSwitches.slice(1).some((row,i)=>Math.abs(row.gain-nativeSwitches[i].gain)>1e-10),'Actual received effective response weights change during native Run');
+   for(const row of nativeSwitches){assert.ok(row.trainedThrough<row.action);assert.ok(Math.abs(row.bounded)<=70+1e-8);}
    assert.equal((await read(page)).ui.playing,true,'Native Run must not stop at old finite boundaries');
    await pause(page);
    const native=await read(page),nativeMetrics=await page.evaluate(()=>{
@@ -65,7 +82,7 @@ async function main(){
       initialDomNodes:m.initialDomNodes,finalDomNodes:document.getElementsByTagName('*').length,
       initialHeapBytes:m.initialHeapBytes,finalHeapBytes:performance.memory?.usedJSHeapSize??null};
    });
-   nativeMetrics.elapsedMs=Date.now()-nativeStarted;nativeMetrics.actions=native.s.t-nativeBefore.s.t;
+   nativeMetrics.elapsedMs=Date.now()-nativeStarted;nativeMetrics.actions=native.s.t-nativeBefore.s.t;nativeMetrics.sourceSwitches=nativeSwitches;
    assert.ok(native.s.t>=901);assert.equal(native.s.phase,'ongoing');assert.equal(native.s.mode,'running');
    assert.equal(native.s.historyLength,native.s.t,'Native playback retains all observed samples');
    assert.ok(native.s.learning.sourceUpdates>nativeBefore.s.learning.sourceUpdates);
