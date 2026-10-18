@@ -76,7 +76,7 @@ for(const network of Demo.networks)test(network.id+' stationary columns preserve
 for(const network of Demo.networks)test(network.id+' executes all predefined quality and seed streams past old boundaries without reset',()=>{
   const api=Demo.forNetwork(network.id),outcomes=[];
   for(const quality of plan.quality_cases)for(const seed of plan.seeds){
-    const sim=new api.Simulation(opts(network,quality,seed));let previous=Object.fromEntries(keys.map(k=>[k,0])),changedCommands=0,previousCoefficients=null;
+    const sim=new api.Simulation(opts(network,quality,seed));let previous=Object.fromEntries(keys.map(k=>[k,0])),changedCommands=0,changedExecutedCommands=0,previousCoefficients=null;
     assert.equal(sim.options.horizon,null);assert.equal(sim.phase,'ongoing');
     assert.equal(sim.deployTopology(),false);assert.equal(sim.freeze(),false);
     for(let action=0;action<plan.steps;action++){
@@ -98,6 +98,7 @@ for(const network of Demo.networks)test(network.id+' executes all predefined qua
       if(previousCoefficients&&action>=30){
         const before=independentRaw(sim,'online',action,previousCoefficients);
         if(before.some((v,r)=>Math.abs(v-receipt.policies.online.raw[r])>1e-9))changedCommands++;
+        if(before.some((v,r)=>Math.abs(Math.max(-.07,Math.min(.07,v))-receipt.policies.online.bounded[r])>1e-9))changedExecutedCommands++;
       }
       previousCoefficients=c;
       for(let r=0;r<network.M;r++)for(let j=0;j<network.N-1;j++){
@@ -110,7 +111,8 @@ for(const network of Demo.networks)test(network.id+' executes all predefined qua
         assert.equal(report.windowCount,Math.min(action,60));assert.equal(report.updates,Math.max(0,action-29));
       }
     }
-    assert.ok(changedCommands>0,'Actual weight updates change executed raw commands on fixed current input');
+    assert.ok(changedCommands>0,'Actual weight updates change raw commands on fixed current input');
+    assert.ok(changedExecutedCommands>0,'Actual weight updates change the bounded executed command on fixed current input');
     const snap=sim.snapshot(),edges=sim.continuousController.selection.links.length,issued=plan.steps+4;
     for(const key of ['online','scalar','static']){
       const traffic=snap.traffic[key],remote=key==='static'?network.M*(network.N-2):edges;
@@ -120,7 +122,7 @@ for(const network of Demo.networks)test(network.id+' executes all predefined qua
       for(const box of sim.continuousController.boxes[key])assert.ok(box.packets.size<=10);
     }
     assert.equal(snap.traffic.causal.forecastMessages,0);
-    outcomes.push({network:network.id,quality:quality.id,seed,steps:plan.steps,stageCosts:snap.cumulative,changedCommands,
+    outcomes.push({network:network.id,quality:quality.id,seed,steps:plan.steps,stageCosts:snap.cumulative,changedCommands,changedExecutedCommands,
       remoteLinks:{online:edges,scalar:edges,static:network.M*(network.N-2),causal:0}});
     if(seed===plan.seeds[0]&&quality.id==='mixed'){
       const record=JSON.parse(JSON.stringify(sim.recordContinuous())),copy=api.replayContinuous(record);

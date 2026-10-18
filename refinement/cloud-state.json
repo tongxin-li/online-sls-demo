@@ -2704,7 +2704,8 @@
           "Add nine independent and predefined ongoing engine cases covering all 18 network quality seed conditions and actual commands through 901 actions plus 1801 action history.",
           "Bundle the numerical modules into the candidate build without enabling the unfinished ongoing UI.",
           "Reject negative replay times and invalid slack source events; report correction scalar overhead separately from equal link permissions.",
-          "Add explicit hidden truth and excluded new forecast counterfactuals that independently verify causal source admission and held input commands."
+          "Add explicit hidden truth and excluded new forecast counterfactuals that independently verify causal source admission and held input commands.",
+          "Independently compare old and new weights after actuator clipping on identical current state and forecasts, and retain actual bounded command change counts for every predefined case."
         ],
         "tests": {
           "prior_foundation": {
@@ -2740,6 +2741,11 @@
             "source_commit": "86f2551e65aee7711cc0268ef7403753d43310a5",
             "validation_run": 39147631742,
             "status": "superseded_by_additional_independent_causality_acceptance",
+            "publication": false
+          },
+          {
+            "source_commit": "198e093ac8094f7aa15f0bc833e1fe66a9bc7bcf",
+            "status": "superseded_by_bounded_counterfactual_command_assertion",
             "publication": false
           }
         ]
