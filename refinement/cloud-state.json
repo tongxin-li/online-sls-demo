@@ -790,7 +790,7 @@
     "started_at": "2026-10-19T00:44:30+08:00",
     "lease_expires_at": "2026-10-19T01:24:30+08:00"
   },
-  "next_focus": "Integrate a truthful ongoing engine behind an explicit protocol, without changing legacy default or archived replay before UI acceptance.",
+  "next_focus": "Read exact candidate validation and generated ancestry. Continue the same unpublished branch toward an honest single ongoing UI and new replay. Preserve legacy replay and archived evidence. Do not publish until ongoing interaction and pixel acceptance pass.",
   "priorities": [
     "Actual continuous causal response adaptation and executed command evidence",
     "Explicit forecast message access and support feasibility",
@@ -2692,24 +2692,40 @@
         "branch": "cloud/refine/continuous-phi-20261018-2345",
         "started_at": "2026-10-19T00:44:30+08:00",
         "lease_expires_at": "2026-10-19T01:24:30+08:00",
-        "status": "engine_integration_in_progress",
+        "status": "ongoing_engine_candidate_pending_validation",
         "counted_invocation": true,
         "counted_completed": false,
         "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
         "candidate_parent": "4e27460fa29d8565cbe7891ac9b1d212cbb18fcf",
         "early_dispatch": "Read only preflight until 00:45. No extra invocation or deadline extension.",
         "changes": [
-          "Continue tested causal source scaling on the same unpublished candidate toward an explicitly versioned ongoing engine and independently checked stationary response."
+          "Continue tested causal source scaling on the same unpublished candidate toward an explicitly versioned ongoing engine and independently checked stationary response.",
+          "Implement an explicit ongoing engine option with source local coefficients used in admitted sparse prediction commands, fixed offline support, stationary startup and interior response columns, real traffic counters and versioned exact engine replay.",
+          "Add nine independent and predefined ongoing engine cases covering all 18 network quality seed conditions and actual commands through 901 actions plus 1801 action history.",
+          "Bundle the numerical modules into the candidate build without enabling the unfinished ongoing UI."
         ],
         "tests": {
-          "status": "pending"
+          "prior_foundation": {
+            "run_id": 39144327415,
+            "conclusion": "success",
+            "completed_logs_read": true,
+            "cases": 235
+          },
+          "ongoing_candidate": "Pending exact source workflow",
+          "required_legacy_suites": "Preserved without weakening or deleting cases"
         },
         "live_fix": false,
         "remaining_gaps": [
-          "Ongoing engine and UI not yet integrated or published.",
-          "Full predefined continuous commands, replay, browser and pixel acceptance remain required."
+          "Ongoing engine candidate must pass full validation. It is not enabled in the live interface.",
+          "UI phase replacement, causal linked inspection, new UI replay schema and actual desktop and phone ongoing interactions remain unfinished.",
+          "All substantial changed visual output needs authorized cloud pixel review before publication.",
+          "No dynamic topology selection is implemented. Fixed support and actual changing weights must be displayed honestly."
         ],
-        "next_focus": "Integrate a truthful ongoing engine behind an explicit protocol, without changing legacy default or archived replay before UI acceptance."
+        "next_focus": "Read exact candidate validation and generated ancestry. Continue the same unpublished branch toward an honest single ongoing UI and new replay. Preserve legacy replay and archived evidence. Do not publish until ongoing interaction and pixel acceptance pass.",
+        "pixel_review": {
+          "status": "pending_for_future_ongoing_ui",
+          "reason": "No ongoing visual redesign is published by this candidate."
+        }
       }
     ],
     "active_run": {

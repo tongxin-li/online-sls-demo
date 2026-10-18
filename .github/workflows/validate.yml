@@ -28,6 +28,7 @@ jobs:
           python-version: '3.12'
       - name: Test controllers and interactions
         run: |
+          node src/test-continuous-response.cjs
           node src/test-causal-source-scale.cjs
           node src/test-forecast-calibration.cjs
           node src/test-simulation.cjs

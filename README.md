@@ -253,3 +253,5 @@ Repeated forecasted cycle markers keep every actual timestamp, span and full eve
 ## Continuous response implementation work
 
 The current default still uses the frozen communication deployment documented above. The [public implementation map](refinement/continuous-response-map.md) traces the actual estimator, executed gains, message permissions, reset boundaries and replay before algorithm changes. The [predefined acceptance plan](refinement/continuous-response-plan.json) specifies the new ongoing protocol checks. This engineering work does not attribute archived benchmark percentages to a new adaptive protocol or claim that the live freeze is already fixed.
+
+The ongoing engine candidate now has explicit causal source messages, a stationary finite memory response and version 14 engine records. It remains unpublished while continuous UI and replay integration and browser acceptance are unfinished. See the implementation map for the new baseline and communication conventions. The default at the public URL has not yet changed.
