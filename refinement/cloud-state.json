@@ -783,7 +783,30 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "program_id": "continuous-phi-20261018T234500",
+    "slot": "2026-10-19T03:45:00+08:00",
+    "started_at": "2026-10-19T03:48:48+08:00",
+    "lease_expires_at": "2026-10-19T04:28:48+08:00",
+    "branch": "cloud/refine/continuous-phi-20261018-2345",
+    "candidate_parent": "46b2d12363941b546b58cd9a84893bc95de58ed1",
+    "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+    "status": "in_progress",
+    "counted_invocation": true,
+    "counted_completed": false,
+    "changes": [],
+    "tests": {
+      "preflight": {
+        "main_run": 39144310544,
+        "main": "success",
+        "candidate_run": 39157829651,
+        "candidate": "success",
+        "completed_logs_read": true,
+        "generated_child_only_index": true
+      }
+    },
+    "next_focus": "Enable and validate fresh ongoing trials with explicit archived replay fixtures. Keep unpublished until every new trial migration and required acceptance gate is coherent."
+  },
   "next_focus": "First read latest candidate checks, including the visible settings Step test repair, and reconcile interrupted or metadata repeat checks. Then make fresh unsaved sessions and explicit new trials use continuous-phi-v1, preserve exact archived version 13 replay through declared fixtures, expose actual measured weight evolution by default, remove inapplicable legacy controls and update README and environment. Run every required suite and inspect actual fresh desktop and phone pixels before main promotion. Evaluate longer ordinary playback and memory growth explicitly.",
   "priorities": [
     "Actual continuous causal response adaptation and executed command evidence",
@@ -2594,7 +2617,7 @@
     "hard_deadline": "2026-10-19T23:45:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 4,
+    "invocation_count": 5,
     "completed_count": 0,
     "runs": [
       {
@@ -3057,7 +3080,7 @@
         "branch": "cloud/refine/continuous-phi-20261018-2345",
         "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
         "candidate_parent": "f7609eb59b415afc7ee6364df1c984d93bfa5a5e",
-        "status": "ongoing_inspector_and_phone_candidate_unpublished_full_revalidation_pending",
+        "status": "validated_ongoing_inspector_candidate_unpublished",
         "counted_invocation": true,
         "counted_completed": false,
         "changes": [
@@ -3230,6 +3253,20 @@
               }
             },
             "progress_commit_note": "This final metadata checkpoint changes no demo source or test. Its normal push may supersede this still running source validation. Read actual final jobs for the latest candidate head and preserve any cancellations. Do not treat this record as full validation or a live completion."
+          },
+          "final_checkpoint_validation": {
+            "source_commit": "38f18d182041127c55af2fb9320905fd4fcef172",
+            "ready_commit": "46b2d12363941b546b58cd9a84893bc95de58ed1",
+            "run_id": 39157829651,
+            "validate_job": 117764715903,
+            "ongoing_browser_job": 117764716154,
+            "prepare_job": 117767909466,
+            "conclusion": "success",
+            "completed_logs_read": true,
+            "numerical_cases": 252,
+            "original_browser_checks": 44,
+            "network_desktop_phone": "success",
+            "generated_child": "Exact tested source parent and only index.html change verified"
           }
         },
         "remaining_gaps": [
@@ -3348,7 +3385,7 @@
           }
         },
         "source_commit": "3a873d47bcb27b70bfc627e14647e758c49d4f84",
-        "ready_commit": null,
+        "ready_commit": "46b2d12363941b546b58cd9a84893bc95de58ed1",
         "published_commit": null,
         "completed_at": "2026-10-18T19:13:53Z",
         "end_reason": "Bounded implementation checkpoint. Preserve this candidate and finish required checks at the next existing invocation before enabling a fresh ongoing default. No main or hosting change.",
@@ -3359,9 +3396,56 @@
           "main_unchanged": true,
           "generated_child": "None from the failed full run. Never promote the current unverified candidate."
         }
+      },
+      {
+        "program_id": "continuous-phi-20261018T234500",
+        "slot": "2026-10-19T03:45:00+08:00",
+        "started_at": "2026-10-19T03:48:48+08:00",
+        "lease_expires_at": "2026-10-19T04:28:48+08:00",
+        "branch": "cloud/refine/continuous-phi-20261018-2345",
+        "candidate_parent": "46b2d12363941b546b58cd9a84893bc95de58ed1",
+        "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+        "status": "in_progress",
+        "counted_invocation": true,
+        "counted_completed": false,
+        "changes": [],
+        "tests": {
+          "preflight": {
+            "main_run": 39144310544,
+            "main": "success",
+            "candidate_run": 39157829651,
+            "candidate": "success",
+            "completed_logs_read": true,
+            "generated_child_only_index": true
+          }
+        },
+        "next_focus": "Enable and validate fresh ongoing trials with explicit archived replay fixtures. Keep unpublished until every new trial migration and required acceptance gate is coherent."
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "program_id": "continuous-phi-20261018T234500",
+      "slot": "2026-10-19T03:45:00+08:00",
+      "started_at": "2026-10-19T03:48:48+08:00",
+      "lease_expires_at": "2026-10-19T04:28:48+08:00",
+      "branch": "cloud/refine/continuous-phi-20261018-2345",
+      "candidate_parent": "46b2d12363941b546b58cd9a84893bc95de58ed1",
+      "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+      "status": "in_progress",
+      "counted_invocation": true,
+      "counted_completed": false,
+      "changes": [],
+      "tests": {
+        "preflight": {
+          "main_run": 39144310544,
+          "main": "success",
+          "candidate_run": 39157829651,
+          "candidate": "success",
+          "completed_logs_read": true,
+          "generated_child_only_index": true
+        }
+      },
+      "next_focus": "Enable and validate fresh ongoing trials with explicit archived replay fixtures. Keep unpublished until every new trial migration and required acceptance gate is coherent."
+    },
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
       "is_enabled": true,
@@ -3372,6 +3456,15 @@
       "setup_counts_as_improvement": false
     },
     "candidate_branch": "cloud/refine/continuous-phi-20261018-2345",
-    "next_focus": "First read latest candidate checks, including the visible settings Step test repair, and reconcile interrupted or metadata repeat checks. Then make fresh unsaved sessions and explicit new trials use continuous-phi-v1, preserve exact archived version 13 replay through declared fixtures, expose actual measured weight evolution by default, remove inapplicable legacy controls and update README and environment. Run every required suite and inspect actual fresh desktop and phone pixels before main promotion. Evaluate longer ordinary playback and memory growth explicitly."
+    "next_focus": "First read latest candidate checks, including the visible settings Step test repair, and reconcile interrupted or metadata repeat checks. Then make fresh unsaved sessions and explicit new trials use continuous-phi-v1, preserve exact archived version 13 replay through declared fixtures, expose actual measured weight evolution by default, remove inapplicable legacy controls and update README and environment. Run every required suite and inspect actual fresh desktop and phone pixels before main promotion. Evaluate longer ordinary playback and memory growth explicitly.",
+    "skipped_duplicate_dispatches": [
+      {
+        "dispatch": "2026-10-19T03:13:56+08:00",
+        "slot": "2026-10-19T02:45:00+08:00",
+        "status": "read_only_duplicate_preflight",
+        "counted": false,
+        "details": "Already recorded scheduled slot. No extra invocation, implementation, lease or completion."
+      }
+    ]
   }
 }
