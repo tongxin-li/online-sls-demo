@@ -783,17 +783,8 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-18T10:00:00+08:00",
-    "started_at": "2026-10-18T09:57:54+08:00",
-    "expires_at": "2026-10-18T10:37:54+08:00",
-    "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
-    "candidate_branch": "cloud/refine/20261018-1000",
-    "base_commit": "86ab70244254733b22f3991a328470e010a615d5",
-    "status": "validating",
-    "scope": "Readable phone network geometry without label/equipment collisions"
-  },
-  "next_focus": "Review remaining dense phone feeder geometry and 9 px unselected bus numbers from actual cloud screenshots. Consider a modest responsive network height or clearer existing selection hierarchy only after measured overlap/touch checks and pixel review, without new panels or controls. Preserve contextual source/receiver marks and caption, all four costs and recorded regimes, compact desktop columns and phone order. No scientific retuning or broad benchmark study for visual work.",
+  "active_run": null,
+  "next_focus": "Inspect whether the controller represented by the network and matrix links is unmistakable in existing headings and current/history labels. Reuse actual protocol and support information, including Learned sparse versus Matrix adaptation, without adding panels or controls or implying all four designs use the displayed links. Preserve actual scores, commands, fixed deployment, all four costs and honest recorded regimes. Keep the readable phone feeder and contextual source/receiver marks. No scientific retuning or broad benchmark study for visual work.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -903,19 +894,19 @@
       "pages_run": 39052070867
     },
     "renewed_completion": {
-      "slot": "2026-10-18T09:00:00+08:00",
-      "branch": "cloud/refine/20261018-0900",
-      "product_ready_commit": "78f803f6cc8de784a14b60cdedc4cb19a1ab2faa",
+      "slot": "2026-10-18T10:00:00+08:00",
+      "branch": "cloud/refine/20261018-1000",
+      "product_ready_commit": "5bb463c9d9f40e04440755a59275c918e92a6c2b",
       "scope": "Completion record only, no product changes",
-      "status": "Recovered metadata candidate 86ab70244254733b22f3991a328470e010a615d5 after normal validation 39087283602 passed all 212 tests and full browser checks. Expected-main guarded metadata-only promotion succeeded. No count increment.",
-      "instruction": "The 09:00 slot is counted once in this candidate's renewed_program.completed_count. At the next existing slot read actual metadata candidate workflow result and branch head. Promote only after normal validation with expected current main 78f803f6cc8de784a14b60cdedc4cb19a1ab2faa and force false if still matching. If main changed, reapply only the verified completion metadata onto latest main and validate normally. Do not overwrite newer source, count metadata recovery as another improvement, or count this slot twice. Original 40 minute pass deadline remains 09:43:32. Do not extend it or start an additional refinement from a duplicate dispatch."
+      "status": "Metadata candidate validation pending at record creation. Product candidate, main, build consistency, full browser checks and exact ready Pages deployment succeeded.",
+      "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and metadata candidate workflow results before recovery. Promote only after normal validation with expected main 5bb463c9d9f40e04440755a59275c918e92a6c2b and force false if still matching. On newer main reapply only verified completion metadata and validate normally. Do not count metadata recovery, previous recovery or a duplicate dispatch as another invocation or improvement. Preserve the original 10:37:54 pass deadline."
     },
     "previous_renewed_metadata_verification": {
-      "commit": "e5c4359617dcd084368f476a0ef86bdacdfa290f",
-      "candidate_run": 39082377587,
-      "main_run": 39082970486,
-      "pages_run": 39082970980,
-      "result": "success independently verified before this slot"
+      "commit": "86ab70244254733b22f3991a328470e010a615d5",
+      "candidate_run": 39087283602,
+      "main_run": 39088429417,
+      "pages_run": 39088429153,
+      "result": "success independently verified during this slot; recovered metadata only with no invocation or completion increment"
     },
     "renewed_completion_history": {
       "0": {
@@ -973,8 +964,27 @@
         "product_ready_commit": "f48d5db46d796fa7bf7fad46e537a26c4acc2a6a",
         "scope": "Completion record only, no product changes",
         "instruction": "This slot is counted once in renewed_program.completed_count. Read actual current main and candidate workflow results for metadata recovery. Do not count metadata validation as a new invocation or improvement, or promote an older branch over newer main."
+      },
+      "8": {
+        "slot": "2026-10-18T09:00:00+08:00",
+        "branch": "cloud/refine/20261018-0900",
+        "product_ready_commit": "78f803f6cc8de784a14b60cdedc4cb19a1ab2faa",
+        "scope": "Completion record only, no product changes",
+        "status": "Recovered metadata-only completion and independently verified main repeat 39088429417 plus exact Pages 39088429153. Counted 09:00 once, no recovery improvement increment.",
+        "instruction": "The 09:00 slot is counted once in this candidate's renewed_program.completed_count. At the next existing slot read actual metadata candidate workflow result and branch head. Promote only after normal validation with expected current main 78f803f6cc8de784a14b60cdedc4cb19a1ab2faa and force false if still matching. If main changed, reapply only the verified completion metadata onto latest main and validate normally. Do not overwrite newer source, count metadata recovery as another improvement, or count this slot twice. Original 40 minute pass deadline remains 09:43:32. Do not extend it or start an additional refinement from a duplicate dispatch.",
+        "main_run": 39088429417,
+        "pages_run": 39088429153
       }
-    }
+    },
+    "renewed_metadata_verification_history": [
+      {
+        "commit": "e5c4359617dcd084368f476a0ef86bdacdfa290f",
+        "candidate_run": 39082377587,
+        "main_run": 39082970486,
+        "pages_run": 39082970980,
+        "result": "success independently verified before this slot"
+      }
+    ]
   },
   "parent_handoffs": [
     {
@@ -1059,7 +1069,7 @@
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
     "invocation_count": 10,
-    "completed_count": 9,
+    "completed_count": 10,
     "runs": [
       {
         "slot": "2026-10-18T01:00:00+08:00",
@@ -1489,27 +1499,47 @@
       {
         "slot": "2026-10-18T10:00:00+08:00",
         "started_at": "2026-10-18T09:57:54+08:00",
-        "status": "validating",
+        "status": "completed",
         "candidate_branch": "cloud/refine/20261018-1000",
         "base_commit": "86ab70244254733b22f3991a328470e010a615d5",
-        "counted_completed": false,
+        "counted_completed": true,
         "changes": [
           "Give the existing phone network a 360 px drawing area and 12 px higher contrast bus numbers instead of compressing all 24 physical buses into the 220 px desktop height. Retain desktop geometry and normalized bus layout.",
           "Preserve every physical and prediction connection, real source/receiver markers, power and forecast badges, all four policies, scientific settings, costs and exact replay. No new panel, control, dependency or numerical study.",
           "Add actual all-bus centre hit testing, glyph-to-glyph and glyph-to-equipment overlap checks, viewport containment and physical line attachment checks, plus responsive geometry and full trial invariance assertions and pixel screenshots."
-        ]
+        ],
+        "source_commit": "ed57f9cf986d96ee62029a718287a11e82bc95bc",
+        "published_commit": "5bb463c9d9f40e04440755a59275c918e92a6c2b",
+        "candidate_run": 39088645235,
+        "main_run": 39089279358,
+        "pages_run": 39089279247,
+        "tests": {
+          "suites": 7,
+          "total": 212,
+          "failed": 0,
+          "candidate": "passed",
+          "main": "All 212 tests, build consistency and full desktop/phone browser checks passed.",
+          "build": "passed",
+          "browser": "Full desktop and phone browser suite passed. All 24 bus centres target themselves, labels do not overlap one another or neighbouring equipment discs on phones, all 23 physical edges remain attached to the same buses, and full paused snapshots and normalized positions are invariant across 390/650/651/768/1440 resizing. Existing real playback, repeated/continuous attacks, forecast toggles, automatic comparison, stable live cost buttons, all four curves and exact old replay remain covered.",
+          "benchmarks": "Not rerun. Only phone drawing height and bus label typography changed. No physical model, controller, gains, objective, limits, default scenario, forecast timing, source errors, learning equations or recorded result changes.",
+          "main_consistency": "passed"
+        },
+        "screenshots": {
+          "artifact_id": 12122127168,
+          "artifact_digest": "sha256:0c8130f3fd91b6b14faa452f44086d0af36416f466b627488cb9ddaef0bba7ab",
+          "captures": [
+            "network-inspection-1440-discovery.jpg",
+            "network-inspection-1440-deployment.jpg",
+            "network-inspection-390-deployment.jpg"
+          ],
+          "pixel_review": "Actual desktop 1440 discovery and deployment, and phone 390 deployment JPEG pixels reviewed through authorized Actions logs. Phone feeder is taller, with dark 12 px numbers readable at every bus, separated equipment, preserved source/receiver rings, number backdrops and role caption. No clipped labels or label-to-equipment overlap observed in the reviewed phone image. Desktop geometry and typography remain unchanged. Actual feedback-only lowest cost on the stressed desktop and fixed-sparse lowest on the phone remain visible, with all four complete costs. All-bus geometry and centre targeting were verified at 390, 650, 651, 768 and 1440 px through responsive DOM assertions. Existing 320 px interaction and page-fit checks passed, but no new all-bus geometry or screenshot pixel review is claimed at 320 px. This is artifact pixel review, not direct live browser access."
+        },
+        "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed. No public HTTP byte comparison performed this pass.",
+        "completed_at": "2026-10-18T02:20:02.541Z",
+        "publication": "Candidate and main validation succeeded. Generated ready child has the tested source as its single parent and only index.html changed. Promoted with expected current main SHA and force false. Pages succeeded for that exact tested ready version; deployment logs verified."
       }
     ],
-    "active_run": {
-      "slot": "2026-10-18T10:00:00+08:00",
-      "started_at": "2026-10-18T09:57:54+08:00",
-      "expires_at": "2026-10-18T10:37:54+08:00",
-      "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
-      "candidate_branch": "cloud/refine/20261018-1000",
-      "base_commit": "86ab70244254733b22f3991a328470e010a615d5",
-      "status": "validating",
-      "scope": "Readable phone network geometry without label/equipment collisions"
-    },
+    "active_run": null,
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
@@ -1529,5 +1559,5 @@
     "baseline_main": "2a9ff26b59565ecac1eb5274fbea4d813a18f24f"
   },
   "completed_count_scope": "Original bounded program, retained at 15. Renewed counts are tracked independently in renewed_program.",
-  "total_completed_count": 24
+  "total_completed_count": 25
 }
