@@ -85,7 +85,8 @@ async function main(){
    nativeMetrics.elapsedMs=Date.now()-nativeStarted;nativeMetrics.actions=native.s.t-nativeBefore.s.t;nativeMetrics.sourceSwitches=nativeSwitches;
    assert.ok(native.s.t>=901);assert.equal(native.s.phase,'ongoing');assert.equal(native.s.mode,'running');
    assert.equal(native.s.historyLength,native.s.t,'Native playback retains all observed samples');
-   assert.ok(native.s.learning.sourceUpdates>nativeBefore.s.learning.sourceUpdates);
+   assert.equal(native.s.learning.sourceUpdates,Math.max(0,native.s.lastExecution.action-29),'One causal source fit per action after the 30 pair warmup');
+   assert.ok(native.s.learning.sourceUpdates>(nativeBefore.s.learning.sourceUpdates??0));
    for(const key of ['online','scalar','static','causal'])assert.ok(native.s.cumulative[key]>nativeBefore.s.cumulative[key],'Native full physical costs continue '+key);
    assert.ok(nativeMetrics.frames>100,'Actual rendering frames are observed during native playback');
    console.log('NATIVE_PLAYBACK '+JSON.stringify({networkId,mobile,...nativeMetrics,costs:native.s.cumulative,sourceUpdates:native.s.learning.sourceUpdates}));
