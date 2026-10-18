@@ -1693,7 +1693,7 @@
       .attr('data-event-steps',g=>g.items.map(item=>item.at).join(','))
       .attr('data-event-types',g=>g.items.map(item=>item.type).join(','))
       .attr('data-forecast-count',g=>g.forecasts).attr('data-scenario-count',g=>g.scenarios)
-      .attr('data-label-visible',g=>String(g.labelVisible)).attr('aria-label',g=>g.accessible);
+      .attr('data-label-visible',g=>String(g.labelVisible)).attr('aria-label',g=>g.accessible).attr('aria-hidden','true');
     // Position badges directly. They must never fly in from a stale chart scale.
     labels.interrupt().interrupt('update').attr('transform',g=>'translate('+g.x+','+(chart.frame.y-14)+')');
     labels.select('rect').attr('x',g=>-g.width/2).attr('y',-10).attr('width',g=>g.width).attr('height',20).attr('rx',6)

@@ -2450,7 +2450,16 @@
         },
         "screenshots": {
           "status": "Review actual desktop and phone plot pixels before promotion"
-        }
+        },
+        "candidate_revisions": [
+          {
+            "source_commit": "8e4e2184bfee6919007164a96a1fe509a7e8f1e1",
+            "status": "superseded_unpublished",
+            "reason": "Before browser validation, keep one assistive event description on the retained actual marker and mark its decorative badge hidden from assistive technology. Full native titles and labels stay in the DOM. This avoids introducing duplicate semantic event readings.",
+            "validation_conclusion": "In progress at correction. Read actual final cancellation result before completion.",
+            "candidate_run": 39138677274
+          }
+        ]
       }
     ],
     "active_run": {
