@@ -1582,7 +1582,14 @@
         "screenshots": {
           "pixel_review": "Pending candidate cloud screenshots. Prior published matrix desktop and phone pixels reviewed to identify ambiguous ownership before this edit."
         },
-        "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed."
+        "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed.",
+        "superseded_candidates": [
+          {
+            "source_commit": "b97eea983793beff5715e78d7446c4e5d92a396c",
+            "candidate_run": 39092280279,
+            "reason": "Read-only review found one existing exact inspection label fixture needed the newly explicit controller suffix. Preserve the full exact label assertion with its actual phase-specific controller name. Superseded before publication."
+          }
+        ]
       }
     ],
     "active_run": {

@@ -1338,7 +1338,7 @@ test('prediction link inspection uses current support without changing plant or 
     assert.ok(edge,'Actual candidate or deployed support exists');
     h.inspectLink(edge.to,edge.from);
     assert.deepEqual(h.inspection(),{source:edge.from,receiver:edge.to,local:false,connected:true,
-      label:'Source bus '+edge.from+' → inverter '+edge.to+' · Selected link · '+(before.phase==='deployment'?'Deployed':'Candidate')});
+      label:'Source bus '+edge.from+' → inverter '+edge.to+' · Selected link · '+(before.phase==='deployment'?'Deployed · Learned sparse':'Candidate · Matrix adaptation')});
     const absent=Array.from({length:23},(_,i)=>i+2).find(bus=>bus!==edge.to&&!before.recommendations.some(e=>e.to===edge.to&&e.from===bus));
     h.inspectLink(edge.to,absent);
     assert.equal(h.inspection().connected,false,'An absent source must not fabricate a link');
