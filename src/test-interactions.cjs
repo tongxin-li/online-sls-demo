@@ -1874,6 +1874,9 @@ test('scheduled cycle markers distinguish forecasted power from surprise attacks
   assert.ok(windowed.slice(0,2).every(group=>windowed[0].badgeDescription.includes(group.description)));
   const solar=h.interventionGroups({...view,eventLog:[{type:'scenario',t:0,forecasted:false,message:'Unforecast outage'},{type:'scenario',t:60,forecasted:false,message:'Unforecast recovery'}]},[0,180],3);
   assert.deepEqual(solar.map(group=>group.labelVisible),[true,true],'Unforecast outages and recovery keep every label');
+  const long=h.interventionGroups({...view,t:600,eventLog:Array.from({length:9},(_,i)=>({type:'scenario',t:i*60,forecasted:true,message:'Recorded cycle '+i}))},[0,600],1);
+  assert.equal(long[0].label,'Scheduled ×9');assert.equal(long[0].items.length,9);assert.equal(long[0].details.length,8);
+  assert.match(long[0].badgeDescription,/Latest 8 events shown/,'Retain the original explicit detail cap without dropping event records or inventing older details');
   assert.equal(JSON.stringify(view),before);assert.equal(JSON.stringify(h.snapshot()),trial);assert.deepEqual(h.state(),state);
 });
 

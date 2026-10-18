@@ -2472,6 +2472,13 @@
             "status": "superseded_unpublished",
             "reason": "Source review confirmed cross-series hover overlay covers marker bands. Preserve mouse access to every compacted cycle detail through the existing first visible badge tooltip, with its actual cycle count, while retaining all original marker details and geometry. No new controls or numerical changes.",
             "validation_conclusion": "In progress at correction. Read actual final result."
+          },
+          {
+            "source_commit": "e5cec7bc0d5a7d06a85d216d12eb066d08f1600e",
+            "candidate_run": 39139474702,
+            "status": "superseded_unpublished",
+            "reason": "Qualify documentation to preserve the original latest eight detail cap for a dense event group and extend the existing regression to nine actual cycles. No further product or rendering change. Full event records, counts and markers remain intact.",
+            "validation_conclusion": "In progress at correction. Read actual final result."
           }
         ]
       }
