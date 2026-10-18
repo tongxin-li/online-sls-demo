@@ -783,14 +783,8 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "slot": "2026-10-18T18:00:00+08:00",
-    "branch": "cloud/refine/20261018-1800",
-    "started_at": "2026-10-18T18:00:00+08:00",
-    "preflight_at": "2026-10-18T17:55:26+08:00",
-    "lease_expires_at": "2026-10-18T18:35:26+08:00"
-  },
-  "next_focus": "Validate complete edge source labels and their actual column guides without moving source cells or hiding sources. Preserve existing linked inspection and evidence.",
+  "active_run": null,
+  "next_focus": "Verify final repeated checks and completion metadata. Then review the existing linked inspector for compact hierarchy between current revealed error, frozen discovery score and executed resynthesized command without repeating source and receiver identity. Preserve complete matrix edge labels, all sources, the single cost table, two stage strip and stable headings. Do not add panels or broaden numerical studies.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -900,16 +894,16 @@
       "pages_run": 39052070867
     },
     "renewed_completion": {
-      "slot": "2026-10-18T17:00:00+08:00",
-      "branch": "cloud/refine/20261018-1700",
-      "product_ready_commit": "13eb5e384f1aad5b1c66fa2aae3b9e76bc101b54",
-      "source_commit": "03d40975d86ff941af9d5b9c3db09ea9f0e3dbf3",
-      "candidate_run": 39113979517,
-      "main_run": 39114876692,
-      "pages_run": 39114876840,
+      "slot": "2026-10-18T18:00:00+08:00",
+      "branch": "cloud/refine/20261018-1800",
+      "product_ready_commit": "947d397913477c59285e3d687499dee901202687",
+      "source_commit": "90ebadbb6b47693e785b43c490b6d87f7c4f55b6",
+      "candidate_run": 39117774293,
+      "main_run": 39118725048,
+      "pages_run": 39118724552,
       "scope": "Completion record only. Product already validated and deployed.",
-      "status": "17:00 completion metadata is already main at a7e8046aeacd638a20ed43a69e08b89d719c45eb. Its candidate and prepare plus main repeat succeeded, as did the product repeat and exact Pages deployments. No recovery invocation or completion increment.",
-      "instruction": "Read actual product main repeat before further source edits and metadata validation before promotion. This 17:00 completion is counted once in this candidate. Promote metadata only after normal successful validation with matching current main 13eb5e384f1aad5b1c66fa2aae3b9e76bc101b54 and force false. On newer main reapply only verified metadata without overwriting concurrent product changes or double counting. Recovery, coordination, preflight and duplicate dispatches are not refinements. Preserve the original 17:41:35 pass deadline."
+      "status": "Metadata validation pending at creation. Historical completed 15, renewed invocation 17 and completed 17 yield total 32. Earlier verification and cancelled superseded source did not increment counts.",
+      "instruction": "Read actual product main repeat before further source edits and metadata validation before promotion. This 18:00 slot is counted once. Promote metadata only after normal successful validation with matching current main 947d397913477c59285e3d687499dee901202687 and force false. On newer main preserve concurrent changes and reapply only verified metadata without double counting. Recovery, coordination, early preflight, cancelled superseded candidates and duplicate dispatches are not refinements. Preserve the original stricter 18:35:26 deadline from the 17:55:26 early dispatch."
     },
     "previous_renewed_metadata_verification": {
       "commit": "e72156d27b731f00f88edee1ce3fe007ea3786f8",
@@ -1048,6 +1042,18 @@
         "scope": "Completion record only. Product already validated and deployed.",
         "status": "16:00 completion metadata is already main at f7b71ba54c2e8d6bc0c200c28b9107e0df6ad8ed. Its candidate and prepare plus main repeat succeeded. Product repeat also succeeded and exact Pages deployment was verified. No recovery invocation or completion increment.",
         "instruction": "Read actual main repeat before further source edits and metadata validation before promotion. This 16:00 completion is counted once in this candidate. Promote metadata only after normal successful validation with matching current main 76b2e15f503ebe2f0159b1247e1f6534e56c3b5d and force false. On newer main reapply only verified metadata without overwriting concurrent product changes or double counting. Recovery, coordination, preflight and duplicate dispatches are not refinements. Preserve the original 16:42:22 pass deadline."
+      },
+      "15": {
+        "slot": "2026-10-18T17:00:00+08:00",
+        "branch": "cloud/refine/20261018-1700",
+        "product_ready_commit": "13eb5e384f1aad5b1c66fa2aae3b9e76bc101b54",
+        "source_commit": "03d40975d86ff941af9d5b9c3db09ea9f0e3dbf3",
+        "candidate_run": 39113979517,
+        "main_run": 39114876692,
+        "pages_run": 39114876840,
+        "scope": "Completion record only. Product already validated and deployed.",
+        "status": "17:00 completion metadata is already main at a7e8046aeacd638a20ed43a69e08b89d719c45eb. Its candidate and prepare plus main repeat succeeded, as did the product repeat and exact Pages deployments. No recovery invocation or completion increment.",
+        "instruction": "Read actual product main repeat before further source edits and metadata validation before promotion. This 17:00 completion is counted once in this candidate. Promote metadata only after normal successful validation with matching current main 13eb5e384f1aad5b1c66fa2aae3b9e76bc101b54 and force false. On newer main reapply only verified metadata without overwriting concurrent product changes or double counting. Recovery, coordination, preflight and duplicate dispatches are not refinements. Preserve the original 17:41:35 pass deadline."
       }
     },
     "renewed_metadata_verification_history": [
@@ -1201,7 +1207,7 @@
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
     "invocation_count": 17,
-    "completed_count": 16,
+    "completed_count": 17,
     "runs": [
       {
         "slot": "2026-10-18T01:00:00+08:00",
@@ -2009,11 +2015,11 @@
         "started_at": "2026-10-18T18:00:00+08:00",
         "preflight_at": "2026-10-18T17:55:26+08:00",
         "lease_expires_at": "2026-10-18T18:35:26+08:00",
-        "status": "validating",
+        "status": "completed",
         "candidate_branch": "cloud/refine/20261018-1800",
         "base_commit": "a7e8046aeacd638a20ed43a69e08b89d719c45eb",
         "counted_invocation": true,
-        "counted_completed": false,
+        "counted_completed": true,
         "slot_resolution": "Read only early preflight before 18:00. Source edits and publication begin after the scheduled start. Preserve the stricter 18:35:26 deadline measured from the original early dispatch. Count this slot once.",
         "changes": [
           "Keep whole source numbers readable for every partly visible large matrix column, by clamping only edge labels inside the source viewport. Reuse each existing guide to point to the unchanged actual column.",
@@ -2021,30 +2027,54 @@
           "Add actual desktop and phone checks at eight pan positions for complete exposed source labels, no overlap or hidden sources, exact guide endpoints and full paused trial invariance. Preserve existing all source reachability and pointer hit tests. No scientific or numerical result changes."
         ],
         "tests": {
-          "status": "Pending normal cloud validation",
-          "benchmarks": "Not rerun for this presentation change."
+          "suites": 8,
+          "total": 224,
+          "failed": 0,
+          "candidate": "Current candidate validation and prepare succeeded. Earlier source was superseded before publication by test synchronization and both of its jobs were cancelled, preserved above.",
+          "build": "passed",
+          "reference_artifact": "Passed unchanged reference generator and artifact checks.",
+          "main": "Repeat validation 39118725048 is running at completion record creation. Read actual final status before further source edits.",
+          "browser": "Full original desktop and phone browser suite and both network suites passed without runtime errors. Existing playback, repeated and continuous attacks, forecast toggles, automatic fresh comparison, stable cost buttons, all four traces, network switching and exact replay remain covered. New actual desktop and phone tests inspect eight pan positions, require whole numbers for every exposed source column, no source label overlap or hidden sources, guide starts at actual labels and ends at original column coordinates. Existing real pointer hit targets, pinned receiver geometry, correct visible range and direction cues, all 46 source headers and 736 cells, every source reachable, native keyboard scrolling and unchanged full paused trial snapshots remain checked. Consecutive middle positions wait for native scroll dispatch and paint before assertions.",
+          "benchmarks": "Not rerun. No engine, controller, objective, learning, forecast timing, noise, limits, attack, numerical output or recorded result changes."
         },
         "screenshots": {
-          "pixel_review": "Pending actual Actions desktop and phone JPEG previews. Before choosing work reviewed the current phone middle pan from completed main Actions evidence, including a truncated source digit at the right edge."
+          "artifact_id": 12132354393,
+          "artifact_digest": "sha256:14bcce32709b650ac4710ac13b481387becdd14dcf0cf38cb95f38222e7d63cd",
+          "captures": [
+            "networks/matrix-navigation-1440-start.jpg",
+            "networks/matrix-navigation-1440-middle.jpg",
+            "networks/matrix-navigation-1440-end.jpg",
+            "networks/matrix-navigation-390-start.jpg",
+            "networks/matrix-navigation-390-middle.jpg",
+            "networks/matrix-navigation-390-end.jpg"
+          ],
+          "pixel_review": "Six actual desktop 1440 and phone 390 start middle end JPEG pixels reviewed through authorized Actions previews before publication. All edge source numbers are whole, including 34 at the phone middle right boundary and 42 at the desktop middle right boundary. Labels retain staggered rows without overlap. Existing guides point to actual columns. All pinned inverter numbers, Source bus title, actual source ranges, native focus outline, selected cells and all 46 source headers remain intact. Support cells can still be partly clipped at pan boundaries by the viewport, but their source labels are complete and every source remains reachable. No direct live browser inspection claimed."
         },
-        "direct_live_inspection": "Unverified. Previously denied direct live browser access will not be retried or bypassed.",
+        "direct_live_inspection": "Unverified. Previously denied direct live browser access was not retried or bypassed. Public HTTP bytes were not independently fetched in this pass. Actual generated page interactions and desktop and phone screenshot pixels were reviewed through authorized Actions evidence.",
         "candidate_attempts": [
           {
             "source_commit": "6c227c4892ac7e6bdfa2a84e85aeceb381de3248",
             "candidate_run": 39117608692,
             "status": "superseded_before_publication",
-            "reason": "Test synchronization waits for native scroll dispatch and paint between consecutive middle positions. Product implementation and scientific controls unchanged. No failed outcome erased."
+            "reason": "Test synchronization waits for native scroll dispatch and paint between consecutive middle positions. Product implementation and scientific controls unchanged. No failed outcome erased.",
+            "validation_conclusion": "cancelled",
+            "prepare_conclusion": "cancelled"
           }
+        ],
+        "source_commit": "90ebadbb6b47693e785b43c490b6d87f7c4f55b6",
+        "published_commit": "947d397913477c59285e3d687499dee901202687",
+        "candidate_run": 39117774293,
+        "main_run": 39118725048,
+        "pages_run": 39118724552,
+        "completed_at": "2026-10-18T10:19:35.037Z",
+        "publication": "Candidate validation and prepare succeeded. Generated child has tested source as its single parent and only index.html changed with expected label and guide presentation code. Promoted with matching expected main a7e8046aeacd638a20ed43a69e08b89d719c45eb and force false. Pages logs independently confirm exact version 947d397913477c59285e3d687499dee901202687 and canonical deployment environment. Main repeat pending at creation.",
+        "remaining_visual_limitations": [
+          "Support cells can still be partly clipped at native pan boundaries. Whole labels and existing guides identify their source; all sources and cells remain reachable.",
+          "Existing command table numeric text can still partly clip at pan boundaries. No extra panel or control was added. Only the declared Chrome desktop and phone layouts have pixel review. No direct live browser inspection claimed."
         ]
       }
     ],
-    "active_run": {
-      "slot": "2026-10-18T18:00:00+08:00",
-      "branch": "cloud/refine/20261018-1800",
-      "started_at": "2026-10-18T18:00:00+08:00",
-      "preflight_at": "2026-10-18T17:55:26+08:00",
-      "lease_expires_at": "2026-10-18T18:35:26+08:00"
-    },
+    "active_run": null,
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
@@ -2064,5 +2094,5 @@
     "baseline_main": "2a9ff26b59565ecac1eb5274fbea4d813a18f24f"
   },
   "completed_count_scope": "Original bounded program, retained at 15. Renewed counts are tracked independently in renewed_program.",
-  "total_completed_count": 31
+  "total_completed_count": 32
 }
