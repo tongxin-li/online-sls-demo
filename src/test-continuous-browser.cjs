@@ -169,6 +169,7 @@ async function main(){
     await page.reload({waitUntil:'networkidle'});
     const archived=await read(page);assert.equal(archived.s.t,8);assert.notEqual(archived.s.protocol,'continuous-phi-v1');
     assert.equal(archived.ui.playing,false);assert.match(await page.locator('#pr-scenario-name').textContent(),/Archived trial/);
+    await setting(page,'view','cost');
     await page.locator('#pr-cost-gap').click();await page.locator('#pr-cost-total').click();
     assert.deepEqual((await read(page)).s,archived.s,'Read only cost controls preserve the actual archived replay');
     if(action==='restart')await page.screenshot({path:path.join(output,label+'-archived-before-handoff.png'),fullPage:true});
