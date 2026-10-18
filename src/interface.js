@@ -435,7 +435,7 @@
     for(const key of ['source','receiver','action','issuedAt','observedAt','forecast','realized','error'])
       panel.dataset[key]=observation ? String(observation[key]) : '';
     $('forecast-timing').textContent=observation
-      ? 'Source '+observation.source+' · Action '+observation.action+' s · Issued '+observation.issuedAt+' s · Revealed '+observation.observedAt+' s'
+      ? 'Source '+observation.source+' · Issued '+observation.issuedAt+' s · Target '+observation.action+' s · Revealed '+observation.observedAt+' s'
       : historyIndex!==null ? 'Saved links · Return to Latest for current observations'
       : 'Run or step to reveal a source observation';
     for(const key of ['forecast','realized','error'])

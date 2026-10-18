@@ -245,6 +245,28 @@ async function main() {
       assert.ok(snapshot.states[row.method].every(Number.isFinite));
     }
     assert.equal(await surface.locator('#pr-cost path.data-series').count(), 4, 'All four comparison curves remain visible');
+    const beforeInspection=JSON.stringify((await read(surface)).snapshot),receiver=snapshot.localChannels[0].to,source=2;
+    await surface.locator('.pr-matrix-scroll').evaluate(node=>{node.scrollLeft=0;});
+    const cell=surface.locator('.matrix-cell[data-receiver="'+receiver+'"][data-source="'+source+'"]');
+    if(surface.viewportSize().width<500)await cell.tap();else await cell.click();
+    const observation=await surface.evaluate(()=>{
+      const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),sample=snapshot.lastSample,values=document.querySelector('#pr-forecast-values');
+      return {snapshot:JSON.stringify(snapshot),t:sample.t,forecast:sample.forecast[1],forcing:sample.disturbance[1],
+        timing:document.querySelector('#pr-forecast-timing').textContent,
+        labels:Array.from(values.querySelectorAll('dt')).map(node=>({text:node.textContent,font:parseFloat(getComputedStyle(node).fontSize)})),
+        values:Array.from(values.querySelectorAll('dd')).map(node=>({text:node.textContent,font:parseFloat(getComputedStyle(node).fontSize)})),
+        units:document.querySelector('#pr-forecast-units').textContent,
+        width:innerWidth,overflow:document.documentElement.scrollWidth};
+    });
+    assert.equal(observation.snapshot,beforeInspection,'Reading a source changes no network trial, support, cost or issued forecast');
+    assert.equal(observation.timing,'Source 2 · Issued '+Math.max(0,observation.t-4)+' s · Target '+observation.t+' s · Revealed '+(observation.t+1)+' s');
+    assert.deepEqual(observation.values.map(item=>item.text),[observation.forecast,observation.forcing,observation.forecast-observation.forcing].map(value=>(1000*value).toFixed(3)));
+    assert.ok(observation.labels.every(item=>item.font>=12)&&observation.values.every(item=>item.font>=16));
+    assert.match(observation.units,/forcing, not bus voltage/);assert.ok(observation.overflow<=observation.width+1);
+    const preview=await surface.locator('#pr-forecast-observation').screenshot({path:path.join(output,'observation-'+id+'-'+surface.viewportSize().width+'.jpg'),type:'jpeg',quality:85});
+    console.log('CLOUD_OBSERVATION_'+id+'_'+surface.viewportSize().width+' '+preview.toString('base64'));
+    assert.equal(JSON.stringify((await read(surface)).snapshot),beforeInspection,'Pixel capture is read only');
+    checks.push(id+' actual source timing, unchanged revealed values and readable forcing units at '+surface.viewportSize().width);
     results.push({ networkId: id, width: surface.viewportSize().width, costs: snapshot.cumulative, links: rows.map(row => row.links) });
     checks.push(id + ' real automatic handoff and all four comparison costs');
     console.log('Network comparison passed ' + id + ' at ' + surface.viewportSize().width);

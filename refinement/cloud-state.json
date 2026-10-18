@@ -783,8 +783,13 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
-  "next_focus": "Verify final repeated checks and completion metadata. Then review source observation timing and command action identity in the existing linked inspector, keeping measured error, discovery score, resynthesized gain and bounded command distinct. Preserve the single cost table, two stage strip, stable headings and every source. Do not add panels or broaden the numerical study.",
+  "active_run": {
+    "slot": "2026-10-18T17:00:00+08:00",
+    "branch": "cloud/refine/20261018-1700",
+    "started_at": "2026-10-18T17:01:35+08:00",
+    "lease_expires_at": "2026-10-18T17:41:35+08:00"
+  },
+  "next_focus": "Validate chronological observed source timing and readable forcing error in the existing linked inspector, while preserving all four command previews and frozen deployment.",
   "priorities": [
     "Explain corruption and repair as persistent source states, and explain that deployed links remain fixed.",
     "Synchronize source and receiver inspection between the matrix and physical network without cosmetic link changes.",
@@ -902,7 +907,7 @@
       "main_run": 39111191529,
       "pages_run": 39111191339,
       "scope": "Completion record only. Product already validated and deployed.",
-      "status": "Metadata validation pending at record creation. Historical completed 15, renewed invocation 15 and completed 15 yield total 30. Previous metadata verification did not increment either count.",
+      "status": "16:00 completion metadata is already main at f7b71ba54c2e8d6bc0c200c28b9107e0df6ad8ed. Its candidate and prepare plus main repeat succeeded. Product repeat also succeeded and exact Pages deployment was verified. No recovery invocation or completion increment.",
       "instruction": "Read actual main repeat before further source edits and metadata validation before promotion. This 16:00 completion is counted once in this candidate. Promote metadata only after normal successful validation with matching current main 76b2e15f503ebe2f0159b1247e1f6534e56c3b5d and force false. On newer main reapply only verified metadata without overwriting concurrent product changes or double counting. Recovery, coordination, preflight and duplicate dispatches are not refinements. Preserve the original 16:42:22 pass deadline."
     },
     "previous_renewed_metadata_verification": {
@@ -1182,7 +1187,7 @@
     "hard_deadline": "2026-10-19T01:00:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 15,
+    "invocation_count": 16,
     "completed_count": 15,
     "runs": [
       {
@@ -1903,7 +1908,7 @@
           "candidate": "Full validation and prepare passed on first candidate.",
           "build": "passed",
           "reference_artifact": "Passed unchanged reference generator and artifact checks.",
-          "main": "Repeat validation 39111191529 is running at completion record creation. Read actual final status before further source edits.",
+          "main": "Product repeat 39111191529 and completion metadata repeat 39112180542 both succeeded. Latest completed main logs independently read before this source edit, all 224 cases and full original and network browser suites passed. Completion metadata is already main at f7b71ba54c2e8d6bc0c200c28b9107e0df6ad8ed. Metadata recovery does not increment counts.",
           "browser": "Full original desktop and phone browser suite and both network suites passed without runtime errors. Existing playback, repeated and continuous attacks, forecast toggles, automatic fresh comparison, stable cost view switching, all four traces, model switching and exact replay remain covered. New checks open the real command disclosure, pan start middle end, verify all four method names stay fully visible against opaque pinned backgrounds, every heading and value has at least 12 px type, every numeric heading remains reachable, native keyboard panning works, all 24 displayed terms remain present and correctly formatted, and full trial snapshots and inspection state remain unchanged by disclosure and scrolling.",
           "benchmarks": "Not rerun. No engine, control, objective, learning, forecast timing, noise, limits, attack, numerical output or recorded result changes."
         },
@@ -1932,9 +1937,38 @@
           "The phone command table still requires horizontal panning and numeric text can clip at viewport boundaries. All terms remain reachable and the method identity now stays visible.",
           "Matrix partial source glyph clipping from the previous pass remains unchanged. Only declared Chrome desktop and phone layouts have pixel review, and direct live browser inspection remains unavailable."
         ]
+      },
+      {
+        "slot": "2026-10-18T17:00:00+08:00",
+        "branch": "cloud/refine/20261018-1700",
+        "started_at": "2026-10-18T17:01:35+08:00",
+        "lease_expires_at": "2026-10-18T17:41:35+08:00",
+        "status": "validating",
+        "candidate_branch": "cloud/refine/20261018-1700",
+        "base_commit": "f7b71ba54c2e8d6bc0c200c28b9107e0df6ad8ed",
+        "counted_invocation": true,
+        "counted_completed": false,
+        "changes": [
+          "Clarify the existing revealed source observation in chronological issue, target action and reveal order. Explicitly identify forcing error rather than bus voltage. No timing calculation changes.",
+          "Raise existing observation labels and notes to 12 px and measured values to 16 px. Emphasize signed error without a success or failure color. Keep the existing panel, all values, rolling statistics, current support and full preview command qualification.",
+          "Add exact chronological timing, raw value preservation, assistive unit description, readable typography and text wrapping checks across existing browser interactions, plus actual source inspection and unchanged full snapshot checks on both new networks at desktop and phone sizes. No engine, scientific or recorded result changes."
+        ],
+        "tests": {
+          "status": "Pending normal cloud validation",
+          "benchmarks": "Not rerun for this presentation change."
+        },
+        "screenshots": {
+          "pixel_review": "Pending actual Actions JPEG previews. Before choice, reviewed actual current phone link inspector screenshot from completed main Actions logs."
+        },
+        "direct_live_inspection": "Unverified. Previously denied direct live browser access will not be retried or bypassed."
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "slot": "2026-10-18T17:00:00+08:00",
+      "branch": "cloud/refine/20261018-1700",
+      "started_at": "2026-10-18T17:01:35+08:00",
+      "lease_expires_at": "2026-10-18T17:41:35+08:00"
+    },
     "configuration": {
       "configured_at": "2026-10-17T16:08:20.808Z",
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",

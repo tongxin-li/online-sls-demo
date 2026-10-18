@@ -281,7 +281,14 @@ async function main() {
             action:sample.t,issuedAt:Math.max(0,sample.t-4),observedAt:sample.t+1,
             forecast:sample.forecast[index],realized:sample.disturbance[index],error:sample.forecast[index]-sample.disturbance[index]}:null,
           shown:Object.fromEntries(['forecast','realized','error'].map(key=>[key,document.querySelector('#pr-observed-'+key).textContent])),
-          context:document.querySelector('#pr-forecast-support').textContent,phase:snapshot.phase};
+          context:document.querySelector('#pr-forecast-support').textContent,phase:snapshot.phase,
+          timing:document.querySelector('#pr-forecast-timing').textContent,
+          units:document.querySelector('#pr-forecast-units').textContent,describedBy:values.getAttribute('aria-describedby'),
+          typography:Array.from(panel.querySelectorAll(':scope > .pr-caption, .pr-forecast-values dt, .pr-forecast-values dd')).filter(node=>!node.hidden&&getComputedStyle(node).display!=='none').map(node=>{
+            const range=document.createRange();range.selectNodeContents(node);
+            return {tag:node.tagName,id:node.id,font:parseFloat(getComputedStyle(node).fontSize),weight:getComputedStyle(node).fontWeight,
+              bounds:node.getBoundingClientRect().toJSON(),glyphs:Array.from(range.getClientRects()).map(box=>box.toJSON())};
+          })};
       });
       assert.equal(reading.hidden,!reading.active);
       assert.equal(reading.valuesHidden,!reading.expected);
@@ -290,6 +297,15 @@ async function main() {
         for(const [key,value] of Object.entries(reading.expected))assert.equal(Number(reading.data[key]),value,'Observed '+key+' matches the actual revealed pair');
         for(const key of ['forecast','realized','error'])assert.equal(reading.shown[key],(1000*reading.expected[key]).toFixed(3));
         assert.match(reading.context,reading.phase==='discovery'?/Discovery uses dense messages/:/deployed support.*Links fixed/);
+        const pair=reading.expected;
+        assert.equal(reading.timing,'Source '+pair.source+' · Issued '+pair.issuedAt+' s · Target '+pair.action+' s · Revealed '+pair.observedAt+' s','Observed pair timing follows actual issue target reveal order');
+        assert.equal(reading.describedBy,'pr-forecast-units');
+        assert.match(reading.units,/mpu of forcing, not bus voltage.*1 mpu = 0.001 pu.*unforecast power/);
+        for(const item of reading.typography){
+          assert.ok(item.font>=(item.tag==='DD'?16:12),'Observation values and labels remain readable');
+          for(const glyph of item.glyphs)assert.ok(glyph.left>=item.bounds.left-1&&glyph.right<=item.bounds.right+1,'Every observation glyph wraps inside its existing column');
+          if(item.id==='pr-observed-error')assert.ok(Number(item.weight)>=600,'Signed error has a stable text emphasis, not a success color');
+        }
       }else assert.equal(reading.data.forecast,'','Unavailable observations clear stale numeric metadata');
     };
     const checkForecastSettings = async surface => {

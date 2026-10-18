@@ -45,12 +45,12 @@
       <div id="pr-source-controls" class="pr-source-controls" hidden><button type="button" id="pr-source-fault" class="btn btn-quiet" aria-describedby="pr-source-status" disabled>Corrupt source</button><span id="pr-source-status" class="pr-caption" role="status"></span></div>
       <div id="pr-forecast-observation" class="pr-forecast-observation" hidden>
         <p id="pr-forecast-timing" class="pr-caption"></p>
-        <dl id="pr-forecast-values" class="pr-forecast-values" aria-label="Raw source voltage forcing in mpu" hidden>
+        <dl id="pr-forecast-values" class="pr-forecast-values" aria-label="Raw source voltage forcing in mpu" aria-describedby="pr-forecast-units" hidden>
           <div><dt>Raw forecast</dt><dd id="pr-observed-forecast">—</dd></div>
           <div><dt>Revealed forcing</dt><dd id="pr-observed-realized">—</dd></div>
           <div><dt>Error <span title="Raw forecast minus revealed forcing">f − w</span></dt><dd id="pr-observed-error">—</dd></div>
         </dl>
-        <p class="pr-caption">mpu · 1 mpu = 0.001 pu · Error includes unforecast power changes</p>
+        <p id="pr-forecast-units" class="pr-caption">mpu of forcing, not bus voltage · 1 mpu = 0.001 pu · Error includes unforecast power changes</p>
         <p id="pr-forecast-window" class="pr-caption"></p>
         <p id="pr-forecast-change" class="pr-caption"></p>
         <p id="pr-forecast-support" class="pr-caption"></p>
