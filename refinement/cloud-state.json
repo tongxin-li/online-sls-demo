@@ -2703,7 +2703,8 @@
           "Implement an explicit ongoing engine option with source local coefficients used in admitted sparse prediction commands, fixed offline support, stationary startup and interior response columns, real traffic counters and versioned exact engine replay.",
           "Add nine independent and predefined ongoing engine cases covering all 18 network quality seed conditions and actual commands through 901 actions plus 1801 action history.",
           "Bundle the numerical modules into the candidate build without enabling the unfinished ongoing UI.",
-          "Reject negative replay times and invalid slack source events; report correction scalar overhead separately from equal link permissions."
+          "Reject negative replay times and invalid slack source events; report correction scalar overhead separately from equal link permissions.",
+          "Add explicit hidden truth and excluded new forecast counterfactuals that independently verify causal source admission and held input commands."
         ],
         "tests": {
           "prior_foundation": {
@@ -2713,7 +2714,8 @@
             "cases": 235
           },
           "ongoing_candidate": "Pending exact source workflow",
-          "required_legacy_suites": "Preserved without weakening or deleting cases"
+          "required_legacy_suites": "Preserved without weakening or deleting cases",
+          "predefined_ongoing_cases": 11
         },
         "live_fix": false,
         "remaining_gaps": [
@@ -2732,6 +2734,12 @@
             "source_commit": "685750a5889de9aa1baf905a27aadfe5faf2a248",
             "validation_run": 39147453898,
             "status": "superseded_by_causal_replay_input_hardening",
+            "publication": false
+          },
+          {
+            "source_commit": "86f2551e65aee7711cc0268ef7403753d43310a5",
+            "validation_run": 39147631742,
+            "status": "superseded_by_additional_independent_causality_acceptance",
             "publication": false
           }
         ]

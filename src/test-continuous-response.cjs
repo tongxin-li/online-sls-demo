@@ -171,3 +171,44 @@ test('ongoing solar outage remains a shared unforecast physical event with all c
   assert.ok(sim.history[30].online>sim.history[29].online);
   for(const key of keys)sim.lastSample.disturbances[key].forEach((v,j)=>near(v,sim.lastSample.disturbance[j],1e-11));
 });
+
+test('unrevealed physical truth cannot alter the current command but enters the next revealed update',()=>{
+  const api=Demo.forNetwork('toy8'),options={protocol:'continuous-phi-v1',powerScenario:'forecasted-demand',beta:4,seed:20261013};
+  const a=new api.Simulation(options),b=new api.Simulation(options);
+  for(let t=0;t<40;t++){a.step();b.step();}
+  const issued=b.forecasts[40],base=issued.base.slice();base[1]+=.02;
+  b.forecasts[40]=Object.freeze({...issued,base:Object.freeze(base)});
+  assert.deepEqual(a.forecasts[40].forecast,b.forecasts[40].forecast,'The originally issued immutable message is retained');
+  assert.ok(Object.isFrozen(b.forecasts[40].forecast));
+  const aa=a.step(),bb=b.step();
+  for(const key of keys)aa.lastExecution.policies[key].raw.forEach((v,r)=>near(v,bb.lastExecution.policies[key].raw[r],1e-11));
+  assert.ok(aa.lastSample.disturbance.some((v,j)=>Math.abs(v-bb.lastSample.disturbance[j])>1e-8),'The hidden truth perturbation must be effective');
+  assert.equal(aa.lastExecution.trainedThrough,39);assert.equal(bb.lastExecution.trainedThrough,39);
+  aa.lastExecution.sourceReports.forEach((r,j)=>near(r.coefficient,bb.lastExecution.sourceReports[j].coefficient,1e-11));
+  const ac=a.step(),bc=b.step();assert.equal(ac.lastExecution.trainedThrough,40);
+  assert.ok(ac.lastExecution.sourceReports.some((r,j)=>Math.abs(r.coefficient-bc.lastExecution.sourceReports[j].coefficient)>1e-10));
+});
+
+test('an excluded newly issued source cannot enter a sparse receiver command or offline selector',()=>{
+  const api=Demo.forNetwork('toy8'),options={protocol:'continuous-phi-v1',powerScenario:'forecasted-demand',beta:4,seed:20261013};
+  const a=new api.Simulation(options),b=new api.Simulation(options),receiver=0;
+  for(let t=0;t<60;t++){a.step();b.step();}
+  const support=a.continuousController.selection.support;
+  const gain=a.continuousController.dense.row(60).find(block=>block.target===64).L[receiver];
+  const excluded=gain.map((value,j)=>({value,j})).filter(x=>!support[receiver][x.j]).sort((x,y)=>Math.abs(y.value)-Math.abs(x.value))[0];
+  assert.ok(Math.abs(excluded.value)>1e-8,'The excluded source must have a genuine dense contribution');
+  const original=b.sealPreview;
+  b.sealPreview=function(){
+    original.call(this);
+    if(this.t===60){
+      const issued=this.forecasts[64],forecast=issued.forecast.slice();forecast[excluded.j+1]+=.02;
+      this.forecasts[64]=Object.freeze({...issued,forecast:Object.freeze(forecast)});
+    }
+  };
+  const aa=a.step(),bb=b.step();
+  near(aa.lastExecution.policies.online.raw[receiver],bb.lastExecution.policies.online.raw[receiver],1e-11);
+  near(bb.lastExecution.policies.static.raw[receiver]-aa.lastExecution.policies.static.raw[receiver],.02*excluded.value,1e-11);
+  assert.equal(bb.lastExecution.policies.online.receivedCoefficients[receiver][excluded.j],null);
+  assert.equal(bb.lastExecution.policies.online.sourceContributions[receiver][excluded.j],0);
+  assert.deepEqual(b.continuousController.selection,a.continuousController.selection);
+});
