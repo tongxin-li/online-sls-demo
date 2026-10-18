@@ -26,6 +26,11 @@ async function main(){
   for(const mobile of [false,true])for(const networkId of ['toy8','feeder24','feeder47']){
    const context=await browser.newContext({viewport:mobile?{width:390,height:844}:{width:1440,height:1000},isMobile:mobile,hasTouch:mobile,deviceScaleFactor:1});
    await context.addInitScript(({networkId})=>{
+    window.__attackPointerEvents=[];
+    for(const type of ['pointerdown','pointerup','pointercancel','lostpointercapture','click'])document.addEventListener(type,event=>{
+      if(event.target.closest?.('#pr-pulse'))window.__attackPointerEvents.push({type,pointerType:event.pointerType??null,button:event.button,detail:event.detail,touch:event.sourceCapabilities?.firesTouchEvents??null});
+    },true);
+    window.addEventListener('blur',()=>window.__attackPointerEvents.push({type:'window-blur'}));
     const state={privateContent:{version:14,networkId,phase:'ongoing',t:0,selectedBus:7,speed:'32',view:'cost',matrixView:'change',intervention:'forecast',
      continuousRecord:{version:14,protocol:'continuous-phi-v1',networkId,options:{networkId,protocol:'continuous-phi-v1',experiment:'communication',powerScenario:'forecasted-demand',beta:4,preset:'mixed',seed:20261013},steps:0,events:[]}}};
     if(!localStorage.getItem('online-sls-demo-v1'))localStorage.setItem('online-sls-demo-v1',JSON.stringify(state));
@@ -49,7 +54,7 @@ async function main(){
    assert.ok(second.s.cumulative.online>=first.s.cumulative.online);
    await page.locator('#pr-intervention').selectOption('power');
    await setting(page,'bus','7');if(mobile)await page.locator('#pr-pulse').tap();else await page.locator('#pr-pulse').click();
-   console.log('ATTACK_DIAGNOSTIC '+JSON.stringify(await page.evaluate(()=>{const d=document.querySelector('#power-response-demo').powerDemo,u=d.getState();return {mobile:matchMedia('(pointer:coarse)').matches,playing:u.playing,attacks:u.activeAttackBuses,intervention:u.intervention,selectedBus:u.selectedBus,attackMode:document.querySelector('#pr-attack-mode').value,events:u.journal.slice(-3),button:document.querySelector('#pr-pulse').outerHTML};})));
+   console.log('ATTACK_DIAGNOSTIC '+JSON.stringify(await page.evaluate(()=>{const d=document.querySelector('#power-response-demo').powerDemo,u=d.getState();return {mobile:matchMedia('(pointer:coarse)').matches,playing:u.playing,attacks:u.activeAttackBuses,intervention:u.intervention,selectedBus:u.selectedBus,attackMode:document.querySelector('#pr-attack-mode').value,pointerEvents:window.__attackPointerEvents,events:u.journal.slice(-3),button:document.querySelector('#pr-pulse').outerHTML};})));
    await page.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getState().activeAttackBuses.includes(7));
    await setting(page,'bus','5');if(mobile)await page.locator('#pr-pulse').tap();else await page.locator('#pr-pulse').click();
    const attackStart=(await read(page)).s.t;

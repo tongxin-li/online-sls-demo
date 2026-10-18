@@ -783,121 +783,8 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "program_id": "continuous-phi-20261018T234500",
-    "slot": "2026-10-19T01:45:00+08:00",
-    "started_at": "2026-10-19T01:47:02+08:00",
-    "lease_expires_at": "2026-10-19T02:27:02+08:00",
-    "branch": "cloud/refine/continuous-phi-20261018-2345",
-    "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
-    "candidate_parent": "1c21862596f32da12435a7bc20b12fc4ae0dd156",
-    "status": "in_progress",
-    "counted_invocation": true,
-    "counted_completed": false,
-    "changes": [
-      "Integrate version 14 ongoing saved trials into live UI state, source and command inspection, stable cost comparison, protocol status and network scoped restart. Keep the public default unchanged pending ongoing browser and pixel acceptance.",
-      "Add predefined ongoing interaction and real desktop and phone browser suites for exact replay, old boundary crossing, arbitrary multi bus held attacks, admitted weights and commands.",
-      "Add a cloud Actions screenshot blob archive using existing candidate job permission, without a branch or hosting change, so actual captured pixels can be inspected through the authenticated GitHub API.",
-      "Teach the topology observer the ongoing phase without inventing support motion, and align matrix energy diagnostics with the exact last executed row rather than the next row with stale coefficients. Add independent reconstruction checks.",
-      "Correct the ongoing browser fixture to seed the actual page storage key. Reduce transport to fields used by assertions, retain full last execution replay checks, require real touch power attacks and at least five applied multi bus samples, and check all four cost traces. Run new ongoing browser checks as a separate required job; preserve all old suites. Raise existing validator ceiling from 15 to 20 minutes after observed 14 minute legacy execution."
-    ],
-    "tests": {
-      "metadata_repeat": {
-        "run_id": 39149170485,
-        "conclusion": "success",
-        "completed_logs_read": true
-      },
-      "first_full_validation": {
-        "source_commit": "8dd9628e0fda99cd62a8f55a577545a27c940bec",
-        "run_id": 39152130517,
-        "job_id": 117747864743,
-        "conclusion": "failure",
-        "completed_logs_read": true,
-        "numerical": {
-          "total": 251,
-          "failed": 0,
-          "ongoing_engine": 12,
-          "source_scale": 11,
-          "legacy": 224,
-          "ongoing_ui_added": 3,
-          "topology_added": 1
-        },
-        "legacy_browser": "Original browser checks and both network suites passed.",
-        "ongoing_browser": "Fixture failed before ongoing trial because page adapter replaces window.openai. No ongoing browser acceptance claimed."
-      },
-      "solar_audit": {
-        "run_id": 39152130525,
-        "job_id": 117747767613,
-        "conclusion": "success",
-        "completed_logs_read": true,
-        "scope": "Archived frozen solar protocol, all 20 seeds and beta 0, 1, 2. Not ongoing performance."
-      },
-      "ongoing_browser_attempt": {
-        "source_commit": "5b6b006f59d015e00848025430fdb8ed86961643",
-        "run_id": 39153498763,
-        "job_id": 117751806084,
-        "conclusion": "failure",
-        "completed_logs_read": true,
-        "desktop": {
-          "toy8": 953,
-          "feeder24": 969,
-          "feeder47": 987
-        },
-        "phone": "Toy8 touch attack button did not remain active. Investigating actual pointer behavior; phone acceptance not claimed."
-      }
-    },
-    "remaining_gaps": [
-      "Investigate the ongoing phone header attack activation failure. Keep this failure distinct from passing desktop trials.",
-      "Default is still archived, and full ongoing phone, pixel, traffic payload and archived evidence labeling acceptance remain open."
-    ],
-    "next_focus": "Read independent ongoing browser outcome and actual cloud screenshots. Keep the default gated and do not publish before final ongoing workflow and visual acceptance.",
-    "pixel_review": {
-      "status": "pending_cloud_capture_and_actual_pixel_review",
-      "publication": false
-    },
-    "candidate_revisions": [
-      {
-        "source_commit": "440cc5bced95fdb62ef50d114629abf5321fd79a",
-        "validation_run": 39151736395,
-        "status": "pending_when_superseded",
-        "publication": false,
-        "reason": "Keep legacy inspector labels exact, make ongoing group labels accurate, deterministic browser restoration and authenticated cloud screenshot review path."
-      },
-      {
-        "source_commit": "1b6f61cca5a019458eec7fb54848fac2b94da149",
-        "validation_run": 39151902916,
-        "status": "pending_when_superseded",
-        "publication": false,
-        "reason": "Complete ongoing topology observer support and exact executed matrix row diagnostics before full acceptance."
-      },
-      {
-        "source_commit": "8dd9628e0fda99cd62a8f55a577545a27c940bec",
-        "validation_run": 39152130517,
-        "conclusion": "failure",
-        "completed_logs_read": true,
-        "publication": false,
-        "reason": "New ongoing browser fixture did not use the real storage adapter. Numerical and all old browser cases passed."
-      },
-      {
-        "source_commit": "5b6b006f59d015e00848025430fdb8ed86961643",
-        "validation_run": 39153498763,
-        "ongoing_job": 117751806084,
-        "ongoing_conclusion": "failure",
-        "completed_logs_read": true,
-        "publication": false
-      }
-    ],
-    "duplicate_dispatches": [
-      {
-        "at": "2026-10-19T02:19:19+08:00",
-        "status": "read_only_overlap",
-        "counted_invocation": false,
-        "counted_completed": false,
-        "lease_extended": false
-      }
-    ]
-  },
-  "next_focus": "Continue this same validated candidate into the single ongoing UI and new replay. Read metadata repeat and current main checks first. Use actual execution receipts and source pair counts, not legacy completed row diagnostics. Preserve all archived data and full regression suites. Keep unpublished until ongoing browser and pixel acceptance.",
+  "active_run": null,
+  "next_focus": "Trace and fix actual phone header pointer cancellation or duplicate activation first, using ATTACK_DIAGNOSTIC pointerEvents. Inspect base64 wrapped actual screenshots. Then finish traffic and archived labels and enable a fully validated ongoing default without resetting plant time or costs.",
   "priorities": [
     "Actual continuous causal response adaptation and executed command evidence",
     "Explicit forecast message access and support feasibility",
@@ -2928,7 +2815,12 @@
           "prior_pages_conclusion": "success",
           "public_http_behavior": "Not rechecked because no live change was made. Previously denied direct live browser access was not retried or bypassed."
         },
-        "checkpoint_validation": "Pending metadata only repeat. The successful scientific and browser evidence above refers to exact source bf9201227ef102aa77f60f5bdbbb07580ffe3115 and its generated child. This checkpoint changes only progress and the saved acceptance outcomes.",
+        "checkpoint_validation": {
+          "source_commit": "1c21862596f32da12435a7bc20b12fc4ae0dd156",
+          "run_id": 39149170485,
+          "conclusion": "success",
+          "completed_logs_read": true
+        },
         "bounded_work_completed_at": "2026-10-18T17:20:48.362Z"
       },
       {
@@ -2939,7 +2831,7 @@
         "branch": "cloud/refine/continuous-phi-20261018-2345",
         "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
         "candidate_parent": "1c21862596f32da12435a7bc20b12fc4ae0dd156",
-        "status": "in_progress",
+        "status": "ongoing_ui_candidate_unpublished_phone_failure",
         "counted_invocation": true,
         "counted_completed": false,
         "changes": [
@@ -2992,16 +2884,60 @@
               "feeder47": 987
             },
             "phone": "Toy8 touch attack button did not remain active. Investigating actual pointer behavior; phone acceptance not claimed."
+          },
+          "latest_ongoing_browser": {
+            "run_id": 39153742127,
+            "source_commit": "28514568ca608b9dda1d0c33d756630d08964385",
+            "job_id": 117752715143,
+            "conclusion": "failure",
+            "completed_logs_read": true,
+            "desktop": {
+              "toy8": 957,
+              "feeder24": 991,
+              "feeder47": 993
+            },
+            "phone": "Toy8 touch header activation emits held-target-v1 request and starts playback, but activeAttackBuses is already empty immediately after tap. Thirty second wait confirms failure. No phone acceptance claimed.",
+            "review_job": 117753113050,
+            "review_conclusion": "success",
+            "review_logs_read": true
+          },
+          "superseded_metadata_lease": {
+            "source_commit": "99ffbe263b122d928dc8da6f18d39b6e60cd1fc8",
+            "run_id": 39151448599,
+            "conclusion": "cancelled",
+            "completed_logs_read": true
+          },
+          "superseded_repeat": {
+            "source_commit": "5b6b006f59d015e00848025430fdb8ed86961643",
+            "run_id": 39153498763,
+            "validate_job": 117751806260,
+            "conclusion": "cancelled",
+            "completed_logs_read": true
           }
         },
         "remaining_gaps": [
-          "Investigate the ongoing phone header attack activation failure. Keep this failure distinct from passing desktop trials.",
-          "Default is still archived, and full ongoing phone, pixel, traffic payload and archived evidence labeling acceptance remain open."
+          "Resolve real phone header touch attack cancellation with the new pointer event diagnostic. Preserve cancellation and zero detail touch protections; do not bypass the failing button or weaken tests.",
+          "Read checkpoint independent ongoing browser and full validation logs. Latest repeat is still running and the checkpoint may supersede it. All required suites and exact generated child ancestry remain required.",
+          "Use base64_text_sha from successful cloud archive logs to read PNG base64 as UTF-8 and emit actual pixels through functions.image. Binary blob readers are unsuitable. Wrapper is not yet exercised.",
+          "Enable ongoing default only after all ongoing desktop and phone interactions, actual pixel inspection and final source checks. Current public default still freezes and resets.",
+          "Add actual cumulative remote forecast and correction scalar counts to existing comparison, disclose version metadata, and explicitly label archived frozen benchmark evidence.",
+          "Add useful selected deployed coefficient or gain evolution in existing inspector and assess long history performance beyond 1801 numerical actions and about 1000 desktop actions. Do not invent support motion.",
+          "Reconcile experimental fixed offline support and source local correction assumptions. No dynamic selection, no probing, no manuscript equivalence or stability guarantee is implemented.",
+          "Promote only a coherent validated candidate with expected current main and verify Pages and canonical public behavior. No live algorithm fix has been published."
         ],
-        "next_focus": "Read independent ongoing browser outcome and actual cloud screenshots. Keep the default gated and do not publish before final ongoing workflow and visual acceptance.",
+        "next_focus": "Trace and fix actual phone header pointer cancellation or duplicate activation first, using ATTACK_DIAGNOSTIC pointerEvents. Inspect base64 wrapped actual screenshots. Then finish traffic and archived labels and enable a fully validated ongoing default without resetting plant time or costs.",
         "pixel_review": {
-          "status": "pending_cloud_capture_and_actual_pixel_review",
-          "publication": false
+          "status": "not_visually_reviewed",
+          "source_commit": "28514568ca608b9dda1d0c33d756630d08964385",
+          "review_job": 117753113050,
+          "artifact": "ongoing-browser-evidence",
+          "blobs": {
+            "phone_failure": "9135d38141c7270a885cfa56bfa8702ef7705b72",
+            "feeder24_desktop": "273150a3a9d566d6d6951dfc9aff0a5123aa0904",
+            "feeder47_desktop": "c0b544d9599865e6cd01adffdd7b37570f05afe6",
+            "toy8_desktop": "d9373dacde1c60d986e10994e9b9e6a3b041ae02"
+          },
+          "limitation": "Actual cloud PNG screenshots captured and archived. GitHub fetch rejects binary blobs as UTF-8 only and fetch_blob raises UnicodeDecodeError. No pixels were emitted or inspected. Add an identical ASCII base64 blob wrapper in the next checkpoint and inspect through UTF-8 blob reader. No direct live browser route retried."
         },
         "candidate_revisions": [
           {
@@ -3009,14 +2945,18 @@
             "validation_run": 39151736395,
             "status": "pending_when_superseded",
             "publication": false,
-            "reason": "Keep legacy inspector labels exact, make ongoing group labels accurate, deterministic browser restoration and authenticated cloud screenshot review path."
+            "reason": "Keep legacy inspector labels exact, make ongoing group labels accurate, deterministic browser restoration and authenticated cloud screenshot review path.",
+            "conclusion": "cancelled",
+            "completed_logs_read": true
           },
           {
             "source_commit": "1b6f61cca5a019458eec7fb54848fac2b94da149",
             "validation_run": 39151902916,
             "status": "pending_when_superseded",
             "publication": false,
-            "reason": "Complete ongoing topology observer support and exact executed matrix row diagnostics before full acceptance."
+            "reason": "Complete ongoing topology observer support and exact executed matrix row diagnostics before full acceptance.",
+            "conclusion": "cancelled",
+            "completed_logs_read": true
           },
           {
             "source_commit": "8dd9628e0fda99cd62a8f55a577545a27c940bec",
@@ -3043,123 +2983,34 @@
             "counted_completed": false,
             "lease_extended": false
           }
-        ]
+        ],
+        "live_fix": false,
+        "source_commit": "28514568ca608b9dda1d0c33d756630d08964385",
+        "published_commit": null,
+        "publication": {
+          "status": "unpublished",
+          "main_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+          "main_verified_unchanged_at": "2026-10-18T18:22:35Z",
+          "pages_prior_run": 39144310532,
+          "public_behavior": "Not rechecked because no product publication. No direct live browser access attempted."
+        },
+        "product_evidence": {
+          "tested_product_source": "8dd9628e0fda99cd62a8f55a577545a27c940bec",
+          "later_product_blobs_unchanged": true,
+          "verified_compare_paths": [
+            ".github/workflows/validate.yml",
+            "refinement/cloud-state.json",
+            "src/archive-browser-review.py",
+            "src/test-continuous-browser.cjs"
+          ],
+          "generated_child": "None for failed current UI candidates. No promotion."
+        },
+        "checkpoint_at": "2026-10-18T18:25:26.749Z",
+        "bounded_work_completed_at": "2026-10-18T18:25:26.749Z",
+        "checkpoint_validation": "Pending new diagnostic and UTF-8 pixel wrapper repeat. No completed live improvement counted."
       }
     ],
-    "active_run": {
-      "program_id": "continuous-phi-20261018T234500",
-      "slot": "2026-10-19T01:45:00+08:00",
-      "started_at": "2026-10-19T01:47:02+08:00",
-      "lease_expires_at": "2026-10-19T02:27:02+08:00",
-      "branch": "cloud/refine/continuous-phi-20261018-2345",
-      "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
-      "candidate_parent": "1c21862596f32da12435a7bc20b12fc4ae0dd156",
-      "status": "in_progress",
-      "counted_invocation": true,
-      "counted_completed": false,
-      "changes": [
-        "Integrate version 14 ongoing saved trials into live UI state, source and command inspection, stable cost comparison, protocol status and network scoped restart. Keep the public default unchanged pending ongoing browser and pixel acceptance.",
-        "Add predefined ongoing interaction and real desktop and phone browser suites for exact replay, old boundary crossing, arbitrary multi bus held attacks, admitted weights and commands.",
-        "Add a cloud Actions screenshot blob archive using existing candidate job permission, without a branch or hosting change, so actual captured pixels can be inspected through the authenticated GitHub API.",
-        "Teach the topology observer the ongoing phase without inventing support motion, and align matrix energy diagnostics with the exact last executed row rather than the next row with stale coefficients. Add independent reconstruction checks.",
-        "Correct the ongoing browser fixture to seed the actual page storage key. Reduce transport to fields used by assertions, retain full last execution replay checks, require real touch power attacks and at least five applied multi bus samples, and check all four cost traces. Run new ongoing browser checks as a separate required job; preserve all old suites. Raise existing validator ceiling from 15 to 20 minutes after observed 14 minute legacy execution."
-      ],
-      "tests": {
-        "metadata_repeat": {
-          "run_id": 39149170485,
-          "conclusion": "success",
-          "completed_logs_read": true
-        },
-        "first_full_validation": {
-          "source_commit": "8dd9628e0fda99cd62a8f55a577545a27c940bec",
-          "run_id": 39152130517,
-          "job_id": 117747864743,
-          "conclusion": "failure",
-          "completed_logs_read": true,
-          "numerical": {
-            "total": 251,
-            "failed": 0,
-            "ongoing_engine": 12,
-            "source_scale": 11,
-            "legacy": 224,
-            "ongoing_ui_added": 3,
-            "topology_added": 1
-          },
-          "legacy_browser": "Original browser checks and both network suites passed.",
-          "ongoing_browser": "Fixture failed before ongoing trial because page adapter replaces window.openai. No ongoing browser acceptance claimed."
-        },
-        "solar_audit": {
-          "run_id": 39152130525,
-          "job_id": 117747767613,
-          "conclusion": "success",
-          "completed_logs_read": true,
-          "scope": "Archived frozen solar protocol, all 20 seeds and beta 0, 1, 2. Not ongoing performance."
-        },
-        "ongoing_browser_attempt": {
-          "source_commit": "5b6b006f59d015e00848025430fdb8ed86961643",
-          "run_id": 39153498763,
-          "job_id": 117751806084,
-          "conclusion": "failure",
-          "completed_logs_read": true,
-          "desktop": {
-            "toy8": 953,
-            "feeder24": 969,
-            "feeder47": 987
-          },
-          "phone": "Toy8 touch attack button did not remain active. Investigating actual pointer behavior; phone acceptance not claimed."
-        }
-      },
-      "remaining_gaps": [
-        "Investigate the ongoing phone header attack activation failure. Keep this failure distinct from passing desktop trials.",
-        "Default is still archived, and full ongoing phone, pixel, traffic payload and archived evidence labeling acceptance remain open."
-      ],
-      "next_focus": "Read independent ongoing browser outcome and actual cloud screenshots. Keep the default gated and do not publish before final ongoing workflow and visual acceptance.",
-      "pixel_review": {
-        "status": "pending_cloud_capture_and_actual_pixel_review",
-        "publication": false
-      },
-      "candidate_revisions": [
-        {
-          "source_commit": "440cc5bced95fdb62ef50d114629abf5321fd79a",
-          "validation_run": 39151736395,
-          "status": "pending_when_superseded",
-          "publication": false,
-          "reason": "Keep legacy inspector labels exact, make ongoing group labels accurate, deterministic browser restoration and authenticated cloud screenshot review path."
-        },
-        {
-          "source_commit": "1b6f61cca5a019458eec7fb54848fac2b94da149",
-          "validation_run": 39151902916,
-          "status": "pending_when_superseded",
-          "publication": false,
-          "reason": "Complete ongoing topology observer support and exact executed matrix row diagnostics before full acceptance."
-        },
-        {
-          "source_commit": "8dd9628e0fda99cd62a8f55a577545a27c940bec",
-          "validation_run": 39152130517,
-          "conclusion": "failure",
-          "completed_logs_read": true,
-          "publication": false,
-          "reason": "New ongoing browser fixture did not use the real storage adapter. Numerical and all old browser cases passed."
-        },
-        {
-          "source_commit": "5b6b006f59d015e00848025430fdb8ed86961643",
-          "validation_run": 39153498763,
-          "ongoing_job": 117751806084,
-          "ongoing_conclusion": "failure",
-          "completed_logs_read": true,
-          "publication": false
-        }
-      ],
-      "duplicate_dispatches": [
-        {
-          "at": "2026-10-19T02:19:19+08:00",
-          "status": "read_only_overlap",
-          "counted_invocation": false,
-          "counted_completed": false,
-          "lease_extended": false
-        }
-      ]
-    },
+    "active_run": null,
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
       "is_enabled": true,
@@ -3169,6 +3020,7 @@
       "setup_counts_as_invocation": false,
       "setup_counts_as_improvement": false
     },
-    "candidate_branch": "cloud/refine/continuous-phi-20261018-2345"
+    "candidate_branch": "cloud/refine/continuous-phi-20261018-2345",
+    "next_focus": "Trace and fix actual phone header pointer cancellation or duplicate activation first, using ATTACK_DIAGNOSTIC pointerEvents. Inspect base64 wrapped actual screenshots. Then finish traffic and archived labels and enable a fully validated ongoing default without resetting plant time or costs."
   }
 }
