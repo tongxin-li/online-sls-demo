@@ -101,6 +101,40 @@ jobs:
           path: ${{ runner.temp }}/ongoing-results/ongoing
           if-no-files-found: error
 
+
+  release-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build the exact revision for release verification
+        run: python3 build.py
+      - name: Install existing isolated browser test tools
+        run: |
+          npm install --prefix "$RUNNER_TEMP/browser-test" --no-audit --no-fund playwright@1.56.1
+          "$RUNNER_TEMP/browser-test/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Verify built bytes and actual release playback
+        env:
+          NODE_PATH: ${{ runner.temp }}/browser-test/node_modules
+          DEMO_SMOKE_OUTPUT: ${{ runner.temp }}/release-results
+          DEMO_VERIFY_PUBLIC: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'true' || 'false' }}
+        run: node src/test-release-browser.cjs
+      - name: Save release verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-browser-evidence
+          path: ${{ runner.temp }}/release-results
+          if-no-files-found: error
+
   review-ongoing:
     if: always() && github.event_name == 'push' && startsWith(github.ref, 'refs/heads/cloud/refine/') && needs.ongoing-browser.result != 'cancelled'
     needs: ongoing-browser
@@ -124,7 +158,7 @@ jobs:
 
   prepare-candidate:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/cloud/refine/')
-    needs: [validate, ongoing-browser, review-ongoing]
+    needs: [validate, ongoing-browser, review-ongoing, release-browser]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:

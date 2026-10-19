@@ -5575,17 +5575,32 @@
             "ongoing_conditions": 6,
             "handoffs": 18
           },
-          "candidate": "Pending full cloud validation and actual pixel review."
+          "candidate": "Pending full cloud validation and actual pixel review.",
+          "superseded": [
+            {
+              "source": "01ceab4eae21c65a75038ba5f29018e2b8c3a354",
+              "run": 39182508026,
+              "status": "Superseded by adding the required cloud public verification route. Preserve final actual results when available."
+            }
+          ]
         },
         "changes": [
           "Reuse only measured matrix label and scroll hint geometry during unchanged layout. Reapply clamped positions without synchronous rectangle and glyph reads on every physical action.",
           "Invalidate visual geometry for network rebuilds, viewport changes, font loading, inspected and noisy source styling, native scroll and keyboard navigation. No controller or scientific data is cached.",
-          "Add independent long ongoing glyph range and whole edge label checks after native scroll, actual glyph metric changes with font completion events and viewport resizing on desktop and phone. Preserve exact physical state, costs and receipts across inspection."
+          "Add independent long ongoing glyph range and whole edge label checks after native scroll, actual glyph metric changes with font completion events and viewport resizing on desktop and phone. Preserve exact physical state, costs and receipts across inspection.",
+          "Add release verification to the existing validation workflow using its existing isolated Chromium dependency. Candidates verify exact built page and environment bytes plus native playback and replay locally; main pushes verify the same expected bytes and behavior at the sole canonical URL through authorized cloud compute."
         ],
         "remaining_gaps": [
           "Native 47 bus playback remains slower than requested with roughly 150 ms frame gaps. Public main still runs the archived protocol."
         ],
-        "next_focus": "Reuse only stable matrix display geometry with explicit invalidation while every causal controller action continues."
+        "next_focus": "Reuse only stable matrix display geometry with explicit invalidation while every causal controller action continues.",
+        "duplicate_dispatches": [
+          {
+            "at": "2026-10-19T08:53:01+08:00",
+            "slot": "2026-10-19T08:45:00+08:00",
+            "action": "Read only duplicate preflight during the counted pass. No new invocation or deadline extension."
+          }
+        ]
       }
     ],
     "active_run": {
@@ -5662,6 +5677,11 @@
         "at": "2026-10-19T08:17:48+08:00",
         "slot": "2026-10-19T07:45:00+08:00",
         "action": "Read only duplicate preflight during final checkpoint. Original deadline retained and no invocation or lease added."
+      },
+      {
+        "at": "2026-10-19T08:53:01+08:00",
+        "slot": "2026-10-19T08:45:00+08:00",
+        "action": "Read only duplicate preflight during the counted pass. No new invocation or deadline extension."
       }
     ],
     "read_only_preflights": [
