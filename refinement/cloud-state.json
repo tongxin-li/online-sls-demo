@@ -783,7 +783,12 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-19T18:45:00+08:00",
+    "started_at": "2026-10-19T18:45:37+08:00",
+    "lease_expires_at": "2026-10-19T19:25:37+08:00",
+    "branch": "cloud/refine/continuous-release-20261019"
+  },
   "next_focus": "First read current main and all final jobs and logs from 39235839246. Retry the failed canonical release job after the run finishes, diagnose page readiness without weakening physical assertions if the failure repeats, and record the outcome separately. Then validate the candidate checkpoint archive helper and inspect actual nested 6001 action PNGs. Continue the public packet ledger and paid probe admission plan only after these release evidence gaps are reconciled. Do not count this documentation, audit or restoration test addition as an algorithm improvement. Preserve all histories, physical costs and archived replay.",
   "priorities": [
     "Actual continuous causal response adaptation and executed command evidence",
@@ -2594,7 +2599,7 @@
     "hard_deadline": "2026-10-19T23:45:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 11,
+    "invocation_count": 12,
     "completed_count": 0,
     "runs": [
       {
@@ -9168,9 +9173,49 @@
           ],
           "published": false
         }
+      },
+      {
+        "program_id": "continuous-phi-20261018T234500",
+        "slot": "2026-10-19T18:45:00+08:00",
+        "started_at": "2026-10-19T18:45:37+08:00",
+        "lease_expires_at": "2026-10-19T19:25:37+08:00",
+        "branch": "cloud/refine/continuous-release-20261019",
+        "base_commit": "658e2611278c1ea746c5009dd5adfa5d71663f03",
+        "candidate_base": "d75cf21b63628e7d5384c53488775df25888e0d1",
+        "status": "in_progress",
+        "counted_invocation": true,
+        "counted_completed": false,
+        "changes": [
+          "Read completed main and candidate results, retry both failed main jobs without changing assertions, inspect actual 6001 action pixels, then implement a bounded causal packet admission foundation on an unpublished candidate if evidence allows."
+        ],
+        "tests": {
+          "prior_main": {
+            "run": 39235839246,
+            "attempt": 1,
+            "conclusion": "failure",
+            "validate": "success",
+            "ongoing": "success",
+            "release": "failure before first trial due unavailable page API",
+            "long_sessions": "failure after first restored state while locating Step",
+            "retry_requested": true
+          },
+          "prior_candidate": {
+            "source": "d75cf21b63628e7d5384c53488775df25888e0d1",
+            "run": 39236325451,
+            "conclusion": "success",
+            "all_six_jobs": "success",
+            "nested_images": 6
+          }
+        },
+        "next_focus": "First read current main and all final jobs and logs from 39235839246. Retry the failed canonical release job after the run finishes, diagnose page readiness without weakening physical assertions if the failure repeats, and record the outcome separately. Then validate the candidate checkpoint archive helper and inspect actual nested 6001 action PNGs. Continue the public packet ledger and paid probe admission plan only after these release evidence gaps are reconciled. Do not count this documentation, audit or restoration test addition as an algorithm improvement. Preserve all histories, physical costs and archived replay."
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "slot": "2026-10-19T18:45:00+08:00",
+      "started_at": "2026-10-19T18:45:37+08:00",
+      "lease_expires_at": "2026-10-19T19:25:37+08:00",
+      "branch": "cloud/refine/continuous-release-20261019"
+    },
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
       "is_enabled": true,
