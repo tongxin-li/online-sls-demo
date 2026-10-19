@@ -1,0 +1,57 @@
+# Ongoing response and support learning plan
+
+This is public demo engineering work based on main 48b65da4c6613d5472ae878214dfc82f03fd044e. It supplies no unpublished manuscript content and makes no Algorithm 1 equivalence or new theorem claim. The live continuous-phi-v1 protocol remains the reference until the new protocol passes acceptance. This document is a plan, not implemented adaptive topology.
+
+## What is already live
+
+Sources continually fit their own revealed forcing and immutable issued forecasts. Received correction scalars change the actual feasible predictive response and later bounded commands. One physical clock, all receipts and all accumulated stage costs continue without the archived 180 and 360 resets. Support is selected offline. Drawing observes a complete frame separately from the physical getSnapshot API. Version 13 archived replay is preserved. The manual release is separate from scheduled completions.
+
+## First implementable extension
+
+The first extension is an explicitly experimental alternating response and support policy. Retain the existing causal source correction and the existing physical objective and limits. Learn support from measured historical counterfactual stage cost and resynthesize the actual predictive kernel for an accepted mask. This is genuine ongoing deployed response and support adaptation if it passes the checks below. It is not full joint response optimization. A later direct response optimizer needs its own public derivation and independent gradients before it can replace the existing correction.
+
+The selector may not inspect the full simulator forecast array. Give it a receiver scoped packet ledger. A packet records source, receiver, original target and issue time, request time, arrival time, scalar payload and the reason it was transmitted. Allowed reasons are current control, correction metadata, explicit probe and transition retrieval. The existing common state feedback and revealed physical forcing are distinct inputs. Error generator labels, unrevealed truth and excluded unrequested forecasts are inaccessible.
+
+Use the existing 60 sample observation window and 30 sample warmup as initial engineering conditions, fixed before outcomes are read. Every 60 completed actions request one deterministic rotating excluded source per receiver. Requests rotate independently of noise labels and outcomes, covering every excluded source. At most one probe channel per receiver is requested at an epoch. Report its payload in addition to the control budget. This is not free all source calibration at the selector.
+
+For a probe, explicitly request the immutable historical packets needed for the last 60 completed validation actions, the preceding 60 fit actions and the finite memory context. Charge each returned target packet and coefficient scalar at its actual arrival. Never count one historical batch as one scalar message. No absent packet may be silently reconstructed from the simulator. Cache previously paid packets with their receipt times; reusing an actually received historical packet is allowed and is not a new transmission. Account for local messages, remote forecasts, correction scalars, probes and transition retrieval separately, with totals. Do not invent a monetary communication price.
+
+## Causal evaluation and selection
+
+At decision action t the newest revealed outcome is t minus 1. Candidate evaluation uses only packets already arrived and forcing already revealed. For each replayed validation action tau, fit correction only from pairs before tau and use only originally issued forecasts whose issue time is at most tau. Historical retrieval arriving at t cannot claim that the sparse receiver had those packets during the past experiment. Label the calculation a retrospective candidate replay evaluated now, not past executed performance.
+
+Compare the incumbent mask and every single remote edge exchange involving that epoch's explicitly probed sources. Keep mandatory local permission and the exact per network control budgets of 6, 24 and 48 remote links. A permitted zero gain is allowed and must remain distinct from an effective nonzero response. Compare proposals on the identical revealed physical input sequence, initial measured state and actuator model. Resimulate the complete state, common feedback, inverter lag and clipping for each proposal. Sum the existing stage objective over the declared validation window. Do not alter accumulated live costs or add a terminal episode penalty to this live score. Preserve every proposal and loss, including failures and worse outcomes.
+
+Use the declared candidate set and deterministic source index tie breaks. Replace the incumbent only for an actual cost reduction beyond the existing scale relative numerical tolerance, with all feasibility and packet availability checks passing. Otherwise keep it. Do not force a change for display activity or select a successful noise switch after seeing results. A score is a measured replay estimate, not a guarantee that the next physical interval will improve. The held aside study must report how often those decisions lose.
+
+The exact initial state and finite memory context for replay, the dimensionally consistent score normalization and the treatment of incomplete early windows must be written as executable equations and independently checked before implementation. Incomplete windows must cause deferral rather than future data filling. No new regularization, seeds, physical parameters or loss weights may be tuned to produce a favorable ranking.
+
+## Deployment is a transaction
+
+Use the existing nullspace constrained synthesis and independently reconstruct X_next = A X + B U and L = U minus K X for startup, interior and temporal endpoints under each proposed mask. Right multiplication by the actually received diagonal correction must preserve forbidden raw gains. Keep common K, voltage units, equipment and inverter limits unchanged.
+
+Synthesis and scoring must not block physical playback. Prepare a worker or bounded cooperative evaluator with a fixed revealed prefix and explicit readiness receipts. A late or failed result leaves the incumbent running. Do not skip physical actions to finish optimization. Record logical decision and activation actions so replay does not depend on machine wall time.
+
+A newly selected edge cannot use forecasts that its receiver never received. Request all missing immutable finite memory packets explicitly and charge their actual deliveries. Declare at least one sample request latency for probing and transition retrieval. Continue the incumbent until the proposed kernel is feasible and every required packet has arrived. New ordinary forecasts follow the same declared delivery convention as the existing controller. Activate support, controller and admitted caches atomically at an action boundary. A failed or incomplete transition keeps the old controller, state and costs. Dropped edges immediately lose access to new control forecasts. Previously paid history remains auditable.
+
+Control support stays within its original remote budget during transitions. Probe and transition payload may temporarily add traffic and must be shown honestly. A sparse control budget alone does not establish total communication savings. Do not hide a dense probing cost beneath a sparse label.
+
+## Baselines and replay
+
+Keep Fixed sparse at its original offline support with identity correction, Dense prediction at full support with identity correction, and Feedback only without predictions. They share the identical realized physical input and current objective. The adaptive method's additional probe and transition traffic is part of its reported communication. No baseline may be weakened to make adaptation look better.
+
+Introduce a separate protocol identity and record schema only after integration. Exact version 14 ongoing and version 13 archived records must retain their actual algorithms. No visible version selector or new demo URL is needed. Record requests, arrivals, evaluated prefix, all candidate scores, selected mask, solver residuals, gain version and actual activation action. A replay verifies causal admissibility and feasibility before reproducing the recorded activation. It must retain every physical event and cost and must not treat a recorded mask as unvalidated truth.
+
+## Predefined acceptance before changing the default
+
+Use all three networks, seeds 20261013 and 21 and the existing reliable, mixed and all noisy regimes. Retain every condition and unfavorable result. Reuse the existing 901 action corruption, repair and physical attack stream and add switches after 1800 and 4096. Run at least 6001 actions for long history. Request timing and source rotation are predefined and identical across seeds. No confidence interval is inferred from two seeds; a subsequent held aside five seed study reports all outcomes and paired uncertainty without reusing archived frozen percentages.
+
+Independent checks must cover packet ledgers and exact scalar traffic arithmetic, forbidden getter reads, missing and delayed packets, no unrevealed truth or future click leakage, per action old and new gain command reconstruction, feasible support transitions, mandatory local permissions, exact full quadratic synthesis, clipping, common physical inputs, deterministic ties, unsuccessful candidates, machine independent recorded activation replay and all accumulated costs. Controlled numerical fixtures may verify justified topology changes, but the full predefined study must also retain cases with no support change.
+
+Browser acceptance must preserve every existing numerical and interaction protection, all four panels and all four traces. Test ordinary playback, all source reachability, repeated and continuous same and multiple bus attacks, corruption and repair at arbitrary times, stable cost switching, actual gain and command effects after causal delay, rendered frame consistency, phone and keyboard controls, real native performance and actual screenshot pixels. Show candidate score, allowed support, executed nonzero gain, clipped command and outcome as distinct measured quantities in the existing concise inspector. Never animate hypothetical links as deployment.
+
+## This pass and later implementation
+
+This pass records the verified manual release, reconciles the interrupted progress record and adds a dedicated 6001 action saved session restoration test. It changes no controller, support, plant or interface. Next implement and independently validate the receiver packet ledger and paid probe admission before wiring a selector. Then implement causal candidate replay and resynthesis, atomic deployment, exact new and legacy replay and browser acceptance. Each incomplete stage remains unpublished. Direct joint response optimization remains a separate unresolved scientific step rather than an implicit claim of this alternating policy.
+
+The authoritative public implementation references are src/continuous-response.js, src/causal-source-scale.js, src/response-controller.js, src/simulation.js and src/interface.js at the stated main revision. No private research source was used.

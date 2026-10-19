@@ -135,9 +135,42 @@ jobs:
           path: ${{ runner.temp }}/release-results
           if-no-files-found: error
 
+
+  long-session-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build the identical page for long saved sessions
+        run: python3 build.py
+      - name: Install existing isolated browser test tools
+        run: |
+          npm install --prefix "$RUNNER_TEMP/browser-test" --no-audit --no-fund playwright@1.56.1
+          "$RUNNER_TEMP/browser-test/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Restore every predefined very long saved session
+        env:
+          NODE_PATH: ${{ runner.temp }}/browser-test/node_modules
+          DEMO_SMOKE_OUTPUT: ${{ runner.temp }}/long-session-results
+        run: node src/test-long-session-browser.cjs
+      - name: Save long session evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: long-session-browser-evidence
+          path: ${{ runner.temp }}/long-session-results
+          if-no-files-found: error
+
   review-ongoing:
     if: always() && github.event_name == 'push' && startsWith(github.ref, 'refs/heads/cloud/refine/') && needs.ongoing-browser.result != 'cancelled'
-    needs: ongoing-browser
+    needs: [ongoing-browser, long-session-browser]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -150,6 +183,10 @@ jobs:
         with:
           name: ongoing-browser-evidence
           path: ${{ runner.temp }}/ongoing-review
+      - uses: actions/download-artifact@v4
+        with:
+          name: long-session-browser-evidence
+          path: ${{ runner.temp }}/ongoing-review/long-session
       - name: Make captured ongoing pixels available for authenticated review
         env:
           GH_TOKEN: ${{ github.token }}
@@ -158,7 +195,7 @@ jobs:
 
   prepare-candidate:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/cloud/refine/')
-    needs: [validate, ongoing-browser, review-ongoing, release-browser]
+    needs: [validate, ongoing-browser, review-ongoing, release-browser, long-session-browser]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:

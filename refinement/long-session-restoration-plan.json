@@ -1,0 +1,72 @@
+{
+  "schema": "very-long-session-restoration-v1",
+  "status": "predefined_before_execution",
+  "protocol": "continuous-phi-v1",
+  "steps": 6001,
+  "networks": [
+    "toy8",
+    "feeder24",
+    "feeder47"
+  ],
+  "surfaces": [
+    {
+      "width": 1440,
+      "height": 1000,
+      "touch": false
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "touch": true
+    }
+  ],
+  "seed": 20261013,
+  "beta": 4,
+  "powerScenario": "forecasted-demand",
+  "faultSwitches": [
+    45,
+    95,
+    185,
+    245,
+    365,
+    425,
+    605,
+    665,
+    1999,
+    2001,
+    4095,
+    4180,
+    5200,
+    5300
+  ],
+  "pulseActions": [
+    60,
+    61,
+    355,
+    356,
+    500,
+    501
+  ],
+  "heldRanges": [
+    [
+      110,
+      120
+    ],
+    [
+      270,
+      280
+    ],
+    [
+      2040,
+      2050
+    ],
+    [
+      5000,
+      5020
+    ]
+  ],
+  "scope": "Deterministic long record fixture generated with the production engine, then actual production browser hydration, reload and resumed Step. This is saved session restoration evidence, not a native playback throughput or fresh default experiment.",
+  "history": "Every physical history entry and execution receipt is verified in ordered chunk hashes to avoid duplicating the entire large history in one JSON string. Full state, costs, traffic and latest receipt are verified separately. No history is omitted from the comparison.",
+  "retention": "No truncation of live history or accumulated costs. Finite observations do not establish an indefinite bound.",
+  "sourcePlan": "refinement/ongoing-support-plan.md"
+}

@@ -8411,9 +8411,26 @@
             "completed_main_and_deployment_logs_read": true,
             "numerical_cases": 257,
             "public_hashes_and_six_trials_verified": true
+          },
+          "candidate": {
+            "status": "Pending full workflow including new required very long session browser job.",
+            "predefined_steps": 6001,
+            "networks": 3,
+            "surfaces": 2,
+            "original_cases": 257,
+            "history_comparison": "Every ordered entry in fixed size hash chunks plus full physical state and first resumed action."
           }
         },
-        "next_focus": "Public causal support learning protocol and full very long saved session restoration evidence."
+        "next_focus": "Public causal support learning protocol and full very long saved session restoration evidence.",
+        "implementation_plan": "refinement/ongoing-support-plan.md",
+        "restoration_plan": "refinement/long-session-restoration-plan.json",
+        "scope": {
+          "controller_changed": false,
+          "physical_parameters_changed": false,
+          "live_default_changed": false,
+          "new_dependencies": false,
+          "protocol_plan_not_implementation": true
+        }
       }
     ],
     "active_run": {
