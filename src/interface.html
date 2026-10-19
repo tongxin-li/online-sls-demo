@@ -43,6 +43,12 @@
       <p id="pr-link-budget" class="pr-caption pr-link-budget"></p><p id="pr-noisy-links" class="pr-caption pr-noisy-links" hidden></p><div class="pr-matrix-key" id="pr-matrix-key"></div><p id="pr-matrix-scroll-hint" class="pr-scroll-hint" hidden>Scroll to explore all sources →</p><div class="pr-matrix-scroll" role="region" aria-describedby="pr-matrix-scroll-hint"><svg class="pr-chart" id="pr-matrix" role="group" aria-label="Candidate prediction links. Rows receive forecasts from columns"></svg></div>
       <p id="pr-matrix-inspect-hint" class="pr-caption">Select a link to inspect its source</p>
       <div id="pr-source-controls" class="pr-source-controls" hidden><button type="button" id="pr-source-fault" class="btn btn-quiet" aria-describedby="pr-source-status" disabled>Corrupt source</button><span id="pr-source-status" class="pr-caption" role="status"></span></div>
+      <div id="pr-response-history-panel" hidden>
+        <p id="pr-response-history-label" class="pr-caption">Executed signed response gain</p>
+        <svg id="pr-response-history" class="pr-chart" role="img" aria-label="Actual executed current target prediction gain over time"></svg>
+      </div>
+      <details id="pr-source-details" class="pr-panel-details pr-source-details" hidden>
+      <summary>Source details</summary>
       <div id="pr-forecast-observation" class="pr-forecast-observation" hidden>
         <p id="pr-forecast-timing" class="pr-caption"></p>
         <dl id="pr-forecast-values" class="pr-forecast-values" aria-label="Raw source voltage forcing in mpu" aria-describedby="pr-forecast-units" hidden>
@@ -66,10 +72,6 @@
           </table>
           <p id="pr-link-receipt-note" class="pr-caption">Score averages discovery gain². Gain norm uses the resynthesized row. Source is before limiting; command includes all messages and each controller’s feedback.</p>
         </section>
-        <div id="pr-response-history-panel" hidden>
-          <p id="pr-response-history-label" class="pr-caption">Executed signed response gain</p>
-          <svg id="pr-response-history" class="pr-chart" role="img" aria-label="Actual executed current target prediction gain over time"></svg>
-        </div>
         <details id="pr-command-inspector" class="pr-command-inspector" hidden>
           <summary id="pr-command-title">Command breakdown</summary>
           <p class="pr-caption">kvar · Full issued preview, not just the revealed pair · Highlights show learned or matrix links<span id="pr-command-scroll-hint" hidden></span></p>
@@ -81,6 +83,7 @@
           <p class="pr-caption">Request = Source + Other + Feedback before limiting · Command bounded to ±70 kvar · Source is not a causal share after limiting</p>
         </details>
       </div>
+      </details>
       <div class="pr-panel-foot pr-matrix-detail"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div><details id="pr-link-history-details" class="pr-panel-details"><summary>Link history</summary><div class="pr-topology-status"><strong id="pr-topology-status">Connectivity unchanged</strong><span id="pr-topology-gain">Weights changed 0%</span></div><div id="pr-topology-events" class="pr-topology-events" aria-label="Recent topology changes" hidden></div><div class="pr-topology-history"><label for="pr-topology-history" id="pr-history-count">0 link updates</label><input id="pr-topology-history" type="range" min="0" max="0" step="1" value="0" aria-label="Topology history" disabled><button type="button" id="pr-history-live" aria-pressed="true">Latest</button></div><p id="pr-topology-note" class="pr-caption" aria-live="polite"></p></details>
     </section>
     <section class="pr-panel pr-stage-panel" aria-labelledby="pr-stage-title">

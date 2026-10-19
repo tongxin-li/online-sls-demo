@@ -176,6 +176,18 @@ async function main(){
    await pause(page);
    if(nativeProfile)profiles.push(await finishProfile(page,nativeProfile));
    await assertMatrix(page,'native corruption and repair sequence');
+   const sourceDetails=page.locator('#pr-source-details'),beforeDetails=await read(page);
+   assert.equal(await sourceDetails.getAttribute('open'),null,'Ongoing source details start collapsed');
+   assert.equal(await page.locator('#pr-response-history').isVisible(),true,'Executed gain remains visible outside source details');
+   assert.equal(await page.locator('#pr-forecast-observation').isVisible(),false);
+   await sourceDetails.locator('summary').first().click();
+   assert.equal(await page.locator('#pr-forecast-observation').isVisible(),true);
+   await setting(page,'matrix-view','links');await setting(page,'matrix-view','change');
+   assert.equal(await sourceDetails.getAttribute('open'),'','Redrawing inspection preserves the user disclosure choice');
+   assert.deepEqual((await read(page)).s,beforeDetails.s,'Opening source details and redrawing do not mutate the paused trial');
+   await sourceDetails.locator('summary').first().click();
+   assert.equal(await page.locator('#pr-response-history').isVisible(),true);
+   assert.deepEqual((await read(page)).s,beforeDetails.s,'Closing source details does not mutate the paused trial');
    const native=await read(page),nativeMetrics=await page.evaluate(()=>{
     const m=window.__nativePlayback;m.stopped=true;
     return {frames:m.frames,maxFrameGapMs:m.maxFrameGapMs,over50ms:m.over50ms,over100ms:m.over100ms,

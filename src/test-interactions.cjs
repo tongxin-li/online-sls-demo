@@ -277,6 +277,17 @@ test('Pause and Step flush a pending playback drawing without extra samples',asy
   h.click('run');assert.equal(h.clock.tasks.size,0);
 });
 
+test('source details use a per trial default and preserve user choices during updates',()=>{
+  const archived=harness();assert.equal(archived.node('source-details').open,true);
+  const h=harness(undefined,null,true,true);assert.equal(h.node('source-details').open,false);
+  assert.equal(h.node('source-details').hidden,false);
+  h.node('source-details').open=true;h.click('step');assert.equal(h.node('source-details').open,true);
+  h.inspectLink(7,6);assert.equal(h.node('source-details').open,true);
+  h.change('bus','2');assert.equal(h.node('source-details').hidden,true);
+  h.inspectLink(7,6);assert.equal(h.node('source-details').open,true);
+  h.click('restart');assert.equal(h.node('source-details').open,false);
+});
+
 test('attacks interleave safely with comparison batches and continue after the batch',async()=>{
   const h=harness();h.check('auto-compare',false);h.change('attack-mode','pulse');const comparison=h.click('compare');assert.equal(h.node('run').disabled,true);
   h.event('pulse','pointerdown');await h.clock.runNext();

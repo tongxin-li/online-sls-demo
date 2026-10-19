@@ -360,6 +360,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 .pr-panel-details .pr-voltage-table { margin-top:5px; }
 .pr-panel-details #pr-voltage-metrics-note { margin-bottom:5px; }
 .pr-panel-details #pr-topology-note { margin:5px 0 3px; line-height:1.5; }
+.pr-source-details>summary { min-height:40px; font-size:12px; }
+.pr-source-details[hidden] { display:none; }
 .pr-topology-status { margin-bottom:5px; }
 .pr-bottomline { min-height:42px; gap:10px 16px; }
 .pr-adaptation { padding-bottom:5px; }

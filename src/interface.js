@@ -97,6 +97,7 @@
   let renderFrame = null;
   let lastRenderAt = -Infinity;
   const LIVE_RENDER_PERIOD=1000/16;
+  let sourceDetailsTrial=null;
   let heldAttack = null;
   const continuousAttacks = new Map();
   const activeAttacks = () => [...continuousAttacks.values(), ...(heldAttack ? [heldAttack] : [])];
@@ -556,6 +557,13 @@
   }
   function renderInspectedSource() {
     const inspection=predictionInspection(),control=$('source-fault');
+    const details=$('source-details');
+    details.hidden=!inspection;
+    // Set the disclosure default once per trial. Ordinary samples and source
+    // selection must preserve the user's choice to open or close the details.
+    if(sourceDetailsTrial!==simulation) {
+      details.open=!ongoing();sourceDetailsTrial=simulation;
+    }
     renderForecastObservation(inspection);
     const command=renderCommandInspection(inspection);
     renderLinkEvidence(inspectedLinkEvidence(command));
@@ -945,6 +953,7 @@
   $('matrix')?.parentElement?.addEventListener('scroll',updateMatrixScrollHint,{passive:true});
   $('command-scroll').addEventListener('scroll',updateCommandScrollHint,{passive:true});
   $('command-inspector').addEventListener('toggle',updateCommandScrollHint);
+  $('source-details').addEventListener('toggle',updateCommandScrollHint);
   if ($('matrix-view')) $('matrix-view').addEventListener('change',()=>{historyIndex=null;renderProtocol();renderInspectedSource();drawNetwork();drawMatrix();save();});
   $('topology-history').addEventListener('input',()=>reviewTopology(Number($('topology-history').value)));
   $('history-live').addEventListener('click',()=>reviewTopology(null));
@@ -1150,7 +1159,7 @@
   function experimentProgress() {
     const status=protocolStatus(),deployed=status.phase==='deployment';
     if(ongoing())return {visible:true,phase:'ongoing',learningStatus:'active',comparisonStatus:'active',
-      learningCount:(snapshot.learning?.sourcePairs||0)+' pairs used per source',comparisonCount:snapshot.t+' samples · All costs retained',
+      learningCount:(snapshot.learning?.sourcePairs||0)+' observations received',comparisonCount:snapshot.t+' samples · All costs retained',
       learningFraction:Math.min(1,(snapshot.learning?.sourcePairs||0)/30),comparisonFraction:0,
       note:'One ongoing trial. Source corrections update after observations. Prediction support stays fixed. No reset or stop at 180 or 360 samples.'};
     return {visible:snapshot.experiment==='communication',phase:status.phase,

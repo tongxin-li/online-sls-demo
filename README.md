@@ -8,7 +8,7 @@ Unless another size is named, numerical values and archived studies below descri
 
 ## Ongoing protocol and archived trials
 
-Live playback keeps the simulation clock separate from drawing. Every due action still computes control, learns from revealed observations and records its full cost. Drawing uses the latest complete snapshot at up to 16 frames per second, with immediate updates for Pause, Step and other direct controls. Short rendering delays are recovered in bounded sample batches. A suspended tab does not replay missed wall time.
+Live playback keeps the simulation clock separate from drawing. Every due action still computes control, learns from revealed observations and records its full cost. Drawing uses the latest complete snapshot at up to 16 frames per second, with immediate updates for Pause, Step and other direct controls. Short rendering delays are recovered in bounded sample batches. A suspended tab does not replay missed wall time. Executed response gains remain visible beside source controls. Detailed source measurements and command tables are available under Source details, collapsed by default for ongoing trials; opening them does not change the experiment.
 
 The interface starts fresh unsaved sessions directly in `continuous-phi-v1`. One physical clock and every accumulated stage cost continue through 180 and 360 samples. Source local calibration uses immutable issued forecasts and revealed forcing with the existing ridge, a 30 pair warmup and a 60 pair window. Actual received correction weights change the predictive response used for later commands. The shared feedback and actuator limits remain unchanged.
 
