@@ -784,10 +784,10 @@
     }
   ],
   "active_run": {
-    "slot": "2026-10-19T09:45:00+08:00",
-    "started_at": "2026-10-19T09:42:05+08:00",
-    "lease_expires_at": "2026-10-19T10:22:05+08:00",
-    "branch": "cloud/refine/continuous-phi-20261018-2345"
+    "slot": "2026-10-19T17:45:00+08:00",
+    "started_at": "2026-10-19T17:42:34+08:00",
+    "lease_expires_at": "2026-10-19T18:22:34+08:00",
+    "branch": "cloud/refine/continuous-release-20261019"
   },
   "next_focus": "Read latest main and this checkpoint repeat checks first. Profile 47 bus native execution and rendering with growing history at 901 and roughly 1850 samples. Separate actual controller step, immutable snapshot and chart work. Optimize the measured hotspot without retuning gains, objective, noise or limits and without dropping costs or evidence. If caching stationary response geometry, keep current causal correction weights and command receipts fresh at every action. Revalidate all suites and actual pixels before expected SHA nonforce publication.",
   "priorities": [
@@ -2599,7 +2599,7 @@
     "hard_deadline": "2026-10-19T23:45:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 10,
+    "invocation_count": 11,
     "completed_count": 0,
     "runs": [
       {
@@ -6400,7 +6400,7 @@
         "branch": "cloud/refine/continuous-phi-20261018-2345",
         "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
         "candidate_parent": "c22804c429eeffccc60424b4293a74902ccd9726",
-        "status": "in_progress",
+        "status": "validated_unpublished_work_superseded_by_manual_release",
         "counted_invocation": true,
         "counted_completed": false,
         "preflight": {
@@ -8366,14 +8366,61 @@
           "47 bus native playback remains slow at about twelve samples per wall second and gaps up to 267 ms. Keep unpublished.",
           "Browser subsystem timeline attribution remains to be measured. No guess about paint or layout is a finding.",
           "Exact public release verification remains unexercised. Main is archived and unchanged."
-        ]
+        ],
+        "prior_status_before_reconciliation": "in_progress",
+        "recovery": {
+          "at": "2026-10-19T17:45:38+08:00",
+          "expired_lease": {
+            "slot": "2026-10-19T09:45:00+08:00",
+            "started_at": "2026-10-19T09:42:05+08:00",
+            "lease_expires_at": "2026-10-19T10:22:05+08:00",
+            "branch": "cloud/refine/continuous-phi-20261018-2345"
+          },
+          "reason": "Old slot ended with a failed checkpoint attempt and later a user mutation hold. Completed candidate validation and its incorporation into the manual release are reconciled without another invocation or scheduled completion.",
+          "source": "6d5499724f5a1639a01148b3ee56e99ded64dd35",
+          "validation_run": 39188266661,
+          "conclusion": "success",
+          "manual_release": "48b65da4c6613d5472ae878214dfc82f03fd044e",
+          "counted_invocation": false,
+          "counted_completed": false,
+          "checkpoint_status": "Closure tree request did not produce a branch update; subsequent retry was rejected during the user hold. No completion was recorded."
+        }
+      },
+      {
+        "program_id": "continuous-phi-20261018T234500",
+        "slot": "2026-10-19T17:45:00+08:00",
+        "started_at": "2026-10-19T17:42:34+08:00",
+        "work_started_at": "2026-10-19T17:45:38+08:00",
+        "lease_expires_at": "2026-10-19T18:22:34+08:00",
+        "branch": "cloud/refine/continuous-release-20261019",
+        "base_commit": "48b65da4c6613d5472ae878214dfc82f03fd044e",
+        "status": "in_progress",
+        "counted_invocation": true,
+        "counted_completed": false,
+        "changes": [
+          "Reconcile verified manual release and old interrupted lease without changing scheduled completion counts.",
+          "Define a public causal response and support learning implementation plan before algorithm changes.",
+          "Predefine a dedicated exact restoration check for 6001 action saved sessions on every network and desktop and phone."
+        ],
+        "tests": {
+          "preflight": {
+            "main_validation": 39228537441,
+            "source_validation": 39226644505,
+            "pages": 39228538183,
+            "conclusion": "success",
+            "completed_main_and_deployment_logs_read": true,
+            "numerical_cases": 257,
+            "public_hashes_and_six_trials_verified": true
+          }
+        },
+        "next_focus": "Public causal support learning protocol and full very long saved session restoration evidence."
       }
     ],
     "active_run": {
-      "slot": "2026-10-19T09:45:00+08:00",
-      "started_at": "2026-10-19T09:42:05+08:00",
-      "lease_expires_at": "2026-10-19T10:22:05+08:00",
-      "branch": "cloud/refine/continuous-phi-20261018-2345"
+      "slot": "2026-10-19T17:45:00+08:00",
+      "started_at": "2026-10-19T17:42:34+08:00",
+      "lease_expires_at": "2026-10-19T18:22:34+08:00",
+      "branch": "cloud/refine/continuous-release-20261019"
     },
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
@@ -8384,7 +8431,7 @@
       "setup_counts_as_invocation": false,
       "setup_counts_as_improvement": false
     },
-    "candidate_branch": "cloud/refine/continuous-phi-20261018-2345",
+    "candidate_branch": "cloud/refine/continuous-release-20261019",
     "next_focus": "Read current main and this checkpoint repeat first. Reduce unchanged matrix SVG mutations while retaining every source, cell, permission and actual per action coefficient value. Source labels currently reset text and titles every render, cached positions are reapplied, and all 736 cells receive many static attributes each action. Separate static geometry and accessibility updates from actual changing response energy. For ongoing fixed support, update every admitted gain including zero values, while leaving excluded zero cells present and correctly inspectable. Keep archived behavior correct. Add independent checks that every displayed matrix value matches the actual diagnostics after corruption, repair, selection, scroll, resize and font changes. Keep all physical actions and receipts; do not lower the requested test rate or tune physics. Read all timing outcomes, capture and inspect pixels, then promote only after responsiveness and exact public verification pass.",
     "skipped_duplicate_dispatches": [
       {
@@ -8428,6 +8475,40 @@
         "conclusion": "success",
         "completed_logs_read": true,
         "source_changed": false
+      }
+    ],
+    "manual_releases": [
+      {
+        "commit": "48b65da4c6613d5472ae878214dfc82f03fd044e",
+        "source": "6d014662d6478d4a34307780c2cd7b91da378ae9",
+        "provenance": "Manual user release handoff. Not a scheduled implementation.",
+        "counted_invocation": false,
+        "counted_completed": false,
+        "verified_at": "2026-10-19T17:43:32+08:00",
+        "source_validation": 39226644505,
+        "main_validation": 39228537441,
+        "pages": 39228538183,
+        "all_main_completed_logs_read": true,
+        "parent_and_generated_index_only_diff_verified": true,
+        "numerical_cases": 257,
+        "ongoing_cases": 6,
+        "main_long_actions": [
+          1821,
+          1837,
+          1992,
+          1821,
+          1834,
+          2002
+        ],
+        "public_page_sha256": "69097822be929ce69de2d00427f5360b54859d27187f19ad91fb5c98522aabff",
+        "environment_sha256": "9ba870badcc3f8150521c44d17430606536b43a10c11a1337cfb4c9a2172682d",
+        "public_trials": 6,
+        "canonical_url": "https://tongxin.me/online-sls-demo/",
+        "limitations": [
+          "Fixed offline support and source local correction are not full co design or literal manuscript Algorithm 1.",
+          "47 bus playback remains slower on some machines. Very long saved session restoration needs a dedicated check."
+        ],
+        "source_mirror": "Synchronized by manual release owner as reported in handoff. Not separately accessed by cloud task."
       }
     ]
   }
