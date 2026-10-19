@@ -783,7 +783,12 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-19T09:45:00+08:00",
+    "started_at": "2026-10-19T09:42:05+08:00",
+    "lease_expires_at": "2026-10-19T10:22:05+08:00",
+    "branch": "cloud/refine/continuous-phi-20261018-2345"
+  },
   "next_focus": "Read latest main and this checkpoint repeat checks first. Profile 47 bus native execution and rendering with growing history at 901 and roughly 1850 samples. Separate actual controller step, immutable snapshot and chart work. Optimize the measured hotspot without retuning gains, objective, noise or limits and without dropping costs or evidence. If caching stationary response geometry, keep current causal correction weights and command receipts fresh at every action. Revalidate all suites and actual pixels before expected SHA nonforce publication.",
   "priorities": [
     "Actual continuous causal response adaptation and executed command evidence",
@@ -2594,7 +2599,7 @@
     "hard_deadline": "2026-10-19T23:45:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 9,
+    "invocation_count": 10,
     "completed_count": 0,
     "runs": [
       {
@@ -6385,9 +6390,38 @@
           "status": "Archived public protocol remains unchanged. Candidate contains an authorized cloud public verification route for eventual publication."
         },
         "end_reason": "Bounded fully validated candidate checkpoint with actual pixel review and all unfavorable timings preserved. Rendering responsiveness remains unresolved so there is no new live completion."
+      },
+      {
+        "program_id": "continuous-phi-20261018T234500",
+        "slot": "2026-10-19T09:45:00+08:00",
+        "started_at": "2026-10-19T09:42:05+08:00",
+        "work_started_at": "2026-10-19T09:45:01+08:00",
+        "lease_expires_at": "2026-10-19T10:22:05+08:00",
+        "branch": "cloud/refine/continuous-phi-20261018-2345",
+        "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+        "candidate_parent": "c22804c429eeffccc60424b4293a74902ccd9726",
+        "status": "in_progress",
+        "counted_invocation": true,
+        "counted_completed": false,
+        "preflight": {
+          "repeat_run": 39184981627,
+          "conclusion": "success",
+          "all_five_completed_logs_read": true,
+          "main_unchanged": true,
+          "early_dispatch": "Read only until scheduled slot. Deadline remains original dispatch plus forty minutes."
+        },
+        "changes": [
+          "Reduce unchanged SVG matrix mutations while retaining every source, cell, permission and actual per action response value."
+        ],
+        "next_focus": "Full unchanged scientific and browser acceptance plus independent per cell data checks and native playback evidence."
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "slot": "2026-10-19T09:45:00+08:00",
+      "started_at": "2026-10-19T09:42:05+08:00",
+      "lease_expires_at": "2026-10-19T10:22:05+08:00",
+      "branch": "cloud/refine/continuous-phi-20261018-2345"
+    },
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
       "is_enabled": true,
