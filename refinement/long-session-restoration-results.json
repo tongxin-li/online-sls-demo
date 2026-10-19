@@ -1,0 +1,173 @@
+{
+  "schema": "very-long-session-restoration-results-v1",
+  "source": "658e2611278c1ea746c5009dd5adfa5d71663f03",
+  "workflow_run": 39234241276,
+  "job_id": 117999862671,
+  "job_conclusion": "success",
+  "completed_log_read": true,
+  "plan": "refinement/long-session-restoration-plan.json",
+  "results": [
+    {
+      "networkId": "toy8",
+      "mobile": false,
+      "steps": 6001,
+      "generationMs": 5993,
+      "restoreMs": 5322,
+      "secondRestoreMs": 5660,
+      "savedBytes": 46275,
+      "historyBytes": 46196858,
+      "historyEntries": 6001,
+      "historyChunks": 94,
+      "costs": {
+        "online": 0.3833422152524623,
+        "scalar": 0.4966935323106422,
+        "static": 0.5570665302858188,
+        "causal": 0.40024717574509927
+      },
+      "sourceUpdates": 5971,
+      "exactFirstRestore": true,
+      "exactResumedStep": true,
+      "exactSecondRestore": true,
+      "passed": true
+    },
+    {
+      "networkId": "feeder24",
+      "mobile": false,
+      "steps": 6001,
+      "generationMs": 11936,
+      "restoreMs": 9947,
+      "secondRestoreMs": 10151,
+      "savedBytes": 46571,
+      "historyBytes": 125325618,
+      "historyEntries": 6001,
+      "historyChunks": 94,
+      "costs": {
+        "online": 2.754736842624508,
+        "scalar": 3.9342730458891486,
+        "static": 4.85759653982906,
+        "causal": 2.830457860286317
+      },
+      "sourceUpdates": 5971,
+      "exactFirstRestore": true,
+      "exactResumedStep": true,
+      "exactSecondRestore": true,
+      "passed": true
+    },
+    {
+      "networkId": "feeder47",
+      "mobile": false,
+      "steps": 6001,
+      "generationMs": 25247,
+      "restoreMs": 20934,
+      "secondRestoreMs": 21431,
+      "savedBytes": 46661,
+      "historyBytes": 257800434,
+      "historyEntries": 6001,
+      "historyChunks": 94,
+      "costs": {
+        "online": 5.6243666100080025,
+        "scalar": 7.982918791874502,
+        "static": 9.95382674474383,
+        "causal": 5.782219503795506
+      },
+      "sourceUpdates": 5971,
+      "exactFirstRestore": true,
+      "exactResumedStep": true,
+      "exactSecondRestore": true,
+      "passed": true
+    },
+    {
+      "networkId": "toy8",
+      "mobile": true,
+      "steps": 6001,
+      "generationMs": 5993,
+      "restoreMs": 5308,
+      "secondRestoreMs": 5422,
+      "savedBytes": 46275,
+      "historyBytes": 46196858,
+      "historyEntries": 6001,
+      "historyChunks": 94,
+      "costs": {
+        "online": 0.3833422152524623,
+        "scalar": 0.4966935323106422,
+        "static": 0.5570665302858188,
+        "causal": 0.40024717574509927
+      },
+      "sourceUpdates": 5971,
+      "exactFirstRestore": true,
+      "exactResumedStep": true,
+      "exactSecondRestore": true,
+      "passed": true
+    },
+    {
+      "networkId": "feeder24",
+      "mobile": true,
+      "steps": 6001,
+      "generationMs": 11936,
+      "restoreMs": 10056,
+      "secondRestoreMs": 10479,
+      "savedBytes": 46571,
+      "historyBytes": 125325618,
+      "historyEntries": 6001,
+      "historyChunks": 94,
+      "costs": {
+        "online": 2.754736842624508,
+        "scalar": 3.9342730458891486,
+        "static": 4.85759653982906,
+        "causal": 2.830457860286317
+      },
+      "sourceUpdates": 5971,
+      "exactFirstRestore": true,
+      "exactResumedStep": true,
+      "exactSecondRestore": true,
+      "passed": true
+    },
+    {
+      "networkId": "feeder47",
+      "mobile": true,
+      "steps": 6001,
+      "generationMs": 25247,
+      "restoreMs": 20896,
+      "secondRestoreMs": 22043,
+      "savedBytes": 46661,
+      "historyBytes": 257800434,
+      "historyEntries": 6001,
+      "historyChunks": 94,
+      "costs": {
+        "online": 5.6243666100080025,
+        "scalar": 7.982918791874502,
+        "static": 9.95382674474383,
+        "causal": 5.782219503795506
+      },
+      "sourceUpdates": 5971,
+      "exactFirstRestore": true,
+      "exactResumedStep": true,
+      "exactSecondRestore": true,
+      "passed": true
+    }
+  ],
+  "interpretation": [
+    "All six predefined network and surface conditions are reported. This is an exact restoration integrity test, not a performance superiority benchmark or confidence interval.",
+    "The fixtures use the production engine and the actual page storage adapter, hydration, UI Step and reload. They do not replace native fresh default playback acceptance.",
+    "Every exported physical snapshot field is compared, including actual inverter state and physical power. Every ordered history entry and complete executed receipt is included in 94 chunk hashes. No physical sample or cost is truncated.",
+    "Restore timings include complete browser state and history verification. Second restore timing also includes screenshot capture. They do not isolate engine replay or establish device independent latency.",
+    "History byte counts describe serialized history chunks, not retained heap usage. Compact saved records contain original options and immutable event records; the tested engine reconstructs all history exactly.",
+    "The declared stream includes repeated pulses, bounded two bus held requests and multiple corruption and repair switches through action 5300. It is not a guarantee for arbitrary future session length or every event density.",
+    "The 47 bus history encodes about 258 MB in this finite test and verified restore takes about 21 seconds. Long history remains a performance limitation. Do not silently discard physical costs or evidence to reduce it.",
+    "Support remains fixed offline. No adaptive topology, full joint co design or manuscript equivalence is implemented by these tests."
+  ],
+  "artifact": {
+    "id": 12178314444,
+    "digest": "sha256:b1ee74fcbf88b3c409fef6651dd42768fe27ef0c7bfaa78889f661794c838f7d",
+    "size_in_bytes": 1856368
+  },
+  "publication": {
+    "commit": "658e2611278c1ea746c5009dd5adfa5d71663f03",
+    "pages_run": 39235838715,
+    "pages_conclusion": "success",
+    "main_run": 39235839246,
+    "main_repeat": "in_progress with public release browser job failed before first trial",
+    "scheduled_algorithm_completion": false
+  },
+  "pixel_review": "Long session PNGs retained in Actions artifact but not yet exposed by root only archive helper. No actual 6001 action pixel review is claimed. Candidate checkpoint updates nested PNG discovery and remains unverified until a later completed workflow."
+}
