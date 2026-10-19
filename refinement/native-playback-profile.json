@@ -1222,5 +1222,1228 @@
     }
   ],
   "all_outcomes_reported": true,
-  "interpretation": "Nearest named frame matrix attribution ranges from about 41 to 53 percent of all sampled time. Controller and plant attribution is about 3 percent. Native per label getBoundingClientRect self time is the largest measured hotspot. Profiling includes overhead and is not a clean speed benchmark. Full profiles are in the ongoing browser artifact. Heap observations do not establish a constant bound."
+  "interpretation": "Nearest named frame matrix attribution ranges from about 41 to 53 percent of all sampled time. Controller and plant attribution is about 3 percent. Native per label getBoundingClientRect self time is the largest measured hotspot. Profiling includes overhead and is not a clean speed benchmark. Full profiles are in the ongoing browser artifact. Heap observations do not establish a constant bound.",
+  "optimized": {
+    "source": "95da2f82feb2c746c3ab400b52311bd5e53d5ed1",
+    "run_id": 39179178243,
+    "job_id": 117828084751,
+    "profiles": [
+      {
+        "label": "feeder47-desktop-near-900",
+        "before": {
+          "t": 652,
+          "history": 652,
+          "samples": 652,
+          "sourceUpdates": 622,
+          "costs": {
+            "online": 0.6447311051736494,
+            "scalar": 0.8940985676611861,
+            "static": 1.1351591919516633,
+            "causal": 0.6531700185039158
+          },
+          "domNodes": 4467,
+          "playing": true
+        },
+        "after": {
+          "t": 909,
+          "history": 909,
+          "samples": 909,
+          "sourceUpdates": 879,
+          "costs": {
+            "online": 0.8692894550483922,
+            "scalar": 1.224773819115092,
+            "static": 1.578748694280881,
+            "causal": 0.8847094697067084
+          },
+          "domNodes": 4477,
+          "playing": false
+        },
+        "elapsedMs": 19049,
+        "heapBefore": {
+          "usedSize": 99101572,
+          "totalSize": 156049408,
+          "embedderHeapUsedSize": 342704440,
+          "backingStorageSize": 1520146
+        },
+        "heapAfter": {
+          "usedSize": 72098044,
+          "totalSize": 173088768,
+          "embedderHeapUsedSize": 41669016,
+          "backingStorageSize": 1047976
+        },
+        "samples": 17560,
+        "sampledUs": 19136855,
+        "attributionUs": {
+          "other": 4637932,
+          "controller_and_plant": 640520,
+          "snapshot": 302393,
+          "render": 936301,
+          "response_history": 701044,
+          "network": 910434,
+          "matrix": 9164660,
+          "cost_chart": 571459,
+          "voltage_metrics": 723016,
+          "voltage_chart": 268633,
+          "garbage_collection": 261258,
+          "persistence": 3205,
+          "idle": 16000
+        },
+        "hottestSelf": [
+          {
+            "function": "getBoundingClientRect",
+            "url": "",
+            "line": 0,
+            "selfUs": 6910868
+          },
+          {
+            "function": "(program)",
+            "url": "",
+            "line": 0,
+            "selfUs": 4170463
+          },
+          {
+            "function": "updateMatrixScrollHint",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4088,
+            "selfUs": 1170048
+          },
+          {
+            "function": "setAttribute",
+            "url": "",
+            "line": 0,
+            "selfUs": 1039417
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 800738
+          },
+          {
+            "function": "worst",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2238,
+            "selfUs": 539174
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 3111,
+            "selfUs": 338026
+          },
+          {
+            "function": "(garbage collector)",
+            "url": "",
+            "line": 0,
+            "selfUs": 261258
+          },
+          {
+            "function": "updateCommandScrollHint",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2927,
+            "selfUs": 212279
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1530,
+            "selfUs": 179413
+          },
+          {
+            "function": "each",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 178232
+          },
+          {
+            "function": "command",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1398,
+            "selfUs": 148836
+          },
+          {
+            "function": "querySelectorAll",
+            "url": "",
+            "line": 0,
+            "selfUs": 130343
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2246,
+            "selfUs": 126240
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4462,
+            "selfUs": 117439
+          },
+          {
+            "function": "branchFlows",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1684,
+            "selfUs": 113321
+          },
+          {
+            "function": "querySelector",
+            "url": "",
+            "line": 0,
+            "selfUs": 111287
+          },
+          {
+            "function": "removeEventListener",
+            "url": "",
+            "line": 0,
+            "selfUs": 105923
+          },
+          {
+            "function": "l",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 101194
+          },
+          {
+            "function": "setProperty",
+            "url": "",
+            "line": 0,
+            "selfUs": 85454
+          },
+          {
+            "function": "drawMatrix",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4128,
+            "selfUs": 75927
+          },
+          {
+            "function": "inspectedResponseHistory",
+            "url": "http://127.0.0.1:34533/",
+            "line": 3107,
+            "selfUs": 69533
+          },
+          {
+            "function": "addEventListener",
+            "url": "",
+            "line": 0,
+            "selfUs": 63979
+          },
+          {
+            "function": "voltageMetrics",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2236,
+            "selfUs": 57602
+          },
+          {
+            "function": "getAttribute",
+            "url": "",
+            "line": 0,
+            "selfUs": 55555
+          },
+          {
+            "function": "receiverMessages",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1266,
+            "selfUs": 52372
+          },
+          {
+            "function": "chartBase",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4276,
+            "selfUs": 46776
+          },
+          {
+            "function": "rn",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 45937
+          },
+          {
+            "function": "snapshot",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2187,
+            "selfUs": 44916
+          },
+          {
+            "function": "row",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1334,
+            "selfUs": 43869
+          },
+          {
+            "function": "M",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 43609
+          },
+          {
+            "function": "a",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 42560
+          },
+          {
+            "function": "replaceChildren",
+            "url": "",
+            "line": 0,
+            "selfUs": 40443
+          },
+          {
+            "function": "step",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2042,
+            "selfUs": 40146
+          },
+          {
+            "function": "diagnostics",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1428,
+            "selfUs": 36462
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4330,
+            "selfUs": 36248
+          },
+          {
+            "function": "deliverPolicy",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1361,
+            "selfUs": 35254
+          },
+          {
+            "function": "fitSource",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1219,
+            "selfUs": 34029
+          },
+          {
+            "function": "drawCost",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4459,
+            "selfUs": 32469
+          },
+          {
+            "function": "remove",
+            "url": "",
+            "line": 0,
+            "selfUs": 27764
+          }
+        ],
+        "caveat": "Profiler and browser assertions add overhead. Heap usage is an actual finite observation, not a retained heap or indefinite bound. Stack attribution uses the nearest named application frame."
+      },
+      {
+        "label": "feeder47-desktop-after-1800",
+        "before": {
+          "t": 1848,
+          "history": 1848,
+          "samples": 1848,
+          "sourceUpdates": 1818,
+          "costs": {
+            "online": 1.7361960561807612,
+            "scalar": 2.4645149349577564,
+            "static": 3.1033891594132643,
+            "causal": 1.7787158017455749
+          },
+          "domNodes": 4468,
+          "playing": false
+        },
+        "after": {
+          "t": 1955,
+          "history": 1955,
+          "samples": 1955,
+          "sourceUpdates": 1925,
+          "costs": {
+            "online": 1.8490849529210573,
+            "scalar": 2.6222145385177535,
+            "static": 3.296882167000923,
+            "causal": 1.895223944814681
+          },
+          "domNodes": 4456,
+          "playing": false
+        },
+        "elapsedMs": 9573,
+        "heapBefore": {
+          "usedSize": 180930552,
+          "totalSize": 249634816,
+          "embedderHeapUsedSize": 183381464,
+          "backingStorageSize": 1213007
+        },
+        "heapAfter": {
+          "usedSize": 148444388,
+          "totalSize": 257499136,
+          "embedderHeapUsedSize": 121809096,
+          "backingStorageSize": 1143078
+        },
+        "samples": 8814,
+        "sampledUs": 9755829,
+        "attributionUs": {
+          "other": 2190441,
+          "idle": 29374,
+          "controller_and_plant": 257836,
+          "snapshot": 120563,
+          "render": 562467,
+          "response_history": 529229,
+          "network": 396911,
+          "matrix": 4221612,
+          "cost_chart": 435788,
+          "voltage_metrics": 744536,
+          "voltage_chart": 128373,
+          "garbage_collection": 138699
+        },
+        "hottestSelf": [
+          {
+            "function": "getBoundingClientRect",
+            "url": "",
+            "line": 0,
+            "selfUs": 3241165
+          },
+          {
+            "function": "(program)",
+            "url": "",
+            "line": 0,
+            "selfUs": 1988900
+          },
+          {
+            "function": "updateMatrixScrollHint",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4088,
+            "selfUs": 557617
+          },
+          {
+            "function": "worst",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2238,
+            "selfUs": 546354
+          },
+          {
+            "function": "setAttribute",
+            "url": "",
+            "line": 0,
+            "selfUs": 470093
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 375155
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 3111,
+            "selfUs": 228902
+          },
+          {
+            "function": "updateCommandScrollHint",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2927,
+            "selfUs": 214805
+          },
+          {
+            "function": "each",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 149914
+          },
+          {
+            "function": "inspectedResponseHistory",
+            "url": "http://127.0.0.1:34533/",
+            "line": 3107,
+            "selfUs": 139352
+          },
+          {
+            "function": "(garbage collector)",
+            "url": "",
+            "line": 0,
+            "selfUs": 138699
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2246,
+            "selfUs": 103423
+          },
+          {
+            "function": "voltageMetrics",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2236,
+            "selfUs": 94759
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4462,
+            "selfUs": 90887
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1530,
+            "selfUs": 61464
+          },
+          {
+            "function": "l",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 51274
+          },
+          {
+            "function": "querySelector",
+            "url": "",
+            "line": 0,
+            "selfUs": 47079
+          },
+          {
+            "function": "drawCost",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4459,
+            "selfUs": 46939
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4330,
+            "selfUs": 45906
+          },
+          {
+            "function": "setProperty",
+            "url": "",
+            "line": 0,
+            "selfUs": 42699
+          },
+          {
+            "function": "querySelectorAll",
+            "url": "",
+            "line": 0,
+            "selfUs": 42110
+          },
+          {
+            "function": "removeEventListener",
+            "url": "",
+            "line": 0,
+            "selfUs": 39452
+          },
+          {
+            "function": "chartBase",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4276,
+            "selfUs": 33068
+          },
+          {
+            "function": "row",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1334,
+            "selfUs": 30870
+          },
+          {
+            "function": "branchFlows",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1684,
+            "selfUs": 30758
+          },
+          {
+            "function": "(idle)",
+            "url": "",
+            "line": 0,
+            "selfUs": 29374
+          },
+          {
+            "function": "receiverMessages",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1266,
+            "selfUs": 25853
+          },
+          {
+            "function": "step",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2042,
+            "selfUs": 25598
+          },
+          {
+            "function": "drawMatrix",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4128,
+            "selfUs": 24573
+          },
+          {
+            "function": "column",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1328,
+            "selfUs": 23511
+          },
+          {
+            "function": "addEventListener",
+            "url": "",
+            "line": 0,
+            "selfUs": 23428
+          },
+          {
+            "function": "snapshot",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2187,
+            "selfUs": 20449
+          },
+          {
+            "function": "deepFreeze",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1535,
+            "selfUs": 19878
+          },
+          {
+            "function": "replaceChildren",
+            "url": "",
+            "line": 0,
+            "selfUs": 18165
+          },
+          {
+            "function": "command",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1398,
+            "selfUs": 17269
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 3041,
+            "selfUs": 17155
+          },
+          {
+            "function": "rn",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 17081
+          },
+          {
+            "function": "matvec",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1530,
+            "selfUs": 16158
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4297,
+            "selfUs": 15984
+          },
+          {
+            "function": "a",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 15978
+          }
+        ],
+        "caveat": "Profiler and browser assertions add overhead. Heap usage is an actual finite observation, not a retained heap or indefinite bound. Stack attribution uses the nearest named application frame."
+      },
+      {
+        "label": "feeder47-phone-near-900",
+        "before": {
+          "t": 653,
+          "history": 653,
+          "samples": 653,
+          "sourceUpdates": 623,
+          "costs": {
+            "online": 0.6458536366000818,
+            "scalar": 0.8962434210298248,
+            "static": 1.1393165387991453,
+            "causal": 0.6544118603684324
+          },
+          "domNodes": 4443,
+          "playing": true
+        },
+        "after": {
+          "t": 909,
+          "history": 909,
+          "samples": 909,
+          "sourceUpdates": 879,
+          "costs": {
+            "online": 0.8692470706209585,
+            "scalar": 1.2247519540839538,
+            "static": 1.5787736298885044,
+            "causal": 0.8847094697067084
+          },
+          "domNodes": 4477,
+          "playing": false
+        },
+        "elapsedMs": 18471,
+        "heapBefore": {
+          "usedSize": 95083584,
+          "totalSize": 156311552,
+          "embedderHeapUsedSize": 109670488,
+          "backingStorageSize": 1166433
+        },
+        "heapAfter": {
+          "usedSize": 100108920,
+          "totalSize": 174137344,
+          "embedderHeapUsedSize": 82882192,
+          "backingStorageSize": 1114403
+        },
+        "samples": 17181,
+        "sampledUs": 18567398,
+        "attributionUs": {
+          "other": 4678972,
+          "controller_and_plant": 551300,
+          "snapshot": 253038,
+          "render": 827254,
+          "response_history": 622205,
+          "network": 840109,
+          "matrix": 9059896,
+          "cost_chart": 560690,
+          "voltage_metrics": 662343,
+          "voltage_chart": 256565,
+          "garbage_collection": 241112,
+          "persistence": 2149,
+          "idle": 11765
+        },
+        "hottestSelf": [
+          {
+            "function": "getBoundingClientRect",
+            "url": "",
+            "line": 0,
+            "selfUs": 6806661
+          },
+          {
+            "function": "(program)",
+            "url": "",
+            "line": 0,
+            "selfUs": 4213809
+          },
+          {
+            "function": "updateMatrixScrollHint",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4088,
+            "selfUs": 1179844
+          },
+          {
+            "function": "setAttribute",
+            "url": "",
+            "line": 0,
+            "selfUs": 987939
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 776382
+          },
+          {
+            "function": "worst",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2238,
+            "selfUs": 496308
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 3111,
+            "selfUs": 297758
+          },
+          {
+            "function": "(garbage collector)",
+            "url": "",
+            "line": 0,
+            "selfUs": 241112
+          },
+          {
+            "function": "updateCommandScrollHint",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2927,
+            "selfUs": 198796
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1530,
+            "selfUs": 143656
+          },
+          {
+            "function": "each",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 135604
+          },
+          {
+            "function": "command",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1398,
+            "selfUs": 131101
+          },
+          {
+            "function": "querySelector",
+            "url": "",
+            "line": 0,
+            "selfUs": 119967
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4462,
+            "selfUs": 114422
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2246,
+            "selfUs": 110166
+          },
+          {
+            "function": "querySelectorAll",
+            "url": "",
+            "line": 0,
+            "selfUs": 109963
+          },
+          {
+            "function": "removeEventListener",
+            "url": "",
+            "line": 0,
+            "selfUs": 108877
+          },
+          {
+            "function": "l",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 89230
+          },
+          {
+            "function": "branchFlows",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1684,
+            "selfUs": 83708
+          },
+          {
+            "function": "drawMatrix",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4128,
+            "selfUs": 80127
+          },
+          {
+            "function": "setProperty",
+            "url": "",
+            "line": 0,
+            "selfUs": 76936
+          },
+          {
+            "function": "replaceChildren",
+            "url": "",
+            "line": 0,
+            "selfUs": 61873
+          },
+          {
+            "function": "inspectedResponseHistory",
+            "url": "http://127.0.0.1:34533/",
+            "line": 3107,
+            "selfUs": 59671
+          },
+          {
+            "function": "rn",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 57649
+          },
+          {
+            "function": "voltageMetrics",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2236,
+            "selfUs": 55869
+          },
+          {
+            "function": "receiverMessages",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1266,
+            "selfUs": 55454
+          },
+          {
+            "function": "a",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 49297
+          },
+          {
+            "function": "addEventListener",
+            "url": "",
+            "line": 0,
+            "selfUs": 44762
+          },
+          {
+            "function": "row",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1334,
+            "selfUs": 43515
+          },
+          {
+            "function": "chartBase",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4276,
+            "selfUs": 42940
+          },
+          {
+            "function": "u",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 41619
+          },
+          {
+            "function": "M",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 39454
+          },
+          {
+            "function": "getAttribute",
+            "url": "",
+            "line": 0,
+            "selfUs": 38334
+          },
+          {
+            "function": "diagnostics",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1428,
+            "selfUs": 37651
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4330,
+            "selfUs": 36329
+          },
+          {
+            "function": "select",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 34123
+          },
+          {
+            "function": "snapshot",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2187,
+            "selfUs": 32033
+          },
+          {
+            "function": "cellLabel",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4218,
+            "selfUs": 30899
+          },
+          {
+            "function": "step",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2042,
+            "selfUs": 30820
+          },
+          {
+            "function": "drawCost",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4459,
+            "selfUs": 29855
+          }
+        ],
+        "caveat": "Profiler and browser assertions add overhead. Heap usage is an actual finite observation, not a retained heap or indefinite bound. Stack attribution uses the nearest named application frame."
+      },
+      {
+        "label": "feeder47-phone-after-1800",
+        "before": {
+          "t": 1852,
+          "history": 1852,
+          "samples": 1852,
+          "sourceUpdates": 1822,
+          "costs": {
+            "online": 1.7364834854980005,
+            "scalar": 2.466825233771763,
+            "static": 3.107165400464878,
+            "causal": 1.7790518151561638
+          },
+          "domNodes": 4462,
+          "playing": false
+        },
+        "after": {
+          "t": 1957,
+          "history": 1957,
+          "samples": 1957,
+          "sourceUpdates": 1927,
+          "costs": {
+            "online": 1.851730027856557,
+            "scalar": 2.625025307951719,
+            "static": 3.3004453370681834,
+            "causal": 1.897948283930407
+          },
+          "domNodes": 4456,
+          "playing": false
+        },
+        "elapsedMs": 10384,
+        "heapBefore": {
+          "usedSize": 119176836,
+          "totalSize": 268247040,
+          "embedderHeapUsedSize": 29544616,
+          "backingStorageSize": 1054536
+        },
+        "heapAfter": {
+          "usedSize": 182669912,
+          "totalSize": 255401984,
+          "embedderHeapUsedSize": 415507952,
+          "backingStorageSize": 1585033
+        },
+        "samples": 9651,
+        "sampledUs": 10528090,
+        "attributionUs": {
+          "other": 2519793,
+          "controller_and_plant": 233302,
+          "snapshot": 122346,
+          "render": 639681,
+          "response_history": 653902,
+          "network": 475283,
+          "matrix": 4113332,
+          "cost_chart": 533476,
+          "voltage_metrics": 894664,
+          "voltage_chart": 185478,
+          "garbage_collection": 148234,
+          "idle": 7515,
+          "persistence": 1084
+        },
+        "hottestSelf": [
+          {
+            "function": "getBoundingClientRect",
+            "url": "",
+            "line": 0,
+            "selfUs": 3026666
+          },
+          {
+            "function": "(program)",
+            "url": "",
+            "line": 0,
+            "selfUs": 2262500
+          },
+          {
+            "function": "updateMatrixScrollHint",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4088,
+            "selfUs": 649763
+          },
+          {
+            "function": "setAttribute",
+            "url": "",
+            "line": 0,
+            "selfUs": 551264
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 479937
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2246,
+            "selfUs": 468650
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 3111,
+            "selfUs": 376966
+          },
+          {
+            "function": "worst",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2238,
+            "selfUs": 314277
+          },
+          {
+            "function": "updateCommandScrollHint",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2927,
+            "selfUs": 230783
+          },
+          {
+            "function": "(garbage collector)",
+            "url": "",
+            "line": 0,
+            "selfUs": 148234
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4462,
+            "selfUs": 148140
+          },
+          {
+            "function": "voltageMetrics",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2236,
+            "selfUs": 111737
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1530,
+            "selfUs": 89159
+          },
+          {
+            "function": "each",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 76882
+          },
+          {
+            "function": "querySelectorAll",
+            "url": "",
+            "line": 0,
+            "selfUs": 74657
+          },
+          {
+            "function": "inspectedResponseHistory",
+            "url": "http://127.0.0.1:34533/",
+            "line": 3107,
+            "selfUs": 72452
+          },
+          {
+            "function": "l",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 62947
+          },
+          {
+            "function": "querySelector",
+            "url": "",
+            "line": 0,
+            "selfUs": 61804
+          },
+          {
+            "function": "setProperty",
+            "url": "",
+            "line": 0,
+            "selfUs": 55361
+          },
+          {
+            "function": "removeEventListener",
+            "url": "",
+            "line": 0,
+            "selfUs": 46877
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4330,
+            "selfUs": 40625
+          },
+          {
+            "function": "drawMatrix",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4128,
+            "selfUs": 38483
+          },
+          {
+            "function": "chartBase",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4276,
+            "selfUs": 38347
+          },
+          {
+            "function": "row",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1334,
+            "selfUs": 35300
+          },
+          {
+            "function": "replaceChildren",
+            "url": "",
+            "line": 0,
+            "selfUs": 34108
+          },
+          {
+            "function": "branchFlows",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1684,
+            "selfUs": 31663
+          },
+          {
+            "function": "column",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1328,
+            "selfUs": 28300
+          },
+          {
+            "function": "getAttribute",
+            "url": "",
+            "line": 0,
+            "selfUs": 27811
+          },
+          {
+            "function": "addEventListener",
+            "url": "",
+            "line": 0,
+            "selfUs": 27692
+          },
+          {
+            "function": "snapshot",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2187,
+            "selfUs": 25879
+          },
+          {
+            "function": "select",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 23659
+          },
+          {
+            "function": "rn",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 19272
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4531,
+            "selfUs": 19242
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4297,
+            "selfUs": 19103
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:34533/",
+            "line": 3041,
+            "selfUs": 18103
+          },
+          {
+            "function": "a",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 17091
+          },
+          {
+            "function": "cellLabel",
+            "url": "http://127.0.0.1:34533/",
+            "line": 4218,
+            "selfUs": 17075
+          },
+          {
+            "function": "step",
+            "url": "http://127.0.0.1:34533/",
+            "line": 2042,
+            "selfUs": 16755
+          },
+          {
+            "function": "receiverMessages",
+            "url": "http://127.0.0.1:34533/",
+            "line": 1266,
+            "selfUs": 16063
+          },
+          {
+            "function": "M",
+            "url": "http://127.0.0.1:34533/assets/d3.v7.min.js",
+            "line": 2,
+            "selfUs": 14988
+          }
+        ],
+        "caveat": "Profiler and browser assertions add overhead. Heap usage is an actual finite observation, not a retained heap or indefinite bound. Stack attribution uses the nearest named application frame."
+      }
+    ],
+    "status": "All conditions passed. Improvement in sampled layout time is engineering evidence and does not establish requested speed 32 or improved numerical control performance."
+  }
 }

@@ -783,41 +783,7 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "program_id": "continuous-phi-20261018T234500",
-    "slot": "2026-10-19T07:45:00+08:00",
-    "started_at": "2026-10-19T07:40:16+08:00",
-    "work_started_at": "2026-10-19T07:45:04+08:00",
-    "lease_expires_at": "2026-10-19T08:20:16+08:00",
-    "branch": "cloud/refine/continuous-phi-20261018-2345",
-    "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
-    "candidate_parent": "2ae31c21b4f3095d6d1da9bb56bcd5eefd1c89a3",
-    "status": "profiling_native_long_playback",
-    "counted_invocation": true,
-    "counted_completed": false,
-    "early_dispatch": "Read only preflight until the scheduled slot. Original dispatch deadline retained.",
-    "tests": {
-      "preflight": {
-        "main_run": 39144310544,
-        "main_conclusion": "success",
-        "candidate_repeat": 39171828317,
-        "candidate_conclusion": "success",
-        "jobs": [
-          117806318288,
-          117806318535,
-          117807771634,
-          117808808968
-        ],
-        "completed_logs_read": true,
-        "cases": 254,
-        "old_browser_checks": 44,
-        "ongoing_conditions": 6,
-        "handoffs": 18
-      }
-    },
-    "changes": [],
-    "next_focus": "Measure native 47 bus CPU attribution and retained history near 900 and beyond 1800 actions before optimizing."
-  },
+  "active_run": null,
   "next_focus": "Read latest main and this checkpoint repeat checks first. Profile 47 bus native execution and rendering with growing history at 901 and roughly 1850 samples. Separate actual controller step, immutable snapshot and chart work. Optimize the measured hotspot without retuning gains, objective, noise or limits and without dropping costs or evidence. If caching stationary response geometry, keep current causal correction weights and command receipts fresh at every action. Revalidate all suites and actual pixels before expected SHA nonforce publication.",
   "priorities": [
     "Actual continuous causal response adaptation and executed command evidence",
@@ -5377,7 +5343,7 @@
         "branch": "cloud/refine/continuous-phi-20261018-2345",
         "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
         "candidate_parent": "2ae31c21b4f3095d6d1da9bb56bcd5eefd1c89a3",
-        "status": "measured_matrix_layout_optimization_pending_validation",
+        "status": "validated_matrix_layout_improvement_unpublished_remaining_layout_work",
         "counted_invocation": true,
         "counted_completed": false,
         "early_dispatch": "Read only preflight until the scheduled slot. Original dispatch deadline retained.",
@@ -5418,7 +5384,60 @@
             "profiles": 4,
             "generated_child": "None. Product bytes and generated page are unchanged from the previous tested ready commit."
           },
-          "optimized_candidate": "Pending full required validation and pixel review. No live publication."
+          "optimized_candidate": {
+            "run_id": 39179178243,
+            "conclusion": "success",
+            "all_completed_logs_read": true,
+            "numerical_and_interaction_cases": 254,
+            "interaction_cases": 143,
+            "original_browser_checks": 44,
+            "archived_network_suites": "success",
+            "ongoing_desktop_phone_conditions": 6,
+            "archived_handoff_conditions": 18,
+            "long_scroll_geometry_checks": "Passed on both 47 bus surfaces against actual rendered glyph rectangles at start middle and end, with exact physical trial invariance.",
+            "actions": [
+              1822,
+              1852,
+              1955,
+              1825,
+              1848,
+              1957
+            ],
+            "jobs": {
+              "ongoing": 117828084751,
+              "validate": 117828084987,
+              "review": 117829739550,
+              "prepare": 117830826382
+            },
+            "generated_child": {
+              "sha": "5864ed2b484ec2e18bde9fd218e59b6cbce2b8c8",
+              "parent": "95da2f82feb2c746c3ab400b52311bd5e53d5ed1",
+              "only_changes": [
+                "index.html"
+              ],
+              "ancestry_verified": true
+            },
+            "performance": "All four profiled matrix sample times per action decreased by roughly 30 to 41 percent. This includes profiler and assertion overhead and is not a controlled speed guarantee. The 47 bus native run still requested 32 but achieved roughly 14.5 to 15.9 samples per wall second and reached 150 ms frame gaps."
+          },
+          "superseded": [
+            {
+              "source": "7f08aa0635844144fbbc8d33c0336e7934a3c34b",
+              "run": 39177857226,
+              "status": "cancelled",
+              "reason": "Lease and plan superseded by intended instrumentation."
+            },
+            {
+              "source": "a778d14b67302381fa7a175a9eb13a7664196f53",
+              "run": 39177926909,
+              "status": "cancelled",
+              "completed_cancelled_logs_read": true,
+              "jobs": [
+                117824456668,
+                117824456858
+              ],
+              "reason": "Restore exact durable lease and all prior history after reuse of an early serialized in memory checkpoint. No extra invocation or completion."
+            }
+          ]
         },
         "changes": [
           "Add cloud CDP CPU profiling of real 47 bus desktop and phone Run at 650 through 901 actions and 100 additional native actions after the existing full long interaction sequence beyond 1800.",
@@ -5426,7 +5445,7 @@
           "No product engine, UI, physical parameter or numerical benchmark is changed by profiling.",
           "Use measured SVG glyph extents and a batched read phase for matrix source scroll cues instead of measuring every label rectangle after writes. Retain actual SVG scaling, pinned inverter labels, edge source clamping and guide positions."
         ],
-        "next_focus": "Measure native 47 bus CPU attribution and retained history near 900 and beyond 1800 actions before optimizing.",
+        "next_focus": "Read latest main and checkpoint repeat first. Further reduce measured matrix layout cost by reusing stable visual geometry with correct scroll resize font reliability and inspection invalidation, retaining every source and all actual controller updates. Revalidate independent rendered glyph bounds and native desktop and phone playback. Add or use an authorized existing Actions cloud public byte and playback verification route before eventual publication. Keep candidate unpublished while high speed responsiveness remains unresolved.",
         "metadata_recovery": {
           "commit": "a778d14b67302381fa7a175a9eb13a7664196f53",
           "reason": "An in memory serialized checkpoint was saved before the lease mutation and was reused for the first instrumentation commit. Restore the exact durable lease and all preceding program records from 7f08aa0635844144fbbc8d33c0336e7934a3c34b without extra invocation or completion.",
@@ -5438,45 +5457,62 @@
             "at": "2026-10-19T08:04:04+08:00",
             "slot": "2026-10-19T07:45:00+08:00",
             "action": "Read only duplicate preflight during the counted pass. No invocation, lease or deadline extension."
+          },
+          {
+            "at": "2026-10-19T08:17:48+08:00",
+            "slot": "2026-10-19T07:45:00+08:00",
+            "action": "Read only duplicate preflight during final checkpoint. Original deadline retained and no invocation or lease added."
           }
-        ]
+        ],
+        "source_commit": "95da2f82feb2c746c3ab400b52311bd5e53d5ed1",
+        "ready_commit": "5864ed2b484ec2e18bde9fd218e59b6cbce2b8c8",
+        "published_commit": null,
+        "finished_at": "2026-10-19T08:18:28+08:00",
+        "pixel_review": {
+          "source": "95da2f82feb2c746c3ab400b52311bd5e53d5ed1",
+          "status": "actual_pixels_reviewed",
+          "job": 117829739550,
+          "route": "Authenticated GitHub base64 text wrappers emitted directly as original PNG images. No local files or direct live browser.",
+          "reviewed": [
+            "feeder47-desktop-inspection.png",
+            "feeder47-phone-inspection.png"
+          ],
+          "artifacts": [
+            {
+              "file": "feeder47-desktop-inspection.png",
+              "sha": "04a075a5c16d218744679ec61e5d2e7cebeb4d78",
+              "base64_text_sha": "b9d16c848e8c56ddef9d66fd46ac2b699599febc",
+              "bytes": 140893
+            },
+            {
+              "file": "feeder47-phone-inspection.png",
+              "sha": "c637238c19913ad9813857ef3a0e0216b0150a40",
+              "base64_text_sha": "6fc512c4cfc68236205a07050d55e561bb8810ab",
+              "bytes": 117451
+            }
+          ],
+          "findings": [
+            "Whole source labels, pinned receiver labels and visible source range cues remain readable on both surfaces.",
+            "Actual selected support and nonzero deployed gains remain separate. The selected noisy source shows attenuated executed gain with its recorded history and bounded command.",
+            "All sources remain reachable through existing scrolling. No extra panel or hidden cost row was added."
+          ]
+        },
+        "remaining_gaps": [
+          "Matrix layout remains the main measured hotspot. Even the two remaining rectangle reads after SVG mutations can force expensive layout. Next investigate caching only stable visual geometry with explicit invalidation for viewport, font, source reliability, inspection, network, native scroll and keyboard movement. Never cache causal coefficients or executed gains.",
+          "The 47 bus native playback still reaches roughly 150 ms frame gaps at requested speed 32. Preserve every update, sample, receipt and physical cost while reducing layout work. Do not claim the high speed gate resolved.",
+          "Full history remains retained and finite heap observations vary with GC. No constant or indefinite memory bound is established. Source local estimator windows are bounded, but engine and UI evidence grow.",
+          "Read automatic checkpoint repeat before source edits. Use exact expected main SHA and force false for eventual publication and verify exact Pages deployment and canonical public behavior through authorized cloud compute. Current workflows have no explicit public behavior verification step.",
+          "Keep fixed support and source local specialization explicit. No dynamic topology, free excluded forecasts, manuscript equivalence or stability guarantee is implemented."
+        ],
+        "deployment": {
+          "attempted": false,
+          "main": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+          "status": "Public archived protocol unchanged"
+        },
+        "end_reason": "Bounded validated candidate checkpoint with actual pixel review. No live release or new completion."
       }
     ],
-    "active_run": {
-      "program_id": "continuous-phi-20261018T234500",
-      "slot": "2026-10-19T07:45:00+08:00",
-      "started_at": "2026-10-19T07:40:16+08:00",
-      "work_started_at": "2026-10-19T07:45:04+08:00",
-      "lease_expires_at": "2026-10-19T08:20:16+08:00",
-      "branch": "cloud/refine/continuous-phi-20261018-2345",
-      "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
-      "candidate_parent": "2ae31c21b4f3095d6d1da9bb56bcd5eefd1c89a3",
-      "status": "profiling_native_long_playback",
-      "counted_invocation": true,
-      "counted_completed": false,
-      "early_dispatch": "Read only preflight until the scheduled slot. Original dispatch deadline retained.",
-      "tests": {
-        "preflight": {
-          "main_run": 39144310544,
-          "main_conclusion": "success",
-          "candidate_repeat": 39171828317,
-          "candidate_conclusion": "success",
-          "jobs": [
-            117806318288,
-            117806318535,
-            117807771634,
-            117808808968
-          ],
-          "completed_logs_read": true,
-          "cases": 254,
-          "old_browser_checks": 44,
-          "ongoing_conditions": 6,
-          "handoffs": 18
-        }
-      },
-      "changes": [],
-      "next_focus": "Measure native 47 bus CPU attribution and retained history near 900 and beyond 1800 actions before optimizing."
-    },
+    "active_run": null,
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
       "is_enabled": true,
@@ -5487,7 +5523,7 @@
       "setup_counts_as_improvement": false
     },
     "candidate_branch": "cloud/refine/continuous-phi-20261018-2345",
-    "next_focus": "Read latest main and this checkpoint repeat checks first. Profile 47 bus native execution and rendering with growing history at 901 and roughly 1850 samples. Separate actual controller step, immutable snapshot and chart work. Optimize the measured hotspot without retuning gains, objective, noise or limits and without dropping costs or evidence. If caching stationary response geometry, keep current causal correction weights and command receipts fresh at every action. Revalidate all suites and actual pixels before expected SHA nonforce publication.",
+    "next_focus": "Read latest main and checkpoint repeat first. Further reduce measured matrix layout cost by reusing stable visual geometry with correct scroll resize font reliability and inspection invalidation, retaining every source and all actual controller updates. Revalidate independent rendered glyph bounds and native desktop and phone playback. Add or use an authorized existing Actions cloud public byte and playback verification route before eventual publication. Keep candidate unpublished while high speed responsiveness remains unresolved.",
     "skipped_duplicate_dispatches": [
       {
         "dispatch": "2026-10-19T03:13:56+08:00",
@@ -5510,6 +5546,11 @@
         "at": "2026-10-19T08:04:04+08:00",
         "slot": "2026-10-19T07:45:00+08:00",
         "action": "Read only duplicate preflight during the counted pass. No invocation, lease or deadline extension."
+      },
+      {
+        "at": "2026-10-19T08:17:48+08:00",
+        "slot": "2026-10-19T07:45:00+08:00",
+        "action": "Read only duplicate preflight during final checkpoint. Original deadline retained and no invocation or lease added."
       }
     ],
     "read_only_preflights": [
