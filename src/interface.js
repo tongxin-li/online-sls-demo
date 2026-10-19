@@ -13,6 +13,7 @@
   const networkCatalog = window.PowerDemo;
   let PowerDemo = networkCatalog;
   const DEFAULT_SCENARIO='forecasted-demand';
+  const MANUAL_SCENARIO='interactive';
   const COMPARISON_SAMPLES=180;
   // Fresh trials execute continuous causal response adaptation. Actual v13 saves
   // retain their archived protocol until an explicit new protocol handoff.
@@ -30,7 +31,7 @@
     const experiment=ongoingProtocol(trialProtocol)?'communication':$('experiment').value==='prediction'?'prediction':'communication';
     const beta=Number($('noise').value);
     return {networkId:PowerDemo.constants.networkId,experiment,powerScenario:$('power-scenario').value || DEFAULT_SCENARIO,beta:communicationNoiseLevels.includes(beta)?beta:1,preset:experiment==='communication'?'mixed':$('preset').value,
-      ...($('stress-profile').value==='strong-v1'?{stressProfile:'strong-v1'}:{}),
+      ...($('power-scenario').value===MANUAL_SCENARIO?{attackProfile:'manual-v1'}:$('stress-profile').value==='strong-v1'?{stressProfile:'strong-v1'}:{}),
       ...(ongoingProtocol(trialProtocol)?{protocol:trialProtocol}:experiment==='communication'?{horizon:180}:{})};
   }
   let simulation = new PowerDemo.Simulation(optionsFromControls());
@@ -96,7 +97,7 @@
     const support=snapshot.deployedSupport;
     return !!support && JSON.stringify(support.learned)===JSON.stringify(support.fixed);
   }
-  let selectedBus = 7;
+  let selectedBus = initialSaved ? 7 : 6;
   let playing = false;
   let comparing = false;
   let timer = null;
@@ -111,7 +112,19 @@
   const activeAttacks = () => [...continuousAttacks.values(), ...(heldAttack ? [heldAttack] : [])];
   const attackAt = bus => continuousAttacks.get(bus) || (heldAttack?.bus===bus ? heldAttack : null);
   let snapshot = simulation.snapshot();
-  $('intervention').value=snapshot.experiment==='communication'?'forecast':'power';
+  const manualTrial=()=>snapshot.attackProfile==='manual-v1';
+  function configureStrength(value=null) {
+    const settings=snapshot.attackSettings;
+    const choices=settings?.strengthsKw || [50,100,150];
+    const fallback=settings?.defaultKw || 100;
+    $('strength').replaceChildren();
+    for(const strength of choices) {
+      const option=document.createElement('option');option.value=String(strength);option.textContent=strength+' kW';$('strength').append(option);
+    }
+    $('strength').value=String(value!==null&&choices.includes(Number(value))?Number(value):fallback);
+  }
+  configureStrength(initialSaved?$('strength').value:null);
+  $('intervention').value=manualTrial()?'power':snapshot.experiment==='communication'?'forecast':'power';
   const topology = new TopologyTimeline(snapshot);
   let historyIndex = null;
   let visualTopologyEvent = null;
@@ -177,7 +190,7 @@
   function appliedPulseLabel(bus) {
     const power=appliedPulse(bus);
     if(!power) return 'Pulse active';
-    return disturbanceName(bus)+' '+Math.round(power.applied)+' kW applied'+(power.capped?' · Equipment limit':'');
+    return disturbanceName(bus)+' '+Math.round(power.applied)+' kW applied'+(power.capped?(manualTrial()&&busRole(bus)==='Homes'?' · Attack limit':' · Equipment limit'):'');
   }
   function disturbanceName(bus) { return busRole(bus)==='Solar' ? 'PV loss' : busRole(bus)==='Battery' ? 'Charging surge' : 'Load surge'; }
   const feederPositions = [
@@ -709,7 +722,6 @@
     $('speed').value=['2','4','8','16','32'].includes(data.speed)?data.speed:'16';
     $('attack-mode').value=data.attackMode==='pulse'?'pulse':'continuous';
     $('intervention').value=data.intervention==='forecast'?'forecast':'power';
-    $('strength').value=['50','100','150'].includes(data.pulseStrength)?data.pulseStrength:'100';
     $('stress-profile').value=savedOptions?.stressProfile==='strong-v1'?'strong-v1':'standard';
     $('all-links').checked=!!data.allLinks;
     $('matrix-view').value=data.matrixView==='change'?'change':'links';
@@ -717,7 +729,7 @@
     $('experiment').value=savedOptions?.experiment==='prediction'?'prediction':'communication';
     $('noise').value=String(communicationNoiseLevels.includes(savedOptions?.beta)?savedOptions.beta:1);
     $('preset').value=preset;
-    $('power-scenario').value=['reference','solar-outage',DEFAULT_SCENARIO].includes(savedOptions?.powerScenario)?savedOptions.powerScenario:'reference';
+    $('power-scenario').value=['reference','solar-outage',DEFAULT_SCENARIO,MANUAL_SCENARIO].includes(savedOptions?.powerScenario)?savedOptions.powerScenario:'reference';
     if(data.version>=14) {
       simulation=PowerDemo.replayContinuous(data.continuousRecord);
       topology.reset(simulation.snapshot());
@@ -742,6 +754,7 @@
     const initialLinks=simulation.snapshot().recommendations.map(e=>({...e}));
     if(data.version===13) replayRecord({t:data.t,events:data.events});
     snapshot=simulation.snapshot();
+    configureStrength(data.pulseStrength || '100');
     $('stress-profile').value=snapshot.stressProfile==='strong-v1'?'strong-v1':'standard';
     $('preset').value=snapshot.preset; $('experiment').value=snapshot.experiment; $('noise').value=String(snapshot.beta);
     $('view').value=data.view==='learning'?'learning':'cost';
@@ -752,7 +765,7 @@
     else matrixReference={t:0,recommendations:initialLinks,edges:new Set(initialLinks.map(recommendationKey))};
     const restoredPulse=journal.filter(item=>item.type==='pulse').at(-1);
     if(restoredPulse) lastPulse={...restoredPulse,before:snapshot.history.find(item=>(item.costTime ?? item.t-1)===restoredPulse.t-1)?.stage.online || 0};
-    announce('Trial restored · Press Run');
+    announce(manualTrial()?'Trial restored · Press Run':'Saved trial restored · Restart for manual attacks');
   }
 
   function releaseHeldAttack() {
@@ -902,7 +915,9 @@
   });
   function startSelectedExperiment() {
     stop(); simulation=new PowerDemo.Simulation(optionsFromControls());
-    resetExperiment(); $('intervention').value=snapshot.experiment==='communication'?'forecast':'power';
+    const strength=$('strength').value;
+    resetExperiment(); configureStrength(strength);
+    $('intervention').value=manualTrial()?'power':snapshot.experiment==='communication'?'forecast':'power';
     if(ongoing()) {inspectedSource=hasInverter(selectedBus)?selectedBus:null;$('matrix-view').value='change';}
     visible.clear();series.forEach(item=>visible.add(item.key));
     announce(adaptive()?'Ongoing response and link learning · New trial':ongoing()?'Ongoing causal learning · New trial':(snapshot.experiment==='communication'?'Communication topology':snapshot.presetLabel)+' · New learning trial'); render(); save();
@@ -913,18 +928,21 @@
     trialProtocol='adaptive-phi-v2';$('experiment').value='communication';
     startSelectedExperiment();
   }
+  function startManualTrial() {
+    $('experiment').value='communication';$('power-scenario').value=MANUAL_SCENARIO;
+    $('stress-profile').value='standard';$('preset').value='reliable';$('noise').value='4';
+    selectedBus=6;$('bus').value='6';inspectedSource=null;
+    startOngoingTrial();configureStrength();render();save();
+  }
   $('new-scenario').addEventListener('click',()=>{
     if(comparing) return;
-    $('experiment').value='communication';$('power-scenario').value=DEFAULT_SCENARIO;
-    $('noise').value='4';$('preset').value='mixed';$('auto-compare').checked=true;
-    $('stress-profile').value='strong-v1';$('strength').value='150';
-    startOngoingTrial();toggleRun();
+    $('noise').value='4';startManualTrial();
   });
   $('network-scenario').addEventListener('change',()=>{
     if(comparing) return;
-    stop();selectedBus=7;inspectedSource=null;
+    stop();selectedBus=6;inspectedSource=null;
     bindNetwork($('network-scenario').value);
-    startOngoingTrial();
+    startManualTrial();
     announce(PowerDemo.constants.networkLabel+' · New ongoing trial · Press Run');
   });
   $('stress-profile').addEventListener('change',()=>{
@@ -935,7 +953,10 @@
   $('preset').addEventListener('change',startSelectedExperiment);
   $('experiment').addEventListener('change',startSelectedExperiment);
   $('noise').addEventListener('change',startSelectedExperiment);
-  $('power-scenario').addEventListener('change',startSelectedExperiment);
+  $('power-scenario').addEventListener('change',()=>{
+    if($('power-scenario').value===MANUAL_SCENARIO)startManualTrial();
+    else startSelectedExperiment();
+  });
   $('compare').addEventListener('click', async () => {
     if (comparing) return;
     stop(true); resumePlant(); comparing=true; $('view').value='cost';
@@ -963,7 +984,7 @@
     if(comparing) return;
     // Restart is one complete new trial under the selected settings.
     // The optional link rebuild in settings preserves edited source reliability.
-    startOngoingTrial();
+    startManualTrial();
     announce('Ready · Ongoing learning · Press Run'); render(); save();
   });
   $('speed').addEventListener('change', () => { if (playing) { clearTimeout(timer); nextTickAt=0; schedule(); } save(); });
@@ -1293,7 +1314,7 @@
     const scheduled=snapshot.powerScenario===DEFAULT_SCENARIO,scenario=snapshot.scenario || {};
     const strong=snapshot.stressProfile==='strong-v1';
     const powers=(snapshot.eventLog || []).filter(event=>event.type==='pulse').length;
-    const allNoisy=scheduled && snapshot.beta>0 && Array.from({length:PowerDemo.constants.N-1},(_,i)=>i+2).every(bus=>snapshot.faults.includes(bus));
+    const allNoisy=(scheduled||manualTrial()) && snapshot.beta>0 && Array.from({length:PowerDemo.constants.N-1},(_,i)=>i+2).every(bus=>snapshot.faults.includes(bus));
     $('scenario-name').textContent=(adaptive()?'':ongoing()?'Saved trial · ':'Archived trial · ')+(scheduled?(scenario.phaseLabel || 'Demand and solar cycle'):snapshot.powerScenario==='solar-outage'?'Solar outage trial':'Reference trial');
     const description=$('scenario-description'),settings=forecastSettings();
     const guidance=adaptive()?'Ongoing response and topology learning · One physical clock':ongoing()?'Ongoing trial · No physical reset · Corrections learn from revealed source errors':scheduled?(snapshot.phase==='deployment'?(snapshot.experiment==='communication'?'Fresh comparison · Deployed links and prediction correction stay fixed':'Fresh comparison · Links fixed · Prediction correction adapts')
@@ -1307,12 +1328,20 @@
       +(settings.noiseEnabled?settings.quiet+' quiet / '+settings.noisy+' noisy':'Noise disabled')
       :scheduled?guidance:(restoredTrial?'Restored run · ':'')+'Forecast stress β '+snapshot.beta+' · Previous samples and costs retained';
     if(strong&&scheduled) description.textContent=scenario.periodSeconds+' s cycle · Peaks per site · Homes '+scenario.homeAmplitudeKw+' kW · Solar loss '+scenario.solarLossMaxKw+' kW · Battery charge '+scenario.batteryAmplitudeKw+' kW';
+    if(manualTrial()) {
+      $('scenario-name').textContent='You control the disturbances';
+      const attacked=powers||snapshot.faults.length||(snapshot.eventLog||[]).some(event=>event.type==='forecast');
+      description.textContent=(attacked?'Your attacks only':'No attacks until you act')+' · Background load varies';
+    }
     description.title=settings?guidance+'. Current configuration for newly issued forecasts, not observed accuracy or bus voltage. Quiet and noisy are synthetic source labels, not inputs to the learner. Already issued messages stay unchanged. Noise disabled does not forecast unannounced power attacks.':guidance;
     description.setAttribute('aria-description',description.title);
-    $('new-scenario').hidden=scheduled && !powers && !allNoisy;
+    $('new-scenario').hidden=manualTrial()||(scheduled && !powers && !allNoisy);
     $('new-scenario').disabled=comparing;
-    $('new-scenario').textContent='Restore default scenario';
-    $('new-scenario').title='Start a new Strong demand and solar trial with forecast stress β 4 and 150 kW manual pulses. This explicit new trial clears previous trial costs. Archived replay is preserved until this action.';
+    $('new-scenario').textContent='Start manual trial';
+    $('new-scenario').title='Start a fresh paused trial with no scheduled attacks or corrupted sources. The previous trial remains unchanged until you start again.';
+    $('saved-trial-hint').hidden=manualTrial()||!restoredTrial;
+    $('legacy-scenario-control').hidden=manualTrial();
+    $('legacy-stress-control').hidden=manualTrial();
     const status=$('scheduled-power'),applied=Number(scenario.appliedKw)||0;
     status.hidden=!scheduled;
     status.dataset.appliedKw=String(applied);status.dataset.action=String(scenario.action ?? '');
@@ -1320,7 +1349,7 @@
     const context=$('trial-context');
     context.hidden=!powers && !allNoisy && snapshot.powerScenario!=='solar-outage';
     context.dataset.powerRequests=String(powers);context.dataset.allSourcesNoisy=String(allNoisy);
-    const physical=powers?'Mixed trial · '+powers+' unforecast power request'+(powers===1?'':'s')+' · All recovery costs included'
+    const physical=powers?(manualTrial()?'Manual trial · ':'Mixed trial · ')+powers+' unforecast power request'+(powers===1?'':'s')+' · All recovery costs included'
       :snapshot.powerScenario==='solar-outage'?'Includes an unforecast solar outage · All recovery costs included':'';
     context.textContent=[physical,allNoisy?'All forecast sources are noisy · No reliable alternative to select':''].filter(Boolean).join(' · ');
   }
@@ -1343,8 +1372,8 @@
     const beta=snapshot.beta || 0;
     const faultScale=snapshot.forecastFaultScale || 1;
     const noiseMpu=1000*PowerDemo.model.forecastForcingScales[selectedBus-1]*beta*(snapshot.faults.includes(selectedBus)?4*faultScale:.05);
-    $('noise-caption').textContent=beta===0?'No forecast noise':'Bus '+selectedBus+' · '+(snapshot.faults.includes(selectedBus)?'Noisy':'Quiet')+' · Noise SD '+d3.format('.3~g')(noiseMpu)+' mpu'+(faultScale>1?' · Strong stress · Noisy SD ×'+faultScale:beta>2?' · Extended stress':'');
-    $('noise-caption').title='Configured additive error in newly issued voltage forcing forecasts, not actual bus voltage. 1 mpu = 0.001 pu. Noisy sources have '+(80*faultScale)+' times the noise SD of quiet sources. The Strong profile doubles only noisy source error. β 4, 8 and 16 are additional feeder stress tests outside the reference grid. Changing β starts a fresh trial.';
+    $('noise-caption').textContent=beta===0?'No forecast noise':'Bus '+selectedBus+' · '+(snapshot.faults.includes(selectedBus)?'Noisy':'Quiet')+' · Noise SD '+d3.format('.3~g')(noiseMpu)+' mpu'+(faultScale>1?(manualTrial()?' · Manual corruption':' · Strong stress')+' · Noisy SD ×'+faultScale:beta>2?' · Extended stress':'');
+    $('noise-caption').title='Configured additive error in newly issued voltage forcing forecasts, not actual bus voltage. 1 mpu = 0.001 pu. Noisy sources have '+(80*faultScale)+' times the noise SD of quiet sources. In manual trials every source starts quiet and corruption requires a click. Changing β starts a fresh trial.';
     $('network-scenario').disabled=comparing; $('stress-profile').disabled=comparing; $('experiment').disabled=comparing||ongoing(); $('noise').disabled=comparing; $('power-scenario').disabled=comparing;
     if($('experiment').parentElement)$('experiment').parentElement.hidden=ongoing();
     const scenario=snapshot.scenario;
@@ -1375,11 +1404,12 @@
     $('restart').textContent=ongoing()&&!adaptive()?'Start adaptive demo':'Restart demo';
     $('restart').title=ongoing()&&!adaptive()
       ?'This saved trial retains its original fixed support and costs. Start a new trial to enable ongoing response and topology learning.'
-      :'Start a new trial with ongoing response and topology learning. Previous trial costs are cleared.';
+      :'Start a fresh paused trial with no scheduled attacks or corrupted sources. Previous trial costs are cleared.';
     $('run').setAttribute('aria-label',playing?'Pause simulation':comparisonComplete()?'Continue simulation':frozen?'Run frozen fit':'Run simulation');
     $('run').setAttribute('aria-pressed',String(playing));
     const forecast=forecastMode();root.dataset.interaction=forecast?'forecast':'power';
-    $('attack-mode').hidden=forecast;$('strength').hidden=forecast;
+    $('attack-mode').hidden=forecast;$('strength').hidden=forecast;$('strength-control').hidden=forecast;
+    $('strength').title=manualTrial()?'Requested additional power, capped at '+snapshot.attackSettings.maxKw+' kW per bus including overlapping pulses. Solar loss and battery charging also respect equipment limits.':'Requested power per pulse. Applied power respects equipment limits';
     const selectedAttack=attackAt(selectedBus),attackCount=activeAttacks().length;
     if ($('pulse-label')) $('pulse-label').textContent=!forecast&&selectedAttack?.latched?'Stop bus '+selectedBus:selectedBus===1?'Fixed substation':forecast
       ?(snapshot.faults.includes(selectedBus)?'Repair':'Corrupt')+' bus '+selectedBus:'Attack bus '+selectedBus;
@@ -1399,6 +1429,10 @@
     }
     $('pulse').dataset.attackState=forecast?(forecastNoisy(selectedBus)?'noisy':'quiet'):feedback.state;
     $('attack-hint').textContent=forecast?(snapshot.phase==='deployment'?'Links remain fixed':forecastNoiseEnabled()?'New forecasts only':'No noise at β 0'):Number($('strength').value)+(continuousMode()&&!heldAttack?' kW target per bus · ':' kW per pulse · ')+feedback.hint;
+    if(forecast&&manualTrial()&&forecastNoiseEnabled()) {
+      const attackNoise=1000*PowerDemo.model.forecastForcingScales[selectedBus-1]*beta*4*faultScale;
+      $('attack-hint').textContent='Attack noise SD '+d3.format('.3~g')(attackNoise)+' mpu · '+(snapshot.faults.includes(selectedBus)?'Click again to repair':'Click to corrupt');
+    }
     $('step').textContent=frozen?'100 fit steps':'Step';
     $('step').disabled=comparing || snapshot.mode==='converged';
     $('freeze').hidden=true;

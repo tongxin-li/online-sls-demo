@@ -17,7 +17,7 @@ async function main(){
   }catch(_){res.writeHead(404).end();}
  });await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  const address='http://127.0.0.1:'+server.address().port,errors=[],results=[];let browser;
- const read=page=>page.evaluate(()=>{const d=document.querySelector('#power-response-demo').powerDemo,s=d.getSnapshot();return {s:{networkId:s.networkId,protocol:s.protocol,phase:s.phase,t:s.t,mode:s.mode,historyLength:s.history.length,learning:s.learning,cumulative:s.cumulative,commandQ:s.commandQ,states:s.states,lastExecution:s.lastExecution,deployedSupport:s.deployedSupport,traffic:s.traffic},ui:d.getState(),evidence:d.getLinkEvidence()};});
+ const read=page=>page.evaluate(()=>{const d=document.querySelector('#power-response-demo').powerDemo,s=d.getSnapshot();return {s:{networkId:s.networkId,protocol:s.protocol,phase:s.phase,t:s.t,mode:s.mode,powerScenario:s.powerScenario,attackProfile:s.attackProfile,faults:s.faults,eventLog:s.eventLog,historyLength:s.history.length,learning:s.learning,cumulative:s.cumulative,commandQ:s.commandQ,states:s.states,lastExecution:s.lastExecution,deployedSupport:s.deployedSupport,traffic:s.traffic},ui:d.getState(),evidence:d.getLinkEvidence()};});
 
  // Compare every displayed cell to independently exported current controller
  // diagnostics, including excluded zeros and local permissions.
@@ -361,9 +361,9 @@ async function main(){
     else if(action==='new-scenario')await settings(page,()=>page.locator('#pr-new-scenario').click());
     else await page.locator('#pr-restart').click();
     const fresh=await read(page);assert.equal(fresh.s.protocol,'adaptive-phi-v2');assert.equal(fresh.s.phase,'ongoing');
-    assert.equal(fresh.s.historyLength,fresh.s.t);assert.equal(fresh.ui.playing,action==='new-scenario');
+    assert.equal(fresh.s.historyLength,fresh.s.t);assert.equal(fresh.ui.playing,false);assert.equal(fresh.s.powerScenario,'interactive');assert.equal(fresh.s.attackProfile,'manual-v1');assert.deepEqual(fresh.s.faults,[]);assert.deepEqual(fresh.s.eventLog,[]);
     assert.deepEqual(fresh.ui.activeAttackBuses,[]);assert.doesNotMatch(await page.locator('#pr-scenario-name').textContent(),/Saved trial|Archived trial/);
-    if(action!=='new-scenario'){assert.equal(fresh.s.t,0);assert.ok(Object.values(fresh.s.cumulative).every(v=>v===0));}
+    assert.equal(fresh.s.t,0);assert.ok(Object.values(fresh.s.cumulative).every(v=>v===0));
     if(action==='restart')await page.screenshot({path:path.join(output,label+'-handoff-restart.png'),fullPage:true});
     await pause(page);const exact=await read(page);assert.equal((await page.evaluate(()=>window.openai.widgetState)).privateContent.version,15);
     await page.reload({waitUntil:'networkidle'});

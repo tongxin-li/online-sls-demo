@@ -38,6 +38,11 @@
   const BASE_KV=12.47,BASE_MVA=1,POWER_BASE_KW=1000,SAMPLE_SECONDS=1,TAU_SECONDS=2;
   const LAG=Math.exp(-SAMPLE_SECONDS/TAU_SECONDS),Q_LIMIT=.07,S_RATING=.12;
   const PULSE_DEFAULT=100,PULSE_MIN=10,PULSE_MAX=150;
+  // Explicit interactive trials use network sized, user initiated requests.
+  // These limits never modify archived trials or the feeder/controller model.
+  const MANUAL_ATTACKS=network.id==='toy8'
+    ?{strengthsKw:[150,450,900],defaultKw:900,maxKw:900,forecastFaultScale:8}
+    :{strengthsKw:[50,150,300],defaultKw:150,maxKw:300,forecastFaultScale:2};
   const CONTROLLERS=['online','scalar','static','causal'];
   const COMMUNICATION_BETAS=[0,.25,.5,1,2];
   const COMMUNICATION_STRESS_BETAS=[4,8,16];
@@ -390,14 +395,17 @@
       const preset=FORECAST_PRESETS.find(p=>p.id===id);
       if(!preset)throw new RangeError('Forecast preset must be reliable, uniform, or mixed');
       const powerScenario=options.powerScenario || 'reference';
-      if(!['reference','solar-outage','forecasted-demand'].includes(powerScenario))throw new RangeError('Unknown power scenario');
+      if(!['reference','solar-outage','forecasted-demand','interactive'].includes(powerScenario))throw new RangeError('Unknown power scenario');
       if(options.stressProfile!==undefined&&!['standard','strong-v1'].includes(options.stressProfile))throw new RangeError('Unknown stress profile');
+      if(options.attackProfile!==undefined&&options.attackProfile!=='manual-v1')throw new RangeError('Unknown attack profile');
+      if(options.attackProfile==='manual-v1'&&powerScenario!=='interactive')throw new RangeError('Manual attacks require the interactive scenario');
       this.preset=preset;
       this.initialOptions={networkId:network.id,experiment,beta,powerScenario,seed:options.seed===undefined?20261013:options.seed,
         horizon:ongoing?null:options.horizon===undefined?480:options.horizon,preset:id,
-        faultBuses:options.faultBuses===undefined?(powerScenario==='forecasted-demand'&&id==='mixed'?FORECASTED_DEMAND.noisySources:preset.faultBuses).slice():options.faultBuses.slice()};
+        faultBuses:options.faultBuses===undefined?(powerScenario==='interactive'?[]:powerScenario==='forecasted-demand'&&id==='mixed'?FORECASTED_DEMAND.noisySources:preset.faultBuses).slice():options.faultBuses.slice()};
       // Absent settings retain the exact archived environment and replay shape.
       if(options.stressProfile==='strong-v1')this.initialOptions.stressProfile=options.stressProfile;
+      if(options.attackProfile==='manual-v1')this.initialOptions.attackProfile=options.attackProfile;
       if(!ongoing&&(!Number.isInteger(this.initialOptions.horizon)||this.initialOptions.horizon<1))throw new Error('Invalid horizon');
       if(ongoing)this.initialOptions.protocol=options.protocol;
       this.phase=ongoing?'ongoing':'discovery';this.discoveryRecord=null;this.deployedSupport=null;this.reset();
@@ -449,9 +457,10 @@
       this.segments.push({start,end:start+length,length,dense,designs,offlineScores,fixed});
     }
     checkBus(bus){if(!Number.isInteger(bus)||bus<1||bus>N)throw new Error('Bus must be an integer from 1 through '+N);return bus;}
-    queuePulse(bus,strength=PULSE_DEFAULT,protocol=null){
+    queuePulse(bus,strength=this.options.attackProfile==='manual-v1'?MANUAL_ATTACKS.defaultKw:PULSE_DEFAULT,protocol=null){
       this.checkBus(bus);
-      if(!Number.isFinite(strength)||strength<PULSE_MIN||strength>PULSE_MAX)throw new RangeError('Pulse strength must be from 10 through 150 kW');
+      const maxKw=this.options.attackProfile==='manual-v1'?MANUAL_ATTACKS.maxKw:PULSE_MAX;
+      if(!Number.isFinite(strength)||strength<PULSE_MIN||strength>maxKw)throw new RangeError('Pulse strength must be from 10 through '+maxKw+' kW');
       if(bus===1)return false;if(this.mode==='completed')this.extend();if(this.mode!=='running')return false;
       if(protocol!==null&&protocol!=='held-target-v1')throw new RangeError('Unknown power request protocol');
       // Refresh only this bus's continuous component. Explicit and legacy pulses
@@ -483,9 +492,10 @@
         const forecast=baseW.map((v,i)=>{
           const faulty=this.faults.has(i+1),noise=this.random.normal();
           const scale=model.forecastForcingScales[i];
-          if(this.options.experiment==='communication')return i===0?0:v+scale*this.options.beta*(faulty?(this.options.stressProfile==='strong-v1'?8:4):.05)*noise;
+          const faultScale=this.options.attackProfile==='manual-v1'?MANUAL_ATTACKS.forecastFaultScale:this.options.stressProfile==='strong-v1'?2:1;
+          if(this.options.experiment==='communication')return i===0?0:v+scale*this.options.beta*(faulty?4*faultScale:.05)*noise;
           return i===0?0:(faulty?this.preset.faultyGain:this.preset.gain)*v
-            +scale*(faulty?this.preset.faultyNoise*(this.options.stressProfile==='strong-v1'?2:1):this.preset.noise)*noise;
+            +scale*(faulty?this.preset.faultyNoise*faultScale:this.preset.noise)*noise;
         });
         const scheduledMetadata=scheduled?{scheduledPowerKw:scheduled.map(value=>value*POWER_BASE_KW),
           scheduledAppliedKw:base.map((value,i)=>(value-boundedPowerDeviation(i+1,randomBase[i]))*POWER_BASE_KW)}:{};
@@ -640,7 +650,8 @@
       if((this.phase==='deployment'||this.ongoing)&&this.options.powerScenario==='solar-outage'&&(time===30||time===50))
         this.eventLog.push(deepFreeze({t:time,type:'scenario',action:time===30?'start':'restore',buses:SOLAR_BUSES.slice(),message:time===30?'Solar outage begins':'Solar generation restored'}));
       for(const event of this.pulses){event.requestedKw=event.strength*Math.exp(-event.age/event.decay);requested[event.bus-1]+=event.requestedKw;}
-      const nextPower=scenarioBase.map((v,i)=>boundedPowerDeviation(i+1,v+requested[i]/1000));
+      const nextPower=scenarioBase.map((v,i)=>boundedPowerDeviation(i+1,v+
+        (this.options.attackProfile==='manual-v1'?Math.min(requested[i],MANUAL_ATTACKS.maxKw):requested[i])/1000));
       const pulse=nextPower.map((v,i)=>(v-scenarioBase[i])*1000);this.lastPulseApplications=[];
       for(let i=1;i<N;i++)if(requested[i]>0)this.lastPulseApplications.push({bus:i+1,requestedKw:requested[i],
         appliedKw:pulse[i],capped:pulse[i]<requested[i]-1e-9,eventName:BUS_PROFILES[i].eventName});
@@ -806,6 +817,7 @@
         requestedKw:this.lastScenarioApplications.reduce((sum,item)=>sum+item.requestedKw,0),appliedKw:sumScheduled(),
         demandChangeKw:sumScheduled('Homes'),solarLossKw:sumScheduled('Solar'),batteryChangeKw:sumScheduled('Battery'),
         absoluteAppliedKw:this.lastScenarioApplications.reduce((sum,item)=>sum+Math.abs(item.appliedKw),0)}
+        :this.options.powerScenario==='interactive'?{id:'interactive',label:'User controlled attacks',forecasted:false,active:false,requestedKw:0,appliedKw:0}
         :{id:this.options.powerScenario,start:30,end:50,active:(this.phase==='deployment'||this.ongoing)&&this.t>30&&this.t<=50,requestedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.requestedKw,0),appliedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.appliedKw,0)};
       return{networkId:network.id,networkLabel:network.label,t:this.t,costTime:this.lastSample?this.lastSample.t:null,stateTime:this.t,horizon:this.options.horizon,
         initialOptions:{...this.initialOptions,faultBuses:this.initialOptions.faultBuses.slice()},
@@ -824,6 +836,11 @@
         edgeData:model.edgeData.map((edge,i)=>({...edge,pKw:flows.online[i].pKw,qKvar:Object.fromEntries(CONTROLLERS.map(key=>[key,flows[key][i].qKvar]))})),
         powerScenario:this.options.powerScenario,scenario,
         ...(strong?{stressProfile:'strong-v1',forecastFaultScale:2}:{}),
+        ...(this.options.attackProfile==='manual-v1'?{attackProfile:'manual-v1',forecastFaultScale:MANUAL_ATTACKS.forecastFaultScale,
+          attackSettings:{...MANUAL_ATTACKS,strengthsKw:MANUAL_ATTACKS.strengthsKw.slice(),minKw:PULSE_MIN,
+            forecastNoiseCoefficient:4*MANUAL_ATTACKS.forecastFaultScale,
+            forecastStdPu:model.forecastForcingScales.map(scale=>scale*(this.options.experiment==='communication'
+              ?this.options.beta*4:this.preset.faultyNoise)*MANUAL_ATTACKS.forecastFaultScale)}}:{}),
         ...(scheduled?{scheduledPowerKw:this.lastSample?.scheduledPowerKw.slice() || Array(N).fill(0)}:{}),
         lastScenarioApplications:this.lastScenarioApplications.map(p=>({...p})),lastPulseApplications:this.lastPulseApplications.map(p=>({...p})),costStates:Object.fromEntries(CONTROLLERS.map(key=>[key,this.costStates[key].slice()])),
         learning:{...this.learning},calibration:{...this.calibration,matrix:copy(this.calibration.matrix)},predictionDiagnostics:this.predictionDiagnostics,lastPreview:this.lastPreview.slice(),

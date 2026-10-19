@@ -113,14 +113,15 @@ function harness(saved,experiment='prediction',reducedMotion=true,fresh=false,qu
     const selected=options.find(option=>/\bselected\b/.test(option[1]))||options[0];
     if(selected)nodes.get(select[1]).value=selected[1].match(/\bvalue="([^"]*)"/)[1];
   }
-  // Legacy cases explicitly keep the reference physics and beta. Passing null
-  // exercises the actual shipped HTML defaults, including the new scenario.
+  // Legacy cases explicitly keep the reference physics and beta. A null
+  // experiment without fresh requests the archived shipped demand scenario.
   if(experiment!==null) {
     nodes.get('pr-experiment').value=experiment;
     nodes.get('pr-power-scenario').value='reference';
     nodes.get('pr-noise').value='1';
     nodes.get('pr-view').value=experiment==='communication'?'learning':'cost';
   }
+  if(experiment===null&&!fresh&&saved===undefined)nodes.get('pr-power-scenario').value='forecasted-demand';
   // These original cases explicitly restore the archived v13 protocol through
   // the production restore route. Fresh ongoing defaults are tested separately.
   if(saved===undefined&&!fresh) {
@@ -282,7 +283,8 @@ test('Pause and Step flush a pending playback drawing without extra samples',asy
 test('source details use a per trial default and preserve user choices during updates',()=>{
   const archived=harness();assert.equal(archived.node('source-details').open,true);
   const h=harness(undefined,null,true,true);assert.equal(h.node('source-details').open,false);
-  assert.equal(h.node('source-details').hidden,false);
+  assert.equal(h.node('source-details').hidden,true,'Initial Homes bus has no inverter source inspector');
+  h.inspectLink(7,6);assert.equal(h.node('source-details').hidden,false);
   h.node('source-details').open=true;h.click('step');assert.equal(h.node('source-details').open,true);
   h.inspectLink(7,6);assert.equal(h.node('source-details').open,true);
   h.change('bus','2');assert.equal(h.node('source-details').hidden,true);
@@ -1068,7 +1070,7 @@ test('hidden diagnostic controls cannot defer the automatic comparison transitio
 });
 
 
-test('communication starts in learning and preserves the chosen noise across reset and learn again',async()=>{
+test('archived communication retains chosen noise until explicit restart selects the manual environment',async()=>{
   assert.match(html,/<option value="communication" selected>/);
   const h=harness(undefined,'communication');
   assert.equal(h.snapshot().experiment,'communication');assert.equal(h.snapshot().beta,1);assert.equal(h.snapshot().horizon,180);
@@ -1077,7 +1079,7 @@ test('communication starts in learning and preserves the chosen noise across res
   h.change('noise',2);assert.equal(h.snapshot().beta,2);assert.equal(h.snapshot().t,0);
   await compare(h);assert.equal(h.snapshot().phase,'deployment');assert.equal(h.node('view').value,'cost');
   assert.equal(h.node('view').hidden,true);assert.equal(h.snapshot().calibration.updates,0);
-  h.click('restart');assert.equal(h.snapshot().phase,'ongoing');assert.equal(h.snapshot().protocol,'adaptive-phi-v2');assert.equal(h.snapshot().beta,2);
+  h.click('restart');assert.equal(h.snapshot().phase,'ongoing');assert.equal(h.snapshot().protocol,'adaptive-phi-v2');assert.equal(h.snapshot().beta,4);assert.equal(h.snapshot().powerScenario,'interactive');assert.deepEqual(h.snapshot().faults,[]);assert.equal(h.state().playing,false);
   assert.equal(h.node('view').value,'cost');assert.equal(h.node('experiment').value,'communication');
 });
 
@@ -1876,10 +1878,10 @@ test('the new scenario action preserves a restored trial until an explicit fresh
   assert.match(restored.node('trial-context').textContent,/unforecast power requests/);
   assert.deepEqual(restored.snapshot().cumulative,old.snapshot().cumulative);
   restored.change('intervention','forecast');assert.deepEqual(restored.snapshot().cumulative,old.snapshot().cumulative,'Mode selection never silently removes old costs');
-  restored.click('new-scenario');assert.equal(restored.snapshot().powerScenario,'forecasted-demand');assert.equal(restored.snapshot().beta,4);
-  assert.equal(restored.snapshot().phase,'ongoing');assert.equal(restored.snapshot().protocol,'adaptive-phi-v2');assert.equal(restored.state().playing,true);assert.equal(restored.state().intervention,'forecast');
+  restored.click('new-scenario');assert.equal(restored.snapshot().powerScenario,'interactive');assert.equal(restored.snapshot().attackProfile,'manual-v1');assert.equal(restored.snapshot().beta,4);
+  assert.equal(restored.snapshot().phase,'ongoing');assert.equal(restored.snapshot().protocol,'adaptive-phi-v2');assert.equal(restored.state().playing,false);assert.equal(restored.state().intervention,'power');
   assert.deepEqual(restored.state().activeAttackBuses,[]);assert.equal(restored.snapshot().eventLog.some(event=>event.type==='pulse'),false);
-  assert.ok(restored.snapshot().t<=1,'Explicit action starts only the new trial');
+  assert.equal(restored.snapshot().t,0,'Explicit new trial remains paused');assert.deepEqual(restored.snapshot().faults,[]);assert.ok(Object.values(restored.snapshot().cumulative).every(value=>value===0));
   assert.equal(restored.node('trial-context').hidden,true);
 });
 
@@ -1938,9 +1940,9 @@ test('corrupting every scenario source reports the missing reliable alternatives
   assert.equal(h.node('trial-context').hidden,false);assert.equal(h.node('trial-context').dataset.allSourcesNoisy,'true');
   assert.match(h.node('trial-context').textContent,/All forecast sources are noisy.*No reliable alternative to select/);
   assert.equal(h.node('new-scenario').hidden,false);
-  h.click('new-scenario');assert.equal(h.snapshot().powerScenario,'forecasted-demand');assert.equal(h.snapshot().beta,4);
-  assert.equal(h.snapshot().faults.length,15);assert.equal(h.node('trial-context').hidden,true);
-  assert.deepEqual(h.snapshot().faults,PowerDemo.constants.busProfiles.filter(profile=>profile.role==='Homes').map(profile=>profile.bus));
+  h.click('new-scenario');assert.equal(h.snapshot().powerScenario,'interactive');assert.equal(h.snapshot().attackProfile,'manual-v1');assert.equal(h.snapshot().beta,4);
+  assert.equal(h.snapshot().faults.length,0);assert.equal(h.node('trial-context').hidden,true);
+  assert.deepEqual(h.snapshot().faults,[]);assert.equal(h.state().playing,false);assert.equal(h.snapshot().t,0);
   assert.equal(h.snapshot().eventLog.some(event=>event.type==='forecast'||event.type==='pulse'),false);
 });
 
@@ -2102,7 +2104,7 @@ test('restored guided trials with wider horizons keep the 180 sample review pend
 });
 
 
-test('primary restart clears comparison, attacks and custom source changes while preserving selected experiment settings',async()=>{
+test('primary restart clears comparison and attacks into the paused manual environment',async()=>{
   const h=harness(undefined,'communication');
   h.change('noise','8');h.change('power-scenario','solar-outage');h.change('speed','32');
   h.change('attack-mode','continuous');h.change('strength','150');
@@ -2114,16 +2116,16 @@ test('primary restart clears comparison, attacks and custom source changes while
   h.click('restart');const restarted=h.snapshot();
   assert.equal(restarted.phase,'ongoing');assert.equal(restarted.protocol,'adaptive-phi-v2');assert.equal(restarted.t,0);assert.equal(restarted.deployedSupport.links.filter(e=>e.from!==e.to).length,24);
   assert.equal(restarted.discoveryRecord,null);assert.equal(restarted.experiment,'communication');
-  assert.equal(restarted.beta,8);assert.equal(restarted.powerScenario,'solar-outage');
+  assert.equal(restarted.beta,4);assert.equal(restarted.powerScenario,'interactive');assert.equal(restarted.attackProfile,'manual-v1');
   assert.equal(h.node('speed').value,'32');assert.equal(h.node('attack-mode').value,'continuous');assert.equal(h.node('strength').value,'150');
   assert.equal(h.node('auto-compare').checked,true);assert.equal(h.node('view').value,'cost');
   assert.equal(h.node('matrix-view').value,'change');assert.equal(h.node('cost-metric').value,'total');
   assert.equal(h.node('cost-total')['aria-pressed'],'true');assert.equal(h.node('cost-gap')['aria-pressed'],'false');
-  assert.deepEqual(restarted.faults,new PowerDemo.Simulation({experiment:'communication',beta:8,powerScenario:'solar-outage'}).snapshot().faults);
+  assert.deepEqual(restarted.faults,[]);
   assert.ok(Object.values(restarted.cumulative).every(value=>value===0));
   assert.equal(restarted.eventLog.length,0);assert.equal(restarted.activePulses.length,0);assert.equal(restarted.pendingPulses.length,0);
   assert.deepEqual(h.state().activeAttackBuses,[]);assert.equal(h.state().playing,false);assert.equal(h.clock.tasks.size,0);
-  assert.equal(h.state().topology.events.length,0);assert.equal(h.state().historyIndex,null);assert.equal(h.state().inspectedSource,7);
+  assert.equal(h.state().topology.events.length,0);assert.equal(h.state().historyIndex,null);assert.equal(h.state().inspectedSource,null);assert.equal(h.state().selectedBus,6);
   assert.deepEqual(h.comparison().plotted,['online','scalar','static','causal']);
   await h.samples(3);assert.equal(h.snapshot().t,0,'Restart stays paused until the next explicit Run');
   h.click('run');await h.samples(410);h.click('run');
@@ -2499,18 +2501,20 @@ test('ongoing UI keeps arbitrary multi bus held attacks and fresh paused network
   const restored=harness(h.saved(),null);assert.deepEqual(restored.responseHistory(),history);
  });
 
-test('fresh unsaved sessions execute the ongoing default with visible actual weight inspection',async()=>{
+test('fresh unsaved sessions execute the manual ongoing default with no automatic attacks',async()=>{
   const h=harness(undefined,null,true,true);
   assert.equal(h.snapshot().protocol,'adaptive-phi-v2');assert.equal(h.snapshot().phase,'ongoing');
-  assert.equal(h.snapshot().powerScenario,'forecasted-demand');assert.equal(h.snapshot().beta,4);
+  assert.equal(h.snapshot().powerScenario,'interactive');assert.equal(h.snapshot().attackProfile,'manual-v1');assert.equal(h.snapshot().beta,4);
+  assert.deepEqual(h.snapshot().faults,[]);assert.deepEqual(h.snapshot().eventLog,[]);assert.equal(h.state().intervention,'power');
   assert.equal(h.node('view').value,'cost');assert.equal(h.node('matrix-view').value,'change');
-  assert.equal(h.state().inspectedSource,h.state().selectedBus);assert.equal(h.state().playing,false);
+  assert.equal(h.state().inspectedSource,null);assert.equal(h.state().selectedBus,6);assert.equal(h.state().playing,false);
   assert.equal(h.node('deploy').hidden,true);assert.equal(h.node('auto-compare').disabled,true);
   const initial=h.snapshot();h.change('matrix-view','links');h.change('matrix-view','change');
   assert.deepEqual(plain(h.snapshot()),plain(initial),'Views cannot change control or physics');
   h.click('run');await h.samples(410);h.click('run');
   const before=h.snapshot();assert.ok(before.t>360);assert.equal(before.history.length,before.t);
   assert.equal(h.state().comparisonComplete,false);assert.ok(before.learning.sourceUpdates>0);
+  assert.deepEqual(before.faults,[]);assert.deepEqual(before.eventLog,[]);assert.deepEqual(before.lastScenarioApplications,[]);
   assert.equal(h.saved().privateContent.version,15);
   const restored=harness(h.saved(),null);
   for(const field of ['t','states','cumulative','commandQ','lastExecution'])assert.deepEqual(plain(restored.snapshot()[field]),plain(before[field]));
@@ -2530,10 +2534,70 @@ test('archived new trial controls migrate only on explicit actions and save ongo
   if(action==='network-scenario')h.change(action,networkId==='toy8'?'feeder47':'toy8');else h.click(action);
   assert.equal(h.snapshot().protocol,'adaptive-phi-v2');assert.equal(h.snapshot().phase,'ongoing');
   assert.ok(h.snapshot().t<2);assert.equal(h.saved().privateContent.version,15);
-  assert.equal(h.state().playing,action==='new-scenario');assert.deepEqual(h.state().activeAttackBuses,[]);
+  assert.equal(h.state().playing,false);assert.deepEqual(h.state().activeAttackBuses,[]);assert.equal(h.snapshot().powerScenario,'interactive');assert.equal(h.snapshot().attackProfile,'manual-v1');assert.deepEqual(h.snapshot().faults,[]);
   assert.equal(h.snapshot().discoveryRecord,null);assert.doesNotMatch(h.node('scenario-name').textContent,/Archived trial/);
-  if(action!=='new-scenario')assert.ok(Object.values(h.snapshot().cumulative).every(v=>v===0));
+  assert.equal(h.snapshot().t,0);assert.ok(Object.values(h.snapshot().cumulative).every(v=>v===0));
   if(h.state().playing)h.click('run');const restored=harness(h.saved(),null);
   for(const field of ['t','states','cumulative','commandQ','lastExecution'])assert.deepEqual(plain(restored.snapshot()[field]),plain(h.snapshot()[field]));
+ }
+});
+
+test('manual network choices expose actual request units and preserve every applied attack through reload',async()=>{
+ for(const [networkId,expectedChoices,initialStrength] of [['toy8',[150,450,900],900],['feeder24',[50,150,300],150],['feeder47',[50,150,300],150]]){
+  const h=harness(undefined,null,true,true);h.change('network-scenario',networkId);
+  assert.equal(h.snapshot().powerScenario,'interactive');assert.equal(h.snapshot().attackProfile,'manual-v1');
+  assert.deepEqual(h.snapshot().faults,[]);assert.deepEqual(h.snapshot().eventLog,[]);assert.equal(h.snapshot().t,0);assert.equal(h.state().playing,false);
+  assert.deepEqual(h.node('strength').children.map(option=>Number(option.value)),expectedChoices);assert.equal(Number(h.node('strength').value),initialStrength);
+  assert.equal(h.state().selectedBus,6);assert.equal(h.state().intervention,'power');assert.equal(h.node('scheduled-power').hidden,true);
+  h.click('step');assert.deepEqual(h.snapshot().eventLog,[]);assert.deepEqual(h.snapshot().lastScenarioApplications,[]);
+  pointerClick(h,h.bus(6));await h.samples(8);h.click('run');
+  const before=h.snapshot(),applied=before.lastPulseApplications.find(item=>item.bus===6);
+  assert.equal(applied.requestedKw,initialStrength);assert.ok(Math.abs(applied.appliedKw-initialStrength)<1e-8);
+  assert.ok(before.voltage[5]<before.referenceVoltage[5]);assert.deepEqual(before.faults,[]);
+  assert.ok(before.eventLog.length>0);assert.ok(before.eventLog.every(event=>event.type==='pulse'&&event.bus===6));
+  const restored=harness(h.saved(),null);
+  assert.equal(Number(restored.node('strength').value),initialStrength);assert.equal(restored.state().playing,false);
+  for(const key of ['initialOptions','t','states','cumulative','commandQ','lastExecution','lastPulseApplications','eventLog'])assert.deepEqual(plain(restored.snapshot()[key]),plain(before[key]),networkId+' exact manual reload '+key);
+  restored.change('intervention','forecast');pointerClick(restored,restored.bus(6));await restored.samples(8);restored.click('run');
+  assert.deepEqual(restored.snapshot().faults,[6]);assert.equal(restored.snapshot().forecastFaultScale,networkId==='toy8'?8:2);
+  assert.equal(restored.snapshot().eventLog.filter(event=>event.type==='forecast').length,1);
+  const noisyReload=harness(restored.saved(),null);assert.deepEqual(plain(noisyReload.snapshot()),plain(restored.snapshot()));
+  const retainedCost=plain(noisyReload.snapshot().cumulative);noisyReload.click('fault');
+  assert.deepEqual(noisyReload.snapshot().faults,[]);assert.match(noisyReload.node('scenario-description').textContent,/^Your attacks only/);
+  assert.equal(noisyReload.snapshot().eventLog.filter(event=>event.type==='forecast').length,2);assert.deepEqual(plain(noisyReload.snapshot().cumulative),retainedCost);
+ }
+});
+
+test('saved Standard and Strong toy trials retain their 100 kW request and exact physics until explicit manual restart',()=>{
+ for(const stressProfile of [undefined,'strong-v1']){
+  const api=PowerDemo.forNetwork('toy8'),options={networkId:'toy8',protocol:'adaptive-phi-v2',experiment:'communication',powerScenario:'forecasted-demand',preset:'mixed',beta:4,...(stressProfile?{stressProfile}:{})};
+  const old=new api.Simulation(options);old.queuePulse(6,100);for(let i=0;i<8;i++)old.step();
+  const saved={privateContent:{version:15,networkId:'toy8',continuousRecord:old.recordContinuous(),phase:'ongoing',t:old.t,
+   selectedBus:6,pulseStrength:'100',intervention:'power',attackMode:'continuous',speed:'32',view:'cost',costMetric:'total',matrixView:'change'}};
+  const h=harness(saved,null);
+  assert.equal(h.node('strength').value,'100');assert.equal(h.snapshot().powerScenario,'forecasted-demand');assert.equal(h.snapshot().stressProfile,stressProfile);assert.equal(h.state().playing,false);
+  for(const key of ['initialOptions','t','states','cumulative','commandQ','lastExecution','lastPulseApplications','eventLog'])assert.deepEqual(plain(h.snapshot()[key]),plain(old.snapshot()[key]),'Archived '+String(stressProfile)+' '+key);
+  h.click('restart');assert.equal(h.snapshot().powerScenario,'interactive');assert.equal(h.snapshot().attackProfile,'manual-v1');assert.equal(h.node('strength').value,'900');
+  assert.equal(h.snapshot().t,0);assert.equal(h.state().playing,false);assert.deepEqual(h.snapshot().faults,[]);assert.deepEqual(h.snapshot().eventLog,[]);
+  assert.ok(Object.values(h.snapshot().cumulative).every(value=>value===0));
+ }
+});
+
+test('an archived environment switch explicitly adopts manual version 15 before recording larger toy requests',async()=>{
+ for(const strength of [450,900]){
+  const api=PowerDemo.forNetwork('toy8'),old=new api.Simulation({networkId:'toy8',experiment:'communication',powerScenario:'reference',beta:4,preset:'mixed',horizon:180});
+  for(let t=0;t<6;t++)old.step();
+  const saved={privateContent:{version:13,networkId:'toy8',phase:'discovery',initialOptions:old.snapshot().initialOptions,t:old.t,events:old.eventLog,
+   selectedBus:7,pulseStrength:'100',intervention:'forecast',attackMode:'continuous',speed:'32',view:'learning',matrixView:'links'}};
+  const h=harness(saved,null);assert.equal(h.snapshot().protocol,undefined);assert.equal(h.snapshot().t,6);
+  h.change('power-scenario','interactive');
+  assert.equal(h.snapshot().protocol,'adaptive-phi-v2');assert.equal(h.snapshot().attackProfile,'manual-v1');assert.equal(h.snapshot().powerScenario,'interactive');
+  assert.equal(h.saved().privateContent.version,15);assert.equal(h.snapshot().t,0);assert.equal(h.state().playing,false);assert.deepEqual(h.snapshot().faults,[]);
+  h.change('strength',strength);pointerClick(h,h.bus(6));await h.samples(6);h.click('run');
+  const before=h.snapshot();assert.equal(h.saved().privateContent.version,15);
+  assert.equal(before.lastPulseApplications.find(item=>item.bus===6).requestedKw,strength);
+  assert.ok(Math.abs(before.lastPulseApplications.find(item=>item.bus===6).appliedKw-strength)<1e-8);
+  const restored=harness(h.saved(),null);assert.equal(Number(restored.node('strength').value),strength);
+  for(const key of ['initialOptions','t','states','cumulative','commandQ','lastExecution','lastPulseApplications','eventLog'])assert.deepEqual(plain(restored.snapshot()[key]),plain(before[key]),'Manual environment handoff '+strength+' '+key);
  }
 });

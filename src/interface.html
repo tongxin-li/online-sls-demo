@@ -1,9 +1,8 @@
 <div id="power-response-demo">
   <div class="pr-scenario-heading">
-    <div><strong id="pr-scenario-name">Forecasted demand</strong><p id="pr-scenario-description" class="pr-caption">Forecast settings · β 4 · 8 quiet / 15 noisy</p></div>
+    <div><strong id="pr-scenario-name">You control the disturbances</strong><p id="pr-scenario-description" class="pr-caption">No attacks until you act · Background load varies</p><p id="pr-saved-trial-hint" class="pr-caption" hidden>Saved trial · Restart for manual attacks</p></div>
     <div class="pr-scenario-controls">
       <label class="pr-network-picker" for="pr-network-scenario"><span>Network</span><select id="pr-network-scenario" aria-label="Network scenario" title="Changing network starts a fresh trial"><option value="toy8">Toy · 8 buses</option><option value="feeder24" selected>Feeder · 24 buses</option><option value="feeder47">Larger · 47 buses</option></select></label>
-      <label class="pr-network-picker" for="pr-stress-profile"><span>Stress</span><select id="pr-stress-profile" aria-label="Stress profile" title="Changing stress starts a fresh trial"><option value="standard">Standard</option><option value="strong-v1" selected>Strong</option></select></label>
     </div>
   </div>
   <div class="pr-controlbar" aria-label="Simulation controls">
@@ -14,8 +13,9 @@
       <span id="pr-clock" class="tabular-nums">0 s</span>
     </div>
     <div class="pr-actions">
-      <select id="pr-intervention" aria-label="Bus interaction" title="Choose what clicking a bus changes"><option value="forecast" selected>Forecast</option><option value="power">Unforecast power stress</option></select>
-      <button type="button" class="btn btn-attack" id="pr-pulse" aria-keyshortcuts="D" title="Click for a pulse or hold for one pulse each sample"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path class="pr-forecast-signal" d="M3 12h3l3-7 6 14 3-7h3"/><path class="pr-attack-bolt" d="M14 2 5 14h6l-1 8 9-13h-6z"/><rect class="pr-attack-stop" x="6" y="6" width="12" height="12" rx="2"/></svg><span id="pr-pulse-label">Attack bus 7</span></button>
+      <select id="pr-intervention" aria-label="Bus interaction" title="Choose what clicking a bus changes"><option value="power" selected>Power disturbance</option><option value="forecast">Forecast corruption</option></select>
+      <label id="pr-strength-control" class="pr-power-picker" for="pr-strength"><span>Request</span><select id="pr-strength" aria-label="Pulse strength" title="Requested additional power. Solar and battery equipment limits still apply"><option value="50">50 kW</option><option value="100">100 kW</option><option value="150" selected>150 kW</option></select></label>
+      <button type="button" class="btn btn-attack" id="pr-pulse" aria-keyshortcuts="D" title="Click for a pulse or hold for one pulse each sample"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path class="pr-forecast-signal" d="M3 12h3l3-7 6 14 3-7h3"/><path class="pr-attack-bolt" d="M14 2 5 14h6l-1 8 9-13h-6z"/><rect class="pr-attack-stop" x="6" y="6" width="12" height="12" rx="2"/></svg><span id="pr-pulse-label">Attack bus 6</span></button>
       <button type="button" class="btn btn-stop-attacks" id="pr-stop-attacks" title="Stop requests at every bus. Existing disturbances then decay" hidden>Stop all <span id="pr-attack-count" class="pr-attack-count tabular-nums" aria-live="polite"></span></button>
       <span id="pr-attack-hint" class="pr-attack-hint">Click to start or stop</span>
     </div>
@@ -132,7 +132,6 @@
     </div>
     <div class="pr-settings-group pr-attack-settings" aria-label="Power attack settings">
       <label class="pr-setting-control" for="pr-attack-mode">Power attack <select id="pr-attack-mode" aria-label="Attack mode"><option value="continuous" selected>Continuous</option><option value="pulse">Pulse</option></select></label>
-      <label class="pr-setting-control" for="pr-strength">Per pulse <select id="pr-strength" aria-label="Pulse strength" title="Requested power per pulse. Applied power respects equipment limits"><option value="50">50 kW</option><option value="100">100 kW</option><option value="150" selected>150 kW</option></select></label>
     </div>
   <div class="pr-experiment-bar" aria-label="Experiment selection">
     <label class="pr-experiment-choice" for="pr-experiment">Experiment <select id="pr-experiment" aria-label="Experiment"><option value="communication" selected>Communication topology</option><option value="prediction">Prediction adaptation</option></select></label>
@@ -140,7 +139,8 @@
     <span id="pr-noise-caption" class="pr-caption">Selected source forecast error in mpu</span>
   </div>
     <div class="pr-comparison-controls">
-      <label for="pr-power-scenario">Power scenario <select id="pr-power-scenario" aria-label="Power scenario" title="Changing the scenario starts a fresh discovery trial"><option value="forecasted-demand" selected>Forecasted demand</option><option value="reference">Reference</option><option value="solar-outage">Solar outage · 20 s</option></select></label>
+      <label id="pr-legacy-scenario-control" for="pr-power-scenario">Saved environment <select id="pr-power-scenario" aria-label="Power scenario" title="Archived settings are retained for exact replay"><option value="interactive" selected>User controlled</option><option value="forecasted-demand">Archived demand cycle</option><option value="reference">Archived reference</option><option value="solar-outage">Archived solar outage</option></select></label>
+      <label id="pr-legacy-stress-control" for="pr-stress-profile">Saved stress <select id="pr-stress-profile" aria-label="Stress profile"><option value="standard" selected>Standard</option><option value="strong-v1">Strong</option></select></label>
       <label id="pr-preset-control" for="pr-preset">Forecasts <select id="pr-preset" aria-label="Forecast preset" title="Changing forecasts starts a new discovery trial"><option value="reliable">Reliable forecasts</option><option value="uniform">Uniform noise</option><option value="mixed" selected>Mixed reliability</option></select></label>
       <button type="button" class="btn btn-compare" id="pr-compare" title="Advance 180 samples across discovery and comparison">Advance 180</button>
     </div>

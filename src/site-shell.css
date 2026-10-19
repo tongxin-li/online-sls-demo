@@ -535,6 +535,10 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 
 /* Network choice changes the physical model and retains readable geometry. */
 .pr-scenario-controls { display:flex; align-items:center; flex-wrap:wrap; gap:12px; }
+.pr-power-picker { display:flex; align-items:center; gap:6px; color:var(--muted-foreground); font-size:12px; }
+.pr-power-picker[hidden] { display:none; }
+.pr-power-picker select { min-width:96px; min-height:44px; border:1px solid #e8e8ed; border-radius:10px; background:#f5f5f7; color:var(--foreground); padding:8px; font:inherit; font-size:13px; cursor:pointer; }
+@media(max-width:650px) { .pr-power-picker { flex:0 1 126px; } .pr-actions .pr-power-picker select { width:auto; min-width:80px; } }
 .pr-network-picker { display:flex; align-items:center; gap:10px; flex-shrink:0; color:var(--muted-foreground); font-size:12px; }
 .pr-network-picker select { min-height:40px; border:1px solid #e8e8ed; border-radius:10px; background:#f5f5f7; color:var(--foreground); padding:8px 30px 8px 12px; font:inherit; font-size:13px; cursor:pointer; }
 .pr-network-scroll,.pr-matrix-scroll { min-width:0; }
