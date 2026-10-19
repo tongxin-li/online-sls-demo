@@ -18,6 +18,29 @@ async function main(){
  const address='http://127.0.0.1:'+server.address().port,errors=[],results=[];let browser;
  const read=page=>page.evaluate(()=>{const d=document.querySelector('#power-response-demo').powerDemo,s=d.getSnapshot();return {s:{networkId:s.networkId,protocol:s.protocol,phase:s.phase,t:s.t,mode:s.mode,historyLength:s.history.length,learning:s.learning,cumulative:s.cumulative,commandQ:s.commandQ,states:s.states,lastExecution:s.lastExecution,deployedSupport:s.deployedSupport,traffic:s.traffic},ui:d.getState(),evidence:d.getLinkEvidence()};});
 
+ // Compare every displayed cell to independently exported current controller
+ // diagnostics, including excluded zeros and local permissions.
+ const assertMatrix=async(page,reason)=>{
+  const result=await page.evaluate(()=>{
+   const d=document.querySelector('#power-response-demo').powerDemo,s=d.getSnapshot();
+   const delta=s.predictionDiagnostics.receiverNormalizedChange;
+   const receivers=[...new Set(Array.from(document.querySelectorAll('#pr-matrix .matrix-cell'),n=>Number(n.dataset.receiver)))];
+   const allowed=new Set(s.deployedSupport.links.map(e=>e.to+','+e.from));
+   return {expected:delta.flat().length,cells:Array.from(document.querySelectorAll('#pr-matrix .matrix-cell'),n=>{
+    const r=Number(n.dataset.receiver),source=Number(n.dataset.source);
+    return {receiver:r,source,actual:Number(n.dataset.weightChange),expected:delta[receivers.indexOf(r)][source-2],
+     connected:n.dataset.connected==='true',allowed:r===source||allowed.has(r+','+source)};
+   })};
+  });
+  assert.equal(result.cells.length,result.expected,'Every source and receiver retained '+reason);
+  for(const cell of result.cells){
+   assert.equal(cell.connected,cell.allowed,'Actual support '+reason);
+   assert.ok(Number.isFinite(cell.actual)&&Math.abs(cell.actual-cell.expected)<1e-12,
+    'Displayed response energy '+reason+' receiver '+cell.receiver+' source '+cell.source);
+   if(!cell.allowed)assert.equal(cell.actual,0,'Excluded response stays zero '+reason);
+  }
+ };
+
  // CDP observes actual native Run execution. It does not replace the plant,
  // scheduler, controller, renderer or issued observations.
  const profileState=page=>page.evaluate(()=>{const d=document.querySelector('#power-response-demo').powerDemo,s=d.getSnapshot();return {
@@ -128,6 +151,7 @@ async function main(){
    assert.equal((await read(page)).ui.playing,true,'Native Run must not stop at old finite boundaries');
    await pause(page);
    if(nativeProfile)profiles.push(await finishProfile(page,nativeProfile));
+   await assertMatrix(page,'native corruption and repair sequence');
    const native=await read(page),nativeMetrics=await page.evaluate(()=>{
     const m=window.__nativePlayback;m.stopped=true;
     return {frames:m.frames,maxFrameGapMs:m.maxFrameGapMs,over50ms:m.over50ms,over100ms:m.over100ms,
@@ -148,11 +172,11 @@ async function main(){
    await cell.scrollIntoViewIfNeeded();if(mobile)await cell.tap();else{await cell.focus();await page.keyboard.press('Enter');}
    assert.equal((await read(page)).ui.inspectedSource,edge.from);
    if(mobile)await page.locator('#pr-source-fault').tap();else await page.locator('#pr-source-fault').click();
-   await advance(page);const first=await read(page);
+   await advance(page);await assertMatrix(page,'corrupted and selected');const first=await read(page);
    assert.ok(first.s.t>180);assert.equal(first.s.phase,'ongoing');assert.equal(first.ui.comparisonComplete,false);
    assert.equal(first.evidence.ongoing,true);
    await page.locator('#pr-source-fault').click();
-   await advance(page);const second=await read(page);assert.ok(second.s.t>360);assert.equal(second.s.historyLength,second.s.t);
+   await advance(page);await assertMatrix(page,'repaired and selected');const second=await read(page);assert.ok(second.s.t>360);assert.equal(second.s.historyLength,second.s.t);
    assert.ok(second.s.cumulative.online>=first.s.cumulative.online);
    await page.locator('#pr-intervention').selectOption('power');
    await setting(page,'bus','7');await page.locator('#pr-pulse').scrollIntoViewIfNeeded();
@@ -176,6 +200,7 @@ async function main(){
     await page.waitForFunction(target=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t>=target,lateBefore.s.t+100,{timeout:150000,polling:100});
     await pause(page);profiles.push(await finishProfile(page,late));
    }
+   await assertMatrix(page,'growing history and physical attacks');
    const final=await read(page);assert.ok(final.s.t>900);assert.equal(final.s.phase,'ongoing');assert.equal(final.ui.comparisonComplete,false);
    assert.equal(final.s.historyLength,final.s.t);assert.equal(final.s.mode,'running');
    assert.ok(final.s.learning.sourceUpdates>second.s.learning.sourceUpdates);
@@ -190,6 +215,7 @@ async function main(){
     const initialOffset=await scroll.evaluate(node=>node.scrollLeft),viewport=page.viewportSize();
     const settled=()=>scroll.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
     const assertCue=async reason=>{
+     await assertMatrix(page,reason);
      const cue=await scroll.evaluate(node=>{
       const bounds=node.getBoundingClientRect(),axis=node.querySelector('.matrix-receiver-background').getBoundingClientRect();
       const labels=Array.from(node.querySelectorAll('.matrix-columns text'));

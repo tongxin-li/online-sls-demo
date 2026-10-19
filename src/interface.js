@@ -111,6 +111,7 @@
   let pin = null;
   let matrixReference = null;
   let matrixGeometry = null;
+  let matrixStaticKey = null;
   let renderWidths = null;
   function displayWidth(element) {
     const measured=renderWidths?.get(element);
@@ -176,6 +177,7 @@
   let positions = feederPositions;
   function bindNetwork(id) {
     matrixGeometry=null;
+    matrixStaticKey=null;
     PowerDemo = networkCatalog.forNetwork(id);
     const count=PowerDemo.constants.N, large=count>24;
     root.dataset.network=id;
@@ -1519,7 +1521,7 @@
     const el=$('matrix'),hint=$('matrix-scroll-hint'),scroller=el?.parentElement;
     if(!scroller||!hint)return;
     if(!force&&matrixGeometry?.el===el&&matrixGeometry.key===key) {
-      applyMatrixScrollGeometry(matrixGeometry);return;
+      return;
     }
     const viewportWidth=scroller.clientWidth,maximum=Math.max(0,scroller.scrollWidth-viewportWidth),overflow=maximum>1;
     hint.hidden=!overflow;
@@ -1568,6 +1570,14 @@
     const budget=predictionBudget(recommendations);
     const showSourceQuality=snapshot.experiment==='communication'&&snapshot.beta>0&&historyIndex===null;
     const noisySources=new Set(showSourceQuality?snapshot.faults:[]);
+    // Cache presentation structure only. Every admitted response value below is
+    // still read from this action's diagnostics, including exact zero weights.
+    // Archived discovery may change support and keeps the general update path.
+    const staticKey=[PowerDemo.constants.networkId,width,available,receivers.join(','),
+      sources.join(','),changing,deployed,selectedBus,inspectedSource,showSourceQuality,
+      [...noisySources].join(','),[...current].join('|'),[...frame.reference].join('|')].join(';');
+    const staticChanged=!ongoing()||matrixStaticKey!==staticKey;
+    matrixStaticKey=staticKey;
     $('link-budget').textContent=(historyIndex!==null?'Saved at '+protocolStatus().historyAt+' s · ':deployed?'Deployed · ':'Candidate · ')+budget.remote+' of '+budget.dense+' remote links · '+budget.replaced+' replaced';
     $('link-budget').title='Replacements relative to the offline fixed sparse topology. Remote prediction channels only. Local predictions and common state feedback are excluded.';
     $('noisy-links').hidden=!showSourceQuality||!deployed||historyIndex!==null;
@@ -1614,6 +1624,7 @@
       axis.append('text').attr('class','matrix-receiver-title matrix-axis');
       axis.append('g').attr('class','matrix-rows');
     }
+    if(staticChanged) {
     svg.select('.matrix-receiver-background').attr('height',height);
     svg.select('title').text(changing?'Signed change in learned gain energy divided by each receiver’s offline energy. Outline shows selected sources.':'Rows are inverter receivers. Columns are prediction sources.');
     svg.select('.matrix-source-title').attr('x',left+(width-left)/2).attr('y',14).attr('text-anchor','middle').text('Source bus');
@@ -1629,6 +1640,7 @@
       .text(bus=>bus);
     sourceLabels.append('title').text(bus=>'Bus '+bus+(noisySources.has(bus)?' · Noisy forecast source':showSourceQuality?' · Quiet forecast source':'')
       +(showSourceQuality?' · Current error generator label, not a learner input':''));
+    }
     const cells=receivers.flatMap((receiver,i)=>sources.map((source,j)=>{
       const id=receiver+','+source,local=receiver===source,connected=local||current.has(id);
       const change=local?'local':current.has(id)?(frame.reference.has(id)?'retained':'added'):frame.reference.has(id)?'removed':'inactive';
@@ -1654,9 +1666,10 @@
         }
       }
     };
-    const marks=svg.select('.matrix-cells').selectAll('rect').data(cells,d=>d.receiver+','+d.source).join(enter=>{const r=enter.append('rect').attr('class','matrix-cell');r.append('title');return r;})
+    const allMarks=svg.select('.matrix-cells').selectAll('rect').data(cells,d=>d.receiver+','+d.source).join(enter=>{const r=enter.append('rect').attr('class','matrix-cell');r.append('title');return r;});
+    if(staticChanged) allMarks
       .attr('x',d=>left+d.j*cellWidth+1).attr('y',d=>top+d.i*cellHeight+1).attr('width',Math.max(2,cellWidth-2)).attr('height',cellHeight-2).attr('rx',2)
-      .attr('data-receiver',d=>d.receiver).attr('data-source',d=>d.source).attr('data-connected',d=>String(d.connected)).attr('data-change',d=>d.change).attr('data-weight-change',d=>d.delta)
+      .attr('data-receiver',d=>d.receiver).attr('data-source',d=>d.source).attr('data-connected',d=>String(d.connected)).attr('data-change',d=>d.change)
       .attr('role','button').attr('aria-label',d=>'Inspect '+cellLabel(d))
       .attr('tabindex',d=>d.receiver===(matrixReceiver||receivers[0])&&d.source===(inspectedSource||sources[0])?0:-1)
       .style('cursor','pointer').on('click',(_event,d)=>inspect(d.receiver,d.source))
@@ -1669,6 +1682,11 @@
           inspect(receivers[row],sources[column],true);
         }
       });
+    // Excluded cells remain present with truthful zero values. A view, support
+    // or inspection change refreshes all cells. Connected cells always update,
+    // so a coefficient becoming zero cannot leave a stale mark.
+    const marks=staticChanged?allMarks:allMarks.filter(d=>d.connected);
+    marks.attr('data-weight-change',d=>d.delta).attr('aria-label',d=>'Inspect '+cellLabel(d));
     animate(marks).attr('fill',d=>changing?shade(d.delta):color(d.change==='removed'?'var(--background)':d.change==='retained'?matrixColors.connected:matrixColors[d.change] || matrixColors.inactive))
       .attr('stroke',d=>changing?(d.change==='added'?color(matrixColors.added):d.change==='removed'?color(matrixColors.removed):d.connected?'#404047':'transparent'):d.change==='removed'?color(matrixColors.removed):d.change==='added'?color(matrixColors.added):'transparent')
       .attr('stroke-width',d=>changing&&d.connected?1.2:d.change==='removed'?1.4:0).attr('stroke-dasharray',d=>changing&&d.change==='removed'?'2 2':null);
@@ -1677,6 +1695,7 @@
       .attr('width',cellWidth+1).attr('height',cellHeight+1).attr('rx',3).attr('stroke','#1d1d1f').attr('stroke-width',2).attr('display',inspected?null:'none');
     svg.select('.matrix-selected-row').attr('x',left-2).attr('y',top+receivers.indexOf(matrixReceiver)*cellHeight-1)
       .attr('width',width-left-5).attr('height',cellHeight+2).attr('rx',3).attr('stroke','#1d1d1f').attr('stroke-width',1).attr('display',matrixReceiver?null:'none');
+    if(staticChanged) {
     const rows=svg.select('.matrix-rows').selectAll('g').data(receivers).join(enter=>{
       const g=enter.append('g').attr('role','button').attr('tabindex',0).style('cursor','pointer');
       g.append('rect').attr('x',-10).attr('width',20).attr('height',cellHeight).attr('y',-cellHeight/2).attr('rx',3);
@@ -1692,9 +1711,10 @@
       });
     rows.select('rect').attr('fill',bus=>bus===selectedBus?'var(--primary)':'transparent');
     rows.select('text').style('fill',bus=>bus===selectedBus?'#fff':'var(--muted-foreground)').text(bus=>bus);
+    }
     const geometryKey=[PowerDemo.constants.networkId,width,available,receivers.length,sources.length,
       inspectedSource,[...noisySources].join(','),window.innerWidth,window.innerHeight].join('|');
-    updateMatrixScrollHint(false,geometryKey);
+    updateMatrixScrollHint(staticChanged,geometryKey);
   }
   function chartBase(el, observations, keys, yTitle, xTitle, height, options={}) {
     const width = Math.max(240,displayWidth(el));
