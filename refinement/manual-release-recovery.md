@@ -1,0 +1,18 @@
+# Manual attack release recovery
+
+The first final source 6e6b4d65e86fdd0173dd105a6b391023d27135b4 was not published. Validation 39279821357 failed in two browser fixtures. The adaptive fixture read an inverter inspector while the fresh manual default correctly selected household bus 6 and had no inspector. The network fixture still expected inspected source 7 after a fresh network switch. Its broad archived smoke had passed before the network assertion. These are documented fixture mismatches with the explicitly authorized manual default, not a reason to change the plant or suppress an assertion.
+
+The reviewed descendant keeps every runtime, engine, HTML, CSS, build input, physical parameter, baseline, controller and manual default byte identical to that source. The adaptive browser first verifies bus 6, no inspector, power interaction, interactive environment, manual-v1 and no corrupted sources. It then selects the actual inverter 7 local matrix cell through native desktop or touch interaction and verifies no physical state, action, cost, command, link or fault changed. It explicitly selects Forecast corruption before the existing corruption and repair sequence. Every executed gain, support, command sum, bound, boundary, four cost trace, topology event and exact replay assertion remains required.
+
+The network browser now verifies the clean household bus 6 selection with null inverter inspection and quiet manual sources. Its original explicit archived v13 fixture and all archived numerical, browser, network, interaction and replay protections remain.
+
+Publication pixel review now includes the existing release browser artifact with recursive relative paths. This exposes actual captured manual attack desktop and phone PNGs to the authenticated review route, including nested restoration evidence. It does not add a dashboard or change any displayed product.
+
+The original source's full-response, ongoing-browser, release-browser, long-session-browser, review-ongoing and solar audit all completed successfully; validate and adaptive-browser failed, prepare-candidate was skipped. All completed logs were independently read. Six original manual restart screenshots were inspected as actual pixels through the authenticated Git blob route. They show paused time zero, household bus 6, quiet sources, all four methods, 900 kW for toy8 and 150 kW for feeder24 and feeder47. Larger phone network/matrix views use their existing horizontal scrolling. Those observations do not replace the new full validation.
+
+The original ready tree e895afca452850e6dbcb40eb8a4003596d0e4c46 was a local review tree and returned 404 through the connected public Git tree API. Because this authorized correction changes only tests, review plumbing and this record, its full ready tree necessarily differs from the original handoff tree. Reestablish exact source and ready child ancestry and complete tree after all eight descendant validation jobs succeed. The child must change only index.html. Compare the descendant source against the original source to prove product inputs are unchanged, then require the same independent expected runtime hashes below before any promotion. Record the actual updated source/ready/tree and logs in hosted progress rather than claiming the old full tree matched.
+
+Expected built index SHA256 remains bff935ae9acc35b011ef1d1f9bd5ddc0db127fbb4db60777f6121cc4b4d01340.
+Expected environment SHA256 remains 11b5a646d3197f054b40c3eeea16f7246d8c79b7f6459ac9bbcae0331e840ce0.
+
+No failed job is cancelled, retried or erased. A new full validation on the reviewed descendant is required. Manual release provenance remains separate from scheduled implementation completions.

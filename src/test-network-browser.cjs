@@ -244,7 +244,13 @@ async function main() {
     assert.ok(state.selectedBus >= 1 && state.selectedBus <= networks[id].buses);
     assert.deepEqual(Object.values(snapshot.cumulative), [0, 0, 0, 0]);
     assert.equal(state.historyIndex, null);
-    assert.equal(state.inspectedSource, 7, 'New ongoing trial selects the mandatory local source instead of stale inspection');
+    // A new manual trial selects household bus 6; no inverter inspector is
+    // fabricated for a receiver that has no actuator. Archived v13 follows below.
+    assert.equal(state.selectedBus,6,'New manual trial selects aggregate household demand');
+    assert.equal(state.inspectedSource,null,'Non-inverter selection clears stale inspection');
+    assert.equal(snapshot.initialOptions.powerScenario,'interactive');
+    assert.equal(snapshot.attackProfile,'manual-v1');
+    assert.deepEqual(snapshot.faults,[],'Network switching starts with no forecast attacks');
     await checkLayout(surface, id);
     // Keep the original finite controller and reference arithmetic checks
     // under their actual archived v13 protocol after testing the new handoff.

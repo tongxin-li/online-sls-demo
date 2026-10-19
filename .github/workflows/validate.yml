@@ -219,7 +219,7 @@ jobs:
 
   review-ongoing:
     if: always() && github.event_name == 'push' && startsWith(github.ref, 'refs/heads/cloud/refine/') && needs.ongoing-browser.result != 'cancelled'
-    needs: [ongoing-browser, long-session-browser]
+    needs: [ongoing-browser, long-session-browser, release-browser]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -236,6 +236,10 @@ jobs:
         with:
           name: long-session-browser-evidence
           path: ${{ runner.temp }}/ongoing-review/long-session
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-browser-evidence
+          path: ${{ runner.temp }}/ongoing-review/release
       - name: Make captured ongoing pixels available for authenticated review
         env:
           GH_TOKEN: ${{ github.token }}

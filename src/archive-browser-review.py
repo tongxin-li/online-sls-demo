@@ -12,7 +12,7 @@ import urllib.request
 
 root = Path(os.environ["REVIEW_ROOT"])
 repo = os.environ["GITHUB_REPOSITORY"]
-for image in sorted(root.glob("*.png")):
+for image in sorted(root.rglob("*.png")):
     data = image.read_bytes()
     request = urllib.request.Request(
         f"https://api.github.com/repos/{repo}/git/blobs",
@@ -36,5 +36,5 @@ for image in sorted(root.glob("*.png")):
     )
     with urllib.request.urlopen(text_request) as response:
         text_result = json.load(response)
-    print("BROWSER_REVIEW_BLOB " + json.dumps({"file": image.name, "sha": result["sha"],
+    print("BROWSER_REVIEW_BLOB " + json.dumps({"file": image.relative_to(root).as_posix(), "sha": result["sha"],
           "base64_text_sha": text_result["sha"], "bytes": len(data)}))

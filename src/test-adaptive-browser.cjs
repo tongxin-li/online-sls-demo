@@ -21,7 +21,7 @@ async function main(){
   const d=document.querySelector('#power-response-demo').powerDemo,s=d.getSnapshot();
   return {network:s.networkId,protocol:s.protocol,phase:s.phase,t:s.t,samples:s.sampleCount,history:s.history.length,
    costs:s.cumulative,states:s.states,commandQ:s.commandQ,lastExecution:s.lastExecution,adaptation:s.adaptation,
-   learning:s.learning,links:s.recommendations,deployedSupport:s.deployedSupport,faults:s.faults,
+   learning:s.learning,options:s.initialOptions,attackProfile:s.attackProfile,links:s.recommendations,deployedSupport:s.deployedSupport,faults:s.faults,
    ui:d.getState(),evidence:d.getLinkEvidence(),gain:d.getResponseHistory()};
  });
  const click=async(page,selector,mobile)=>{const element=page.locator(selector);if(mobile)await element.tap();else await element.click();};
@@ -77,6 +77,17 @@ async function main(){
    if(network!=='feeder24')await page.locator('#pr-network-scenario').selectOption(network);
    const start=await read(page);assert.equal(start.network,network);assert.equal(start.t,0);assert.equal(start.ui.playing,false);
    assert.ok(Object.values(start.costs).every(value=>value===0));
+   // manual-v1 deliberately starts at household bus 6, not an inverter.
+   // Verify that default, then choose a real local receiver through the matrix.
+   assert.equal(start.options.powerScenario,'interactive');assert.equal(start.attackProfile,'manual-v1');
+   assert.equal(start.ui.selectedBus,6);assert.equal(start.ui.inspectedSource,null);
+   assert.deepEqual(start.faults,[],'Fresh manual sources begin quiet');
+   assert.equal(start.ui.intervention,'power','Manual power is the fresh interaction');
+   await click(page,'#pr-matrix .matrix-cell[data-receiver="7"][data-source="7"]',mobile);
+   const inspected=await read(page);
+   assert.equal(inspected.ui.selectedBus,7);assert.equal(inspected.ui.inspectedSource,7);
+   for(const field of ['t','costs','states','commandQ','lastExecution','links','faults'])
+    assert.deepEqual(inspected[field],start[field],'Choosing a receiver is read only '+field);
    await setting(page,'speed','32');
    await inspect(page,'before playback');
    await click(page,'#pr-run',mobile);await until(page,75);await pause(page,mobile);
@@ -85,6 +96,7 @@ async function main(){
    for(let i=0;i<4;i++){await click(page,'#pr-cost-gap',mobile);await click(page,'#pr-cost-total',mobile);}
    assert.equal((await read(page)).ui.playing,true,'Cost switching preserves playback');
    const beforeAttack=await read(page);
+   await page.locator('#pr-intervention').selectOption('forecast');
    await click(page,'#pr-pulse',mobile);assert.ok((await read(page)).faults.includes(7));
    await until(page,beforeAttack.t+90);await pause(page,mobile);
    const corrupted=await read(page);await inspect(page,'after source corruption');
