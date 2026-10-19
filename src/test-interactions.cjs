@@ -21,6 +21,7 @@ assert.equal(original.split(cardStart).length,2,'Topology cards anchor must be u
 const withoutCards=original.slice(0,original.indexOf(cardStart))+original.slice(original.indexOf(cardEnd));
 const source=withoutCards.replace(anchor,
   '  drawNetwork=renderNetworkInspection;drawCost=drawStage=drawVoltage=drawConvergence=highlightTopology=()=>{};\n'+
+  '  if(!window.useQueuedDrawing)requestLiveRender=()=>render();\n'+
   '  drawMatrix=drawTopologyHistory;drawResponseHistory=()=>{};\n'+
   '  root.bindTestBus=(element,bus)=>bindAttackTarget(element,()=>bus);\n'+
   '  root.testSummary=()=>comparisonSummary();\n'+
@@ -87,7 +88,7 @@ function target(tagName='DIV') {
   };
 }
 
-function harness(saved,experiment='prediction',reducedMotion=true,fresh=false) {
+function harness(saved,experiment='prediction',reducedMotion=true,fresh=false,queuedDrawing=false) {
   const clock=new Clock(),nodes=new Map(),savedStates=[],captures=new Map();
   function element(tagName='DIV') {
     const node=target(tagName);
@@ -141,6 +142,8 @@ function harness(saved,experiment='prediction',reducedMotion=true,fresh=false) {
   root.querySelectorAll=selector=>selector==='[data-series]'?[...seriesButtons.values()]:[];
   const document=Object.assign(target(),{getElementById:()=>root,createElement:tag=>target(tag.toUpperCase()),createTextNode:text=>({textContent:text})});
   const window=Object.assign(target(),{d3,PowerDemo,TopologyTimeline,matchMedia:()=>({matches:reducedMotion}),
+    useQueuedDrawing:queuedDrawing,
+    requestAnimationFrame:fn=>clock.setTimeout(()=>fn(clock.now),16),cancelAnimationFrame:clock.clearTimeout,
     openai:{widgetState:saved,setWidgetState:state=>{savedStates.push(plain(state));return Promise.resolve();}}});
   vm.runInNewContext(source,{window,document,PowerDemo,d3,TopologyTimeline,console,
     performance:{now:()=>clock.now},setTimeout:clock.setTimeout,clearTimeout:clock.clearTimeout,
@@ -251,6 +254,27 @@ test('late timers do not burst through missed physical samples',async()=>{
   assert.ok(h.clock.next()[1].at>=10000+recoveryDelay);
   await h.clock.advance(recoveryDelay-.01);assert.equal(h.snapshot().t,1);
   await h.clock.advance(.01);assert.equal(h.snapshot().t,2);
+});
+
+test('short drawing delays retain every due physical sample and attack',async()=>{
+  const h=harness();h.change('speed','32');h.change('attack-mode','pulse');h.quickClick();
+  h.clock.now=90;await h.clock.runNext();
+  assert.equal(h.snapshot().t,2);assert.equal(h.snapshot().history.length,2);
+  assert.equal(pulses(h).length,1,'A single attack must not be duplicated by catchup');
+  h.click('run');assert.equal(h.saved().privateContent.t,2);
+});
+
+test('Pause and Step flush a pending playback drawing without extra samples',async()=>{
+  const h=harness(undefined,'prediction',true,false,true);
+  h.click('run');assert.equal(h.snapshot().t,1);assert.equal(h.node('clock').textContent,'1 s');
+  await h.samples(1);assert.equal(h.snapshot().t,2);
+  assert.equal(h.node('clock').textContent,'1 s','The queued drawing has not run yet');
+  h.click('run');assert.equal(h.state().playing,false);assert.equal(h.node('clock').textContent,'2 s');
+  assert.equal(h.saved().privateContent.t,2);assert.equal(h.clock.tasks.size,0);
+  h.click('step');assert.equal(h.snapshot().t,3);assert.equal(h.node('clock').textContent,'3 s');
+  await h.samples(2);assert.equal(h.snapshot().t,3,'Cancelled drawing never advances the plant');
+  h.click('run');assert.equal(h.snapshot().t,4);assert.equal(h.node('clock').textContent,'4 s');
+  h.click('run');assert.equal(h.clock.tasks.size,0);
 });
 
 test('attacks interleave safely with comparison batches and continue after the batch',async()=>{

@@ -94,6 +94,9 @@
   let comparing = false;
   let timer = null;
   let nextTickAt = 0;
+  let renderFrame = null;
+  let lastRenderAt = -Infinity;
+  const LIVE_RENDER_PERIOD=1000/16;
   let heldAttack = null;
   const continuousAttacks = new Map();
   const activeAttacks = () => [...continuousAttacks.values(), ...(heldAttack ? [heldAttack] : [])];
@@ -723,6 +726,17 @@
     playing = false;
     if (timer) clearTimeout(timer);
     timer = null;
+    if(renderFrame!==null) window.cancelAnimationFrame(renderFrame);
+    renderFrame=null;
+  }
+  function requestLiveRender() {
+    if(renderFrame!==null) return;
+    renderFrame=window.requestAnimationFrame(now=>{
+      renderFrame=null;
+      if(!playing)return;
+      if(now-lastRenderAt<LIVE_RENDER_PERIOD) {requestLiveRender();return;}
+      render();
+    });
   }
   function schedule() {
     if (!playing) return;
@@ -730,10 +744,19 @@
     if(!nextTickAt) nextTickAt=performance.now()+period;
     timer=setTimeout(() => {
       timer=null;
-      tick();
-      // Never burst through missed samples after a busy or hidden frame.
-      nextTickAt=Math.max(nextTickAt+period,performance.now()+period*.15);
-      if(playing) schedule();
+      const started=performance.now();
+      // Recover modest drawing delays, but never replay a suspended tab's wall
+      // time. Every due sample still executes control, learning and history.
+      if(started-nextTickAt>4*period)nextTickAt=started-period*.85;
+      let count=0;
+      do {
+        tick(false);count++;nextTickAt+=period;
+      } while(playing&&nextTickAt<=performance.now()&&count<4&&performance.now()-started<8);
+      if(playing) {
+        requestLiveRender();
+        nextTickAt=Math.max(nextTickAt,performance.now()+period*.15);
+        schedule();
+      } else render();
     },Math.max(0,nextTickAt-performance.now()));
   }
   function enterComparison(preserveAttack=false) {
@@ -773,7 +796,7 @@
     for(const attack of activeAttacks()) {
       if(attack.lastQueuedAt<simulation.t) pulse(attack.bus,{repeated:true});
     }
-    advanceSample();snapshot=simulation.snapshot();
+    snapshot=advanceSample();
     transitioned=startAutomaticComparison() || transitioned;
     if(comparisonComplete()) {
       stop();announce('Comparison complete · All costs retained · Continue to explore');
@@ -781,10 +804,9 @@
     if(transitioned || comparisonComplete()) save();
     return transitioned;
   }
-  function tick() {
-    if (isFit()) { simulation.fitStep(100); fitSteps+=100; }
+  function tick(draw=true) {
+    if (isFit()) { snapshot=simulation.fitStep(100); fitSteps+=100; }
     else advanceLiveSample();
-    snapshot = simulation.snapshot();
     if (!forecastMode() && !isFit() && lastPulse && snapshot.t>lastPulse.t) {
       const state=attackState(lastPulse.bus);
       announce((state==='continuous'||state==='held'?'Adding attacks':state==='fading'?'Disturbance fading':state==='paused'?'Paused':'Disturbance ended')+' · Bus '+lastPulse.bus+' · t = '+snapshot.t+' s');
@@ -792,7 +814,7 @@
     if(comparisonComplete()) announce('Comparison complete · All costs retained · Continue to explore');
     else if (snapshot.mode === 'completed' && !playing) announce('Run or Step to continue');
     if (snapshot.mode === 'converged') { stop(); announce('Fit converged · Return to simulation'); }
-    render();
+    if(draw)render();
     if (snapshot.t % 30 === 0 || !playing) save();
   }
   function resetExperiment() {
@@ -2080,6 +2102,11 @@
     layout();
   }
   function render() {
+    // Explicit actions, including Pause and Step, always draw the current
+    // snapshot immediately and supersede any pending playback drawing pass.
+    if(renderFrame!==null)window.cancelAnimationFrame(renderFrame);
+    renderFrame=null;
+    lastRenderAt=performance.now();
     // Read all visible chart widths in one phase before controls or SVG mutate
     // the layout. Newly exposed charts fall back to a fresh measurement.
     const nodes=new Set([...root.querySelectorAll('svg'),$('network').parentElement,$('matrix').parentElement]);
@@ -2096,7 +2123,14 @@
   if (!matrixReference) captureMatrixReference();
   actionNote(snapshot.pendingPulses?.length ? 'Pulse queued · Run or Step' : attackInstruction());
   window.addEventListener('openai:set_globals',e=>{if(!playing&&!restored&&!journal.length){hydrate(e.detail?.globals?.widgetState);render();}});
-  new ResizeObserver(()=>render()).observe(root);
+  let observedRootWidth=null;
+  new ResizeObserver(entries=>{
+    const width=entries[0]?.contentRect.width;
+    // Chart text can change the dashboard height every sample. Only a width
+    // change needs fresh chart geometry and an additional full drawing pass.
+    if(width===undefined||width===observedRootWidth)return;
+    observedRootWidth=width;matrixGeometry=null;render();
+  }).observe(root);
   // Font loading and viewport changes can alter glyph extents without changing
   // the trial. Clear only visual geometry and redraw with the same observations.
   const refreshMatrixGeometry=()=>{matrixGeometry=null;render();};
