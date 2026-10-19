@@ -1,29 +1,38 @@
 'use strict';
-const test=require('node:test'),assert=require('node:assert/strict'),crypto=require('node:crypto');
+const test=require('node:test'),assert=require('node:assert/strict');
 const Demo=require('./simulation.js'),toy=Demo.forNetwork('toy8');
+const baseline=require('./fixtures/strong-stress-standard.json');
 const keys=toy.constants.controllers;
 const options={protocol:'adaptive-phi-v2',experiment:'communication',powerScenario:'forecasted-demand',beta:4,seed:17};
 const trial=extra=>new toy.Simulation({...options,...extra});
 const run=(sim,count)=>{for(let i=0;i<count;i++)sim.step();return sim.snapshot();};
 const near=(actual,expected,message,tolerance=1e-13)=>assert.ok(Number.isFinite(actual)&&Math.abs(actual-expected)<=tolerance,message+' '+actual+' versus '+expected);
 const truth=(api,sim,t)=>api.math.matvec(api.model.powerToVoltage,sim.forecasts[t].base.map((value,i)=>value-api.model.lag*(t?sim.forecasts[t-1].base[i]:0)));
-function legacyDigest(sim){
-  const s=sim.snapshot(),data={states:s.states,cumulative:s.cumulative,commandQ:s.commandQ,stage:s.stage,
+function legacyTrajectory(sim){
+  const s=sim.snapshot();return {states:s.states,cumulative:s.cumulative,commandQ:s.commandQ,stage:s.stage,
     disturbances:s.lastSample.disturbances,forecasts:sim.forecasts.map(f=>({t:f.t,issuedAt:f.issuedAt,base:f.base,forecast:f.forecast}))};
-  return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex');
+}
+function compareBaseline(actual,expected,field='trajectory'){
+  if(typeof expected==='number'){near(actual,expected,field,1e-12);return;}
+  if(expected===null||typeof expected!=='object'){assert.equal(actual,expected,field);return;}
+  assert.ok(actual!==null&&typeof actual==='object',field+' remains an object');
+  assert.equal(Array.isArray(actual),Array.isArray(expected),field+' retains its shape');
+  assert.deepEqual(Object.keys(actual),Object.keys(expected),field+' retains every field and array entry');
+  for(const key of Object.keys(expected))compareBaseline(actual[key],expected[key],field+'.'+key);
 }
 
 test('absent and explicit standard profiles preserve captured prechange v13 v14 and v15 trajectories exactly',()=>{
-  // Captured before introducing stressProfile, seed 17 and 80 executed actions.
-  const fixtures=[
-    [undefined,'b5d1d6cb44cfeb17030634aea34bdfd0da420ae9a4c5959baa5286fa15c8a248'],
-    ['continuous-phi-v1','4d11e7bce962d123b90af002c14f1d3474d8a436fcba2da9eb67ac88a1ecff86'],
-    ['adaptive-phi-v2','2d85c4708248d7ca307146cee319a8db689f4748711424028ccdceef7657e330']
-  ];
-  for(const [protocol,digest] of fixtures){
+  // Captured from prechange 4e34cd7 with unchanged controller dependencies.
+  // Math and floating point JSON bytes can differ between Node runtimes and
+  // platforms. Cross runtime values use 1e-12 absolute tolerance; same runtime
+  // omitted versus explicit Standard and archived replay remain exact.
+  assert.equal(baseline.sourceRevision,'4e34cd76542a521466fc2a8da676da447ae7539e');
+  assert.equal(baseline.actions,80);assert.equal(baseline.seed,17);assert.equal(baseline.network,'toy8');
+  for(const fixture of baseline.cases){
+    const protocol=fixture.protocol??undefined;
     const absent=trial({protocol}),standard=trial({protocol,stressProfile:'standard'});
     assert.deepEqual(run(absent,80),run(standard,80));
-    assert.equal(legacyDigest(absent),digest,'Original states, costs, commands, forcing and issued forecasts');
+    compareBaseline(legacyTrajectory(absent),fixture.data);
     assert.equal(Object.hasOwn(absent.initialOptions,'stressProfile'),false,'Original replay options remain unchanged');
     assert.equal(Object.hasOwn(absent.snapshot(),'stressProfile'),false,'Original snapshot shape remains unchanged');
     assert.equal(absent.snapshot().forecastFaultScale??1,1);
