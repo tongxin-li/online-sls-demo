@@ -5602,7 +5602,8 @@
           "Invalidate visual geometry for network rebuilds, viewport changes, font loading, inspected and noisy source styling, native scroll and keyboard navigation. No controller or scientific data is cached.",
           "Add independent long ongoing glyph range and whole edge label checks after native scroll, actual glyph metric changes with font completion events and viewport resizing on desktop and phone. Preserve exact physical state, costs and receipts across inspection.",
           "Add release verification to the existing validation workflow using its existing isolated Chromium dependency. Candidates verify exact built page and environment bytes plus native playback and replay locally; main pushes verify the same expected bytes and behavior at the sole canonical URL through authorized cloud compute.",
-          "Batch visible chart and network viewport width measurements before each complete render writes controls or SVG. Reuse only those widths within that render and measure newly revealed charts freshly. This removes read and write layout interleaving without caching controller or chart data."
+          "Batch visible chart and network viewport width measurements before each complete render writes controls or SVG. Reuse only those widths within that render and measure newly revealed charts freshly. This removes read and write layout interleaving without caching controller or chart data.",
+          "Make README and environment protocol descriptions independent of temporary candidate status while keeping exact publication state and all earlier slow outcomes in durable progress and engineering evidence."
         ],
         "remaining_gaps": [
           "Native 47 bus playback remains slower than requested with roughly 150 ms frame gaps. Public main still runs the archived protocol."
