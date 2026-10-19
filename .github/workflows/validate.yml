@@ -31,6 +31,7 @@ jobs:
           node src/test-interactions.cjs
           node src/test-continuous-response.cjs
           node src/test-causal-source-scale.cjs
+          node src/test-receiver-packet-ledger.cjs
           node src/test-forecast-calibration.cjs
           node src/test-simulation.cjs
           node src/test-communication.cjs

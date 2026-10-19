@@ -1,0 +1,34 @@
+{
+  "schema": "receiver-packet-ledger-foundation-v1",
+  "status": "Unpublished foundation only, absent from production build and controller",
+  "base_main": "658e2611278c1ea746c5009dd5adfa5d71663f03",
+  "clock": "Nondecreasing logical actions. At t only targets below t are revealed. Immutable forecast issue time is max(0,target-preview+1).",
+  "support": "Constructor retains mandatory local permission and exactly the network remote budget. No support activation method exists in this foundation.",
+  "control_requests": "Only the newly issued target t+preview-1, or all startup targets at action zero, may use zero delay control delivery. Old missing context requires paid transition retrieval.",
+  "probe_requests": "Only already revealed targets. Probe and transition delays are at least one logical sample. Arrival is requestedAt+delay and must not overflow.",
+  "payload": "One immutable source forecast and one correction scalar per packet. Every arrived schema payload charges both scalar slots, even when rejected. Transport exceptions record failure and no delivered payload. Requests and deliveries are distinct.",
+  "cache": "An already paid accepted source and target can be reused for retrospective evaluation without another charge. Excluded sources remain forbidden for control. No full simulator forecast array, forcing truth, quality label or packet reconstruction is exposed.",
+  "metadata": "Correction availableAt cannot exceed delivery action. trainedThrough is null or a target strictly before delivery action and revealed no later than availableAt.",
+  "tests": [
+    "Configuration rejects missing locals, duplicate or unknown sources and wrong remote budgets.",
+    "Only explicitly requested source getters are accessed and excluded control access fails before the reader is called.",
+    "Requests do not count as delivered payload. Probe cannot arrive or be read before one sample.",
+    "Historical retrieval cannot masquerade as ordinary zero latency control.",
+    "Future issue and unrevealed probe targets fail before any source access.",
+    "Exact independent scalar arithmetic separates local, remote, control, probe and transition including rejected packets.",
+    "Cached paid probe remains evaluation only while support is fixed.",
+    "Forecast and correction receipts are copied and immutable after sender changes.",
+    "Invalid, nonfinite and future correction packets are rejected but charged, with valid batch entries still admitted.",
+    "Transport failures remain auditable and inaccessible without invented delivered bytes.",
+    "Duplicate pending and accepted requests do not read or charge again.",
+    "All network receiver placements and exact budgets retain one local plus the actual remote count.",
+    "Predefined 6001 action rotating paid probe and ordinary control sequence is deterministic with all events and counters retained.",
+    "No actual response, support, command, baseline, physical cost or version 13 or 14 replay is changed by this module."
+  ],
+  "next_gates": [
+    "Independent candidate replay equations and source fit timing",
+    "Selector with all losses and no future or unrequested packet access",
+    "Feasible synthesis and atomic paid transition with exact replay",
+    "All protocol numerical and native browser acceptance before default changes"
+  ]
+}

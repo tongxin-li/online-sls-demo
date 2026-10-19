@@ -9186,7 +9186,8 @@
         "counted_invocation": true,
         "counted_completed": false,
         "changes": [
-          "Read completed main and candidate results, retry both failed main jobs without changing assertions, inspect actual 6001 action pixels, then implement a bounded causal packet admission foundation on an unpublished candidate if evidence allows."
+          "Read completed main and candidate results, retry both failed main jobs without changing assertions, inspect actual 6001 action pixels, then implement a bounded causal packet admission foundation on an unpublished candidate if evidence allows.",
+          "Implement an isolated receiver scoped packet ledger with fixed constructor support, explicit paid requests, delayed probes and context retrieval, immutable receipts and separate delivered scalar accounting. It is absent from build.py and no live controller uses it."
         ],
         "tests": {
           "prior_main": {
@@ -9205,9 +9206,62 @@
             "conclusion": "success",
             "all_six_jobs": "success",
             "nested_images": 6
+          },
+          "foundation": {
+            "status": "Pending Actions validation",
+            "predefined": "refinement/packet-ledger-plan.json",
+            "test_file": "src/test-receiver-packet-ledger.cjs",
+            "cases": 17,
+            "no_live_integration": true
           }
         },
-        "next_focus": "First read current main and all final jobs and logs from 39235839246. Retry the failed canonical release job after the run finishes, diagnose page readiness without weakening physical assertions if the failure repeats, and record the outcome separately. Then validate the candidate checkpoint archive helper and inspect actual nested 6001 action PNGs. Continue the public packet ledger and paid probe admission plan only after these release evidence gaps are reconciled. Do not count this documentation, audit or restoration test addition as an algorithm improvement. Preserve all histories, physical costs and archived replay."
+        "next_focus": "First read current main and all final jobs and logs from 39235839246. Retry the failed canonical release job after the run finishes, diagnose page readiness without weakening physical assertions if the failure repeats, and record the outcome separately. Then validate the candidate checkpoint archive helper and inspect actual nested 6001 action PNGs. Continue the public packet ledger and paid probe admission plan only after these release evidence gaps are reconciled. Do not count this documentation, audit or restoration test addition as an algorithm improvement. Preserve all histories, physical costs and archived replay.",
+        "implementation_plan": "refinement/ongoing-support-plan.md",
+        "packet_admission_plan": "refinement/packet-ledger-plan.json",
+        "pixel_review": {
+          "source": "d75cf21b63628e7d5384c53488775df25888e0d1",
+          "run": 39236325451,
+          "job": 118009227549,
+          "long_session_images": [
+            {
+              "file": "long-session/feeder24-desktop-long-restored.png",
+              "sha": "205ed5cecf845cd596755b8667483879fbcb99f4",
+              "base64_text_sha": "8ac3bf084d5b75b25c4c3789b8f48bb281a24077",
+              "bytes": 349363
+            },
+            {
+              "file": "long-session/feeder24-phone-long-restored.png",
+              "sha": "89a69a4626e6a47ff823254e0f91149daf0181c8",
+              "base64_text_sha": "70034c000a040a1187f636bffa42444272987796",
+              "bytes": 307451
+            },
+            {
+              "file": "long-session/feeder47-desktop-long-restored.png",
+              "sha": "ca28d3599fa3cb80715414840cdfcc1424b574fe",
+              "base64_text_sha": "f6337b18c5e39f699f40da28443ff6bd57fed7dd",
+              "bytes": 432627
+            },
+            {
+              "file": "long-session/feeder47-phone-long-restored.png",
+              "sha": "ecd93a684d94d77d380bad9ca60442626756d759",
+              "base64_text_sha": "d96c8b1a0f3ee7c79e32f158006e108836f2a151",
+              "bytes": 281155
+            },
+            {
+              "file": "long-session/toy8-desktop-long-restored.png",
+              "sha": "f44ae3ba22316d386c267b2a56f26d861965d046",
+              "base64_text_sha": "1bfe1f21ccd36b1c8c0605573663efce24f4a862",
+              "bytes": 285458
+            },
+            {
+              "file": "long-session/toy8-phone-long-restored.png",
+              "sha": "1444f5208046aca370435911908162a7a7ea1113",
+              "base64_text_sha": "67b9b3b4df957e556f7bbeb07212acc025e25a88",
+              "bytes": 244385
+            }
+          ],
+          "status": "All six actual full page PNGs inspected through authenticated Git blob wrappers. Four panels, full signed gain history, retained four method costs and action 6002 are visible. Larger phone network and matrix use labeled horizontal scroll. No new visual or algorithm change is implied."
+        }
       }
     ],
     "active_run": {
