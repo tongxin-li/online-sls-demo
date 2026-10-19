@@ -6,6 +6,16 @@ The experiment uses a forecasted demand and solar cycle on the LinDistFlow feede
 
 Unless another size is named, numerical values and archived studies below describe the original 24 bus reference. The Network menu selects 8, 24 or 47 buses.
 
+## Strong stress setting
+
+The visible Stress menu selects Standard or Strong and starts a fresh trial. New trials default to Strong with 150 kW manual requests. Saved trials without a stress setting keep the exact Standard environment and their recorded request strength.
+
+Strong replaces the phase cancelling demand cycle with a declared unipolar surge every 30 seconds with a two second rise, four second hold and two second fall. Peak additional power is 120 kW for each aggregate household bus and 60 kW for solar loss and battery charging. The second radial branch is delayed by four seconds. Original line impedances, background power, inverter ratings and limits, cost weights, common feedback and all four controller definitions stay unchanged. The bounded physical schedule enters the same sealed preview for every controller.
+
+Strong also doubles the additive noise standard deviation of faulty sources, leaving quiet source noise unchanged. Clicking a source toggles its reliability for future messages, including the larger faulty error. It does not alter physical power or rewrite issued forecasts. Bigger forecastable loads can make prediction more useful, while bigger prediction errors can favor feedback only. No ranking is enforced. Physical attacks remain unannounced and all recovery costs remain included.
+
+[All stress outcomes](refinement/strong-stress-outcomes.json) retain Standard, the exploratory sustained excursion and the selected short surge. The short surge reduces persistent saturation rather than altering any controller. Run `node src/benchmark-strong-stress.cjs --json` to reproduce selected profile cases. The exploratory and validation roles of each seed are recorded separately.
+
 ## Continuous response and topology
 
 Fresh trials use `adaptive-phi-v2`. The controller learns all finite memory predictive state and input response matrices in a feasible coordinate space. It updates after each newly completed response row once 30 rows are available and reviews incoming prediction support every 30 updates. New support is projected through the same exact constrained synthesis geometry. Every issued forecast retains its matrices and admitted messages through expiration. The plant, clock and cumulative costs do not reset.
@@ -75,9 +85,9 @@ Experiment settings retains Reference and adds a 20 second solar outage in held 
 
 See [environment](environment.html) and the [paired audit](benchmark-stress.json) for physical bounds, all predefined seeds, reference/outage outcomes and matched-reference recovery. This preset does not claim a universal prediction advantage.
 
-## Forecasted demand and solar
+## Archived Standard demand and solar
 
-The default scenario is `forecasted-demand` at β 4 with the unchanged demonstration seed 20261013. It adds known 60 second operating envelopes to the original stochastic background with a 6 kW scale. Household demand varies by ±35 kW, solar generation loss varies from 0 to 30 kW, and battery power varies by ±15 kW. Household and battery phase is `2π (bus mod 6) / 6`. Solar loss is `15 (1 − cos(2π t / 60))` kW. Existing equipment bounds remain in force. These constructed profiles represent aggregate load schedules, a passing cloud and charging schedules rather than measured utility traces.
+The archived default scenario is `forecasted-demand` at β 4 with the unchanged demonstration seed 20261013. It adds known 60 second operating envelopes to the original stochastic background with a 6 kW scale. Household demand varies by ±35 kW, solar generation loss varies from 0 to 30 kW, and battery power varies by ±15 kW. Household and battery phase is `2π (bus mod 6) / 6`. Solar loss is `15 (1 − cos(2π t / 60))` kW. Existing equipment bounds remain in force. These constructed profiles represent aggregate load schedules, a passing cloud and charging schedules rather than measured utility traces.
 
 The physical schedule enters the base power before voltage forcing and forecast noise are formed. Its five sample preview includes the current action. A target action t is issued at max(0, t − 4) and observed at state t + 1. The same sealed forecast and physical base drive every controller. Manual power attacks remain unforecast additions, and their costs are never removed from a trial.
 

@@ -1,7 +1,10 @@
 <div id="power-response-demo">
   <div class="pr-scenario-heading">
     <div><strong id="pr-scenario-name">Forecasted demand</strong><p id="pr-scenario-description" class="pr-caption">Forecast settings · β 4 · 8 quiet / 15 noisy</p></div>
-    <label class="pr-network-picker" for="pr-network-scenario"><span>Network</span><select id="pr-network-scenario" aria-label="Network scenario" title="Changing network starts a fresh learning and comparison trial"><option value="toy8">Toy · 8 buses</option><option value="feeder24" selected>Feeder · 24 buses</option><option value="feeder47">Larger · 47 buses</option></select></label>
+    <div class="pr-scenario-controls">
+      <label class="pr-network-picker" for="pr-network-scenario"><span>Network</span><select id="pr-network-scenario" aria-label="Network scenario" title="Changing network starts a fresh trial"><option value="toy8">Toy · 8 buses</option><option value="feeder24" selected>Feeder · 24 buses</option><option value="feeder47">Larger · 47 buses</option></select></label>
+      <label class="pr-network-picker" for="pr-stress-profile"><span>Stress</span><select id="pr-stress-profile" aria-label="Stress profile" title="Changing stress starts a fresh trial"><option value="standard">Standard</option><option value="strong-v1" selected>Strong</option></select></label>
+    </div>
   </div>
   <div class="pr-controlbar" aria-label="Simulation controls">
     <div class="pr-toolbar">
@@ -129,7 +132,7 @@
     </div>
     <div class="pr-settings-group pr-attack-settings" aria-label="Power attack settings">
       <label class="pr-setting-control" for="pr-attack-mode">Power attack <select id="pr-attack-mode" aria-label="Attack mode"><option value="continuous" selected>Continuous</option><option value="pulse">Pulse</option></select></label>
-      <label class="pr-setting-control" for="pr-strength">Per pulse <select id="pr-strength" aria-label="Pulse strength" title="Requested power per pulse. Applied power respects equipment limits"><option value="50">50 kW</option><option value="100" selected>100 kW</option><option value="150">150 kW</option></select></label>
+      <label class="pr-setting-control" for="pr-strength">Per pulse <select id="pr-strength" aria-label="Pulse strength" title="Requested power per pulse. Applied power respects equipment limits"><option value="50">50 kW</option><option value="100">100 kW</option><option value="150" selected>150 kW</option></select></label>
     </div>
   <div class="pr-experiment-bar" aria-label="Experiment selection">
     <label class="pr-experiment-choice" for="pr-experiment">Experiment <select id="pr-experiment" aria-label="Experiment"><option value="communication" selected>Communication topology</option><option value="prediction">Prediction adaptation</option></select></label>

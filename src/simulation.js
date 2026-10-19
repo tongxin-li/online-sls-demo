@@ -68,8 +68,21 @@
     homeAmplitudeKw:35,solarLossMaxKw:30,batteryAmplitudeKw:15,maxScheduledKw:35,
     phaseRule:network.id==='feeder47'?'2 pi times original branch bus modulo 6 divided by 6':'2 pi times bus modulo 6 divided by 6',previewSamples:PREVIEW,leadSteps:PREVIEW-1,
     noisySources:BUS_PROFILES.filter(profile=>profile.role==='Homes').map(profile=>profile.bus)};
-  function scheduledPower(bus,t){
+  const STRONG_DEMAND={...FORECASTED_DEMAND,label:'Strong demand and solar cycle',periodSeconds:30,
+    homeAmplitudeKw:120,solarLossMaxKw:60,batteryAmplitudeKw:60,maxScheduledKw:120,
+    riseSeconds:2,holdSeconds:4,fallSeconds:2,
+    phaseRule:'First radial branch starts at 0 seconds, second at 4 seconds. The larger feeder repeats these delays.',
+    forecastFaultScale:2,profile:'strong-v1'};
+  function scheduledPower(bus,t,stressProfile='standard'){
     const profile=BUS_PROFILES[bus-1],phaseBus=network.id==='feeder47'&&bus>24?bus-23:bus,phase=2*Math.PI*(phaseBus%6)/6;
+    if(stressProfile==='strong-v1'){
+      // A declared forecastable aggregate demand excursion. Its value is shared
+      // by all controllers and never depends on learned support or trial cost.
+      const delay=phaseBus>=13?4:0,phaseTime=Math.max(0,t-delay)%30;
+      const envelope=phaseTime<2?(1-Math.cos(Math.PI*phaseTime/2))/2
+        :phaseTime<6?1:phaseTime<8?(1+Math.cos(Math.PI*(phaseTime-6)/2))/2:0;
+      return (profile.role==='Homes' ? .120 : profile.role==='Solar'||profile.role==='Battery' ? .060 : 0)*envelope;
+    }
     if(profile.role==='Solar')return .030*(1-Math.cos(2*Math.PI*t/60))/2;
     if(profile.role==='Battery')return .015*Math.sin(2*Math.PI*t/60+phase);
     if(profile.role==='Homes')return .035*Math.sin(2*Math.PI*t/60+phase);
@@ -378,10 +391,13 @@
       if(!preset)throw new RangeError('Forecast preset must be reliable, uniform, or mixed');
       const powerScenario=options.powerScenario || 'reference';
       if(!['reference','solar-outage','forecasted-demand'].includes(powerScenario))throw new RangeError('Unknown power scenario');
+      if(options.stressProfile!==undefined&&!['standard','strong-v1'].includes(options.stressProfile))throw new RangeError('Unknown stress profile');
       this.preset=preset;
       this.initialOptions={networkId:network.id,experiment,beta,powerScenario,seed:options.seed===undefined?20261013:options.seed,
         horizon:ongoing?null:options.horizon===undefined?480:options.horizon,preset:id,
         faultBuses:options.faultBuses===undefined?(powerScenario==='forecasted-demand'&&id==='mixed'?FORECASTED_DEMAND.noisySources:preset.faultBuses).slice():options.faultBuses.slice()};
+      // Absent settings retain the exact archived environment and replay shape.
+      if(options.stressProfile==='strong-v1')this.initialOptions.stressProfile=options.stressProfile;
       if(!ongoing&&(!Number.isInteger(this.initialOptions.horizon)||this.initialOptions.horizon<1))throw new Error('Invalid horizon');
       if(ongoing)this.initialOptions.protocol=options.protocol;
       this.phase=ongoing?'ongoing':'discovery';this.discoveryRecord=null;this.deployedSupport=null;this.reset();
@@ -459,7 +475,7 @@
       while(this.forecasts.length<this.t+PREVIEW){
         const s=this.forecasts.length,rho=.72,innovation=Math.sqrt(1-rho*rho);
         this.latent=this.latent.map(v=>rho*v+innovation*this.random.normal());
-        const scheduled=this.options.powerScenario==='forecasted-demand'?Array.from({length:N},(_,i)=>scheduledPower(i+1,s)):null;
+        const scheduled=this.options.powerScenario==='forecasted-demand'?Array.from({length:N},(_,i)=>scheduledPower(i+1,s,this.options.stressProfile)):null;
         const randomBase=Array.from({length:N},(_,i)=>i===0?0:AMPLITUDE*(.35*this.latent[0]+.65*this.latent[i+1]));
         const base=randomBase.map((value,i)=>i===0?0:boundedPowerDeviation(i+1,scheduled?scheduled[i]+value:value));
         const previous=s?this.forecasts[s-1].base:Array(N).fill(0);
@@ -467,9 +483,9 @@
         const forecast=baseW.map((v,i)=>{
           const faulty=this.faults.has(i+1),noise=this.random.normal();
           const scale=model.forecastForcingScales[i];
-          if(this.options.experiment==='communication')return i===0?0:v+scale*this.options.beta*(faulty?4:.05)*noise;
+          if(this.options.experiment==='communication')return i===0?0:v+scale*this.options.beta*(faulty?(this.options.stressProfile==='strong-v1'?8:4):.05)*noise;
           return i===0?0:(faulty?this.preset.faultyGain:this.preset.gain)*v
-            +scale*(faulty?this.preset.faultyNoise:this.preset.noise)*noise;
+            +scale*(faulty?this.preset.faultyNoise*(this.options.stressProfile==='strong-v1'?2:1):this.preset.noise)*noise;
         });
         const scheduledMetadata=scheduled?{scheduledPowerKw:scheduled.map(value=>value*POWER_BASE_KW),
           scheduledAppliedKw:base.map((value,i)=>(value-boundedPowerDeviation(i+1,randomBase[i]))*POWER_BASE_KW)}:{};
@@ -619,7 +635,7 @@
       this.lastScenarioApplications=issued.scheduledPowerKw
         ?issued.scheduledPowerKw.flatMap((requestedKw,i)=>i>0?[{bus:i+1,requestedKw,appliedKw:issued.scheduledAppliedKw[i],forecasted:true,role:BUS_PROFILES[i].role}]:[])
         :scenarioRequest.flatMap((requestedKw,i)=>requestedKw>0?[{bus:i+1,requestedKw,appliedKw:(scenarioBase[i]-background[i])*1000}]:[]);
-      if(this.options.powerScenario==='forecasted-demand'&&time%FORECASTED_DEMAND.periodSeconds===0)
+      if(this.options.powerScenario==='forecasted-demand'&&time%(this.options.stressProfile==='strong-v1'?STRONG_DEMAND:FORECASTED_DEMAND).periodSeconds===0)
         this.eventLog.push(deepFreeze({t:time,type:'scenario',kind:'demand',forecasted:true,message:'Scheduled demand and solar cycle'}));
       if((this.phase==='deployment'||this.ongoing)&&this.options.powerScenario==='solar-outage'&&(time===30||time===50))
         this.eventLog.push(deepFreeze({t:time,type:'scenario',action:time===30?'start':'restore',buses:SOLAR_BUSES.slice(),message:time===30?'Solar outage begins':'Solar generation restored'}));
@@ -784,7 +800,8 @@
         const x=this.states[key].slice(1).map((v,i)=>v-model.baseDrop[i+1]),px=matvec(model.P,x);return[key,x.reduce((sum,v,i)=>sum+v*px[i],0)];}));
       const scheduled=this.options.powerScenario==='forecasted-demand';
       const sumScheduled=role=>this.lastScenarioApplications.filter(item=>!role||item.role===role).reduce((sum,item)=>sum+item.appliedKw,0);
-      const scenario=scheduled?{...FORECASTED_DEMAND,forecasted:true,phaseLabel:'Demand and solar cycle',
+      const strong=this.options.stressProfile==='strong-v1';
+      const scenario=scheduled?{...(strong?STRONG_DEMAND:FORECASTED_DEMAND),forecasted:true,phaseLabel:strong?'Strong demand and solar cycle':'Demand and solar cycle',
         action:this.lastSample?.t ?? null,active:this.t>0,
         requestedKw:this.lastScenarioApplications.reduce((sum,item)=>sum+item.requestedKw,0),appliedKw:sumScheduled(),
         demandChangeKw:sumScheduled('Homes'),solarLossKw:sumScheduled('Solar'),batteryChangeKw:sumScheduled('Battery'),
@@ -806,6 +823,7 @@
         ...Object.fromEntries(Object.entries(this.power).map(([key,value])=>[key,value.slice()])),powerDeviation:this.powerDeviation.slice(),
         edgeData:model.edgeData.map((edge,i)=>({...edge,pKw:flows.online[i].pKw,qKvar:Object.fromEntries(CONTROLLERS.map(key=>[key,flows[key][i].qKvar]))})),
         powerScenario:this.options.powerScenario,scenario,
+        ...(strong?{stressProfile:'strong-v1',forecastFaultScale:2}:{}),
         ...(scheduled?{scheduledPowerKw:this.lastSample?.scheduledPowerKw.slice() || Array(N).fill(0)}:{}),
         lastScenarioApplications:this.lastScenarioApplications.map(p=>({...p})),lastPulseApplications:this.lastPulseApplications.map(p=>({...p})),costStates:Object.fromEntries(CONTROLLERS.map(key=>[key,this.costStates[key].slice()])),
         learning:{...this.learning},calibration:{...this.calibration,matrix:copy(this.calibration.matrix)},predictionDiagnostics:this.predictionDiagnostics,lastPreview:this.lastPreview.slice(),
@@ -871,7 +889,7 @@
   return{Simulation,replayContinuous,model,voltageMetrics,constants:deepFreeze({networkId:network.id,networkLabel:network.label,N,M,edges:EDGES,edgeData:model.edgeData,inverterBuses:INVERTER_BUSES,
     amplitude:AMPLITUDE,ridge:RIDGE,rawRidge:RAW_RIDGE,remoteBudget:REMOTE_BUDGET,preview:PREVIEW,window:WINDOW,warmup:WARMUP,
     busProfiles:BUS_PROFILES,controllers:CONTROLLERS,forecastPresets:FORECAST_PRESETS,communicationBetas:COMMUNICATION_BETAS,
-    communicationStressBetas:COMMUNICATION_STRESS_BETAS,forecastedDemand:FORECASTED_DEMAND,tolerance:TOLERANCE,horizon:480,
+    communicationStressBetas:COMMUNICATION_STRESS_BETAS,forecastedDemand:FORECASTED_DEMAND,strongDemand:STRONG_DEMAND,tolerance:TOLERANCE,horizon:480,
     pulseDefault:PULSE_DEFAULT,pulseMin:PULSE_MIN,pulseMax:PULSE_MAX,pulseUnits:'kW',powerBaseKw:POWER_BASE_KW,
     baseKv:BASE_KV,baseMva:BASE_MVA,sampleSeconds:SAMPLE_SECONDS,tauSeconds:TAU_SECONDS,inverterKvar:70}),
     math:{zeros,eye,transpose,multiply,matvec,combine,frobenius,normInf,solveSPD,getDesign,Response,calibratedScores,

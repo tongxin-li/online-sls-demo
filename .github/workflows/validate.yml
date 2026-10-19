@@ -83,6 +83,7 @@ jobs:
         run: |
           node src/test-adaptive-response.cjs
           node src/test-adaptive-integration.cjs
+          node src/test-strong-stress.cjs
 
   ongoing-browser:
     runs-on: ubuntu-latest

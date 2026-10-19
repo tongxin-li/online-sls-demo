@@ -39,13 +39,23 @@ async function main(){
   }
   browser=await chromium.launch({headless:true,...(process.env.DEMO_BROWSER_CHANNEL?{channel:process.env.DEMO_BROWSER_CHANNEL}:{})});
   const read=page=>page.evaluate(()=>{const root=document.querySelector('#power-response-demo'),api=root.powerDemo,s=api.getSnapshot();
-   const row=window.PowerDemo.forNetwork(root.dataset.network).constants.inverterBuses.indexOf(7),j=5,p=s.lastExecution?.policies.online;
+   const network=window.PowerDemo.forNetwork(root.dataset.network),ui=api.getState(),bus=ui.selectedBus;
+   const row=network.constants.inverterBuses.indexOf(7),j=5,p=s.lastExecution?.policies.online;
    return {network:s.networkId,protocol:s.protocol,phase:s.phase,t:s.t,history:s.history.length,samples:s.sampleCount,
+    stressProfile:s.stressProfile||'standard',initialOptions:s.initialOptions,forecastFaultScale:s.forecastFaultScale||1,
+    selectedStress:document.querySelector('#pr-stress-profile').value,pulseStrength:document.querySelector('#pr-strength').value,
+    scenarioCaption:document.querySelector('#pr-scenario-description').textContent,
+    noiseCaption:document.querySelector('#pr-noise-caption').textContent,
+    expectedNoiseMpu:1000*network.model.forecastForcingScales[bus-1]*s.beta*(s.faults.includes(bus)?4*(s.forecastFaultScale||1):.05),
     costs:s.cumulative,states:s.states,commandQ:s.commandQ,lastExecution:s.lastExecution,
     gain:p?.gainNorms[row][j]??null,currentGain:p?.currentGains[row][j]??null,responseGains:p?.gainNorms??null,
     topologyAdaptive:s.deployedSupport?.topologyAdaptive,learning:s.learning,
-    faulty:s.faults.includes(7),playing:api.getState().playing,attacks:api.getState().activeAttackBuses};
+    faulty:s.faults.includes(7),playing:ui.playing,attacks:ui.activeAttackBuses};
   });
+  const checkNoiseCaption=value=>{
+   const displayed=Number(value.noiseCaption.match(/Noise SD ([\d.e+-]+)/)?.[1]);
+   assert.ok(Number.isFinite(displayed)&&Math.abs(displayed-value.expectedNoiseMpu)<=Math.max(1e-8,value.expectedNoiseMpu*.005),'Caption reports actual configured source noise in mpu');
+  };
   for(const mobile of [false,true])for(const network of ['toy8','feeder24','feeder47']){
    const context=await browser.newContext({viewport:mobile?{width:390,height:844}:{width:1440,height:1000},isMobile:mobile,hasTouch:mobile,deviceScaleFactor:1});
    const page=await context.newPage();page.setDefaultTimeout(30000);page.on('pageerror',error=>errors.push(error.message));
@@ -55,14 +65,31 @@ async function main(){
    const fresh=await read(page);assert.equal(fresh.network,network);assert.equal(fresh.protocol,'adaptive-phi-v2');
    assert.equal(fresh.topologyAdaptive,true,'Fresh release executes online response and topology adaptation');
    assert.equal(fresh.t,0);assert.equal(fresh.playing,false);
+   assert.equal(fresh.stressProfile,'strong-v1');assert.equal(fresh.selectedStress,'strong-v1');assert.equal(fresh.initialOptions.stressProfile,'strong-v1');
+   assert.equal(fresh.pulseStrength,'150');assert.equal(fresh.forecastFaultScale,2);checkNoiseCaption(fresh);
+   assert.match(fresh.scenarioCaption,/30 s.*Homes 120 kW.*Solar loss 60 kW.*Battery charge 60 kW/);
    const settings=page.locator('#pr-adaptation');await settings.locator('summary').first().click();
    await page.locator('#pr-speed').selectOption('32');await settings.locator('summary').first().click();
    const activate=async selector=>{const node=page.locator(selector);if(mobile)await node.tap();else await node.click();};
    const until=target=>page.waitForFunction(target=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t>=target,target,{timeout:120000,polling:100});
+   if(network==='toy8'){
+    await activate('#pr-run');await until(5);assert.equal((await read(page)).playing,true);
+    await page.locator('#pr-stress-profile').selectOption('standard');const standardStart=await read(page);
+    assert.equal(standardStart.playing,false);assert.equal(standardStart.t,0);assert.equal(standardStart.stressProfile,'standard');assert.equal(standardStart.selectedStress,'standard');
+    assert.equal(Object.hasOwn(standardStart.initialOptions,'stressProfile'),false,'Standard preserves archived option shape');
+    assert.equal(standardStart.forecastFaultScale,1);assert.ok(Object.values(standardStart.costs).every(value=>value===0));checkNoiseCaption(standardStart);
+    await activate('#pr-run');await until(6);await activate('#pr-run');const standard=await read(page);
+    await page.reload({waitUntil:'networkidle'});const restored=await read(page);
+    for(const field of ['t','costs','states','commandQ','lastExecution','initialOptions','stressProfile','selectedStress','pulseStrength'])assert.deepEqual(restored[field],standard[field],'Exact Standard trial replay '+field);
+    assert.equal(restored.playing,false);assert.equal(restored.forecastFaultScale,1);checkNoiseCaption(restored);
+    await page.locator('#pr-stress-profile').selectOption('strong-v1');const strongStart=await read(page);
+    assert.equal(strongStart.t,0);assert.equal(strongStart.playing,false);assert.equal(strongStart.stressProfile,'strong-v1');assert.equal(strongStart.initialOptions.stressProfile,'strong-v1');
+    assert.equal(strongStart.forecastFaultScale,2);assert.equal(strongStart.pulseStrength,'150');assert.ok(Object.values(strongStart.costs).every(value=>value===0));
+   }
    await activate('#pr-run');await until(40);const before=await read(page);
    await activate('#pr-cost-gap');await activate('#pr-cost-total');
    assert.equal((await read(page)).playing,true,'Cost controls preserve playback');
-   await activate('#pr-pulse');assert.equal((await read(page)).faulty,true);
+   await activate('#pr-pulse');const noisy=await read(page);assert.equal(noisy.faulty,true);checkNoiseCaption(noisy);assert.match(noisy.noiseCaption,/Noisy SD ×2/);
    await until(before.t+75);const corrupted=await read(page);
    assert.ok(responseDistance(corrupted.responseGains,before.responseGains)>1e-8,'Executed response matrices continue adapting after source corruption');
    await activate('#pr-pulse');assert.equal((await read(page)).faulty,false);
@@ -81,11 +108,11 @@ async function main(){
    assert.equal(await page.locator('#pr-cost-detail tr').count(),4);
    assert.equal(await page.locator('#pr-cost path.data-series').count(),4);
    await page.reload({waitUntil:'networkidle'});const replay=await read(page);
-   for(const field of ['t','costs','states','commandQ','lastExecution'])assert.deepEqual(replay[field],final[field],'Exact deployed replay '+field);
+   for(const field of ['t','costs','states','commandQ','lastExecution','initialOptions','stressProfile','selectedStress','pulseStrength'])assert.deepEqual(replay[field],final[field],'Exact deployed replay '+field);
    await page.screenshot({path:path.join(output,network+(mobile?'-phone':'-desktop')+'.png'),fullPage:true});
    const checkpoint=value=>({t:value.t,gain:value.gain,currentGain:value.currentGain,responseGains:value.responseGains,
     action:value.lastExecution.action,trainedThrough:value.lastExecution.trainedThrough});
-   const result={network,mobile,actions:final.t,before:checkpoint(before),corrupted:checkpoint(corrupted),repaired:checkpoint(repaired),costs:final.costs,exactReplay:true,passed:true};
+   const result={network,mobile,stressProfile:final.stressProfile,stressSwitchVerified:network==='toy8',actions:final.t,before:checkpoint(before),corrupted:checkpoint(corrupted),repaired:checkpoint(repaired),costs:final.costs,exactReplay:true,passed:true};
    results.push(result);console.log('RELEASE_PLAYBACK '+JSON.stringify(result));await context.close();
   }
   assert.deepEqual(errors,[]);

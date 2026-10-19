@@ -1,0 +1,4187 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUtc": "2026-10-19T13:49:18.582988+00:00",
+  "purpose": "Declared physical stress characterization and exploratory transient comparison. This is not a reproduction of paper experiments and does not certify universal controller dominance.",
+  "provenance": {
+    "baseRevision": "4e34cd76542a521466fc2a8da676da447ae7539e",
+    "originalSimulationSha256": "841487f5e5a6bb7798bcd3a6b1716cc9d6ad6fd18ee2bf71323fd3c7a716de21",
+    "controllerFiles": {
+      "src/adaptive-response.js": {
+        "baselineSha256": "4bf45171bd1899bbbe0b76548be0b2351ddbfe6c6d8a927c13f1d48466397226",
+        "candidateSha256": "4bf45171bd1899bbbe0b76548be0b2351ddbfe6c6d8a927c13f1d48466397226",
+        "unchanged": true
+      },
+      "src/continuous-response.js": {
+        "baselineSha256": "6e386894e4a82fa03ef28ad3ffba583d6aecce7b4ef37c94b43069572acef076",
+        "candidateSha256": "6e386894e4a82fa03ef28ad3ffba583d6aecce7b4ef37c94b43069572acef076",
+        "unchanged": true
+      },
+      "src/response-controller.js": {
+        "baselineSha256": "fa33f8b1b6dea3c4d8562ac4c5484c5cbc3c7e453e35f41769eddd1fc11a4a8b",
+        "candidateSha256": "fa33f8b1b6dea3c4d8562ac4c5484c5cbc3c7e453e35f41769eddd1fc11a4a8b",
+        "unchanged": true
+      },
+      "src/forecast-calibration.js": {
+        "baselineSha256": "148abf6d0e701563d89c5017c147289948e85cfb2976db5b32385feb0d13bc2d",
+        "candidateSha256": "148abf6d0e701563d89c5017c147289948e85cfb2976db5b32385feb0d13bc2d",
+        "unchanged": true
+      },
+      "src/causal-source-scale.js": {
+        "baselineSha256": "4a818d886696c7d425a042c34328056ae9ed6ebe9960b8357c78a2cc69d88efd",
+        "candidateSha256": "4a818d886696c7d425a042c34328056ae9ed6ebe9960b8357c78a2cc69d88efd",
+        "unchanged": true
+      }
+    },
+    "physicalModels": {
+      "toy8": {
+        "baselineSha256": "475d38babd5255f54c8ff6f774d6ca5ee3377be1663c5bb1f84a9e821798ca89",
+        "candidateSha256": "475d38babd5255f54c8ff6f774d6ca5ee3377be1663c5bb1f84a9e821798ca89",
+        "unchanged": true,
+        "canonicalization": "SHA256 of JSON.stringify(api.model) in original property order"
+      },
+      "feeder24": {
+        "baselineSha256": "2c0bf7e480e5c8073dcc5c56067a3c533a6949c1c7618a0eac322e3a67be464a",
+        "candidateSha256": "2c0bf7e480e5c8073dcc5c56067a3c533a6949c1c7618a0eac322e3a67be464a",
+        "unchanged": true,
+        "canonicalization": "SHA256 of JSON.stringify(api.model) in original property order"
+      },
+      "feeder47": {
+        "baselineSha256": "af28967b6b35fa2e75e22ad915a9b258550b487fb17842974ca261884e95e508",
+        "candidateSha256": "af28967b6b35fa2e75e22ad915a9b258550b487fb17842974ca261884e95e508",
+        "unchanged": true,
+        "canonicalization": "SHA256 of JSON.stringify(api.model) in original property order"
+      }
+    }
+  },
+  "policyKeys": {
+    "online": "Adaptive sparse",
+    "scalar": "Fixed sparse",
+    "static": "Dense prediction",
+    "causal": "Feedback only"
+  },
+  "casePlan": {
+    "coreCases": 16,
+    "additionalHeldOutCases": 4,
+    "largerNetworkCandidateAPICases": 0,
+    "exploratoryShortSurgeCases": 2,
+    "allCasesRetained": 28,
+    "primarySeed": 20261013,
+    "heldOutSeeds": [
+      17,
+      29
+    ],
+    "actionsPerCase": 240,
+    "samplingSeconds": 1,
+    "manualAttacksDuringScreen": false,
+    "defaultBeta": 4,
+    "beta8Purpose": "Sensitivity screen. Default remains beta 4 regardless of rankings.",
+    "selectedActualAPICases": 5,
+    "earlierRaisedCosineLargerNetworkAPICases": 1
+  },
+  "profiles": {
+    "standard": {
+      "homesKw": "35 sin(2 pi t / 60 + phase)",
+      "solarLossKw": "30 (1 - cos(2 pi t / 60)) / 2",
+      "batteryKw": "15 sin(2 pi t / 60 + phase)",
+      "phase": "2 pi (original bus modulo 6) / 6",
+      "faultNoiseMultiplier": 1
+    },
+    "raised-cosine-30": {
+      "candidateOption": "stressProfile = strong-v1 at time of actual 47 bus test",
+      "envelope": "(1 - cos(2 pi max(0, t - delay) / 30)) / 2",
+      "delaySeconds": "0 for original buses 2 through 12 and 4 for original buses 13 through 24. For the second 47 bus branch original bus = bus - 23.",
+      "homesPeakKw": 120,
+      "solarLossPeakKw": 60,
+      "batteryChargingPeakKw": 60,
+      "faultNoiseMultiplier": 2,
+      "quietNoiseMultiplier": 1
+    },
+    "short-surge-30": {
+      "status": "Selected for transient anticipation and reduced sustained saturation after the exploratory screen. Five separate actual API validations are included. All exploratory outcomes remain retained.",
+      "phase": "max(0, t - delay) modulo 30",
+      "envelope": "(1 - cos(pi phase / 2)) / 2 for phase < 2; 1 for 2 <= phase < 6; (1 + cos(pi (phase - 6) / 2)) / 2 for 6 <= phase < 8; 0 otherwise.",
+      "delaySeconds": "Same branch delays as raised-cosine-30",
+      "homesPeakKw": 120,
+      "solarLossPeakKw": 60,
+      "batteryChargingPeakKw": 60,
+      "faultNoiseMultiplier": 2,
+      "quietNoiseMultiplier": 1
+    }
+  },
+  "sharedConditions": {
+    "powerNoise": "Original AR(1) background with rho 0.72 and amplitude 6 kW is unchanged.",
+    "forecast": "Every target forecast is sealed once at max(0, target - 4). Changing the source fault flag affects only future issued packets.",
+    "forecastNoise": "Communication forecast = true voltage forcing + physical source scale * beta * sigma * Normal(0,1). sigma is 4 at faulty sources for standard, 8 for both stronger profiles, and 0.05 at quiet sources for every profile.",
+    "noiseScale": "Source scale remains the original physical forcing scale based on the 6 kW random component. Increasing scheduled demand also changes signal to noise. Fixed beta is not fixed relative forecast error.",
+    "faults": "Reliable uses no faulty sources. Mixed uses every Homes source, as in the existing forecasted demand experiment.",
+    "fairness": "Every policy receives the same realized power stream and the same canonical forecast packets subject to its existing incoming support. No controller, feedback gain, objective, actuator rating, lag, line parameter or sparse budget was retuned.",
+    "cost": "35 times squared deviation from the original nominal feasible voltage profile plus 0.08 times squared bounded command, summed over all 240 actions including startup and learning.",
+    "limits": "Command limit 70 kvar, inverter apparent rating 120 kVA, active solar and battery bound 90 kW. Existing physical power clipping is retained.",
+    "acChecks": "Independent balanced constant power AC check every 5 actions for all four controllers, 48 checkpoints per controller per case. Voltage ranges and saturation counts use all actions."
+  },
+  "findings": [
+    "Stronger forecastable physical demand lowers feeder voltage and increases absolute cost while retaining all four genuine policy costs.",
+    "The raised cosine profile does not create a large relative advantage on 24 or 47 buses. Shared actuator saturation leaves a large common cost component.",
+    "At 24 buses, raised cosine beta 4 mixed gives adaptive 0.52 percent below feedback and about 1.00 percent below fixed sparse; dense remains lower. At beta 8 mixed feedback is lowest.",
+    "At 24 buses, the exploratory short surge beta 4 mixed reduces sparse saturation to about 18 percent and gives adaptive about 3.52 percent below feedback. Adaptive and dense differ by only about 0.026 percent, effectively a tie.",
+    "Forecast corruption alone does not change physical load. Feedback does not consume forecast messages, so stronger corruption can legitimately favor feedback.",
+    "Across the current feeder, all 70 kvar inverter commands can change voltage by at most about 0.00302 pu relative to zero inverter injection. Toy feeder authority is about 0.00192 pu. Similar voltage traces are physically plausible.",
+    "The 47 bus network repeats the two original radial branches. Similar normalized effects are structural and are not evidence of broad independent network generalization.",
+    "For the selected short surge profile, the five actual API checks retain all rankings. Adaptive improves on feedback and fixed sparse in these cases but does not consistently beat dense prediction. The 24 bus default near tie with dense does not persist across the two additional seeds."
+  ],
+  "limitations": [
+    "Only three seeds were screened for raised cosine beta 4 mixed and one for each other case. No significance or universal ranking claim is supported.",
+    "Short surge is an explicitly exploratory alternative, not an independently preregistered superiority result.",
+    "Some controllers saturate often under strong physical stress. Unconstrained response guarantees do not directly transfer to clipped nonlinear execution.",
+    "The stronger profile reaches roughly 0.967 to 0.969 pu on larger feeders and roughly 0.989 pu on the toy feeder. It does not create a mandatory 0.95 pu violation.",
+    "The sampled AC discrepancy grows to about 0.001 pu for large feeder stress. The original representative standard scenario accuracy check of 0.0005 pu remains separate and unchanged.",
+    "Forecast source corruption is measured in voltage forcing units. It is not itself a physical kW load increase.",
+    "The original profiles and these stronger profiles are synthetic feeder demonstrations, not certified equipment or operational planning studies.",
+    "The stronger scheduled profile does not alter the distinction between a constant unforecast clicked power target and a forecast source fault. Large manual unforecast loads can still dominate common costs."
+  ],
+  "summary": [
+    {
+      "network": "toy8",
+      "profileId": "standard",
+      "seed": 20261013,
+      "beta": 4,
+      "quality": "reliable",
+      "cumulativeCosts": {
+        "online": 0.01114848173578572,
+        "scalar": 0.011148697820322741,
+        "static": 0.010583970614354446,
+        "causal": 0.012200275074122094
+      },
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 0.0019382042683644021,
+        "static": -5.3336421840179735,
+        "causal": 8.621062492003347
+      },
+      "voltageRangePu": [
+        0.9947671753712541,
+        1
+      ],
+      "saturationPercent": {
+        "online": 0,
+        "scalar": 0,
+        "static": 0,
+        "causal": 0
+      },
+      "maxSampledACErrorPu": 2.4996449695890988e-05,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 0.17123405635687808
+    },
+    {
+      "network": "toy8",
+      "profileId": "standard",
+      "seed": 20261013,
+      "beta": 4,
+      "quality": "mixed",
+      "cumulativeCosts": {
+        "online": 0.012398643249541848,
+        "scalar": 0.015447229747405972,
+        "static": 0.01732358976817432,
+        "causal": 0.012200275074122094
+      },
+      "ranking": [
+        "causal",
+        "online",
+        "scalar",
+        "static"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 19.73549010220469,
+        "static": 28.429133825832317,
+        "causal": -1.6259319909967553
+      },
+      "voltageRangePu": [
+        0.9947138313893689,
+        1
+      ],
+      "saturationPercent": {
+        "online": 0,
+        "scalar": 0,
+        "static": 0,
+        "causal": 0
+      },
+      "maxSampledACErrorPu": 2.4996449695890988e-05,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 8.48157438111067
+    },
+    {
+      "network": "toy8",
+      "profileId": "standard",
+      "seed": 20261013,
+      "beta": 8,
+      "quality": "reliable",
+      "cumulativeCosts": {
+        "online": 0.011176923371537948,
+        "scalar": 0.011160857486168909,
+        "static": 0.01059637699035145,
+        "causal": 0.012200275074122094
+      },
+      "ranking": [
+        "static",
+        "scalar",
+        "online",
+        "causal"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": -0.14394848593801163,
+        "static": -5.478725244629519,
+        "causal": 8.387939586335795
+      },
+      "voltageRangePu": [
+        0.9947671753712541,
+        1
+      ],
+      "saturationPercent": {
+        "online": 0,
+        "scalar": 0,
+        "static": 0,
+        "causal": 0
+      },
+      "maxSampledACErrorPu": 2.4996449695890988e-05,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 0.3424681127137558
+    },
+    {
+      "network": "toy8",
+      "profileId": "standard",
+      "seed": 20261013,
+      "beta": 8,
+      "quality": "mixed",
+      "cumulativeCosts": {
+        "online": 0.01597545930615878,
+        "scalar": 0.027892607348990905,
+        "static": 0.03744513092337316,
+        "causal": 0.012200275074122094
+      },
+      "ranking": [
+        "causal",
+        "online",
+        "scalar",
+        "static"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 42.725113123077264,
+        "static": 57.33635078256079,
+        "causal": -30.943435366012352
+      },
+      "voltageRangePu": [
+        0.9944840776827775,
+        1
+      ],
+      "saturationPercent": {
+        "online": 0,
+        "scalar": 0,
+        "static": 0,
+        "causal": 0
+      },
+      "maxSampledACErrorPu": 2.5741173263371664e-05,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 16.96314876222134
+    },
+    {
+      "network": "toy8",
+      "profileId": "raised-cosine-30",
+      "seed": 20261013,
+      "beta": 4,
+      "quality": "reliable",
+      "cumulativeCosts": {
+        "online": 0.6596109807171608,
+        "scalar": 0.6596359163798767,
+        "static": 0.6310009012817199,
+        "causal": 0.7228107724584188
+      },
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 0.0037802160398927877,
+        "static": -4.534079012775849,
+        "causal": 8.743615085633452
+      },
+      "voltageRangePu": [
+        0.9891791120252205,
+        1
+      ],
+      "saturationPercent": {
+        "online": 0,
+        "scalar": 0,
+        "static": 31.25,
+        "causal": 0
+      },
+      "maxSampledACErrorPu": 0.00010789082795215066,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 0.024629860630443576
+    },
+    {
+      "network": "toy8",
+      "profileId": "raised-cosine-30",
+      "seed": 20261013,
+      "beta": 4,
+      "quality": "mixed",
+      "cumulativeCosts": {
+        "online": 0.658921204553027,
+        "scalar": 0.6814546830786851,
+        "static": 0.6541431365361691,
+        "causal": 0.7228107724584188
+      },
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 3.306673075288875,
+        "static": -0.7304315752908298,
+        "causal": 8.839044787350229
+      },
+      "voltageRangePu": [
+        0.9891791120252205,
+        1
+      ],
+      "saturationPercent": {
+        "online": 4.583333333333333,
+        "scalar": 5.277777777777778,
+        "static": 24.86111111111111,
+        "causal": 0
+      },
+      "maxSampledACErrorPu": 0.00010789082795215066,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 2.439705111760317
+    },
+    {
+      "network": "toy8",
+      "profileId": "raised-cosine-30",
+      "seed": 20261013,
+      "beta": 8,
+      "quality": "reliable",
+      "cumulativeCosts": {
+        "online": 0.6596357399120876,
+        "scalar": 0.6596822949102659,
+        "static": 0.6310221408676087,
+        "causal": 0.7228107724584188
+      },
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 0.007057184729298659,
+        "static": -4.534484163287414,
+        "causal": 8.740189680829022
+      },
+      "voltageRangePu": [
+        0.9891791120252205,
+        1
+      ],
+      "saturationPercent": {
+        "online": 0,
+        "scalar": 0,
+        "static": 30.97222222222222,
+        "causal": 0
+      },
+      "maxSampledACErrorPu": 0.00010789082795215066,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 0.04925972126088718
+    },
+    {
+      "network": "toy8",
+      "profileId": "raised-cosine-30",
+      "seed": 20261013,
+      "beta": 8,
+      "quality": "mixed",
+      "cumulativeCosts": {
+        "online": 0.6770353721685471,
+        "scalar": 0.7293900740806587,
+        "static": 0.7175141617209616,
+        "causal": 0.7228107724584188
+      },
+      "ranking": [
+        "online",
+        "static",
+        "causal",
+        "scalar"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 7.177874195518868,
+        "static": 5.641531792951078,
+        "causal": 6.332971509843544
+      },
+      "voltageRangePu": [
+        0.9888767960712772,
+        1
+      ],
+      "saturationPercent": {
+        "online": 5.138888888888888,
+        "scalar": 11.944444444444445,
+        "static": 29.166666666666668,
+        "causal": 0
+      },
+      "maxSampledACErrorPu": 0.00011086885661992785,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 4.879410223520633
+    },
+    {
+      "network": "toy8",
+      "profileId": "raised-cosine-30",
+      "seed": 17,
+      "beta": 4,
+      "quality": "mixed",
+      "cumulativeCosts": {
+        "online": 0.6770678146732904,
+        "scalar": 0.7029824020954629,
+        "static": 0.6765511967453939,
+        "causal": 0.7455143691865549
+      },
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 3.6863778303590364,
+        "static": -0.07636050758341906,
+        "causal": 9.181118076630487
+      },
+      "voltageRangePu": [
+        0.9891684655156868,
+        1
+      ],
+      "saturationPercent": {
+        "online": 6.388888888888888,
+        "scalar": 5.972222222222222,
+        "static": 27.500000000000004,
+        "causal": 0
+      },
+      "maxSampledACErrorPu": 0.00010904200589700874,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 2.536269528769566
+    },
+    {
+      "network": "toy8",
+      "profileId": "raised-cosine-30",
+      "seed": 29,
+      "beta": 4,
+      "quality": "mixed",
+      "cumulativeCosts": {
+        "online": 0.6826011569703635,
+        "scalar": 0.7094804283245575,
+        "static": 0.6802066063290801,
+        "causal": 0.7514144613917558
+      },
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 3.788585319776834,
+        "static": -0.35203284105195604,
+        "causal": 9.157836048821526
+      },
+      "voltageRangePu": [
+        0.9889604268721999,
+        1
+      ],
+      "saturationPercent": {
+        "online": 4.722222222222222,
+        "scalar": 4.166666666666666,
+        "static": 30.138888888888886,
+        "causal": 0
+      },
+      "maxSampledACErrorPu": 0.00011670776966032914,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 2.4239051281463238
+    },
+    {
+      "network": "feeder24",
+      "profileId": "standard",
+      "seed": 20261013,
+      "beta": 4,
+      "quality": "reliable",
+      "cumulativeCosts": {
+        "online": 0.10296256916743021,
+        "scalar": 0.10302097373949086,
+        "static": 0.08456498933351606,
+        "causal": 0.1100858734277744
+      },
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 0.05669192392641765,
+        "static": -21.755551533691914,
+        "causal": 6.470679696262459
+      },
+      "voltageRangePu": [
+        0.9852645357009499,
+        1
+      ],
+      "saturationPercent": {
+        "online": 0,
+        "scalar": 0,
+        "static": 0,
+        "causal": 0
+      },
+      "maxSampledACErrorPu": 0.0001927102436598549,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 0.15070794194301335
+    },
+    {
+      "network": "feeder24",
+      "profileId": "standard",
+      "seed": 20261013,
+      "beta": 4,
+      "quality": "mixed",
+      "cumulativeCosts": {
+        "online": 0.12077127270541212,
+        "scalar": 0.1499993993156813,
+        "static": 0.18023761661428847,
+        "causal": 0.1100858734277744
+      },
+      "ranking": [
+        "causal",
+        "online",
+        "scalar",
+        "static"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 19.485495771057796,
+        "static": 32.993303521170795,
+        "causal": -9.70642185497873
+      },
+      "voltageRangePu": [
+        0.9850902280009832,
+        1
+      ],
+      "saturationPercent": {
+        "online": 0,
+        "scalar": 0.10416666666666667,
+        "static": 1.7708333333333333,
+        "causal": 0
+      },
+      "maxSampledACErrorPu": 0.0001927102436598549,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 9.334969217836223
+    },
+    {
+      "network": "feeder24",
+      "profileId": "standard",
+      "seed": 20261013,
+      "beta": 8,
+      "quality": "reliable",
+      "cumulativeCosts": {
+        "online": 0.10306440906391413,
+        "scalar": 0.1030884398841062,
+        "static": 0.0846612924949615,
+        "causal": 0.1100858734277744
+      },
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 0.023310877746406132,
+        "static": -21.73734421789966,
+        "causal": 6.3781701913524245
+      },
+      "voltageRangePu": [
+        0.9852645357009499,
+        1
+      ],
+      "saturationPercent": {
+        "online": 0,
+        "scalar": 0,
+        "static": 0,
+        "causal": 0
+      },
+      "maxSampledACErrorPu": 0.0001927102436598549,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 0.30141588388602675
+    },
+    {
+      "network": "feeder24",
+      "profileId": "standard",
+      "seed": 20261013,
+      "beta": 8,
+      "quality": "mixed",
+      "cumulativeCosts": {
+        "online": 0.16988428295647665,
+        "scalar": 0.2624343785347538,
+        "static": 0.3635617843629445,
+        "causal": 0.1100858734277744
+      },
+      "ranking": [
+        "causal",
+        "online",
+        "scalar",
+        "static"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 35.26599529185575,
+        "static": 53.272238650121494,
+        "causal": -54.31978478867685
+      },
+      "voltageRangePu": [
+        0.983996470210393,
+        1
+      ],
+      "saturationPercent": {
+        "online": 0.9895833333333333,
+        "scalar": 4.895833333333333,
+        "static": 11.927083333333334,
+        "causal": 0
+      },
+      "maxSampledACErrorPu": 0.00019963474808937232,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 18.669938435672442
+    },
+    {
+      "network": "feeder24",
+      "profileId": "raised-cosine-30",
+      "seed": 20261013,
+      "beta": 4,
+      "quality": "reliable",
+      "cumulativeCosts": {
+        "online": 11.627447354014137,
+        "scalar": 11.627276225409641,
+        "static": 11.408690605037865,
+        "causal": 11.747291736611
+      },
+      "ranking": [
+        "static",
+        "scalar",
+        "online",
+        "causal"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": -0.00147178583512007,
+        "static": -1.91745710835276,
+        "causal": 1.0201873358040676
+      },
+      "voltageRangePu": [
+        0.9682939803210043,
+        1
+      ],
+      "saturationPercent": {
+        "online": 42.239583333333336,
+        "scalar": 42.1875,
+        "static": 62.239583333333336,
+        "causal": 32.708333333333336
+      },
+      "maxSampledACErrorPu": 0.0009786428812583736,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 0.017286993617968545
+    },
+    {
+      "network": "feeder24",
+      "profileId": "raised-cosine-30",
+      "seed": 20261013,
+      "beta": 4,
+      "quality": "mixed",
+      "cumulativeCosts": {
+        "online": 11.68629269624961,
+        "scalar": 11.804040851305206,
+        "static": 11.527464465496607,
+        "causal": 11.747291736611
+      },
+      "ranking": [
+        "static",
+        "online",
+        "causal",
+        "scalar"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 0.9975241236358133,
+        "static": -1.377824509703762,
+        "causal": 0.5192604536353101
+      },
+      "voltageRangePu": [
+        0.9682898329222632,
+        1
+      ],
+      "saturationPercent": {
+        "online": 43.59375,
+        "scalar": 44.21875,
+        "static": 66.71875,
+        "causal": 32.708333333333336
+      },
+      "maxSampledACErrorPu": 0.0009789052621518302,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 2.1414562860401802
+    },
+    {
+      "network": "feeder24",
+      "profileId": "raised-cosine-30",
+      "seed": 20261013,
+      "beta": 8,
+      "quality": "reliable",
+      "cumulativeCosts": {
+        "online": 11.627605315755638,
+        "scalar": 11.627461399709626,
+        "static": 11.408788696979581,
+        "causal": 11.747291736611
+      },
+      "ranking": [
+        "static",
+        "scalar",
+        "online",
+        "causal"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": -0.0012377254248767684,
+        "static": -1.9179653913126387,
+        "causal": 1.0188426706247045
+      },
+      "voltageRangePu": [
+        0.9682939803210043,
+        1
+      ],
+      "saturationPercent": {
+        "online": 42.135416666666664,
+        "scalar": 42.135416666666664,
+        "static": 62.239583333333336,
+        "causal": 32.708333333333336
+      },
+      "maxSampledACErrorPu": 0.0009786428812583736,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 0.03457398723593713
+    },
+    {
+      "network": "feeder24",
+      "profileId": "raised-cosine-30",
+      "seed": 20261013,
+      "beta": 8,
+      "quality": "mixed",
+      "cumulativeCosts": {
+        "online": 11.875185308460662,
+        "scalar": 12.246265350589603,
+        "static": 11.755122817882253,
+        "causal": 11.747291736611
+      },
+      "ranking": [
+        "causal",
+        "static",
+        "online",
+        "scalar"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 3.0301486331183853,
+        "static": -1.0213631319595076,
+        "causal": -1.0887068672268922
+      },
+      "voltageRangePu": [
+        0.9680990173261641,
+        1
+      ],
+      "saturationPercent": {
+        "online": 45.104166666666664,
+        "scalar": 48.90625,
+        "static": 69.42708333333333,
+        "causal": 32.708333333333336
+      },
+      "maxSampledACErrorPu": 0.0009805382889496173,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 4.28291257208036
+    },
+    {
+      "network": "feeder24",
+      "profileId": "raised-cosine-30",
+      "seed": 17,
+      "beta": 4,
+      "quality": "mixed",
+      "cumulativeCosts": {
+        "online": 11.601441786264672,
+        "scalar": 11.722246924100382,
+        "static": 11.4230848959232,
+        "causal": 11.640987715818385
+      },
+      "ranking": [
+        "static",
+        "online",
+        "causal",
+        "scalar"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 1.0305629852186458,
+        "static": -1.5613723610259305,
+        "causal": 0.33971283639424793
+      },
+      "voltageRangePu": [
+        0.9680348930514645,
+        1
+      ],
+      "saturationPercent": {
+        "online": 41.458333333333336,
+        "scalar": 41.822916666666664,
+        "static": 65.625,
+        "causal": 31.302083333333336
+      },
+      "maxSampledACErrorPu": 0.0009987115047156436,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 2.186395703198018
+    },
+    {
+      "network": "feeder24",
+      "profileId": "raised-cosine-30",
+      "seed": 29,
+      "beta": 4,
+      "quality": "mixed",
+      "cumulativeCosts": {
+        "online": 11.225910557472718,
+        "scalar": 11.358871272891562,
+        "static": 11.10835727896544,
+        "causal": 11.296869658689486
+      },
+      "ranking": [
+        "static",
+        "online",
+        "causal",
+        "scalar"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 1.170545138020547,
+        "static": -1.0582417863879234,
+        "causal": 0.6281306535407106
+      },
+      "voltageRangePu": [
+        0.9688602546454479,
+        1
+      ],
+      "saturationPercent": {
+        "online": 41.66666666666667,
+        "scalar": 42.239583333333336,
+        "static": 65.10416666666666,
+        "causal": 31.822916666666668
+      },
+      "maxSampledACErrorPu": 0.0009374208939408879,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 2.192875642188072
+    },
+    {
+      "network": "feeder47",
+      "profileId": "raised-cosine-30",
+      "seed": 20261013,
+      "beta": 4,
+      "quality": "mixed",
+      "cumulativeCosts": {
+        "online": 23.577139664479496,
+        "scalar": 23.791839205027912,
+        "static": 23.274630767455758,
+        "causal": 23.665111977015936
+      },
+      "ranking": [
+        "static",
+        "online",
+        "causal",
+        "scalar"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 0.9024083371538756,
+        "static": -1.299736610415869,
+        "causal": 0.3717384165428019
+      },
+      "voltageRangePu": [
+        0.9676176942324318,
+        1
+      ],
+      "saturationPercent": {
+        "online": 43.75,
+        "scalar": 43.48958333333333,
+        "static": 65.33854166666667,
+        "causal": 31.770833333333332
+      },
+      "maxSampledACErrorPu": 0.0010141060997225226,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 2.136071777420728,
+      "evaluation": "earlier exploratory raised cosine API before final profile selection",
+      "role": "historical exploratory API case, not current selected profile"
+    },
+    {
+      "network": "feeder24",
+      "profileId": "short-surge-30",
+      "seed": 20261013,
+      "beta": 4,
+      "quality": "reliable",
+      "cumulativeCosts": {
+        "online": 6.199298067535187,
+        "scalar": 6.199147270378277,
+        "static": 5.961090391180626,
+        "causal": 6.469127428893371
+      },
+      "ranking": [
+        "static",
+        "scalar",
+        "online",
+        "causal"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": -0.0024325467734969304,
+        "static": -3.996042011155992,
+        "causal": 4.17103178634312
+      },
+      "voltageRangePu": [
+        0.9670048981688103,
+        1
+      ],
+      "saturationPercent": {
+        "online": 18.229166666666664,
+        "scalar": 18.229166666666664,
+        "static": 24.322916666666668,
+        "causal": 18.90625
+      },
+      "maxSampledACErrorPu": 0.0010264977707690193,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 0.019542188791561756
+    },
+    {
+      "network": "feeder24",
+      "profileId": "short-surge-30",
+      "seed": 20261013,
+      "beta": 4,
+      "quality": "mixed",
+      "cumulativeCosts": {
+        "online": 6.241661763657325,
+        "scalar": 6.343912694529677,
+        "static": 6.243308175951551,
+        "causal": 6.469127428893371
+      },
+      "ranking": [
+        "online",
+        "static",
+        "scalar",
+        "causal"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 1.6117959971378975,
+        "static": 0.026370831742186417,
+        "causal": 3.5161722772704334
+      },
+      "voltageRangePu": [
+        0.9670048981688103,
+        1
+      ],
+      "saturationPercent": {
+        "online": 18.4375,
+        "scalar": 21.302083333333332,
+        "static": 30.729166666666668,
+        "causal": 18.90625
+      },
+      "maxSampledACErrorPu": 0.0010264977707690193,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 2.420822495542265
+    },
+    {
+      "network": "toy8",
+      "profileId": "short-surge-30",
+      "seed": 20261013,
+      "beta": 4,
+      "quality": "mixed",
+      "evaluation": "selected actual candidate API",
+      "role": "default network validation",
+      "cumulativeCosts": {
+        "online": 0.3449100807994407,
+        "scalar": 0.36063386108774015,
+        "static": 0.35696670192964086,
+        "causal": 0.38068443415806064
+      },
+      "ranking": [
+        "online",
+        "static",
+        "scalar",
+        "causal"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 4.360039914408912,
+        "static": 3.377519826086347,
+        "causal": 9.397377499224566
+      },
+      "voltageRangePu": [
+        0.9885062222934562,
+        1
+      ],
+      "saturationPercent": {
+        "online": 2.7777777777777777,
+        "scalar": 2.638888888888889,
+        "static": 11.805555555555555,
+        "causal": 0
+      },
+      "maxSampledACErrorPu": 0.00011187909487098135,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 2.7418456242408724
+    },
+    {
+      "network": "feeder24",
+      "profileId": "short-surge-30",
+      "seed": 20261013,
+      "beta": 4,
+      "quality": "mixed",
+      "evaluation": "selected actual candidate API",
+      "role": "default network validation",
+      "cumulativeCosts": {
+        "online": 6.241661763657325,
+        "scalar": 6.343912694529677,
+        "static": 6.243308175951551,
+        "causal": 6.469127428893371
+      },
+      "ranking": [
+        "online",
+        "static",
+        "scalar",
+        "causal"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 1.6117959971378975,
+        "static": 0.026370831742186417,
+        "causal": 3.5161722772704334
+      },
+      "voltageRangePu": [
+        0.9670048981688103,
+        1
+      ],
+      "saturationPercent": {
+        "online": 18.4375,
+        "scalar": 21.302083333333332,
+        "static": 30.729166666666668,
+        "causal": 18.90625
+      },
+      "maxSampledACErrorPu": 0.0010264977707690193,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 2.420822495542265
+    },
+    {
+      "network": "feeder24",
+      "profileId": "short-surge-30",
+      "seed": 17,
+      "beta": 4,
+      "quality": "mixed",
+      "evaluation": "selected actual candidate API",
+      "role": "held out seed validation",
+      "cumulativeCosts": {
+        "online": 6.290973106921077,
+        "scalar": 6.408048992077207,
+        "static": 6.232189180493445,
+        "causal": 6.515476630794184
+      },
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 1.8270129535663802,
+        "static": -0.9432307769414856,
+        "causal": 3.445696095540164
+      },
+      "voltageRangePu": [
+        0.966427899694746,
+        1
+      ],
+      "saturationPercent": {
+        "online": 18.90625,
+        "scalar": 21.510416666666668,
+        "static": 31.822916666666668,
+        "causal": 18.802083333333332
+      },
+      "maxSampledACErrorPu": 0.0010406666138185194,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 2.4527555720261147
+    },
+    {
+      "network": "feeder24",
+      "profileId": "short-surge-30",
+      "seed": 29,
+      "beta": 4,
+      "quality": "mixed",
+      "evaluation": "selected actual candidate API",
+      "role": "held out seed validation",
+      "cumulativeCosts": {
+        "online": 6.147531460470584,
+        "scalar": 6.2666179668212285,
+        "static": 6.136567846611313,
+        "causal": 6.356828794594836
+      },
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 1.9003313586555128,
+        "static": -0.17866035434327493,
+        "causal": 3.2924802741614823
+      },
+      "voltageRangePu": [
+        0.9670330944589876,
+        1
+      ],
+      "saturationPercent": {
+        "online": 18.645833333333332,
+        "scalar": 21.822916666666668,
+        "static": 31.458333333333332,
+        "causal": 18.958333333333332
+      },
+      "maxSampledACErrorPu": 0.0009952900979344204,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 2.448428177558516
+    },
+    {
+      "network": "feeder47",
+      "profileId": "short-surge-30",
+      "seed": 20261013,
+      "beta": 4,
+      "quality": "mixed",
+      "evaluation": "selected actual candidate API",
+      "role": "default network validation",
+      "cumulativeCosts": {
+        "online": 12.791210305099579,
+        "scalar": 12.955873910293908,
+        "static": 12.678026557954816,
+        "causal": 13.18768599733945
+      },
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "adaptivePercentLowerThan": {
+        "scalar": 1.2709571452644206,
+        "static": -0.8927552456793535,
+        "causal": 3.0064083442679657
+      },
+      "voltageRangePu": [
+        0.9665453484843817,
+        1
+      ],
+      "saturationPercent": {
+        "online": 19.453125,
+        "scalar": 22.057291666666668,
+        "static": 33.385416666666664,
+        "causal": 19.0625
+      },
+      "maxSampledACErrorPu": 0.001044954640755047,
+      "allSampledACConverged": true,
+      "normalizedForecastError": 2.4007957038605356
+    }
+  ],
+  "outcomes": [
+    {
+      "network": "toy8",
+      "profile": "existing",
+      "beta": 4,
+      "quality": "reliable",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 1,
+      "steps": 240,
+      "elapsedMs": 1773,
+      "maxTotalKw": 112.6886639725915,
+      "peakHomeKw": 43.68338500310241,
+      "forcingRmsPu": 0.00022777120532547018,
+      "forecastErrorRmsPu": 3.900218740917561e-05,
+      "normalizedForecastError": 0.17123405635687808,
+      "updates": 201,
+      "topologyChanges": 0,
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9948819378980661,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 11.368743555021803,
+          "peakRawKvar": 11.368743555021803,
+          "sumStateCost": 0.009938919689580729,
+          "sumActuationCost": 0.001209562046204997,
+          "first60Cost": 0.004042026806604153,
+          "last60Cost": 0.002650426697337374,
+          "acMaxErrorPu": 2.4080197381537438e-05,
+          "acMinPu": 0.9948578577006846,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.01114848173578572,
+          "saturationFraction": 0
+        },
+        "scalar": {
+          "minPu": 0.9948819378980661,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 11.368743555021803,
+          "peakRawKvar": 11.368743555021803,
+          "sumStateCost": 0.00993943695282495,
+          "sumActuationCost": 0.001209260867497788,
+          "first60Cost": 0.004042037386229858,
+          "last60Cost": 0.00264956347939027,
+          "acMaxErrorPu": 2.4080197381537438e-05,
+          "acMinPu": 0.9948578577006846,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.011148697820322741,
+          "saturationFraction": 0
+        },
+        "static": {
+          "minPu": 0.9950057111853142,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 16.873817472244543,
+          "peakRawKvar": 16.873817472244543,
+          "sumStateCost": 0.007907739140077138,
+          "sumActuationCost": 0.002676231474277312,
+          "first60Cost": 0.0038319263486846487,
+          "last60Cost": 0.0025141046214382807,
+          "acMaxErrorPu": 2.314368395073263e-05,
+          "acMinPu": 0.9949825675013635,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.010583970614354446,
+          "saturationFraction": 0
+        },
+        "causal": {
+          "minPu": 0.9947671753712541,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 7.946615080143635,
+          "peakRawKvar": 7.946615080143635,
+          "sumStateCost": 0.011657010927372228,
+          "sumActuationCost": 0.0005432641467498609,
+          "first60Cost": 0.004422472935071796,
+          "last60Cost": 0.0029010695674139826,
+          "acMaxErrorPu": 2.4996449695890988e-05,
+          "acMinPu": 0.9947421789215583,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.012200275074122094,
+          "saturationFraction": 0
+        }
+      },
+      "profileId": "standard",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "toy8",
+      "profile": "existing",
+      "beta": 4,
+      "quality": "mixed",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 1,
+      "steps": 240,
+      "elapsedMs": 1798,
+      "maxTotalKw": 112.6886639725915,
+      "peakHomeKw": 43.68338500310241,
+      "forcingRmsPu": 0.00022777120532547018,
+      "forecastErrorRmsPu": 0.0019318584198432063,
+      "normalizedForecastError": 8.48157438111067,
+      "updates": 201,
+      "topologyChanges": 1,
+      "ranking": [
+        "causal",
+        "online",
+        "scalar",
+        "static"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9947138313893689,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 31.505163410520517,
+          "peakRawKvar": 31.505163410520517,
+          "sumStateCost": 0.010456661439119294,
+          "sumActuationCost": 0.0019419818104225535,
+          "first60Cost": 0.005332454869808257,
+          "last60Cost": 0.0025882445503742552,
+          "acMaxErrorPu": 2.4508159789826678e-05,
+          "acMinPu": 0.9948024047322522,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.012398643249541848,
+          "saturationFraction": 0
+        },
+        "scalar": {
+          "minPu": 0.9947138313893689,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 36.13154813403588,
+          "peakRawKvar": 36.13154813403588,
+          "sumStateCost": 0.011045345392134321,
+          "sumActuationCost": 0.004401884355271658,
+          "first60Cost": 0.005422416200057284,
+          "last60Cost": 0.003813408923760572,
+          "acMaxErrorPu": 2.4508159789826678e-05,
+          "acMinPu": 0.9948024047322522,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.015447229747405972,
+          "saturationFraction": 0
+        },
+        "static": {
+          "minPu": 0.9948155689031505,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 32.87783314657799,
+          "peakRawKvar": 32.87783314657799,
+          "sumStateCost": 0.009837637670529616,
+          "sumActuationCost": 0.007485952097644699,
+          "first60Cost": 0.005551587663552732,
+          "last60Cost": 0.004512608020634276,
+          "acMaxErrorPu": 2.3844589970956065e-05,
+          "acMinPu": 0.9948886475250623,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.01732358976817432,
+          "saturationFraction": 0
+        },
+        "causal": {
+          "minPu": 0.9947671753712541,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 7.946615080143635,
+          "peakRawKvar": 7.946615080143635,
+          "sumStateCost": 0.011657010927372228,
+          "sumActuationCost": 0.0005432641467498609,
+          "first60Cost": 0.004422472935071796,
+          "last60Cost": 0.0029010695674139826,
+          "acMaxErrorPu": 2.4996449695890988e-05,
+          "acMinPu": 0.9947421789215583,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.012200275074122094,
+          "saturationFraction": 0
+        }
+      },
+      "profileId": "standard",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "toy8",
+      "profile": "existing",
+      "beta": 8,
+      "quality": "reliable",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 1,
+      "steps": 240,
+      "elapsedMs": 1788,
+      "maxTotalKw": 112.6886639725915,
+      "peakHomeKw": 43.68338500310241,
+      "forcingRmsPu": 0.00022777120532547026,
+      "forecastErrorRmsPu": 7.800437481835117e-05,
+      "normalizedForecastError": 0.3424681127137558,
+      "updates": 201,
+      "topologyChanges": 2,
+      "ranking": [
+        "static",
+        "scalar",
+        "online",
+        "causal"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9948816517416028,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 11.45104660818471,
+          "peakRawKvar": 11.45104660818471,
+          "sumStateCost": 0.009983489998239087,
+          "sumActuationCost": 0.0011934333732988552,
+          "first60Cost": 0.004047618782496695,
+          "last60Cost": 0.0026538342282649012,
+          "acMaxErrorPu": 2.4083200232616342e-05,
+          "acMinPu": 0.9948575685413702,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.011176923371537948,
+          "saturationFraction": 0
+        },
+        "scalar": {
+          "minPu": 0.9948816517416028,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 11.45104660818471,
+          "peakRawKvar": 11.45104660818471,
+          "sumStateCost": 0.009952800135147424,
+          "sumActuationCost": 0.001208057351021489,
+          "first60Cost": 0.004047615914697499,
+          "last60Cost": 0.0026518295125545046,
+          "acMaxErrorPu": 2.4083200232616342e-05,
+          "acMinPu": 0.9948575685413702,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.011160857486168909,
+          "saturationFraction": 0
+        },
+        "static": {
+          "minPu": 0.9950043722540939,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 17.129702546329938,
+          "peakRawKvar": 17.129702546329938,
+          "sumStateCost": 0.00793241539505219,
+          "sumActuationCost": 0.0026639615952992572,
+          "first60Cost": 0.0038360924036302804,
+          "last60Cost": 0.002516751382966186,
+          "acMaxErrorPu": 2.315390743889978e-05,
+          "acMinPu": 0.994981218346655,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.01059637699035145,
+          "saturationFraction": 0
+        },
+        "causal": {
+          "minPu": 0.9947671753712541,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 7.946615080143635,
+          "peakRawKvar": 7.946615080143635,
+          "sumStateCost": 0.011657010927372228,
+          "sumActuationCost": 0.0005432641467498609,
+          "first60Cost": 0.004422472935071796,
+          "last60Cost": 0.0029010695674139826,
+          "acMaxErrorPu": 2.4996449695890988e-05,
+          "acMinPu": 0.9947421789215583,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.012200275074122094,
+          "saturationFraction": 0
+        }
+      },
+      "profileId": "standard",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "toy8",
+      "profile": "existing",
+      "beta": 8,
+      "quality": "mixed",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 1,
+      "steps": 240,
+      "elapsedMs": 1799,
+      "maxTotalKw": 112.6886639725915,
+      "peakHomeKw": 43.68338500310241,
+      "forcingRmsPu": 0.00022777120532547018,
+      "forecastErrorRmsPu": 0.0038637168396864125,
+      "normalizedForecastError": 16.96314876222134,
+      "updates": 201,
+      "topologyChanges": 1,
+      "ranking": [
+        "causal",
+        "online",
+        "scalar",
+        "static"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9944875031385483,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 60.883247135166236,
+          "peakRawKvar": 60.883247135166236,
+          "sumStateCost": 0.011709401671236038,
+          "sumActuationCost": 0.004266057634922746,
+          "first60Cost": 0.008601574059987542,
+          "last60Cost": 0.002589323596785122,
+          "acMaxErrorPu": 2.4951052628674475e-05,
+          "acMinPu": 0.994746650676926,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.01597545930615878,
+          "saturationFraction": 0
+        },
+        "scalar": {
+          "minPu": 0.9944875031385483,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 68.40373506434508,
+          "peakRawKvar": 68.40373506434508,
+          "sumStateCost": 0.013129055867271344,
+          "sumActuationCost": 0.014763551481719562,
+          "first60Cost": 0.008968522410216466,
+          "last60Cost": 0.007109927486680661,
+          "acMaxErrorPu": 2.4951052628674475e-05,
+          "acMinPu": 0.994746650676926,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.027892607348990905,
+          "saturationFraction": 0
+        },
+        "static": {
+          "minPu": 0.9944840776827775,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 60.416623743556286,
+          "peakRawKvar": 60.416623743556286,
+          "sumStateCost": 0.013901556593444839,
+          "sumActuationCost": 0.0235435743299283,
+          "first60Cost": 0.010605164952645131,
+          "last60Cost": 0.010492167401730012,
+          "acMaxErrorPu": 2.5741173263371664e-05,
+          "acMinPu": 0.9946153761238411,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.03744513092337316,
+          "saturationFraction": 0
+        },
+        "causal": {
+          "minPu": 0.9947671753712541,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 7.946615080143635,
+          "peakRawKvar": 7.946615080143635,
+          "sumStateCost": 0.011657010927372228,
+          "sumActuationCost": 0.0005432641467498609,
+          "first60Cost": 0.004422472935071796,
+          "last60Cost": 0.0029010695674139826,
+          "acMaxErrorPu": 2.4996449695890988e-05,
+          "acMinPu": 0.9947421789215583,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.012200275074122094,
+          "saturationFraction": 0
+        }
+      },
+      "profileId": "standard",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "toy8",
+      "profile": "strong",
+      "beta": 4,
+      "quality": "reliable",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 2,
+      "steps": 240,
+      "elapsedMs": 1865,
+      "maxTotalKw": 675.2674780647357,
+      "peakHomeKw": 131.1247023964808,
+      "forcingRmsPu": 0.0015835326067970997,
+      "forecastErrorRmsPu": 3.900218740917557e-05,
+      "normalizedForecastError": 0.024629860630443576,
+      "updates": 201,
+      "topologyChanges": 0,
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9897677041982056,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 68.22727916114854,
+          "peakRawKvar": 68.22727916114854,
+          "sumStateCost": 0.5828343501625315,
+          "sumActuationCost": 0.07677663055462952,
+          "first60Cost": 0.1653040185282099,
+          "last60Cost": 0.1644546819815603,
+          "acMaxErrorPu": 0.00010093145204670417,
+          "acMinPu": 0.989874284658329,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.6596109807171608,
+          "saturationFraction": 0
+        },
+        "scalar": {
+          "minPu": 0.9897689971067145,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 68.32932042276312,
+          "peakRawKvar": 68.32932042276312,
+          "sumStateCost": 0.5828879981060388,
+          "sumActuationCost": 0.07674791827383802,
+          "first60Cost": 0.16531334781172066,
+          "last60Cost": 0.16444412449909435,
+          "acMaxErrorPu": 0.00010094526175818963,
+          "acMinPu": 0.9898729634479186,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.6596359163798767,
+          "saturationFraction": 0
+        },
+        "static": {
+          "minPu": 0.9900231329602102,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 225,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 103.19651157036944,
+          "sumStateCost": 0.4936253666197367,
+          "sumActuationCost": 0.13737553466198316,
+          "first60Cost": 0.157935418355163,
+          "last60Cost": 0.15736211055355206,
+          "acMaxErrorPu": 9.796469049438983e-05,
+          "acMinPu": 0.9901764767362761,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.6310009012817199,
+          "saturationFraction": 0.3125
+        },
+        "causal": {
+          "minPu": 0.9891791120252205,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 44.80972070817053,
+          "peakRawKvar": 44.80972070817053,
+          "sumStateCost": 0.6895602600097724,
+          "sumActuationCost": 0.03325051244864608,
+          "first60Cost": 0.18108091359556003,
+          "last60Cost": 0.18020415999234907,
+          "acMaxErrorPu": 0.00010789082795215066,
+          "acMinPu": 0.9892771782501777,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.7228107724584188,
+          "saturationFraction": 0
+        }
+      },
+      "profileId": "raised-cosine-30",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "toy8",
+      "profile": "strong",
+      "beta": 4,
+      "quality": "mixed",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 2,
+      "steps": 240,
+      "elapsedMs": 1948,
+      "maxTotalKw": 675.2674780647357,
+      "peakHomeKw": 131.1247023964808,
+      "forcingRmsPu": 0.0015835326067970995,
+      "forecastErrorRmsPu": 0.003863352595442024,
+      "normalizedForecastError": 2.439705111760317,
+      "updates": 201,
+      "topologyChanges": 1,
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9895527501481854,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 33,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 106.3848683424526,
+          "sumStateCost": 0.5697362386503085,
+          "sumActuationCost": 0.08918496590271853,
+          "first60Cost": 0.1745529623228795,
+          "last60Cost": 0.16073451990988205,
+          "acMaxErrorPu": 0.00010560602093578897,
+          "acMinPu": 0.9894611583004633,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.658921204553027,
+          "saturationFraction": 0.04583333333333333
+        },
+        "scalar": {
+          "minPu": 0.9894907762206332,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 38,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 119.83309256072098,
+          "sumStateCost": 0.6017709498996028,
+          "sumActuationCost": 0.07968373317908231,
+          "first60Cost": 0.17492749732723506,
+          "last60Cost": 0.1725791569184015,
+          "acMaxErrorPu": 0.00010548831551904225,
+          "acMinPu": 0.9894708812012561,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.6814546830786851,
+          "saturationFraction": 0.05277777777777778
+        },
+        "static": {
+          "minPu": 0.9897565772164805,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 179,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 143.71368716972643,
+          "sumStateCost": 0.5263125181856779,
+          "sumActuationCost": 0.12783061835049084,
+          "first60Cost": 0.16393721960895927,
+          "last60Cost": 0.16476370820396227,
+          "acMaxErrorPu": 9.960911533513084e-05,
+          "acMinPu": 0.9899842498023684,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.6541431365361691,
+          "saturationFraction": 0.24861111111111112
+        },
+        "causal": {
+          "minPu": 0.9891791120252205,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 44.80972070817053,
+          "peakRawKvar": 44.80972070817053,
+          "sumStateCost": 0.6895602600097724,
+          "sumActuationCost": 0.03325051244864608,
+          "first60Cost": 0.18108091359556003,
+          "last60Cost": 0.18020415999234907,
+          "acMaxErrorPu": 0.00010789082795215066,
+          "acMinPu": 0.9892771782501777,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.7228107724584188,
+          "saturationFraction": 0
+        }
+      },
+      "profileId": "raised-cosine-30",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "toy8",
+      "profile": "strong",
+      "beta": 8,
+      "quality": "reliable",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 2,
+      "steps": 240,
+      "elapsedMs": 2006,
+      "maxTotalKw": 675.2674780647357,
+      "peakHomeKw": 131.1247023964808,
+      "forcingRmsPu": 0.0015835326067970997,
+      "forecastErrorRmsPu": 7.80043748183512e-05,
+      "normalizedForecastError": 0.04925972126088718,
+      "updates": 201,
+      "topologyChanges": 0,
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9897669196857387,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 68.0256247492836,
+          "peakRawKvar": 68.0256247492836,
+          "sumStateCost": 0.5828739385426476,
+          "sumActuationCost": 0.07676180136943975,
+          "first60Cost": 0.16534299768527333,
+          "last60Cost": 0.16447238712722412,
+          "acMaxErrorPu": 0.00010092217754087418,
+          "acMinPu": 0.9898751526916699,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.6596357399120876,
+          "saturationFraction": 0
+        },
+        "scalar": {
+          "minPu": 0.989769597175093,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 68.23239274727224,
+          "peakRawKvar": 68.23239274727224,
+          "sumStateCost": 0.5829740884334567,
+          "sumActuationCost": 0.07670820647680865,
+          "first60Cost": 0.16536114674778415,
+          "last60Cost": 0.16445016090542253,
+          "acMaxErrorPu": 0.00010094877640298705,
+          "acMinPu": 0.9898726073738502,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.6596822949102659,
+          "saturationFraction": 0
+        },
+        "static": {
+          "minPu": 0.9900229968266577,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 223,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 102.94812730024664,
+          "sumStateCost": 0.4937266968169898,
+          "sumActuationCost": 0.13729544405061905,
+          "first60Cost": 0.15794096178465153,
+          "last60Cost": 0.15736687394730975,
+          "acMaxErrorPu": 9.796403975204093e-05,
+          "acMinPu": 0.9901765474952972,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.6310221408676087,
+          "saturationFraction": 0.30972222222222223
+        },
+        "causal": {
+          "minPu": 0.9891791120252205,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 44.80972070817053,
+          "peakRawKvar": 44.80972070817053,
+          "sumStateCost": 0.6895602600097724,
+          "sumActuationCost": 0.03325051244864608,
+          "first60Cost": 0.18108091359556003,
+          "last60Cost": 0.18020415999234907,
+          "acMaxErrorPu": 0.00010789082795215066,
+          "acMinPu": 0.9892771782501777,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.7228107724584188,
+          "saturationFraction": 0
+        }
+      },
+      "profileId": "raised-cosine-30",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "toy8",
+      "profile": "strong",
+      "beta": 8,
+      "quality": "mixed",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 2,
+      "steps": 240,
+      "elapsedMs": 1901,
+      "maxTotalKw": 675.2674780647357,
+      "peakHomeKw": 131.1247023964808,
+      "forcingRmsPu": 0.0015835326067970997,
+      "forecastErrorRmsPu": 0.007726705190884047,
+      "normalizedForecastError": 4.879410223520633,
+      "updates": 201,
+      "topologyChanges": 1,
+      "ranking": [
+        "online",
+        "static",
+        "causal",
+        "scalar"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9889621099334119,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 37,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 165.53418681145604,
+          "sumStateCost": 0.5853627801765067,
+          "sumActuationCost": 0.09167259199203961,
+          "first60Cost": 0.19130561869888382,
+          "last60Cost": 0.16068239848035334,
+          "acMaxErrorPu": 0.00011086885661992785,
+          "acMinPu": 0.9890551945749897,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.6770353721685471,
+          "saturationFraction": 0.05138888888888889
+        },
+        "scalar": {
+          "minPu": 0.9888767960712772,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 86,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 174.47116408266453,
+          "sumStateCost": 0.6346472206927677,
+          "sumActuationCost": 0.0947428533878908,
+          "first60Cost": 0.19275665571623746,
+          "last60Cost": 0.18795591567911016,
+          "acMaxErrorPu": 0.0001106947825467719,
+          "acMinPu": 0.9890677314108277,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.7293900740806587,
+          "saturationFraction": 0.11944444444444445
+        },
+        "static": {
+          "minPu": 0.9888842019167939,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 210,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 190.1725264363347,
+          "sumStateCost": 0.583336676603425,
+          "sumActuationCost": 0.134177485117537,
+          "first60Cost": 0.18205568662553698,
+          "last60Cost": 0.18637244447107137,
+          "acMaxErrorPu": 0.000106721810959165,
+          "acMinPu": 0.9893352384364975,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.7175141617209616,
+          "saturationFraction": 0.2916666666666667
+        },
+        "causal": {
+          "minPu": 0.9891791120252205,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 44.80972070817053,
+          "peakRawKvar": 44.80972070817053,
+          "sumStateCost": 0.6895602600097724,
+          "sumActuationCost": 0.03325051244864608,
+          "first60Cost": 0.18108091359556003,
+          "last60Cost": 0.18020415999234907,
+          "acMaxErrorPu": 0.00010789082795215066,
+          "acMinPu": 0.9892771782501777,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.7228107724584188,
+          "saturationFraction": 0
+        }
+      },
+      "profileId": "raised-cosine-30",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "toy8",
+      "profile": "strong",
+      "beta": 4,
+      "quality": "mixed",
+      "seed": 17,
+      "faultNoiseMultiplier": 2,
+      "steps": 240,
+      "elapsedMs": 1903,
+      "maxTotalKw": 685.1112694640523,
+      "peakHomeKw": 128.72514430743246,
+      "forcingRmsPu": 0.0016075023003186083,
+      "forecastErrorRmsPu": 0.004077059101725069,
+      "normalizedForecastError": 2.536269528769566,
+      "updates": 201,
+      "topologyChanges": 3,
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9897947344711829,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 46,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 104.11857868225988,
+          "sumStateCost": 0.5830342863559372,
+          "sumActuationCost": 0.094033528317353,
+          "first60Cost": 0.174750829071139,
+          "last60Cost": 0.17057339727373808,
+          "acMaxErrorPu": 0.00010093362094087954,
+          "acMinPu": 0.9896938008502421,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.6770678146732904,
+          "saturationFraction": 0.06388888888888888
+        },
+        "scalar": {
+          "minPu": 0.9895768963269888,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 43,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 132.06947861623436,
+          "sumStateCost": 0.6179300964211933,
+          "sumActuationCost": 0.08505230567426965,
+          "first60Cost": 0.17474802648571774,
+          "last60Cost": 0.17935742575359856,
+          "acMaxErrorPu": 0.00010572233316541446,
+          "acMinPu": 0.9894711739938233,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.7029824020954629,
+          "saturationFraction": 0.059722222222222225
+        },
+        "static": {
+          "minPu": 0.9900138494247241,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 198,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 164.21255372729004,
+          "sumStateCost": 0.5319314283138451,
+          "sumActuationCost": 0.14461976843154944,
+          "first60Cost": 0.16769075383164136,
+          "last60Cost": 0.17386034402116943,
+          "acMaxErrorPu": 9.953552630581619e-05,
+          "acMinPu": 0.9900490085541607,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.6765511967453939,
+          "saturationFraction": 0.275
+        },
+        "causal": {
+          "minPu": 0.9891684655156868,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 44.93873899582052,
+          "peakRawKvar": 44.93873899582052,
+          "sumStateCost": 0.7112171612675783,
+          "sumActuationCost": 0.03429720791897729,
+          "first60Cost": 0.1851771694366085,
+          "last60Cost": 0.19099483242177703,
+          "acMaxErrorPu": 0.00010904200589700874,
+          "acMinPu": 0.9892169878392972,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.7455143691865549,
+          "saturationFraction": 0
+        }
+      },
+      "profileId": "raised-cosine-30",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "toy8",
+      "profile": "strong",
+      "beta": 4,
+      "quality": "mixed",
+      "seed": 29,
+      "faultNoiseMultiplier": 2,
+      "steps": 240,
+      "elapsedMs": 1873,
+      "maxTotalKw": 704.291258667293,
+      "peakHomeKw": 133.6344157696673,
+      "forcingRmsPu": 0.0016136001847129587,
+      "forecastErrorRmsPu": 0.003911213762503595,
+      "normalizedForecastError": 2.4239051281463238,
+      "updates": 201,
+      "topologyChanges": 2,
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.989306661652748,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 34,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 82.58082184414614,
+          "sumStateCost": 0.5876497163311346,
+          "sumActuationCost": 0.09495144063922861,
+          "first60Cost": 0.1733172468860602,
+          "last60Cost": 0.16663836938132023,
+          "acMaxErrorPu": 0.00011230791494554193,
+          "acMinPu": 0.9891943537378025,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.6826011569703635,
+          "saturationFraction": 0.04722222222222222
+        },
+        "scalar": {
+          "minPu": 0.989306661652748,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 30,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 110.29254464499701,
+          "sumStateCost": 0.6260318420522814,
+          "sumActuationCost": 0.0834485862722752,
+          "first60Cost": 0.17366910653480935,
+          "last60Cost": 0.17675734268996093,
+          "acMaxErrorPu": 0.00011230791494554193,
+          "acMinPu": 0.9891943537378025,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.7094804283245575,
+          "saturationFraction": 0.041666666666666664
+        },
+        "static": {
+          "minPu": 0.989815086229874,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 217,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 143.61554875348972,
+          "sumStateCost": 0.540400690640795,
+          "sumActuationCost": 0.13980591568828538,
+          "first60Cost": 0.16673774556872673,
+          "last60Cost": 0.16754731062951014,
+          "acMaxErrorPu": 0.00010665495506156919,
+          "acMinPu": 0.9897084312748125,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.6802066063290801,
+          "saturationFraction": 0.3013888888888889
+        },
+        "causal": {
+          "minPu": 0.9889604268721999,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 46.392526439131075,
+          "peakRawKvar": 46.392526439131075,
+          "sumStateCost": 0.716843843957908,
+          "sumActuationCost": 0.034570617433848115,
+          "first60Cost": 0.18505002336735335,
+          "last60Cost": 0.18668674939347848,
+          "acMaxErrorPu": 0.00011670776966032914,
+          "acMinPu": 0.9888437191025395,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.7514144613917558,
+          "saturationFraction": 0
+        }
+      },
+      "profileId": "raised-cosine-30",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "feeder24",
+      "profile": "existing",
+      "beta": 4,
+      "quality": "reliable",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 1,
+      "steps": 240,
+      "elapsedMs": 14898,
+      "maxTotalKw": 276.3241526041856,
+      "peakHomeKw": 47.270335877515144,
+      "forcingRmsPu": 0.000422489643973447,
+      "forecastErrorRmsPu": 6.367254473547463e-05,
+      "normalizedForecastError": 0.15070794194301335,
+      "updates": 201,
+      "topologyChanges": 3,
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9853936803466615,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 22.698894178008064,
+          "peakRawKvar": 22.698894178008064,
+          "sumStateCost": 0.09345200428832125,
+          "sumActuationCost": 0.009510564879108903,
+          "first60Cost": 0.023293602465746868,
+          "last60Cost": 0.02679142766435119,
+          "acMaxErrorPu": 0.00019102452655483937,
+          "acMinPu": 0.9854503331562893,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.10296256916743021,
+          "saturationFraction": 0
+        },
+        "scalar": {
+          "minPu": 0.9853934923156644,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 22.708436339236965,
+          "peakRawKvar": 22.708436339236965,
+          "sumStateCost": 0.09354101340449393,
+          "sumActuationCost": 0.009479960334996892,
+          "first60Cost": 0.023299567040411393,
+          "last60Cost": 0.026830703763387528,
+          "acMaxErrorPu": 0.00019102452655483937,
+          "acMinPu": 0.9854503331562893,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.10302097373949086,
+          "saturationFraction": 0
+        },
+        "static": {
+          "minPu": 0.9860342765456904,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 39.92469141502794,
+          "peakRawKvar": 39.92469141502794,
+          "sumStateCost": 0.051481721942881926,
+          "sumActuationCost": 0.03308326739063412,
+          "first60Cost": 0.01931221801258427,
+          "last60Cost": 0.021777846570820852,
+          "acMaxErrorPu": 0.00018111175532875556,
+          "acMinPu": 0.9859668435881415,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.08456498933351606,
+          "saturationFraction": 0
+        },
+        "causal": {
+          "minPu": 0.9852645357009499,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 21.552807785215283,
+          "peakRawKvar": 21.552807785215283,
+          "sumStateCost": 0.10260095972169346,
+          "sumActuationCost": 0.007484913706080919,
+          "first60Cost": 0.024850713343085824,
+          "last60Cost": 0.028639044609758624,
+          "acMaxErrorPu": 0.0001927102436598549,
+          "acMinPu": 0.9853693904786148,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.1100858734277744,
+          "saturationFraction": 0
+        }
+      },
+      "profileId": "standard",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "feeder24",
+      "profile": "existing",
+      "beta": 4,
+      "quality": "mixed",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 1,
+      "steps": 240,
+      "elapsedMs": 14890,
+      "maxTotalKw": 276.3241526041856,
+      "peakHomeKw": 47.270335877515144,
+      "forcingRmsPu": 0.000422489643973447,
+      "forecastErrorRmsPu": 0.003943927821346713,
+      "normalizedForecastError": 9.334969217836223,
+      "updates": 201,
+      "topologyChanges": 4,
+      "ranking": [
+        "causal",
+        "online",
+        "scalar",
+        "static"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9852931590607895,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 67.35346481471122,
+          "peakRawKvar": 67.35346481471122,
+          "sumStateCost": 0.09539496108864891,
+          "sumActuationCost": 0.025376311616763216,
+          "first60Cost": 0.034100614781044716,
+          "last60Cost": 0.02730309306513109,
+          "acMaxErrorPu": 0.00019041444862299972,
+          "acMinPu": 0.9854621495155383,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.12077127270541212,
+          "saturationFraction": 0
+        },
+        "scalar": {
+          "minPu": 0.9851924797588425,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 2,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 89.00150953034431,
+          "sumStateCost": 0.10011319450851017,
+          "sumActuationCost": 0.04988620480717112,
+          "first60Cost": 0.034442658736404015,
+          "last60Cost": 0.03805482265892435,
+          "acMaxErrorPu": 0.0001915412466968469,
+          "acMinPu": 0.985439728545348,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.1499993993156813,
+          "saturationFraction": 0.0010416666666666667
+        },
+        "static": {
+          "minPu": 0.9850902280009832,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 34,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 112.05145182716629,
+          "sumStateCost": 0.08251739518429968,
+          "sumActuationCost": 0.09772022142998897,
+          "first60Cost": 0.04495949907337814,
+          "last60Cost": 0.04490237996379389,
+          "acMaxErrorPu": 0.00018610189541667932,
+          "acMinPu": 0.9854551496875021,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.18023761661428847,
+          "saturationFraction": 0.017708333333333333
+        },
+        "causal": {
+          "minPu": 0.9852645357009499,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 21.552807785215283,
+          "peakRawKvar": 21.552807785215283,
+          "sumStateCost": 0.10260095972169346,
+          "sumActuationCost": 0.007484913706080919,
+          "first60Cost": 0.024850713343085824,
+          "last60Cost": 0.028639044609758624,
+          "acMaxErrorPu": 0.0001927102436598549,
+          "acMinPu": 0.9853693904786148,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.1100858734277744,
+          "saturationFraction": 0
+        }
+      },
+      "profileId": "standard",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "feeder24",
+      "profile": "existing",
+      "beta": 8,
+      "quality": "reliable",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 1,
+      "steps": 240,
+      "elapsedMs": 14509,
+      "maxTotalKw": 276.3241526041856,
+      "peakHomeKw": 47.270335877515144,
+      "forcingRmsPu": 0.0004224896439734471,
+      "forecastErrorRmsPu": 0.0001273450894709493,
+      "normalizedForecastError": 0.30141588388602675,
+      "updates": 201,
+      "topologyChanges": 1,
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.985389407612148,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 22.9242599551698,
+          "peakRawKvar": 22.9242599551698,
+          "sumStateCost": 0.09354012033853834,
+          "sumActuationCost": 0.00952428872537576,
+          "first60Cost": 0.023335782913298173,
+          "last60Cost": 0.026804085422155153,
+          "acMaxErrorPu": 0.00019105954915799028,
+          "acMinPu": 0.9854481602521249,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.10306440906391413,
+          "saturationFraction": 0
+        },
+        "scalar": {
+          "minPu": 0.9853897566153755,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 22.94812959044264,
+          "peakRawKvar": 22.94812959044264,
+          "sumStateCost": 0.09357868577266311,
+          "sumActuationCost": 0.009509754111443136,
+          "first60Cost": 0.023335774836720575,
+          "last60Cost": 0.026830884724702887,
+          "acMaxErrorPu": 0.00019105954915799028,
+          "acMinPu": 0.9854481602521249,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.1030884398841062,
+          "saturationFraction": 0
+        },
+        "static": {
+          "minPu": 0.9860130164629094,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 39.097740589301814,
+          "peakRawKvar": 39.097740589301814,
+          "sumStateCost": 0.051581882116911976,
+          "sumActuationCost": 0.03307941037804947,
+          "first60Cost": 0.019338966678611007,
+          "last60Cost": 0.02180616000313142,
+          "acMaxErrorPu": 0.0001811464290807363,
+          "acMinPu": 0.9859648720170172,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.0846612924949615,
+          "saturationFraction": 0
+        },
+        "causal": {
+          "minPu": 0.9852645357009499,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 21.552807785215283,
+          "peakRawKvar": 21.552807785215283,
+          "sumStateCost": 0.10260095972169346,
+          "sumActuationCost": 0.007484913706080919,
+          "first60Cost": 0.024850713343085824,
+          "last60Cost": 0.028639044609758624,
+          "acMaxErrorPu": 0.0001927102436598549,
+          "acMinPu": 0.9853693904786148,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.1100858734277744,
+          "saturationFraction": 0
+        }
+      },
+      "profileId": "standard",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "feeder24",
+      "profile": "existing",
+      "beta": 8,
+      "quality": "mixed",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 1,
+      "steps": 240,
+      "elapsedMs": 14869,
+      "maxTotalKw": 276.3241526041856,
+      "peakHomeKw": 47.270335877515144,
+      "forcingRmsPu": 0.0004224896439734471,
+      "forecastErrorRmsPu": 0.007887855642693425,
+      "normalizedForecastError": 18.669938435672442,
+      "updates": 201,
+      "topologyChanges": 4,
+      "ranking": [
+        "causal",
+        "online",
+        "scalar",
+        "static"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9848209723429524,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 19,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 133.0827835154789,
+          "sumStateCost": 0.10260523488150647,
+          "sumActuationCost": 0.06727904807497025,
+          "first60Cost": 0.0616099826263101,
+          "last60Cost": 0.0303701462135969,
+          "acMaxErrorPu": 0.00019303048593022343,
+          "acMinPu": 0.9853276157647365,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.16988428295647665,
+          "saturationFraction": 0.009895833333333333
+        },
+        "scalar": {
+          "minPu": 0.9848209723429524,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 94,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 166.89243227852577,
+          "sumStateCost": 0.11637852057055297,
+          "sumActuationCost": 0.14605585796420073,
+          "first60Cost": 0.062404313548756765,
+          "last60Cost": 0.06564007409809292,
+          "acMaxErrorPu": 0.00019614039956916685,
+          "acMinPu": 0.9852340610766309,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.2624343785347538,
+          "saturationFraction": 0.04895833333333333
+        },
+        "static": {
+          "minPu": 0.983996470210393,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 229,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 218.33191858031986,
+          "sumStateCost": 0.14684602050833198,
+          "sumActuationCost": 0.2167157638546124,
+          "first60Cost": 0.09596644350476272,
+          "last60Cost": 0.09143925017778802,
+          "acMaxErrorPu": 0.00019963474808937232,
+          "acMinPu": 0.9848753580682829,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.3635617843629445,
+          "saturationFraction": 0.11927083333333334
+        },
+        "causal": {
+          "minPu": 0.9852645357009499,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 21.552807785215283,
+          "peakRawKvar": 21.552807785215283,
+          "sumStateCost": 0.10260095972169346,
+          "sumActuationCost": 0.007484913706080919,
+          "first60Cost": 0.024850713343085824,
+          "last60Cost": 0.028639044609758624,
+          "acMaxErrorPu": 0.0001927102436598549,
+          "acMinPu": 0.9853693904786148,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.1100858734277744,
+          "saturationFraction": 0
+        }
+      },
+      "profileId": "standard",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "feeder24",
+      "profile": "strong",
+      "beta": 4,
+      "quality": "reliable",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 2,
+      "steps": 240,
+      "elapsedMs": 16076,
+      "maxTotalKw": 2241.5007215428604,
+      "peakHomeKw": 135.27520495818203,
+      "forcingRmsPu": 0.003683263044031651,
+      "forecastErrorRmsPu": 6.367254473547455e-05,
+      "normalizedForecastError": 0.017286993617968545,
+      "updates": 201,
+      "topologyChanges": 3,
+      "ranking": [
+        "static",
+        "scalar",
+        "online",
+        "causal"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9682982455444094,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 811,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 251.76161798635277,
+          "sumStateCost": 11.209888341376049,
+          "sumActuationCost": 0.4175590126381039,
+          "first60Cost": 2.9407545518609775,
+          "last60Cost": 3.011949335310588,
+          "acMaxErrorPu": 0.0009785447768297928,
+          "acMinPu": 0.9679981406176847,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.627447354014137,
+          "saturationFraction": 0.42239583333333336
+        },
+        "scalar": {
+          "minPu": 0.9682982459233989,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 810,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 251.73011937434097,
+          "sumStateCost": 11.209680821618981,
+          "sumActuationCost": 0.4175954037906617,
+          "first60Cost": 2.9407534101734325,
+          "last60Cost": 3.0119514293159617,
+          "acMaxErrorPu": 0.0009785447768297928,
+          "acMinPu": 0.9679981406176847,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.627276225409641,
+          "saturationFraction": 0.421875
+        },
+        "static": {
+          "minPu": 0.9683149297451721,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 1195,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 479.7003764709893,
+          "sumStateCost": 10.881809033703595,
+          "sumActuationCost": 0.5268815713342698,
+          "first60Cost": 2.8866853927231713,
+          "last60Cost": 2.9571735832877053,
+          "acMaxErrorPu": 0.0009781754185952396,
+          "acMinPu": 0.968007891239665,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.408690605037865,
+          "saturationFraction": 0.6223958333333334
+        },
+        "causal": {
+          "minPu": 0.9682939803210043,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 628,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 214.15821136375058,
+          "sumStateCost": 11.366964075906669,
+          "sumActuationCost": 0.3803276607043294,
+          "first60Cost": 2.9699498404005356,
+          "last60Cost": 3.0415029470243913,
+          "acMaxErrorPu": 0.0009786428812583736,
+          "acMinPu": 0.9679956865924317,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.747291736611,
+          "saturationFraction": 0.32708333333333334
+        }
+      },
+      "profileId": "raised-cosine-30",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "feeder24",
+      "profile": "strong",
+      "beta": 4,
+      "quality": "mixed",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 2,
+      "steps": 240,
+      "elapsedMs": 15818,
+      "maxTotalKw": 2241.5007215428604,
+      "peakHomeKw": 135.27520495818203,
+      "forcingRmsPu": 0.0036832630440316507,
+      "forecastErrorRmsPu": 0.007887546798781068,
+      "normalizedForecastError": 2.1414562860401802,
+      "updates": 201,
+      "topologyChanges": 4,
+      "ranking": [
+        "static",
+        "online",
+        "causal",
+        "scalar"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9683039008339321,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 837,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 305.6298381976882,
+          "sumStateCost": 11.252311584208778,
+          "sumActuationCost": 0.43398111204083534,
+          "first60Cost": 2.994651039089505,
+          "last60Cost": 3.003966089268992,
+          "acMaxErrorPu": 0.0009789052621518302,
+          "acMinPu": 0.9679885148666466,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.68629269624961,
+          "saturationFraction": 0.4359375
+        },
+        "scalar": {
+          "minPu": 0.9682898329222632,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 849,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 328.6990117318886,
+          "sumStateCost": 11.353638239687205,
+          "sumActuationCost": 0.450402611618,
+          "first60Cost": 2.994346257383508,
+          "last60Cost": 3.0452634995009134,
+          "acMaxErrorPu": 0.0009789052621518302,
+          "acMinPu": 0.9679885148666466,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.804040851305206,
+          "saturationFraction": 0.4421875
+        },
+        "static": {
+          "minPu": 0.9683097123981175,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 1281,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 627.2442567413799,
+          "sumStateCost": 10.964813322379452,
+          "sumActuationCost": 0.5626511431171674,
+          "first60Cost": 2.910733140668433,
+          "last60Cost": 2.9957460304688612,
+          "acMaxErrorPu": 0.00097820112101199,
+          "acMinPu": 0.9680072611369126,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.527464465496607,
+          "saturationFraction": 0.6671875
+        },
+        "causal": {
+          "minPu": 0.9682939803210043,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 628,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 214.15821136375058,
+          "sumStateCost": 11.366964075906669,
+          "sumActuationCost": 0.3803276607043294,
+          "first60Cost": 2.9699498404005356,
+          "last60Cost": 3.0415029470243913,
+          "acMaxErrorPu": 0.0009786428812583736,
+          "acMinPu": 0.9679956865924317,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.747291736611,
+          "saturationFraction": 0.32708333333333334
+        }
+      },
+      "profileId": "raised-cosine-30",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "feeder24",
+      "profile": "strong",
+      "beta": 8,
+      "quality": "reliable",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 2,
+      "steps": 240,
+      "elapsedMs": 15400,
+      "maxTotalKw": 2241.5007215428604,
+      "peakHomeKw": 135.27520495818203,
+      "forcingRmsPu": 0.003683263044031651,
+      "forecastErrorRmsPu": 0.00012734508947094924,
+      "normalizedForecastError": 0.03457398723593713,
+      "updates": 201,
+      "topologyChanges": 3,
+      "ranking": [
+        "static",
+        "scalar",
+        "online",
+        "causal"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9682982594483933,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 809,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 251.63163056407734,
+          "sumStateCost": 11.210108856158131,
+          "sumActuationCost": 0.4174964595975127,
+          "first60Cost": 2.940901779944669,
+          "last60Cost": 3.0119092699863326,
+          "acMaxErrorPu": 0.0009785451647612575,
+          "acMinPu": 0.9679981307978468,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.627605315755638,
+          "saturationFraction": 0.42135416666666664
+        },
+        "scalar": {
+          "minPu": 0.9682982579593695,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 809,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 251.57886869187618,
+          "sumStateCost": 11.209932642899096,
+          "sumActuationCost": 0.41752875681052454,
+          "first60Cost": 2.940899441165843,
+          "last60Cost": 3.011921222192335,
+          "acMaxErrorPu": 0.0009785451647612575,
+          "acMinPu": 0.9679981307978468,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.627461399709626,
+          "saturationFraction": 0.42135416666666664
+        },
+        "static": {
+          "minPu": 0.9683149023661286,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 1195,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 479.9579204494215,
+          "sumStateCost": 10.882071610907621,
+          "sumActuationCost": 0.5267170860719678,
+          "first60Cost": 2.8867162339819665,
+          "last60Cost": 2.957237857495219,
+          "acMaxErrorPu": 0.0009781757742087782,
+          "acMinPu": 0.9680078820791209,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.408788696979581,
+          "saturationFraction": 0.6223958333333334
+        },
+        "causal": {
+          "minPu": 0.9682939803210043,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 628,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 214.15821136375058,
+          "sumStateCost": 11.366964075906669,
+          "sumActuationCost": 0.3803276607043294,
+          "first60Cost": 2.9699498404005356,
+          "last60Cost": 3.0415029470243913,
+          "acMaxErrorPu": 0.0009786428812583736,
+          "acMinPu": 0.9679956865924317,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.747291736611,
+          "saturationFraction": 0.32708333333333334
+        }
+      },
+      "profileId": "raised-cosine-30",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "feeder24",
+      "profile": "strong",
+      "beta": 8,
+      "quality": "mixed",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 2,
+      "steps": 240,
+      "elapsedMs": 15336,
+      "maxTotalKw": 2241.5007215428604,
+      "peakHomeKw": 135.27520495818203,
+      "forcingRmsPu": 0.003683263044031651,
+      "forecastErrorRmsPu": 0.015775093597562136,
+      "normalizedForecastError": 4.28291257208036,
+      "updates": 201,
+      "topologyChanges": 4,
+      "ranking": [
+        "causal",
+        "static",
+        "online",
+        "scalar"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9683020569816222,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 866,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 396.7019900542111,
+          "sumStateCost": 11.415629380623303,
+          "sumActuationCost": 0.4595559278373608,
+          "first60Cost": 3.1029858297785093,
+          "last60Cost": 3.0159702512458395,
+          "acMaxErrorPu": 0.0009805382889496173,
+          "acMinPu": 0.9679455785400771,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.875185308460662,
+          "saturationFraction": 0.4510416666666667
+        },
+        "scalar": {
+          "minPu": 0.9680990173261641,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 939,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 447.17641318676124,
+          "sumStateCost": 11.755870348033133,
+          "sumActuationCost": 0.49039500255648416,
+          "first60Cost": 3.109258532883326,
+          "last60Cost": 3.152722800945424,
+          "acMaxErrorPu": 0.0009805382889496173,
+          "acMinPu": 0.9679455785400771,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 12.246265350589603,
+          "saturationFraction": 0.4890625
+        },
+        "static": {
+          "minPu": 0.968306068662049,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 1333,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 783.0898805789978,
+          "sumStateCost": 11.162742718073094,
+          "sumActuationCost": 0.5923800998091763,
+          "first60Cost": 2.973106980102688,
+          "last60Cost": 3.0712507481704567,
+          "acMaxErrorPu": 0.00097827590608901,
+          "acMinPu": 0.9680053821815531,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.755122817882253,
+          "saturationFraction": 0.6942708333333333
+        },
+        "causal": {
+          "minPu": 0.9682939803210043,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 628,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 214.15821136375058,
+          "sumStateCost": 11.366964075906669,
+          "sumActuationCost": 0.3803276607043294,
+          "first60Cost": 2.9699498404005356,
+          "last60Cost": 3.0415029470243913,
+          "acMaxErrorPu": 0.0009786428812583736,
+          "acMinPu": 0.9679956865924317,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.747291736611,
+          "saturationFraction": 0.32708333333333334
+        }
+      },
+      "profileId": "raised-cosine-30",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "feeder24",
+      "profile": "strong",
+      "beta": 4,
+      "quality": "mixed",
+      "seed": 17,
+      "faultNoiseMultiplier": 2,
+      "steps": 240,
+      "elapsedMs": 16583,
+      "maxTotalKw": 2276.0839050100094,
+      "peakHomeKw": 132.46912776106484,
+      "forcingRmsPu": 0.003667909999599917,
+      "forecastErrorRmsPu": 0.008019502662842303,
+      "normalizedForecastError": 2.186395703198018,
+      "updates": 201,
+      "topologyChanges": 6,
+      "ranking": [
+        "static",
+        "online",
+        "causal",
+        "scalar"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9680554083314065,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 796,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 305.9894394800743,
+          "sumStateCost": 11.169857618986702,
+          "sumActuationCost": 0.4315841672779668,
+          "first60Cost": 3.0068205725262844,
+          "last60Cost": 2.9538173561339707,
+          "acMaxErrorPu": 0.0009980931773279078,
+          "acMinPu": 0.9676717641686076,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.601441786264672,
+          "saturationFraction": 0.41458333333333336
+        },
+        "scalar": {
+          "minPu": 0.9680348930514645,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 803,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 356.22261301897277,
+          "sumStateCost": 11.280668661384814,
+          "sumActuationCost": 0.44157826271556283,
+          "first60Cost": 3.0074851367334183,
+          "last60Cost": 2.9956747719885937,
+          "acMaxErrorPu": 0.0009987115047156436,
+          "acMinPu": 0.9676555340146998,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.722246924100382,
+          "saturationFraction": 0.41822916666666665
+        },
+        "static": {
+          "minPu": 0.968100829792494,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 1260,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 639.8364992110997,
+          "sumStateCost": 10.85672872514712,
+          "sumActuationCost": 0.5663561707760859,
+          "first60Cost": 2.921243764111618,
+          "last60Cost": 2.9216358873484944,
+          "acMaxErrorPu": 0.0009978443125497893,
+          "acMinPu": 0.9676782500987471,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.4230848959232,
+          "saturationFraction": 0.65625
+        },
+        "causal": {
+          "minPu": 0.968058240344029,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 601,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 216.6174638694869,
+          "sumStateCost": 11.262806044243886,
+          "sumActuationCost": 0.3781816715744904,
+          "first60Cost": 2.983089862163716,
+          "last60Cost": 2.9885553875259037,
+          "acMaxErrorPu": 0.000998403572074591,
+          "acMinPu": 0.9676638075354848,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.640987715818385,
+          "saturationFraction": 0.31302083333333336
+        }
+      },
+      "profileId": "raised-cosine-30",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "feeder24",
+      "profile": "strong",
+      "beta": 4,
+      "quality": "mixed",
+      "seed": 29,
+      "faultNoiseMultiplier": 2,
+      "steps": 240,
+      "elapsedMs": 15988,
+      "maxTotalKw": 2295.6797480839687,
+      "peakHomeKw": 130.5381368228984,
+      "forcingRmsPu": 0.003617969478530105,
+      "forecastErrorRmsPu": 0.007933757143648548,
+      "normalizedForecastError": 2.192875642188072,
+      "updates": 201,
+      "topologyChanges": 6,
+      "ranking": [
+        "static",
+        "online",
+        "causal",
+        "scalar"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9689421047785021,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 800,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 362.0019490475869,
+          "sumStateCost": 10.792465247651492,
+          "sumActuationCost": 0.4334453098212323,
+          "first60Cost": 2.8336685822529195,
+          "last60Cost": 2.8353743067290367,
+          "acMaxErrorPu": 0.0009370241731438966,
+          "acMinPu": 0.9686909224580247,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.225910557472718,
+          "saturationFraction": 0.4166666666666667
+        },
+        "scalar": {
+          "minPu": 0.9688602546454479,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 811,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 362.0019490475869,
+          "sumStateCost": 10.916487670517244,
+          "sumActuationCost": 0.4423836023743161,
+          "first60Cost": 2.8346208682030936,
+          "last60Cost": 2.8878450912115405,
+          "acMaxErrorPu": 0.0009374208939408879,
+          "acMinPu": 0.9686890181792644,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.358871272891562,
+          "saturationFraction": 0.42239583333333336
+        },
+        "static": {
+          "minPu": 0.968962633137074,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 1250,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 635.0771430330647,
+          "sumStateCost": 10.55103383790629,
+          "sumActuationCost": 0.5573234410591504,
+          "first60Cost": 2.7784160893300736,
+          "last60Cost": 2.8360892709414176,
+          "acMaxErrorPu": 0.0009357088989762063,
+          "acMinPu": 0.9687256748350555,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.10835727896544,
+          "saturationFraction": 0.6510416666666666
+        },
+        "causal": {
+          "minPu": 0.9689219868537754,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 611,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 207.4044699884811,
+          "sumStateCost": 10.922258121225662,
+          "sumActuationCost": 0.37461153746382514,
+          "first60Cost": 2.8233217202720384,
+          "last60Cost": 2.8759108158647164,
+          "acMaxErrorPu": 0.0009362322237844722,
+          "acMinPu": 0.9687116592350561,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 11.296869658689486,
+          "saturationFraction": 0.3182291666666667
+        }
+      },
+      "profileId": "raised-cosine-30",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "feeder47",
+      "profile": "strong",
+      "beta": 4,
+      "quality": "mixed",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 2,
+      "steps": 240,
+      "elapsedMs": 60211,
+      "maxTotalKw": 4613.574623368473,
+      "peakHomeKw": 133.7854121349345,
+      "forcingRmsPu": 0.0036940283251175026,
+      "forecastErrorRmsPu": 0.00789070965027626,
+      "normalizedForecastError": 2.136071777420728,
+      "updates": 201,
+      "topologyChanges": 4,
+      "ranking": [
+        "static",
+        "online",
+        "causal",
+        "scalar"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9676318073037925,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 1680,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 320.66606809870547,
+          "sumStateCost": 22.691239314104642,
+          "sumActuationCost": 0.8859003503748603,
+          "first60Cost": 5.935213963212869,
+          "last60Cost": 5.779967253062934,
+          "acMaxErrorPu": 0.0010141060997225226,
+          "acMinPu": 0.9673739926841053,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 23.577139664479496,
+          "saturationFraction": 0.4375
+        },
+        "scalar": {
+          "minPu": 0.9676176942324318,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 1670,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 353.6669213153703,
+          "sumStateCost": 22.89533257714672,
+          "sumActuationCost": 0.8965066278812004,
+          "first60Cost": 5.933721661125254,
+          "last60Cost": 5.879411020816995,
+          "acMaxErrorPu": 0.0010141060997225226,
+          "acMinPu": 0.9673739926841053,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 23.791839205027912,
+          "saturationFraction": 0.4348958333333333
+        },
+        "static": {
+          "minPu": 0.9676444603297919,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 2509,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 637.7049061555024,
+          "sumStateCost": 22.147536742629068,
+          "sumActuationCost": 1.1270940248266943,
+          "first60Cost": 5.811135539460505,
+          "last60Cost": 5.768467076420036,
+          "acMaxErrorPu": 0.001013521229329073,
+          "acMinPu": 0.9673888460760446,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 23.274630767455758,
+          "saturationFraction": 0.6533854166666667
+        },
+        "causal": {
+          "minPu": 0.9676250224696091,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 1220,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 221.51863455542596,
+          "sumStateCost": 22.899308124192128,
+          "sumActuationCost": 0.7658038528238083,
+          "first60Cost": 5.917185503941965,
+          "last60Cost": 5.840609337881205,
+          "acMaxErrorPu": 0.001014091006255824,
+          "acMinPu": 0.9673742956279182,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 23.665111977015936,
+          "saturationFraction": 0.3177083333333333
+        }
+      },
+      "profileId": "raised-cosine-30",
+      "evaluation": "earlier exploratory raised cosine API before final profile selection",
+      "role": "historical exploratory API case, not current selected profile"
+    },
+    {
+      "network": "feeder24",
+      "profile": "short-surge",
+      "beta": 4,
+      "quality": "reliable",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 2,
+      "steps": 240,
+      "elapsedMs": 14872,
+      "maxTotalKw": 2295.2434089644325,
+      "peakHomeKw": 132.26161853266515,
+      "forcingRmsPu": 0.0032582094776900427,
+      "forecastErrorRmsPu": 6.367254473547463e-05,
+      "normalizedForecastError": 0.019542188791561756,
+      "updates": 201,
+      "topologyChanges": 3,
+      "ranking": [
+        "static",
+        "scalar",
+        "online",
+        "causal"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9676213215288365,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 350,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 269.1375015348167,
+          "sumStateCost": 6.031891179222314,
+          "sumActuationCost": 0.16740688831287212,
+          "first60Cost": 1.5905532047543014,
+          "last60Cost": 1.5716862310740183,
+          "acMaxErrorPu": 0.0010229994444675983,
+          "acMinPu": 0.9672009841759565,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 6.199298067535187,
+          "saturationFraction": 0.18229166666666666
+        },
+        "scalar": {
+          "minPu": 0.9676213215288365,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 350,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 269.1375015348167,
+          "sumStateCost": 6.031776963634405,
+          "sumActuationCost": 0.16737030674387274,
+          "first60Cost": 1.5905531963781894,
+          "last60Cost": 1.5717449638420453,
+          "acMaxErrorPu": 0.0010229994444675983,
+          "acMinPu": 0.9672009841759565,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 6.199147270378277,
+          "saturationFraction": 0.18229166666666666
+        },
+        "static": {
+          "minPu": 0.9680558083152951,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 467,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 491.56068213892456,
+          "sumStateCost": 5.754141788733144,
+          "sumActuationCost": 0.20694860244747768,
+          "first60Cost": 1.5298540656901582,
+          "last60Cost": 1.5119740187432646,
+          "acMaxErrorPu": 0.001018523257045434,
+          "acMinPu": 0.96731385085783,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 5.961090391180626,
+          "saturationFraction": 0.24322916666666666
+        },
+        "causal": {
+          "minPu": 0.9670048981688103,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 363,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 227.0570188885063,
+          "sumStateCost": 6.311445235395447,
+          "sumActuationCost": 0.15768219349793458,
+          "first60Cost": 1.655147650401305,
+          "last60Cost": 1.6388689972822945,
+          "acMaxErrorPu": 0.0010264977707690193,
+          "acMinPu": 0.9671140620196322,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 6.469127428893371,
+          "saturationFraction": 0.1890625
+        }
+      },
+      "profileId": "short-surge-30",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "feeder24",
+      "profile": "short-surge",
+      "beta": 4,
+      "quality": "mixed",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 2,
+      "steps": 240,
+      "elapsedMs": 15147,
+      "maxTotalKw": 2295.2434089644325,
+      "peakHomeKw": 132.26161853266515,
+      "forcingRmsPu": 0.0032582094776900422,
+      "forecastErrorRmsPu": 0.007887546798781068,
+      "normalizedForecastError": 2.420822495542265,
+      "updates": 201,
+      "topologyChanges": 5,
+      "ranking": [
+        "online",
+        "static",
+        "scalar",
+        "causal"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9675417948508555,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 354,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 343.9555187236736,
+          "sumStateCost": 6.0354638346444185,
+          "sumActuationCost": 0.2061979290129026,
+          "first60Cost": 1.6164528614582576,
+          "last60Cost": 1.5608567569787586,
+          "acMaxErrorPu": 0.001023510279515416,
+          "acMinPu": 0.9671897105754191,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 6.241661763657325,
+          "saturationFraction": 0.184375
+        },
+        "scalar": {
+          "minPu": 0.9675417948508555,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 409,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 370.9239081567649,
+          "sumStateCost": 6.08112341475172,
+          "sumActuationCost": 0.2627892797779542,
+          "first60Cost": 1.6174288656478497,
+          "last60Cost": 1.5991970116557643,
+          "acMaxErrorPu": 0.001023510279515416,
+          "acMinPu": 0.9671897105754191,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 6.343912694529677,
+          "saturationFraction": 0.21302083333333333
+        },
+        "static": {
+          "minPu": 0.9679696102032762,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 590,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 608.2888942987721,
+          "sumStateCost": 5.904453995516499,
+          "sumActuationCost": 0.3388541804350464,
+          "first60Cost": 1.601475465978587,
+          "last60Cost": 1.5755639648707884,
+          "acMaxErrorPu": 0.0010206714644265258,
+          "acMinPu": 0.9672594208527,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 6.243308175951551,
+          "saturationFraction": 0.3072916666666667
+        },
+        "causal": {
+          "minPu": 0.9670048981688103,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 363,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 227.0570188885063,
+          "sumStateCost": 6.311445235395447,
+          "sumActuationCost": 0.15768219349793458,
+          "first60Cost": 1.655147650401305,
+          "last60Cost": 1.6388689972822945,
+          "acMaxErrorPu": 0.0010264977707690193,
+          "acMinPu": 0.9671140620196322,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 6.469127428893371,
+          "saturationFraction": 0.1890625
+        }
+      },
+      "profileId": "short-surge-30",
+      "evaluation": "in memory 4e34cd7 simulation with only declared generator replacements"
+    },
+    {
+      "network": "toy8",
+      "profile": "selected-short-surge",
+      "beta": 4,
+      "quality": "mixed",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 2,
+      "implementationSimulationSha256": "a845590bec26be4a3132ed855adf3a7f9e91e40f8da2ab1a0a0212cacdde7b3e",
+      "steps": 240,
+      "elapsedMs": 1840,
+      "maxTotalKw": 688.3473964106136,
+      "peakHomeKw": 128.65421684910828,
+      "forcingRmsPu": 0.001409033594483154,
+      "forecastErrorRmsPu": 0.003863352595442024,
+      "normalizedForecastError": 2.7418456242408724,
+      "updates": 201,
+      "topologyChanges": 1,
+      "ranking": [
+        "online",
+        "static",
+        "scalar",
+        "causal"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9890364981360378,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 20,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 99.50367214223094,
+          "sumStateCost": 0.304661996031146,
+          "sumActuationCost": 0.04024808476829463,
+          "first60Cost": 0.09531866530112847,
+          "last60Cost": 0.0822787918793965,
+          "acMaxErrorPu": 0.0001094219763515536,
+          "acMinPu": 0.9892761313125782,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.3449100807994407,
+          "saturationFraction": 0.027777777777777776
+        },
+        "scalar": {
+          "minPu": 0.9889623185555054,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 19,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 114.3378604128543,
+          "sumStateCost": 0.3174911157644803,
+          "sumActuationCost": 0.04314274532326003,
+          "first60Cost": 0.09561898048106893,
+          "last60Cost": 0.08739522234906802,
+          "acMaxErrorPu": 0.0001094219763515536,
+          "acMinPu": 0.9892761313125782,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.36063386108774015,
+          "saturationFraction": 0.02638888888888889
+        },
+        "static": {
+          "minPu": 0.9893535059489674,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 85,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 146.04972369174348,
+          "sumStateCost": 0.2867142223200037,
+          "sumActuationCost": 0.07025247960963717,
+          "first60Cost": 0.09388868408916366,
+          "last60Cost": 0.08866615704762822,
+          "acMaxErrorPu": 0.00010305286230383182,
+          "acMinPu": 0.9898455955432695,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.35696670192964086,
+          "saturationFraction": 0.11805555555555555
+        },
+        "causal": {
+          "minPu": 0.9885062222934562,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 0,
+          "peakCommandKvar": 48.82798318327419,
+          "peakRawKvar": 48.82798318327419,
+          "sumStateCost": 0.36316356849340825,
+          "sumActuationCost": 0.017520865664652406,
+          "first60Cost": 0.10006646647991242,
+          "last60Cost": 0.09260333768900045,
+          "acMaxErrorPu": 0.00011187909487098135,
+          "acMinPu": 0.9890841207138055,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 0.38068443415806064,
+          "saturationFraction": 0
+        }
+      },
+      "profileId": "short-surge-30",
+      "evaluation": "selected actual candidate API",
+      "role": "default network validation"
+    },
+    {
+      "network": "feeder24",
+      "profile": "selected-short-surge",
+      "beta": 4,
+      "quality": "mixed",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 2,
+      "implementationSimulationSha256": "a845590bec26be4a3132ed855adf3a7f9e91e40f8da2ab1a0a0212cacdde7b3e",
+      "steps": 240,
+      "elapsedMs": 15321,
+      "maxTotalKw": 2295.2434089644325,
+      "peakHomeKw": 132.26161853266515,
+      "forcingRmsPu": 0.0032582094776900422,
+      "forecastErrorRmsPu": 0.007887546798781068,
+      "normalizedForecastError": 2.420822495542265,
+      "updates": 201,
+      "topologyChanges": 5,
+      "ranking": [
+        "online",
+        "static",
+        "scalar",
+        "causal"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9675417948508555,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 354,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 343.9555187236736,
+          "sumStateCost": 6.0354638346444185,
+          "sumActuationCost": 0.2061979290129026,
+          "first60Cost": 1.6164528614582576,
+          "last60Cost": 1.5608567569787586,
+          "acMaxErrorPu": 0.001023510279515416,
+          "acMinPu": 0.9671897105754191,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 6.241661763657325,
+          "saturationFraction": 0.184375
+        },
+        "scalar": {
+          "minPu": 0.9675417948508555,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 409,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 370.9239081567649,
+          "sumStateCost": 6.08112341475172,
+          "sumActuationCost": 0.2627892797779542,
+          "first60Cost": 1.6174288656478497,
+          "last60Cost": 1.5991970116557643,
+          "acMaxErrorPu": 0.001023510279515416,
+          "acMinPu": 0.9671897105754191,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 6.343912694529677,
+          "saturationFraction": 0.21302083333333333
+        },
+        "static": {
+          "minPu": 0.9679696102032762,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 590,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 608.2888942987721,
+          "sumStateCost": 5.904453995516499,
+          "sumActuationCost": 0.3388541804350464,
+          "first60Cost": 1.601475465978587,
+          "last60Cost": 1.5755639648707884,
+          "acMaxErrorPu": 0.0010206714644265258,
+          "acMinPu": 0.9672594208527,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 6.243308175951551,
+          "saturationFraction": 0.3072916666666667
+        },
+        "causal": {
+          "minPu": 0.9670048981688103,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 363,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 227.0570188885063,
+          "sumStateCost": 6.311445235395447,
+          "sumActuationCost": 0.15768219349793458,
+          "first60Cost": 1.655147650401305,
+          "last60Cost": 1.6388689972822945,
+          "acMaxErrorPu": 0.0010264977707690193,
+          "acMinPu": 0.9671140620196322,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 6.469127428893371,
+          "saturationFraction": 0.1890625
+        }
+      },
+      "profileId": "short-surge-30",
+      "evaluation": "selected actual candidate API",
+      "role": "default network validation"
+    },
+    {
+      "network": "feeder24",
+      "profile": "selected-short-surge",
+      "beta": 4,
+      "quality": "mixed",
+      "seed": 17,
+      "faultNoiseMultiplier": 2,
+      "implementationSimulationSha256": "a845590bec26be4a3132ed855adf3a7f9e91e40f8da2ab1a0a0212cacdde7b3e",
+      "steps": 240,
+      "elapsedMs": 15438,
+      "maxTotalKw": 2377.2184703617677,
+      "peakHomeKw": 132.6892272229146,
+      "forcingRmsPu": 0.0032695890101343203,
+      "forecastErrorRmsPu": 0.008019502662842303,
+      "normalizedForecastError": 2.4527555720261147,
+      "updates": 201,
+      "topologyChanges": 6,
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9670229875833761,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 363,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 348.52292379271256,
+          "sumStateCost": 6.078709644390022,
+          "sumActuationCost": 0.21226346253105663,
+          "first60Cost": 1.5559482060512067,
+          "last60Cost": 1.543126047790855,
+          "acMaxErrorPu": 0.0010369647650736447,
+          "acMinPu": 0.9669762278573906,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 6.290973106921077,
+          "saturationFraction": 0.1890625
+        },
+        "scalar": {
+          "minPu": 0.9669491842850955,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 413,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 385.0869217711225,
+          "sumStateCost": 6.144811700605106,
+          "sumActuationCost": 0.26323729147210173,
+          "first60Cost": 1.557725199400876,
+          "last60Cost": 1.586209099843565,
+          "acMaxErrorPu": 0.0010373567025602215,
+          "acMinPu": 0.966966514314982,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 6.408048992077207,
+          "saturationFraction": 0.21510416666666668
+        },
+        "static": {
+          "minPu": 0.9677255150619174,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 611,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 655.0132061069658,
+          "sumStateCost": 5.891727173221793,
+          "sumActuationCost": 0.3404620072716544,
+          "first60Cost": 1.51346073124251,
+          "last60Cost": 1.5554545214298239,
+          "acMaxErrorPu": 0.0010329337511506553,
+          "acMinPu": 0.9670768854004073,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 6.232189180493445,
+          "saturationFraction": 0.3182291666666667
+        },
+        "causal": {
+          "minPu": 0.966427899694746,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 361,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 233.968120552315,
+          "sumStateCost": 6.356933823113382,
+          "sumActuationCost": 0.15854280768079884,
+          "first60Cost": 1.594337764212651,
+          "last60Cost": 1.6219416522317969,
+          "acMaxErrorPu": 0.0010406666138185194,
+          "acMinPu": 0.9668839893404356,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 6.515476630794184,
+          "saturationFraction": 0.18802083333333333
+        }
+      },
+      "profileId": "short-surge-30",
+      "evaluation": "selected actual candidate API",
+      "role": "held out seed validation"
+    },
+    {
+      "network": "feeder24",
+      "profile": "selected-short-surge",
+      "beta": 4,
+      "quality": "mixed",
+      "seed": 29,
+      "faultNoiseMultiplier": 2,
+      "implementationSimulationSha256": "a845590bec26be4a3132ed855adf3a7f9e91e40f8da2ab1a0a0212cacdde7b3e",
+      "steps": 240,
+      "elapsedMs": 15158,
+      "maxTotalKw": 2312.7426950955687,
+      "peakHomeKw": 129.32304390417545,
+      "forcingRmsPu": 0.0032403470995664664,
+      "forecastErrorRmsPu": 0.007933757143648548,
+      "normalizedForecastError": 2.448428177558516,
+      "updates": 201,
+      "topologyChanges": 6,
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9674550282440636,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 358,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 350.69774500014546,
+          "sumStateCost": 5.93742737243204,
+          "sumActuationCost": 0.21010408803854733,
+          "first60Cost": 1.601843451386301,
+          "last60Cost": 1.458833777806322,
+          "acMaxErrorPu": 0.0009907619902477238,
+          "acMinPu": 0.9677192317915874,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 6.147531460470584,
+          "saturationFraction": 0.18645833333333334
+        },
+        "scalar": {
+          "minPu": 0.9674550282440636,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 419,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 350.1931719470355,
+          "sumStateCost": 6.00328189211974,
+          "sumActuationCost": 0.2633360747014864,
+          "first60Cost": 1.6031994834216368,
+          "last60Cost": 1.5173305714567908,
+          "acMaxErrorPu": 0.0009913048734515595,
+          "acMinPu": 0.967706698897267,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 6.2666179668212285,
+          "saturationFraction": 0.21822916666666667
+        },
+        "static": {
+          "minPu": 0.9677076279561109,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 604,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 612.5293211991643,
+          "sumStateCost": 5.78945315024201,
+          "sumActuationCost": 0.3471146963693098,
+          "first60Cost": 1.594624240434826,
+          "last60Cost": 1.4716451126065837,
+          "acMaxErrorPu": 0.0009887529335511624,
+          "acMinPu": 0.9677714498867941,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 6.136567846611313,
+          "saturationFraction": 0.3145833333333333
+        },
+        "causal": {
+          "minPu": 0.9670330944589876,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 364,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 227.28203240925268,
+          "sumStateCost": 6.198378584051041,
+          "sumActuationCost": 0.15845021054378597,
+          "first60Cost": 1.6247383100481123,
+          "last60Cost": 1.5321923355763114,
+          "acMaxErrorPu": 0.0009952900979344204,
+          "acMinPu": 0.9676052856161759,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 6.356828794594836,
+          "saturationFraction": 0.18958333333333333
+        }
+      },
+      "profileId": "short-surge-30",
+      "evaluation": "selected actual candidate API",
+      "role": "held out seed validation"
+    },
+    {
+      "network": "feeder47",
+      "profile": "selected-short-surge",
+      "beta": 4,
+      "quality": "mixed",
+      "seed": 20261013,
+      "faultNoiseMultiplier": 2,
+      "implementationSimulationSha256": "a845590bec26be4a3132ed855adf3a7f9e91e40f8da2ab1a0a0212cacdde7b3e",
+      "steps": 240,
+      "elapsedMs": 60570,
+      "maxTotalKw": 4727.023210388349,
+      "peakHomeKw": 137.08812930034443,
+      "forcingRmsPu": 0.0032867060023423957,
+      "forecastErrorRmsPu": 0.007890709650276261,
+      "normalizedForecastError": 2.4007957038605356,
+      "updates": 201,
+      "topologyChanges": 4,
+      "ranking": [
+        "static",
+        "online",
+        "scalar",
+        "causal"
+      ],
+      "metrics": {
+        "online": {
+          "minPu": 0.9672432075702883,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 747,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 358.800014287366,
+          "sumStateCost": 12.346609496714766,
+          "sumActuationCost": 0.4446008083848076,
+          "first60Cost": 3.3077636503371,
+          "last60Cost": 3.149157535585158,
+          "acMaxErrorPu": 0.001041514718341574,
+          "acMinPu": 0.966917198336932,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 12.791210305099579,
+          "saturationFraction": 0.19453125
+        },
+        "scalar": {
+          "minPu": 0.9672390935230305,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 847,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 368.1425416720617,
+          "sumStateCost": 12.421431846261015,
+          "sumActuationCost": 0.5344420640328923,
+          "first60Cost": 3.308987176264183,
+          "last60Cost": 3.225716950390564,
+          "acMaxErrorPu": 0.0010413422213186863,
+          "acMinPu": 0.9669215889526138,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 12.955873910293908,
+          "saturationFraction": 0.22057291666666667
+        },
+        "static": {
+          "minPu": 0.9676427929828105,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 1282,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 626.8077091022784,
+          "sumStateCost": 11.965727491762397,
+          "sumActuationCost": 0.7122990661924081,
+          "first60Cost": 3.2486331517410094,
+          "last60Cost": 3.170949683433242,
+          "acMaxErrorPu": 0.0010357663703584041,
+          "acMinPu": 0.9670620186897315,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 12.678026557954816,
+          "saturationFraction": 0.3338541666666667
+        },
+        "causal": {
+          "minPu": 0.9665453484843817,
+          "maxPu": 1,
+          "voltageViolatingBusSamples": 0,
+          "saturatedActuatorSamples": 732,
+          "peakCommandKvar": 70,
+          "peakRawKvar": 232.13597803182907,
+          "sumStateCost": 12.870803690107646,
+          "sumActuationCost": 0.3168823072318095,
+          "first60Cost": 3.360927251101833,
+          "last60Cost": 3.2801242355357134,
+          "acMaxErrorPu": 0.001044954640755047,
+          "acMinPu": 0.9668333429451987,
+          "acConverged": true,
+          "acChecks": 48,
+          "cumulativeCost": 13.18768599733945,
+          "saturationFraction": 0.190625
+        }
+      },
+      "profileId": "short-surge-30",
+      "evaluation": "selected actual candidate API",
+      "role": "default network validation"
+    }
+  ],
+  "selectedProfile": {
+    "option": "stressProfile = strong-v1",
+    "profileId": "short-surge-30",
+    "defaultBeta": 4,
+    "selectionReason": "The brief forecastable surge exposes transient anticipation and recovery and reduces sustained inverter saturation relative to the raised cosine. It was not selected as evidence that adaptive sparse always wins.",
+    "validation": "All three default networks and two additional 24 bus seeds were run for 240 actions through the actual candidate API.",
+    "sourceSha256": "a845590bec26be4a3132ed855adf3a7f9e91e40f8da2ab1a0a0212cacdde7b3e",
+    "benchmarkSource": "src/benchmark-strong-stress.cjs",
+    "benchmarkSha256": "3d4c1b374903703a6b6d6bdde576cf8b559e95c5f2d8162ccb07348048dcef5d",
+    "reproduce": "node src/benchmark-strong-stress.cjs --json",
+    "exploratoryCasesRetained": 23,
+    "validationCases": [
+      {
+        "network": "toy8",
+        "profileId": "short-surge-30",
+        "seed": 20261013,
+        "beta": 4,
+        "quality": "mixed",
+        "evaluation": "selected actual candidate API",
+        "role": "default network validation",
+        "cumulativeCosts": {
+          "online": 0.3449100807994407,
+          "scalar": 0.36063386108774015,
+          "static": 0.35696670192964086,
+          "causal": 0.38068443415806064
+        },
+        "ranking": [
+          "online",
+          "static",
+          "scalar",
+          "causal"
+        ],
+        "adaptivePercentLowerThan": {
+          "scalar": 4.360039914408912,
+          "static": 3.377519826086347,
+          "causal": 9.397377499224566
+        },
+        "voltageRangePu": [
+          0.9885062222934562,
+          1
+        ],
+        "saturationPercent": {
+          "online": 2.7777777777777777,
+          "scalar": 2.638888888888889,
+          "static": 11.805555555555555,
+          "causal": 0
+        },
+        "maxSampledACErrorPu": 0.00011187909487098135,
+        "allSampledACConverged": true,
+        "normalizedForecastError": 2.7418456242408724
+      },
+      {
+        "network": "feeder24",
+        "profileId": "short-surge-30",
+        "seed": 20261013,
+        "beta": 4,
+        "quality": "mixed",
+        "evaluation": "selected actual candidate API",
+        "role": "default network validation",
+        "cumulativeCosts": {
+          "online": 6.241661763657325,
+          "scalar": 6.343912694529677,
+          "static": 6.243308175951551,
+          "causal": 6.469127428893371
+        },
+        "ranking": [
+          "online",
+          "static",
+          "scalar",
+          "causal"
+        ],
+        "adaptivePercentLowerThan": {
+          "scalar": 1.6117959971378975,
+          "static": 0.026370831742186417,
+          "causal": 3.5161722772704334
+        },
+        "voltageRangePu": [
+          0.9670048981688103,
+          1
+        ],
+        "saturationPercent": {
+          "online": 18.4375,
+          "scalar": 21.302083333333332,
+          "static": 30.729166666666668,
+          "causal": 18.90625
+        },
+        "maxSampledACErrorPu": 0.0010264977707690193,
+        "allSampledACConverged": true,
+        "normalizedForecastError": 2.420822495542265
+      },
+      {
+        "network": "feeder24",
+        "profileId": "short-surge-30",
+        "seed": 17,
+        "beta": 4,
+        "quality": "mixed",
+        "evaluation": "selected actual candidate API",
+        "role": "held out seed validation",
+        "cumulativeCosts": {
+          "online": 6.290973106921077,
+          "scalar": 6.408048992077207,
+          "static": 6.232189180493445,
+          "causal": 6.515476630794184
+        },
+        "ranking": [
+          "static",
+          "online",
+          "scalar",
+          "causal"
+        ],
+        "adaptivePercentLowerThan": {
+          "scalar": 1.8270129535663802,
+          "static": -0.9432307769414856,
+          "causal": 3.445696095540164
+        },
+        "voltageRangePu": [
+          0.966427899694746,
+          1
+        ],
+        "saturationPercent": {
+          "online": 18.90625,
+          "scalar": 21.510416666666668,
+          "static": 31.822916666666668,
+          "causal": 18.802083333333332
+        },
+        "maxSampledACErrorPu": 0.0010406666138185194,
+        "allSampledACConverged": true,
+        "normalizedForecastError": 2.4527555720261147
+      },
+      {
+        "network": "feeder24",
+        "profileId": "short-surge-30",
+        "seed": 29,
+        "beta": 4,
+        "quality": "mixed",
+        "evaluation": "selected actual candidate API",
+        "role": "held out seed validation",
+        "cumulativeCosts": {
+          "online": 6.147531460470584,
+          "scalar": 6.2666179668212285,
+          "static": 6.136567846611313,
+          "causal": 6.356828794594836
+        },
+        "ranking": [
+          "static",
+          "online",
+          "scalar",
+          "causal"
+        ],
+        "adaptivePercentLowerThan": {
+          "scalar": 1.9003313586555128,
+          "static": -0.17866035434327493,
+          "causal": 3.2924802741614823
+        },
+        "voltageRangePu": [
+          0.9670330944589876,
+          1
+        ],
+        "saturationPercent": {
+          "online": 18.645833333333332,
+          "scalar": 21.822916666666668,
+          "static": 31.458333333333332,
+          "causal": 18.958333333333332
+        },
+        "maxSampledACErrorPu": 0.0009952900979344204,
+        "allSampledACConverged": true,
+        "normalizedForecastError": 2.448428177558516
+      },
+      {
+        "network": "feeder47",
+        "profileId": "short-surge-30",
+        "seed": 20261013,
+        "beta": 4,
+        "quality": "mixed",
+        "evaluation": "selected actual candidate API",
+        "role": "default network validation",
+        "cumulativeCosts": {
+          "online": 12.791210305099579,
+          "scalar": 12.955873910293908,
+          "static": 12.678026557954816,
+          "causal": 13.18768599733945
+        },
+        "ranking": [
+          "static",
+          "online",
+          "scalar",
+          "causal"
+        ],
+        "adaptivePercentLowerThan": {
+          "scalar": 1.2709571452644206,
+          "static": -0.8927552456793535,
+          "causal": 3.0064083442679657
+        },
+        "voltageRangePu": [
+          0.9665453484843817,
+          1
+        ],
+        "saturationPercent": {
+          "online": 19.453125,
+          "scalar": 22.057291666666668,
+          "static": 33.385416666666664,
+          "causal": 19.0625
+        },
+        "maxSampledACErrorPu": 0.001044954640755047,
+        "allSampledACConverged": true,
+        "normalizedForecastError": 2.4007957038605356
+      }
+    ],
+    "rankingLimit": "Adaptive is lowest in the toy default and essentially tied with dense in the 24 bus default. Dense is lower for the 47 bus default and both held out 24 bus seeds. Adaptive remains below feedback and fixed sparse in these five tested cases."
+  }
+}
