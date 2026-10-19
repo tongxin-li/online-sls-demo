@@ -183,6 +183,28 @@ async function main(){
     assert.ok(final.s.cumulative[key]>=second.s.cumulative[key]);
     assert.ok(final.s.commandQ[key].every(value=>Math.abs(value)<=70+1e-8));
    }
+   if(networkId==='feeder47'){
+    // Independent rendered glyph bounds validate the computed cue after long
+    // ongoing playback. Geometry inspection cannot mutate the physical trial.
+    const invariant=await read(page),scroll=page.locator('.pr-matrix-scroll');
+    const initialOffset=await scroll.evaluate(node=>node.scrollLeft);
+    for(const fraction of [0,.5,1]){
+     await scroll.evaluate((node,fraction)=>{node.scrollLeft=fraction*(node.scrollWidth-node.clientWidth);},fraction);
+     await scroll.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+     const cue=await scroll.evaluate(node=>{
+      const bounds=node.getBoundingClientRect(),axis=node.querySelector('.matrix-receiver-axis').getBoundingClientRect();
+      const visible=Array.from(node.querySelectorAll('.matrix-columns text')).filter(label=>{
+       const box=label.getBoundingClientRect();return box.left>=axis.right-.5&&box.right<=bounds.right+.5;
+      }).map(label=>Number(label.firstChild.nodeValue));
+      return {visible,data:{...document.querySelector('#pr-matrix-scroll-hint').dataset}};
+     });
+     assert.ok(cue.visible.length>1);assert.equal(Number(cue.data.first),cue.visible[0]);
+     assert.equal(Number(cue.data.last),cue.visible.at(-1),'Long ongoing source cue matches actual rendered whole glyphs');
+    }
+    await scroll.evaluate((node,offset)=>{node.scrollLeft=offset;},initialOffset);
+    await scroll.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+    assert.deepEqual((await read(page)).s,invariant.s,'Long history scroll inspection preserves every command and physical cost');
+   }
    assert.equal(await page.locator('#pr-cost-detail tr').count(),4);assert.equal(await page.locator('.pr-panel').count(),4);
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
    assert.match(await page.locator('#pr-transition-note').textContent(),/No reset or stop/);

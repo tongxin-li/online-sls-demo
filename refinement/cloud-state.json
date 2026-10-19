@@ -5377,7 +5377,7 @@
         "branch": "cloud/refine/continuous-phi-20261018-2345",
         "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
         "candidate_parent": "2ae31c21b4f3095d6d1da9bb56bcd5eefd1c89a3",
-        "status": "profiling_native_long_playback",
+        "status": "measured_matrix_layout_optimization_pending_validation",
         "counted_invocation": true,
         "counted_completed": false,
         "early_dispatch": "Read only preflight until the scheduled slot. Original dispatch deadline retained.",
@@ -5399,12 +5399,32 @@
             "ongoing_conditions": 6,
             "handoffs": 18
           },
-          "profiling": "Pending full cloud validation. Diagnostic timing includes profiler overhead and cannot be claimed as improved speed."
+          "profiling": "Pending full cloud validation. Diagnostic timing includes profiler overhead and cannot be claimed as improved speed.",
+          "baseline_profile": {
+            "source": "e4be70fcaca29b37deffd5a69dbf23e0113e0d24",
+            "run_id": 39178020942,
+            "conclusion": "success",
+            "completed_logs_read": true,
+            "jobs": {
+              "validate": 117824761506,
+              "ongoing_browser": 117824761655,
+              "review": 117826906313,
+              "prepare": 117827661669
+            },
+            "numerical_cases": 254,
+            "original_browser_checks": 44,
+            "ongoing_conditions": 6,
+            "handoffs": 18,
+            "profiles": 4,
+            "generated_child": "None. Product bytes and generated page are unchanged from the previous tested ready commit."
+          },
+          "optimized_candidate": "Pending full required validation and pixel review. No live publication."
         },
         "changes": [
           "Add cloud CDP CPU profiling of real 47 bus desktop and phone Run at 650 through 901 actions and 100 additional native actions after the existing full long interaction sequence beyond 1800.",
           "Keep all existing controller, immutable forecast, attack, support, accumulated cost, old boundary and exact replay assertions. Store full profiles and compact stack attribution plus actual finite heap observations.",
-          "No product engine, UI, physical parameter or numerical benchmark is changed by profiling."
+          "No product engine, UI, physical parameter or numerical benchmark is changed by profiling.",
+          "Use measured SVG glyph extents and a batched read phase for matrix source scroll cues instead of measuring every label rectangle after writes. Retain actual SVG scaling, pinned inverter labels, edge source clamping and guide positions."
         ],
         "next_focus": "Measure native 47 bus CPU attribution and retained history near 900 and beyond 1800 actions before optimizing.",
         "metadata_recovery": {
@@ -5412,7 +5432,14 @@
           "reason": "An in memory serialized checkpoint was saved before the lease mutation and was reused for the first instrumentation commit. Restore the exact durable lease and all preceding program records from 7f08aa0635844144fbbc8d33c0336e7934a3c34b without extra invocation or completion.",
           "counted_invocation": false,
           "counted_completed": false
-        }
+        },
+        "duplicate_dispatches": [
+          {
+            "at": "2026-10-19T08:04:04+08:00",
+            "slot": "2026-10-19T07:45:00+08:00",
+            "action": "Read only duplicate preflight during the counted pass. No invocation, lease or deadline extension."
+          }
+        ]
       }
     ],
     "active_run": {
@@ -5478,6 +5505,11 @@
         "at": "2026-10-19T06:18:28+08:00",
         "slot": "2026-10-19T05:45:00+08:00",
         "action": "Read only duplicate preflight while the already counted invocation finishes its checkpoint. No new lease, invocation, refinement or deadline extension."
+      },
+      {
+        "at": "2026-10-19T08:04:04+08:00",
+        "slot": "2026-10-19T07:45:00+08:00",
+        "action": "Read only duplicate preflight during the counted pass. No invocation, lease or deadline extension."
       }
     ],
     "read_only_preflights": [

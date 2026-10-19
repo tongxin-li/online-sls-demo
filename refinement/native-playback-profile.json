@@ -1,0 +1,1226 @@
+{
+  "source": "e4be70fcaca29b37deffd5a69dbf23e0113e0d24",
+  "run_id": 39178020942,
+  "job_id": 117824761655,
+  "protocol": "continuous-phi-v1",
+  "scope": "Engineering CPU profiles of actual native 47 bus desktop and phone playback. No new numerical superiority study.",
+  "profiles": [
+    {
+      "label": "feeder47-desktop-near-900",
+      "before": {
+        "t": 652,
+        "history": 652,
+        "samples": 652,
+        "sourceUpdates": 622,
+        "costs": {
+          "online": 0.6446979714290385,
+          "scalar": 0.894133761167692,
+          "static": 1.1357160712784697,
+          "causal": 0.6531700185039158
+        },
+        "domNodes": 4467,
+        "playing": true
+      },
+      "after": {
+        "t": 910,
+        "history": 910,
+        "samples": 910,
+        "sourceUpdates": 880,
+        "costs": {
+          "online": 0.8698633974147112,
+          "scalar": 1.2256033762327914,
+          "static": 1.5802991692358634,
+          "causal": 0.8853589926092614
+        },
+        "domNodes": 4477,
+        "playing": false
+      },
+      "elapsedMs": 29700,
+      "heapBefore": {
+        "usedSize": 72539024,
+        "totalSize": 154214400,
+        "embedderHeapUsedSize": 114469824,
+        "backingStorageSize": 1165631
+      },
+      "heapAfter": {
+        "usedSize": 110462428,
+        "totalSize": 177283072,
+        "embedderHeapUsedSize": 90437360,
+        "backingStorageSize": 1116310
+      },
+      "samples": 26830,
+      "sampledUs": 29848312,
+      "attributionUs": {
+        "other": 6183711,
+        "controller_and_plant": 967137,
+        "snapshot": 617954,
+        "render": 1333730,
+        "response_history": 926521,
+        "network": 1452469,
+        "matrix": 15678056,
+        "cost_chart": 887311,
+        "voltage_chart": 434866,
+        "voltage_metrics": 983707,
+        "garbage_collection": 366560,
+        "persistence": 2168,
+        "idle": 14122
+      },
+      "hottestSelf": [
+        {
+          "function": "getBoundingClientRect",
+          "url": "",
+          "line": 0,
+          "selfUs": 12018377
+        },
+        {
+          "function": "(program)",
+          "url": "",
+          "line": 0,
+          "selfUs": 5397623
+        },
+        {
+          "function": "updateMatrixScrollHint",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4088,
+          "selfUs": 1778336
+        },
+        {
+          "function": "setAttribute",
+          "url": "",
+          "line": 0,
+          "selfUs": 1616590
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 1383008
+        },
+        {
+          "function": "worst",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2238,
+          "selfUs": 707310
+        },
+        {
+          "function": "(garbage collector)",
+          "url": "",
+          "line": 0,
+          "selfUs": 366560
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 3111,
+          "selfUs": 363047
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1530,
+          "selfUs": 308933
+        },
+        {
+          "function": "updateCommandScrollHint",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2927,
+          "selfUs": 288663
+        },
+        {
+          "function": "each",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 270139
+        },
+        {
+          "function": "branchFlows",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1684,
+          "selfUs": 193415
+        },
+        {
+          "function": "command",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1398,
+          "selfUs": 185475
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2246,
+          "selfUs": 182440
+        },
+        {
+          "function": "l",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 178251
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4451,
+          "selfUs": 172168
+        },
+        {
+          "function": "querySelector",
+          "url": "",
+          "line": 0,
+          "selfUs": 165298
+        },
+        {
+          "function": "querySelectorAll",
+          "url": "",
+          "line": 0,
+          "selfUs": 157298
+        },
+        {
+          "function": "removeEventListener",
+          "url": "",
+          "line": 0,
+          "selfUs": 136933
+        },
+        {
+          "function": "u",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 134920
+        },
+        {
+          "function": "receiverMessages",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1266,
+          "selfUs": 122963
+        },
+        {
+          "function": "setProperty",
+          "url": "",
+          "line": 0,
+          "selfUs": 119148
+        },
+        {
+          "function": "snapshot",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2187,
+          "selfUs": 104552
+        },
+        {
+          "function": "addEventListener",
+          "url": "",
+          "line": 0,
+          "selfUs": 99516
+        },
+        {
+          "function": "voltageMetrics",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2236,
+          "selfUs": 93957
+        },
+        {
+          "function": "replaceChildren",
+          "url": "",
+          "line": 0,
+          "selfUs": 88931
+        },
+        {
+          "function": "drawMatrix",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4117,
+          "selfUs": 84814
+        },
+        {
+          "function": "a",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 83815
+        },
+        {
+          "function": "rn",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 82415
+        },
+        {
+          "function": "inspectedResponseHistory",
+          "url": "http://127.0.0.1:46519/",
+          "line": 3107,
+          "selfUs": 82219
+        },
+        {
+          "function": "chartBase",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4265,
+          "selfUs": 74082
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4319,
+          "selfUs": 71403
+        },
+        {
+          "function": "row",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1334,
+          "selfUs": 70163
+        },
+        {
+          "function": "getAttribute",
+          "url": "",
+          "line": 0,
+          "selfUs": 63780
+        },
+        {
+          "function": "step",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2042,
+          "selfUs": 59248
+        },
+        {
+          "function": "select",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 56536
+        },
+        {
+          "function": "deepFreeze",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1535,
+          "selfUs": 56011
+        },
+        {
+          "function": "diagnostics",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1428,
+          "selfUs": 54934
+        },
+        {
+          "function": "M",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 54311
+        },
+        {
+          "function": "deliverPolicy",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1361,
+          "selfUs": 47468
+        }
+      ],
+      "caveat": "Profiler and browser assertions add overhead. Heap usage is an actual finite observation, not a retained heap or indefinite bound. Stack attribution uses the nearest named application frame."
+    },
+    {
+      "label": "feeder47-desktop-after-1800",
+      "before": {
+        "t": 1854,
+        "history": 1854,
+        "samples": 1854,
+        "sourceUpdates": 1824,
+        "costs": {
+          "online": 1.738001894462699,
+          "scalar": 2.4694707321505263,
+          "static": 3.1102819850446255,
+          "causal": 1.7806119463936385
+        },
+        "domNodes": 4462,
+        "playing": false
+      },
+      "after": {
+        "t": 1962,
+        "history": 1962,
+        "samples": 1962,
+        "sourceUpdates": 1932,
+        "costs": {
+          "online": 1.8601141588155965,
+          "scalar": 2.635556135120037,
+          "static": 3.311708635608268,
+          "causal": 1.9066031803613632
+        },
+        "domNodes": 4456,
+        "playing": false
+      },
+      "elapsedMs": 14489,
+      "heapBefore": {
+        "usedSize": 123098168,
+        "totalSize": 271130624,
+        "embedderHeapUsedSize": 37418056,
+        "backingStorageSize": 1050443
+      },
+      "heapAfter": {
+        "usedSize": 163700340,
+        "totalSize": 256712704,
+        "embedderHeapUsedSize": 320736440,
+        "backingStorageSize": 1456939
+      },
+      "samples": 13106,
+      "sampledUs": 14694097,
+      "attributionUs": {
+        "other": 3009789,
+        "controller_and_plant": 431577,
+        "snapshot": 239051,
+        "render": 882676,
+        "response_history": 717318,
+        "network": 608161,
+        "matrix": 6741956,
+        "cost_chart": 691039,
+        "voltage_metrics": 1001991,
+        "voltage_chart": 206400,
+        "garbage_collection": 157667,
+        "persistence": 2175,
+        "idle": 4297
+      },
+      "hottestSelf": [
+        {
+          "function": "getBoundingClientRect",
+          "url": "",
+          "line": 0,
+          "selfUs": 5236116
+        },
+        {
+          "function": "(program)",
+          "url": "",
+          "line": 0,
+          "selfUs": 2674499
+        },
+        {
+          "function": "updateMatrixScrollHint",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4088,
+          "selfUs": 766837
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 756474
+        },
+        {
+          "function": "setAttribute",
+          "url": "",
+          "line": 0,
+          "selfUs": 720378
+        },
+        {
+          "function": "worst",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2238,
+          "selfUs": 712238
+        },
+        {
+          "function": "updateCommandScrollHint",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2927,
+          "selfUs": 362024
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 3111,
+          "selfUs": 330470
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4451,
+          "selfUs": 158895
+        },
+        {
+          "function": "(garbage collector)",
+          "url": "",
+          "line": 0,
+          "selfUs": 157667
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2246,
+          "selfUs": 157192
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1530,
+          "selfUs": 148099
+        },
+        {
+          "function": "voltageMetrics",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2236,
+          "selfUs": 132561
+        },
+        {
+          "function": "inspectedResponseHistory",
+          "url": "http://127.0.0.1:46519/",
+          "line": 3107,
+          "selfUs": 121575
+        },
+        {
+          "function": "each",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 100013
+        },
+        {
+          "function": "branchFlows",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1684,
+          "selfUs": 91667
+        },
+        {
+          "function": "l",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 81527
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4319,
+          "selfUs": 73160
+        },
+        {
+          "function": "querySelector",
+          "url": "",
+          "line": 0,
+          "selfUs": 69724
+        },
+        {
+          "function": "column",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1328,
+          "selfUs": 65235
+        },
+        {
+          "function": "querySelectorAll",
+          "url": "",
+          "line": 0,
+          "selfUs": 62607
+        },
+        {
+          "function": "removeEventListener",
+          "url": "",
+          "line": 0,
+          "selfUs": 54177
+        },
+        {
+          "function": "setProperty",
+          "url": "",
+          "line": 0,
+          "selfUs": 53356
+        },
+        {
+          "function": "addEventListener",
+          "url": "",
+          "line": 0,
+          "selfUs": 51403
+        },
+        {
+          "function": "chartBase",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4265,
+          "selfUs": 49782
+        },
+        {
+          "function": "receiverMessages",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1266,
+          "selfUs": 45052
+        },
+        {
+          "function": "row",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1334,
+          "selfUs": 43583
+        },
+        {
+          "function": "drawMatrix",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4117,
+          "selfUs": 41014
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4286,
+          "selfUs": 40455
+        },
+        {
+          "function": "a",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 36783
+        },
+        {
+          "function": "replaceChildren",
+          "url": "",
+          "line": 0,
+          "selfUs": 35897
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 3041,
+          "selfUs": 34251
+        },
+        {
+          "function": "select",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 33633
+        },
+        {
+          "function": "rn",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 30292
+        },
+        {
+          "function": "snapshot",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2187,
+          "selfUs": 30169
+        },
+        {
+          "function": "getAttribute",
+          "url": "",
+          "line": 0,
+          "selfUs": 29271
+        },
+        {
+          "function": "M",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 29267
+        },
+        {
+          "function": "deliverPolicy",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1361,
+          "selfUs": 24700
+        },
+        {
+          "function": "refreshContinuousScores",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2125,
+          "selfUs": 21530
+        },
+        {
+          "function": "step",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2042,
+          "selfUs": 21105
+        }
+      ],
+      "caveat": "Profiler and browser assertions add overhead. Heap usage is an actual finite observation, not a retained heap or indefinite bound. Stack attribution uses the nearest named application frame."
+    },
+    {
+      "label": "feeder47-phone-near-900",
+      "before": {
+        "t": 653,
+        "history": 653,
+        "samples": 653,
+        "sourceUpdates": 623,
+        "costs": {
+          "online": 0.645851402631862,
+          "scalar": 0.8962858476610899,
+          "static": 1.1394254544295672,
+          "causal": 0.6544118603684324
+        },
+        "domNodes": 4443,
+        "playing": true
+      },
+      "after": {
+        "t": 912,
+        "history": 912,
+        "samples": 912,
+        "sourceUpdates": 882,
+        "costs": {
+          "online": 0.8707029802561408,
+          "scalar": 1.2270796388303524,
+          "static": 1.5832346002450206,
+          "causal": 0.886241406951127
+        },
+        "domNodes": 4477,
+        "playing": false
+      },
+      "elapsedMs": 27922,
+      "heapBefore": {
+        "usedSize": 85008368,
+        "totalSize": 156573696,
+        "embedderHeapUsedSize": 165248032,
+        "backingStorageSize": 1248183
+      },
+      "heapAfter": {
+        "usedSize": 89340600,
+        "totalSize": 177020928,
+        "embedderHeapUsedSize": 171450408,
+        "backingStorageSize": 1244255
+      },
+      "samples": 25577,
+      "sampledUs": 28081612,
+      "attributionUs": {
+        "other": 6239110,
+        "controller_and_plant": 899985,
+        "snapshot": 478203,
+        "render": 1139468,
+        "garbage_collection": 322691,
+        "response_history": 770043,
+        "network": 1285358,
+        "matrix": 14657027,
+        "cost_chart": 866577,
+        "voltage_metrics": 1003432,
+        "voltage_chart": 403486,
+        "idle": 16232
+      },
+      "hottestSelf": [
+        {
+          "function": "getBoundingClientRect",
+          "url": "",
+          "line": 0,
+          "selfUs": 11118820
+        },
+        {
+          "function": "(program)",
+          "url": "",
+          "line": 0,
+          "selfUs": 5482080
+        },
+        {
+          "function": "updateMatrixScrollHint",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4088,
+          "selfUs": 1668658
+        },
+        {
+          "function": "setAttribute",
+          "url": "",
+          "line": 0,
+          "selfUs": 1517205
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 1325927
+        },
+        {
+          "function": "worst",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2238,
+          "selfUs": 776004
+        },
+        {
+          "function": "(garbage collector)",
+          "url": "",
+          "line": 0,
+          "selfUs": 322691
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 3111,
+          "selfUs": 315012
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1530,
+          "selfUs": 273624
+        },
+        {
+          "function": "each",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 256166
+        },
+        {
+          "function": "updateCommandScrollHint",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2927,
+          "selfUs": 255535
+        },
+        {
+          "function": "command",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1398,
+          "selfUs": 210877
+        },
+        {
+          "function": "querySelector",
+          "url": "",
+          "line": 0,
+          "selfUs": 164513
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2246,
+          "selfUs": 160545
+        },
+        {
+          "function": "branchFlows",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1684,
+          "selfUs": 159423
+        },
+        {
+          "function": "l",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 154871
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4451,
+          "selfUs": 153587
+        },
+        {
+          "function": "querySelectorAll",
+          "url": "",
+          "line": 0,
+          "selfUs": 133356
+        },
+        {
+          "function": "setProperty",
+          "url": "",
+          "line": 0,
+          "selfUs": 131047
+        },
+        {
+          "function": "receiverMessages",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1266,
+          "selfUs": 127220
+        },
+        {
+          "function": "removeEventListener",
+          "url": "",
+          "line": 0,
+          "selfUs": 122269
+        },
+        {
+          "function": "u",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 118969
+        },
+        {
+          "function": "addEventListener",
+          "url": "",
+          "line": 0,
+          "selfUs": 111204
+        },
+        {
+          "function": "snapshot",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2187,
+          "selfUs": 94926
+        },
+        {
+          "function": "a",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 89875
+        },
+        {
+          "function": "rn",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 87696
+        },
+        {
+          "function": "drawMatrix",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4117,
+          "selfUs": 81984
+        },
+        {
+          "function": "inspectedResponseHistory",
+          "url": "http://127.0.0.1:46519/",
+          "line": 3107,
+          "selfUs": 74503
+        },
+        {
+          "function": "getAttribute",
+          "url": "",
+          "line": 0,
+          "selfUs": 73480
+        },
+        {
+          "function": "chartBase",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4265,
+          "selfUs": 69155
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4319,
+          "selfUs": 66889
+        },
+        {
+          "function": "voltageMetrics",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2236,
+          "selfUs": 66883
+        },
+        {
+          "function": "M",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 61559
+        },
+        {
+          "function": "diagnostics",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1428,
+          "selfUs": 61087
+        },
+        {
+          "function": "step",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2042,
+          "selfUs": 58787
+        },
+        {
+          "function": "cellLabel",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4207,
+          "selfUs": 58338
+        },
+        {
+          "function": "replaceChildren",
+          "url": "",
+          "line": 0,
+          "selfUs": 51939
+        },
+        {
+          "function": "row",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1334,
+          "selfUs": 50006
+        },
+        {
+          "function": "select",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 49691
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4286,
+          "selfUs": 46519
+        }
+      ],
+      "caveat": "Profiler and browser assertions add overhead. Heap usage is an actual finite observation, not a retained heap or indefinite bound. Stack attribution uses the nearest named application frame."
+    },
+    {
+      "label": "feeder47-phone-after-1800",
+      "before": {
+        "t": 1858,
+        "history": 1858,
+        "samples": 1858,
+        "sourceUpdates": 1828,
+        "costs": {
+          "online": 1.7389915862617238,
+          "scalar": 2.4725801637079736,
+          "static": 3.114481168953656,
+          "causal": 1.7817446104945018
+        },
+        "domNodes": 4462,
+        "playing": false
+      },
+      "after": {
+        "t": 1964,
+        "history": 1964,
+        "samples": 1964,
+        "sourceUpdates": 1934,
+        "costs": {
+          "online": 1.8604544122542979,
+          "scalar": 2.6359852268274966,
+          "static": 3.3138368409099073,
+          "causal": 1.9070100362399438
+        },
+        "domNodes": 4456,
+        "playing": false
+      },
+      "elapsedMs": 14133,
+      "heapBefore": {
+        "usedSize": 181748704,
+        "totalSize": 248324096,
+        "embedderHeapUsedSize": 178425744,
+        "backingStorageSize": 1218735
+      },
+      "heapAfter": {
+        "usedSize": 169895792,
+        "totalSize": 256450560,
+        "embedderHeapUsedSize": 237999832,
+        "backingStorageSize": 1325397
+      },
+      "samples": 12917,
+      "sampledUs": 14424628,
+      "attributionUs": {
+        "other": 3161995,
+        "idle": 29278,
+        "controller_and_plant": 380683,
+        "snapshot": 190749,
+        "render": 840795,
+        "response_history": 767669,
+        "network": 657331,
+        "matrix": 5906276,
+        "cost_chart": 811584,
+        "voltage_metrics": 1236115,
+        "voltage_chart": 250328,
+        "garbage_collection": 190701,
+        "persistence": 1124
+      },
+      "hottestSelf": [
+        {
+          "function": "getBoundingClientRect",
+          "url": "",
+          "line": 0,
+          "selfUs": 4268597
+        },
+        {
+          "function": "(program)",
+          "url": "",
+          "line": 0,
+          "selfUs": 2781863
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 874457
+        },
+        {
+          "function": "setAttribute",
+          "url": "",
+          "line": 0,
+          "selfUs": 787558
+        },
+        {
+          "function": "updateMatrixScrollHint",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4088,
+          "selfUs": 779009
+        },
+        {
+          "function": "worst",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2238,
+          "selfUs": 705267
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2246,
+          "selfUs": 393401
+        },
+        {
+          "function": "updateCommandScrollHint",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2927,
+          "selfUs": 292062
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 3111,
+          "selfUs": 273943
+        },
+        {
+          "function": "inspectedResponseHistory",
+          "url": "http://127.0.0.1:46519/",
+          "line": 3107,
+          "selfUs": 212595
+        },
+        {
+          "function": "(garbage collector)",
+          "url": "",
+          "line": 0,
+          "selfUs": 190701
+        },
+        {
+          "function": "each",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 148227
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4451,
+          "selfUs": 144380
+        },
+        {
+          "function": "voltageMetrics",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2236,
+          "selfUs": 137447
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1530,
+          "selfUs": 108718
+        },
+        {
+          "function": "l",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 103846
+        },
+        {
+          "function": "querySelector",
+          "url": "",
+          "line": 0,
+          "selfUs": 87824
+        },
+        {
+          "function": "setProperty",
+          "url": "",
+          "line": 0,
+          "selfUs": 74533
+        },
+        {
+          "function": "drawCost",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4448,
+          "selfUs": 68098
+        },
+        {
+          "function": "column",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1328,
+          "selfUs": 66108
+        },
+        {
+          "function": "removeEventListener",
+          "url": "",
+          "line": 0,
+          "selfUs": 65975
+        },
+        {
+          "function": "chartBase",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4265,
+          "selfUs": 64898
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4319,
+          "selfUs": 63977
+        },
+        {
+          "function": "branchFlows",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1684,
+          "selfUs": 62102
+        },
+        {
+          "function": "querySelectorAll",
+          "url": "",
+          "line": 0,
+          "selfUs": 60716
+        },
+        {
+          "function": "drawMatrix",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4117,
+          "selfUs": 56309
+        },
+        {
+          "function": "getAttribute",
+          "url": "",
+          "line": 0,
+          "selfUs": 44981
+        },
+        {
+          "function": "addEventListener",
+          "url": "",
+          "line": 0,
+          "selfUs": 44289
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4286,
+          "selfUs": 42864
+        },
+        {
+          "function": "a",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 39084
+        },
+        {
+          "function": "row",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1334,
+          "selfUs": 36966
+        },
+        {
+          "function": "replaceChildren",
+          "url": "",
+          "line": 0,
+          "selfUs": 34701
+        },
+        {
+          "function": "rn",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 34569
+        },
+        {
+          "function": "M",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 32437
+        },
+        {
+          "function": "snapshot",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2187,
+          "selfUs": 31876
+        },
+        {
+          "function": "receiverMessages",
+          "url": "http://127.0.0.1:46519/",
+          "line": 1266,
+          "selfUs": 30600
+        },
+        {
+          "function": "(anonymous)",
+          "url": "http://127.0.0.1:46519/",
+          "line": 4520,
+          "selfUs": 30496
+        },
+        {
+          "function": "(idle)",
+          "url": "",
+          "line": 0,
+          "selfUs": 29278
+        },
+        {
+          "function": "step",
+          "url": "http://127.0.0.1:46519/",
+          "line": 2042,
+          "selfUs": 28433
+        },
+        {
+          "function": "It",
+          "url": "http://127.0.0.1:46519/assets/d3.v7.min.js",
+          "line": 2,
+          "selfUs": 27098
+        }
+      ],
+      "caveat": "Profiler and browser assertions add overhead. Heap usage is an actual finite observation, not a retained heap or indefinite bound. Stack attribution uses the nearest named application frame."
+    }
+  ],
+  "all_outcomes_reported": true,
+  "interpretation": "Nearest named frame matrix attribution ranges from about 41 to 53 percent of all sampled time. Controller and plant attribution is about 3 percent. Native per label getBoundingClientRect self time is the largest measured hotspot. Profiling includes overhead and is not a clean speed benchmark. Full profiles are in the ongoing browser artifact. Heap observations do not establish a constant bound."
+}
