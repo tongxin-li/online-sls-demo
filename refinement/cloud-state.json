@@ -783,7 +783,14 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "slot": "2026-10-20T03:00:00+08:00",
+    "started_at": "2026-10-20T03:00:21+08:00",
+    "lease_expires_at": "2026-10-20T03:40:21+08:00",
+    "branch": "cloud/refine/response-strip-20261020",
+    "base_commit": "7c48236135d2b57c2a174a1dd4a2f5a54ab9f9b7",
+    "progress_parent": "224e1b8448cfb7720b2d64b1bb6a62ae51ae4708"
+  },
   "next_focus": "Preserve clean user-triggered defaults. Consider compact actual frozen response timing inside the existing inspector or 47-bus responsiveness without changing physical steps, causal data, costs or rankings.",
   "priorities": [
     "Actual continuous causal response adaptation and executed command evidence",
@@ -10587,9 +10594,9 @@
     "hard_deadline": "2026-10-20T20:00:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 6,
+    "invocation_count": 7,
     "completed_count": 0,
-    "candidate_branch": "cloud/refine/manual-attacks-20261019",
+    "candidate_branch": "cloud/refine/response-strip-20261020",
     "runs": [
       {
         "slot": "2026-10-19T20:00:00+08:00",
@@ -10683,6 +10690,19 @@
         "counted_invocation": true,
         "counted_completed": false,
         "implementation_completed": false
+      },
+      {
+        "slot": "2026-10-20T03:00:00+08:00",
+        "started_at": "2026-10-20T03:00:21+08:00",
+        "lease_expires_at": "2026-10-20T03:40:21+08:00",
+        "branch": "cloud/refine/response-strip-20261020",
+        "base_commit": "7c48236135d2b57c2a174a1dd4a2f5a54ab9f9b7",
+        "progress_parent": "224e1b8448cfb7720b2d64b1bb6a62ae51ae4708",
+        "status": "in_progress",
+        "counted_invocation": true,
+        "counted_completed": false,
+        "implementation_completed": false,
+        "focus": "Frozen predictive response timing in existing link inspector"
       }
     ],
     "manual_releases": [
@@ -10744,7 +10764,14 @@
         "scientific_scope": "Shared stationary response specialization with experimental online support reselection. No manuscript equivalence, convergence or universal ranking."
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "slot": "2026-10-20T03:00:00+08:00",
+      "started_at": "2026-10-20T03:00:21+08:00",
+      "lease_expires_at": "2026-10-20T03:40:21+08:00",
+      "branch": "cloud/refine/response-strip-20261020",
+      "base_commit": "7c48236135d2b57c2a174a1dd4a2f5a54ab9f9b7",
+      "progress_parent": "224e1b8448cfb7720b2d64b1bb6a62ae51ae4708"
+    },
     "live_release": {
       "commit": "7c48236135d2b57c2a174a1dd4a2f5a54ab9f9b7",
       "source_commit": "9eafa029562c31b1c5e4f7ecf0c85bd93d248ee5",
@@ -10771,7 +10798,13 @@
       "first_notice": "Use Restart demo once to enter the clean manual environment; archived saved trials are preserved.",
       "scientific_scope": "Shared stationary response specialization with experimental online support reselection. No manuscript equivalence, convergence or universal ranking."
     },
-    "next_focus": "Preserve clean user-triggered defaults. Consider compact actual frozen response timing inside the existing inspector or 47-bus responsiveness without changing physical steps, causal data, costs or rankings."
+    "next_focus": "Preserve clean user-triggered defaults. Consider compact actual frozen response timing inside the existing inspector or 47-bus responsiveness without changing physical steps, causal data, costs or rankings.",
+    "progress_validation": {
+      "source": "224e1b8448cfb7720b2d64b1bb6a62ae51ae4708",
+      "run": 39299833279,
+      "conclusion": "success",
+      "all_eight_completed_logs_read": true
+    }
   },
   "public_release": {
     "commit": "7c48236135d2b57c2a174a1dd4a2f5a54ab9f9b7",
