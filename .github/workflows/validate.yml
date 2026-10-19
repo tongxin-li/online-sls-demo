@@ -15,7 +15,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,8 +30,6 @@ jobs:
         run: |
           node src/test-interactions.cjs
           node src/test-continuous-response.cjs
-          node src/test-adaptive-response.cjs
-          node src/test-adaptive-integration.cjs
           node src/test-causal-source-scale.cjs
           node src/test-forecast-calibration.cjs
           node src/test-simulation.cjs
@@ -71,6 +69,21 @@ jobs:
           path: index.html
           if-no-files-found: error
 
+  full-response:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check full response feasibility and integration
+        run: |
+          node src/test-adaptive-response.cjs
+          node src/test-adaptive-integration.cjs
+
   ongoing-browser:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -94,9 +107,7 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/browser-test/node_modules
           DEMO_SMOKE_OUTPUT: ${{ runner.temp }}/ongoing-results
-        run: |
-          node src/test-continuous-browser.cjs
-          node src/test-adaptive-browser.cjs
+        run: node src/test-continuous-browser.cjs
       - name: Save ongoing browser evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -106,9 +117,41 @@ jobs:
           if-no-files-found: error
 
 
+  adaptive-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build the same adaptive candidate
+        run: python3 build.py
+      - name: Install isolated browser test tools
+        run: |
+          npm install --prefix "$RUNNER_TEMP/browser-test" --no-audit --no-fund playwright@1.56.1
+          "$RUNNER_TEMP/browser-test/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Check adaptive desktop and phone trials
+        env:
+          NODE_PATH: ${{ runner.temp }}/browser-test/node_modules
+          DEMO_SMOKE_OUTPUT: ${{ runner.temp }}/ongoing-results
+        run: node src/test-adaptive-browser.cjs
+      - name: Save adaptive browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: adaptive-browser-evidence
+          path: ${{ runner.temp }}/ongoing-results/adaptive
+          if-no-files-found: error
+
   release-browser:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -199,7 +242,7 @@ jobs:
 
   prepare-candidate:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/cloud/refine/')
-    needs: [validate, ongoing-browser, review-ongoing, release-browser, long-session-browser]
+    needs: [validate, full-response, ongoing-browser, adaptive-browser, review-ongoing, release-browser, long-session-browser]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
