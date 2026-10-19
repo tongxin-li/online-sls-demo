@@ -26,7 +26,9 @@ async function main(){
     if(pending){localStorage.setItem('online-sls-demo-v1',pending);sessionStorage.removeItem('online-sls-demo-long-restore');}
     window.__longSessionFingerprint=async s=>{
      const hash=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(value))))).map(v=>v.toString(16).padStart(2,'0')).join('');
-     const keys=['networkId','protocol','t','phase','mode','initialOptions','states','cumulative','commandQ','lastExecution','sampleCount','learning','deployedSupport','traffic','faults','pendingPulses','eventLog','lastSample','sourceReports','predictionDiagnostics'];
+     // Compare every exported physical field, including actual inverter lag state,
+     // forcing, limits and terminal diagnostics. History is checked separately.
+     const keys=Object.keys(s).filter(key=>key!=='history').sort();
      const chunks=[];let historyBytes=0;
      for(let i=0;i<s.history.length;i+=64){
       const part=s.history.slice(i,i+64),text=JSON.stringify(part);historyBytes+=new TextEncoder().encode(text).length;
