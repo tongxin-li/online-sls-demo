@@ -783,7 +783,42 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": null,
+  "active_run": {
+    "program_id": "continuous-phi-20261018T234500",
+    "slot": "2026-10-19T08:45:00+08:00",
+    "started_at": "2026-10-19T08:45:09+08:00",
+    "lease_expires_at": "2026-10-19T09:25:09+08:00",
+    "branch": "cloud/refine/continuous-phi-20261018-2345",
+    "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+    "candidate_parent": "f4df60749ba2b871bccfb53fa1787055b48d6b9f",
+    "status": "reducing_repeated_stable_matrix_layout",
+    "counted_invocation": true,
+    "counted_completed": false,
+    "tests": {
+      "preflight": {
+        "main_run": 39144310544,
+        "main_conclusion": "success",
+        "candidate_repeat": 39180266495,
+        "candidate_conclusion": "success",
+        "jobs": [
+          117831326168,
+          117831326447,
+          117833587958,
+          117834120717
+        ],
+        "completed_logs_read": true,
+        "numerical_cases": 254,
+        "original_browser_checks": 44,
+        "ongoing_conditions": 6,
+        "handoffs": 18
+      }
+    },
+    "changes": [],
+    "remaining_gaps": [
+      "Native 47 bus playback remains slower than requested with roughly 150 ms frame gaps. Public main still runs the archived protocol."
+    ],
+    "next_focus": "Reuse only stable matrix display geometry with explicit invalidation while every causal controller action continues."
+  },
   "next_focus": "Read latest main and this checkpoint repeat checks first. Profile 47 bus native execution and rendering with growing history at 901 and roughly 1850 samples. Separate actual controller step, immutable snapshot and chart work. Optimize the measured hotspot without retuning gains, objective, noise or limits and without dropping costs or evidence. If caching stationary response geometry, keep current causal correction weights and command receipts fresh at every action. Revalidate all suites and actual pixels before expected SHA nonforce publication.",
   "priorities": [
     "Actual continuous causal response adaptation and executed command evidence",
@@ -2594,7 +2629,7 @@
     "hard_deadline": "2026-10-19T23:45:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 8,
+    "invocation_count": 9,
     "completed_count": 0,
     "runs": [
       {
@@ -5510,9 +5545,80 @@
           "status": "Public archived protocol unchanged"
         },
         "end_reason": "Bounded validated candidate checkpoint with actual pixel review. No live release or new completion."
+      },
+      {
+        "program_id": "continuous-phi-20261018T234500",
+        "slot": "2026-10-19T08:45:00+08:00",
+        "started_at": "2026-10-19T08:45:09+08:00",
+        "lease_expires_at": "2026-10-19T09:25:09+08:00",
+        "branch": "cloud/refine/continuous-phi-20261018-2345",
+        "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+        "candidate_parent": "f4df60749ba2b871bccfb53fa1787055b48d6b9f",
+        "status": "reducing_repeated_stable_matrix_layout",
+        "counted_invocation": true,
+        "counted_completed": false,
+        "tests": {
+          "preflight": {
+            "main_run": 39144310544,
+            "main_conclusion": "success",
+            "candidate_repeat": 39180266495,
+            "candidate_conclusion": "success",
+            "jobs": [
+              117831326168,
+              117831326447,
+              117833587958,
+              117834120717
+            ],
+            "completed_logs_read": true,
+            "numerical_cases": 254,
+            "original_browser_checks": 44,
+            "ongoing_conditions": 6,
+            "handoffs": 18
+          }
+        },
+        "changes": [],
+        "remaining_gaps": [
+          "Native 47 bus playback remains slower than requested with roughly 150 ms frame gaps. Public main still runs the archived protocol."
+        ],
+        "next_focus": "Reuse only stable matrix display geometry with explicit invalidation while every causal controller action continues."
       }
     ],
-    "active_run": null,
+    "active_run": {
+      "program_id": "continuous-phi-20261018T234500",
+      "slot": "2026-10-19T08:45:00+08:00",
+      "started_at": "2026-10-19T08:45:09+08:00",
+      "lease_expires_at": "2026-10-19T09:25:09+08:00",
+      "branch": "cloud/refine/continuous-phi-20261018-2345",
+      "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+      "candidate_parent": "f4df60749ba2b871bccfb53fa1787055b48d6b9f",
+      "status": "reducing_repeated_stable_matrix_layout",
+      "counted_invocation": true,
+      "counted_completed": false,
+      "tests": {
+        "preflight": {
+          "main_run": 39144310544,
+          "main_conclusion": "success",
+          "candidate_repeat": 39180266495,
+          "candidate_conclusion": "success",
+          "jobs": [
+            117831326168,
+            117831326447,
+            117833587958,
+            117834120717
+          ],
+          "completed_logs_read": true,
+          "numerical_cases": 254,
+          "original_browser_checks": 44,
+          "ongoing_conditions": 6,
+          "handoffs": 18
+        }
+      },
+      "changes": [],
+      "remaining_gaps": [
+        "Native 47 bus playback remains slower than requested with roughly 150 ms frame gaps. Public main still runs the archived protocol."
+      ],
+      "next_focus": "Reuse only stable matrix display geometry with explicit invalidation while every causal controller action continues."
+    },
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
       "is_enabled": true,
