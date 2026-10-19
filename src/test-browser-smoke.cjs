@@ -514,7 +514,7 @@ async function main() {
       const before=await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot()));
       const width=surface.viewportSize().width,header=surface.locator('.pr-scenario-heading');
       await header.screenshot({path:path.join(output,'forecast-settings-'+width+'.png')});
-      const preview=await surface.locator('.pr-scenario-heading > div').screenshot({path:path.join(output,'forecast-settings-'+width+'.jpg'),type:'jpeg',quality:90});
+      const preview=await surface.locator('.pr-scenario-heading > div:first-child').screenshot({path:path.join(output,'forecast-settings-'+width+'.jpg'),type:'jpeg',quality:90});
       console.log('CLOUD_SETTINGS_PREVIEW_'+width+' '+preview.toString('base64'));
       assert.equal(await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),before,'Heading review cannot alter the paused trial');
     };
