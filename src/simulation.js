@@ -282,6 +282,7 @@
   const Calibration=typeof module==='object'&&module.exports?require('./forecast-calibration.js'):globalThis.ForecastCalibration;
   if(!Calibration)throw new Error('Load forecast-calibration.js before simulation.js');
   const Ongoing=typeof module==='object'&&module.exports?require('./continuous-response.js'):globalThis.ContinuousResponse;
+  const Adaptive=typeof module==='object'&&module.exports?require('./adaptive-response.js'):globalThis.AdaptiveResponse;
   const synthesizer=new Response.Synthesizer(model,PREVIEW),designCache=new Map(),gramCache=new WeakMap();
   // At the larger feeder's fixed slack, each outgoing radial component is
   // independent. A, B, Q, R and P are block diagonal up to bus ordering, so
@@ -365,7 +366,7 @@
   class Simulation{
     constructor(options={}){
       if(options.networkId!==undefined&&options.networkId!==network.id)throw new RangeError('Saved trial network does not match '+network.id);
-      const ongoing=options.protocol==='continuous-phi-v1';
+      const ongoing=['continuous-phi-v1','adaptive-phi-v2'].includes(options.protocol);
       if(options.protocol!==undefined&&!ongoing)throw new RangeError('Unknown trial protocol');
       if(ongoing&&options.experiment!==undefined&&options.experiment!=='communication')throw new RangeError('Ongoing protocol requires communication baselines');
       const experiment=ongoing?'communication':options.experiment===undefined?'prediction':options.experiment;
@@ -382,10 +383,11 @@
         horizon:ongoing?null:options.horizon===undefined?480:options.horizon,preset:id,
         faultBuses:options.faultBuses===undefined?(powerScenario==='forecasted-demand'&&id==='mixed'?FORECASTED_DEMAND.noisySources:preset.faultBuses).slice():options.faultBuses.slice()};
       if(!ongoing&&(!Number.isInteger(this.initialOptions.horizon)||this.initialOptions.horizon<1))throw new Error('Invalid horizon');
-      if(ongoing)this.initialOptions.protocol='continuous-phi-v1';
+      if(ongoing)this.initialOptions.protocol=options.protocol;
       this.phase=ongoing?'ongoing':'discovery';this.discoveryRecord=null;this.deployedSupport=null;this.reset();
     }
-    get ongoing(){return this.initialOptions?.protocol==='continuous-phi-v1';}
+    get ongoing(){return ['continuous-phi-v1','adaptive-phi-v2'].includes(this.initialOptions?.protocol);}
+    get adaptive(){return this.initialOptions?.protocol==='adaptive-phi-v2';}
     reset(){
       this.options={...this.initialOptions,faultBuses:this.initialOptions.faultBuses.slice()};
       this.random=seededRandom(this.options.seed);this.t=0;this.mode='running';
@@ -403,10 +405,12 @@
       this.rows=[];this.rowIds=new Set();this.segments=[];
       if(this.ongoing){
         if(!Ongoing)throw new Error('Load the continuous response modules before an ongoing trial');
-        this.continuousController=new Ongoing.Controller({model,constants:{N,M,preview:PREVIEW,remoteBudget:REMOTE_BUDGET,inverterBuses:INVERTER_BUSES},math:{getDesign,Response}});
+        const implementation=this.adaptive?Adaptive:Ongoing;
+        if(!implementation)throw new Error('Load the adaptive response module before starting this trial');
+        this.continuousController=new implementation.Controller({model,constants:{N,M,preview:PREVIEW,remoteBudget:REMOTE_BUDGET,inverterBuses:INVERTER_BUSES,rawRidge:RAW_RIDGE},math:{getDesign,Response}});
         const selection=this.continuousController.selection;
         this.deployedSupport=deepFreeze({learned:selection.support,fixed:selection.support,links:selection.links,fixedLinks:selection.links,
-          selection:'fixed offline stationary response energy',topologyAdaptive:false,discoveryTime:null,trainingSamples:[]});
+          selection:this.adaptive?'ongoing response gain energy':'fixed offline stationary response energy',topologyAdaptive:this.adaptive,discoveryTime:null,trainingSamples:[]});
         this.lastExecution=null;
       }else this.addSegment(0,this.options.horizon);
       this.learning={completedRows:0,delay:PREVIEW,updates:0,updateCount:0,prefixError:null,prefixLoss:null,
@@ -673,6 +677,21 @@
     }
     prepareContinuousAction(){
       const controller=this.continuousController;controller.begin(this.t,this.samples,this.forecasts);
+      if(this.adaptive){
+        const measured=controller.diagnostics(this.t),learning=measured.learning||controller.learning||{};
+        const updates=learning.updateCount??learning.updates??controller.updateCount??0;
+        this.calibration={matrix:eye(N-1),scalar:1,windowSize:learning.windowSize??Math.min(Math.max(0,this.t-PREVIEW+1),WINDOW),
+          updates,trainedThrough:learning.trainedThrough??null,parameterChange:learning.parameterChange??learning.parameterDelta??0,
+          rawRms:null,matrixRms:null,protocol:'full-feasible-response-v2'};
+        Object.assign(this.learning,learning,{updates,updateCount:updates,sourcePairs:this.t,sourceUpdates:updates,
+          completedRows:learning.completedRows??Math.max(0,this.t-PREVIEW+1)});
+        const fixed=controller.fixedSelection;
+        this.deployedSupport=deepFreeze({learned:controller.selection.support,fixed:fixed.support,
+          links:controller.selection.links,fixedLinks:fixed.links,selection:'ongoing response gain energy',
+          topologyAdaptive:true,discoveryTime:null,trainingSamples:[]});
+        this.lastTrainingTime=learning.trainedThrough??null;this.lastTrainingSampleCount=learning.completedRows??0;
+        return;
+      }
       const reports=controller.sourceReports,c=reports.map(r=>r.coefficient),updates=Math.max(0,this.t-WARMUP+1);
       const rms=key=>reports[0][key]===null?null:Math.sqrt(reports.reduce((sum,r)=>sum+r[key]**2,0)/(N-1));
       this.calibration={matrix:c.map((v,i)=>c.map((_,j)=>i===j?v:0)),scalar:1,windowSize:Math.min(this.t,WINDOW),
@@ -687,19 +706,31 @@
       const gain=scoreGain(scores),energyChange=scores.map((row,r)=>row.map((v,j)=>v-baseline[r][j]));
       const receiverEnergy=baseline.map(row=>row.reduce((sum,v)=>sum+v,0)),total=receiverEnergy.reduce((sum,v)=>sum+v,0);
       this.drift=this.directGain?frobenius(combine(gain,this.directGain,1,-1))/Math.max(frobenius(this.directGain),1e-12):0;
-      this.changedEdges=0;this.directGain=gain;this.predictionScores=scores;
+      const fixed=controller.fixedSelection||controller.selection;
+      const oldKeys=new Set((this.recommendations||[]).map(e=>e.to+','+e.from));
+      const newKeys=new Set(controller.selection.links.map(e=>e.to+','+e.from));
+      const baselineKeys=new Set(fixed.links.map(e=>e.to+','+e.from));
+      const added=controller.selection.links.filter(e=>!baselineKeys.has(e.to+','+e.from)).length;
+      const removed=fixed.links.filter(e=>!newKeys.has(e.to+','+e.from)).length;
+      this.changedEdges=this.adaptive?[...newKeys].filter(k=>!oldKeys.has(k)).length+[...oldKeys].filter(k=>!newKeys.has(k)).length:0;
+      this.directGain=gain;this.predictionScores=scores;
       this.recommendations=controller.selection.links.map(e=>({...e,weight:scores[INVERTER_BUSES.indexOf(e.to)][e.from-2]}));
-      this.predictionDiagnostics=deepFreeze({available:this.calibration.windowSize>0,frozen:false,actualDeployed:true,topologyAdaptive:false,action:controller.receipt?.action??null,
+      this.predictionDiagnostics=deepFreeze({available:this.calibration.windowSize>0,frozen:false,actualDeployed:true,topologyAdaptive:this.adaptive,action:controller.receipt?.action??null,
         completedRows:0,sourcePairs:controller.observed,sourceWindowSize:this.calibration.windowSize,scoreSamples:0,receiverBuses:INVERTER_BUSES.slice(),sourceBuses:Array.from({length:N-1},(_,j)=>j+2),
         baselineScores:baseline,learnedScores:scores,energyChange,relativeEnergyChange:energyChange.map((row,r)=>row.map((v,j)=>baseline[r][j]>0?v/baseline[r][j]:null)),
         receiverNormalizedChange:energyChange.map((row,r)=>row.map(v=>receiverEnergy[r]>0?v/receiverEnergy[r]:0)),
         relativeGainChange:total>0?Math.sqrt(scores.flatMap((row,r)=>row.map((_,j)=>(Math.sqrt(scores[r][j])-Math.sqrt(baseline[r][j]))**2)).reduce((a,b)=>a+b,0)/total):null,
         overallRelativeEnergyChange:total>0?energyChange.flat().reduce((a,b)=>a+b,0)/total:null,
-        offlineLinks:controller.selection.links,addedLinkCount:0,removedLinkCount:0,changedLinkCount:0});
+        offlineLinks:fixed.links,addedLinkCount:this.adaptive?added:0,removedLinkCount:this.adaptive?removed:0,changedLinkCount:this.adaptive?added:0,
+        ...(this.adaptive?{adaptation:{updateCount:controller.learning?.updates??0,
+          topologyRevision:Math.max(0,(controller.supportHistory?.length??1)-1),
+          retiringLinks:controller.receipt?.retiringLinks??0,retiringLinkPairs:controller.receipt?.retiringLinkPairs??[],
+          learningTraffic:{...controller.learningTraffic},responseVersion:controller.receipt?.parameterVersion??0},
+          learning:measured.learning||controller.learning||{}}:{})});
     }
     recordContinuous(){
       if(!this.ongoing)throw new Error('Use legacy replay for an archived protocol');
-      return deepFreeze({version:14,protocol:'continuous-phi-v1',networkId:network.id,options:{...this.initialOptions,faultBuses:this.initialOptions.faultBuses.slice()},
+      return deepFreeze({version:this.adaptive?15:14,protocol:this.initialOptions.protocol,networkId:network.id,options:{...this.initialOptions,faultBuses:this.initialOptions.faultBuses.slice()},
         steps:this.t,events:this.eventLog.filter(e=>e.type==='pulse'||e.type==='forecast').map(e=>({...e}))});
     }
     freeze(){
@@ -761,8 +792,9 @@
         :{id:this.options.powerScenario,start:30,end:50,active:(this.phase==='deployment'||this.ongoing)&&this.t>30&&this.t<=50,requestedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.requestedKw,0),appliedKw:this.lastScenarioApplications.reduce((sum,p)=>sum+p.appliedKw,0)};
       return{networkId:network.id,networkLabel:network.label,t:this.t,costTime:this.lastSample?this.lastSample.t:null,stateTime:this.t,horizon:this.options.horizon,
         initialOptions:{...this.initialOptions,faultBuses:this.initialOptions.faultBuses.slice()},
-        ...(this.ongoing?{protocol:'continuous-phi-v1',ongoing:true,lastExecution:this.lastExecution,
-          planning:{kind:'stationary finite memory predictive response',horizon:this.continuousController.dense.planningHorizon,preview:PREVIEW,topologyAdaptive:false},
+        ...(this.ongoing?{protocol:this.initialOptions.protocol,ongoing:true,lastExecution:this.lastExecution,
+          planning:{kind:this.adaptive?'causal full response and support adaptation':'stationary finite memory predictive response',horizon:this.continuousController.dense.planningHorizon,preview:PREVIEW,topologyAdaptive:this.adaptive},
+          ...(this.adaptive?{adaptation:this.predictionDiagnostics?.adaptation||{}}:{}),
           traffic:JSON.parse(JSON.stringify(this.continuousController.traffic)),sourceReports:this.continuousController.sourceReports}:{}),
         phase:this.phase,experiment:this.options.experiment,beta:this.options.beta,canDeploy:this.phase==='discovery'&&this.samples.length>=WARMUP&&(this.options.experiment!=='communication'||this.communicationScoreSamples>0),
         discoveryRecord:this.discoveryRecord,deployedSupport:this.deployedSupport,
@@ -817,7 +849,8 @@
     }));
   }
   function replayContinuous(record){
-    if(record?.version!==14||record.protocol!=='continuous-phi-v1'||record.networkId!==network.id||record.options?.protocol!=='continuous-phi-v1')throw new RangeError('Invalid ongoing replay protocol or network');
+    const valid=record?.version===14&&record.protocol==='continuous-phi-v1'||record?.version===15&&record.protocol==='adaptive-phi-v2';
+    if(!valid||record.networkId!==network.id||record.options?.protocol!==record.protocol)throw new RangeError('Invalid ongoing replay protocol or network');
     if(!Number.isSafeInteger(record.steps)||record.steps<0||!Array.isArray(record.events))throw new RangeError('Invalid ongoing replay prefix');
     let previous=-1;
     for(const event of record.events){

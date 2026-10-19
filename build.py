@@ -22,7 +22,7 @@ def build(source_url):
         "__DEMO_FOOTER__": (source / "site-footer.html").read_text(encoding="utf-8"),
         "__DEMO_INTERFACE_HTML__": interface,
         "__DEMO_RESPONSES_JS__": ((source / "response-controller.js").read_text(encoding="utf-8") + "\n" + (source / "forecast-calibration.js").read_text(encoding="utf-8") + "\n" + (source / "causal-source-scale.js").read_text(encoding="utf-8") + "\n" + (source / "continuous-response.js").read_text(encoding="utf-8")).replace("</script", "<\\/script"),
-        "__DEMO_SIMULATION_JS__": (source / "simulation.js").read_text(encoding="utf-8").replace("</script", "<\\/script"),
+        "__DEMO_SIMULATION_JS__": ((source / "adaptive-response.js").read_text(encoding="utf-8") + "\n" + (source / "simulation.js").read_text(encoding="utf-8")).replace("</script", "<\\/script"),
         "__DEMO_EQUIPMENT_JS__": (source / "equipment.js").read_text(encoding="utf-8").replace("</script", "<\\/script"),
         "__DEMO_TOPOLOGY_JS__": (source / "topology-timeline.js").read_text(encoding="utf-8").replace("</script", "<\\/script"),
         "__DEMO_INTERFACE_JS__": (source / "interface.js").read_text(encoding="utf-8").replace("</script", "<\\/script"),

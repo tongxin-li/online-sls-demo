@@ -2,9 +2,19 @@
 
 [Open the experiment](https://tongxin.me/online-sls-demo/) · [Experimental environment](environment.html)
 
-The experiment uses a forecasted demand and solar cycle on the LinDistFlow feeder. The ongoing protocol tests continuous causal prediction correction under a fixed offline communication support. All four controllers share the plant, realized physical power, immutable raw forecasts, feedback, objective and actuator limits. Adaptive sparse receives only its admitted forecasts and correction metadata. Archived numerical evidence retains its original finite protocol. Exact validation and publication status is recorded in [cloud progress](refinement/cloud-state.json).
+The experiment uses a forecasted demand and solar cycle on the LinDistFlow feeder. The ongoing protocol tests continuous full predictive response and incoming communication support adaptation. All four controllers share the plant, realized physical power, immutable raw forecasts, feedback, objective and actuator limits. Adaptive sparse receives only its admitted forecasts and correction metadata. Archived numerical evidence retains its original finite protocol. Exact validation and publication status is recorded in [cloud progress](refinement/cloud-state.json).
 
 Unless another size is named, numerical values and archived studies below describe the original 24 bus reference. The Network menu selects 8, 24 or 47 buses.
+
+## Continuous response and topology
+
+Fresh trials use `adaptive-phi-v2`. The controller learns all finite memory predictive state and input response matrices in a feasible coordinate space. It updates after each newly completed response row once 30 rows are available and reviews incoming prediction support every 30 updates. New support is projected through the same exact constrained synthesis geometry. Every issued forecast retains its matrices and admitted messages through expiration. The plant, clock and cumulative costs do not reset.
+
+The matrix displays the learned response applied to new forecasts and the actual incoming communication support. The source inspector reads executed gains and commands from immutable receipts. Removed links can temporarily contribute from previously received messages and this cached influence is counted separately. Full response learning uses central revealed pair telemetry and parameter broadcasts, also counted separately from sparse actuator channels. No total communication saving follows from sparse channel counts alone.
+
+Fixed sparse, Dense prediction and Feedback only retain their actual baseline definitions, physical inputs and costs. Full response adaptation uses the response mismatch objective, not direct stage cost minimization or a guarantee of outperforming feedback in every trial. Shared stationary parameters and online support reselection are declared experimental choices. See [implementation](refinement/adaptive-response-map.md) and [predefined checks](refinement/adaptive-response-plan.json).
+
+Saved version 15 trials replay this algorithm exactly. Saved version 14 source correction trials and version 13 finite trials retain their original algorithms until an explicit new trial. The following fixed support description documents those earlier version 14 trials, not fresh trials.
 
 ## Ongoing protocol and archived trials
 

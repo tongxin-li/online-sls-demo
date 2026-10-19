@@ -17,14 +17,18 @@
   // Fresh trials execute continuous causal response adaptation. Actual v13 saves
   // retain their archived protocol until an explicit new protocol handoff.
   const initialSaved=window.openai?.widgetState?.privateContent;
-  let trialProtocol=initialSaved?.version===13?null:'continuous-phi-v1';
-  const ongoing=()=>snapshot.protocol==='continuous-phi-v1';
+  let trialProtocol=initialSaved?.version===13?null:initialSaved?.version===14?'continuous-phi-v1':'adaptive-phi-v2';
+  const ongoingProtocol=value=>value==='continuous-phi-v1'||value==='adaptive-phi-v2';
+  const ongoing=()=>ongoingProtocol(snapshot.protocol);
+  const adaptive=()=>snapshot.protocol==='adaptive-phi-v2';
+  const adaptationCount=()=>snapshot.adaptation?.updateCount??snapshot.adaptation?.updates??snapshot.learning?.updates??0;
+  const retiringCount=()=>snapshot.adaptation?.retiringLinks??snapshot.lastExecution?.retiringLinks??0;
   const communicationNoiseLevels=[...PowerDemo.constants.communicationBetas,...(PowerDemo.constants.communicationStressBetas || [])];
   function optionsFromControls() {
-    const experiment=trialProtocol==='continuous-phi-v1'?'communication':$('experiment').value==='prediction'?'prediction':'communication';
+    const experiment=ongoingProtocol(trialProtocol)?'communication':$('experiment').value==='prediction'?'prediction':'communication';
     const beta=Number($('noise').value);
     return {networkId:PowerDemo.constants.networkId,experiment,powerScenario:$('power-scenario').value || DEFAULT_SCENARIO,beta:communicationNoiseLevels.includes(beta)?beta:1,preset:experiment==='communication'?'mixed':$('preset').value,
-      ...(trialProtocol==='continuous-phi-v1'?{protocol:trialProtocol}:experiment==='communication'?{horizon:180}:{})};
+      ...(ongoingProtocol(trialProtocol)?{protocol:trialProtocol}:experiment==='communication'?{horizon:180}:{})};
   }
   let simulation = new PowerDemo.Simulation(optionsFromControls());
   const series = [
@@ -122,7 +126,7 @@
     const measured=renderWidths?.get(element);
     return measured>0?measured:element.getBoundingClientRect().width;
   }
-  let inspectedSource = trialProtocol==='continuous-phi-v1'?selectedBus:null;
+  let inspectedSource = ongoingProtocol(trialProtocol)?selectedBus:null;
   let lastPulse = null;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const duration = () => reducedMotion ? 0 : 1000 / Number($('speed').value || 16);
@@ -230,7 +234,7 @@
   function topologyFrame() {
     const event=historyIndex===null ? topology.latest : historyIndex ? topology.events[historyIndex-1] : null;
     const links=historyIndex===null ? snapshot.recommendations : topology.at(historyIndex);
-    const reference=communicationComparison()&&historyIndex===null?snapshot.deployedSupport.fixedLinks:(event?.before || links);
+    const reference=!adaptive()&&communicationComparison()&&historyIndex===null?snapshot.deployedSupport.fixedLinks:(event?.before || links);
     return {event,links,reference:new Set(reference.map(recommendationKey))};
   }
   function reviewTopology(index) {
@@ -283,17 +287,21 @@
       : snapshot.phase==='deployment' ? 'No link changes during discovery. Deployed links stay fixed.'
       : snapshot.t<30 ? 'Weights start adapting at 30 s. Each link update is kept here.'
       : 'No links have changed yet. Learning weights may still change.';
-    if(ongoing()) {
+    if(adaptive()) {
+      $('topology-status').textContent=historyIndex!==null?'Viewing saved incoming links':topology.latest?'Last link change at '+topology.latest.t+' s':'Incoming links unchanged';
+      $('topology-note').textContent=adaptationCount()+' response updates · '+total+' actual link updates · '+retiringCount()+' retiring cached links';
+    } else if(ongoing()) {
       $('topology-status').textContent='Deployed support fixed';
       $('topology-note').textContent='Weights use only revealed source pairs. Unchanged support is intentional.';
     }
-    $('topology-note').title=snapshot.phase==='deployment' ? (communicationComparison()?'Discovery history. Deployed links and prediction weights stay fixed.':'Discovery history. Deployed links stay fixed while prediction weights continue adapting.') : 'History displays observed connectivity only. Reviewing an update does not change the controller.';
+    $('topology-note').title=adaptive()?'History records actual incoming support changes. It does not replace the live controller or reconstruct old gains. Previously issued response columns remain in the executed receipt.':snapshot.phase==='deployment' ? (communicationComparison()?'Discovery history. Deployed links and prediction weights stay fixed.':'Discovery history. Deployed links stay fixed while prediction weights continue adapting.') : 'History displays observed connectivity only. Reviewing an update does not change the controller.';
   }
   // Reconstruct the last executed command from the exact issued preview and
   // calibration retained for that action. No future realized forcing is read.
   function commandContributions(view,segments,forecasts,source,receiver) {
     if(!view.lastSample) return null;
     const action=view.lastSample.t,row=PowerDemo.constants.inverterBuses.indexOf(receiver),column=source-2;
+    if(view.protocol==='adaptive-phi-v2') return adaptiveCommandContributions(view,source,receiver);
     if(view.protocol==='continuous-phi-v1') return ongoingCommandContributions(view,forecasts,source,receiver,simulation.continuousController);
     const segment=segments.find(item=>action>=item.start&&action<item.end);
     if(row<0 || column<0 || column>=PowerDemo.constants.N-1 || !segment) return null;
@@ -318,6 +326,20 @@
         limited:view.saturation[key][receiver-1]};
     });
     return {source,receiver,action,rows};
+  }
+  // A v2 action can combine columns issued under different response versions.
+  // Its immutable receipt, including retiring packets, is the sole gain source.
+  function adaptiveCommandContributions(view,source,receiver) {
+    const receipt=view.lastExecution,row=PowerDemo.constants.inverterBuses.indexOf(receiver),column=source-2;
+    if(!receipt||row<0||column<0||column>=PowerDemo.constants.N-1)return null;
+    const rows=['online','scalar','static','causal'].map(key=>{
+      const policy=receipt.policies[key],sourcePart=policy.sourceContributions[row][column];
+      return {key,sourceKvar:1000*sourcePart,otherKvar:1000*(policy.prediction[row]-sourcePart),
+        feedbackKvar:1000*policy.feedback[row],requestedKvar:1000*policy.raw[row],commandKvar:1000*policy.bounded[row],
+        gainNorm:policy.gainNorms[row][column],currentGain:policy.currentGains[row][column],coefficient:null,
+        limited:Math.abs(policy.raw[row]-policy.bounded[row])>1e-12};
+    });
+    return {source,receiver,action:receipt.action,trainedThrough:receipt.trainedThrough,rows};
   }
   // Read the immutable executed receipt, never the learner's newer coefficients.
   function ongoingCommandContributions(view,forecasts,source,receiver,controller) {
@@ -404,7 +426,7 @@
           sourceKvar:executed?.sourceKvar??null,commandKvar:executed?.commandKvar??null,limited:executed?.limited??null};
       });
       return {ongoing:true,source:inspection.source,receiver:inspection.receiver,discoverySamples:null,scoreSamples:null,
-        trainedThrough:command?.trainedThrough??null,sourcePairs:snapshot.lastExecution?.sourceReports[column]?.totalPairs??0,
+        trainedThrough:command?.trainedThrough??null,sourcePairs:adaptive()?(snapshot.learning?.completedRows??0):(snapshot.lastExecution?.sourceReports?.[column]?.totalPairs??0),adaptive:adaptive(),
         action:command?.action??null,rows};
     }
     const diagnostics=support.discoveryDiagnostics;
@@ -427,16 +449,16 @@
     for(const key of ['source','receiver','discoverySamples','scoreSamples','action'])
       panel.dataset[key]=reading&&reading[key]!==null?String(reading[key]):'';
     if(!reading) return;
-    body.setAttribute('aria-label',reading.ongoing?'Deployed support and received correction':'Frozen discovery evidence');
-    $('link-receipt-note').textContent=reading.ongoing?'Correction is received only on admitted channels. Signed current gain applies to the current target. Temporal norm spans all issued targets. Source contributions add before limiting; the bounded command includes feedback and every admitted message.':'Score averages discovery gain². Gain norm uses the resynthesized row. Source is before limiting; command includes all messages and each controller’s feedback.';
+    body.setAttribute('aria-label',reading.adaptive?'Incoming support and executed response':reading.ongoing?'Deployed support and received correction':'Frozen discovery evidence');
+    $('link-receipt-note').textContent=reading.adaptive?'Gains come from the exact executed receipt. A removed link may still contribute a cached forecast issued before the change. The signed gain applies to the current target; the norm spans all issued targets. Contributions add before limiting.':reading.ongoing?'Correction is received only on admitted channels. Signed current gain applies to the current target. Temporal norm spans all issued targets. Source contributions add before limiting; the bounded command includes feedback and every admitted message.':'Score averages discovery gain². Gain norm uses the resynthesized row. Source is before limiting; command includes all messages and each controller’s feedback.';
     $('link-receipt-title').textContent='Source '+reading.source+' → inverter '+reading.receiver;
-    $('link-receipt-time').textContent=reading.ongoing?(reading.trainedThrough===null?'Calibration warmup':'Weights use observations through '+reading.trainedThrough+' s')+' · Support fixed · Excluded sources send no messages':reading.discoverySamples+' discovery samples · '+reading.scoreSamples+' scored actions · Links and scores fixed';
+    $('link-receipt-time').textContent=reading.adaptive?(reading.trainedThrough===null?'Collecting revealed responses':'Response learned through '+reading.trainedThrough+' s')+' · Incoming support may change · '+retiringCount()+' retiring cached links':reading.ongoing?(reading.trainedThrough===null?'Calibration warmup':'Weights use observations through '+reading.trainedThrough+' s')+' · Support fixed · Excluded sources send no messages':reading.discoverySamples+' discovery samples · '+reading.scoreSamples+' scored actions · Links and scores fixed';
     $('link-receipt-action').textContent=reading.action===null?'Step to reveal executed gains and commands':'Executed action '+reading.action+' s · Full issued preview';
     for(const item of reading.rows) {
       const header=$('link-receipt-'+item.key);header.textContent=item.label+'\n'+item.budget+' remote';
       header.dataset.budget=String(item.budget);
     }
-    for(const [key,label] of [['selection','Selected support'],['score',reading.ongoing?'Received correction':'Discovery score'],...(reading.ongoing?[['currentGain','Signed current gain']]:[]),['gainNorm',reading.ongoing?'Temporal gain norm':'Deployed gain'],['sourceKvar','Source (kvar)'],['commandKvar','Command (kvar)']]) {
+    for(const [key,label] of [['selection',reading.adaptive?'Incoming support':'Selected support'],...(reading.adaptive?[]:[['score',reading.ongoing?'Received correction':'Discovery score']]),...(reading.ongoing?[['currentGain','Signed current gain']]:[]),['gainNorm',reading.ongoing?'Temporal gain norm':'Deployed gain'],['sourceKvar','Source (kvar)'],['commandKvar','Command (kvar)']]) {
       const row=document.createElement('tr'),labelCell=document.createElement('th');labelCell.scope='row';labelCell.textContent=label;row.append(labelCell);row.dataset.measure=key;
       for(const item of reading.rows) {
         const cell=document.createElement('td');cell.dataset.controller=item.key;cell.dataset.measure=key;
@@ -492,7 +514,7 @@
     window.dataset.available=String(!!stats);
     for(const key of ['count','firstAction','lastAction','firstObservedAt','lastObservedAt','rmse','bias'])
       window.dataset[key]=stats ? String(stats[key]) : '';
-    window.textContent=stats ? (ongoing()?'Source local window · ':'Last ')+stats.count+' revealed pairs · RMSE '+(1000*stats.rmse).toFixed(3)+' mpu · Bias '+(1000*stats.bias).toFixed(3)+' mpu'
+    window.textContent=stats ? (adaptive()?'Revealed observation window · ':ongoing()?'Source local window · ':'Last ')+stats.count+' revealed pairs · RMSE '+(1000*stats.rmse).toFixed(3)+' mpu · Bias '+(1000*stats.bias).toFixed(3)+' mpu'
       : 'No revealed pairs yet';
     window.title=stats ? 'Observed '+stats.firstObservedAt+' to '+stats.lastObservedAt+' s in this phase. RMSE is root mean square raw forecast minus forcing error. Bias is its signed mean. Past settings and unforecast power may contribute.'
       : 'Only revealed observations enter this summary. The window holds at most 60 pairs.';
@@ -522,7 +544,7 @@
       $('observed-'+key).textContent=observation ? (1000*observation[key]).toFixed(3) : '—';
     $('forecast-support').textContent=!inspection ? '' : historyIndex!==null ? 'Current sample hidden while reviewing saved links'
       : snapshot.phase==='discovery' ? 'Discovery uses dense messages · Displayed links are candidates'
-      : (inspection.connected ? 'Permitted by deployed support' : 'Excluded from deployed support')+' at inverter '+inspection.receiver+' · '+(ongoing()?'Adaptive sparse':snapshot.experiment==='communication'?'Learned sparse':'Matrix adaptation')+' · Links fixed';
+      : (inspection.connected ? (adaptive()?'Admitted for new forecasts':'Permitted by deployed support') : (adaptive()?'No new forecasts admitted':'Excluded from deployed support'))+' at inverter '+inspection.receiver+' · '+(ongoing()?'Adaptive sparse':snapshot.experiment==='communication'?'Learned sparse':'Matrix adaptation')+(adaptive()?' · New incoming messages only':' · Links fixed');
   }
   // Full executed history only. No candidate score or source local coefficient
   // substitutes for an admitted coefficient used by this receiver.
@@ -534,7 +556,7 @@
       const receipt=entry.execution,policy=receipt?.policies.online;
       if(!policy)return [];
       return [{x:receipt.action,gain:policy.currentGains[row][column],
-        correction:policy.receivedCoefficients[row][column],sourceKvar:1000*policy.sourceContributions[row][column],
+        correction:policy.receivedCoefficients?.[row]?.[column]??null,sourceKvar:1000*policy.sourceContributions[row][column],
         commandKvar:1000*policy.bounded[row],trainedThrough:receipt.trainedThrough}];
     });
     return {source:inspection.source,receiver:inspection.receiver,connected:inspection.connected,points};
@@ -544,7 +566,7 @@
     panel.hidden=!reading;
     if(!reading)return;
     const last=reading.points.at(-1);
-    $('response-history-label').textContent='Executed signed gain · '+(reading.connected?'Source '+reading.source+' → inverter '+reading.receiver:'Excluded source · Zero gain')
+    $('response-history-label').textContent='Executed signed gain · '+(reading.connected?'Source '+reading.source+' → inverter '+reading.receiver:adaptive()?'Source '+reading.source+' → inverter '+reading.receiver+' · No new messages':'Excluded source · Zero gain')
       +(last?' · Action '+last.x+' s':' · Run to record');
     if(last)el.removeAttribute('hidden');else el.setAttribute('hidden','');
     for(const [key,value]of Object.entries({source:reading.source,receiver:reading.receiver,count:reading.points.length,
@@ -637,7 +659,7 @@
     const events=snapshot.eventLog || [];
     const state = {
       modelContent: { scenario:PowerDemo.constants.N+' bus LinDistFlow voltage regulation', variant:snapshot.experiment==='communication'?'Communication topology comparison':'Shared prediction adaptation and sparse deployment', phase:snapshot.phase, step:snapshot.t, mode:snapshot.mode, cumulativeCost:snapshot.cumulative, selectedBus, faultyBuses:snapshot.faults, fitError:snapshot.fitError },
-      privateContent: { version:ongoing()?14:13, ...(ongoing()?{continuousRecord:simulation.recordContinuous()}:{}), networkId:PowerDemo.constants.networkId, comparisonContinued, intervention:$('intervention').value, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, automaticComparison:automaticComparison(), view:$('view').value, costMetric:$('cost-metric').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, inspectedSource, speed:$('speed').value, allLinks:$('all-links').checked }
+      privateContent: { version:adaptive()?15:ongoing()?14:13, ...(ongoing()?{continuousRecord:simulation.recordContinuous()}:{}), networkId:PowerDemo.constants.networkId, comparisonContinued, intervention:$('intervention').value, attackMode:$('attack-mode').value, phase:snapshot.phase, initialOptions:snapshot.initialOptions, discoveryRecord:snapshot.discoveryRecord, preset:snapshot.preset, matrixReference:matrixReference?{t:matrixReference.t,recommendations:matrixReference.recommendations}:null, automaticComparison:automaticComparison(), view:$('view').value, costMetric:$('cost-metric').value, matrixView:$('matrix-view').value, pulseStrength:$('strength').value, t:snapshot.t, events, selectedBus, inspectedSource, speed:$('speed').value, allLinks:$('all-links').checked }
     };
     window.openai.setWidgetState(state).catch(() => {});
   }
@@ -668,10 +690,10 @@
   }
   function hydrate(saved) {
     const data=saved?.privateContent;
-    if(restored||!data||![13,14].includes(data.version)) return;
-    if(data.version===14&&data.continuousRecord?.protocol!=='continuous-phi-v1')return;
-    trialProtocol=data.version===14?'continuous-phi-v1':null;
-    const savedOptions=data.version===14?data.continuousRecord.options:data.phase==='deployment'&&data.discoveryRecord?data.discoveryRecord.options:data.initialOptions;
+    if(restored||!data||![13,14,15].includes(data.version)) return;
+    if(data.version>=14&&data.continuousRecord?.protocol!==(data.version===15?'adaptive-phi-v2':'continuous-phi-v1'))return;
+    trialProtocol=data.version===15?'adaptive-phi-v2':data.version===14?'continuous-phi-v1':null;
+    const savedOptions=data.version>=14?data.continuousRecord.options:data.phase==='deployment'&&data.discoveryRecord?data.discoveryRecord.options:data.initialOptions;
     const networkId=data.networkId || savedOptions?.networkId || 'feeder24';
     if(!networkCatalog.networks.some(network=>network.id===networkId)) {announce('Saved network unavailable · Start a new trial');return;}
     bindNetwork(networkId);
@@ -692,9 +714,17 @@
     $('noise').value=String(communicationNoiseLevels.includes(savedOptions?.beta)?savedOptions.beta:1);
     $('preset').value=preset;
     $('power-scenario').value=['reference','solar-outage',DEFAULT_SCENARIO].includes(savedOptions?.powerScenario)?savedOptions.powerScenario:'reference';
-    if(data.version===14) {
+    if(data.version>=14) {
       simulation=PowerDemo.replayContinuous(data.continuousRecord);
       topology.reset(simulation.snapshot());
+      if(data.version===15) {
+        const changes=simulation.continuousController?.supportHistory||[];
+        if(changes.length) {
+          topology.reset({phase:'ongoing',t:changes[0].t,recommendations:changes[0].links});
+          for(const change of changes.slice(1))topology.observe({phase:'ongoing',t:change.t,recommendations:change.links});
+          topology.observe(simulation.snapshot());
+        }
+      }
     } else if(data.phase==='deployment' && data.discoveryRecord) {
       simulation=new PowerDemo.Simulation(data.discoveryRecord.options || optionsFromControls());
       topology.reset(simulation.snapshot());
@@ -706,7 +736,7 @@
       topology.reset(simulation.snapshot());
     }
     const initialLinks=simulation.snapshot().recommendations.map(e=>({...e}));
-    if(data.version!==14) replayRecord({t:data.t,events:data.events});
+    if(data.version===13) replayRecord({t:data.t,events:data.events});
     snapshot=simulation.snapshot();
     $('preset').value=snapshot.preset; $('experiment').value=snapshot.experiment; $('noise').value=String(snapshot.beta);
     $('view').value=data.view==='learning'?'learning':'cost';
@@ -870,12 +900,12 @@
     resetExperiment(); $('intervention').value=snapshot.experiment==='communication'?'forecast':'power';
     if(ongoing()) {inspectedSource=hasInverter(selectedBus)?selectedBus:null;$('matrix-view').value='change';}
     visible.clear();series.forEach(item=>visible.add(item.key));
-    announce(ongoing()?'Ongoing causal learning · New trial':(snapshot.experiment==='communication'?'Communication topology':snapshot.presetLabel)+' · New learning trial'); render(); save();
+    announce(adaptive()?'Ongoing response and link learning · New trial':ongoing()?'Ongoing causal learning · New trial':(snapshot.experiment==='communication'?'Communication topology':snapshot.presetLabel)+' · New learning trial'); render(); save();
   }
   function startOngoingTrial() {
     // Only an explicit new trial migrates an archived replay. Its old costs
     // and physical history are preserved until the user takes that action.
-    trialProtocol='continuous-phi-v1';$('experiment').value='communication';
+    trialProtocol='adaptive-phi-v2';$('experiment').value='communication';
     startSelectedExperiment();
   }
   $('new-scenario').addEventListener('click',()=>{
@@ -1149,8 +1179,9 @@
   }
   function protocolStatus() {
     const deployed=snapshot.phase==='deployment',saved=historyIndex!==null;
-    if(ongoing())return {phase:'ongoing',view:'ongoing',discoverySamples:0,comparisonSamples:snapshot.t,
-      selection:'offline',synthesis:'stationary',links:'fixed',predictionWeights:'adaptive',historyAt:null};
+    if(ongoing())return {phase:'ongoing',view:saved?'saved-topology':'ongoing',discoverySamples:0,comparisonSamples:snapshot.t,
+      selection:adaptive()?'online':'offline',synthesis:adaptive()?'adaptive':'stationary',links:adaptive()?'adaptive':'fixed',predictionWeights:'adaptive',
+      historyAt:saved?(historyIndex?topology.events[historyIndex-1]?.t:topology.initialT)??0:null};
     return {phase:deployed?'deployment':'discovery',view:saved?'saved-discovery':deployed?'comparison':'discovery',
       discoverySamples:deployed?(snapshot.discoveryRecord?.t ?? snapshot.deployedSupport?.discoveryTime ?? 0):snapshot.t,
       comparisonSamples:deployed?snapshot.t:0,selection:deployed?'complete':'pending',synthesis:deployed?'complete':'pending',
@@ -1160,9 +1191,9 @@
   function experimentProgress() {
     const status=protocolStatus(),deployed=status.phase==='deployment';
     if(ongoing())return {visible:true,phase:'ongoing',learningStatus:'active',comparisonStatus:'active',
-      learningCount:(snapshot.learning?.sourcePairs||0)+' observations received',comparisonCount:snapshot.t+' samples · All costs retained',
-      learningFraction:Math.min(1,(snapshot.learning?.sourcePairs||0)/30),comparisonFraction:0,
-      note:'One ongoing trial. Source corrections update after observations. Prediction support stays fixed. No reset or stop at 180 or 360 samples.'};
+      learningCount:adaptive()?adaptationCount()+' response updates':(snapshot.learning?.sourcePairs||0)+' observations received',comparisonCount:snapshot.t+' samples · All costs retained',
+      learningFraction:Math.min(1,(adaptive()?(snapshot.learning?.completedRows||0):(snapshot.learning?.sourcePairs||0))/30),comparisonFraction:0,
+      note:adaptive()?'Responses learn from revealed errors. New links admit future messages; cached forecasts keep their issued response. One clock and all costs retained.':'One ongoing trial. Source corrections update after observations. Prediction support stays fixed. No reset or stop at 180 or 360 samples.'};
     return {visible:snapshot.experiment==='communication',phase:status.phase,
       discoverySamples:status.discoverySamples,comparisonSamples:status.comparisonSamples,
       learningStatus:deployed?'complete':'active',
@@ -1213,6 +1244,13 @@
     phase.title=receipt+' · No joint online topology adaptation is claimed.';
     phase.hidden=snapshot.experiment==='communication';
     renderExperimentProgress();
+    if(adaptive()) {
+      phase.textContent='Response and topology learning';phase.title='Causal response updates with actual incoming support changes. Previously issued columns remain unchanged.';
+      $('phase-note').textContent=adaptationCount()+' response updates · '+(snapshot.adaptation?.topologyRevision??topology.cumulative.transitions)+' link revisions · '+retiringCount()+' retiring links';
+      $('phase-note').title='Incoming links carry new forecasts. Removed channels may retain a short cached response. Central learning telemetry is counted separately from control messages.';
+      const title=$('matrix-title');title.textContent=historyIndex===null?'Incoming prediction links':'Saved incoming links';title.dataset.controller='Adaptive sparse';title.dataset.context=historyIndex===null?'adaptive':'saved-topology';
+      title.title='Actual incoming support for Adaptive sparse. Color shows measured response energy. Executed gains can include forecasts admitted by earlier supports.';return;
+    }
     if(ongoing()) {
       phase.textContent='Continuous response adaptation';phase.title='Fixed offline support · Causal source correction · No online topology selection';
       $('phase-note').textContent='Source local learning · Fixed support · Executed weights update causally';
@@ -1244,9 +1282,9 @@
     const scheduled=snapshot.powerScenario===DEFAULT_SCENARIO,scenario=snapshot.scenario || {};
     const powers=(snapshot.eventLog || []).filter(event=>event.type==='pulse').length;
     const allNoisy=scheduled && snapshot.beta>0 && Array.from({length:PowerDemo.constants.N-1},(_,i)=>i+2).every(bus=>snapshot.faults.includes(bus));
-    $('scenario-name').textContent=(ongoing()?'':'Archived trial · ')+(scheduled?'Demand and solar cycle':snapshot.powerScenario==='solar-outage'?'Solar outage trial':'Reference trial');
+    $('scenario-name').textContent=(adaptive()?'':ongoing()?'Saved trial · ':'Archived trial · ')+(scheduled?'Demand and solar cycle':snapshot.powerScenario==='solar-outage'?'Solar outage trial':'Reference trial');
     const description=$('scenario-description'),settings=forecastSettings();
-    const guidance=ongoing()?'Ongoing trial · No physical reset · Corrections learn from revealed source errors':scheduled?(snapshot.phase==='deployment'?(snapshot.experiment==='communication'?'Fresh comparison · Deployed links and prediction correction stay fixed':'Fresh comparison · Links fixed · Prediction correction adapts')
+    const guidance=adaptive()?'Ongoing response and topology learning · One physical clock':ongoing()?'Ongoing trial · No physical reset · Corrections learn from revealed source errors':scheduled?(snapshot.phase==='deployment'?(snapshot.experiment==='communication'?'Fresh comparison · Deployed links and prediction correction stay fixed':'Fresh comparison · Links fixed · Prediction correction adapts')
       :automaticComparison()?'Run to learn the links, then compare four controllers automatically':'Manual comparison enabled in Experiment settings')
       :(restoredTrial?'Restored run · ':'')+'Previous samples and costs retained';
     description.dataset.forecastSettings=String(!!settings);
@@ -1318,6 +1356,10 @@
     $('compare').textContent=comparing ? 'Running…' : 'Advance 180';
     $('preset').disabled=comparing;
     $('restart').disabled=comparing;
+    $('restart').textContent=ongoing()&&!adaptive()?'Start adaptive demo':'Restart demo';
+    $('restart').title=ongoing()&&!adaptive()
+      ?'This saved trial retains its original fixed support and costs. Start a new trial to enable ongoing response and topology learning.'
+      :'Start a new trial with ongoing response and topology learning. Previous trial costs are cleared.';
     $('run').setAttribute('aria-label',playing?'Pause simulation':comparisonComplete()?'Continue simulation':frozen?'Run frozen fit':'Run simulation');
     $('run').setAttribute('aria-pressed',String(playing));
     const forecast=forecastMode();root.dataset.interaction=forecast?'forecast':'power';
@@ -1366,7 +1408,15 @@
       $('mode-note').textContent='Fixed sparse and dense use raw predictions. Adaptive sparse uses admitted source corrections. All costs include the full ongoing trial.';
       write('flow-update',(snapshot.learning?.sourceUpdates||0)+' correction updates');
       $('attack-hint').textContent=forecast?'New forecasts only · Weights learn after reveal':$('attack-hint').textContent;
-      $('scenario-description').title='One physical clock and accumulated cost. Forecast settings affect newly issued messages only. Source corrections use revealed observations, never the synthetic reliability labels.';
+      $('scenario-description').title=adaptive()?'One physical clock and accumulated cost. Forecast settings affect newly issued messages. Responses learn from revealed data and are frozen when each column is issued.':'One physical clock and accumulated cost. Forecast settings affect newly issued messages only. Source corrections use revealed observations, never the synthetic reliability labels.';
+      if(adaptive()) {
+        $('learning').textContent=adaptationCount()+' response updates · Links adapt';
+        $('fit-title').textContent='Response and topology learning';
+        $('fit-detail').textContent='First update after 30 completed response rows · New supports apply to future messages';
+        $('mode-note').textContent='Incoming links may change. Issued responses stay fixed until their cached forecasts expire. Every controller retains the full physical cost.';
+        write('flow-update',adaptationCount()+' response updates');
+        $('attack-hint').textContent=forecast?'New forecasts only · Responses learn after reveal':$('attack-hint').textContent;
+      }
     } else {$('auto-compare').disabled=false;if($('auto-compare').parentElement)$('auto-compare').parentElement.hidden=false;}
     renderLearningView();
   }
@@ -1613,8 +1663,8 @@
     $('link-budget').textContent=(historyIndex!==null?'Saved at '+protocolStatus().historyAt+' s · ':deployed?'Deployed · ':'Candidate · ')+budget.remote+' of '+budget.dense+' remote links · '+budget.replaced+' replaced';
     $('link-budget').title='Replacements relative to the offline fixed sparse topology. Remote prediction channels only. Local predictions and common state feedback are excluded.';
     $('noisy-links').hidden=!showSourceQuality||!deployed||historyIndex!==null;
-    $('noisy-links').textContent=budget.noisy+' noisy remote links used · Fixed sparse '+budget.fixedNoisy;
-    $('noisy-links').title='Counts use the displayed deployed support and current source noise settings. Noise labels describe the error generator and are not supplied to the learner.';
+    $('noisy-links').textContent=budget.noisy+(adaptive()?' noisy incoming links · Fixed sparse ':' noisy remote links used · Fixed sparse ')+budget.fixedNoisy;
+    $('noisy-links').title=adaptive()?'Counts describe incoming support and current source labels, excluding retiring cached packets. Labels describe the error generator and are not supplied to the learner.':'Counts use the displayed deployed support and current source noise settings. Noise labels describe the error generator and are not supplied to the learner.';
     const replaced=diagnostics?.changedLinkCount || 0;
     const matrixReceiver=hasInverter(selectedBus)?selectedBus:null;
     const selectedSources=recommendations.filter(e=>e.to===selectedBus).map(e=>e.from).sort((a,b)=>a-b);
@@ -1622,7 +1672,12 @@
     $('matrix-changes').textContent=(deployed?(historyIndex===null?(communicationComparison()?'vs fixed sparse · ':'Fixed links · '):'Discovery history · '):'')+added.length+' added · '+removed.length+' removed';
     $('matrix-changes').title=communicationComparison()&&historyIndex===null?'Deployed learned topology compared with fixed sparse':'Changes in the displayed topology update';
     drawTopologyHistory();
-    if(ongoing()) {
+    if(adaptive()) {
+      $('matrix-detail').textContent=changing?'Learned response energy relative to fixed sparse':$('matrix-detail').textContent;
+      $('matrix-changes').textContent=(historyIndex!==null?'Saved links · ':topology.cumulative.transitions+' link updates · ')+retiringCount()+' retiring cached links';
+      $('matrix-changes').title='Outline shows incoming support. Old issued response columns may still use cached messages from removed links.';
+      $('link-budget').textContent=(historyIndex!==null?'Saved at '+protocolStatus().historyAt+' s · ':'Incoming · ')+budget.remote+' of '+budget.dense+' remote links';
+    } else if(ongoing()) {
       $('matrix-detail').textContent=changing?'Effective response energy change from identity correction':$('matrix-detail').textContent;
       $('matrix-changes').textContent='Fixed support · Weights continue adapting';
       $('matrix-changes').title='No dynamic topology reselection or probing in this protocol';
@@ -1643,7 +1698,7 @@
       key.append(label);
     }
     const svg=d3.select(el).attr('viewBox','0 0 '+width+' '+height).attr('height',height)
-      .attr('role','group').attr('aria-label',displayedLinkController()+' · '+(historyIndex!==null?'Saved discovery prediction sources for '+receivers.length+' inverter receivers':changing?'Learning changes in predictive response weights':'Current selected prediction sources for '+receivers.length+' inverter receivers'))
+      .attr('role','group').attr('aria-label',displayedLinkController()+' · '+(historyIndex!==null?(adaptive()?'Saved incoming prediction sources for ':'Saved discovery prediction sources for ')+receivers.length+' inverter receivers':changing?'Learning changes in predictive response weights':'Current selected prediction sources for '+receivers.length+' inverter receivers'))
       .attr('data-gain-change',gainPercent).attr('data-source-changes',added.length).attr('data-offline-source-changes',replaced)
       .attr('data-history-index',historyIndex===null?'latest':historyIndex).attr('data-topology-updates',topology.cumulative.transitions);
     if(svg.select('.matrix-cells').empty()) {
@@ -1658,7 +1713,7 @@
     }
     if(staticChanged) {
     svg.select('.matrix-receiver-background').attr('height',height);
-    svg.select('title').text(changing?'Signed change in learned gain energy divided by each receiver’s offline energy. Outline shows selected sources.':'Rows are inverter receivers. Columns are prediction sources.');
+    svg.select('title').text(changing?(adaptive()?'Current learned response energy relative to fixed sparse, divided by each receiver’s baseline energy. Outline shows incoming support. Cached retiring gains are in the executed receipt.':'Signed change in learned gain energy divided by each receiver’s offline energy. Outline shows selected sources.'):'Rows are inverter receivers. Columns are prediction sources.');
     svg.select('.matrix-source-title').attr('x',left+(width-left)/2).attr('y',14).attr('text-anchor','middle').text('Source bus');
     svg.select('.matrix-receiver-title').attr('transform','translate(12,'+(top+cellHeight*receivers.length/2)+') rotate(-90)').attr('text-anchor','middle').text('Inverter');
     const labelY=(_,i)=>top-8-(staggered&&i%2===0?16:0);
@@ -1717,7 +1772,7 @@
     // Excluded cells remain present with truthful zero values. A view, support
     // or inspection change refreshes all cells. Connected cells always update,
     // so a coefficient becoming zero cannot leave a stale mark.
-    const marks=staticChanged?allMarks:allMarks.filter(d=>d.connected);
+    const marks=staticChanged||adaptive()?allMarks:allMarks.filter(d=>d.connected);
     marks.attr('data-weight-change',d=>d.delta).attr('aria-label',d=>'Inspect '+cellLabel(d));
     animate(marks).attr('fill',d=>changing?shade(d.delta):color(d.change==='removed'?'var(--background)':d.change==='retained'?matrixColors.connected:matrixColors[d.change] || matrixColors.inactive))
       .attr('stroke',d=>changing?(d.change==='added'?color(matrixColors.added):d.change==='removed'?color(matrixColors.removed):d.connected?'#404047':'transparent'):d.change==='removed'?color(matrixColors.removed):d.change==='added'?color(matrixColors.added):'transparent')
@@ -1962,9 +2017,19 @@
           payload.className='pr-method-traffic';payload.dataset.forecasts=String(traffic.remoteForecastMessages);
           payload.dataset.corrections=String(traffic.remoteCorrectionScalars);payload.dataset.probes=String(traffic.probingMessages);
           payload.textContent=d3.format(',')(traffic.remoteForecastMessages)+' forecasts'
-            +(item.key==='online'?' + '+d3.format(',')(traffic.remoteCorrectionScalars)+' corrections':'');
-          payload.title='Cumulative remote numeric payload values, including startup preview. Adaptive corrections add one scalar and causal version metadata to each admitted forecast. Fixed and dense identity correction is preknown. No probing. Local forecasts, common state feedback and operator diagnostics are excluded. This is not a wire byte count.';
+            +(!adaptive()&&item.key==='online'?' + '+d3.format(',')(traffic.remoteCorrectionScalars)+' corrections':'');
+          payload.title=adaptive()?'Cumulative admitted remote forecast messages, including startup. Central learning observations and response broadcasts are reported separately. Cached packets do not count as new messages. This is not a wire byte count.':'Cumulative remote numeric payload values, including startup preview. Adaptive corrections add one scalar and causal version metadata to each admitted forecast. Fixed and dense identity correction is preknown. No probing. Local forecasts, common state feedback and operator diagnostics are excluded. This is not a wire byte count.';
           label.append(payload);
+          if(adaptive()&&item.key==='online') {
+            const telemetry=snapshot.adaptation?.learningTraffic;
+            if(telemetry) {
+              const learning=document.createElement('span');learning.className='pr-method-traffic';learning.dataset.learningTraffic=JSON.stringify(telemetry);
+              const observed=telemetry.revealedScalarValues??telemetry.observationScalars;
+              const broadcasts=telemetry.parameterScalars;
+              learning.textContent='Learning telemetry'+(Number.isFinite(observed)?' · '+d3.format(',')(observed)+' observed values':'')+(Number.isFinite(broadcasts)?' · '+d3.format(',')(broadcasts)+' parameter values':'');
+              learning.title='Central learning traffic is additional to admitted prediction messages. '+JSON.stringify(telemetry);label.append(learning);
+            }
+          }
         }
       }
       value.textContent=costFormat(c[item.key]);value.title=d3.format('.10~g')(c[item.key]);
@@ -1980,6 +2045,7 @@
   function comparisonSummary() {
     const c=snapshot.cumulative,comparison=comparativeCost(c.online,c.scalar);
     if(snapshot.experiment==='communication') {
+      if(adaptive())return codesignMetrics().status+' · '+(sameSparseSupport()?'Same incoming support':'Different incoming support')+' · Full trial costs';
       if(ongoing())return codesignMetrics().status+' · Same sparse support · Adaptive correction adds one scalar per forecast';
       if(snapshot.phase!=='deployment') return 'Discovery costs · Sparse controllers have not been deployed';
       const dense=comparativeCost(c.online,c.static),budget=predictionBudget();

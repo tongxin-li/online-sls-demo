@@ -30,6 +30,8 @@ jobs:
         run: |
           node src/test-interactions.cjs
           node src/test-continuous-response.cjs
+          node src/test-adaptive-response.cjs
+          node src/test-adaptive-integration.cjs
           node src/test-causal-source-scale.cjs
           node src/test-forecast-calibration.cjs
           node src/test-simulation.cjs
@@ -92,7 +94,9 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/browser-test/node_modules
           DEMO_SMOKE_OUTPUT: ${{ runner.temp }}/ongoing-results
-        run: node src/test-continuous-browser.cjs
+        run: |
+          node src/test-continuous-browser.cjs
+          node src/test-adaptive-browser.cjs
       - name: Save ongoing browser evidence
         if: always()
         uses: actions/upload-artifact@v4

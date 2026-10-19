@@ -1,0 +1,52 @@
+{
+  "protocol": "adaptive-phi-v2",
+  "record_version": 15,
+  "scope": "Continuous full finite memory predictive response and incoming communication support learning. Experimental shared stationary specialization with online topology extension.",
+  "constants": {
+    "preview": 5,
+    "completed_window": 60,
+    "warmup_completed_rows": 30,
+    "support_review_interval": 30,
+    "response_ridge": 1e-06
+  },
+  "physical_changes": false,
+  "baseline_changes": false,
+  "data": "Immutable issued forecast packets and revealed forcing only. Central learning telemetry counted separately from sparse actuator forecast messages.",
+  "handoff": "Freeze the full response and support of every issued forecast column until its FIR expiration. New support governs only newly issued forecast messages. Retiring cached influences are counted separately.",
+  "predefined_integration": {
+    "networks": [
+      "toy8",
+      "feeder24",
+      "feeder47"
+    ],
+    "quality": [
+      "reliable",
+      "mixed",
+      "all_noisy"
+    ],
+    "seed": 20261013,
+    "steps": 240,
+    "corrupt_first_inverter": 90,
+    "repair_first_inverter": 150,
+    "held_power_on_last_bus": [
+      180,
+      199
+    ],
+    "requested_kw": 100
+  },
+  "checks": [
+    "Independent finite difference gradient",
+    "Frozen loss descent using curvature step",
+    "Both FIR boundaries and predictive affine dynamics",
+    "Forbidden incoming message reads",
+    "Same immutable column after a later update",
+    "Actual controller commands follow retained columns",
+    "Real measured support replacements with old cache retained",
+    "Fair baseline trajectory identity with previous protocol",
+    "No reset at 180 and no cost loss",
+    "Exact new and archived replay",
+    "Fresh desktop and phone playback and continuous attacks",
+    "Real screenshots and public release verification"
+  ],
+  "claims": "No guarantee of winning every trial and no transfer of archived finite protocol performance percentages."
+}

@@ -1,11 +1,12 @@
 'use strict';
-// Real fresh ongoing defaults, production controls and exact protocol 14 replay.
-// No injected saved trial or alternative controller test hook.
+// Actual protocol 14 archives retain their original numerical behavior and
+// production controls. Explicit new trial actions hand off to protocol 15.
 const assert=require('node:assert/strict');
 const fs=require('node:fs/promises');
 const path=require('node:path');
 const http=require('node:http');
 const {chromium}=require('playwright');
+const LegacyDemo=require('./simulation.js');
 async function main(){
  const root=path.resolve(__dirname,'..'),output=path.join(process.env.DEMO_SMOKE_OUTPUT||path.join(root,'browser-results'),'ongoing');
  await fs.mkdir(output,{recursive:true});
@@ -117,24 +118,31 @@ async function main(){
  const pause=async page=>{if((await read(page)).ui.playing)await page.locator('#pr-run').click();};
  const advance=page=>settings(page,async()=>{await page.locator('#pr-compare').click();await page.waitForFunction(()=>!document.querySelector('#pr-compare').disabled);});
  try{
-  browser=await chromium.launch({headless:true});
+  browser=await chromium.launch({headless:true,...(process.env.DEMO_BROWSER_CHANNEL?{channel:process.env.DEMO_BROWSER_CHANNEL}:{})});
   for(const mobile of [false,true])for(const networkId of ['toy8','feeder24','feeder47']){
    const context=await browser.newContext({viewport:mobile?{width:390,height:844}:{width:1440,height:1000},isMobile:mobile,hasTouch:mobile,deviceScaleFactor:1});
-   await context.addInitScript(({networkId})=>{
+   const legacyRecord=new (LegacyDemo.forNetwork(networkId).Simulation)({networkId,protocol:'continuous-phi-v1',
+    experiment:'communication',powerScenario:'forecasted-demand',beta:4,preset:'mixed',seed:20261013}).recordContinuous();
+   const legacySaved={privateContent:{version:14,networkId,continuousRecord:legacyRecord,phase:'ongoing',t:0,
+    selectedBus:7,inspectedSource:7,speed:'32',view:'cost',costMetric:'total',matrixView:'change',
+    intervention:'forecast',attackMode:'continuous',pulseStrength:'100',allLinks:true,preset:'mixed'}};
+   await context.addInitScript(({legacySaved})=>{
     const pending=sessionStorage.getItem('online-sls-demo-test-restore');
     if(pending){localStorage.setItem('online-sls-demo-v1',pending);sessionStorage.removeItem('online-sls-demo-test-restore');}
+    else if(!localStorage.getItem('online-sls-demo-v1'))localStorage.setItem('online-sls-demo-v1',JSON.stringify(legacySaved));
     window.__attackPointerEvents=[];
     for(const type of ['pointerdown','pointerup','pointercancel','lostpointercapture','click'])document.addEventListener(type,event=>{
       if(event.target.closest?.('#pr-pulse, #pr-stop-attacks'))window.__attackPointerEvents.push({type,target:event.target.closest('#pr-pulse, #pr-stop-attacks').id,pointerType:event.pointerType??null,button:event.button,detail:event.detail,touch:event.sourceCapabilities?.firesTouchEvents??null});
     },true);
     window.addEventListener('blur',()=>window.__attackPointerEvents.push({type:'window-blur'}));
-   },{networkId});
+   },{legacySaved});
    const page=await context.newPage();page.setDefaultTimeout(30000);page.on('pageerror',e=>errors.push(e.message));
    await page.goto(address,{waitUntil:'networkidle'});
    assert.equal((await read(page)).s.protocol,'continuous-phi-v1');
    assert.equal((await read(page)).s.t,0);assert.equal((await read(page)).ui.playing,false);
-   assert.equal((await read(page)).ui.inspectedSource,7,'Fresh default inspection follows the main forecast target');
-   if(networkId!=='feeder24')await page.locator('#pr-network-scenario').selectOption(networkId);
+   assert.equal((await read(page)).ui.inspectedSource,7,'Actual v14 inspection follows the saved forecast target');
+   assert.match(await page.locator('#pr-scenario-name').textContent(),/^Saved trial/);
+   assert.equal(await page.locator('#pr-restart').textContent(),'Start adaptive demo');
    await setting(page,'speed','32');
    assert.equal(await page.locator('#pr-response-history').getAttribute('hidden'),'','Executed gain SVG has a native hidden attribute until execution');
    assert.equal(await page.locator('#pr-response-history').isVisible(),false,'No executed gain plot before the first action');
@@ -325,8 +333,16 @@ async function main(){
    for(const field of ['t','cumulative','states','commandQ','lastExecution'])assert.deepEqual(restored.s[field],final.s[field],field+' exact UI replay');
    await page.screenshot({path:path.join(output,networkId+(mobile?'-phone':'-desktop')+'.png'),fullPage:true});
    await page.locator('.pr-matrix-panel').screenshot({path:path.join(output,networkId+(mobile?'-phone':'-desktop')+'-inspection.png')});
+   assert.match(await page.locator('#pr-scenario-name').textContent(),/^Saved trial/);
+   assert.equal(await page.locator('#pr-restart').textContent(),'Start adaptive demo');
+   await page.locator('#pr-restart').click();
+   const adopted=await read(page);assert.equal(adopted.s.protocol,'adaptive-phi-v2');assert.equal(adopted.s.t,0);
+   assert.equal(adopted.ui.playing,false);assert.ok(Object.values(adopted.s.cumulative).every(value=>value===0));
+   assert.equal((await page.evaluate(()=>window.openai.widgetState)).privateContent.version,15);
+   assert.equal(await page.locator('#pr-restart').textContent(),'Restart demo');
+   assert.doesNotMatch(await page.locator('#pr-scenario-name').textContent(),/Saved trial|Archived trial/);
    const next=networkId==='toy8'?'feeder47':'toy8';await page.locator('#pr-network-scenario').selectOption(next);
-   const switched=await read(page);assert.equal(switched.s.t,0);assert.equal(switched.ui.playing,false);assert.equal(switched.s.protocol,'continuous-phi-v1');
+   const switched=await read(page);assert.equal(switched.s.t,0);assert.equal(switched.ui.playing,false);assert.equal(switched.s.protocol,'adaptive-phi-v2');
    const handoffs=[];
    for(const action of ['restart','new-scenario','network-scenario']){
     await pause(page);
@@ -344,12 +360,12 @@ async function main(){
     if(action==='network-scenario')await page.locator('#pr-network-scenario').selectOption(networkId==='toy8'?'feeder47':'toy8');
     else if(action==='new-scenario')await settings(page,()=>page.locator('#pr-new-scenario').click());
     else await page.locator('#pr-restart').click();
-    const fresh=await read(page);assert.equal(fresh.s.protocol,'continuous-phi-v1');assert.equal(fresh.s.phase,'ongoing');
+    const fresh=await read(page);assert.equal(fresh.s.protocol,'adaptive-phi-v2');assert.equal(fresh.s.phase,'ongoing');
     assert.equal(fresh.s.historyLength,fresh.s.t);assert.equal(fresh.ui.playing,action==='new-scenario');
-    assert.deepEqual(fresh.ui.activeAttackBuses,[]);assert.doesNotMatch(await page.locator('#pr-scenario-name').textContent(),/Archived trial/);
+    assert.deepEqual(fresh.ui.activeAttackBuses,[]);assert.doesNotMatch(await page.locator('#pr-scenario-name').textContent(),/Saved trial|Archived trial/);
     if(action!=='new-scenario'){assert.equal(fresh.s.t,0);assert.ok(Object.values(fresh.s.cumulative).every(v=>v===0));}
     if(action==='restart')await page.screenshot({path:path.join(output,label+'-handoff-restart.png'),fullPage:true});
-    await pause(page);const exact=await read(page);assert.equal((await page.evaluate(()=>window.openai.widgetState)).privateContent.version,14);
+    await pause(page);const exact=await read(page);assert.equal((await page.evaluate(()=>window.openai.widgetState)).privateContent.version,15);
     await page.reload({waitUntil:'networkidle'});
     for(const field of ['t','cumulative','states','commandQ','lastExecution'])assert.deepEqual((await read(page)).s[field],exact.s[field],'Handoff exact replay '+action+' '+field);
     handoffs.push({action,protocol:exact.s.protocol,t:exact.s.t,passed:true});

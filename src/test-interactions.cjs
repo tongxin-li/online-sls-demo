@@ -421,7 +421,7 @@ test('old algorithm saves start a clean paused trial instead of replaying incomp
     assert.ok(Object.values(restored.snapshot().cumulative).every(value=>value===0));
     assert.equal(restored.snapshot().eventLog.length,0);assert.equal(restored.state().playing,false);
     assert.equal(restored.node('attack-mode').value,'continuous');assert.equal(restored.node('view').value,'cost');
-    restored.quickClick();assert.equal(restored.saved().privateContent.version,14);
+    restored.quickClick();assert.equal(restored.saved().privateContent.version,15);
   }
 });
 
@@ -477,7 +477,7 @@ test('deployment preserves discovery history and primary restart clears the whol
   assert.equal(restored.snapshot().phase,'deployment');
   h.node('topology-history').value='1';h.event('topology-history','input');
   h.click('restart');assert.equal(h.snapshot().t,0);assert.equal(h.snapshot().phase,'ongoing');
-  assert.equal(h.snapshot().protocol,'continuous-phi-v1');assert.equal(h.snapshot().deployedSupport.links.filter(e=>e.from!==e.to).length,24);assert.equal(h.snapshot().discoveryRecord,null);
+  assert.equal(h.snapshot().protocol,'adaptive-phi-v2');assert.equal(h.snapshot().deployedSupport.links.filter(e=>e.from!==e.to).length,24);assert.equal(h.snapshot().discoveryRecord,null);
   assert.equal(h.state().historyIndex,null);
   assert.equal(h.state().topology.events.length,0);assert.equal(h.state().topology.lastT,0);
   assert.equal(h.state().topology.phase,'ongoing');assert.equal(h.state().historyIndex,null);
@@ -1077,7 +1077,7 @@ test('communication starts in learning and preserves the chosen noise across res
   h.change('noise',2);assert.equal(h.snapshot().beta,2);assert.equal(h.snapshot().t,0);
   await compare(h);assert.equal(h.snapshot().phase,'deployment');assert.equal(h.node('view').value,'cost');
   assert.equal(h.node('view').hidden,true);assert.equal(h.snapshot().calibration.updates,0);
-  h.click('restart');assert.equal(h.snapshot().phase,'ongoing');assert.equal(h.snapshot().protocol,'continuous-phi-v1');assert.equal(h.snapshot().beta,2);
+  h.click('restart');assert.equal(h.snapshot().phase,'ongoing');assert.equal(h.snapshot().protocol,'adaptive-phi-v2');assert.equal(h.snapshot().beta,2);
   assert.equal(h.node('view').value,'cost');assert.equal(h.node('experiment').value,'communication');
 });
 
@@ -1119,7 +1119,7 @@ test('communication design shows actual cost and deployed prediction budgets ind
   h.click('cost-gap');assert.deepEqual(h.codesign(),view,'Measured method budgets and total costs are independent of the selected chart metric');
   assert.deepEqual(plain(h.snapshot()),before,'Read only design summaries cannot affect the experiment');
   const restored=harness(h.saved());assert.deepEqual(restored.codesign(),view);assert.equal(restored.state().playing,false);
-  h.click('restart');assert.ok(h.codesign().points.every(point=>point.cost===0));assert.equal(h.snapshot().t,0);assert.equal(h.snapshot().protocol,'continuous-phi-v1');
+  h.click('restart');assert.ok(h.codesign().points.every(point=>point.cost===0));assert.equal(h.snapshot().t,0);assert.equal(h.snapshot().protocol,'adaptive-phi-v2');
 });
 
 test('communication design acknowledges identical supports and a winning feedback controller',async()=>{
@@ -1877,7 +1877,7 @@ test('the new scenario action preserves a restored trial until an explicit fresh
   assert.deepEqual(restored.snapshot().cumulative,old.snapshot().cumulative);
   restored.change('intervention','forecast');assert.deepEqual(restored.snapshot().cumulative,old.snapshot().cumulative,'Mode selection never silently removes old costs');
   restored.click('new-scenario');assert.equal(restored.snapshot().powerScenario,'forecasted-demand');assert.equal(restored.snapshot().beta,4);
-  assert.equal(restored.snapshot().phase,'ongoing');assert.equal(restored.snapshot().protocol,'continuous-phi-v1');assert.equal(restored.state().playing,true);assert.equal(restored.state().intervention,'forecast');
+  assert.equal(restored.snapshot().phase,'ongoing');assert.equal(restored.snapshot().protocol,'adaptive-phi-v2');assert.equal(restored.state().playing,true);assert.equal(restored.state().intervention,'forecast');
   assert.deepEqual(restored.state().activeAttackBuses,[]);assert.equal(restored.snapshot().eventLog.some(event=>event.type==='pulse'),false);
   assert.ok(restored.snapshot().t<=1,'Explicit action starts only the new trial');
   assert.equal(restored.node('trial-context').hidden,true);
@@ -2112,7 +2112,7 @@ test('primary restart clears comparison, attacks and custom source changes while
   assert.ok(Object.values(h.snapshot().cumulative).some(value=>value>0));
   assert.ok(h.snapshot().eventLog.length>0);assert.ok(h.state().activeAttackBuses.length>0);
   h.click('restart');const restarted=h.snapshot();
-  assert.equal(restarted.phase,'ongoing');assert.equal(restarted.protocol,'continuous-phi-v1');assert.equal(restarted.t,0);assert.equal(restarted.deployedSupport.links.filter(e=>e.from!==e.to).length,24);
+  assert.equal(restarted.phase,'ongoing');assert.equal(restarted.protocol,'adaptive-phi-v2');assert.equal(restarted.t,0);assert.equal(restarted.deployedSupport.links.filter(e=>e.from!==e.to).length,24);
   assert.equal(restarted.discoveryRecord,null);assert.equal(restarted.experiment,'communication');
   assert.equal(restarted.beta,8);assert.equal(restarted.powerScenario,'solar-outage');
   assert.equal(h.node('speed').value,'32');assert.equal(h.node('attack-mode').value,'continuous');assert.equal(h.node('strength').value,'150');
@@ -2268,7 +2268,7 @@ test('persistent experiment stages explain the automatic reset without stopping 
   assert.equal(restored.node('results-stage').textContent,'Controller comparison');
   assert.equal(restored.state().playing,false);
   h.click('restart');
-  assert.equal(h.snapshot().protocol,'continuous-phi-v1');assert.equal(h.progress().phase,'ongoing');
+  assert.equal(h.snapshot().protocol,'adaptive-phi-v2');assert.equal(h.progress().phase,'ongoing');
   assert.equal(h.node('progress-comparison').dataset.status,'active');
 });
 
@@ -2290,7 +2290,7 @@ test('persistent stages report short discovery honestly and ignore historical to
   h.event('topology-history','input');assert.deepEqual(inspect(),first,'Historical links do not rewind the live experiment stage');
   h.click('history-live');assert.deepEqual(harness(h.saved()).progress(),first);
   h.click('restart');assert.equal(h.node('progress-learning').dataset.status,'active');
-  assert.equal(h.node('progress-comparison').dataset.status,'active');assert.equal(h.snapshot().protocol,'continuous-phi-v1');
+  assert.equal(h.node('progress-comparison').dataset.status,'active');assert.equal(h.snapshot().protocol,'adaptive-phi-v2');
   const prediction=harness();
   assert.equal(prediction.node('experiment-progress').hidden,true,'The specialized communication explanation is not shown for adapting prediction coefficients');
   assert.equal(prediction.node('phase').hidden,false);
@@ -2387,8 +2387,8 @@ test('displayed link ownership follows the actual controller phase and saved dis
     const h=harness(undefined,experiment);h.check('auto-compare',false);h.inspectLink(5,7);
     const check=(controller,context)=>{
       const heading=h.node('matrix-title');
-      assert.equal(heading.textContent,controller+' links');assert.equal(heading.dataset.controller,controller);
-      assert.equal(heading.dataset.context,context);assert.match(heading.title,/Other controllers use their own prediction sources/);
+      assert.equal(heading.textContent,context==='ongoing'?'Incoming prediction links':controller+' links');assert.equal(heading.dataset.controller,controller);
+      assert.equal(heading.dataset.context,context==='ongoing'?'adaptive':context);assert.match(heading.title,context==='ongoing'?/support|Support|forecast|Forecast/:/Other controllers use their own prediction sources/);
       if(h.inspection()){
         assert.equal(h.node('network-inspection').dataset.controller,controller);
         assert.ok(h.node('network-inspection-status').textContent.endsWith(' · '+controller));
@@ -2409,7 +2409,7 @@ test('displayed link ownership follows the actual controller phase and saved dis
     const restored=harness(h.saved(),experiment);
     assert.deepEqual(plain(restored.snapshot()),before,'Version 13 replay remains exact');
     assert.equal(restored.node('matrix-title').dataset.controller,controller);
-    h.click('restart');check('Adaptive sparse','ongoing');assert.equal(h.snapshot().protocol,'continuous-phi-v1');
+    h.click('restart');check('Adaptive sparse','ongoing');assert.equal(h.snapshot().protocol,'adaptive-phi-v2');
   }
 });
 
@@ -2472,7 +2472,7 @@ test('ongoing UI keeps arbitrary multi bus held attacks and fresh paused network
   assert.equal(h.snapshot().cumulative.online,prior);
   for(const id of ['feeder24','feeder47','toy8']) {
     h.change('network-scenario',id);
-    assert.equal(h.snapshot().networkId,id);assert.equal(h.snapshot().protocol,'continuous-phi-v1');
+    assert.equal(h.snapshot().networkId,id);assert.equal(h.snapshot().protocol,'adaptive-phi-v2');
     assert.equal(h.snapshot().t,0);assert.equal(h.state().playing,false);assert.equal(h.snapshot().cumulative.online,0);
     assert.equal(h.snapshot().deployedSupport.links.filter(e=>e.from!==e.to).length,{toy8:6,feeder24:24,feeder47:48}[id]);
   }
@@ -2501,7 +2501,7 @@ test('ongoing UI keeps arbitrary multi bus held attacks and fresh paused network
 
 test('fresh unsaved sessions execute the ongoing default with visible actual weight inspection',async()=>{
   const h=harness(undefined,null,true,true);
-  assert.equal(h.snapshot().protocol,'continuous-phi-v1');assert.equal(h.snapshot().phase,'ongoing');
+  assert.equal(h.snapshot().protocol,'adaptive-phi-v2');assert.equal(h.snapshot().phase,'ongoing');
   assert.equal(h.snapshot().powerScenario,'forecasted-demand');assert.equal(h.snapshot().beta,4);
   assert.equal(h.node('view').value,'cost');assert.equal(h.node('matrix-view').value,'change');
   assert.equal(h.state().inspectedSource,h.state().selectedBus);assert.equal(h.state().playing,false);
@@ -2511,10 +2511,10 @@ test('fresh unsaved sessions execute the ongoing default with visible actual wei
   h.click('run');await h.samples(410);h.click('run');
   const before=h.snapshot();assert.ok(before.t>360);assert.equal(before.history.length,before.t);
   assert.equal(h.state().comparisonComplete,false);assert.ok(before.learning.sourceUpdates>0);
-  assert.equal(h.saved().privateContent.version,14);
+  assert.equal(h.saved().privateContent.version,15);
   const restored=harness(h.saved(),null);
   for(const field of ['t','states','cumulative','commandQ','lastExecution'])assert.deepEqual(plain(restored.snapshot()[field]),plain(before[field]));
-  h.click('restart');assert.equal(h.snapshot().protocol,'continuous-phi-v1');assert.equal(h.snapshot().t,0);
+  h.click('restart');assert.equal(h.snapshot().protocol,'adaptive-phi-v2');assert.equal(h.snapshot().t,0);
   assert.equal(h.state().playing,false);
 });
 
@@ -2525,11 +2525,11 @@ test('archived new trial controls migrate only on explicit actions and save ongo
   for(let i=0;i<8;i++)old.step();
   const state={privateContent:{version:13,networkId,phase:'discovery',t:old.t,events:old.eventLog,initialOptions:old.snapshot().initialOptions,selectedBus:7,speed:'32',intervention:'forecast'}};
   const h=harness(state,'communication'),before=plain(h.snapshot());
-  assert.notEqual(h.snapshot().protocol,'continuous-phi-v1');assert.match(h.node('scenario-name').textContent,/Archived trial/);
+  assert.notEqual(h.snapshot().protocol,'adaptive-phi-v2');assert.match(h.node('scenario-name').textContent,/Archived trial/);
   h.change('cost-metric','gap');h.change('cost-metric','total');assert.deepEqual(plain(h.snapshot()),before);
   if(action==='network-scenario')h.change(action,networkId==='toy8'?'feeder47':'toy8');else h.click(action);
-  assert.equal(h.snapshot().protocol,'continuous-phi-v1');assert.equal(h.snapshot().phase,'ongoing');
-  assert.ok(h.snapshot().t<2);assert.equal(h.saved().privateContent.version,14);
+  assert.equal(h.snapshot().protocol,'adaptive-phi-v2');assert.equal(h.snapshot().phase,'ongoing');
+  assert.ok(h.snapshot().t<2);assert.equal(h.saved().privateContent.version,15);
   assert.equal(h.state().playing,action==='new-scenario');assert.deepEqual(h.state().activeAttackBuses,[]);
   assert.equal(h.snapshot().discoveryRecord,null);assert.doesNotMatch(h.node('scenario-name').textContent,/Archived trial/);
   if(action!=='new-scenario')assert.ok(Object.values(h.snapshot().cumulative).every(v=>v===0));

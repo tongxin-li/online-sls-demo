@@ -1,0 +1,139 @@
+{
+  "protocol": "adaptive-phi-v2",
+  "scope": "Predefined engineering integration trials at 240 actions including corruption, repair and held physical attacks. One seed per condition, no significance claim.",
+  "source": "test-adaptive-integration.cjs",
+  "all_conditions_reported": true,
+  "results": [
+    {
+      "network": "toy8",
+      "quality": "reliable",
+      "seed": 20261013,
+      "actions": 240,
+      "stage_costs": {
+        "online": 0.015313952545036815,
+        "scalar": 0.015722517517974714,
+        "static": 0.015653222394725306,
+        "causal": 0.01606606954934964
+      },
+      "response_updates": 201,
+      "topology_revisions": 2
+    },
+    {
+      "network": "toy8",
+      "quality": "mixed",
+      "seed": 20261013,
+      "actions": 240,
+      "stage_costs": {
+        "online": 0.017204445019135366,
+        "scalar": 0.020046021447786902,
+        "static": 0.022619844149558352,
+        "causal": 0.01606606954934964
+      },
+      "response_updates": 201,
+      "topology_revisions": 1
+    },
+    {
+      "network": "toy8",
+      "quality": "all_noisy",
+      "seed": 20261013,
+      "actions": 240,
+      "stage_costs": {
+        "online": 0.023041286543134993,
+        "scalar": 0.028807530734985154,
+        "static": 0.03449545800742918,
+        "causal": 0.01606606954934964
+      },
+      "response_updates": 201,
+      "topology_revisions": 5
+    },
+    {
+      "network": "feeder24",
+      "quality": "reliable",
+      "seed": 20261013,
+      "actions": 240,
+      "stage_costs": {
+        "online": 0.11861204940848129,
+        "scalar": 0.11964974627864156,
+        "static": 0.09911949537203005,
+        "causal": 0.12547565830877858
+      },
+      "response_updates": 201,
+      "topology_revisions": 4
+    },
+    {
+      "network": "feeder24",
+      "quality": "mixed",
+      "seed": 20261013,
+      "actions": 240,
+      "stage_costs": {
+        "online": 0.13740851387166503,
+        "scalar": 0.16737291294716705,
+        "static": 0.19619837018474978,
+        "causal": 0.12547565830877858
+      },
+      "response_updates": 201,
+      "topology_revisions": 4
+    },
+    {
+      "network": "feeder24",
+      "quality": "all_noisy",
+      "seed": 20261013,
+      "actions": 240,
+      "stage_costs": {
+        "online": 0.1783934145175273,
+        "scalar": 0.20762316165700478,
+        "static": 0.2587581336019692,
+        "causal": 0.12547565830877858
+      },
+      "response_updates": 201,
+      "topology_revisions": 4
+    },
+    {
+      "network": "feeder47",
+      "quality": "reliable",
+      "seed": 20261013,
+      "actions": 240,
+      "stage_costs": {
+        "online": 0.2573724802876971,
+        "scalar": 0.25797389080265676,
+        "static": 0.21111277253652885,
+        "causal": 0.27366484560594634
+      },
+      "response_updates": 201,
+      "topology_revisions": 6
+    },
+    {
+      "network": "feeder47",
+      "quality": "mixed",
+      "seed": 20261013,
+      "actions": 240,
+      "stage_costs": {
+        "online": 0.30567852469686435,
+        "scalar": 0.355108861050184,
+        "static": 0.4424520521580812,
+        "causal": 0.27366484560594634
+      },
+      "response_updates": 201,
+      "topology_revisions": 4
+    },
+    {
+      "network": "feeder47",
+      "quality": "all_noisy",
+      "seed": 20261013,
+      "actions": 240,
+      "stage_costs": {
+        "online": 0.38171932410204373,
+        "scalar": 0.42402448483249666,
+        "static": 0.5843747693895572,
+        "causal": 0.27366484560594634
+      },
+      "response_updates": 201,
+      "topology_revisions": 4
+    }
+  ],
+  "limitations": [
+    "These finite trials do not guarantee a winning rank or convergence.",
+    "Some mixed and all noisy trials favor feedback, with every startup and recovery cost retained.",
+    "Sparse actuator channels exclude separately counted central learning telemetry."
+  ]
+}

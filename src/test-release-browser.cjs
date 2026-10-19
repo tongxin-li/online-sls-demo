@@ -5,6 +5,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs/promises'),path=require('node:path'),http=require('node:http');
 const {createHash}=require('node:crypto'),{chromium}=require('playwright');
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
+const responseDistance=(a,b)=>Math.hypot(...a.flat().map((value,index)=>value-b.flat()[index]));
 async function main(){
  const root=path.resolve(__dirname,'..'),output=process.env.DEMO_SMOKE_OUTPUT||path.join(root,'browser-results','release');
  const live=process.env.DEMO_VERIFY_PUBLIC==='true',canonical='https://tongxin.me/online-sls-demo/';
@@ -36,12 +37,13 @@ async function main(){
    assert.equal(actual,expected[file],'Exact built bytes for '+file+' at '+url+' status '+status);
    verified[file]={sha256:actual,status};
   }
-  browser=await chromium.launch({headless:true});
+  browser=await chromium.launch({headless:true,...(process.env.DEMO_BROWSER_CHANNEL?{channel:process.env.DEMO_BROWSER_CHANNEL}:{})});
   const read=page=>page.evaluate(()=>{const root=document.querySelector('#power-response-demo'),api=root.powerDemo,s=api.getSnapshot();
    const row=window.PowerDemo.forNetwork(root.dataset.network).constants.inverterBuses.indexOf(7),j=5,p=s.lastExecution?.policies.online;
    return {network:s.networkId,protocol:s.protocol,phase:s.phase,t:s.t,history:s.history.length,samples:s.sampleCount,
     costs:s.cumulative,states:s.states,commandQ:s.commandQ,lastExecution:s.lastExecution,
-    gain:p?.currentGains[row][j]??null,coefficient:p?.receivedCoefficients[row][j]??null,
+    gain:p?.gainNorms[row][j]??null,currentGain:p?.currentGains[row][j]??null,responseGains:p?.gainNorms??null,
+    topologyAdaptive:s.deployedSupport?.topologyAdaptive,learning:s.learning,
     faulty:s.faults.includes(7),playing:api.getState().playing,attacks:api.getState().activeAttackBuses};
   });
   for(const mobile of [false,true])for(const network of ['toy8','feeder24','feeder47']){
@@ -50,7 +52,8 @@ async function main(){
    const response=await page.goto(address,{waitUntil:'networkidle'});
    assert.equal(hash(await response.body()),expected['index.html'],'Browser receives the same tested page bytes');
    if(network!=='feeder24')await page.locator('#pr-network-scenario').selectOption(network);
-   const fresh=await read(page);assert.equal(fresh.network,network);assert.equal(fresh.protocol,'continuous-phi-v1');
+   const fresh=await read(page);assert.equal(fresh.network,network);assert.equal(fresh.protocol,'adaptive-phi-v2');
+   assert.equal(fresh.topologyAdaptive,true,'Fresh release executes online response and topology adaptation');
    assert.equal(fresh.t,0);assert.equal(fresh.playing,false);
    const settings=page.locator('#pr-adaptation');await settings.locator('summary').first().click();
    await page.locator('#pr-speed').selectOption('32');await settings.locator('summary').first().click();
@@ -61,10 +64,10 @@ async function main(){
    assert.equal((await read(page)).playing,true,'Cost controls preserve playback');
    await activate('#pr-pulse');assert.equal((await read(page)).faulty,true);
    await until(before.t+75);const corrupted=await read(page);
-   assert.ok(Math.abs(corrupted.gain-before.gain)>1e-8,'Observed corruption changes the executed response');
+   assert.ok(responseDistance(corrupted.responseGains,before.responseGains)>1e-8,'Executed response matrices continue adapting after source corruption');
    await activate('#pr-pulse');assert.equal((await read(page)).faulty,false);
    await until(corrupted.t+75);const repaired=await read(page);
-   assert.ok(Math.abs(repaired.gain-corrupted.gain)>1e-8,'Observed repair changes the executed response');
+   assert.ok(responseDistance(repaired.responseGains,corrupted.responseGains)>1e-8,'Executed response matrices continue adapting after source repair');
    assert.ok(repaired.t>180);assert.equal(repaired.phase,'ongoing');assert.equal(repaired.playing,true);
    await page.locator('#pr-intervention').selectOption('power');await activate('#pr-pulse');
    await page.waitForFunction(()=>document.querySelector('#power-response-demo').powerDemo.getState().activeAttackBuses.includes(7));
@@ -80,7 +83,8 @@ async function main(){
    await page.reload({waitUntil:'networkidle'});const replay=await read(page);
    for(const field of ['t','costs','states','commandQ','lastExecution'])assert.deepEqual(replay[field],final[field],'Exact deployed replay '+field);
    await page.screenshot({path:path.join(output,network+(mobile?'-phone':'-desktop')+'.png'),fullPage:true});
-   const checkpoint=value=>({t:value.t,gain:value.gain,coefficient:value.coefficient,action:value.lastExecution.action,trainedThrough:value.lastExecution.trainedThrough});
+   const checkpoint=value=>({t:value.t,gain:value.gain,currentGain:value.currentGain,responseGains:value.responseGains,
+    action:value.lastExecution.action,trainedThrough:value.lastExecution.trainedThrough});
    const result={network,mobile,actions:final.t,before:checkpoint(before),corrupted:checkpoint(corrupted),repaired:checkpoint(repaired),costs:final.costs,exactReplay:true,passed:true};
    results.push(result);console.log('RELEASE_PLAYBACK '+JSON.stringify(result));await context.close();
   }
