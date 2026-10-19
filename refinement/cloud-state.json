@@ -783,42 +783,7 @@
       "direct_live_inspection": "unverified, prior denied live browser access not retried"
     }
   ],
-  "active_run": {
-    "program_id": "continuous-phi-20261018T234500",
-    "slot": "2026-10-19T08:45:00+08:00",
-    "started_at": "2026-10-19T08:45:09+08:00",
-    "lease_expires_at": "2026-10-19T09:25:09+08:00",
-    "branch": "cloud/refine/continuous-phi-20261018-2345",
-    "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
-    "candidate_parent": "f4df60749ba2b871bccfb53fa1787055b48d6b9f",
-    "status": "reducing_repeated_stable_matrix_layout",
-    "counted_invocation": true,
-    "counted_completed": false,
-    "tests": {
-      "preflight": {
-        "main_run": 39144310544,
-        "main_conclusion": "success",
-        "candidate_repeat": 39180266495,
-        "candidate_conclusion": "success",
-        "jobs": [
-          117831326168,
-          117831326447,
-          117833587958,
-          117834120717
-        ],
-        "completed_logs_read": true,
-        "numerical_cases": 254,
-        "original_browser_checks": 44,
-        "ongoing_conditions": 6,
-        "handoffs": 18
-      }
-    },
-    "changes": [],
-    "remaining_gaps": [
-      "Native 47 bus playback remains slower than requested with roughly 150 ms frame gaps. Public main still runs the archived protocol."
-    ],
-    "next_focus": "Reuse only stable matrix display geometry with explicit invalidation while every causal controller action continues."
-  },
+  "active_run": null,
   "next_focus": "Read latest main and this checkpoint repeat checks first. Profile 47 bus native execution and rendering with growing history at 901 and roughly 1850 samples. Separate actual controller step, immutable snapshot and chart work. Optimize the measured hotspot without retuning gains, objective, noise or limits and without dropping costs or evidence. If caching stationary response geometry, keep current causal correction weights and command receipts fresh at every action. Revalidate all suites and actual pixels before expected SHA nonforce publication.",
   "priorities": [
     "Actual continuous causal response adaptation and executed command evidence",
@@ -5554,7 +5519,7 @@
         "branch": "cloud/refine/continuous-phi-20261018-2345",
         "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
         "candidate_parent": "f4df60749ba2b871bccfb53fa1787055b48d6b9f",
-        "status": "reducing_repeated_stable_matrix_layout",
+        "status": "validated_continuous_candidate_unpublished_render_work_pending",
         "counted_invocation": true,
         "counted_completed": false,
         "tests": {
@@ -5595,6 +5560,754 @@
             "conclusion": "success",
             "completed_logs_read": true,
             "scope": "Same built local candidate. Exact page and environment hashes, six network and surface playback conditions, causal gain changes, attacks, old boundary crossing, all costs and exact replay. Public mode only runs after a main push."
+          },
+          "final": {
+            "run_id": 39183677664,
+            "conclusion": "success",
+            "all_completed_logs_read": true,
+            "numerical_and_interaction_cases": 254,
+            "interaction_cases": 143,
+            "original_browser_checks": 44,
+            "archived_network_suites": "success",
+            "ongoing_desktop_phone_conditions": 6,
+            "archived_handoff_conditions": 18,
+            "long_history_actions": [
+              1819,
+              1846,
+              1954,
+              1819,
+              1843,
+              1952
+            ],
+            "font_and_viewport_invalidation": "Passed independently against actual glyph bounds after font metric changes, font completion events, viewport resizing and native scrolling. Entire physical trial remains unchanged by inspection.",
+            "jobs": {
+              "validate": 117841728392,
+              "ongoing_browser": 117841728395,
+              "release_browser": 117841728191,
+              "review": 117843390211,
+              "prepare": 117844472958
+            },
+            "generated_child": {
+              "sha": "f504171f6863f3832ed4221725d572da0d264565",
+              "parent": "f2b33109ee387e5565185e8f4711e282c031e6b3",
+              "only_files": [
+                "index.html"
+              ],
+              "ancestry_verified": true
+            },
+            "artifacts": [
+              {
+                "id": 12157536757,
+                "name": "browser-evidence",
+                "digest": "sha256:6771ec78470aaf7dd23326404cbbe1bf7cc92ac859a43fefc737a6b5bae7b018"
+              },
+              {
+                "id": 12157506601,
+                "name": "release-browser-evidence",
+                "digest": "sha256:e8ffd1d812e7d1407eba54855a150321e3c99f8498faf9521406f92eb64ef246"
+              },
+              {
+                "id": 12157102839,
+                "name": "validated-page",
+                "digest": "sha256:52fba4463dc4a8bf85333f5f0ae6c6fc9f8d5f41d277f08674b4d1f1380b3f0d"
+              },
+              {
+                "id": 12157067427,
+                "name": "ongoing-browser-evidence",
+                "digest": "sha256:23b6953ac6813ab2432601422630bf28fbc027814d620b74a37d515f4c3bcafc"
+              }
+            ]
+          },
+          "release_verification": {
+            "passed": true,
+            "mode": "same built local candidate",
+            "url": null,
+            "revision": "f2b33109ee387e5565185e8f4711e282c031e6b3",
+            "verified": {
+              "index.html": {
+                "sha256": "0ace62c4f79045b486f2e3e7889c5d6491472850a6b9f39951afa5ff420f14d9",
+                "status": 200
+              },
+              "environment.html": {
+                "sha256": "9ba870badcc3f8150521c44d17430606536b43a10c11a1337cfb4c9a2172682d",
+                "status": 200
+              }
+            },
+            "results": [
+              {
+                "network": "toy8",
+                "mobile": false,
+                "actions": 217,
+                "before": {
+                  "t": 42,
+                  "gain": -2.6723897112162365,
+                  "coefficient": 0.9612510759117202,
+                  "action": 41,
+                  "trainedThrough": 40
+                },
+                "corrupted": {
+                  "t": 118,
+                  "gain": 0.00825496614047351,
+                  "coefficient": -0.0029692881434323537,
+                  "action": 117,
+                  "trainedThrough": 116
+                },
+                "repaired": {
+                  "t": 193,
+                  "gain": -2.7376004420201108,
+                  "coefficient": 0.9847071926910674,
+                  "action": 192,
+                  "trainedThrough": 191
+                },
+                "costs": {
+                  "online": 0.01531946701319679,
+                  "scalar": 0.018963884726288713,
+                  "static": 0.021151556837530627,
+                  "causal": 0.015365608030430387
+                },
+                "exactReplay": true,
+                "passed": true
+              },
+              {
+                "network": "feeder24",
+                "mobile": false,
+                "actions": 227,
+                "before": {
+                  "t": 42,
+                  "gain": -1.8435969763852849,
+                  "coefficient": 1.0016254773758837,
+                  "action": 41,
+                  "trainedThrough": 40
+                },
+                "corrupted": {
+                  "t": 120,
+                  "gain": -0.029624296969426023,
+                  "coefficient": 0.016094868332939365,
+                  "action": 119,
+                  "trainedThrough": 118
+                },
+                "repaired": {
+                  "t": 196,
+                  "gain": -1.8821170185115255,
+                  "coefficient": 1.02255340038587,
+                  "action": 195,
+                  "trainedThrough": 194
+                },
+                "costs": {
+                  "online": 0.11842866202178944,
+                  "scalar": 0.15449223979346616,
+                  "static": 0.18437121600771642,
+                  "causal": 0.11705635757009006
+                },
+                "exactReplay": true,
+                "passed": true
+              },
+              {
+                "network": "feeder47",
+                "mobile": false,
+                "actions": 225,
+                "before": {
+                  "t": 41,
+                  "gain": -1.841853735952685,
+                  "coefficient": 1.0006783755673814,
+                  "action": 40,
+                  "trainedThrough": 39
+                },
+                "corrupted": {
+                  "t": 118,
+                  "gain": -0.05433614500875738,
+                  "coefficient": 0.02952080518697267,
+                  "action": 117,
+                  "trainedThrough": 116
+                },
+                "repaired": {
+                  "t": 193,
+                  "gain": -1.8084768007428735,
+                  "coefficient": 0.982544700425204,
+                  "action": 192,
+                  "trainedThrough": 191
+                },
+                "costs": {
+                  "online": 0.26511568041241357,
+                  "scalar": 0.3375309456646796,
+                  "static": 0.41730141380160124,
+                  "causal": 0.26174483911410307
+                },
+                "exactReplay": true,
+                "passed": true
+              },
+              {
+                "network": "toy8",
+                "mobile": true,
+                "actions": 223,
+                "before": {
+                  "t": 42,
+                  "gain": -2.6723897112162365,
+                  "coefficient": 0.9612510759117202,
+                  "action": 41,
+                  "trainedThrough": 40
+                },
+                "corrupted": {
+                  "t": 120,
+                  "gain": 0.014926272504965709,
+                  "coefficient": -0.005368938311852697,
+                  "action": 119,
+                  "trainedThrough": 118
+                },
+                "repaired": {
+                  "t": 198,
+                  "gain": -2.7459466867812443,
+                  "coefficient": 0.98770931349807,
+                  "action": 197,
+                  "trainedThrough": 196
+                },
+                "costs": {
+                  "online": 0.01648488156509826,
+                  "scalar": 0.020497625565573045,
+                  "static": 0.022739036338352295,
+                  "causal": 0.016634010755411224
+                },
+                "exactReplay": true,
+                "passed": true
+              },
+              {
+                "network": "feeder24",
+                "mobile": true,
+                "actions": 236,
+                "before": {
+                  "t": 42,
+                  "gain": -1.8435969763852849,
+                  "coefficient": 1.0016254773758837,
+                  "action": 41,
+                  "trainedThrough": 40
+                },
+                "corrupted": {
+                  "t": 119,
+                  "gain": -0.0315620902280437,
+                  "coefficient": 0.017147670611626264,
+                  "action": 118,
+                  "trainedThrough": 117
+                },
+                "repaired": {
+                  "t": 196,
+                  "gain": -1.8821170185115255,
+                  "coefficient": 1.02255340038587,
+                  "action": 195,
+                  "trainedThrough": 194
+                },
+                "costs": {
+                  "online": 0.12003865723131531,
+                  "scalar": 0.158388462307693,
+                  "static": 0.18846595556347326,
+                  "causal": 0.11871566292491231
+                },
+                "exactReplay": true,
+                "passed": true
+              },
+              {
+                "network": "feeder47",
+                "mobile": true,
+                "actions": 226,
+                "before": {
+                  "t": 41,
+                  "gain": -1.841853735952685,
+                  "coefficient": 1.0006783755673814,
+                  "action": 40,
+                  "trainedThrough": 39
+                },
+                "corrupted": {
+                  "t": 116,
+                  "gain": -0.06690424856730824,
+                  "coefficient": 0.03634905067000943,
+                  "action": 115,
+                  "trainedThrough": 114
+                },
+                "repaired": {
+                  "t": 193,
+                  "gain": -1.8084768007428735,
+                  "coefficient": 0.982544700425204,
+                  "action": 192,
+                  "trainedThrough": 191
+                },
+                "costs": {
+                  "online": 0.2653773182435331,
+                  "scalar": 0.3382746150933079,
+                  "static": 0.41898775880721245,
+                  "causal": 0.2620538522309103
+                },
+                "exactReplay": true,
+                "passed": true
+              }
+            ],
+            "errors": [],
+            "scope": "Same built local candidate only. Public mode has not run because main was not changed. No live publication is claimed."
+          },
+          "native_playback": [
+            {
+              "networkId": "toy8",
+              "mobile": false,
+              "frames": 1695,
+              "maxFrameGapMs": 33.400000000001455,
+              "over50ms": 0,
+              "over100ms": 0,
+              "initialDomNodes": 1261,
+              "finalDomNodes": 1424,
+              "initialHeapBytes": 27600000,
+              "finalHeapBytes": 27600000,
+              "elapsedMs": 28299,
+              "actions": 904,
+              "sourceSwitches": [
+                {
+                  "action": 90,
+                  "trainedThrough": 89,
+                  "coefficient": 0.9988286314942323,
+                  "gain": -2.7768596831391434,
+                  "raw": 0.0069188657890316314,
+                  "bounded": 0.0069188657890316314,
+                  "corrupted": false
+                },
+                {
+                  "action": 220,
+                  "trainedThrough": 219,
+                  "coefficient": 0.017792197929587656,
+                  "gain": -0.04946437811979061,
+                  "raw": 0.005103554537199878,
+                  "bounded": 0.005103554537199878,
+                  "corrupted": true
+                },
+                {
+                  "action": 430,
+                  "trainedThrough": 429,
+                  "coefficient": 0.9573044070354575,
+                  "gain": -2.6614175130436637,
+                  "raw": 0.0007441943823570457,
+                  "bounded": 0.0007441943823570457,
+                  "corrupted": false
+                },
+                {
+                  "action": 651,
+                  "trainedThrough": 650,
+                  "coefficient": 0.023512146909048754,
+                  "gain": -0.06536650107647532,
+                  "raw": 0.0032798477099262374,
+                  "bounded": 0.0032798477099262374,
+                  "corrupted": true
+                },
+                {
+                  "action": 902,
+                  "trainedThrough": 901,
+                  "coefficient": 1.0279365007948762,
+                  "gain": -2.8577829428199593,
+                  "raw": -0.002287712768364679,
+                  "bounded": -0.002287712768364679,
+                  "corrupted": false
+                }
+              ],
+              "costs": {
+                "online": 0.050542470583888145,
+                "scalar": 0.06908717531061209,
+                "static": 0.08018790826596069,
+                "causal": 0.05224729915623826
+              },
+              "sourceUpdates": 874
+            },
+            {
+              "networkId": "feeder24",
+              "mobile": false,
+              "frames": 1649,
+              "maxFrameGapMs": 66.69999999999709,
+              "over50ms": 2,
+              "over100ms": 0,
+              "initialDomNodes": 2239,
+              "finalDomNodes": 2378,
+              "initialHeapBytes": 19300000,
+              "finalHeapBytes": 19300000,
+              "elapsedMs": 29383,
+              "actions": 909,
+              "sourceSwitches": [
+                {
+                  "action": 90,
+                  "trainedThrough": 89,
+                  "coefficient": 0.9936280934601275,
+                  "gain": -1.8288769506480127,
+                  "raw": 0.011671670908788291,
+                  "bounded": 0.011671670908788291,
+                  "corrupted": false
+                },
+                {
+                  "action": 219,
+                  "trainedThrough": 218,
+                  "coefficient": -0.00711159955000375,
+                  "gain": 0.013089646503400273,
+                  "raw": 0.00836101863696167,
+                  "bounded": 0.00836101863696167,
+                  "corrupted": true
+                },
+                {
+                  "action": 430,
+                  "trainedThrough": 429,
+                  "coefficient": 0.9927158854087788,
+                  "gain": -1.8271979358432908,
+                  "raw": -0.0016186738699941494,
+                  "bounded": -0.0016186738699941494,
+                  "corrupted": false
+                },
+                {
+                  "action": 652,
+                  "trainedThrough": 651,
+                  "coefficient": 0.020955009014667448,
+                  "gain": -0.038569896764985644,
+                  "raw": -0.001797981169944756,
+                  "bounded": -0.001797981169944756,
+                  "corrupted": true
+                },
+                {
+                  "action": 902,
+                  "trainedThrough": 901,
+                  "coefficient": 0.9786694361839486,
+                  "gain": -1.8013439695607139,
+                  "raw": -0.004970167352640885,
+                  "bounded": -0.004970167352640885,
+                  "corrupted": false
+                }
+              ],
+              "costs": {
+                "online": 0.42203714887075916,
+                "scalar": 0.5952487847854799,
+                "static": 0.7508418953969989,
+                "causal": 0.43035826662077686
+              },
+              "sourceUpdates": 879
+            },
+            {
+              "networkId": "feeder47",
+              "mobile": false,
+              "frames": 1585,
+              "maxFrameGapMs": 150,
+              "over50ms": 370,
+              "over100ms": 16,
+              "initialDomNodes": 4326,
+              "finalDomNodes": 4477,
+              "initialHeapBytes": 33100000,
+              "finalHeapBytes": 33100000,
+              "elapsedMs": 61649,
+              "actions": 909,
+              "sourceSwitches": [
+                {
+                  "action": 89,
+                  "trainedThrough": 88,
+                  "coefficient": 0.9982933464034762,
+                  "gain": -1.8374638390755749,
+                  "raw": 0.010043331570126119,
+                  "bounded": 0.010043331570126119,
+                  "corrupted": false
+                },
+                {
+                  "action": 220,
+                  "trainedThrough": 219,
+                  "coefficient": -0.00453709565549395,
+                  "gain": 0.008351001468087111,
+                  "raw": 0.010629323983343248,
+                  "bounded": 0.010629323983343248,
+                  "corrupted": true
+                },
+                {
+                  "action": 430,
+                  "trainedThrough": 429,
+                  "coefficient": 0.9995973243240479,
+                  "gain": -1.8398639475052618,
+                  "raw": -0.005223996691716795,
+                  "bounded": -0.005223996691716795,
+                  "corrupted": false
+                },
+                {
+                  "action": 651,
+                  "trainedThrough": 650,
+                  "coefficient": 0.009013691637618977,
+                  "gain": -0.016590646927951015,
+                  "raw": -0.0008526628389039653,
+                  "bounded": -0.0008526628389039653,
+                  "corrupted": true
+                },
+                {
+                  "action": 902,
+                  "trainedThrough": 901,
+                  "coefficient": 0.9832151187501043,
+                  "gain": -1.8097107761404818,
+                  "raw": -0.008893476178642038,
+                  "bounded": -0.008893476178642038,
+                  "corrupted": false
+                }
+              ],
+              "costs": {
+                "online": 0.8692513141686207,
+                "scalar": 1.224772231828114,
+                "static": 1.578896564322167,
+                "causal": 0.8847094697067084
+              },
+              "sourceUpdates": 879
+            },
+            {
+              "networkId": "toy8",
+              "mobile": true,
+              "frames": 1698,
+              "maxFrameGapMs": 16.80000000000291,
+              "over50ms": 0,
+              "over100ms": 0,
+              "initialDomNodes": 1261,
+              "finalDomNodes": 1424,
+              "initialHeapBytes": 23100000,
+              "finalHeapBytes": 23100000,
+              "elapsedMs": 28287,
+              "actions": 904,
+              "sourceSwitches": [
+                {
+                  "action": 90,
+                  "trainedThrough": 89,
+                  "coefficient": 0.9988286314942323,
+                  "gain": -2.7768596831391434,
+                  "raw": 0.0069188657890316314,
+                  "bounded": 0.0069188657890316314,
+                  "corrupted": false
+                },
+                {
+                  "action": 222,
+                  "trainedThrough": 221,
+                  "coefficient": 0.016845647995383874,
+                  "gain": -0.046832859291143905,
+                  "raw": 0.0021508072693413507,
+                  "bounded": 0.0021508072693413507,
+                  "corrupted": true
+                },
+                {
+                  "action": 430,
+                  "trainedThrough": 429,
+                  "coefficient": 0.9573044070354575,
+                  "gain": -2.6614175130436637,
+                  "raw": 0.0007441943823570457,
+                  "bounded": 0.0007441943823570457,
+                  "corrupted": false
+                },
+                {
+                  "action": 649,
+                  "trainedThrough": 648,
+                  "coefficient": 0.023288270602965618,
+                  "gain": -0.06474409892582575,
+                  "raw": 0.0035283087074285337,
+                  "bounded": 0.0035283087074285337,
+                  "corrupted": true
+                },
+                {
+                  "action": 901,
+                  "trainedThrough": 900,
+                  "coefficient": 1.025371448911144,
+                  "gain": -2.8506518004632966,
+                  "raw": -0.0014033026520986107,
+                  "bounded": -0.0014033026520986107,
+                  "corrupted": false
+                }
+              ],
+              "costs": {
+                "online": 0.05054333980298748,
+                "scalar": 0.06917015346222279,
+                "static": 0.08031433841051991,
+                "causal": 0.05224729915623826
+              },
+              "sourceUpdates": 874
+            },
+            {
+              "networkId": "feeder24",
+              "mobile": true,
+              "frames": 1686,
+              "maxFrameGapMs": 66.70000000000073,
+              "over50ms": 2,
+              "over100ms": 0,
+              "initialDomNodes": 2262,
+              "finalDomNodes": 2401,
+              "initialHeapBytes": 19300000,
+              "finalHeapBytes": 19300000,
+              "elapsedMs": 29069,
+              "actions": 909,
+              "sourceSwitches": [
+                {
+                  "action": 90,
+                  "trainedThrough": 89,
+                  "coefficient": 0.9936280934601275,
+                  "gain": -1.8288769506480127,
+                  "raw": 0.011671670908788291,
+                  "bounded": 0.011671670908788291,
+                  "corrupted": false
+                },
+                {
+                  "action": 221,
+                  "trainedThrough": 220,
+                  "coefficient": -0.005061400702689221,
+                  "gain": 0.009316040019467732,
+                  "raw": 0.010369395079606193,
+                  "bounded": 0.010369395079606193,
+                  "corrupted": true
+                },
+                {
+                  "action": 431,
+                  "trainedThrough": 430,
+                  "coefficient": 0.9917916419008043,
+                  "gain": -1.8254967685155492,
+                  "raw": -0.001093497081370629,
+                  "bounded": -0.001093497081370629,
+                  "corrupted": false
+                },
+                {
+                  "action": 649,
+                  "trainedThrough": 648,
+                  "coefficient": 0.021442708963977406,
+                  "gain": -0.039467559785984936,
+                  "raw": -0.0006587127179968581,
+                  "bounded": -0.0006587127179968581,
+                  "corrupted": true
+                },
+                {
+                  "action": 903,
+                  "trainedThrough": 902,
+                  "coefficient": 0.9769385924130308,
+                  "gain": -1.798158169663711,
+                  "raw": -0.003771683900434129,
+                  "bounded": -0.003771683900434129,
+                  "corrupted": false
+                }
+              ],
+              "costs": {
+                "online": 0.4220289297718097,
+                "scalar": 0.5950947880439683,
+                "static": 0.7507515398681415,
+                "causal": 0.43035826662077686
+              },
+              "sourceUpdates": 879
+            },
+            {
+              "networkId": "feeder47",
+              "mobile": true,
+              "frames": 1524,
+              "maxFrameGapMs": 133.1999999999971,
+              "over50ms": 220,
+              "over100ms": 11,
+              "initialDomNodes": 4326,
+              "finalDomNodes": 4477,
+              "initialHeapBytes": 37300000,
+              "finalHeapBytes": 37300000,
+              "elapsedMs": 53627,
+              "actions": 909,
+              "sourceSwitches": [
+                {
+                  "action": 92,
+                  "trainedThrough": 91,
+                  "coefficient": 0.9973581993148491,
+                  "gain": -1.8357426025615187,
+                  "raw": 0.008685198852762704,
+                  "bounded": 0.008685198852762704,
+                  "corrupted": false
+                },
+                {
+                  "action": 221,
+                  "trainedThrough": 220,
+                  "coefficient": -0.004380336128050841,
+                  "gain": 0.008062469080142224,
+                  "raw": 0.007830786623061583,
+                  "bounded": 0.007830786623061583,
+                  "corrupted": true
+                },
+                {
+                  "action": 431,
+                  "trainedThrough": 430,
+                  "coefficient": 0.9995477549758082,
+                  "gain": -1.8397727099093737,
+                  "raw": -0.0043047735439139265,
+                  "bounded": -0.0043047735439139265,
+                  "corrupted": false
+                },
+                {
+                  "action": 650,
+                  "trainedThrough": 649,
+                  "coefficient": 0.008858922017510814,
+                  "gain": -0.01630577717362404,
+                  "raw": -0.001749125254399532,
+                  "bounded": -0.001749125254399532,
+                  "corrupted": true
+                },
+                {
+                  "action": 902,
+                  "trainedThrough": 901,
+                  "coefficient": 0.9832151187501043,
+                  "gain": -1.8097107761404818,
+                  "raw": -0.008893476178642038,
+                  "bounded": -0.008893476178642038,
+                  "corrupted": false
+                }
+              ],
+              "costs": {
+                "online": 0.8692440795065329,
+                "scalar": 1.2247474434084358,
+                "static": 1.5786816205638707,
+                "causal": 0.8847094697067084
+              },
+              "sourceUpdates": 879
+            }
+          ],
+          "intermediate_sources": [
+            {
+              "source": "2cc580017a52017a12eec855460057204d183d9c",
+              "run": 39182322807,
+              "status": "cancelled",
+              "reason": "Lease and engineering plan superseded by intended source."
+            },
+            {
+              "source": "01ceab4eae21c65a75038ba5f29018e2b8c3a354",
+              "run": 39182508026,
+              "status": "cancelled_after_completed_ongoing_browser",
+              "ongoing_job": 117838402367,
+              "ongoing_conclusion": "success",
+              "ongoing_logs_read": true,
+              "numerical_cases_passed": 254,
+              "cancelled_validate_job": 117838402158,
+              "cancelled_validate_logs_read": true,
+              "review_job": 117840035892,
+              "review_conclusion": "success",
+              "reason": "Superseded by required public verification route. No complete validation or publication claimed."
+            },
+            {
+              "source": "4779b1049105a90ae9da6b9f9689573bd363bf54",
+              "run": 39183204866,
+              "status": "cancelled_after_completed_release_browser",
+              "release_job": 117840417733,
+              "release_conclusion": "success",
+              "release_logs_read": true,
+              "numerical_cases_passed": 166,
+              "cancelled_validate_job": 117840417885,
+              "cancelled_validate_logs_read": true,
+              "reason": "Residual layout measured and batched chart width reads added. Full final validation required."
+            },
+            {
+              "source": "c0e9ac02cd4c62c28bb12822051783fd6ddadf14",
+              "run": 39183538263,
+              "status": "cancelled",
+              "cancelled_logs_read": true,
+              "jobs": [
+                117841360817,
+                117841360586
+              ],
+              "reason": "Superseded by release neutral README and environment scope descriptions."
+            }
+          ],
+          "scope": {
+            "parent": "f4df60749ba2b871bccfb53fa1787055b48d6b9f",
+            "source": "f2b33109ee387e5565185e8f4711e282c031e6b3",
+            "behind_main_by": 0,
+            "controller_engine_changed_this_pass": false,
+            "physical_parameters_changed": false,
+            "weights_cached": false,
+            "history_dropped": false,
+            "workflow_existing_commands_preserved": true,
+            "new_dependency": false,
+            "release_tools": "Same existing pinned Playwright dependency in isolated cloud runner."
           }
         },
         "changes": [
@@ -5606,54 +6319,75 @@
           "Make README and environment protocol descriptions independent of temporary candidate status while keeping exact publication state and all earlier slow outcomes in durable progress and engineering evidence."
         ],
         "remaining_gaps": [
-          "Native 47 bus playback remains slower than requested with roughly 150 ms frame gaps. Public main still runs the archived protocol."
+          "The final 47 bus native runs advanced roughly 14.7 and 17.0 samples per wall second at requested 32 with frame gaps of 150 and 133.2 ms. Profiling and cloud variation apply. The responsiveness gate remains open and no uniform throughput improvement is claimed.",
+          "Desktop matrix JavaScript attribution fell, but much sampled time moved into unsymbolized browser work. Phone matrix attribution remains substantial. Need distinguish unchanged SVG mutation, style, layout and paint work rather than assuming synchronous reads were the whole problem.",
+          "Full samples, forecasts, history, receipts and costs remain retained through roughly 1900 actions. Actual finite heap readings vary with GC and do not establish constant or indefinite memory use.",
+          "The new release browser route passed locally on all six conditions and exact page and environment hashes. Public mode remains unexercised until an eventual validated promotion. Verify exact Pages and canonical public browser behavior before counting a completion.",
+          "Fixed offline support and source local specialization remain explicit. No dynamic topology reselection, free excluded forecasts, manuscript equivalence or stability guarantee is implemented."
         ],
-        "next_focus": "Reuse only stable matrix display geometry with explicit invalidation while every causal controller action continues.",
+        "next_focus": "Read current main and this checkpoint repeat first. Reduce unchanged matrix SVG mutations while retaining every source, cell, permission and actual per action coefficient value. Source labels currently reset text and titles every render, cached positions are reapplied, and all 736 cells receive many static attributes each action. Separate static geometry and accessibility updates from actual changing response energy. For ongoing fixed support, update every admitted gain including zero values, while leaving excluded zero cells present and correctly inspectable. Keep archived behavior correct. Add independent checks that every displayed matrix value matches the actual diagnostics after corruption, repair, selection, scroll, resize and font changes. Keep all physical actions and receipts; do not lower the requested test rate or tune physics. Read all timing outcomes, capture and inspect pixels, then promote only after responsiveness and exact public verification pass.",
         "duplicate_dispatches": [
           {
             "at": "2026-10-19T08:53:01+08:00",
             "slot": "2026-10-19T08:45:00+08:00",
             "action": "Read only duplicate preflight during the counted pass. No new invocation or deadline extension."
           }
-        ]
+        ],
+        "source_commit": "f2b33109ee387e5565185e8f4711e282c031e6b3",
+        "ready_commit": "f504171f6863f3832ed4221725d572da0d264565",
+        "published_commit": null,
+        "finished_at": "2026-10-19T09:19:48+08:00",
+        "tool_recovery": {
+          "reason": "An API mutation result lacked a structured SHA before a ref update. Independently verified the candidate ref unchanged, then repeated the tree and commit operations with checked results and an expected SHA update.",
+          "counted_invocation": false,
+          "counted_completed": false
+        },
+        "pixel_review": {
+          "source": "f2b33109ee387e5565185e8f4711e282c031e6b3",
+          "status": "actual_pixels_reviewed",
+          "job": 117843390211,
+          "route": "Authenticated GitHub base64 text wrappers emitted as original PNG images. No local files or direct live browser.",
+          "reviewed": [
+            "feeder47-desktop-inspection.png",
+            "feeder47-phone-inspection.png",
+            "feeder24-desktop-start.png"
+          ],
+          "artifacts": [
+            {
+              "file": "feeder47-desktop-inspection.png",
+              "sha": "73bdd086cebb2d1d3ae752030a1b6ba87657b029",
+              "base64_text_sha": "f8e0b737fbf3713a71f2add1bfb4b8c3a459c284",
+              "bytes": 140166
+            },
+            {
+              "file": "feeder47-phone-inspection.png",
+              "sha": "346ca1c803b976d9f71653e3d60dcf755224fdf9",
+              "base64_text_sha": "28d40ca50d2b4e3160c2a75c0f78c41554af80ee",
+              "bytes": 116626
+            },
+            {
+              "file": "feeder24-desktop-start.png",
+              "sha": "17c21ed19f35579fb3babd8fbbf88ec936ce2b0e",
+              "base64_text_sha": "5a7fa0865affd90c6dc7b1dcad99adbd9f8c9947",
+              "bytes": 334824
+            }
+          ],
+          "findings": [
+            "Whole source labels, pinned receivers and visible range cues remain readable on desktop and phone after the visual geometry changes.",
+            "The actual selected support, received correction, signed gain, source contribution and bounded command remain distinct. The executed gain trace retains its full observed history.",
+            "The fresh 24 bus page retains four panels, one comparison, zero costs and truthful pending receipts with no fake executed gain plot.",
+            "Pixel approval does not establish smooth high speed playback."
+          ]
+        },
+        "deployment": {
+          "attempted": false,
+          "main": "b28a1db1595ed812002e5401e0825f0da12f6e36",
+          "status": "Archived public protocol remains unchanged. Candidate contains an authorized cloud public verification route for eventual publication."
+        },
+        "end_reason": "Bounded fully validated candidate checkpoint with actual pixel review and all unfavorable timings preserved. Rendering responsiveness remains unresolved so there is no new live completion."
       }
     ],
-    "active_run": {
-      "program_id": "continuous-phi-20261018T234500",
-      "slot": "2026-10-19T08:45:00+08:00",
-      "started_at": "2026-10-19T08:45:09+08:00",
-      "lease_expires_at": "2026-10-19T09:25:09+08:00",
-      "branch": "cloud/refine/continuous-phi-20261018-2345",
-      "base_commit": "b28a1db1595ed812002e5401e0825f0da12f6e36",
-      "candidate_parent": "f4df60749ba2b871bccfb53fa1787055b48d6b9f",
-      "status": "reducing_repeated_stable_matrix_layout",
-      "counted_invocation": true,
-      "counted_completed": false,
-      "tests": {
-        "preflight": {
-          "main_run": 39144310544,
-          "main_conclusion": "success",
-          "candidate_repeat": 39180266495,
-          "candidate_conclusion": "success",
-          "jobs": [
-            117831326168,
-            117831326447,
-            117833587958,
-            117834120717
-          ],
-          "completed_logs_read": true,
-          "numerical_cases": 254,
-          "original_browser_checks": 44,
-          "ongoing_conditions": 6,
-          "handoffs": 18
-        }
-      },
-      "changes": [],
-      "remaining_gaps": [
-        "Native 47 bus playback remains slower than requested with roughly 150 ms frame gaps. Public main still runs the archived protocol."
-      ],
-      "next_focus": "Reuse only stable matrix display geometry with explicit invalidation while every causal controller action continues."
-    },
+    "active_run": null,
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
       "is_enabled": true,
@@ -5664,7 +6398,7 @@
       "setup_counts_as_improvement": false
     },
     "candidate_branch": "cloud/refine/continuous-phi-20261018-2345",
-    "next_focus": "Read latest main and checkpoint repeat first. Further reduce measured matrix layout cost by reusing stable visual geometry with correct scroll resize font reliability and inspection invalidation, retaining every source and all actual controller updates. Revalidate independent rendered glyph bounds and native desktop and phone playback. Add or use an authorized existing Actions cloud public byte and playback verification route before eventual publication. Keep candidate unpublished while high speed responsiveness remains unresolved.",
+    "next_focus": "Read current main and this checkpoint repeat first. Reduce unchanged matrix SVG mutations while retaining every source, cell, permission and actual per action coefficient value. Source labels currently reset text and titles every render, cached positions are reapplied, and all 736 cells receive many static attributes each action. Separate static geometry and accessibility updates from actual changing response energy. For ongoing fixed support, update every admitted gain including zero values, while leaving excluded zero cells present and correctly inspectable. Keep archived behavior correct. Add independent checks that every displayed matrix value matches the actual diagnostics after corruption, repair, selection, scroll, resize and font changes. Keep all physical actions and receipts; do not lower the requested test rate or tune physics. Read all timing outcomes, capture and inspect pixels, then promote only after responsiveness and exact public verification pass.",
     "skipped_duplicate_dispatches": [
       {
         "dispatch": "2026-10-19T03:13:56+08:00",
