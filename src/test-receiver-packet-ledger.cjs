@@ -27,9 +27,9 @@ test('explicit request transport never reads excluded forecasts or quality and f
 test('probe latency uses actual arrivals and requests alone are not payload traffic',()=>{
  const l=ledger();advance(l,60);l.request({source:3,target:59,reason:'probe'});
  assert.equal(l.snapshot().traffic.total.totalScalars,0);
- assert.deepEqual(advance(l,60),[]);assert.throws(()=>l.read({source:3,target:59,purpose:'evaluation'}),/not available/);
+ assert.deepEqual(advance(l,60),[]);assert.throws(()=>l.read({source:3,target:59,purpose:'evaluation',asOfAction:59}),/not available/);
  assert.equal(advance(l,61)[0].deliveredAt,61);
- assert.equal(l.read({source:3,target:59,purpose:'evaluation'}).issuedAt,55);
+ assert.equal(l.read({source:3,target:59,purpose:'evaluation',asOfAction:59}).issuedAt,55);
  assert.equal(l.snapshot().traffic.byReason.probe.totalScalars,2);
 });
 test('old missing context cannot use ordinary zero latency control delivery',()=>{
@@ -39,17 +39,27 @@ test('old missing context cannot use ordinary zero latency control delivery',()=
  l.request({source:2,target:55,reason:'transition',delay:2});
  assert.deepEqual(advance(l,61),[]);assert.equal(advance(l,62)[0].status,'accepted');
 });
-test('unissued forecasts and unrevealed probe outcomes cannot be requested',()=>{
+test('unissued forecasts and unrevealed evaluation actions cannot be used',()=>{
  const l=ledger();
  assert.throws(()=>l.request({source:5,target:5,reason:'control'}),/not issued/);
- assert.throws(()=>l.request({source:3,target:0,reason:'probe'}),/not revealed/);
+ assert.throws(()=>l.request({source:3,target:5,reason:'probe'}),/not issued/);
  assert.throws(()=>l.request({source:3,target:0,reason:'probe',delay:0}),/delay/);
  assert.throws(()=>l.request({source:5,target:0,reason:'unknown'}),/reason/);
  assert.equal(l.snapshot().requests.length,0);
  l.request({source:5,target:4,reason:'control'});advance(l,0);
- assert.throws(()=>l.read({source:5,target:4,purpose:'evaluation'}),/not revealed/);
+ assert.throws(()=>l.read({source:5,target:4,purpose:'evaluation',asOfAction:0}),/not revealed/);
  assert.throws(()=>advance(l,-1));advance(l,10);assert.throws(()=>advance(l,9),/backward/);
 });
+
+test('issued preview probes are legal while future replay issuance and current correction leakage are rejected',()=>{
+ const l=ledger();advance(l,60);l.request({source:3,target:64,reason:'probe'});advance(l,61);
+ assert.throws(()=>l.read({source:3,target:64,purpose:'evaluation',asOfAction:59}),/issued after/);
+ const p=l.read({source:3,target:64,purpose:'evaluation',asOfAction:60});
+ assert.equal(p.issuedAt,60);assert.equal(p.target,64);
+ assert.equal(Object.hasOwn(p,'coefficient'),false);assert.equal(Object.hasOwn(p,'trainedThrough'),false);
+ assert.throws(()=>l.read({source:3,target:64,purpose:'evaluation'}),/replayed action/);
+});
+
 test('independent scalar arithmetic separates control probe transition and local traffic',()=>{
  const l=ledger();
  l.request({source:5,target:0,reason:'control'});l.request({source:2,target:0,reason:'control'});advance(l,0);
@@ -64,7 +74,7 @@ test('paid cached probes remain unavailable to the fixed support control path',(
  const request=l.request({source:3,target:59,reason:'probe'});advance(l,61);
  assert.equal(l.request({source:3,target:59,reason:'probe'}).id,request.id);
  assert.equal(l.request({source:3,target:59,reason:'probe'}).cached,true);
- assert.equal(l.read({source:3,target:59,purpose:'evaluation'}).source,3);
+ assert.equal(l.read({source:3,target:59,purpose:'evaluation',asOfAction:59}).source,3);
  assert.throws(()=>l.read({source:3,target:59,purpose:'control'}),/Excluded/);
  assert.equal(l.snapshot().traffic.total.totalScalars,2);
  assert.deepEqual(l.config.support,[2,5,7]);assert.equal(l.activateSupport,undefined);
@@ -74,7 +84,7 @@ test('receipts copy and freeze forecasts and correction versions after sender mu
  const sent=payload({source:5,target:4,issuedAt:0});l.advance(0,()=>sent);
  sent.forecast=999;sent.coefficient=999;
  const p=l.read({source:5,target:4,purpose:'control'});
- assert.equal(p.forecast,.005004);assert.equal(p.coefficient,.75);
+ assert.ok(Math.abs(p.forecast-.005004)<1e-15);assert.equal(p.coefficient,.75);
  assert.throws(()=>{p.forecast=7;},TypeError);
  assert.throws(()=>{l.snapshot().deliveries.push({});},TypeError);
 });

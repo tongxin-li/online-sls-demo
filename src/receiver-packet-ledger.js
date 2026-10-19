@@ -39,7 +39,6 @@
     if(!(now===0&&target<preview)&&target!==now+preview-1)throw new RangeError('Historical context requires transition retrieval');
    }else{
     if(delay<1)throw new RangeError('Probe and transition require at least one sample delay');
-    if(reason==='probe'&&target>=now)throw new RangeError('Probe target is not revealed');
    }
    const arrivesAt=integer(now+delay,0,'arrival'),key=this.#key(source,target);
    if(this.#cache.has(key))return freeze({id:this.#cache.get(key).requestId,cached:true});
@@ -80,13 +79,21 @@
    }}finally{this.#busy=false;}
    return freeze(receipts);
   }
-  read({source,target,purpose}={}){
+  read({source,target,purpose,asOfAction}={}){
    this.#source(source);integer(target,0,'target');
    if(!['control','evaluation'].includes(purpose))throw new RangeError('Explicit read purpose required');
    if(purpose==='control'&&!this.#config.support.includes(source))throw new RangeError('Excluded control source');
    const packet=this.#cache.get(this.#key(source,target));
    if(!packet||packet.deliveredAt>this.#clock)throw new RangeError('Paid packet not available');
-   if(purpose==='evaluation'&&target>=this.#clock)throw new RangeError('Evaluation outcome is not revealed');
+   if(purpose==='evaluation'){
+    integer(asOfAction,0,'replayed action');
+    if(asOfAction>=this.#clock)throw new RangeError('Evaluation outcome is not revealed');
+    if(packet.issuedAt>asOfAction)throw new RangeError('Forecast was issued after replayed action');
+    // A legal preview may target an outcome after the replayed action.
+    // Current correction metadata is not a historical prequential parameter.
+    const {receiver,source,target,issuedAt,deliveredAt,requestId,reason,forecast}=packet;
+    return freeze({receiver,source,target,issuedAt,deliveredAt,requestId,reason,forecast});
+   }
    return packet;
   }
   snapshot(){

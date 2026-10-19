@@ -166,8 +166,587 @@
     "pages_run": 39235838715,
     "pages_conclusion": "success",
     "main_run": 39235839246,
-    "main_repeat": "in_progress with public release browser job failed before first trial",
-    "scheduled_algorithm_completion": false
+    "main_repeat": "Attempt 2 succeeded, with both failed jobs retried and all inherited required main jobs successful. Both original failures remain retained.",
+    "scheduled_algorithm_completion": false,
+    "canonical_public": {
+      "run": 39235839246,
+      "attempt": 2,
+      "job": 118017657443,
+      "conclusion": "success",
+      "completed_log_read": true,
+      "verification": {
+        "passed": true,
+        "mode": "canonical public",
+        "url": "https://tongxin.me/online-sls-demo/",
+        "revision": "658e2611278c1ea746c5009dd5adfa5d71663f03",
+        "verified": {
+          "index.html": {
+            "sha256": "69097822be929ce69de2d00427f5360b54859d27187f19ad91fb5c98522aabff",
+            "status": 200
+          },
+          "environment.html": {
+            "sha256": "9ba870badcc3f8150521c44d17430606536b43a10c11a1337cfb4c9a2172682d",
+            "status": 200
+          }
+        },
+        "results": [
+          {
+            "network": "toy8",
+            "mobile": false,
+            "actions": 206,
+            "before": {
+              "t": 41,
+              "gain": -2.6856516792460687,
+              "coefficient": 0.9660213685767003,
+              "action": 40,
+              "trainedThrough": 39
+            },
+            "corrupted": {
+              "t": 118,
+              "gain": 0.008254966140473571,
+              "coefficient": -0.0029692881434323754,
+              "action": 117,
+              "trainedThrough": 116
+            },
+            "repaired": {
+              "t": 194,
+              "gain": -2.7389992836583845,
+              "coefficient": 0.9852103521008561,
+              "action": 193,
+              "trainedThrough": 192
+            },
+            "costs": {
+              "online": 0.011777370576096674,
+              "scalar": 0.01569601433423547,
+              "static": 0.01813491570363401,
+              "causal": 0.01170982798500097
+            },
+            "exactReplay": true,
+            "passed": true
+          },
+          {
+            "network": "feeder24",
+            "mobile": false,
+            "actions": 210,
+            "before": {
+              "t": 41,
+              "gain": -1.8463265918067588,
+              "coefficient": 1.003108476309277,
+              "action": 40,
+              "trainedThrough": 39
+            },
+            "corrupted": {
+              "t": 118,
+              "gain": -0.019589662648401836,
+              "coefficient": 0.010643055642404893,
+              "action": 117,
+              "trainedThrough": 116
+            },
+            "repaired": {
+              "t": 193,
+              "gain": -1.8756605813062464,
+              "coefficient": 1.0190456207134577,
+              "action": 192,
+              "trainedThrough": 191
+            },
+            "costs": {
+              "online": 0.10252469879717925,
+              "scalar": 0.1364730650684869,
+              "static": 0.16367561114071597,
+              "causal": 0.10076138738175616
+            },
+            "exactReplay": true,
+            "passed": true
+          },
+          {
+            "network": "feeder47",
+            "mobile": false,
+            "actions": 244,
+            "before": {
+              "t": 43,
+              "gain": -1.8448945714124283,
+              "coefficient": 1.0023304602192877,
+              "action": 42,
+              "trainedThrough": 41
+            },
+            "corrupted": {
+              "t": 123,
+              "gain": -0.055292416012656026,
+              "coefficient": 0.030040346829234794,
+              "action": 122,
+              "trainedThrough": 121
+            },
+            "repaired": {
+              "t": 200,
+              "gain": -1.8125230022217416,
+              "coefficient": 0.9847430000209086,
+              "action": 199,
+              "trainedThrough": 198
+            },
+            "costs": {
+              "online": 0.2721087750375821,
+              "scalar": 0.351130646363755,
+              "static": 0.43890470284023436,
+              "causal": 0.269018361403777
+            },
+            "exactReplay": true,
+            "passed": true
+          },
+          {
+            "network": "toy8",
+            "mobile": true,
+            "actions": 209,
+            "before": {
+              "t": 41,
+              "gain": -2.6856516792460687,
+              "coefficient": 0.9660213685767003,
+              "action": 40,
+              "trainedThrough": 39
+            },
+            "corrupted": {
+              "t": 119,
+              "gain": 0.014442230638100333,
+              "coefficient": -0.005194829811375458,
+              "action": 118,
+              "trainedThrough": 117
+            },
+            "repaired": {
+              "t": 194,
+              "gain": -2.7389992836583845,
+              "coefficient": 0.9852103521008561,
+              "action": 193,
+              "trainedThrough": 192
+            },
+            "costs": {
+              "online": 0.01240756732624904,
+              "scalar": 0.016291304653873656,
+              "static": 0.01873270281793618,
+              "causal": 0.012326400743665806
+            },
+            "exactReplay": true,
+            "passed": true
+          },
+          {
+            "network": "feeder24",
+            "mobile": true,
+            "actions": 213,
+            "before": {
+              "t": 40,
+              "gain": -1.847169273421866,
+              "coefficient": 1.003566304883428,
+              "action": 39,
+              "trainedThrough": 38
+            },
+            "corrupted": {
+              "t": 116,
+              "gain": -0.014239844758472647,
+              "coefficient": 0.007736501787895579,
+              "action": 115,
+              "trainedThrough": 114
+            },
+            "repaired": {
+              "t": 194,
+              "gain": -1.8802391899636504,
+              "coefficient": 1.0215331769098133,
+              "action": 193,
+              "trainedThrough": 192
+            },
+            "costs": {
+              "online": 0.10503752804761698,
+              "scalar": 0.13978644770024948,
+              "static": 0.16683978214341486,
+              "causal": 0.1033198599813918
+            },
+            "exactReplay": true,
+            "passed": true
+          },
+          {
+            "network": "feeder47",
+            "mobile": true,
+            "actions": 249,
+            "before": {
+              "t": 40,
+              "gain": -1.8382672610783264,
+              "coefficient": 0.9987298452464165,
+              "action": 39,
+              "trainedThrough": 38
+            },
+            "corrupted": {
+              "t": 116,
+              "gain": -0.06537242911061146,
+              "coefficient": 0.035516813790571776,
+              "action": 115,
+              "trainedThrough": 114
+            },
+            "repaired": {
+              "t": 192,
+              "gain": -1.808978829408354,
+              "coefficient": 0.9828174523922332,
+              "action": 191,
+              "trainedThrough": 190
+            },
+            "costs": {
+              "online": 0.27707391009909305,
+              "scalar": 0.3574662474852183,
+              "static": 0.44730815498675014,
+              "causal": 0.27414131791542373
+            },
+            "exactReplay": true,
+            "passed": true
+          }
+        ],
+        "errors": []
+      }
+    }
   },
-  "pixel_review": "Long session PNGs retained in Actions artifact but not yet exposed by root only archive helper. No actual 6001 action pixel review is claimed. Candidate checkpoint updates nested PNG discovery and remains unverified until a later completed workflow."
+  "pixel_review": "Actual 6002 action restored PNGs inspected for all three network sizes on desktop and phone from successful candidate run 39236325451 through authenticated Git blob wrappers. Product UI and bytes are unchanged. No new support behavior is implied.",
+  "repeats": [
+    {
+      "source": "d75cf21b63628e7d5384c53488775df25888e0d1",
+      "workflow_run": 39236325451,
+      "job_id": 118006157742,
+      "conclusion": "success",
+      "completed_log_read": true,
+      "results": [
+        {
+          "networkId": "toy8",
+          "mobile": false,
+          "steps": 6001,
+          "generationMs": 7747,
+          "restoreMs": 7084,
+          "secondRestoreMs": 7128,
+          "savedBytes": 46275,
+          "historyBytes": 46196858,
+          "historyEntries": 6001,
+          "historyChunks": 94,
+          "costs": {
+            "online": 0.3833422152524623,
+            "scalar": 0.4966935323106422,
+            "static": 0.5570665302858188,
+            "causal": 0.40024717574509927
+          },
+          "sourceUpdates": 5971,
+          "exactFirstRestore": true,
+          "exactResumedStep": true,
+          "exactSecondRestore": true,
+          "passed": true
+        },
+        {
+          "networkId": "feeder24",
+          "mobile": false,
+          "steps": 6001,
+          "generationMs": 15242,
+          "restoreMs": 12641,
+          "secondRestoreMs": 13202,
+          "savedBytes": 46571,
+          "historyBytes": 125325618,
+          "historyEntries": 6001,
+          "historyChunks": 94,
+          "costs": {
+            "online": 2.754736842624508,
+            "scalar": 3.9342730458891486,
+            "static": 4.85759653982906,
+            "causal": 2.830457860286317
+          },
+          "sourceUpdates": 5971,
+          "exactFirstRestore": true,
+          "exactResumedStep": true,
+          "exactSecondRestore": true,
+          "passed": true
+        },
+        {
+          "networkId": "feeder47",
+          "mobile": false,
+          "steps": 6001,
+          "generationMs": 31927,
+          "restoreMs": 26452,
+          "secondRestoreMs": 28145,
+          "savedBytes": 46661,
+          "historyBytes": 257800434,
+          "historyEntries": 6001,
+          "historyChunks": 94,
+          "costs": {
+            "online": 5.6243666100080025,
+            "scalar": 7.982918791874502,
+            "static": 9.95382674474383,
+            "causal": 5.782219503795506
+          },
+          "sourceUpdates": 5971,
+          "exactFirstRestore": true,
+          "exactResumedStep": true,
+          "exactSecondRestore": true,
+          "passed": true
+        },
+        {
+          "networkId": "toy8",
+          "mobile": true,
+          "steps": 6001,
+          "generationMs": 7747,
+          "restoreMs": 6857,
+          "secondRestoreMs": 7081,
+          "savedBytes": 46275,
+          "historyBytes": 46196858,
+          "historyEntries": 6001,
+          "historyChunks": 94,
+          "costs": {
+            "online": 0.3833422152524623,
+            "scalar": 0.4966935323106422,
+            "static": 0.5570665302858188,
+            "causal": 0.40024717574509927
+          },
+          "sourceUpdates": 5971,
+          "exactFirstRestore": true,
+          "exactResumedStep": true,
+          "exactSecondRestore": true,
+          "passed": true
+        },
+        {
+          "networkId": "feeder24",
+          "mobile": true,
+          "steps": 6001,
+          "generationMs": 15242,
+          "restoreMs": 12694,
+          "secondRestoreMs": 13021,
+          "savedBytes": 46571,
+          "historyBytes": 125325618,
+          "historyEntries": 6001,
+          "historyChunks": 94,
+          "costs": {
+            "online": 2.754736842624508,
+            "scalar": 3.9342730458891486,
+            "static": 4.85759653982906,
+            "causal": 2.830457860286317
+          },
+          "sourceUpdates": 5971,
+          "exactFirstRestore": true,
+          "exactResumedStep": true,
+          "exactSecondRestore": true,
+          "passed": true
+        },
+        {
+          "networkId": "feeder47",
+          "mobile": true,
+          "steps": 6001,
+          "generationMs": 31927,
+          "restoreMs": 26643,
+          "secondRestoreMs": 27035,
+          "savedBytes": 46661,
+          "historyBytes": 257800434,
+          "historyEntries": 6001,
+          "historyChunks": 94,
+          "costs": {
+            "online": 5.6243666100080025,
+            "scalar": 7.982918791874502,
+            "static": 9.95382674474383,
+            "causal": 5.782219503795506
+          },
+          "sourceUpdates": 5971,
+          "exactFirstRestore": true,
+          "exactResumedStep": true,
+          "exactSecondRestore": true,
+          "passed": true
+        }
+      ],
+      "pixel_review": {
+        "status": "Actual all six PNGs inspected",
+        "review_job": 118009227549,
+        "images": [
+          {
+            "file": "long-session/feeder24-desktop-long-restored.png",
+            "sha": "205ed5cecf845cd596755b8667483879fbcb99f4",
+            "base64_text_sha": "8ac3bf084d5b75b25c4c3789b8f48bb281a24077",
+            "bytes": 349363
+          },
+          {
+            "file": "long-session/feeder24-phone-long-restored.png",
+            "sha": "89a69a4626e6a47ff823254e0f91149daf0181c8",
+            "base64_text_sha": "70034c000a040a1187f636bffa42444272987796",
+            "bytes": 307451
+          },
+          {
+            "file": "long-session/feeder47-desktop-long-restored.png",
+            "sha": "ca28d3599fa3cb80715414840cdfcc1424b574fe",
+            "base64_text_sha": "f6337b18c5e39f699f40da28443ff6bd57fed7dd",
+            "bytes": 432627
+          },
+          {
+            "file": "long-session/feeder47-phone-long-restored.png",
+            "sha": "ecd93a684d94d77d380bad9ca60442626756d759",
+            "base64_text_sha": "d96c8b1a0f3ee7c79e32f158006e108836f2a151",
+            "bytes": 281155
+          },
+          {
+            "file": "long-session/toy8-desktop-long-restored.png",
+            "sha": "f44ae3ba22316d386c267b2a56f26d861965d046",
+            "base64_text_sha": "1bfe1f21ccd36b1c8c0605573663efce24f4a862",
+            "bytes": 285458
+          },
+          {
+            "file": "long-session/toy8-phone-long-restored.png",
+            "sha": "1444f5208046aca370435911908162a7a7ea1113",
+            "base64_text_sha": "67b9b3b4df957e556f7bbeb07212acc025e25a88",
+            "bytes": 244385
+          }
+        ]
+      }
+    },
+    {
+      "source": "658e2611278c1ea746c5009dd5adfa5d71663f03",
+      "workflow_run": 39235839246,
+      "attempt": 1,
+      "job_id": 118004571136,
+      "conclusion": "failure",
+      "completed_log_read": true,
+      "details": "First toy8 restored state reached action 6001 with exact history. The run then timed out locating #pr-step and did not complete any resumed condition. Cause unconfirmed. No assertion change made."
+    },
+    {
+      "source": "658e2611278c1ea746c5009dd5adfa5d71663f03",
+      "workflow_run": 39235839246,
+      "attempt": 2,
+      "job_id": 118017657280,
+      "conclusion": "success",
+      "completed_log_read": true,
+      "results": [
+        {
+          "networkId": "toy8",
+          "mobile": false,
+          "steps": 6001,
+          "generationMs": 6254,
+          "restoreMs": 5405,
+          "secondRestoreMs": 5530,
+          "savedBytes": 46275,
+          "historyBytes": 46196858,
+          "historyEntries": 6001,
+          "historyChunks": 94,
+          "costs": {
+            "online": 0.3833422152524623,
+            "scalar": 0.4966935323106422,
+            "static": 0.5570665302858188,
+            "causal": 0.40024717574509927
+          },
+          "sourceUpdates": 5971,
+          "exactFirstRestore": true,
+          "exactResumedStep": true,
+          "exactSecondRestore": true,
+          "passed": true
+        },
+        {
+          "networkId": "feeder24",
+          "mobile": false,
+          "steps": 6001,
+          "generationMs": 12214,
+          "restoreMs": 10053,
+          "secondRestoreMs": 10223,
+          "savedBytes": 46571,
+          "historyBytes": 125325618,
+          "historyEntries": 6001,
+          "historyChunks": 94,
+          "costs": {
+            "online": 2.754736842624508,
+            "scalar": 3.9342730458891486,
+            "static": 4.85759653982906,
+            "causal": 2.830457860286317
+          },
+          "sourceUpdates": 5971,
+          "exactFirstRestore": true,
+          "exactResumedStep": true,
+          "exactSecondRestore": true,
+          "passed": true
+        },
+        {
+          "networkId": "feeder47",
+          "mobile": false,
+          "steps": 6001,
+          "generationMs": 25773,
+          "restoreMs": 20978,
+          "secondRestoreMs": 22336,
+          "savedBytes": 46661,
+          "historyBytes": 257800434,
+          "historyEntries": 6001,
+          "historyChunks": 94,
+          "costs": {
+            "online": 5.6243666100080025,
+            "scalar": 7.982918791874502,
+            "static": 9.95382674474383,
+            "causal": 5.782219503795506
+          },
+          "sourceUpdates": 5971,
+          "exactFirstRestore": true,
+          "exactResumedStep": true,
+          "exactSecondRestore": true,
+          "passed": true
+        },
+        {
+          "networkId": "toy8",
+          "mobile": true,
+          "steps": 6001,
+          "generationMs": 6254,
+          "restoreMs": 5422,
+          "secondRestoreMs": 5607,
+          "savedBytes": 46275,
+          "historyBytes": 46196858,
+          "historyEntries": 6001,
+          "historyChunks": 94,
+          "costs": {
+            "online": 0.3833422152524623,
+            "scalar": 0.4966935323106422,
+            "static": 0.5570665302858188,
+            "causal": 0.40024717574509927
+          },
+          "sourceUpdates": 5971,
+          "exactFirstRestore": true,
+          "exactResumedStep": true,
+          "exactSecondRestore": true,
+          "passed": true
+        },
+        {
+          "networkId": "feeder24",
+          "mobile": true,
+          "steps": 6001,
+          "generationMs": 12214,
+          "restoreMs": 10135,
+          "secondRestoreMs": 10232,
+          "savedBytes": 46571,
+          "historyBytes": 125325618,
+          "historyEntries": 6001,
+          "historyChunks": 94,
+          "costs": {
+            "online": 2.754736842624508,
+            "scalar": 3.9342730458891486,
+            "static": 4.85759653982906,
+            "causal": 2.830457860286317
+          },
+          "sourceUpdates": 5971,
+          "exactFirstRestore": true,
+          "exactResumedStep": true,
+          "exactSecondRestore": true,
+          "passed": true
+        },
+        {
+          "networkId": "feeder47",
+          "mobile": true,
+          "steps": 6001,
+          "generationMs": 25773,
+          "restoreMs": 20992,
+          "secondRestoreMs": 21627,
+          "savedBytes": 46661,
+          "historyBytes": 257800434,
+          "historyEntries": 6001,
+          "historyChunks": 94,
+          "costs": {
+            "online": 5.6243666100080025,
+            "scalar": 7.982918791874502,
+            "static": 9.95382674474383,
+            "causal": 5.782219503795506
+          },
+          "sourceUpdates": 5971,
+          "exactFirstRestore": true,
+          "exactResumedStep": true,
+          "exactSecondRestore": true,
+          "passed": true
+        }
+      ],
+      "interpretation": "Recovered without source or test assertion changes. The earlier failure remains separate; retry does not identify or fix its cause."
+    }
+  ]
 }

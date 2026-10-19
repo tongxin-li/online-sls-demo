@@ -5,7 +5,7 @@
   "clock": "Nondecreasing logical actions. At t only targets below t are revealed. Immutable forecast issue time is max(0,target-preview+1).",
   "support": "Constructor retains mandatory local permission and exactly the network remote budget. No support activation method exists in this foundation.",
   "control_requests": "Only the newly issued target t+preview-1, or all startup targets at action zero, may use zero delay control delivery. Old missing context requires paid transition retrieval.",
-  "probe_requests": "Only already revealed targets. Probe and transition delays are at least one logical sample. Arrival is requestedAt+delay and must not overflow.",
+  "probe_requests": "Any already issued forecast target may be explicitly requested, including a legal future preview target. Probe and transition delays are at least one logical sample. Arrival is requestedAt+delay and must not overflow.",
   "payload": "One immutable source forecast and one correction scalar per packet. Every arrived schema payload charges both scalar slots, even when rejected. Transport exceptions record failure and no delivered payload. Requests and deliveries are distinct.",
   "cache": "An already paid accepted source and target can be reused for retrospective evaluation without another charge. Excluded sources remain forbidden for control. No full simulator forecast array, forcing truth, quality label or packet reconstruction is exposed.",
   "metadata": "Correction availableAt cannot exceed delivery action. trainedThrough is null or a target strictly before delivery action and revealed no later than availableAt.",
@@ -14,7 +14,7 @@
     "Only explicitly requested source getters are accessed and excluded control access fails before the reader is called.",
     "Requests do not count as delivered payload. Probe cannot arrive or be read before one sample.",
     "Historical retrieval cannot masquerade as ordinary zero latency control.",
-    "Future issue and unrevealed probe targets fail before any source access.",
+    "Future issue times and unrevealed replay actions fail before evaluation. Legal issued previews remain usable, and current correction metadata is withheld from historical replay reads.",
     "Exact independent scalar arithmetic separates local, remote, control, probe and transition including rejected packets.",
     "Cached paid probe remains evaluation only while support is fixed.",
     "Forecast and correction receipts are copied and immutable after sender changes.",
@@ -30,5 +30,7 @@
     "Selector with all losses and no future or unrequested packet access",
     "Feasible synthesis and atomic paid transition with exact replay",
     "All protocol numerical and native browser acceptance before default changes"
-  ]
+  ],
+  "evaluation_reads": "Specify the replayed action tau. Its outcome must already be revealed at the current ledger action, and the original forecast issue time cannot exceed tau. Return raw forecast and admission identity only. Current correction metadata is withheld because it is not a historical prequential fit.",
+  "prevalidation_revision": "Before reading foundation test outcomes, source review found the first draft overrestricted probes to revealed forecast targets. Forecasts legitimately preview future targets. Replace that target restriction with immutable issuance at or before replayed action, and require the replayed physical action outcome to be revealed. Existing no future forcing or click leakage protections are unchanged."
 }
