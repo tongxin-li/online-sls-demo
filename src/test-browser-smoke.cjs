@@ -1,4 +1,4 @@
-// Archived lifecycle coverage uses explicit production v13 records. Fresh ongoing coverage is in test-continuous-browser.cjs.
+// Archived lifecycle coverage uses explicit production v13 records. Fresh adaptive coverage is in test-adaptive-browser.cjs.
 'use strict';
 
 // Cloud browser validation only. Playwright is installed outside the repository.
@@ -83,16 +83,17 @@ async function main() {
     const stepSetting=surface=>withinSettings(surface,()=>surface.locator('#pr-step').click());
     const useReference=async surface=>{
       // Historical controller checks load an actual v13 record after a new
-      // trial action has legitimately migrated the visible interface to v14.
+      // trial action has legitimately migrated to either ongoing protocol.
       const current=await surface.evaluate(()=>{const d=document.querySelector('#power-response-demo').powerDemo,s=d.getSnapshot();return {protocol:s.protocol,networkId:s.networkId,playing:d.getState().playing,speed:document.querySelector('#pr-speed').value};});
-      if(current.protocol==='continuous-phi-v1'){
+      if(['continuous-phi-v1','adaptive-phi-v2'].includes(current.protocol)){
         if(current.playing)await surface.locator('#pr-run').click();
         await surface.evaluate(({networkId,speed})=>sessionStorage.setItem('online-sls-demo-test-restore',JSON.stringify({privateContent:{
           version:13,networkId,phase:'discovery',t:0,events:[],selectedBus:7,speed,view:'learning',matrixView:'links',intervention:'forecast',automaticComparison:true,
           initialOptions:{networkId,experiment:'communication',powerScenario:'reference',beta:1,preset:'mixed',seed:20261013,horizon:180}
         }})),current);
         await surface.reload({waitUntil:'networkidle'});
-        assert.notEqual(await surface.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().protocol),'continuous-phi-v1','Historical checks explicitly restore their archived production protocol');
+        assert.equal(await surface.evaluate(()=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().protocol),undefined,'Historical checks explicitly restore the actual v13 finite protocol');
+        assert.equal(await surface.evaluate(()=>window.openai.widgetState.privateContent.version),13);
       }
       await selectSetting(surface,'power-scenario','reference');
       await selectSetting(surface,'noise','1');
@@ -1207,7 +1208,7 @@ async function main() {
     const restarted=await page.evaluate(()=>{
       const root=document.querySelector('#power-response-demo');return {snapshot:root.powerDemo.getSnapshot(),state:root.powerDemo.getState()};
     });
-    assert.equal(restarted.snapshot.phase,'ongoing');assert.equal(restarted.snapshot.protocol,'continuous-phi-v1');assert.equal(restarted.snapshot.t,0);
+    assert.equal(restarted.snapshot.phase,'ongoing');assert.equal(restarted.snapshot.protocol,'adaptive-phi-v2');assert.equal(restarted.snapshot.t,0);
     assert.equal(restarted.snapshot.powerScenario,'forecasted-demand');assert.equal(restarted.snapshot.beta,4);
     assert.equal(restarted.snapshot.deployedSupport.links.filter(e=>e.from!==e.to).length,24);assert.equal(restarted.snapshot.discoveryRecord,null);
     assert.ok(Object.values(restarted.snapshot.cumulative).every(value=>value===0));
@@ -1216,7 +1217,7 @@ async function main() {
     assert.equal(await page.locator('#pr-speed').inputValue(),'32');
     assert.equal(await page.locator('#pr-adaptation').getAttribute('open'),null);
     assert.equal(await page.locator('#pr-run').textContent(),'Run');
-    assert.match(await page.locator('#pr-transition-note').textContent(),/No reset or stop/);
+    assert.match(await page.locator('#pr-transition-note').textContent(),/One clock and all costs retained/);
     assert.equal(await page.locator('#pr-progress-comparison').getAttribute('data-status'),'active');
     await page.screenshot({path:path.join(output,'concise-restarted-desktop.png'),fullPage:true});
     await useReference(page);

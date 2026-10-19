@@ -2,7 +2,7 @@
 
 [Open the experiment](https://tongxin.me/online-sls-demo/) · [Experimental environment](environment.html)
 
-The experiment uses a forecasted demand and solar cycle on the LinDistFlow feeder. The ongoing protocol tests continuous full predictive response and incoming communication support adaptation. All four controllers share the plant, realized physical power, immutable raw forecasts, feedback, objective and actuator limits. Adaptive sparse receives only its admitted forecasts and correction metadata. Archived numerical evidence retains its original finite protocol. Exact validation and publication status is recorded in [cloud progress](refinement/cloud-state.json).
+The experiment uses a forecasted demand and solar cycle on the LinDistFlow feeder. The ongoing protocol tests continuous full predictive response and incoming communication support adaptation. All four controllers share the plant, realized physical power, immutable raw forecasts, feedback, objective and actuator limits. Adaptive actuators use admitted forecasts and issued response parameters. Central learning data is counted separately. Archived numerical evidence retains its original finite protocol. Exact validation and publication status is recorded in [cloud progress](refinement/cloud-state.json).
 
 Unless another size is named, numerical values and archived studies below describe the original 24 bus reference. The Network menu selects 8, 24 or 47 buses.
 
@@ -20,7 +20,7 @@ Saved version 15 trials replay this algorithm exactly. Saved version 14 source c
 
 Live playback keeps the simulation clock separate from drawing. Every due action still computes control, learns from revealed observations and records its full cost. Drawing uses the latest complete snapshot at up to 16 frames per second, with immediate updates for Pause, Step and other direct controls. Short rendering delays are recovered in bounded sample batches. A suspended tab does not replay missed wall time. Executed response gains remain visible beside source controls. Detailed source measurements and command tables are available under Source details, collapsed by default for ongoing trials; opening them does not change the experiment.
 
-The interface starts fresh unsaved sessions directly in `continuous-phi-v1`. One physical clock and every accumulated stage cost continue through 180 and 360 samples. Source local calibration uses immutable issued forecasts and revealed forcing with the existing ridge, a 30 pair warmup and a 60 pair window. Actual received correction weights change the predictive response used for later commands. The shared feedback and actuator limits remain unchanged.
+Version 14 trials used `continuous-phi-v1` and retain that protocol on replay. One physical clock and every accumulated stage cost continue through 180 and 360 samples. Source local calibration uses immutable issued forecasts and revealed forcing with the existing ridge, a 30 pair warmup and a 60 pair window. Actual received correction weights change the predictive response used for later commands. The shared feedback and actuator limits remain unchanged.
 
 The initial selected inverter inspects its mandatory local source. Response weights is the initial matrix view and the inspector plots the actual executed signed gain. This deterministic initial choice keeps the main source action and the visible weight trace on the same bus. Every source and remote support entry remains inspectable. View changes do not affect control. Adaptive sparse sends an extra correction scalar with each admitted forecast. The existing comparison reports that payload separately from remote link permission.
 
@@ -209,7 +209,7 @@ Its compact overview contrasts reliable forecasts, mixed source reliability and 
 
 ## Implementation scope
 
-This section describes the archived protocol. The ongoing source local diagonal correction and stationary response are described above and in the implementation map. The shared archived correction follows the explicit experimental mean moment equations, with a declared physical scale transfer and sparse restriction. It is not a literal implementation of Algorithm 1. No completed prefix convergence theorem is claimed for the executed adaptive controller.
+This section describes the archived protocol. The archived version 14 source correction and the fresh continuous full response protocol are distinguished above. The shared archived correction follows the explicit experimental mean moment equations, with a declared physical scale transfer and sparse restriction. It is not a literal implementation of Algorithm 1. No completed prefix convergence theorem is claimed for the executed adaptive controller.
 
 A fixed common correction multiplying both predictive state and input maps preserves their homogeneous recursion and temporal support. Changing the correction between actions produces adaptive feedforward with common stabilizing feedback. The resulting trajectory is not one fixed lifted response. The separate completed response gradient diagnostic remains in source and tests but does not drive the displayed experiment.
 

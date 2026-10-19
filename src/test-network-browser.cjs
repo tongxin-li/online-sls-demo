@@ -1,4 +1,4 @@
-// Archived lifecycle coverage uses explicit production v13 records. Fresh ongoing coverage is in test-continuous-browser.cjs.
+// Archived lifecycle coverage uses explicit production v13 records. Fresh adaptive coverage is in test-adaptive-browser.cjs.
 'use strict';
 
 // Network switching is tested through visible controls and real playback.
@@ -238,7 +238,7 @@ async function main() {
     assert.equal(snapshot.initialOptions.networkId, id);
     assert.equal(snapshot.states.online.length, networks[id].buses);
     assert.equal(snapshot.t, 0, 'Switch begins a fresh trial');
-    assert.equal(snapshot.phase, 'ongoing');assert.equal(snapshot.protocol,'continuous-phi-v1');
+    assert.equal(snapshot.phase, 'ongoing');assert.equal(snapshot.protocol,'adaptive-phi-v2');
     assert.equal(state.playing, false, 'Changing a model pauses playback');
     assert.deepEqual(state.activeAttackBuses, [], 'Attacks do not cross different plants');
     assert.ok(state.selectedBus >= 1 && state.selectedBus <= networks[id].buses);
@@ -254,7 +254,8 @@ async function main() {
     }})),id);
     await surface.reload({waitUntil:'networkidle'});
     assert.equal((await read(surface)).snapshot.phase,'discovery');
-    assert.notEqual((await read(surface)).snapshot.protocol,'continuous-phi-v1');
+    assert.equal((await read(surface)).snapshot.protocol,undefined,'Actual v13 records use the archived finite protocol');
+    assert.equal(await surface.evaluate(()=>window.openai.widgetState.privateContent.version),13);
     await setting(surface, 'power-scenario', 'solar-outage');
     assert.match(await surface.locator('#pr-scenario-status').textContent(), new RegExp('\\b' + networks[id].solar + ' sites\\b'), 'Solar scenario uses the active network site count');
     assert.equal((await read(surface)).snapshot.networkId, id, 'Scenario changes retain the selected physical model');
