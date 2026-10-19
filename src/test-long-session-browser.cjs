@@ -20,6 +20,10 @@ async function main(){
   for(const mobile of [false,true])for(const networkId of plan.networks){
    const context=await browser.newContext({viewport:mobile?{width:390,height:844}:{width:1440,height:1000},isMobile:mobile,hasTouch:mobile,deviceScaleFactor:1});
    await context.addInitScript(()=>{
+    // The old document saves on visibilitychange while reloading. Seed the
+    // fixture in the new document before the production storage adapter reads.
+    const pending=sessionStorage.getItem('online-sls-demo-long-restore');
+    if(pending){localStorage.setItem('online-sls-demo-v1',pending);sessionStorage.removeItem('online-sls-demo-long-restore');}
     window.__longSessionFingerprint=async s=>{
      const hash=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(value))))).map(v=>v.toString(16).padStart(2,'0')).join('');
      const keys=['networkId','protocol','t','phase','mode','initialOptions','states','cumulative','commandQ','lastExecution','sampleCount','learning','deployedSupport','traffic','faults','pendingPulses','eventLog','lastSample','sourceReports','predictionDiagnostics'];
@@ -56,7 +60,9 @@ async function main(){
     await fs.writeFile(path.join(output,networkId+'-fixture.json'),JSON.stringify(fixture,null,2));
    }
    const fixture=fixtures.get(networkId),savedBytes=Buffer.byteLength(JSON.stringify(fixture.saved));
-   await page.evaluate(saved=>localStorage.setItem('online-sls-demo-v1',JSON.stringify(saved)),fixture.saved);
+   assert.equal(fixture.before.entries,plan.steps,'Generated fixture retains every physical action');
+   assert.equal(fixture.saved.privateContent.continuousRecord.steps,plan.steps);
+   await page.evaluate(saved=>sessionStorage.setItem('online-sls-demo-long-restore',JSON.stringify(saved)),fixture.saved);
    const restoreStarted=Date.now();await page.reload({waitUntil:'networkidle',timeout:120000});
    const restored=await page.evaluate(async()=>{
     const d=document.querySelector('#power-response-demo').powerDemo,s=d.getSnapshot(),reading=d.getResponseHistory();
@@ -69,9 +75,10 @@ async function main(){
     return {fingerprint:await window.__longSessionFingerprint(s),t:s.t,phase:s.phase,mode:s.mode,protocol:s.protocol,
      playing:d.getState().playing,rendered:d.getRenderedSnapshot().t,historyValid:valid,sums,costs:s.cumulative,
      bounded:Object.values(s.commandQ).every(row=>row.every(v=>Math.abs(v)<=70+1e-8)),
-     gainPoints:reading.points.length,lastGainAction:reading.points.at(-1).x,updates:s.learning.sourceUpdates};
+     gainPoints:reading?.points?.length??null,lastGainAction:reading?.points?.at(-1)?.x??null,updates:s.learning.sourceUpdates};
    });
    const restoreMs=Date.now()-restoreStarted;
+   console.log('LONG_RESTORE_STATE '+JSON.stringify({networkId,mobile,t:restored.t,history:restored.fingerprint.entries,gainPoints:restored.gainPoints,expected:plan.steps}));
    assert.deepEqual(restored.fingerprint,fixture.before,'Complete physical state and every ordered history entry restore exactly '+networkId);
    assert.equal(restored.t,plan.steps);assert.equal(restored.phase,'ongoing');assert.equal(restored.protocol,plan.protocol);
    assert.equal(restored.playing,false);assert.equal(restored.mode,'running');assert.equal(restored.rendered,restored.t);

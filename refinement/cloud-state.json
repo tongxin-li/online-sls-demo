@@ -8419,7 +8419,19 @@
             "surfaces": 2,
             "original_cases": 257,
             "history_comparison": "Every ordered entry in fixed size hash chunks plus full physical state and first resumed action."
-          }
+          },
+          "candidate_attempts": [
+            {
+              "source": "87d1061aafc9c774deead405217d6b6c7f21867d",
+              "run": 39233260952,
+              "long_session_job": 117996540573,
+              "long_session_conclusion": "failure",
+              "completed_long_log_read": true,
+              "error": "Read of an empty restored gain history failed before first condition completed.",
+              "scope": "New fixture test did not complete. No product failure or long restoration acceptance is claimed.",
+              "correction": "Use the established one time session storage preloading path before the new document storage adapter. The previous document has a visibilitychange handler that saves its actual state during reload. Keep that product protection unchanged."
+            }
+          ]
         },
         "next_focus": "Public causal support learning protocol and full very long saved session restoration evidence.",
         "implementation_plan": "refinement/ongoing-support-plan.md",
