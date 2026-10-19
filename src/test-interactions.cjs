@@ -162,7 +162,7 @@ function harness(saved,experiment='prediction',reducedMotion=true,fresh=false,qu
       return result;
     },
     inspectLink:(receiver,source)=>root.testInspectPredictionLink(receiver,source),inspection:()=>plain(root.testInspection()),protocol:()=>plain(root.testProtocol()),forecastSettings:()=>plain(root.testForecastSettings()),forecastObservation:()=>plain(root.testForecastObservation()),sourceHistory:()=>plain(root.testSourceHistory()),errorWindow:(...args)=>plain(root.testErrorWindow(...args)),commandInspection:()=>plain(root.testInspectedCommand()),decompose:(...args)=>plain(root.testDecompose(...args)),issuedForecasts:()=>plain(root.testIssuedForecasts()),
-    responseHistory:()=>plain(root.powerDemo.getResponseHistory()),linkEvidence:()=>plain(root.powerDemo.getLinkEvidence()),snapshot:()=>root.powerDemo.getSnapshot(),state:()=>plain(root.powerDemo.getState()),
+    responseHistory:()=>plain(root.powerDemo.getResponseHistory()),linkEvidence:()=>plain(root.powerDemo.getLinkEvidence()),snapshot:()=>root.powerDemo.getSnapshot(),renderedSnapshot:()=>root.powerDemo.getRenderedSnapshot(),state:()=>plain(root.powerDemo.getState()),
     saved:()=>savedStates.at(-1),
     event:(id,type,detail)=>node(id).dispatch(type,detail),
     click:(id,detail=0)=>node(id).dispatch('click',{detail}),
@@ -268,8 +268,10 @@ test('Pause and Step flush a pending playback drawing without extra samples',asy
   const h=harness(undefined,'prediction',true,false,true);
   h.click('run');assert.equal(h.snapshot().t,1);assert.equal(h.node('clock').textContent,'1 s');
   await h.samples(1);assert.equal(h.snapshot().t,2);
+  assert.equal(h.renderedSnapshot().t,1,'Physical and completed drawing clocks remain explicit');
   assert.equal(h.node('clock').textContent,'1 s','The queued drawing has not run yet');
   h.click('run');assert.equal(h.state().playing,false);assert.equal(h.node('clock').textContent,'2 s');
+  assert.equal(h.renderedSnapshot().t,2,'Pause completes the latest drawing');
   assert.equal(h.saved().privateContent.t,2);assert.equal(h.clock.tasks.size,0);
   h.click('step');assert.equal(h.snapshot().t,3);assert.equal(h.node('clock').textContent,'3 s');
   await h.samples(2);assert.equal(h.snapshot().t,3,'Cancelled drawing never advances the plant');

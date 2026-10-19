@@ -12,6 +12,19 @@ const { chromium } = require('playwright');
 async function archivedPage(owner,options){
  const page=await owner.newPage(options);
  await page.addInitScript(()=>{
+  // Inspect DOM and evidence synchronously at one completed drawing boundary.
+  // This never draws, pauses or advances the plant. A missing drawing fails.
+  window.__captureRenderedFrame=read=>new Promise((resolve,reject)=>{
+   const root=document.querySelector('#power-response-demo');
+   if(!root.powerDemo.getState().playing){resolve(read(root.powerDemo.getSnapshot()));return;}
+   let timeout;
+   const capture=()=>{
+    clearTimeout(timeout);root.removeEventListener('powerdemo:render',capture);
+    try {resolve(read(root.powerDemo.getRenderedSnapshot()));}catch(error){reject(error);}
+   };
+   timeout=setTimeout(()=>{root.removeEventListener('powerdemo:render',capture);reject(new Error('No completed demo drawing within two seconds'));},2000);
+   root.addEventListener('powerdemo:render',capture,{once:true});
+  });
   const pending=sessionStorage.getItem('online-sls-demo-test-restore');
   if(pending){localStorage.setItem('online-sls-demo-v1',pending);sessionStorage.removeItem('online-sls-demo-test-restore');}
   // Explicit archived v13 production record, preserving superseded lifecycle tests.
@@ -143,8 +156,8 @@ async function main() {
 
     const checkVoltageMetrics = async surface => {
       await checkStageCaptions(surface);
-      const result=await surface.evaluate(()=>{
-        const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot();
+      const result=await surface.evaluate(()=>window.__captureRenderedFrame(snapshot=>{
+        const root=document.querySelector('#power-response-demo');
         const rows=Array.from(document.querySelectorAll('#pr-voltage-metrics tr')).map(row=>({
           key:row.dataset.controller,current:Number(row.dataset.currentPu),peak:Number(row.dataset.peakPu),
           limited:Number(row.dataset.limited),shownCurrent:row.querySelector('.current-deviation').textContent,
@@ -158,7 +171,7 @@ async function main() {
           return [key,{current,peak,limited:snapshot.saturation[key].filter(Boolean).length}];
         }));
         return {rows,expected,detail:document.querySelector('#pr-voltage-detail').textContent};
-      });
+      }));
       assert.deepEqual(result.rows.map(row=>row.key),['online','scalar','static','causal'],'All four controller diagnostics remain present');
       for(const row of result.rows) {
         const expected=result.expected[row.key];
@@ -172,8 +185,8 @@ async function main() {
       assert.match(result.detail,/Δ .* mpu/);
     };
     const checkNetworkInspection = async surface => {
-      const reading=await surface.evaluate(()=>{
-        const root=document.querySelector('#power-response-demo'),state=root.powerDemo.getState(),snapshot=root.powerDemo.getSnapshot();
+      const reading=await surface.evaluate(()=>window.__captureRenderedFrame(snapshot=>{
+        const root=document.querySelector('#power-response-demo'),state=root.powerDemo.getState();
         const caption=document.querySelector('#pr-network-inspection'),network=document.querySelector('#pr-network');
         const box=caption.getBoundingClientRect(),svg=network.getBoundingClientRect();
         const glyphs=Array.from(caption.querySelectorAll('span')).filter(span=>!span.hidden).map(span=>{
@@ -191,7 +204,7 @@ async function main() {
           backdrops:network.querySelectorAll('.pr-inspection-number-bg').length,box:{left:box.left,right:box.right,top:box.top,bottom:box.bottom},svg:{left:svg.left,right:svg.right,top:svg.top,bottom:svg.bottom},
           inspectedColumnFont:parseFloat(getComputedStyle(document.querySelector('#pr-matrix .matrix-columns text[data-inspected="true"]')||caption).fontSize),
           selectedRowFont:parseFloat(getComputedStyle(document.querySelector('#pr-matrix .matrix-rows g[aria-pressed="true"] text')||caption).fontSize)};
-      });
+      }));
       const {state}=reading,active=state.inspectedSource!==null&&[5,7,8,12,14,18,21,24].includes(state.selectedBus);
       assert.equal(reading.hidden,!active,'Role caption is contextual, not another always visible diagnostic');
       if(!active){assert.equal(reading.source,'');assert.equal(reading.roles.length,0);assert.equal(reading.backdrops,0,'Inspection-only number backdrops clear immediately');return;}
@@ -300,8 +313,8 @@ async function main() {
     };
     const checkForecastObservation = async surface => {
       await checkNetworkInspection(surface);
-      const reading=await surface.evaluate(()=>{
-        const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),state=root.powerDemo.getState();
+      const reading=await surface.evaluate(()=>window.__captureRenderedFrame(snapshot=>{
+        const root=document.querySelector('#power-response-demo'),state=root.powerDemo.getState();
         const panel=document.querySelector('#pr-forecast-observation'),values=document.querySelector('#pr-forecast-values');
         const active=state.inspectedSource!==null&&[5,7,8,12,14,18,21,24].includes(state.selectedBus);
         const sample=snapshot.lastSample,index=state.inspectedSource-1;
@@ -318,7 +331,7 @@ async function main() {
             return {tag:node.tagName,id:node.id,font:parseFloat(getComputedStyle(node).fontSize),weight:getComputedStyle(node).fontWeight,
               bounds:node.getBoundingClientRect().toJSON(),glyphs:Array.from(range.getClientRects()).map(box=>box.toJSON())};
           })};
-      });
+      }));
       assert.equal(reading.hidden,!reading.active);
       assert.equal(reading.valuesHidden,!reading.expected);
       assert.equal(reading.data.available,String(!!reading.expected));
@@ -338,11 +351,11 @@ async function main() {
       }else assert.equal(reading.data.forecast,'','Unavailable observations clear stale numeric metadata');
     };
     const checkForecastSettings = async surface => {
-      const reading=await surface.evaluate(()=>{
-        const snapshot=document.querySelector('#power-response-demo').powerDemo.getSnapshot(),node=document.querySelector('#pr-scenario-description');
+      const reading=await surface.evaluate(()=>window.__captureRenderedFrame(snapshot=>{
+        const node=document.querySelector('#pr-scenario-description');
         return {experiment:snapshot.experiment,beta:snapshot.beta,faults:snapshot.faults,sources:snapshot.predictionDiagnostics?.sourceBuses || Array.from({length:23},(_,i)=>i+2),
           data:{...node.dataset},text:node.textContent,title:node.title,description:node.getAttribute('aria-description'),font:parseFloat(getComputedStyle(node).fontSize),box:node.getBoundingClientRect().toJSON()};
-      });
+      }));
       assert.equal(reading.data.forecastSettings,String(reading.experiment==='communication'));
       if(reading.experiment!=='communication')return;
       const noisy=reading.sources.filter(bus=>reading.faults.includes(bus)).length;
@@ -506,11 +519,11 @@ async function main() {
     };
     const checkSourceHistory = async surface => {
       await checkForecastSettings(surface);
-      const reading=await surface.evaluate(()=>{
-        const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),state=root.powerDemo.getState();
+      const reading=await surface.evaluate(()=>window.__captureRenderedFrame(snapshot=>{
+        const root=document.querySelector('#power-response-demo'),state=root.powerDemo.getState();
         const window=document.querySelector('#pr-forecast-window'),change=document.querySelector('#pr-forecast-change');
         return {snapshot:{t:snapshot.t,eventLog:snapshot.eventLog,lastSample:snapshot.lastSample?{forecast:snapshot.lastSample.forecast,disturbance:snapshot.lastSample.disturbance}:null},state,window:{...window.dataset},change:{...change.dataset},text:window.textContent,timing:change.textContent};
-      });
+      }));
       const {snapshot,state,window,change}=reading;
       const active=state.inspectedSource!==null&&[5,7,8,12,14,18,21,24].includes(state.selectedBus)&&state.historyIndex===null;
       assert.equal(window.available,String(!!active&&snapshot.t>0));
@@ -532,12 +545,12 @@ async function main() {
       return reading;
     };
     const checkCommandInspection = async surface => {
-      const result=await surface.evaluate(()=>{
-        const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),state=root.powerDemo.getState();
+      const result=await surface.evaluate(()=>window.__captureRenderedFrame(snapshot=>{
+        const root=document.querySelector('#power-response-demo'),state=root.powerDemo.getState();
         return {snapshot:{lastSample:snapshot.lastSample?{t:snapshot.lastSample.t}:null,commandQ:snapshot.commandQ,saturation:snapshot.saturation},state,rows:Array.from(document.querySelectorAll('#pr-command-rows tr')).map(row=>({
           data:{...row.dataset},shown:Array.from(row.querySelectorAll('td')).map(cell=>cell.textContent),title:row.title
         }))};
-      });
+      }));
       const {snapshot,state,rows}=result,active=state.inspectedSource!==null&&[5,7,8,12,14,18,21,24].includes(state.selectedBus)&&state.historyIndex===null&&snapshot.lastSample;
       assert.equal(rows.length,active?4:0,'No pending or historical commands presented as current');
       if(!active)return;
@@ -706,15 +719,15 @@ async function main() {
       assert.equal(await surface.evaluate(()=>JSON.stringify(document.querySelector('#power-response-demo').powerDemo.getSnapshot())),initial.snapshot);
     };
     const checkProtocol = async surface => {
-      const reading=await surface.evaluate(()=>{
-        const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot(),state=root.powerDemo.getState();
+      const reading=await surface.evaluate(()=>window.__captureRenderedFrame(snapshot=>{
+        const root=document.querySelector('#power-response-demo'),state=root.powerDemo.getState();
         const phase=document.querySelector('#pr-phase');
         return {snapshot:{phase:snapshot.phase,experiment:snapshot.experiment,t:snapshot.t,discoveryRecord:snapshot.discoveryRecord?{t:snapshot.discoveryRecord.t}:null},state,data:{...phase.dataset},badge:phase.textContent,note:document.querySelector('#pr-phase-note').textContent,
           title:document.querySelector('#pr-matrix-title').textContent,headingData:{...document.querySelector('#pr-matrix-title').dataset},headingNote:document.querySelector('#pr-matrix-title').title,
           budget:document.querySelector('#pr-link-budget').textContent,matrixName:document.querySelector('#pr-matrix').getAttribute('aria-label'),
           captionController:document.querySelector('#pr-network-inspection').dataset.controller,
           inspected:state.inspectedSource!==null&&[5,7,8,12,14,18,21,24].includes(state.selectedBus)};
-      });
+      }));
       const {snapshot,state,data}=reading,deployed=snapshot.phase==='deployment',saved=state.historyIndex!==null;
       assert.equal(data.phase,snapshot.phase);
       assert.equal(data.view,saved?'saved-discovery':deployed?'comparison':'discovery');
@@ -747,8 +760,7 @@ async function main() {
     };
 
     const checkEventMarkers = async surface => {
-      const result=await surface.evaluate(()=>{
-        const snapshot=document.querySelector('#power-response-demo').powerDemo.getSnapshot();
+      const result=await surface.evaluate(()=>window.__captureRenderedFrame(snapshot=>{
         return {snapshot:{t:snapshot.t,eventLog:snapshot.eventLog},charts:['pr-cost','pr-stage','pr-voltage'].map(id=>{
           const svg=document.getElementById(id),frame=svg.querySelector('[data-chart-frame]');
           return {id,hidden:svg.hidden||svg.style.display==='none',frame:frame?{x:Number(frame.getAttribute('x')),w:Number(frame.getAttribute('width'))}:null,
@@ -757,7 +769,7 @@ async function main() {
             markerDetails:Array.from(svg.querySelectorAll('.intervention-markers rect')).map(node=>({role:node.getAttribute('role'),label:node.getAttribute('aria-label'),title:node.querySelector('title')?.textContent})),
             lines:Array.from(svg.querySelectorAll('.intervention-markers line')).map(node=>({x1:Number(node.getAttribute('x1')),x2:Number(node.getAttribute('x2'))}))};
         })};
-      });
+      }));
       const snapshot=result.snapshot;
       for(const chart of result.charts.filter(chart=>!chart.hidden)){
         const domain=[chart.id==='pr-cost'?0:Math.max(0,snapshot.t-80),Math.max(1,snapshot.t)];
@@ -798,8 +810,8 @@ async function main() {
       }
     };
 
-    const readPowerAttacks = async surface => surface.evaluate(() => {
-      const root=document.querySelector('#power-response-demo'),snapshot=root.powerDemo.getSnapshot();
+    const readPowerAttacks = async surface => surface.evaluate(() => window.__captureRenderedFrame(snapshot => {
+      const root=document.querySelector('#power-response-demo');
       return {t:snapshot.t,phase:snapshot.phase,selected:root.powerDemo.getState().selectedBus,
         visibleBadges:Array.from(document.querySelectorAll('#pr-network .pe-attack-badge')).filter(node=>getComputedStyle(node).display!=='none').map(node=>Number(node.closest('[data-bus]').dataset.bus)),
         marked:Array.from(document.querySelectorAll('#pr-network [data-bus]')).filter(node=>node.querySelector('.pe-attacked')).map(node=>Number(node.dataset.bus)),
@@ -809,7 +821,7 @@ async function main() {
         targetKw:Number(document.querySelector('#pr-strength').value),continuousComponents:snapshot.activePulses.filter(item=>item.protocol==='held-target-v1').map(item=>item.bus),
         minimumVoltage:Object.fromEntries(Object.entries(snapshot.voltages).map(([key,values])=>[key,Math.min(...values)])),
         cumulative:{...snapshot.cumulative}};
-    });
+    }));
     const checkPowerAttacks = async (surface,buses) => {
       const reading=await readPowerAttacks(surface);
       assert.deepEqual(reading.active,buses,'Each latched bus has its own visible stop action');
@@ -843,8 +855,8 @@ async function main() {
     };
 
     const checkExperimentProgress = async surface => {
-      const reading=await surface.evaluate(()=>{
-        const snapshot=document.querySelector('#power-response-demo').powerDemo.getSnapshot(),section=document.querySelector('#pr-experiment-progress');
+      const reading=await surface.evaluate(()=>window.__captureRenderedFrame(snapshot=>{
+        const section=document.querySelector('#pr-experiment-progress');
         return {phase:snapshot.phase,experiment:snapshot.experiment,costs:snapshot.cumulative,support:snapshot.deployedSupport,
           hidden:section.hidden,phaseHidden:document.querySelector('#pr-phase').hidden,
           discoverySamples:snapshot.discoveryRecord?.t,t:snapshot.t,
@@ -863,7 +875,7 @@ async function main() {
               cost:cost?Number(cost.dataset.cost):null,cells:row.querySelectorAll('th,td').length,
               boxes:Array.from(row.querySelectorAll('th,td,.pr-method-links')).map(cell=>({tag:cell.tagName,font:parseFloat(getComputedStyle(cell).fontSize),...cell.getBoundingClientRect().toJSON()}))};
           })};
-      });
+      }));
       const communication=reading.experiment==='communication',deployed=reading.phase==='deployment';
       assert.equal(reading.hidden,!communication,'Only communication topology has this fixed comparison protocol');
       assert.equal(reading.phaseHidden,communication,'The main controls do not duplicate the progress stage');

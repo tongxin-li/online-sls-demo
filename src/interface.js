@@ -98,6 +98,7 @@
   let lastRenderAt = -Infinity;
   const LIVE_RENDER_PERIOD=1000/16;
   let sourceDetailsTrial=null;
+  let renderedSnapshot=null;
   let heldAttack = null;
   const continuousAttacks = new Map();
   const activeAttacks = () => [...continuousAttacks.values(), ...(heldAttack ? [heldAttack] : [])];
@@ -2125,6 +2126,10 @@
       $('tooltip').style.display='none'; pin=null;
       renderControls(); drawNetwork(); drawMatrix(); drawCost(); drawStage(); drawVoltage(); drawConvergence();highlightTopology();
     } finally { renderWidths=previous; }
+    // A completed drawing has its own observation boundary. Consumers can
+    // inspect that frame without confusing it with the next physical sample.
+    renderedSnapshot=snapshot;
+    if(root.dispatchEvent)root.dispatchEvent(new CustomEvent('powerdemo:render'));
   }
   announce('Ready');
   hydrate(window.openai?.widgetState);
@@ -2149,5 +2154,5 @@
   render();
   observeDashboardLayout();
   // A read only inspection hook supports deterministic browser verification.
-  root.powerDemo = { getLinkEvidence:() => inspectedLinkEvidence(), getResponseHistory:() => inspectedResponseHistory(), getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,inspectedSource,playing,activeAttackBuses:activeAttacks().map(attack=>attack.bus),intervention:$('intervention').value,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null,topology:topology.export(),historyIndex,comparisonComplete:comparisonComplete(),comparisonContinued}) };
+  root.powerDemo = { getLinkEvidence:() => inspectedLinkEvidence(), getResponseHistory:() => inspectedResponseHistory(), getSnapshot:() => simulation.snapshot(), getRenderedSnapshot:() => renderedSnapshot, getState:() => ({selectedBus,inspectedSource,playing,activeAttackBuses:activeAttacks().map(attack=>attack.bus),intervention:$('intervention').value,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null,topology:topology.export(),historyIndex,comparisonComplete:comparisonComplete(),comparisonContinued}) };
 })();
