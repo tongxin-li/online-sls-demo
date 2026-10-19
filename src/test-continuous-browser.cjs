@@ -50,11 +50,35 @@ async function main(){
   const session=await page.context().newCDPSession(page),before=await profileState(page);
   const heapBefore=await session.send('Runtime.getHeapUsage');
   await session.send('Profiler.enable');await session.send('Profiler.setSamplingInterval',{interval:1000});
+  // CPU stack samples cannot identify unsymbolized browser work. Capture
+  // actual browser timeline events and their forced layout stacks as well.
+  await session.send('Tracing.start',{categories:'devtools.timeline,disabled-by-default-devtools.timeline,disabled-by-default-devtools.timeline.stack',transferMode:'ReturnAsStream'});
   await session.send('Profiler.start');return {session,label,before,heapBefore,started:Date.now()};
  };
  const finishProfile=async(page,record)=>{
   const {profile}=await record.session.send('Profiler.stop'),elapsedMs=Date.now()-record.started;
   const heapAfter=await record.session.send('Runtime.getHeapUsage'),after=await profileState(page);
+  const completed=new Promise(resolve=>record.session.once('Tracing.tracingComplete',resolve));
+  await record.session.send('Tracing.end');
+  const {stream}=await completed;let traceText='';
+  for(;;){const part=await record.session.send('IO.read',{handle:stream});traceText+=part.base64Encoded?Buffer.from(part.data,'base64').toString('utf8'):part.data;if(part.eof)break;}
+  await record.session.send('IO.close',{handle:stream});
+  const trace=JSON.parse(traceText),totals={},longest=[];
+  for(const event of trace.traceEvents||[]){
+   if(event.ph!=='X'||!Number.isFinite(event.dur))continue;
+   const row=totals[event.name]||(totals[event.name]={count:0,totalUs:0,maxUs:0});
+   row.count++;row.totalUs+=event.dur;row.maxUs=Math.max(row.maxUs,event.dur);
+   if(['Layout','UpdateLayoutTree','Paint','PrePaint','RecalculateStyles','FunctionCall'].includes(event.name))
+    longest.push({name:event.name,durationUs:event.dur,thread:event.tid,
+      args:event.args});
+  }
+  const timeline={label:record.label,source:process.env.GITHUB_SHA,
+   totals:Object.fromEntries(Object.entries(totals).sort((a,b)=>b[1].totalUs-a[1].totalUs).slice(0,35)),
+   longest:longest.sort((a,b)=>b.durationUs-a.durationUs).slice(0,24),
+   caveat:'Nested timeline events overlap and totals must not be added. Tracing adds overhead. Stack attribution is evidence, not a general device speed guarantee.'};
+  await fs.writeFile(path.join(output,record.label+'-timeline.json'),traceText);
+  await fs.writeFile(path.join(output,record.label+'-timeline-summary.json'),JSON.stringify(timeline,null,2));
+  console.log('NATIVE_BROWSER_TIMELINE '+JSON.stringify(timeline));
   await record.session.detach();
   const nodes=new Map(profile.nodes.map(node=>[node.id,node])),parents=new Map();
   for(const node of profile.nodes)for(const child of node.children||[])parents.set(child,node.id);
