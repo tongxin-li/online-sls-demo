@@ -1,11 +1,11 @@
 {
-  "program": "Continuous predictive response adaptation",
+  "program": "Full continuous predictive response and topology refinement",
   "timezone": "Asia/Shanghai",
   "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
-  "status": "ongoing_candidate_unpublished",
-  "first_run": "2026-10-18T23:45:00+08:00",
-  "last_scheduled_run": "2026-10-19T22:45:00+08:00",
-  "hard_deadline": "2026-10-19T23:45:00+08:00",
+  "status": "active",
+  "first_run": "2026-10-19T20:00:00+08:00",
+  "last_scheduled_run": "2026-10-20T19:00:00+08:00",
+  "hard_deadline": "2026-10-20T20:00:00+08:00",
   "max_scheduled_runs": 24,
   "max_minutes_per_run": 40,
   "completed_count": 15,
@@ -784,12 +784,12 @@
     }
   ],
   "active_run": {
-    "slot": "2026-10-19T17:45:00+08:00",
-    "started_at": "2026-10-19T17:42:34+08:00",
-    "lease_expires_at": "2026-10-19T18:22:34+08:00",
-    "branch": "cloud/refine/continuous-release-20261019"
+    "slot": "2026-10-19T21:00:00+08:00",
+    "started_at": "2026-10-19T21:08:27+08:00",
+    "lease_expires_at": "2026-10-19T21:48:27+08:00",
+    "branch": "cloud/refine/full-response-20261019"
   },
-  "next_focus": "Read latest main and this checkpoint repeat checks first. Profile 47 bus native execution and rendering with growing history at 901 and roughly 1850 samples. Separate actual controller step, immutable snapshot and chart work. Optimize the measured hotspot without retuning gains, objective, noise or limits and without dropping costs or evidence. If caching stationary response geometry, keep current causal correction weights and command receipts fresh at every action. Revalidate all suites and actual pixels before expected SHA nonforce publication.",
+  "next_focus": "Compact measured frozen-column temporal response strip inside existing inspector. No engine or physical changes.",
   "priorities": [
     "Actual continuous causal response adaptation and executed command evidence",
     "Explicit forecast message access and support feasibility",
@@ -2590,7 +2590,7 @@
   },
   "completed_count_scope": "Historical original program completed_count remains 15; renewed_program retains its 21 completions. continuous_program starts with 0. Metadata recovery and audit are not algorithm improvements.",
   "total_completed_count": 36,
-  "active_program_id": "continuous-phi-20261018T234500",
+  "active_program_id": "full-phi-topology-20261019T200000",
   "continuous_program": {
     "id": "continuous-phi-20261018T234500",
     "status": "running",
@@ -2599,7 +2599,7 @@
     "hard_deadline": "2026-10-19T23:45:00+08:00",
     "max_scheduled_runs": 24,
     "max_minutes_per_run": 40,
-    "invocation_count": 11,
+    "invocation_count": 12,
     "completed_count": 0,
     "runs": [
       {
@@ -8394,7 +8394,7 @@
         "lease_expires_at": "2026-10-19T18:22:34+08:00",
         "branch": "cloud/refine/continuous-release-20261019",
         "base_commit": "48b65da4c6613d5472ae878214dfc82f03fd044e",
-        "status": "in_progress",
+        "status": "validated_documentation_and_restoration_checks_published_no_algorithm_completion",
         "counted_invocation": true,
         "counted_completed": false,
         "changes": [
@@ -8413,7 +8413,7 @@
             "public_hashes_and_six_trials_verified": true
           },
           "candidate": {
-            "status": "Pending full workflow including new required very long session browser job.",
+            "status": "All six required source jobs completed successfully at 658e2611278c1ea746c5009dd5adfa5d71663f03. Main repeat remains distinct.",
             "predefined_steps": 6001,
             "networks": 3,
             "surfaces": 2,
@@ -8437,9 +8437,667 @@
               "status": "Superseded by complete exported physical snapshot fingerprint rather than a selected field list. Includes actual inverter lag, physical power and terminal diagnostics. No product source change.",
               "counted_completed": false
             }
+          ],
+          "final_candidate": {
+            "run": 39234241276,
+            "conclusion": "success",
+            "all_six_completed_logs_read": true,
+            "numerical_cases": 257,
+            "archived_browser": "passed",
+            "archived_network_suites": "passed",
+            "ongoing_conditions": 6,
+            "long_restore_conditions": 6,
+            "long_restore_steps": 6001,
+            "exact_first_restore_resumed_action_and_second_restore": true,
+            "jobs": {
+              "validate": 117999862425,
+              "release-browser": 117999862498,
+              "ongoing-browser": 117999862623,
+              "long-session-browser": 117999862671,
+              "review-ongoing": 118003063603,
+              "prepare-candidate": 118003941782
+            },
+            "build_sha256": "69097822be929ce69de2d00427f5360b54859d27187f19ad91fb5c98522aabff",
+            "generated_page": "The checked in page already matches the validated build. Successful prepare job left the source ref unchanged. No generated page changes were needed.",
+            "scope": "Documentation, public progress, tests and validation only. No controller, support or physical parameter change."
+          },
+          "long_sessions": {
+            "schema": "very-long-session-restoration-results-v1",
+            "source": "658e2611278c1ea746c5009dd5adfa5d71663f03",
+            "workflow_run": 39234241276,
+            "job_id": 117999862671,
+            "job_conclusion": "success",
+            "completed_log_read": true,
+            "plan": "refinement/long-session-restoration-plan.json",
+            "results": [
+              {
+                "networkId": "toy8",
+                "mobile": false,
+                "steps": 6001,
+                "generationMs": 5993,
+                "restoreMs": 5322,
+                "secondRestoreMs": 5660,
+                "savedBytes": 46275,
+                "historyBytes": 46196858,
+                "historyEntries": 6001,
+                "historyChunks": 94,
+                "costs": {
+                  "online": 0.3833422152524623,
+                  "scalar": 0.4966935323106422,
+                  "static": 0.5570665302858188,
+                  "causal": 0.40024717574509927
+                },
+                "sourceUpdates": 5971,
+                "exactFirstRestore": true,
+                "exactResumedStep": true,
+                "exactSecondRestore": true,
+                "passed": true
+              },
+              {
+                "networkId": "feeder24",
+                "mobile": false,
+                "steps": 6001,
+                "generationMs": 11936,
+                "restoreMs": 9947,
+                "secondRestoreMs": 10151,
+                "savedBytes": 46571,
+                "historyBytes": 125325618,
+                "historyEntries": 6001,
+                "historyChunks": 94,
+                "costs": {
+                  "online": 2.754736842624508,
+                  "scalar": 3.9342730458891486,
+                  "static": 4.85759653982906,
+                  "causal": 2.830457860286317
+                },
+                "sourceUpdates": 5971,
+                "exactFirstRestore": true,
+                "exactResumedStep": true,
+                "exactSecondRestore": true,
+                "passed": true
+              },
+              {
+                "networkId": "feeder47",
+                "mobile": false,
+                "steps": 6001,
+                "generationMs": 25247,
+                "restoreMs": 20934,
+                "secondRestoreMs": 21431,
+                "savedBytes": 46661,
+                "historyBytes": 257800434,
+                "historyEntries": 6001,
+                "historyChunks": 94,
+                "costs": {
+                  "online": 5.6243666100080025,
+                  "scalar": 7.982918791874502,
+                  "static": 9.95382674474383,
+                  "causal": 5.782219503795506
+                },
+                "sourceUpdates": 5971,
+                "exactFirstRestore": true,
+                "exactResumedStep": true,
+                "exactSecondRestore": true,
+                "passed": true
+              },
+              {
+                "networkId": "toy8",
+                "mobile": true,
+                "steps": 6001,
+                "generationMs": 5993,
+                "restoreMs": 5308,
+                "secondRestoreMs": 5422,
+                "savedBytes": 46275,
+                "historyBytes": 46196858,
+                "historyEntries": 6001,
+                "historyChunks": 94,
+                "costs": {
+                  "online": 0.3833422152524623,
+                  "scalar": 0.4966935323106422,
+                  "static": 0.5570665302858188,
+                  "causal": 0.40024717574509927
+                },
+                "sourceUpdates": 5971,
+                "exactFirstRestore": true,
+                "exactResumedStep": true,
+                "exactSecondRestore": true,
+                "passed": true
+              },
+              {
+                "networkId": "feeder24",
+                "mobile": true,
+                "steps": 6001,
+                "generationMs": 11936,
+                "restoreMs": 10056,
+                "secondRestoreMs": 10479,
+                "savedBytes": 46571,
+                "historyBytes": 125325618,
+                "historyEntries": 6001,
+                "historyChunks": 94,
+                "costs": {
+                  "online": 2.754736842624508,
+                  "scalar": 3.9342730458891486,
+                  "static": 4.85759653982906,
+                  "causal": 2.830457860286317
+                },
+                "sourceUpdates": 5971,
+                "exactFirstRestore": true,
+                "exactResumedStep": true,
+                "exactSecondRestore": true,
+                "passed": true
+              },
+              {
+                "networkId": "feeder47",
+                "mobile": true,
+                "steps": 6001,
+                "generationMs": 25247,
+                "restoreMs": 20896,
+                "secondRestoreMs": 22043,
+                "savedBytes": 46661,
+                "historyBytes": 257800434,
+                "historyEntries": 6001,
+                "historyChunks": 94,
+                "costs": {
+                  "online": 5.6243666100080025,
+                  "scalar": 7.982918791874502,
+                  "static": 9.95382674474383,
+                  "causal": 5.782219503795506
+                },
+                "sourceUpdates": 5971,
+                "exactFirstRestore": true,
+                "exactResumedStep": true,
+                "exactSecondRestore": true,
+                "passed": true
+              }
+            ],
+            "interpretation": [
+              "All six predefined network and surface conditions are reported. This is an exact restoration integrity test, not a performance superiority benchmark or confidence interval.",
+              "The fixtures use the production engine and the actual page storage adapter, hydration, UI Step and reload. They do not replace native fresh default playback acceptance.",
+              "Every exported physical snapshot field is compared, including actual inverter state and physical power. Every ordered history entry and complete executed receipt is included in 94 chunk hashes. No physical sample or cost is truncated.",
+              "Restore timings include complete browser state and history verification. Second restore timing also includes screenshot capture. They do not isolate engine replay or establish device independent latency.",
+              "History byte counts describe serialized history chunks, not retained heap usage. Compact saved records contain original options and immutable event records; the tested engine reconstructs all history exactly.",
+              "The declared stream includes repeated pulses, bounded two bus held requests and multiple corruption and repair switches through action 5300. It is not a guarantee for arbitrary future session length or every event density.",
+              "The 47 bus history encodes about 258 MB in this finite test and verified restore takes about 21 seconds. Long history remains a performance limitation. Do not silently discard physical costs or evidence to reduce it.",
+              "Support remains fixed offline. No adaptive topology, full joint co design or manuscript equivalence is implemented by these tests."
+            ]
+          },
+          "native_playback": [
+            {
+              "networkId": "toy8",
+              "mobile": false,
+              "frames": 1692,
+              "maxFrameGapMs": 33.400000000001455,
+              "over50ms": 0,
+              "over100ms": 0,
+              "initialDomNodes": 1263,
+              "finalDomNodes": 1426,
+              "initialHeapBytes": 23100000,
+              "finalHeapBytes": 23100000,
+              "elapsedMs": 28646,
+              "actions": 905,
+              "sourceSwitches": [
+                {
+                  "action": 89,
+                  "trainedThrough": 88,
+                  "coefficient": 0.9928060644044876,
+                  "gain": -2.7601162466644658,
+                  "raw": 0.005706265316004476,
+                  "bounded": 0.005706265316004476,
+                  "corrupted": false
+                },
+                {
+                  "action": 220,
+                  "trainedThrough": 219,
+                  "coefficient": 0.017792197929587656,
+                  "gain": -0.04946437811979061,
+                  "raw": 0.005103554537199878,
+                  "bounded": 0.005103554537199878,
+                  "corrupted": true
+                },
+                {
+                  "action": 430,
+                  "trainedThrough": 429,
+                  "coefficient": 0.9573044070354575,
+                  "gain": -2.6614175130436637,
+                  "raw": 0.0007441943823570457,
+                  "bounded": 0.0007441943823570457,
+                  "corrupted": false
+                },
+                {
+                  "action": 650,
+                  "trainedThrough": 649,
+                  "coefficient": 0.023401050101000496,
+                  "gain": -0.06505763903801619,
+                  "raw": 0.002768065180412392,
+                  "bounded": 0.002768065180412392,
+                  "corrupted": true
+                },
+                {
+                  "action": 902,
+                  "trainedThrough": 901,
+                  "coefficient": 1.0279365007948762,
+                  "gain": -2.8577829428199593,
+                  "raw": -0.002287712768364679,
+                  "bounded": -0.002287712768364679,
+                  "corrupted": false
+                }
+              ],
+              "costs": {
+                "online": 0.05063286309673587,
+                "scalar": 0.06921333027130577,
+                "static": 0.08034523423038893,
+                "causal": 0.05225583986380973
+              },
+              "sourceUpdates": 875
+            },
+            {
+              "networkId": "feeder24",
+              "mobile": false,
+              "frames": 1361,
+              "maxFrameGapMs": 116.59999999999991,
+              "over50ms": 8,
+              "over100ms": 1,
+              "initialDomNodes": 2241,
+              "finalDomNodes": 2380,
+              "initialHeapBytes": 26000000,
+              "finalHeapBytes": 26000000,
+              "elapsedMs": 29195,
+              "actions": 912,
+              "sourceSwitches": [
+                {
+                  "action": 92,
+                  "trainedThrough": 91,
+                  "coefficient": 0.9882779119712795,
+                  "gain": -1.8190293792365966,
+                  "raw": 0.012035618142023592,
+                  "bounded": 0.012035618142023592,
+                  "corrupted": false
+                },
+                {
+                  "action": 221,
+                  "trainedThrough": 220,
+                  "coefficient": -0.005061400702689194,
+                  "gain": 0.009316040019467682,
+                  "raw": 0.010369395079606193,
+                  "bounded": 0.010369395079606193,
+                  "corrupted": true
+                },
+                {
+                  "action": 432,
+                  "trainedThrough": 431,
+                  "coefficient": 0.9914936542137855,
+                  "gain": -1.82494829085479,
+                  "raw": -0.0005046259559560967,
+                  "bounded": -0.0005046259559560967,
+                  "corrupted": false
+                },
+                {
+                  "action": 651,
+                  "trainedThrough": 650,
+                  "coefficient": 0.0210575674387055,
+                  "gain": -0.038758666324796305,
+                  "raw": -0.002114961379586775,
+                  "bounded": -0.002114961379586775,
+                  "corrupted": true
+                },
+                {
+                  "action": 900,
+                  "trainedThrough": 899,
+                  "coefficient": 0.9819988803505062,
+                  "gain": -1.807472161521835,
+                  "raw": -0.006490080814441436,
+                  "bounded": -0.006490080814441436,
+                  "corrupted": false
+                }
+              ],
+              "costs": {
+                "online": 0.42254881209081363,
+                "scalar": 0.5957687598132344,
+                "static": 0.7512847687641723,
+                "causal": 0.43090263628214714
+              },
+              "sourceUpdates": 882
+            },
+            {
+              "networkId": "feeder47",
+              "mobile": false,
+              "frames": 1223,
+              "maxFrameGapMs": 300,
+              "over50ms": 267,
+              "over100ms": 48,
+              "initialDomNodes": 4328,
+              "finalDomNodes": 4491,
+              "initialHeapBytes": 50400000,
+              "finalHeapBytes": 50400000,
+              "elapsedMs": 46070,
+              "actions": 917,
+              "sourceSwitches": [
+                {
+                  "action": 90,
+                  "trainedThrough": 89,
+                  "coefficient": 1.0064280605469436,
+                  "gain": -1.8524366355323356,
+                  "raw": 0.010465204977635001,
+                  "bounded": 0.010465204977635001,
+                  "corrupted": false
+                },
+                {
+                  "action": 219,
+                  "trainedThrough": 218,
+                  "coefficient": 0.004945961957365242,
+                  "gain": -0.009103562874422896,
+                  "raw": 0.00932185102595253,
+                  "bounded": 0.00932185102595253,
+                  "corrupted": true
+                },
+                {
+                  "action": 431,
+                  "trainedThrough": 430,
+                  "coefficient": 0.9995477549758082,
+                  "gain": -1.8397727099093737,
+                  "raw": -0.0043047735439139265,
+                  "bounded": -0.0043047735439139265,
+                  "corrupted": false
+                },
+                {
+                  "action": 650,
+                  "trainedThrough": 649,
+                  "coefficient": 0.008858922017510814,
+                  "gain": -0.01630577717362404,
+                  "raw": -0.0017491252543995312,
+                  "bounded": -0.0017491252543995312,
+                  "corrupted": true
+                },
+                {
+                  "action": 900,
+                  "trainedThrough": 899,
+                  "coefficient": 0.9859436737529494,
+                  "gain": -1.8147329684336782,
+                  "raw": -0.004076475397227124,
+                  "bounded": -0.004076475397227124,
+                  "corrupted": false
+                }
+              ],
+              "costs": {
+                "online": 0.8729609585195358,
+                "scalar": 1.2304698656302697,
+                "static": 1.5879525177981881,
+                "causal": 0.8885065374798655
+              },
+              "sourceUpdates": 887
+            },
+            {
+              "networkId": "toy8",
+              "mobile": true,
+              "frames": 1717,
+              "maxFrameGapMs": 16.80000000000291,
+              "over50ms": 0,
+              "over100ms": 0,
+              "initialDomNodes": 1263,
+              "finalDomNodes": 1426,
+              "initialHeapBytes": 21700000,
+              "finalHeapBytes": 21700000,
+              "elapsedMs": 28617,
+              "actions": 904,
+              "sourceSwitches": [
+                {
+                  "action": 92,
+                  "trainedThrough": 91,
+                  "coefficient": 0.9929513107775525,
+                  "gain": -2.760520048462661,
+                  "raw": 0.006017373463282414,
+                  "bounded": 0.006017373463282414,
+                  "corrupted": false
+                },
+                {
+                  "action": 220,
+                  "trainedThrough": 219,
+                  "coefficient": 0.01779219792958765,
+                  "gain": -0.04946437811979059,
+                  "raw": 0.005103554537199878,
+                  "bounded": 0.005103554537199878,
+                  "corrupted": true
+                },
+                {
+                  "action": 430,
+                  "trainedThrough": 429,
+                  "coefficient": 0.9573044070354575,
+                  "gain": -2.6614175130436637,
+                  "raw": 0.0007441943823570457,
+                  "bounded": 0.0007441943823570457,
+                  "corrupted": false
+                },
+                {
+                  "action": 650,
+                  "trainedThrough": 649,
+                  "coefficient": 0.023401050101000496,
+                  "gain": -0.06505763903801619,
+                  "raw": 0.002768065180412392,
+                  "bounded": 0.002768065180412392,
+                  "corrupted": true
+                },
+                {
+                  "action": 900,
+                  "trainedThrough": 899,
+                  "coefficient": 1.026745409715456,
+                  "gain": -2.854471571186128,
+                  "raw": -0.0013965328844452237,
+                  "bounded": -0.0013965328844452237,
+                  "corrupted": false
+                }
+              ],
+              "costs": {
+                "online": 0.050564638667483,
+                "scalar": 0.06896818923571041,
+                "static": 0.07990941422508914,
+                "causal": 0.05224729915623826
+              },
+              "sourceUpdates": 874
+            },
+            {
+              "networkId": "feeder24",
+              "mobile": true,
+              "frames": 1362,
+              "maxFrameGapMs": 83.29999999999927,
+              "over50ms": 1,
+              "over100ms": 0,
+              "initialDomNodes": 2264,
+              "finalDomNodes": 2403,
+              "initialHeapBytes": 26000000,
+              "finalHeapBytes": 26000000,
+              "elapsedMs": 29037,
+              "actions": 908,
+              "sourceSwitches": [
+                {
+                  "action": 91,
+                  "trainedThrough": 90,
+                  "coefficient": 0.9851739770733684,
+                  "gain": -1.813316260788694,
+                  "raw": 0.012209050500328396,
+                  "bounded": 0.012209050500328396,
+                  "corrupted": false
+                },
+                {
+                  "action": 220,
+                  "trainedThrough": 219,
+                  "coefficient": -0.006938614164606052,
+                  "gain": 0.012771248718318416,
+                  "raw": 0.008564305647607576,
+                  "bounded": 0.008564305647607576,
+                  "corrupted": true
+                },
+                {
+                  "action": 431,
+                  "trainedThrough": 430,
+                  "coefficient": 0.9917916419008043,
+                  "gain": -1.8254967685155492,
+                  "raw": -0.001093497081370629,
+                  "bounded": -0.001093497081370629,
+                  "corrupted": false
+                },
+                {
+                  "action": 652,
+                  "trainedThrough": 651,
+                  "coefficient": 0.020955009014667448,
+                  "gain": -0.038569896764985644,
+                  "raw": -0.001797981169944756,
+                  "bounded": -0.001797981169944756,
+                  "corrupted": true
+                },
+                {
+                  "action": 902,
+                  "trainedThrough": 901,
+                  "coefficient": 0.9786694361839486,
+                  "gain": -1.8013439695607139,
+                  "raw": -0.004970167352640885,
+                  "bounded": -0.004970167352640885,
+                  "corrupted": false
+                }
+              ],
+              "costs": {
+                "online": 0.4218462278419992,
+                "scalar": 0.5948949628342687,
+                "static": 0.749939252902539,
+                "causal": 0.43017915883438085
+              },
+              "sourceUpdates": 878
+            },
+            {
+              "networkId": "feeder47",
+              "mobile": true,
+              "frames": 1112,
+              "maxFrameGapMs": 266.7000000000007,
+              "over50ms": 247,
+              "over100ms": 47,
+              "initialDomNodes": 4328,
+              "finalDomNodes": 4475,
+              "initialHeapBytes": 47400000,
+              "finalHeapBytes": 47400000,
+              "elapsedMs": 40590,
+              "actions": 923,
+              "sourceSwitches": [
+                {
+                  "action": 92,
+                  "trainedThrough": 91,
+                  "coefficient": 0.9973581993148491,
+                  "gain": -1.8357426025615187,
+                  "raw": 0.008685198852762704,
+                  "bounded": 0.008685198852762704,
+                  "corrupted": false
+                },
+                {
+                  "action": 220,
+                  "trainedThrough": 219,
+                  "coefficient": -0.004537095655493969,
+                  "gain": 0.008351001468087146,
+                  "raw": 0.010629323983343248,
+                  "bounded": 0.010629323983343248,
+                  "corrupted": true
+                },
+                {
+                  "action": 433,
+                  "trainedThrough": 432,
+                  "coefficient": 0.9997231329894477,
+                  "gain": -1.8400955115782343,
+                  "raw": -0.00305081176295055,
+                  "bounded": -0.00305081176295055,
+                  "corrupted": false
+                },
+                {
+                  "action": 651,
+                  "trainedThrough": 650,
+                  "coefficient": 0.009013691637618977,
+                  "gain": -0.016590646927951015,
+                  "raw": -0.0008526628389039653,
+                  "bounded": -0.0008526628389039653,
+                  "corrupted": true
+                },
+                {
+                  "action": 904,
+                  "trainedThrough": 903,
+                  "coefficient": 0.978297315034264,
+                  "gain": -1.8006590414694226,
+                  "raw": -0.005800971557423512,
+                  "bounded": -0.005800971557423512,
+                  "corrupted": false
+                }
+              ],
+              "costs": {
+                "online": 0.8792965506219274,
+                "scalar": 1.2384303242743655,
+                "static": 1.5960236630848261,
+                "causal": 0.8950490430838056
+              },
+              "sourceUpdates": 893
+            }
+          ],
+          "ongoing_long_actions": [
+            1824,
+            1843,
+            1993,
+            1823,
+            1833,
+            2010
+          ],
+          "superseded": {
+            "lease": {
+              "source": "f1f1088f40e8d40d1b6f10ec1f6bbdf57b6af037",
+              "run": 39232594370,
+              "conclusion": "cancelled",
+              "cancelled_validate_log_read": true
+            },
+            "fixture": {
+              "source": "87d1061aafc9c774deead405217d6b6c7f21867d",
+              "run": 39233260952,
+              "conclusion": "cancelled_after_long_fixture_failure",
+              "long_job": 117996540573,
+              "long_log_read": true,
+              "other_completed_and_cancelled_logs_read": true,
+              "partial_numerical_passed": 182
+            },
+            "selected_fields": {
+              "source": "9de74833efd7750dbef1fdc8cc475049dd6ed983",
+              "run": 39233807140,
+              "conclusion": "cancelled_when_superseded",
+              "all_relevant_completed_logs_read": true,
+              "completed_restore_conditions": 4,
+              "fifth_condition_started": true,
+              "reason": "Strengthened the accepted test to include every exported physical snapshot field."
+            }
+          },
+          "artifacts": [
+            {
+              "id": 12179745285,
+              "name": "validated-page",
+              "digest": "sha256:c41dcdf30283292ba39efb5097e987528c5e8d8b98a089eeb89c93ed5eb10c5c",
+              "size_in_bytes": 95257
+            },
+            {
+              "id": 12179490393,
+              "name": "browser-evidence",
+              "digest": "sha256:046f1abf9b4d42f7cf134410fb0cd3a1d15478cb6dfbeaa8524e32724b75673e",
+              "size_in_bytes": 12158474
+            },
+            {
+              "id": 12179190371,
+              "name": "ongoing-browser-evidence",
+              "digest": "sha256:898914e3495bf6588da0e8a65d338884292d2df0d5dc614a0b6768a851bacb10",
+              "size_in_bytes": 16828865
+            },
+            {
+              "id": 12178314444,
+              "name": "long-session-browser-evidence",
+              "digest": "sha256:b1ee74fcbf88b3c409fef6651dd42768fe27ef0c7bfaa78889f661794c838f7d",
+              "size_in_bytes": 1856368
+            },
+            {
+              "id": 12178174407,
+              "name": "release-browser-evidence",
+              "digest": "sha256:8b500accfa68ca3d710d15c38b1dd53752222fdf8dcc25a6207076edaa068244",
+              "size_in_bytes": 1901357
+            }
           ]
         },
-        "next_focus": "Public causal support learning protocol and full very long saved session restoration evidence.",
+        "next_focus": "First read current main and all final jobs and logs from 39235839246. Retry the failed canonical release job after the run finishes, diagnose page readiness without weakening physical assertions if the failure repeats, and record the outcome separately. Then validate the candidate checkpoint archive helper and inspect actual nested 6001 action PNGs. Continue the public packet ledger and paid probe admission plan only after these release evidence gaps are reconciled. Do not count this documentation, audit or restoration test addition as an algorithm improvement. Preserve all histories, physical costs and archived replay.",
         "implementation_plan": "refinement/ongoing-support-plan.md",
         "restoration_plan": "refinement/long-session-restoration-plan.json",
         "scope": {
@@ -8448,15 +9106,1328 @@
           "live_default_changed": false,
           "new_dependencies": false,
           "protocol_plan_not_implementation": true
+        },
+        "source_commit": "658e2611278c1ea746c5009dd5adfa5d71663f03",
+        "ready_commit": "658e2611278c1ea746c5009dd5adfa5d71663f03",
+        "published_commit": "658e2611278c1ea746c5009dd5adfa5d71663f03",
+        "pixel_review": {
+          "product_ui_changed": false,
+          "regular_ongoing": {
+            "status": "Actual feeder47 phone inspection PNG viewed through authenticated Git blob base64 wrapper. Matrix supports horizontal scroll, selected gain history and Source details are readable. Other 35 captures not newly inspected in this pass.",
+            "job": 118003063603,
+            "file": "feeder47-phone-inspection.png",
+            "base64_text_sha": "555251cf24b8e35ec30402e7ea429d7b583690c9",
+            "images_captured": 36
+          },
+          "long_sessions": {
+            "status": "Six actual PNGs are retained in the long session artifact but were not exposed by the existing root only blob archiver. No claim of actual long session pixel inspection.",
+            "artifact": 12178314444
+          },
+          "followup": "Candidate checkpoint changes the existing archiver to include nested PNGs and preserve relative file names. This helper change remains unverified until the next completed workflow and actual pixel inspection. No substantive visual UI publication occurred."
+        },
+        "remaining_gaps": [
+          "Actual deployed support learning remains a plan. Live support is fixed offline and source local correction is not literal manuscript Algorithm 1 or full co design.",
+          "Very long restoration is exact for all six predefined 6001 action cases, but the 47 bus verified restore took roughly 21 seconds. Timings include hashing and some screenshot work and are not pure replay benchmarks.",
+          "Serialized history is roughly 258 MB for the 47 bus finite fixture. This is not retained heap usage or an indefinite bound. No history or costs were dropped.",
+          "The next archive helper must expose nested long session PNGs and be validated before claiming those pixels were inspected.",
+          "Main post publication release browser job failed before the first public trial when root.powerDemo was undefined. Remaining main jobs were in progress. Retry is blocked until the containing run finishes. Do not treat Pages success alone as completed public behavioral verification."
+        ],
+        "finished_at": "2026-10-19T18:16:30+08:00",
+        "deployment": {
+          "source": "658e2611278c1ea746c5009dd5adfa5d71663f03",
+          "published_commit": "658e2611278c1ea746c5009dd5adfa5d71663f03",
+          "prior_main": "48b65da4c6613d5472ae878214dfc82f03fd044e",
+          "promoted_at": "2026-10-19T10:12:58Z",
+          "expected_main_matched": true,
+          "force": false,
+          "generated_child": "No new generated child was necessary because validated index bytes were already identical.",
+          "pages": {
+            "run": 39235838715,
+            "deploy_job": 118004635387,
+            "conclusion": "success",
+            "completed_deploy_log_read": true,
+            "exact_revision_verified": true,
+            "completed_at": "2026-10-19T10:13:42Z"
+          },
+          "main_repeat": {
+            "run": 39235839246,
+            "status": "in_progress",
+            "release_job": 118004570960,
+            "release_conclusion": "failure",
+            "completed_release_log_read": true,
+            "error": "Public trial stopped before its first condition at read(page) because root.powerDemo was undefined. No public trial completion is claimed.",
+            "retry": {
+              "attempted_at": "2026-10-19T10:15:40Z",
+              "result": "GitHub refused the individual rerun because the containing run was still running. No source mutation or acceptance relaxation."
+            }
+          },
+          "public_behavior": "Existing manual release canonical verification remains separately retained. The new main post publication canonical browser check did not complete and requires a retry or diagnosis. Product HTML and environment source bytes are unchanged by this documentation and test release.",
+          "counted_scheduled_implementation_completion": false
+        },
+        "checkpoint": {
+          "status": "Candidate only pending full validation",
+          "changes": [
+            "Expose nested long session PNGs through the existing authorized Git blob review route without altering root file names.",
+            "Record every long session condition, unfavorable timings, all source evidence and the failed main public verification.",
+            "Close the original lease without another invocation or completion."
+          ],
+          "published": false
+        },
+        "followup_verification": [
+          {
+            "recorded_in_slot": "2026-10-19T18:45:00+08:00",
+            "main_run": 39235839246,
+            "attempt": 2,
+            "conclusion": "success",
+            "canonical_public_conditions": 6,
+            "long_restore_conditions": 6,
+            "source_unchanged": true,
+            "earlier_failed_first_attempt_retained": true,
+            "original_counts_unchanged": true
+          }
+        ]
+      },
+      {
+        "program_id": "continuous-phi-20261018T234500",
+        "slot": "2026-10-19T18:45:00+08:00",
+        "started_at": "2026-10-19T18:45:37+08:00",
+        "lease_expires_at": "2026-10-19T19:25:37+08:00",
+        "branch": "cloud/refine/continuous-release-20261019",
+        "base_commit": "658e2611278c1ea746c5009dd5adfa5d71663f03",
+        "candidate_base": "d75cf21b63628e7d5384c53488775df25888e0d1",
+        "status": "validated_packet_foundation_unpublished",
+        "counted_invocation": true,
+        "counted_completed": false,
+        "changes": [
+          "Read completed main and candidate results, retry both failed main jobs without changing assertions, inspect actual 6001 action pixels, then implement a bounded causal packet admission foundation on an unpublished candidate if evidence allows.",
+          "Implement an isolated receiver scoped packet ledger with fixed constructor support, explicit paid requests, delayed probes and context retrieval, immutable receipts and separate delivered scalar accounting. It is absent from build.py and no live controller uses it."
+        ],
+        "tests": {
+          "prior_main": {
+            "run": 39235839246,
+            "attempt": 1,
+            "conclusion": "failure",
+            "validate": "success",
+            "ongoing": "success",
+            "release": "failure before first trial due unavailable page API",
+            "long_sessions": "failure after first restored state while locating Step",
+            "retry_requested": true
+          },
+          "prior_candidate": {
+            "source": "d75cf21b63628e7d5384c53488775df25888e0d1",
+            "run": 39236325451,
+            "conclusion": "success",
+            "all_six_jobs": "success",
+            "nested_images": 6,
+            "all_completed_logs_read": true
+          },
+          "foundation": {
+            "status": "All six required Actions jobs passed. Incomplete protocol foundation stays unpublished.",
+            "source": "3aa3d3443903e8b23d0fac95e2ee00418a715699",
+            "run": 39241078436,
+            "conclusion": "success",
+            "completed_at": "2026-10-19T11:11:42Z",
+            "all_completed_job_logs_read": true,
+            "numerical_original_cases": 257,
+            "packet_cases": 18,
+            "total_cases": 275,
+            "new_case_names": [
+              "packet configuration preserves mandatory local and exact remote permissions",
+              "explicit request transport never reads excluded forecasts or quality and forcing labels",
+              "probe latency uses actual arrivals and requests alone are not payload traffic",
+              "old missing context cannot use ordinary zero latency control delivery",
+              "unissued forecasts and unrevealed evaluation actions cannot be used",
+              "issued preview probes are legal while future replay issuance and current correction leakage are rejected",
+              "independent scalar arithmetic separates control probe transition and local traffic",
+              "paid cached probes remain unavailable to the fixed support control path",
+              "receipts copy and freeze forecasts and correction versions after sender mutation",
+              "invalid numeric identity and future metadata payloads are charged then rejected",
+              "transport failures have no invented delivered scalars and remain in the audit",
+              "duplicate pending and admitted requests neither reread nor double charge",
+              "delivery reader cannot add requests or reenter a delivery batch",
+              "toy8 actual inverter placement and budget give independent packet counts",
+              "feeder24 actual inverter placement and budget give independent packet counts",
+              "feeder47 actual inverter placement and budget give independent packet counts",
+              "6001 logical actions retain deterministic paid receipts without full history scans for delivery",
+              "foundation import does not change the production protocol or physical execution"
+            ],
+            "jobs": {
+              "ongoing-browser": {
+                "id": 118022128202,
+                "conclusion": "success"
+              },
+              "release-browser": {
+                "id": 118022128507,
+                "conclusion": "success"
+              },
+              "long-session-browser": {
+                "id": 118022128706,
+                "conclusion": "success"
+              },
+              "validate": {
+                "id": 118022128831,
+                "conclusion": "success"
+              },
+              "review-ongoing": {
+                "id": 118025193271,
+                "conclusion": "success"
+              },
+              "prepare-candidate": {
+                "id": 118027550001,
+                "conclusion": "success"
+              }
+            },
+            "predefined": "refinement/packet-ledger-plan.json",
+            "test_file": "src/test-receiver-packet-ledger.cjs",
+            "no_live_integration": true,
+            "build_sha256": "69097822be929ce69de2d00427f5360b54859d27187f19ad91fb5c98522aabff",
+            "environment_sha256": "9ba870badcc3f8150521c44d17430606536b43a10c11a1337cfb4c9a2172682d",
+            "generated_page": "Successful prepare job copied the validated artifact and retained the tested source ref unchanged. Product bytes are identical to current main. No generated child was necessary.",
+            "source_review": "Before outcome inspection, corrected an overrestrictive draft by distinguishing legal future forecast targets from revealed replayed physical outcomes. Evaluation reads hide current correction metadata to prevent accidental historical parameter leakage."
+          },
+          "main_retry": {
+            "run": 39235839246,
+            "attempt": 2,
+            "conclusion": "success",
+            "completed_at": "2026-10-19T10:50:43Z",
+            "all_required_completed_logs_read": true,
+            "numerical_cases": 257,
+            "jobs": {
+              "validate": 118017659267,
+              "ongoing": 118017658570,
+              "release": 118017657443,
+              "long_sessions": 118017657280
+            },
+            "canonical": {
+              "passed": true,
+              "mode": "canonical public",
+              "url": "https://tongxin.me/online-sls-demo/",
+              "revision": "658e2611278c1ea746c5009dd5adfa5d71663f03",
+              "verified": {
+                "index.html": {
+                  "sha256": "69097822be929ce69de2d00427f5360b54859d27187f19ad91fb5c98522aabff",
+                  "status": 200
+                },
+                "environment.html": {
+                  "sha256": "9ba870badcc3f8150521c44d17430606536b43a10c11a1337cfb4c9a2172682d",
+                  "status": 200
+                }
+              },
+              "results": [
+                {
+                  "network": "toy8",
+                  "mobile": false,
+                  "actions": 206,
+                  "before": {
+                    "t": 41,
+                    "gain": -2.6856516792460687,
+                    "coefficient": 0.9660213685767003,
+                    "action": 40,
+                    "trainedThrough": 39
+                  },
+                  "corrupted": {
+                    "t": 118,
+                    "gain": 0.008254966140473571,
+                    "coefficient": -0.0029692881434323754,
+                    "action": 117,
+                    "trainedThrough": 116
+                  },
+                  "repaired": {
+                    "t": 194,
+                    "gain": -2.7389992836583845,
+                    "coefficient": 0.9852103521008561,
+                    "action": 193,
+                    "trainedThrough": 192
+                  },
+                  "costs": {
+                    "online": 0.011777370576096674,
+                    "scalar": 0.01569601433423547,
+                    "static": 0.01813491570363401,
+                    "causal": 0.01170982798500097
+                  },
+                  "exactReplay": true,
+                  "passed": true
+                },
+                {
+                  "network": "feeder24",
+                  "mobile": false,
+                  "actions": 210,
+                  "before": {
+                    "t": 41,
+                    "gain": -1.8463265918067588,
+                    "coefficient": 1.003108476309277,
+                    "action": 40,
+                    "trainedThrough": 39
+                  },
+                  "corrupted": {
+                    "t": 118,
+                    "gain": -0.019589662648401836,
+                    "coefficient": 0.010643055642404893,
+                    "action": 117,
+                    "trainedThrough": 116
+                  },
+                  "repaired": {
+                    "t": 193,
+                    "gain": -1.8756605813062464,
+                    "coefficient": 1.0190456207134577,
+                    "action": 192,
+                    "trainedThrough": 191
+                  },
+                  "costs": {
+                    "online": 0.10252469879717925,
+                    "scalar": 0.1364730650684869,
+                    "static": 0.16367561114071597,
+                    "causal": 0.10076138738175616
+                  },
+                  "exactReplay": true,
+                  "passed": true
+                },
+                {
+                  "network": "feeder47",
+                  "mobile": false,
+                  "actions": 244,
+                  "before": {
+                    "t": 43,
+                    "gain": -1.8448945714124283,
+                    "coefficient": 1.0023304602192877,
+                    "action": 42,
+                    "trainedThrough": 41
+                  },
+                  "corrupted": {
+                    "t": 123,
+                    "gain": -0.055292416012656026,
+                    "coefficient": 0.030040346829234794,
+                    "action": 122,
+                    "trainedThrough": 121
+                  },
+                  "repaired": {
+                    "t": 200,
+                    "gain": -1.8125230022217416,
+                    "coefficient": 0.9847430000209086,
+                    "action": 199,
+                    "trainedThrough": 198
+                  },
+                  "costs": {
+                    "online": 0.2721087750375821,
+                    "scalar": 0.351130646363755,
+                    "static": 0.43890470284023436,
+                    "causal": 0.269018361403777
+                  },
+                  "exactReplay": true,
+                  "passed": true
+                },
+                {
+                  "network": "toy8",
+                  "mobile": true,
+                  "actions": 209,
+                  "before": {
+                    "t": 41,
+                    "gain": -2.6856516792460687,
+                    "coefficient": 0.9660213685767003,
+                    "action": 40,
+                    "trainedThrough": 39
+                  },
+                  "corrupted": {
+                    "t": 119,
+                    "gain": 0.014442230638100333,
+                    "coefficient": -0.005194829811375458,
+                    "action": 118,
+                    "trainedThrough": 117
+                  },
+                  "repaired": {
+                    "t": 194,
+                    "gain": -2.7389992836583845,
+                    "coefficient": 0.9852103521008561,
+                    "action": 193,
+                    "trainedThrough": 192
+                  },
+                  "costs": {
+                    "online": 0.01240756732624904,
+                    "scalar": 0.016291304653873656,
+                    "static": 0.01873270281793618,
+                    "causal": 0.012326400743665806
+                  },
+                  "exactReplay": true,
+                  "passed": true
+                },
+                {
+                  "network": "feeder24",
+                  "mobile": true,
+                  "actions": 213,
+                  "before": {
+                    "t": 40,
+                    "gain": -1.847169273421866,
+                    "coefficient": 1.003566304883428,
+                    "action": 39,
+                    "trainedThrough": 38
+                  },
+                  "corrupted": {
+                    "t": 116,
+                    "gain": -0.014239844758472647,
+                    "coefficient": 0.007736501787895579,
+                    "action": 115,
+                    "trainedThrough": 114
+                  },
+                  "repaired": {
+                    "t": 194,
+                    "gain": -1.8802391899636504,
+                    "coefficient": 1.0215331769098133,
+                    "action": 193,
+                    "trainedThrough": 192
+                  },
+                  "costs": {
+                    "online": 0.10503752804761698,
+                    "scalar": 0.13978644770024948,
+                    "static": 0.16683978214341486,
+                    "causal": 0.1033198599813918
+                  },
+                  "exactReplay": true,
+                  "passed": true
+                },
+                {
+                  "network": "feeder47",
+                  "mobile": true,
+                  "actions": 249,
+                  "before": {
+                    "t": 40,
+                    "gain": -1.8382672610783264,
+                    "coefficient": 0.9987298452464165,
+                    "action": 39,
+                    "trainedThrough": 38
+                  },
+                  "corrupted": {
+                    "t": 116,
+                    "gain": -0.06537242911061146,
+                    "coefficient": 0.035516813790571776,
+                    "action": 115,
+                    "trainedThrough": 114
+                  },
+                  "repaired": {
+                    "t": 192,
+                    "gain": -1.808978829408354,
+                    "coefficient": 0.9828174523922332,
+                    "action": 191,
+                    "trainedThrough": 190
+                  },
+                  "costs": {
+                    "online": 0.27707391009909305,
+                    "scalar": 0.3574662474852183,
+                    "static": 0.44730815498675014,
+                    "causal": 0.27414131791542373
+                  },
+                  "exactReplay": true,
+                  "passed": true
+                }
+              ],
+              "errors": []
+            },
+            "long_sessions": [
+              {
+                "networkId": "toy8",
+                "mobile": false,
+                "steps": 6001,
+                "generationMs": 6254,
+                "restoreMs": 5405,
+                "secondRestoreMs": 5530,
+                "savedBytes": 46275,
+                "historyBytes": 46196858,
+                "historyEntries": 6001,
+                "historyChunks": 94,
+                "costs": {
+                  "online": 0.3833422152524623,
+                  "scalar": 0.4966935323106422,
+                  "static": 0.5570665302858188,
+                  "causal": 0.40024717574509927
+                },
+                "sourceUpdates": 5971,
+                "exactFirstRestore": true,
+                "exactResumedStep": true,
+                "exactSecondRestore": true,
+                "passed": true
+              },
+              {
+                "networkId": "feeder24",
+                "mobile": false,
+                "steps": 6001,
+                "generationMs": 12214,
+                "restoreMs": 10053,
+                "secondRestoreMs": 10223,
+                "savedBytes": 46571,
+                "historyBytes": 125325618,
+                "historyEntries": 6001,
+                "historyChunks": 94,
+                "costs": {
+                  "online": 2.754736842624508,
+                  "scalar": 3.9342730458891486,
+                  "static": 4.85759653982906,
+                  "causal": 2.830457860286317
+                },
+                "sourceUpdates": 5971,
+                "exactFirstRestore": true,
+                "exactResumedStep": true,
+                "exactSecondRestore": true,
+                "passed": true
+              },
+              {
+                "networkId": "feeder47",
+                "mobile": false,
+                "steps": 6001,
+                "generationMs": 25773,
+                "restoreMs": 20978,
+                "secondRestoreMs": 22336,
+                "savedBytes": 46661,
+                "historyBytes": 257800434,
+                "historyEntries": 6001,
+                "historyChunks": 94,
+                "costs": {
+                  "online": 5.6243666100080025,
+                  "scalar": 7.982918791874502,
+                  "static": 9.95382674474383,
+                  "causal": 5.782219503795506
+                },
+                "sourceUpdates": 5971,
+                "exactFirstRestore": true,
+                "exactResumedStep": true,
+                "exactSecondRestore": true,
+                "passed": true
+              },
+              {
+                "networkId": "toy8",
+                "mobile": true,
+                "steps": 6001,
+                "generationMs": 6254,
+                "restoreMs": 5422,
+                "secondRestoreMs": 5607,
+                "savedBytes": 46275,
+                "historyBytes": 46196858,
+                "historyEntries": 6001,
+                "historyChunks": 94,
+                "costs": {
+                  "online": 0.3833422152524623,
+                  "scalar": 0.4966935323106422,
+                  "static": 0.5570665302858188,
+                  "causal": 0.40024717574509927
+                },
+                "sourceUpdates": 5971,
+                "exactFirstRestore": true,
+                "exactResumedStep": true,
+                "exactSecondRestore": true,
+                "passed": true
+              },
+              {
+                "networkId": "feeder24",
+                "mobile": true,
+                "steps": 6001,
+                "generationMs": 12214,
+                "restoreMs": 10135,
+                "secondRestoreMs": 10232,
+                "savedBytes": 46571,
+                "historyBytes": 125325618,
+                "historyEntries": 6001,
+                "historyChunks": 94,
+                "costs": {
+                  "online": 2.754736842624508,
+                  "scalar": 3.9342730458891486,
+                  "static": 4.85759653982906,
+                  "causal": 2.830457860286317
+                },
+                "sourceUpdates": 5971,
+                "exactFirstRestore": true,
+                "exactResumedStep": true,
+                "exactSecondRestore": true,
+                "passed": true
+              },
+              {
+                "networkId": "feeder47",
+                "mobile": true,
+                "steps": 6001,
+                "generationMs": 25773,
+                "restoreMs": 20992,
+                "secondRestoreMs": 21627,
+                "savedBytes": 46661,
+                "historyBytes": 257800434,
+                "historyEntries": 6001,
+                "historyChunks": 94,
+                "costs": {
+                  "online": 5.6243666100080025,
+                  "scalar": 7.982918791874502,
+                  "static": 9.95382674474383,
+                  "causal": 5.782219503795506
+                },
+                "sourceUpdates": 5971,
+                "exactFirstRestore": true,
+                "exactResumedStep": true,
+                "exactSecondRestore": true,
+                "passed": true
+              }
+            ],
+            "cause": "No source or assertion change. Earlier first attempt failures remain unresolved in cause, recovered by retry."
+          },
+          "superseded_lease": {
+            "source": "6a5771fc605678685ad6b9ec41c60cfea4df40ca",
+            "run": 39239886325,
+            "conclusion": "cancelled when superseded by coherent foundation source",
+            "completed_and_cancelled_logs_read": true,
+            "release_job": "success",
+            "other_jobs": "cancelled",
+            "counted_completed": false
+          },
+          "foundation_attempts": [
+            {
+              "source": "f6add0c5c28861e869b9343ba5052bdec070c206",
+              "run": 39240378383,
+              "validate_job": 118019936949,
+              "validate_conclusion": "failure",
+              "completed_validate_log_read": true,
+              "error": "SyntaxError in new getter guard test fixture before any packet ledger test could run",
+              "partial_original_numerical_passed": 169,
+              "counted_completed": false,
+              "workflow_conclusion": "cancelled after validation fixture syntax failure and supersession",
+              "all_relevant_completed_and_cancelled_logs_read": true
+            },
+            {
+              "source": "46be6307c7ce4328a63a6b3e33aab37e48a12325",
+              "run": 39240943811,
+              "status": "Superseded by syntax correction to the same fixture; no outcome accepted",
+              "counted_completed": false,
+              "workflow_conclusion": "cancelled",
+              "all_relevant_cancelled_logs_read": true
+            }
+          ],
+          "final_long_sessions": {
+            "run": 39241078436,
+            "job": 118022128706,
+            "conclusion": "success",
+            "results": [
+              {
+                "networkId": "toy8",
+                "mobile": false,
+                "steps": 6001,
+                "generationMs": 8211,
+                "restoreMs": 7351,
+                "secondRestoreMs": 7447,
+                "savedBytes": 46275,
+                "historyBytes": 46196858,
+                "historyEntries": 6001,
+                "historyChunks": 94,
+                "costs": {
+                  "online": 0.3833422152524623,
+                  "scalar": 0.4966935323106422,
+                  "static": 0.5570665302858188,
+                  "causal": 0.40024717574509927
+                },
+                "sourceUpdates": 5971,
+                "exactFirstRestore": true,
+                "exactResumedStep": true,
+                "exactSecondRestore": true,
+                "passed": true
+              },
+              {
+                "networkId": "feeder24",
+                "mobile": false,
+                "steps": 6001,
+                "generationMs": 17113,
+                "restoreMs": 13020,
+                "secondRestoreMs": 13285,
+                "savedBytes": 46571,
+                "historyBytes": 125325618,
+                "historyEntries": 6001,
+                "historyChunks": 94,
+                "costs": {
+                  "online": 2.754736842624508,
+                  "scalar": 3.9342730458891486,
+                  "static": 4.85759653982906,
+                  "causal": 2.830457860286317
+                },
+                "sourceUpdates": 5971,
+                "exactFirstRestore": true,
+                "exactResumedStep": true,
+                "exactSecondRestore": true,
+                "passed": true
+              },
+              {
+                "networkId": "feeder47",
+                "mobile": false,
+                "steps": 6001,
+                "generationMs": 33653,
+                "restoreMs": 27191,
+                "secondRestoreMs": 28921,
+                "savedBytes": 46661,
+                "historyBytes": 257800434,
+                "historyEntries": 6001,
+                "historyChunks": 94,
+                "costs": {
+                  "online": 5.6243666100080025,
+                  "scalar": 7.982918791874502,
+                  "static": 9.95382674474383,
+                  "causal": 5.782219503795506
+                },
+                "sourceUpdates": 5971,
+                "exactFirstRestore": true,
+                "exactResumedStep": true,
+                "exactSecondRestore": true,
+                "passed": true
+              },
+              {
+                "networkId": "toy8",
+                "mobile": true,
+                "steps": 6001,
+                "generationMs": 8211,
+                "restoreMs": 7059,
+                "secondRestoreMs": 7177,
+                "savedBytes": 46275,
+                "historyBytes": 46196858,
+                "historyEntries": 6001,
+                "historyChunks": 94,
+                "costs": {
+                  "online": 0.3833422152524623,
+                  "scalar": 0.4966935323106422,
+                  "static": 0.5570665302858188,
+                  "causal": 0.40024717574509927
+                },
+                "sourceUpdates": 5971,
+                "exactFirstRestore": true,
+                "exactResumedStep": true,
+                "exactSecondRestore": true,
+                "passed": true
+              },
+              {
+                "networkId": "feeder24",
+                "mobile": true,
+                "steps": 6001,
+                "generationMs": 17113,
+                "restoreMs": 13052,
+                "secondRestoreMs": 13520,
+                "savedBytes": 46571,
+                "historyBytes": 125325618,
+                "historyEntries": 6001,
+                "historyChunks": 94,
+                "costs": {
+                  "online": 2.754736842624508,
+                  "scalar": 3.9342730458891486,
+                  "static": 4.85759653982906,
+                  "causal": 2.830457860286317
+                },
+                "sourceUpdates": 5971,
+                "exactFirstRestore": true,
+                "exactResumedStep": true,
+                "exactSecondRestore": true,
+                "passed": true
+              },
+              {
+                "networkId": "feeder47",
+                "mobile": true,
+                "steps": 6001,
+                "generationMs": 33653,
+                "restoreMs": 27121,
+                "secondRestoreMs": 27816,
+                "savedBytes": 46661,
+                "historyBytes": 257800434,
+                "historyEntries": 6001,
+                "historyChunks": 94,
+                "costs": {
+                  "online": 5.6243666100080025,
+                  "scalar": 7.982918791874502,
+                  "static": 9.95382674474383,
+                  "causal": 5.782219503795506
+                },
+                "sourceUpdates": 5971,
+                "exactFirstRestore": true,
+                "exactResumedStep": true,
+                "exactSecondRestore": true,
+                "passed": true
+              }
+            ],
+            "completed_log_read": true
+          },
+          "final_native": {
+            "run": 39241078436,
+            "job": 118022128202,
+            "conclusion": "success",
+            "results": [
+              {
+                "networkId": "toy8",
+                "mobile": false,
+                "frames": 1714,
+                "maxFrameGapMs": 33.399999999999636,
+                "over50ms": 0,
+                "over100ms": 0,
+                "initialDomNodes": 1263,
+                "finalDomNodes": 1426,
+                "initialHeapBytes": 21700000,
+                "finalHeapBytes": 21700000,
+                "elapsedMs": 28586,
+                "actions": 904,
+                "sourceSwitches": [
+                  {
+                    "action": 91,
+                    "trainedThrough": 90,
+                    "coefficient": 0.9959313896800395,
+                    "gain": -2.7688050141674485,
+                    "raw": 0.005751611065061888,
+                    "bounded": 0.005751611065061888,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 219,
+                    "trainedThrough": 218,
+                    "coefficient": 0.017628958105059173,
+                    "gain": -0.04901055243526079,
+                    "raw": 0.004029590014358829,
+                    "bounded": 0.004029590014358829,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 430,
+                    "trainedThrough": 429,
+                    "coefficient": 0.9573044070354575,
+                    "gain": -2.6614175130436637,
+                    "raw": 0.0007441943823570457,
+                    "bounded": 0.0007441943823570457,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 651,
+                    "trainedThrough": 650,
+                    "coefficient": 0.023512146909048754,
+                    "gain": -0.06536650107647532,
+                    "raw": 0.0032798477099262374,
+                    "bounded": 0.0032798477099262374,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 900,
+                    "trainedThrough": 899,
+                    "coefficient": 1.026745409715456,
+                    "gain": -2.854471571186128,
+                    "raw": -0.0013965328844452237,
+                    "bounded": -0.0013965328844452237,
+                    "corrupted": false
+                  }
+                ],
+                "costs": {
+                  "online": 0.050533450719034825,
+                  "scalar": 0.06899511330258766,
+                  "static": 0.07997842455629965,
+                  "causal": 0.05224729915623826
+                },
+                "sourceUpdates": 874
+              },
+              {
+                "networkId": "feeder24",
+                "mobile": false,
+                "frames": 1444,
+                "maxFrameGapMs": 50.099999999998545,
+                "over50ms": 1,
+                "over100ms": 0,
+                "initialDomNodes": 2241,
+                "finalDomNodes": 2380,
+                "initialHeapBytes": 26000000,
+                "finalHeapBytes": 26000000,
+                "elapsedMs": 29139,
+                "actions": 910,
+                "sourceSwitches": [
+                  {
+                    "action": 92,
+                    "trainedThrough": 91,
+                    "coefficient": 0.9882779119712795,
+                    "gain": -1.8190293792365966,
+                    "raw": 0.012035618142023592,
+                    "bounded": 0.012035618142023592,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 220,
+                    "trainedThrough": 219,
+                    "coefficient": -0.00693861416460608,
+                    "gain": 0.012771248718318468,
+                    "raw": 0.008564305647607576,
+                    "bounded": 0.008564305647607576,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 431,
+                    "trainedThrough": 430,
+                    "coefficient": 0.9917916419008043,
+                    "gain": -1.8254967685155492,
+                    "raw": -0.001093497081370629,
+                    "bounded": -0.001093497081370629,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 653,
+                    "trainedThrough": 652,
+                    "coefficient": 0.019223767385652957,
+                    "gain": -0.03538336456833537,
+                    "raw": -0.004570507923464139,
+                    "bounded": -0.004570507923464139,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 903,
+                    "trainedThrough": 902,
+                    "coefficient": 0.9769385924130308,
+                    "gain": -1.798158169663711,
+                    "raw": -0.003771683900434129,
+                    "bounded": -0.003771683900434129,
+                    "corrupted": false
+                  }
+                ],
+                "costs": {
+                  "online": 0.4221716134375446,
+                  "scalar": 0.5954144275729389,
+                  "static": 0.750940536162051,
+                  "causal": 0.4305227310370643
+                },
+                "sourceUpdates": 880
+              },
+              {
+                "networkId": "feeder47",
+                "mobile": false,
+                "frames": 1237,
+                "maxFrameGapMs": 249.89999999999782,
+                "over50ms": 273,
+                "over100ms": 42,
+                "initialDomNodes": 4328,
+                "finalDomNodes": 4479,
+                "initialHeapBytes": 33100000,
+                "finalHeapBytes": 33100000,
+                "elapsedMs": 45751,
+                "actions": 912,
+                "sourceSwitches": [
+                  {
+                    "action": 91,
+                    "trainedThrough": 90,
+                    "coefficient": 1.0041584666697092,
+                    "gain": -1.8482592094342556,
+                    "raw": 0.009433101581380405,
+                    "bounded": 0.009433101581380405,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 220,
+                    "trainedThrough": 219,
+                    "coefficient": -0.004537095655493969,
+                    "gain": 0.008351001468087146,
+                    "raw": 0.010629323983343248,
+                    "bounded": 0.010629323983343248,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 432,
+                    "trainedThrough": 431,
+                    "coefficient": 0.9995339619531732,
+                    "gain": -1.8397473224013685,
+                    "raw": -0.003952802234958066,
+                    "bounded": -0.003952802234958066,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 653,
+                    "trainedThrough": 652,
+                    "coefficient": 0.008229667473888223,
+                    "gain": -0.015147568042364131,
+                    "raw": -0.0002759866604909049,
+                    "bounded": -0.0002759866604909049,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 901,
+                    "trainedThrough": 900,
+                    "coefficient": 0.9883335185400688,
+                    "gain": -1.8191317289715054,
+                    "raw": -0.006868106905175752,
+                    "bounded": -0.006868106905175752,
+                    "corrupted": false
+                  }
+                ],
+                "costs": {
+                  "online": 0.8707158499652947,
+                  "scalar": 1.227190665799699,
+                  "static": 1.5827362817676174,
+                  "causal": 0.886241406951127
+                },
+                "sourceUpdates": 882
+              },
+              {
+                "networkId": "toy8",
+                "mobile": true,
+                "frames": 1715,
+                "maxFrameGapMs": 16.80000000000291,
+                "over50ms": 0,
+                "over100ms": 0,
+                "initialDomNodes": 1263,
+                "finalDomNodes": 1426,
+                "initialHeapBytes": 24500000,
+                "finalHeapBytes": 24500000,
+                "elapsedMs": 28576,
+                "actions": 904,
+                "sourceSwitches": [
+                  {
+                    "action": 90,
+                    "trainedThrough": 89,
+                    "coefficient": 0.9988286314942323,
+                    "gain": -2.7768596831391434,
+                    "raw": 0.0069188657890316314,
+                    "bounded": 0.0069188657890316314,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 221,
+                    "trainedThrough": 220,
+                    "coefficient": 0.017186296536405334,
+                    "gain": -0.04777990182662625,
+                    "raw": 0.0040042604412074065,
+                    "bounded": 0.0040042604412074065,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 431,
+                    "trainedThrough": 430,
+                    "coefficient": 0.9576340598203813,
+                    "gain": -2.662333986099227,
+                    "raw": 0.0012708220955707991,
+                    "bounded": 0.0012708220955707991,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 650,
+                    "trainedThrough": 649,
+                    "coefficient": 0.023401050101000496,
+                    "gain": -0.06505763903801619,
+                    "raw": 0.002768065180412392,
+                    "bounded": 0.002768065180412392,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 901,
+                    "trainedThrough": 900,
+                    "coefficient": 1.025371448911144,
+                    "gain": -2.8506518004632966,
+                    "raw": -0.0014033026520986107,
+                    "bounded": -0.0014033026520986107,
+                    "corrupted": false
+                  }
+                ],
+                "costs": {
+                  "online": 0.050542529135902,
+                  "scalar": 0.06915324077574463,
+                  "static": 0.08027285030722742,
+                  "causal": 0.05224729915623826
+                },
+                "sourceUpdates": 874
+              },
+              {
+                "networkId": "feeder24",
+                "mobile": true,
+                "frames": 1438,
+                "maxFrameGapMs": 66.59999999999854,
+                "over50ms": 4,
+                "over100ms": 0,
+                "initialDomNodes": 2264,
+                "finalDomNodes": 2403,
+                "initialHeapBytes": 26000000,
+                "finalHeapBytes": 26000000,
+                "elapsedMs": 29016,
+                "actions": 907,
+                "sourceSwitches": [
+                  {
+                    "action": 90,
+                    "trainedThrough": 89,
+                    "coefficient": 0.9936280934601275,
+                    "gain": -1.8288769506480127,
+                    "raw": 0.011671670908788291,
+                    "bounded": 0.011671670908788291,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 220,
+                    "trainedThrough": 219,
+                    "coefficient": -0.006938614164606066,
+                    "gain": 0.012771248718318442,
+                    "raw": 0.008564305647607576,
+                    "bounded": 0.008564305647607576,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 431,
+                    "trainedThrough": 430,
+                    "coefficient": 0.9917916419008043,
+                    "gain": -1.8254967685155492,
+                    "raw": -0.001093497081370629,
+                    "bounded": -0.001093497081370629,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 649,
+                    "trainedThrough": 648,
+                    "coefficient": 0.021442708963977406,
+                    "gain": -0.039467559785984936,
+                    "raw": -0.0006587127179968581,
+                    "bounded": -0.0006587127179968581,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 902,
+                    "trainedThrough": 901,
+                    "coefficient": 0.9786694361839486,
+                    "gain": -1.8013439695607139,
+                    "raw": -0.004970167352640885,
+                    "bounded": -0.004970167352640885,
+                    "corrupted": false
+                  }
+                ],
+                "costs": {
+                  "online": 0.42172738516286384,
+                  "scalar": 0.5947167407077544,
+                  "static": 0.7495980234917119,
+                  "causal": 0.4300337944820567
+                },
+                "sourceUpdates": 877
+              },
+              {
+                "networkId": "feeder47",
+                "mobile": true,
+                "frames": 1132,
+                "maxFrameGapMs": 266.59999999999854,
+                "over50ms": 247,
+                "over100ms": 86,
+                "initialDomNodes": 4328,
+                "finalDomNodes": 4491,
+                "initialHeapBytes": 47400000,
+                "finalHeapBytes": 47400000,
+                "elapsedMs": 42774,
+                "actions": 919,
+                "sourceSwitches": [
+                  {
+                    "action": 90,
+                    "trainedThrough": 89,
+                    "coefficient": 1.0064280605469436,
+                    "gain": -1.8524366355323356,
+                    "raw": 0.010465204977635001,
+                    "bounded": 0.010465204977635001,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 221,
+                    "trainedThrough": 220,
+                    "coefficient": -0.004380336128050829,
+                    "gain": 0.008062469080142201,
+                    "raw": 0.007830786623061583,
+                    "bounded": 0.007830786623061583,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 431,
+                    "trainedThrough": 430,
+                    "coefficient": 0.9995477549758082,
+                    "gain": -1.8397727099093737,
+                    "raw": -0.0043047735439139265,
+                    "bounded": -0.0043047735439139265,
+                    "corrupted": false
+                  },
+                  {
+                    "action": 653,
+                    "trainedThrough": 652,
+                    "coefficient": 0.008229667473888223,
+                    "gain": -0.015147568042364131,
+                    "raw": -0.0002759866604909049,
+                    "bounded": -0.0002759866604909049,
+                    "corrupted": true
+                  },
+                  {
+                    "action": 904,
+                    "trainedThrough": 903,
+                    "coefficient": 0.978297315034264,
+                    "gain": -1.8006590414694226,
+                    "raw": -0.005800971557423512,
+                    "bounded": -0.005800971557423512,
+                    "corrupted": false
+                  }
+                ],
+                "costs": {
+                  "online": 0.8751947255275057,
+                  "scalar": 1.23304292700118,
+                  "static": 1.589486434831278,
+                  "causal": 0.8908293248585629
+                },
+                "sourceUpdates": 889
+              }
+            ],
+            "continued_actions": [
+              1820,
+              1840,
+              1991,
+              1820,
+              1836,
+              2010
+            ],
+            "completed_log_read": true
+          },
+          "artifacts": [
+            {
+              "id": 12182460577,
+              "name": "browser-evidence",
+              "digest": "sha256:01d609f33abd32c37c938f7da53e7666780c19380511571dbc6f67391a15c78c",
+              "size_in_bytes": 12136673
+            },
+            {
+              "id": 12182300748,
+              "name": "validated-page",
+              "digest": "sha256:ab8ab53a4768c25faab507ad3a9199932675824e592156926b2e32481c62fa55",
+              "size_in_bytes": 95257
+            },
+            {
+              "id": 12180889637,
+              "name": "ongoing-browser-evidence",
+              "digest": "sha256:0d84e574198e9307b7e39e3825158137efbe255362220c941553af9bf967726c",
+              "size_in_bytes": 16952064
+            },
+            {
+              "id": 12180738003,
+              "name": "release-browser-evidence",
+              "digest": "sha256:11ceeecd5acb97c8a19c9491554ae083d9361a0e9e661e8d42df8d2224172252",
+              "size_in_bytes": 1906461
+            },
+            {
+              "id": 12180679461,
+              "name": "long-session-browser-evidence",
+              "digest": "sha256:1d5e04db89645098f40bc589e60723e08729d5a86f280d9d5f830633184b7d94",
+              "size_in_bytes": 1856359
+            }
+          ]
+        },
+        "next_focus": "Read current main and every completed job and log for the latest checkpoint before edits. Preserve the passed 18 packet admission checks and all 257 existing numerical cases. Derive and independently test candidate replay equations with a common measured initial state, 60 prior fit pairs and 60 validation actions, exact global stationary response row times, legal issued preview packets, shared forcing, inverter lag, clipping and unchanged stage costs. Bind the receiver ledger reader to the actual immutable sealed issuer with forbidden global forecast and quality getters. Define provisional current control admission and atomic rollback accounting before adding support activation. Keep incomplete support learning unpublished and preserve version 13 and 14 replay, all histories and physical costs.",
+        "implementation_plan": "refinement/ongoing-support-plan.md",
+        "packet_admission_plan": "refinement/packet-ledger-plan.json",
+        "pixel_review": {
+          "source": "d75cf21b63628e7d5384c53488775df25888e0d1",
+          "run": 39236325451,
+          "job": 118009227549,
+          "long_session_images": [
+            {
+              "file": "long-session/feeder24-desktop-long-restored.png",
+              "sha": "205ed5cecf845cd596755b8667483879fbcb99f4",
+              "base64_text_sha": "8ac3bf084d5b75b25c4c3789b8f48bb281a24077",
+              "bytes": 349363
+            },
+            {
+              "file": "long-session/feeder24-phone-long-restored.png",
+              "sha": "89a69a4626e6a47ff823254e0f91149daf0181c8",
+              "base64_text_sha": "70034c000a040a1187f636bffa42444272987796",
+              "bytes": 307451
+            },
+            {
+              "file": "long-session/feeder47-desktop-long-restored.png",
+              "sha": "ca28d3599fa3cb80715414840cdfcc1424b574fe",
+              "base64_text_sha": "f6337b18c5e39f699f40da28443ff6bd57fed7dd",
+              "bytes": 432627
+            },
+            {
+              "file": "long-session/feeder47-phone-long-restored.png",
+              "sha": "ecd93a684d94d77d380bad9ca60442626756d759",
+              "base64_text_sha": "d96c8b1a0f3ee7c79e32f158006e108836f2a151",
+              "bytes": 281155
+            },
+            {
+              "file": "long-session/toy8-desktop-long-restored.png",
+              "sha": "f44ae3ba22316d386c267b2a56f26d861965d046",
+              "base64_text_sha": "1bfe1f21ccd36b1c8c0605573663efce24f4a862",
+              "bytes": 285458
+            },
+            {
+              "file": "long-session/toy8-phone-long-restored.png",
+              "sha": "1444f5208046aca370435911908162a7a7ea1113",
+              "base64_text_sha": "67b9b3b4df957e556f7bbeb07212acc025e25a88",
+              "bytes": 244385
+            }
+          ],
+          "status": "All six actual full page PNGs inspected through authenticated Git blob wrappers. Four panels, full signed gain history, retained four method costs and action 6002 are visible. Larger phone network and matrix use labeled horizontal scroll. No new visual or algorithm change is implied.",
+          "latest_candidate": {
+            "source": "3aa3d3443903e8b23d0fac95e2ee00418a715699",
+            "run": 39241078436,
+            "review_job": 118025193271,
+            "completed_log_read": true,
+            "images_captured": 42,
+            "long_images": [
+              {
+                "file": "long-session/feeder24-desktop-long-restored.png",
+                "sha": "205ed5cecf845cd596755b8667483879fbcb99f4",
+                "base64_text_sha": "8ac3bf084d5b75b25c4c3789b8f48bb281a24077",
+                "bytes": 349363,
+                "same_inspected_pixels": true
+              },
+              {
+                "file": "long-session/feeder24-phone-long-restored.png",
+                "sha": "89a69a4626e6a47ff823254e0f91149daf0181c8",
+                "base64_text_sha": "70034c000a040a1187f636bffa42444272987796",
+                "bytes": 307451,
+                "same_inspected_pixels": true
+              },
+              {
+                "file": "long-session/feeder47-desktop-long-restored.png",
+                "sha": "ca28d3599fa3cb80715414840cdfcc1424b574fe",
+                "base64_text_sha": "f6337b18c5e39f699f40da28443ff6bd57fed7dd",
+                "bytes": 432627,
+                "same_inspected_pixels": true
+              },
+              {
+                "file": "long-session/feeder47-phone-long-restored.png",
+                "sha": "ecd93a684d94d77d380bad9ca60442626756d759",
+                "base64_text_sha": "d96c8b1a0f3ee7c79e32f158006e108836f2a151",
+                "bytes": 281155,
+                "same_inspected_pixels": true
+              },
+              {
+                "file": "long-session/toy8-desktop-long-restored.png",
+                "sha": "f44ae3ba22316d386c267b2a56f26d861965d046",
+                "base64_text_sha": "1bfe1f21ccd36b1c8c0605573663efce24f4a862",
+                "bytes": 285458,
+                "same_inspected_pixels": true
+              },
+              {
+                "file": "long-session/toy8-phone-long-restored.png",
+                "sha": "1444f5208046aca370435911908162a7a7ea1113",
+                "base64_text_sha": "67b9b3b4df957e556f7bbeb07212acc025e25a88",
+                "bytes": 244385,
+                "same_inspected_pixels": true
+              }
+            ],
+            "status": "All six new long PNG hashes exactly match the actual six previously inspected pixels. Product source and built bytes are unchanged. Other new native captures are retained but not newly pixel inspected."
+          }
+        },
+        "remaining_gaps": [
+          "Source and support adaptation are not integrated by this foundation. Live support remains fixed offline. The live source local correction is not literal manuscript Algorithm 1 or full joint co design.",
+          "Candidate replay still needs independently checked score equations, a declared common measured initial state, finite memory and source fit context and all candidate outcomes. An issued future forecast target is distinct from an unrevealed physical outcome.",
+          "The support deployment transaction must resolve admission of the new mask ordinary current forecast at activation while preserving delayed historical retrieval, rollback, unchanged physical state and exact accounting of any failed provisional traffic. No activation API exists in this foundation.",
+          "The ledger snapshots retain full finite request and receipt history. Its 6001 action test is not an indefinite memory or native playback performance bound.",
+          "The original main browser API and Step locator failures recovered without source changes. Their cause is unconfirmed and the first attempt evidence is retained.",
+          "The 47 bus finite saved history is roughly 258 MB when serialized and verified restoration remains slow. Keep every sample and accumulated cost; this does not measure retained heap.",
+          "No new default, UI, controller, objective, support, physical limit, baseline or saved protocol is changed or claimed complete.",
+          "The isolated ledger checks source and target identity but does not authenticate a dishonest transport forecast value. Integration must bind its callback to the actual immutable sealed issuer and expose only purpose restricted receiver capabilities."
+        ],
+        "finished_at": "2026-10-19T19:12:30+08:00",
+        "source_commit": "3aa3d3443903e8b23d0fac95e2ee00418a715699",
+        "ready_commit": "3aa3d3443903e8b23d0fac95e2ee00418a715699",
+        "published_commit": null,
+        "scope": {
+          "production_bundle_changed": false,
+          "controller_changed": false,
+          "support_changed": false,
+          "plant_parameters_changed": false,
+          "baseline_changed": false,
+          "version_13_or_14_schema_changed": false,
+          "new_protocol_not_integrated": true,
+          "new_dependencies": false
+        },
+        "checkpoint": {
+          "status": "Progress and evidence only child to be validated separately. Keep branch unpublished.",
+          "parent": "3aa3d3443903e8b23d0fac95e2ee00418a715699",
+          "published": false
         }
       }
     ],
-    "active_run": {
-      "slot": "2026-10-19T17:45:00+08:00",
-      "started_at": "2026-10-19T17:42:34+08:00",
-      "lease_expires_at": "2026-10-19T18:22:34+08:00",
-      "branch": "cloud/refine/continuous-release-20261019"
-    },
+    "active_run": null,
     "configuration": {
       "automation_id": "6ad2628236888191b683d1e7ed2e5b93",
       "is_enabled": true,
@@ -8467,7 +10438,7 @@
       "setup_counts_as_improvement": false
     },
     "candidate_branch": "cloud/refine/continuous-release-20261019",
-    "next_focus": "Read current main and this checkpoint repeat first. Reduce unchanged matrix SVG mutations while retaining every source, cell, permission and actual per action coefficient value. Source labels currently reset text and titles every render, cached positions are reapplied, and all 736 cells receive many static attributes each action. Separate static geometry and accessibility updates from actual changing response energy. For ongoing fixed support, update every admitted gain including zero values, while leaving excluded zero cells present and correctly inspectable. Keep archived behavior correct. Add independent checks that every displayed matrix value matches the actual diagnostics after corruption, repair, selection, scroll, resize and font changes. Keep all physical actions and receipts; do not lower the requested test rate or tune physics. Read all timing outcomes, capture and inspect pixels, then promote only after responsiveness and exact public verification pass.",
+    "next_focus": "Read current main and every completed job and log for the latest checkpoint before edits. Preserve the passed 18 packet admission checks and all 257 existing numerical cases. Derive and independently test candidate replay equations with a common measured initial state, 60 prior fit pairs and 60 validation actions, exact global stationary response row times, legal issued preview packets, shared forcing, inverter lag, clipping and unchanged stage costs. Bind the receiver ledger reader to the actual immutable sealed issuer with forbidden global forecast and quality getters. Define provisional current control admission and atomic rollback accounting before adding support activation. Keep incomplete support learning unpublished and preserve version 13 and 14 replay, all histories and physical costs.",
     "skipped_duplicate_dispatches": [
       {
         "dispatch": "2026-10-19T03:13:56+08:00",
@@ -8500,6 +10471,14 @@
         "at": "2026-10-19T08:53:01+08:00",
         "slot": "2026-10-19T08:45:00+08:00",
         "action": "Read only duplicate preflight during the counted pass. No new invocation or deadline extension."
+      },
+      {
+        "dispatch": "2026-10-19T18:14:45+08:00",
+        "slot": "2026-10-19T17:45:00+08:00",
+        "status": "same_slot_existing_pass_continued",
+        "counted_invocation": false,
+        "deadline_extended": false,
+        "original_dispatch": "2026-10-19T17:42:34+08:00"
       }
     ],
     "read_only_preflights": [
@@ -8545,6 +10524,92 @@
         ],
         "source_mirror": "Synchronized by manual release owner as reported in handoff. Not separately accessed by cloud task."
       }
-    ]
+    ],
+    "current_release_verification": {
+      "commit": "658e2611278c1ea746c5009dd5adfa5d71663f03",
+      "pages_run": 39235838715,
+      "main_validation": 39235839246,
+      "attempt": 2,
+      "conclusion": "success",
+      "public_browser_conditions": 6,
+      "source_page_sha256": "69097822be929ce69de2d00427f5360b54859d27187f19ad91fb5c98522aabff",
+      "checked_at": "2026-10-19T18:51:13+08:00",
+      "protocol": "continuous-phi-v1",
+      "support": "Fixed offline",
+      "scheduled_algorithm_completions": 0
+    },
+    "progress_ref": "cloud/refine/continuous-release-20261019"
+  },
+  "reconciliation_history": [
+    {
+      "program": "full-phi-topology-20261019T200000",
+      "reason": "Manual release main retained stale 17:45 lease and 11-count snapshot. Reconciled legitimate later 18:45 record without losing either scope.",
+      "old_main_state_commit": "4e34cd76542a521466fc2a8da676da447ae7539e",
+      "prior_progress_commit": "c950dae18441048132b0e55b89126412a95a8955",
+      "expired_lease": {
+        "slot": "2026-10-19T17:45:00+08:00",
+        "started_at": "2026-10-19T17:42:34+08:00",
+        "lease_expires_at": "2026-10-19T18:22:34+08:00",
+        "branch": "cloud/refine/continuous-release-20261019"
+      },
+      "prior_invocations": 12,
+      "prior_completions": 0,
+      "historical_completions": 36
+    }
+  ],
+  "full_response_program": {
+    "id": "full-phi-topology-20261019T200000",
+    "status": "active",
+    "first_run": "2026-10-19T20:00:00+08:00",
+    "last_scheduled_run": "2026-10-20T19:00:00+08:00",
+    "hard_deadline": "2026-10-20T20:00:00+08:00",
+    "max_scheduled_runs": 24,
+    "max_minutes_per_run": 40,
+    "invocation_count": 2,
+    "completed_count": 0,
+    "candidate_branch": "cloud/refine/full-response-20261019",
+    "runs": [
+      {
+        "slot": "2026-10-19T20:00:00+08:00",
+        "started_at": "2026-10-19T20:04:59+08:00",
+        "status": "read_only_manual_work_wait",
+        "implementation_completed": false,
+        "repository_mutations": 0,
+        "workflow_dispatches": 0,
+        "publication_attempts": 0
+      },
+      {
+        "slot": "2026-10-19T21:00:00+08:00",
+        "started_at": "2026-10-19T21:08:27+08:00",
+        "status": "in_progress",
+        "implementation_completed": false
+      }
+    ],
+    "manual_releases": [
+      {
+        "commit": "4e34cd76542a521466fc2a8da676da447ae7539e",
+        "protocol": "adaptive-phi-v2",
+        "record_version": 15,
+        "provenance": "Explicit manual release handoff on 19 October 2026",
+        "counted_invocation": false,
+        "counted_completed": false,
+        "source_validation": 39252563811,
+        "main_validation": 39254645634,
+        "main_audit": 39254645640,
+        "pages": 39254646028,
+        "all_final_results": "success",
+        "completed_job_logs_read": true,
+        "public_index_sha256": "777c1a4b047834959556f8629bbf8cbfc24cf6b5f5c2f1c241e4b36b1515d241",
+        "public_environment_sha256": "4aa81d6fa54c8f90543a0cf05faeb2a7074eeecf2637a2adb8693a2752d72200",
+        "direct_public_trials": "Six desktop and phone cases reported independently verified by manual release owner. Main cloud release browser logs read.",
+        "scope": "Shared stationary response specialization with experimental support reselection. No manuscript equivalence or universal guarantee."
+      }
+    ],
+    "active_run": {
+      "slot": "2026-10-19T21:00:00+08:00",
+      "started_at": "2026-10-19T21:08:27+08:00",
+      "lease_expires_at": "2026-10-19T21:48:27+08:00",
+      "branch": "cloud/refine/full-response-20261019"
+    }
   }
 }
