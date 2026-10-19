@@ -747,6 +747,205 @@
         }
       ],
       "interpretation": "Recovered without source or test assertion changes. The earlier failure remains separate; retry does not identify or fix its cause."
+    },
+    {
+      "source": "3aa3d3443903e8b23d0fac95e2ee00418a715699",
+      "workflow_run": 39241078436,
+      "job_id": 118022128706,
+      "conclusion": "success",
+      "completed_log_read": true,
+      "results": [
+        {
+          "networkId": "toy8",
+          "mobile": false,
+          "steps": 6001,
+          "generationMs": 8211,
+          "restoreMs": 7351,
+          "secondRestoreMs": 7447,
+          "savedBytes": 46275,
+          "historyBytes": 46196858,
+          "historyEntries": 6001,
+          "historyChunks": 94,
+          "costs": {
+            "online": 0.3833422152524623,
+            "scalar": 0.4966935323106422,
+            "static": 0.5570665302858188,
+            "causal": 0.40024717574509927
+          },
+          "sourceUpdates": 5971,
+          "exactFirstRestore": true,
+          "exactResumedStep": true,
+          "exactSecondRestore": true,
+          "passed": true
+        },
+        {
+          "networkId": "feeder24",
+          "mobile": false,
+          "steps": 6001,
+          "generationMs": 17113,
+          "restoreMs": 13020,
+          "secondRestoreMs": 13285,
+          "savedBytes": 46571,
+          "historyBytes": 125325618,
+          "historyEntries": 6001,
+          "historyChunks": 94,
+          "costs": {
+            "online": 2.754736842624508,
+            "scalar": 3.9342730458891486,
+            "static": 4.85759653982906,
+            "causal": 2.830457860286317
+          },
+          "sourceUpdates": 5971,
+          "exactFirstRestore": true,
+          "exactResumedStep": true,
+          "exactSecondRestore": true,
+          "passed": true
+        },
+        {
+          "networkId": "feeder47",
+          "mobile": false,
+          "steps": 6001,
+          "generationMs": 33653,
+          "restoreMs": 27191,
+          "secondRestoreMs": 28921,
+          "savedBytes": 46661,
+          "historyBytes": 257800434,
+          "historyEntries": 6001,
+          "historyChunks": 94,
+          "costs": {
+            "online": 5.6243666100080025,
+            "scalar": 7.982918791874502,
+            "static": 9.95382674474383,
+            "causal": 5.782219503795506
+          },
+          "sourceUpdates": 5971,
+          "exactFirstRestore": true,
+          "exactResumedStep": true,
+          "exactSecondRestore": true,
+          "passed": true
+        },
+        {
+          "networkId": "toy8",
+          "mobile": true,
+          "steps": 6001,
+          "generationMs": 8211,
+          "restoreMs": 7059,
+          "secondRestoreMs": 7177,
+          "savedBytes": 46275,
+          "historyBytes": 46196858,
+          "historyEntries": 6001,
+          "historyChunks": 94,
+          "costs": {
+            "online": 0.3833422152524623,
+            "scalar": 0.4966935323106422,
+            "static": 0.5570665302858188,
+            "causal": 0.40024717574509927
+          },
+          "sourceUpdates": 5971,
+          "exactFirstRestore": true,
+          "exactResumedStep": true,
+          "exactSecondRestore": true,
+          "passed": true
+        },
+        {
+          "networkId": "feeder24",
+          "mobile": true,
+          "steps": 6001,
+          "generationMs": 17113,
+          "restoreMs": 13052,
+          "secondRestoreMs": 13520,
+          "savedBytes": 46571,
+          "historyBytes": 125325618,
+          "historyEntries": 6001,
+          "historyChunks": 94,
+          "costs": {
+            "online": 2.754736842624508,
+            "scalar": 3.9342730458891486,
+            "static": 4.85759653982906,
+            "causal": 2.830457860286317
+          },
+          "sourceUpdates": 5971,
+          "exactFirstRestore": true,
+          "exactResumedStep": true,
+          "exactSecondRestore": true,
+          "passed": true
+        },
+        {
+          "networkId": "feeder47",
+          "mobile": true,
+          "steps": 6001,
+          "generationMs": 33653,
+          "restoreMs": 27121,
+          "secondRestoreMs": 27816,
+          "savedBytes": 46661,
+          "historyBytes": 257800434,
+          "historyEntries": 6001,
+          "historyChunks": 94,
+          "costs": {
+            "online": 5.6243666100080025,
+            "scalar": 7.982918791874502,
+            "static": 9.95382674474383,
+            "causal": 5.782219503795506
+          },
+          "sourceUpdates": 5971,
+          "exactFirstRestore": true,
+          "exactResumedStep": true,
+          "exactSecondRestore": true,
+          "passed": true
+        }
+      ],
+      "pixel_review": {
+        "source": "3aa3d3443903e8b23d0fac95e2ee00418a715699",
+        "run": 39241078436,
+        "review_job": 118025193271,
+        "completed_log_read": true,
+        "images_captured": 42,
+        "long_images": [
+          {
+            "file": "long-session/feeder24-desktop-long-restored.png",
+            "sha": "205ed5cecf845cd596755b8667483879fbcb99f4",
+            "base64_text_sha": "8ac3bf084d5b75b25c4c3789b8f48bb281a24077",
+            "bytes": 349363,
+            "same_inspected_pixels": true
+          },
+          {
+            "file": "long-session/feeder24-phone-long-restored.png",
+            "sha": "89a69a4626e6a47ff823254e0f91149daf0181c8",
+            "base64_text_sha": "70034c000a040a1187f636bffa42444272987796",
+            "bytes": 307451,
+            "same_inspected_pixels": true
+          },
+          {
+            "file": "long-session/feeder47-desktop-long-restored.png",
+            "sha": "ca28d3599fa3cb80715414840cdfcc1424b574fe",
+            "base64_text_sha": "f6337b18c5e39f699f40da28443ff6bd57fed7dd",
+            "bytes": 432627,
+            "same_inspected_pixels": true
+          },
+          {
+            "file": "long-session/feeder47-phone-long-restored.png",
+            "sha": "ecd93a684d94d77d380bad9ca60442626756d759",
+            "base64_text_sha": "d96c8b1a0f3ee7c79e32f158006e108836f2a151",
+            "bytes": 281155,
+            "same_inspected_pixels": true
+          },
+          {
+            "file": "long-session/toy8-desktop-long-restored.png",
+            "sha": "f44ae3ba22316d386c267b2a56f26d861965d046",
+            "base64_text_sha": "1bfe1f21ccd36b1c8c0605573663efce24f4a862",
+            "bytes": 285458,
+            "same_inspected_pixels": true
+          },
+          {
+            "file": "long-session/toy8-phone-long-restored.png",
+            "sha": "1444f5208046aca370435911908162a7a7ea1113",
+            "base64_text_sha": "67b9b3b4df957e556f7bbeb07212acc025e25a88",
+            "bytes": 244385,
+            "same_inspected_pixels": true
+          }
+        ],
+        "status": "All six new long PNG hashes exactly match the actual six previously inspected pixels. Product source and built bytes are unchanged. Other new native captures are retained but not newly pixel inspected."
+      }
     }
   ]
 }

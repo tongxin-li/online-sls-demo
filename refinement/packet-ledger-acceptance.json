@@ -1,0 +1,173 @@
+{
+  "schema": "receiver-packet-ledger-acceptance-v1",
+  "status": "Validated isolated foundation, unpublished and absent from the production build",
+  "source": "3aa3d3443903e8b23d0fac95e2ee00418a715699",
+  "workflow_run": 39241078436,
+  "completed_at": "2026-10-19T11:11:42Z",
+  "conclusion": "success",
+  "all_six_completed_logs_read": true,
+  "numerical": {
+    "original": 257,
+    "added": 18,
+    "total": 275,
+    "cases": [
+      "packet configuration preserves mandatory local and exact remote permissions",
+      "explicit request transport never reads excluded forecasts or quality and forcing labels",
+      "probe latency uses actual arrivals and requests alone are not payload traffic",
+      "old missing context cannot use ordinary zero latency control delivery",
+      "unissued forecasts and unrevealed evaluation actions cannot be used",
+      "issued preview probes are legal while future replay issuance and current correction leakage are rejected",
+      "independent scalar arithmetic separates control probe transition and local traffic",
+      "paid cached probes remain unavailable to the fixed support control path",
+      "receipts copy and freeze forecasts and correction versions after sender mutation",
+      "invalid numeric identity and future metadata payloads are charged then rejected",
+      "transport failures have no invented delivered scalars and remain in the audit",
+      "duplicate pending and admitted requests neither reread nor double charge",
+      "delivery reader cannot add requests or reenter a delivery batch",
+      "toy8 actual inverter placement and budget give independent packet counts",
+      "feeder24 actual inverter placement and budget give independent packet counts",
+      "feeder47 actual inverter placement and budget give independent packet counts",
+      "6001 logical actions retain deterministic paid receipts without full history scans for delivery",
+      "foundation import does not change the production protocol or physical execution"
+    ]
+  },
+  "jobs": {
+    "ongoing-browser": {
+      "id": 118022128202,
+      "conclusion": "success"
+    },
+    "release-browser": {
+      "id": 118022128507,
+      "conclusion": "success"
+    },
+    "long-session-browser": {
+      "id": 118022128706,
+      "conclusion": "success"
+    },
+    "validate": {
+      "id": 118022128831,
+      "conclusion": "success"
+    },
+    "review-ongoing": {
+      "id": 118025193271,
+      "conclusion": "success"
+    },
+    "prepare-candidate": {
+      "id": 118027550001,
+      "conclusion": "success"
+    }
+  },
+  "product_build_sha256": "69097822be929ce69de2d00427f5360b54859d27187f19ad91fb5c98522aabff",
+  "product_bytes_unchanged": true,
+  "archived_browser_and_network_suites": "passed",
+  "native_continued_actions": [
+    1820,
+    1840,
+    1991,
+    1820,
+    1836,
+    2010
+  ],
+  "long_restoration": {
+    "steps": 6001,
+    "conditions": 6,
+    "all_exact": true,
+    "details": "long-session-restoration-results.json"
+  },
+  "pixel_review": {
+    "source": "3aa3d3443903e8b23d0fac95e2ee00418a715699",
+    "run": 39241078436,
+    "review_job": 118025193271,
+    "completed_log_read": true,
+    "images_captured": 42,
+    "long_images": [
+      {
+        "file": "long-session/feeder24-desktop-long-restored.png",
+        "sha": "205ed5cecf845cd596755b8667483879fbcb99f4",
+        "base64_text_sha": "8ac3bf084d5b75b25c4c3789b8f48bb281a24077",
+        "bytes": 349363,
+        "same_inspected_pixels": true
+      },
+      {
+        "file": "long-session/feeder24-phone-long-restored.png",
+        "sha": "89a69a4626e6a47ff823254e0f91149daf0181c8",
+        "base64_text_sha": "70034c000a040a1187f636bffa42444272987796",
+        "bytes": 307451,
+        "same_inspected_pixels": true
+      },
+      {
+        "file": "long-session/feeder47-desktop-long-restored.png",
+        "sha": "ca28d3599fa3cb80715414840cdfcc1424b574fe",
+        "base64_text_sha": "f6337b18c5e39f699f40da28443ff6bd57fed7dd",
+        "bytes": 432627,
+        "same_inspected_pixels": true
+      },
+      {
+        "file": "long-session/feeder47-phone-long-restored.png",
+        "sha": "ecd93a684d94d77d380bad9ca60442626756d759",
+        "base64_text_sha": "d96c8b1a0f3ee7c79e32f158006e108836f2a151",
+        "bytes": 281155,
+        "same_inspected_pixels": true
+      },
+      {
+        "file": "long-session/toy8-desktop-long-restored.png",
+        "sha": "f44ae3ba22316d386c267b2a56f26d861965d046",
+        "base64_text_sha": "1bfe1f21ccd36b1c8c0605573663efce24f4a862",
+        "bytes": 285458,
+        "same_inspected_pixels": true
+      },
+      {
+        "file": "long-session/toy8-phone-long-restored.png",
+        "sha": "1444f5208046aca370435911908162a7a7ea1113",
+        "base64_text_sha": "67b9b3b4df957e556f7bbeb07212acc025e25a88",
+        "bytes": 244385,
+        "same_inspected_pixels": true
+      }
+    ],
+    "status": "All six new long PNG hashes exactly match the actual six previously inspected pixels. Product source and built bytes are unchanged. Other new native captures are retained but not newly pixel inspected."
+  },
+  "scope": {
+    "production_bundle_changed": false,
+    "controller_changed": false,
+    "support_changed": false,
+    "plant_parameters_changed": false,
+    "baseline_changed": false,
+    "version_13_or_14_schema_changed": false,
+    "new_protocol_not_integrated": true,
+    "new_dependencies": false
+  },
+  "failures_and_cancelled_attempts": [
+    {
+      "source": "f6add0c5c28861e869b9343ba5052bdec070c206",
+      "run": 39240378383,
+      "validate_job": 118019936949,
+      "validate_conclusion": "failure",
+      "completed_validate_log_read": true,
+      "error": "SyntaxError in new getter guard test fixture before any packet ledger test could run",
+      "partial_original_numerical_passed": 169,
+      "counted_completed": false,
+      "workflow_conclusion": "cancelled after validation fixture syntax failure and supersession",
+      "all_relevant_completed_and_cancelled_logs_read": true
+    },
+    {
+      "source": "46be6307c7ce4328a63a6b3e33aab37e48a12325",
+      "run": 39240943811,
+      "status": "Superseded by syntax correction to the same fixture; no outcome accepted",
+      "counted_completed": false,
+      "workflow_conclusion": "cancelled",
+      "all_relevant_cancelled_logs_read": true
+    }
+  ],
+  "limitations": [
+    "Source and support adaptation are not integrated by this foundation. Live support remains fixed offline. The live source local correction is not literal manuscript Algorithm 1 or full joint co design.",
+    "Candidate replay still needs independently checked score equations, a declared common measured initial state, finite memory and source fit context and all candidate outcomes. An issued future forecast target is distinct from an unrevealed physical outcome.",
+    "The support deployment transaction must resolve admission of the new mask ordinary current forecast at activation while preserving delayed historical retrieval, rollback, unchanged physical state and exact accounting of any failed provisional traffic. No activation API exists in this foundation.",
+    "The ledger snapshots retain full finite request and receipt history. Its 6001 action test is not an indefinite memory or native playback performance bound.",
+    "The original main browser API and Step locator failures recovered without source changes. Their cause is unconfirmed and the first attempt evidence is retained.",
+    "The 47 bus finite saved history is roughly 258 MB when serialized and verified restoration remains slow. Keep every sample and accumulated cost; this does not measure retained heap.",
+    "No new default, UI, controller, objective, support, physical limit, baseline or saved protocol is changed or claimed complete.",
+    "The isolated ledger checks source and target identity but does not authenticate a dishonest transport forecast value. Integration must bind its callback to the actual immutable sealed issuer and expose only purpose restricted receiver capabilities."
+  ],
+  "next_focus": "Read current main and every completed job and log for the latest checkpoint before edits. Preserve the passed 18 packet admission checks and all 257 existing numerical cases. Derive and independently test candidate replay equations with a common measured initial state, 60 prior fit pairs and 60 validation actions, exact global stationary response row times, legal issued preview packets, shared forcing, inverter lag, clipping and unchanged stage costs. Bind the receiver ledger reader to the actual immutable sealed issuer with forbidden global forecast and quality getters. Define provisional current control admission and atomic rollback accounting before adding support activation. Keep incomplete support learning unpublished and preserve version 13 and 14 replay, all histories and physical costs.",
+  "scheduled_live_implementation_completion": false
+}
