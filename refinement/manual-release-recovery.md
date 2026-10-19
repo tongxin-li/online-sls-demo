@@ -16,3 +16,11 @@ Expected built index SHA256 remains bff935ae9acc35b011ef1d1f9bd5ddc0db127fbb4db6
 Expected environment SHA256 remains 11b5a646d3197f054b40c3eeea16f7246d8c79b7f6459ac9bbcae0331e840ce0.
 
 No failed job is cancelled, retried or erased. A new full validation on the reviewed descendant is required. Manual release provenance remains separate from scheduled implementation completions.
+
+## Second fixture observation
+
+Corrected source bd45b8b248cb7984377ecb129a2bc1d3d0f78bfa validation 39290532555 passed the adaptive desktop cases on toy8, feeder24 and feeder47 with actual support changes, then failed the toy phone assertion that every trial must change support. That test only corrupted mandatory local source 7, with the new default otherwise quiet. A local weight update need not justify removing any optional communication. A zero topology revision here is not an engine defect and must not be disguised as one.
+
+The next reviewed fixture preserves all prior assertions and adds an explicit remote reliability challenge through actual user controls. Before corruption it deterministically chooses the lowest numbered currently admitted remote source at inverter 7, using only the displayed current support. This rule applies to every network and surface, is chosen before observing the corrupted outcome, and changes no seed, controller, coefficient, objective or plant. It corrupts that source as well as the original local source, then repairs the same pair. The local inspector and every original command, gain, cost, bound, continuous playback, 365 boundary, topology, full replay and restart check remain. The source ID is reported with every result. This is a predefined user interaction test, not a preset attack added to the demo, a search for a successful seed or a fabricated support animation. All quiet startup and mandatory local behavior remain independently asserted.
+
+The failed local-only phone condition and successful desktop results remain evidence; they are not relabelled completed six-case acceptance. Every job is required again on this descendant. Product runtime bytes and expected hashes remain unchanged.

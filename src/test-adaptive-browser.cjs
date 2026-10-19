@@ -28,6 +28,11 @@ async function main(){
  const setting=async(page,id,value)=>{const box=page.locator('#pr-adaptation'),open=await box.getAttribute('open')!==null;
   if(!open)await box.locator('summary').first().click();await page.locator('#pr-'+id).selectOption(value);
   if(!open)await box.locator('summary').first().click();};
+ const toggleRemoteSource=async(page,source,mobile)=>{
+  await click(page,'#pr-matrix .matrix-cell[data-receiver="7"][data-source="'+source+'"]',mobile);
+  await click(page,'#pr-source-fault',mobile);
+  await click(page,'#pr-matrix .matrix-cell[data-receiver="7"][data-source="7"]',mobile);
+ };
  const pause=async(page,mobile)=>{if((await read(page)).ui.playing)await click(page,'#pr-run',mobile);};
  const until=(page,t)=>page.waitForFunction(t=>document.querySelector('#power-response-demo').powerDemo.getSnapshot().t>=t,t,{timeout:180000,polling:100});
  const updateCount=s=>s.adaptation?.updateCount??s.adaptation?.updates??s.learning.updates;
@@ -96,13 +101,22 @@ async function main(){
    for(let i=0;i<4;i++){await click(page,'#pr-cost-gap',mobile);await click(page,'#pr-cost-total',mobile);}
    assert.equal((await read(page)).ui.playing,true,'Cost switching preserves playback');
    const beforeAttack=await read(page);
+   // Predefined causal test rule: challenge the lowest numbered CURRENT remote
+   // incoming source at inverter 7. A mandatory local source alone need not
+   // justify a topology change. Do not select a source by a successful outcome.
+   const remoteSource=beforeAttack.links.filter(e=>e.to===7&&e.from!==7).sort((a,b)=>a.from-b.from)[0]?.from;
+   assert.ok(Number.isInteger(remoteSource),'A permitted remote source is available under the original budget');
    await page.locator('#pr-intervention').selectOption('forecast');
    await click(page,'#pr-pulse',mobile);assert.ok((await read(page)).faults.includes(7));
+   await toggleRemoteSource(page,remoteSource,mobile);
+   assert.ok((await read(page)).faults.includes(remoteSource),'Explicit user corruption reaches an admitted remote source');
    await until(page,beforeAttack.t+90);await pause(page,mobile);
    const corrupted=await read(page);await inspect(page,'after source corruption');
    assert.ok(updateCount(corrupted)>updateCount(learned),'Learning continues after corruption');
    assert.notDeepEqual(corrupted.lastExecution.policies.online.currentGains,learned.lastExecution.policies.online.currentGains,'Executed response changes after observations');
    await click(page,'#pr-pulse',mobile);assert.equal((await read(page)).faults.includes(7),false);
+   await toggleRemoteSource(page,remoteSource,mobile);
+   assert.equal((await read(page)).faults.includes(remoteSource),false,'The same remote source is explicitly repaired');
    if(!(await read(page)).ui.playing)await click(page,'#pr-run',mobile);await until(page,corrupted.t+90);await pause(page,mobile);
    const repaired=await read(page);await inspect(page,'after source repair');
    assert.ok(updateCount(repaired)>updateCount(corrupted),'Learning continues after repair');
@@ -118,7 +132,7 @@ async function main(){
    assert.equal(final.phase,'ongoing');assert.equal(final.history,final.t);assert.equal(final.samples,final.t);
    for(const key of keys){assert.ok(final.costs[key]>=repaired.costs[key]);assert.ok(final.commandQ[key].every(value=>Math.abs(value)<=70+1e-8));}
    assert.equal(await page.locator('#pr-cost-detail tr').count(),4);assert.equal(await page.locator('#pr-cost path.data-series').count(),4);
-   assert.ok(final.ui.topology.events.length>0,'This predefined mixed trial makes measured support changes');
+   assert.ok(final.ui.topology.events.length>0,'Explicit local and admitted remote corruption produce measured support changes');
    const actual=final.ui.topology.current.map(e=>e.to+','+e.from).sort(),expected=final.links.map(e=>e.to+','+e.from).sort();
    assert.deepEqual(actual,expected,'Topology history ends at actual incoming support');
    for(const event of final.ui.topology.events){assert.ok(event.added.length+event.removed.length>0);assert.ok(event.t<=final.t);}
@@ -131,7 +145,7 @@ async function main(){
    const beforeRestart=await read(page);await click(page,'#pr-restart',mobile);const restarted=await read(page);
    assert.equal(restarted.protocol,'adaptive-phi-v2');assert.equal(restarted.t,0);assert.equal(restarted.ui.playing,false);
    assert.ok(Object.values(restarted.costs).every(value=>value===0));assert.deepEqual(restarted.ui.topology.events,[]);
-   const result={network,mobile,actions:final.t,responseUpdates:updateCount(final),topologyUpdates:final.ui.topology.events.length,costs:final.costs,
+   const result={network,mobile,remoteSource,actions:final.t,responseUpdates:updateCount(final),topologyUpdates:final.ui.topology.events.length,costs:final.costs,
     checkpoints:[learned,corrupted,repaired].map(s=>({t:s.t,updates:updateCount(s),receiptAction:s.lastExecution.action,trainedThrough:s.lastExecution.trainedThrough})),
     exactReplay:true,restart:true,priorActions:beforeRestart.t,passed:true};
    results.push(result);console.log('ADAPTIVE_BROWSER '+JSON.stringify(result));await context.close();
