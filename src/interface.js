@@ -111,6 +111,11 @@
   let pin = null;
   let matrixReference = null;
   let matrixGeometry = null;
+  let renderWidths = null;
+  function displayWidth(element) {
+    const measured=renderWidths?.get(element);
+    return measured>0?measured:element.getBoundingClientRect().width;
+  }
   let inspectedSource = trialProtocol==='continuous-phi-v1'?selectedBus:null;
   let lastPulse = null;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1335,7 +1340,7 @@
     renderNetworkInspection();
     const el = $('network');
     const large=PowerDemo.constants.N>24;
-    const available=el.parentElement.getBoundingClientRect().width;
+    const available=displayWidth(el.parentElement);
     const width = Math.max(large&&available<500?680:240,available);
     $('network-scroll-hint').hidden=width<=available+1;
     el.parentElement.tabIndex=width>available+1?0:-1;
@@ -1549,7 +1554,7 @@
     const receivers=PowerDemo.constants.inverterBuses, sources=d3.range(2,PowerDemo.constants.N+1);
     const changing=$('matrix-view').value==='change', deployed=snapshot.phase==='deployment'||ongoing();
     const large=PowerDemo.constants.N>24;
-    const available=el.parentElement.getBoundingClientRect().width;
+    const available=displayWidth(el.parentElement);
     const width=Math.max(large?784:240,available);
     $('matrix-scroll-hint').hidden=width<=available+1;
     el.parentElement.tabIndex=width>available+1?0:-1;
@@ -1692,7 +1697,7 @@
     updateMatrixScrollHint(false,geometryKey);
   }
   function chartBase(el, observations, keys, yTitle, xTitle, height, options={}) {
-    const width = Math.max(240,el.getBoundingClientRect().width);
+    const width = Math.max(240,displayWidth(el));
     // Keep numeric tick labels and the axis caption on separate lines, including touch layouts.
     const margin = {left:52,right:12,top:25,bottom:38};
     const frame={x:margin.left,y:margin.top,w:width-margin.left-margin.right,h:height-margin.top-margin.bottom};
@@ -2010,7 +2015,7 @@
     const observations=snapshot.history.filter(d=>Number.isFinite(d.rawForecastRms) && Number.isFinite(d.calibratedForecastRms))
       .map(d=>({x:d.t,raw:d.rawForecastRms,adapted:d.calibratedForecastRms}));
     if(!observations.length) {
-      const width=Math.max(240,el.getBoundingClientRect().width),height=140;
+      const width=Math.max(240,displayWidth(el)),height=140;
       svg.attr('viewBox','0 0 '+width+' '+height).attr('height',height).attr('aria-label','Run to observe forecast errors');
       svg.selectAll('*').remove();
       svg.append('text').attr('class','learning-wait').attr('x',width/2).attr('y',60).attr('text-anchor','middle')
@@ -2055,8 +2060,15 @@
     layout();
   }
   function render() {
-    $('tooltip').style.display='none'; pin=null;
-    renderControls(); drawNetwork(); drawMatrix(); drawCost(); drawStage(); drawVoltage(); drawConvergence();highlightTopology();
+    // Read all visible chart widths in one phase before controls or SVG mutate
+    // the layout. Newly exposed charts fall back to a fresh measurement.
+    const nodes=new Set([...root.querySelectorAll('svg'),$('network').parentElement,$('matrix').parentElement]);
+    const previous=renderWidths;
+    renderWidths=new Map([...nodes].filter(Boolean).map(node=>[node,node.getBoundingClientRect().width]));
+    try {
+      $('tooltip').style.display='none'; pin=null;
+      renderControls(); drawNetwork(); drawMatrix(); drawCost(); drawStage(); drawVoltage(); drawConvergence();highlightTopology();
+    } finally { renderWidths=previous; }
   }
   announce('Ready');
   hydrate(window.openai?.widgetState);

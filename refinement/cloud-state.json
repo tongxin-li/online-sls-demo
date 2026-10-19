@@ -5581,14 +5581,28 @@
               "source": "01ceab4eae21c65a75038ba5f29018e2b8c3a354",
               "run": 39182508026,
               "status": "Superseded by adding the required cloud public verification route. Preserve final actual results when available."
+            },
+            {
+              "source": "4779b1049105a90ae9da6b9f9689573bd363bf54",
+              "run": 39183204866,
+              "status": "Superseded by batching chart width measurements after residual synchronous layout was measured. Release browser job succeeded and logs were read. Full final validation remains required."
             }
-          ]
+          ],
+          "release_first": {
+            "source": "4779b1049105a90ae9da6b9f9689573bd363bf54",
+            "run_id": 39183204866,
+            "job": 117840417733,
+            "conclusion": "success",
+            "completed_logs_read": true,
+            "scope": "Same built local candidate. Exact page and environment hashes, six network and surface playback conditions, causal gain changes, attacks, old boundary crossing, all costs and exact replay. Public mode only runs after a main push."
+          }
         },
         "changes": [
           "Reuse only measured matrix label and scroll hint geometry during unchanged layout. Reapply clamped positions without synchronous rectangle and glyph reads on every physical action.",
           "Invalidate visual geometry for network rebuilds, viewport changes, font loading, inspected and noisy source styling, native scroll and keyboard navigation. No controller or scientific data is cached.",
           "Add independent long ongoing glyph range and whole edge label checks after native scroll, actual glyph metric changes with font completion events and viewport resizing on desktop and phone. Preserve exact physical state, costs and receipts across inspection.",
-          "Add release verification to the existing validation workflow using its existing isolated Chromium dependency. Candidates verify exact built page and environment bytes plus native playback and replay locally; main pushes verify the same expected bytes and behavior at the sole canonical URL through authorized cloud compute."
+          "Add release verification to the existing validation workflow using its existing isolated Chromium dependency. Candidates verify exact built page and environment bytes plus native playback and replay locally; main pushes verify the same expected bytes and behavior at the sole canonical URL through authorized cloud compute.",
+          "Batch visible chart and network viewport width measurements before each complete render writes controls or SVG. Reuse only those widths within that render and measure newly revealed charts freshly. This removes read and write layout interleaving without caching controller or chart data."
         ],
         "remaining_gaps": [
           "Native 47 bus playback remains slower than requested with roughly 150 ms frame gaps. Public main still runs the archived protocol."
