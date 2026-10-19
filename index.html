@@ -369,6 +369,8 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
 .pr-panel-details .pr-voltage-table { margin-top:5px; }
 .pr-panel-details #pr-voltage-metrics-note { margin-bottom:5px; }
 .pr-panel-details #pr-topology-note { margin:5px 0 3px; line-height:1.5; }
+.pr-source-details>summary { min-height:40px; font-size:12px; }
+.pr-source-details[hidden] { display:none; }
 .pr-topology-status { margin-bottom:5px; }
 .pr-bottomline { min-height:42px; gap:10px 16px; }
 .pr-adaptation { padding-bottom:5px; }
@@ -740,6 +742,12 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       <p id="pr-link-budget" class="pr-caption pr-link-budget"></p><p id="pr-noisy-links" class="pr-caption pr-noisy-links" hidden></p><div class="pr-matrix-key" id="pr-matrix-key"></div><p id="pr-matrix-scroll-hint" class="pr-scroll-hint" hidden>Scroll to explore all sources →</p><div class="pr-matrix-scroll" role="region" aria-describedby="pr-matrix-scroll-hint"><svg class="pr-chart" id="pr-matrix" role="group" aria-label="Candidate prediction links. Rows receive forecasts from columns"></svg></div>
       <p id="pr-matrix-inspect-hint" class="pr-caption">Select a link to inspect its source</p>
       <div id="pr-source-controls" class="pr-source-controls" hidden><button type="button" id="pr-source-fault" class="btn btn-quiet" aria-describedby="pr-source-status" disabled>Corrupt source</button><span id="pr-source-status" class="pr-caption" role="status"></span></div>
+      <div id="pr-response-history-panel" hidden>
+        <p id="pr-response-history-label" class="pr-caption">Executed signed response gain</p>
+        <svg id="pr-response-history" class="pr-chart" role="img" aria-label="Actual executed current target prediction gain over time"></svg>
+      </div>
+      <details id="pr-source-details" class="pr-panel-details pr-source-details" hidden>
+      <summary>Source details</summary>
       <div id="pr-forecast-observation" class="pr-forecast-observation" hidden>
         <p id="pr-forecast-timing" class="pr-caption"></p>
         <dl id="pr-forecast-values" class="pr-forecast-values" aria-label="Raw source voltage forcing in mpu" aria-describedby="pr-forecast-units" hidden>
@@ -763,10 +771,6 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
           </table>
           <p id="pr-link-receipt-note" class="pr-caption">Score averages discovery gain². Gain norm uses the resynthesized row. Source is before limiting; command includes all messages and each controller’s feedback.</p>
         </section>
-        <div id="pr-response-history-panel" hidden>
-          <p id="pr-response-history-label" class="pr-caption">Executed signed response gain</p>
-          <svg id="pr-response-history" class="pr-chart" role="img" aria-label="Actual executed current target prediction gain over time"></svg>
-        </div>
         <details id="pr-command-inspector" class="pr-command-inspector" hidden>
           <summary id="pr-command-title">Command breakdown</summary>
           <p class="pr-caption">kvar · Full issued preview, not just the revealed pair · Highlights show learned or matrix links<span id="pr-command-scroll-hint" hidden></span></p>
@@ -778,6 +782,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
           <p class="pr-caption">Request = Source + Other + Feedback before limiting · Command bounded to ±70 kvar · Source is not a causal share after limiting</p>
         </details>
       </div>
+      </details>
       <div class="pr-panel-foot pr-matrix-detail"><span id="pr-matrix-detail">Rows receive from columns</span><span id="pr-matrix-changes" class="tabular-nums">0 added · 0 removed</span></div><details id="pr-link-history-details" class="pr-panel-details"><summary>Link history</summary><div class="pr-topology-status"><strong id="pr-topology-status">Connectivity unchanged</strong><span id="pr-topology-gain">Weights changed 0%</span></div><div id="pr-topology-events" class="pr-topology-events" aria-label="Recent topology changes" hidden></div><div class="pr-topology-history"><label for="pr-topology-history" id="pr-history-count">0 link updates</label><input id="pr-topology-history" type="range" min="0" max="0" step="1" value="0" aria-label="Topology history" disabled><button type="button" id="pr-history-live" aria-pressed="true">Latest</button></div><p id="pr-topology-note" class="pr-caption" aria-live="polite"></p></details>
     </section>
     <section class="pr-panel pr-stage-panel" aria-labelledby="pr-stage-title">
@@ -2686,6 +2691,11 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   let comparing = false;
   let timer = null;
   let nextTickAt = 0;
+  let renderFrame = null;
+  let lastRenderAt = -Infinity;
+  const LIVE_RENDER_PERIOD=1000/16;
+  let sourceDetailsTrial=null;
+  let renderedSnapshot=null;
   let heldAttack = null;
   const continuousAttacks = new Map();
   const activeAttacks = () => [...continuousAttacks.values(), ...(heldAttack ? [heldAttack] : [])];
@@ -3145,6 +3155,13 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   }
   function renderInspectedSource() {
     const inspection=predictionInspection(),control=$('source-fault');
+    const details=$('source-details');
+    details.hidden=!inspection;
+    // Set the disclosure default once per trial. Ordinary samples and source
+    // selection must preserve the user's choice to open or close the details.
+    if(sourceDetailsTrial!==simulation) {
+      details.open=!ongoing();sourceDetailsTrial=simulation;
+    }
     renderForecastObservation(inspection);
     const command=renderCommandInspection(inspection);
     renderLinkEvidence(inspectedLinkEvidence(command));
@@ -3315,6 +3332,17 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     playing = false;
     if (timer) clearTimeout(timer);
     timer = null;
+    if(renderFrame!==null) window.cancelAnimationFrame(renderFrame);
+    renderFrame=null;
+  }
+  function requestLiveRender() {
+    if(renderFrame!==null) return;
+    renderFrame=window.requestAnimationFrame(now=>{
+      renderFrame=null;
+      if(!playing)return;
+      if(now-lastRenderAt<LIVE_RENDER_PERIOD) {requestLiveRender();return;}
+      render();
+    });
   }
   function schedule() {
     if (!playing) return;
@@ -3322,10 +3350,19 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     if(!nextTickAt) nextTickAt=performance.now()+period;
     timer=setTimeout(() => {
       timer=null;
-      tick();
-      // Never burst through missed samples after a busy or hidden frame.
-      nextTickAt=Math.max(nextTickAt+period,performance.now()+period*.15);
-      if(playing) schedule();
+      const started=performance.now();
+      // Recover modest drawing delays, but never replay a suspended tab's wall
+      // time. Every due sample still executes control, learning and history.
+      if(started-nextTickAt>4*period)nextTickAt=started-period*.85;
+      let count=0;
+      do {
+        tick(false);count++;nextTickAt+=period;
+      } while(playing&&nextTickAt<=performance.now()&&count<4&&performance.now()-started<8);
+      if(playing) {
+        requestLiveRender();
+        nextTickAt=Math.max(nextTickAt,performance.now()+period*.15);
+        schedule();
+      } else render();
     },Math.max(0,nextTickAt-performance.now()));
   }
   function enterComparison(preserveAttack=false) {
@@ -3365,7 +3402,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     for(const attack of activeAttacks()) {
       if(attack.lastQueuedAt<simulation.t) pulse(attack.bus,{repeated:true});
     }
-    advanceSample();snapshot=simulation.snapshot();
+    snapshot=advanceSample();
     transitioned=startAutomaticComparison() || transitioned;
     if(comparisonComplete()) {
       stop();announce('Comparison complete · All costs retained · Continue to explore');
@@ -3373,10 +3410,9 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     if(transitioned || comparisonComplete()) save();
     return transitioned;
   }
-  function tick() {
-    if (isFit()) { simulation.fitStep(100); fitSteps+=100; }
+  function tick(draw=true) {
+    if (isFit()) { snapshot=simulation.fitStep(100); fitSteps+=100; }
     else advanceLiveSample();
-    snapshot = simulation.snapshot();
     if (!forecastMode() && !isFit() && lastPulse && snapshot.t>lastPulse.t) {
       const state=attackState(lastPulse.bus);
       announce((state==='continuous'||state==='held'?'Adding attacks':state==='fading'?'Disturbance fading':state==='paused'?'Paused':'Disturbance ended')+' · Bus '+lastPulse.bus+' · t = '+snapshot.t+' s');
@@ -3384,7 +3420,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     if(comparisonComplete()) announce('Comparison complete · All costs retained · Continue to explore');
     else if (snapshot.mode === 'completed' && !playing) announce('Run or Step to continue');
     if (snapshot.mode === 'converged') { stop(); announce('Fit converged · Return to simulation'); }
-    render();
+    if(draw)render();
     if (snapshot.t % 30 === 0 || !playing) save();
   }
   function resetExperiment() {
@@ -3515,6 +3551,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   $('matrix')?.parentElement?.addEventListener('scroll',updateMatrixScrollHint,{passive:true});
   $('command-scroll').addEventListener('scroll',updateCommandScrollHint,{passive:true});
   $('command-inspector').addEventListener('toggle',updateCommandScrollHint);
+  $('source-details').addEventListener('toggle',updateCommandScrollHint);
   if ($('matrix-view')) $('matrix-view').addEventListener('change',()=>{historyIndex=null;renderProtocol();renderInspectedSource();drawNetwork();drawMatrix();save();});
   $('topology-history').addEventListener('input',()=>reviewTopology(Number($('topology-history').value)));
   $('history-live').addEventListener('click',()=>reviewTopology(null));
@@ -3720,7 +3757,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   function experimentProgress() {
     const status=protocolStatus(),deployed=status.phase==='deployment';
     if(ongoing())return {visible:true,phase:'ongoing',learningStatus:'active',comparisonStatus:'active',
-      learningCount:(snapshot.learning?.sourcePairs||0)+' pairs used per source',comparisonCount:snapshot.t+' samples · All costs retained',
+      learningCount:(snapshot.learning?.sourcePairs||0)+' observations received',comparisonCount:snapshot.t+' samples · All costs retained',
       learningFraction:Math.min(1,(snapshot.learning?.sourcePairs||0)/30),comparisonFraction:0,
       note:'One ongoing trial. Source corrections update after observations. Prediction support stays fixed. No reset or stop at 180 or 360 samples.'};
     return {visible:snapshot.experiment==='communication',phase:status.phase,
@@ -4672,6 +4709,11 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
     layout();
   }
   function render() {
+    // Explicit actions, including Pause and Step, always draw the current
+    // snapshot immediately and supersede any pending playback drawing pass.
+    if(renderFrame!==null)window.cancelAnimationFrame(renderFrame);
+    renderFrame=null;
+    lastRenderAt=performance.now();
     // Read all visible chart widths in one phase before controls or SVG mutate
     // the layout. Newly exposed charts fall back to a fresh measurement.
     const nodes=new Set([...root.querySelectorAll('svg'),$('network').parentElement,$('matrix').parentElement]);
@@ -4681,6 +4723,10 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
       $('tooltip').style.display='none'; pin=null;
       renderControls(); drawNetwork(); drawMatrix(); drawCost(); drawStage(); drawVoltage(); drawConvergence();highlightTopology();
     } finally { renderWidths=previous; }
+    // A completed drawing has its own observation boundary. Consumers can
+    // inspect that frame without confusing it with the next physical sample.
+    renderedSnapshot=snapshot;
+    if(root.dispatchEvent)root.dispatchEvent(new CustomEvent('powerdemo:render'));
   }
   announce('Ready');
   hydrate(window.openai?.widgetState);
@@ -4688,7 +4734,14 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   if (!matrixReference) captureMatrixReference();
   actionNote(snapshot.pendingPulses?.length ? 'Pulse queued · Run or Step' : attackInstruction());
   window.addEventListener('openai:set_globals',e=>{if(!playing&&!restored&&!journal.length){hydrate(e.detail?.globals?.widgetState);render();}});
-  new ResizeObserver(()=>render()).observe(root);
+  let observedRootWidth=null;
+  new ResizeObserver(entries=>{
+    const width=entries[0]?.contentRect.width;
+    // Chart text can change the dashboard height every sample. Only a width
+    // change needs fresh chart geometry and an additional full drawing pass.
+    if(width===undefined||width===observedRootWidth)return;
+    observedRootWidth=width;matrixGeometry=null;render();
+  }).observe(root);
   // Font loading and viewport changes can alter glyph extents without changing
   // the trial. Clear only visual geometry and redraw with the same observations.
   const refreshMatrixGeometry=()=>{matrixGeometry=null;render();};
@@ -4698,7 +4751,7 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   render();
   observeDashboardLayout();
   // A read only inspection hook supports deterministic browser verification.
-  root.powerDemo = { getLinkEvidence:() => inspectedLinkEvidence(), getResponseHistory:() => inspectedResponseHistory(), getSnapshot:() => simulation.snapshot(), getState:() => ({selectedBus,inspectedSource,playing,activeAttackBuses:activeAttacks().map(attack=>attack.bus),intervention:$('intervention').value,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null,topology:topology.export(),historyIndex,comparisonComplete:comparisonComplete(),comparisonContinued}) };
+  root.powerDemo = { getLinkEvidence:() => inspectedLinkEvidence(), getResponseHistory:() => inspectedResponseHistory(), getSnapshot:() => simulation.snapshot(), getRenderedSnapshot:() => renderedSnapshot, getState:() => ({selectedBus,inspectedSource,playing,activeAttackBuses:activeAttacks().map(attack=>attack.bus),intervention:$('intervention').value,fitSteps,journal:[...journal],lastPulse:lastPulse ? {...lastPulse} : null,topology:topology.export(),historyIndex,comparisonComplete:comparisonComplete(),comparisonContinued}) };
 })();
 </script>
 </body>
