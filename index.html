@@ -4088,25 +4088,36 @@ summary span { color:var(--muted-foreground); transition:transform .15s; }
   function updateMatrixScrollHint() {
     const el=$('matrix'),hint=$('matrix-scroll-hint'),scroller=el?.parentElement;
     if(!scroller||!hint)return;
-    const maximum=Math.max(0,scroller.scrollWidth-scroller.clientWidth),overflow=maximum>1;
+    const viewportWidth=scroller.clientWidth,maximum=Math.max(0,scroller.scrollWidth-viewportWidth),overflow=maximum>1;
     hint.hidden=!overflow;
-    const bounds=scroller.getBoundingClientRect(),inset=overflow?40:0,offset=overflow?scroller.scrollLeft:0;
-    el.querySelector('.matrix-receiver-axis')?.setAttribute('transform','translate('+offset+',0)');
-    if(overflow)el.querySelector('.matrix-source-title')?.setAttribute('x',offset+inset+(scroller.clientWidth-inset)/2);
-    // Keep an exposed edge column's full number readable. Only labels and
-    // their existing guides move; source cells and their data stay fixed.
+    // Read geometry together before moving any SVG labels. Measuring every
+    // label again after those writes forced costly layout during every action.
+    const bounds=scroller.getBoundingClientRect(),svgBounds=el.getBoundingClientRect();
+    const scale=el.viewBox.baseVal.width?svgBounds.width/el.viewBox.baseVal.width:1;
+    const inset=overflow?40:0,offset=overflow?scroller.scrollLeft:0;
     const labels=Array.from(el.querySelectorAll('.matrix-columns text'));
-    const lo=offset+inset+.75,hi=offset+scroller.clientWidth-.75;
-    const positions=labels.map(node=>{
-      const centre=Number(node.dataset.columnX),cellWidth=Number(node.dataset.columnWidth),half=node.getBBox().width/2;
-      const exposed=overflow&&centre+cellWidth/2>offset+inset&&centre-cellWidth/2<offset+scroller.clientWidth;
+    const lo=offset+inset+.75,hi=offset+viewportWidth-.75;
+    const geometry=labels.map(node=>{
+      const box=node.getBBox(),x=Number(node.getAttribute('x'));
+      return {centre:Number(node.dataset.columnX),cellWidth:Number(node.dataset.columnWidth),
+        half:box.width/2,left:box.x-x,right:box.x+box.width-x};
+    });
+    const positions=geometry.map(({centre,cellWidth,half})=>{
+      const exposed=overflow&&centre+cellWidth/2>offset+inset&&centre-cellWidth/2<offset+viewportWidth;
       return exposed?Math.max(lo+half,Math.min(hi-half,centre)):centre;
     });
+    // SVG text has middle anchoring and no per-label transform. Its measured
+    // glyph offsets plus the new x give the same visible range without another
+    // per-label DOM rectangle read. Respect the actual SVG to CSS pixel scale.
+    const shown=labels.filter((_node,i)=>{
+      const left=svgBounds.left+(positions[i]+geometry[i].left)*scale;
+      const right=svgBounds.left+(positions[i]+geometry[i].right)*scale;
+      return left>=bounds.left+inset-.5&&right<=bounds.right+.5;
+    }).map(node=>Number(node.__data__));
+    el.querySelector('.matrix-receiver-axis')?.setAttribute('transform','translate('+offset+',0)');
+    if(overflow)el.querySelector('.matrix-source-title')?.setAttribute('x',offset+inset+(viewportWidth-inset)/2);
     labels.forEach((node,i)=>node.setAttribute('x',positions[i]));
     el.querySelectorAll('.matrix-columns line').forEach((node,i)=>node.setAttribute('x1',positions[i]));
-    const shown=labels.filter(node=>{
-      const box=node.getBoundingClientRect();return box.left>=bounds.left+inset-.5&&box.right<=bounds.right+.5;
-    }).map(node=>Number(node.__data__));
     const left=overflow&&scroller.scrollLeft>1,right=overflow&&scroller.scrollLeft<maximum-1;
     hint.dataset.first=overflow&&shown.length?String(shown[0]):'';
     hint.dataset.last=overflow&&shown.length?String(shown.at(-1)):'';
