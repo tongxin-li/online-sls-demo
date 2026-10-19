@@ -20,7 +20,7 @@ test('explicit request transport never reads excluded forecasts or quality and f
  l.request({source:5,target:4,reason:'control'});
  const packets=new Proxy({5:.01},{get(target,key){seen.push(key);if(key!=='5')throw Error('Excluded source access');return target[key];}});
  const receipt=l.advance(0,r=>Object.defineProperties({...payload(r),forecast:packets[r.source]},{
-  quality:{get(){throw Error('Quality accessed');}},forcing:{get(){throw Error('Truth accessed');}}));
+  quality:{get(){throw Error('Quality accessed');}},forcing:{get(){throw Error('Truth accessed');}}}));
  assert.deepEqual(seen,['5']);assert.equal(receipt[0].status,'accepted');
  assert.throws(()=>l.read({source:3,target:4,purpose:'control'}),/Excluded/);
 });

@@ -9615,7 +9615,25 @@
             "release_job": "success",
             "other_jobs": "cancelled",
             "counted_completed": false
-          }
+          },
+          "foundation_attempts": [
+            {
+              "source": "f6add0c5c28861e869b9343ba5052bdec070c206",
+              "run": 39240378383,
+              "validate_job": 118019936949,
+              "validate_conclusion": "failure",
+              "completed_validate_log_read": true,
+              "error": "SyntaxError in new getter guard test fixture before any packet ledger test could run",
+              "partial_original_numerical_passed": 169,
+              "counted_completed": false
+            },
+            {
+              "source": "46be6307c7ce4328a63a6b3e33aab37e48a12325",
+              "run": 39240943811,
+              "status": "Superseded by syntax correction to the same fixture; no outcome accepted",
+              "counted_completed": false
+            }
+          ]
         },
         "next_focus": "First read current main and all final jobs and logs from 39235839246. Retry the failed canonical release job after the run finishes, diagnose page readiness without weakening physical assertions if the failure repeats, and record the outcome separately. Then validate the candidate checkpoint archive helper and inspect actual nested 6001 action PNGs. Continue the public packet ledger and paid probe admission plan only after these release evidence gaps are reconciled. Do not count this documentation, audit or restoration test addition as an algorithm improvement. Preserve all histories, physical costs and archived replay.",
         "implementation_plan": "refinement/ongoing-support-plan.md",
