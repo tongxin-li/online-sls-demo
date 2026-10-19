@@ -187,20 +187,45 @@ async function main(){
     // Independent rendered glyph bounds validate the computed cue after long
     // ongoing playback. Geometry inspection cannot mutate the physical trial.
     const invariant=await read(page),scroll=page.locator('.pr-matrix-scroll');
-    const initialOffset=await scroll.evaluate(node=>node.scrollLeft);
-    for(const fraction of [0,.5,1]){
-     await scroll.evaluate((node,fraction)=>{node.scrollLeft=fraction*(node.scrollWidth-node.clientWidth);},fraction);
-     await scroll.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+    const initialOffset=await scroll.evaluate(node=>node.scrollLeft),viewport=page.viewportSize();
+    const settled=()=>scroll.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+    const assertCue=async reason=>{
      const cue=await scroll.evaluate(node=>{
-      const bounds=node.getBoundingClientRect(),axis=node.querySelector('.matrix-receiver-axis').getBoundingClientRect();
-      const visible=Array.from(node.querySelectorAll('.matrix-columns text')).filter(label=>{
+      const bounds=node.getBoundingClientRect(),axis=node.querySelector('.matrix-receiver-background').getBoundingClientRect();
+      const labels=Array.from(node.querySelectorAll('.matrix-columns text'));
+      const visible=labels.filter(label=>{
        const box=label.getBoundingClientRect();return box.left>=axis.right-.5&&box.right<=bounds.right+.5;
       }).map(label=>Number(label.firstChild.nodeValue));
-      return {visible,data:{...document.querySelector('#pr-matrix-scroll-hint').dataset}};
+      const exposed=labels.map(label=>{
+       const source=Number(label.firstChild.nodeValue),box=label.getBoundingClientRect();
+       const cell=node.querySelector('.matrix-cell[data-source="'+source+'"]').getBoundingClientRect();
+       return {source,left:box.left,right:box.right,exposed:cell.right>axis.right&&cell.left<bounds.right};
+      }).filter(label=>label.exposed);
+      return {visible,exposed,axisRight:axis.right,right:bounds.right,data:{...document.querySelector('#pr-matrix-scroll-hint').dataset}};
      });
-     assert.ok(cue.visible.length>1);assert.equal(Number(cue.data.first),cue.visible[0]);
-     assert.equal(Number(cue.data.last),cue.visible.at(-1),'Long ongoing source cue matches actual rendered whole glyphs');
+     assert.ok(cue.visible.length>1);assert.equal(Number(cue.data.first),cue.visible[0],reason);
+     assert.equal(Number(cue.data.last),cue.visible.at(-1),'Actual rendered source range after '+reason);
+     for(const label of cue.exposed)assert.ok(label.left>=cue.axisRight-.5&&label.right<=cue.right+.5,
+      'Whole exposed glyph after '+reason+' source '+label.source);
+    };
+    for(const fraction of [0,.5,1]){
+     await scroll.evaluate((node,fraction)=>{node.scrollLeft=fraction*(node.scrollWidth-node.clientWidth);},fraction);
+     await settled();await assertCue('native scroll '+fraction);
     }
+    await scroll.evaluate(node=>{node.scrollLeft=.5*(node.scrollWidth-node.clientWidth);});await settled();
+    // Real glyph metrics change independently of the visual cache signature.
+    // A FontFaceSet completion event must refresh the display without a scroll.
+    await page.evaluate(()=>{
+     document.querySelectorAll('#pr-matrix .matrix-columns text').forEach(node=>{node.style.fontFamily='monospace';});
+     document.fonts.dispatchEvent(new Event('loadingdone'));
+    });await settled();await assertCue('font completion');
+    await page.evaluate(()=>{
+     document.querySelectorAll('#pr-matrix .matrix-columns text').forEach(node=>{node.style.fontFamily='';});
+     document.fonts.dispatchEvent(new Event('loadingdone'));
+    });await settled();await assertCue('font restoration');
+    await page.setViewportSize({width:viewport.width+40,height:viewport.height});
+    await settled();await assertCue('viewport resize');
+    await page.setViewportSize(viewport);await settled();await assertCue('viewport restoration');
     await scroll.evaluate((node,offset)=>{node.scrollLeft=offset;},initialOffset);
     await scroll.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
     assert.deepEqual((await read(page)).s,invariant.s,'Long history scroll inspection preserves every command and physical cost');

@@ -5574,9 +5574,14 @@
             "original_browser_checks": 44,
             "ongoing_conditions": 6,
             "handoffs": 18
-          }
+          },
+          "candidate": "Pending full cloud validation and actual pixel review."
         },
-        "changes": [],
+        "changes": [
+          "Reuse only measured matrix label and scroll hint geometry during unchanged layout. Reapply clamped positions without synchronous rectangle and glyph reads on every physical action.",
+          "Invalidate visual geometry for network rebuilds, viewport changes, font loading, inspected and noisy source styling, native scroll and keyboard navigation. No controller or scientific data is cached.",
+          "Add independent long ongoing glyph range and whole edge label checks after native scroll, actual glyph metric changes with font completion events and viewport resizing on desktop and phone. Preserve exact physical state, costs and receipts across inspection."
+        ],
         "remaining_gaps": [
           "Native 47 bus playback remains slower than requested with roughly 150 ms frame gaps. Public main still runs the archived protocol."
         ],

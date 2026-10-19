@@ -110,6 +110,7 @@
   let comparisonContinued = false;
   let pin = null;
   let matrixReference = null;
+  let matrixGeometry = null;
   let inspectedSource = trialProtocol==='continuous-phi-v1'?selectedBus:null;
   let lastPulse = null;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -169,6 +170,7 @@
   ];
   let positions = feederPositions;
   function bindNetwork(id) {
+    matrixGeometry=null;
     PowerDemo = networkCatalog.forNetwork(id);
     const count=PowerDemo.constants.N, large=count>24;
     root.dataset.network=id;
@@ -1493,13 +1495,29 @@
       +(status.queued?' · '+status.queued+' queued':hovered && canAttack(bus)?(forecastMode()?' · Click to '+(snapshot.faults.includes(bus)?'repair':'corrupt'):continuousMode()?' · Click to toggle attack':' · Hold to keep attacking'):'');
   }
 
-  function updateMatrixScrollHint() {
+  // Display geometry only. No forecast, coefficient, gain or command enters
+  // this cache. Native scroll and keyboard movement always refresh it.
+  function applyMatrixScrollGeometry(reading) {
+    const {el,labels,positions,offset,inset,viewportWidth,overflow,shown,left,right}=reading;
+    const hint=$('matrix-scroll-hint');hint.hidden=!overflow;
+    el.querySelector('.matrix-receiver-axis')?.setAttribute('transform','translate('+offset+',0)');
+    if(overflow)el.querySelector('.matrix-source-title')?.setAttribute('x',offset+inset+(viewportWidth-inset)/2);
+    labels.forEach((node,i)=>node.setAttribute('x',positions[i]));
+    el.querySelectorAll('.matrix-columns line').forEach((node,i)=>node.setAttribute('x1',positions[i]));
+    hint.dataset.first=overflow&&shown.length?String(shown[0]):'';
+    hint.dataset.last=overflow&&shown.length?String(shown.at(-1)):'';
+    hint.dataset.position=!overflow?'all':left?(right?'middle':'end'):'start';
+    const range=shown.length?'Sources '+shown[0]+' to '+shown.at(-1):'Prediction sources';
+    hint.textContent=!overflow?'':left?(right?'← '+range+' →':'← Scroll left · '+range):range+' · Scroll right →';
+  }
+  function updateMatrixScrollHint(force=false,key=matrixGeometry?.key) {
     const el=$('matrix'),hint=$('matrix-scroll-hint'),scroller=el?.parentElement;
     if(!scroller||!hint)return;
+    if(!force&&matrixGeometry?.el===el&&matrixGeometry.key===key) {
+      applyMatrixScrollGeometry(matrixGeometry);return;
+    }
     const viewportWidth=scroller.clientWidth,maximum=Math.max(0,scroller.scrollWidth-viewportWidth),overflow=maximum>1;
     hint.hidden=!overflow;
-    // Read geometry together before moving any SVG labels. Measuring every
-    // label again after those writes forced costly layout during every action.
     const bounds=scroller.getBoundingClientRect(),svgBounds=el.getBoundingClientRect();
     const scale=el.viewBox.baseVal.width?svgBounds.width/el.viewBox.baseVal.width:1;
     const inset=overflow?40:0,offset=overflow?scroller.scrollLeft:0;
@@ -1514,24 +1532,14 @@
       const exposed=overflow&&centre+cellWidth/2>offset+inset&&centre-cellWidth/2<offset+viewportWidth;
       return exposed?Math.max(lo+half,Math.min(hi-half,centre)):centre;
     });
-    // SVG text has middle anchoring and no per-label transform. Its measured
-    // glyph offsets plus the new x give the same visible range without another
-    // per-label DOM rectangle read. Respect the actual SVG to CSS pixel scale.
     const shown=labels.filter((_node,i)=>{
       const left=svgBounds.left+(positions[i]+geometry[i].left)*scale;
       const right=svgBounds.left+(positions[i]+geometry[i].right)*scale;
       return left>=bounds.left+inset-.5&&right<=bounds.right+.5;
     }).map(node=>Number(node.__data__));
-    el.querySelector('.matrix-receiver-axis')?.setAttribute('transform','translate('+offset+',0)');
-    if(overflow)el.querySelector('.matrix-source-title')?.setAttribute('x',offset+inset+(viewportWidth-inset)/2);
-    labels.forEach((node,i)=>node.setAttribute('x',positions[i]));
-    el.querySelectorAll('.matrix-columns line').forEach((node,i)=>node.setAttribute('x1',positions[i]));
     const left=overflow&&scroller.scrollLeft>1,right=overflow&&scroller.scrollLeft<maximum-1;
-    hint.dataset.first=overflow&&shown.length?String(shown[0]):'';
-    hint.dataset.last=overflow&&shown.length?String(shown.at(-1)):'';
-    hint.dataset.position=!overflow?'all':left?(right?'middle':'end'):'start';
-    const range=shown.length?'Sources '+shown[0]+' to '+shown.at(-1):'Prediction sources';
-    hint.textContent=!overflow?'':left?(right?'← '+range+' →':'← Scroll left · '+range):range+' · Scroll right →';
+    matrixGeometry={key,el,labels,positions,offset,inset,viewportWidth,overflow,shown,left,right};
+    applyMatrixScrollGeometry(matrixGeometry);
   }
   function drawMatrix() {
     const el=$('matrix'); if(!el) return;
@@ -1637,7 +1645,7 @@
         if(node&&scroller.scrollWidth>scroller.clientWidth+1) {
           const box=node.getBoundingClientRect(),bounds=scroller.getBoundingClientRect();
           if(box.left<bounds.left+left)scroller.scrollLeft-=bounds.left+left-box.left;
-          updateMatrixScrollHint();
+          updateMatrixScrollHint(true);
         }
       }
     };
@@ -1679,7 +1687,9 @@
       });
     rows.select('rect').attr('fill',bus=>bus===selectedBus?'var(--primary)':'transparent');
     rows.select('text').style('fill',bus=>bus===selectedBus?'#fff':'var(--muted-foreground)').text(bus=>bus);
-    updateMatrixScrollHint();
+    const geometryKey=[PowerDemo.constants.networkId,width,available,receivers.length,sources.length,
+      inspectedSource,[...noisySources].join(','),window.innerWidth,window.innerHeight].join('|');
+    updateMatrixScrollHint(false,geometryKey);
   }
   function chartBase(el, observations, keys, yTitle, xTitle, height, options={}) {
     const width = Math.max(240,el.getBoundingClientRect().width);
@@ -2055,6 +2065,12 @@
   actionNote(snapshot.pendingPulses?.length ? 'Pulse queued · Run or Step' : attackInstruction());
   window.addEventListener('openai:set_globals',e=>{if(!playing&&!restored&&!journal.length){hydrate(e.detail?.globals?.widgetState);render();}});
   new ResizeObserver(()=>render()).observe(root);
+  // Font loading and viewport changes can alter glyph extents without changing
+  // the trial. Clear only visual geometry and redraw with the same observations.
+  const refreshMatrixGeometry=()=>{matrixGeometry=null;render();};
+  window.addEventListener('resize',refreshMatrixGeometry);
+  document.fonts?.addEventListener('loadingdone',refreshMatrixGeometry);
+  document.fonts?.ready?.then(refreshMatrixGeometry);
   render();
   observeDashboardLayout();
   // A read only inspection hook supports deterministic browser verification.
